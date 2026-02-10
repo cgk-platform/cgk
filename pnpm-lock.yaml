@@ -326,6 +326,9 @@ importers:
       '@cgk/core':
         specifier: workspace:*
         version: link:../core
+      '@cgk/db':
+        specifier: workspace:*
+        version: link:../db
       chalk:
         specifier: ^5.3.0
         version: 5.6.2

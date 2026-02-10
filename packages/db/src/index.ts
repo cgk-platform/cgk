@@ -6,10 +6,52 @@
  */
 
 // Client
-export { sql } from './client'
+export { sql } from './client.js'
 
 // Tenant utilities
-export { withTenant, setTenantSchema } from './tenant'
+export {
+  getTenantSchemaName,
+  isValidTenantSlug,
+  resetToPublicSchema,
+  setTenantSchema,
+  validateTenantSlug,
+  withTenant,
+} from './tenant.js'
+
+// Request utilities
+export {
+  getTenantFromRequest,
+  requireTenant,
+  tenantNotFoundResponse,
+  TenantRequiredError,
+  type TenantContext,
+} from './request.js'
+
+// Cache utilities
+export {
+  createGlobalCache,
+  createTenantCache,
+  type CacheEntry,
+  type CacheOptions,
+  type TenantCache,
+} from './cache.js'
+
+// Migration utilities
+export {
+  createTenantSchema,
+  getMigrationStatus,
+  loadMigrations,
+  loadPublicMigrations,
+  loadTenantMigrations,
+  runPublicMigrations,
+  runTenantMigrations,
+  tenantSchemaExists,
+  type Migration,
+  type MigrationOptions,
+  type MigrationRecord,
+  type MigrationResult,
+  type SchemaType,
+} from './migrations/index.js'
 
 // Types
-export type { QueryResult, QueryConfig } from './types'
+export type { QueryConfig, QueryResult } from './types.js'

@@ -3,11 +3,14 @@
  * @cgk/cli - CLI tool for CGK platform
  *
  * Commands:
- * - create <name>  : Create a new brand site
- * - init           : Initialize CGK in existing project
- * - doctor         : Check system requirements
- * - setup          : Run platform setup wizard
- * - migrate        : Run database migrations
+ * - create <name>     : Create a new brand site
+ * - init              : Initialize CGK in existing project
+ * - doctor            : Check system requirements
+ * - setup             : Run platform setup wizard
+ * - setup:database    : Setup database only
+ * - migrate           : Run database migrations
+ * - tenant:create     : Create a new tenant
+ * - tenant:list       : List all tenants
  */
 
 import { Command } from 'commander'
@@ -16,7 +19,8 @@ import { createCommand } from './commands/create.js'
 import { doctorCommand } from './commands/doctor.js'
 import { initCommand } from './commands/init.js'
 import { migrateCommand } from './commands/migrate.js'
-import { setupCommand } from './commands/setup.js'
+import { setupCommand, setupDatabaseCommand } from './commands/setup.js'
+import { createTenantCommand, listTenantsCommand } from './commands/tenant.js'
 
 const program = new Command()
 
@@ -30,6 +34,9 @@ program.addCommand(createCommand)
 program.addCommand(initCommand)
 program.addCommand(doctorCommand)
 program.addCommand(setupCommand)
+program.addCommand(setupDatabaseCommand)
 program.addCommand(migrateCommand)
+program.addCommand(createTenantCommand)
+program.addCommand(listTenantsCommand)
 
 program.parse()

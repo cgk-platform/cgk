@@ -82,6 +82,155 @@ export const setupCommand = new Command('setup')
     console.log('')
   })
 
+/**
+ * setup:database command
+ * Dedicated command for database setup, testing, and migrations
+ */
+export const setupDatabaseCommand = new Command('setup:database')
+  .description('Setup database: test connection, run public migrations, verify')
+  .option('--dry-run', 'Show what would be run without executing')
+  .option('--skip-migrations', 'Skip running migrations')
+  .action(async (options) => {
+    console.log(chalk.cyan('\n🗄️  Database Setup\n'))
+
+    const spinner = ora()
+
+    // Step 1: Check DATABASE_URL
+    console.log(chalk.bold('Step 1: Checking environment'))
+
+    if (!process.env.DATABASE_URL) {
+      console.log(chalk.red('  ✗ DATABASE_URL not set'))
+      console.log('')
+      console.log(chalk.dim('  To set up your database:'))
+      console.log(chalk.dim('  1. Create a database at https://neon.tech'))
+      console.log(chalk.dim('  2. Copy the connection string'))
+      console.log(chalk.dim('  3. Add to .env.local:'))
+      console.log(chalk.cyan('     DATABASE_URL=postgresql://...'))
+      console.log('')
+      process.exit(1)
+    }
+
+    console.log(chalk.green('  ✓ DATABASE_URL is set'))
+
+    // Mask the connection string for display
+    const dbUrl = process.env.DATABASE_URL
+    const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':***@')
+    console.log(chalk.dim(`    ${maskedUrl}`))
+
+    // Step 2: Test connection
+    console.log(chalk.bold('\nStep 2: Testing connection'))
+    spinner.start('Connecting to database...')
+
+    try {
+      const db = await import('@cgk/db')
+      await db.sql`SELECT 1`
+      spinner.succeed('Database connection successful')
+    } catch (error) {
+      spinner.fail('Database connection failed')
+      if (error instanceof Error) {
+        console.log(chalk.red(`  ${error.message}`))
+      }
+      console.log('')
+      console.log(chalk.dim('  Common issues:'))
+      console.log(chalk.dim('  - Check that the connection string is correct'))
+      console.log(chalk.dim('  - Verify the database exists'))
+      console.log(chalk.dim('  - Check firewall/network settings'))
+      console.log('')
+      process.exit(1)
+    }
+
+    if (options.skipMigrations) {
+      console.log(chalk.yellow('\n⚠ Skipping migrations (--skip-migrations flag)'))
+      console.log(chalk.green('\n✅ Database connection verified!\n'))
+      return
+    }
+
+    // Step 3: Run public migrations
+    console.log(chalk.bold('\nStep 3: Running migrations'))
+
+    if (options.dryRun) {
+      console.log(chalk.yellow('  DRY RUN - Showing pending migrations\n'))
+    }
+
+    try {
+      const db = await import('@cgk/db')
+      const results = await db.runPublicMigrations({
+        dryRun: options.dryRun,
+        onProgress: (migration, status) => {
+          if (status === 'running') {
+            spinner.start(`${migration.name}...`)
+          } else if (status === 'complete') {
+            spinner.succeed(migration.name)
+          } else if (status === 'error') {
+            spinner.fail(migration.name)
+          }
+        },
+      })
+
+      if (results.length === 0) {
+        console.log(chalk.dim('  No pending migrations'))
+      } else {
+        const failed = results.filter((r) => !r.success)
+        if (failed.length > 0) {
+          console.log(chalk.red(`\n❌ ${failed.length} migration(s) failed`))
+          for (const f of failed) {
+            console.log(chalk.red(`  ${f.migration.name}: ${f.error}`))
+          }
+          process.exit(1)
+        }
+
+        const verb = options.dryRun ? 'would apply' : 'applied'
+        console.log(chalk.green(`\n  ${results.length} migration(s) ${verb}`))
+      }
+    } catch (error) {
+      spinner.fail('Migration failed')
+      if (error instanceof Error) {
+        console.log(chalk.red(`  ${error.message}`))
+      }
+      process.exit(1)
+    }
+
+    // Step 4: Verify
+    console.log(chalk.bold('\nStep 4: Verifying setup'))
+    spinner.start('Checking tables...')
+
+    try {
+      const db = await import('@cgk/db')
+      const result = await db.sql<{ table_name: string }>`
+        SELECT table_name
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_type = 'BASE TABLE'
+        ORDER BY table_name
+      `
+
+      const tables = result.rows.map((r) => r.table_name)
+      spinner.succeed(`Found ${tables.length} tables in public schema`)
+
+      // Check for required tables
+      const required = [
+        'platform_config',
+        'organizations',
+        'users',
+        'sessions',
+      ]
+      const missing = required.filter((t) => !tables.includes(t))
+
+      if (missing.length > 0) {
+        console.log(chalk.yellow(`  ⚠ Missing tables: ${missing.join(', ')}`))
+      } else {
+        console.log(chalk.green('  ✓ All required tables present'))
+      }
+    } catch (error) {
+      spinner.fail('Verification failed')
+    }
+
+    console.log(chalk.green('\n✅ Database setup complete!\n'))
+    console.log('Next steps:')
+    console.log(chalk.cyan('  npx @cgk/cli tenant:create <slug> --name "Brand Name"'))
+    console.log('')
+  })
+
 async function setupDatabase(): Promise<boolean> {
   const spinner = ora()
 
@@ -98,7 +247,8 @@ async function setupDatabase(): Promise<boolean> {
     // Test connection
     spinner.start('Testing database connection...')
     try {
-      // TODO: Actually test the connection
+      const db = await import('@cgk/db')
+      await db.sql`SELECT 1`
       spinner.succeed('Database connection successful')
       return true
     } catch {
@@ -166,8 +316,8 @@ async function setupDatabase(): Promise<boolean> {
 
 async function setupCache(): Promise<boolean> {
   // Similar to setupDatabase but for Redis/Upstash
-  if (process.env.REDIS_URL) {
-    console.log(chalk.green('  REDIS_URL already set'))
+  if (process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL) {
+    console.log(chalk.green('  Redis/Upstash already configured'))
     return true
   }
 
@@ -193,12 +343,26 @@ async function runMigrations(): Promise<boolean> {
   spinner.start('Running database migrations...')
 
   try {
-    // TODO: Actually run migrations
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    spinner.succeed('Migrations complete')
+    const db = await import('@cgk/db')
+    const results = await db.runPublicMigrations()
+
+    if (results.length === 0) {
+      spinner.succeed('No pending migrations')
+    } else {
+      const failed = results.filter((r) => !r.success)
+      if (failed.length > 0) {
+        spinner.fail('Some migrations failed')
+        return false
+      }
+      spinner.succeed(`Applied ${results.length} migration(s)`)
+    }
+
     return true
-  } catch {
+  } catch (error) {
     spinner.fail('Migration failed')
+    if (error instanceof Error) {
+      console.log(chalk.red(`  ${error.message}`))
+    }
     return false
   }
 }
@@ -221,6 +385,13 @@ async function createAdminUser(): Promise<boolean> {
   const answers = await inquirer.prompt([
     {
       type: 'input',
+      name: 'name',
+      message: 'Admin name:',
+      validate: (input: string) =>
+        input.length >= 2 || 'Name must be at least 2 characters',
+    },
+    {
+      type: 'input',
       name: 'email',
       message: 'Admin email:',
       validate: (input: string) =>
@@ -229,9 +400,9 @@ async function createAdminUser(): Promise<boolean> {
     {
       type: 'password',
       name: 'password',
-      message: 'Admin password:',
+      message: 'Admin password (min 12 characters):',
       validate: (input: string) =>
-        input.length >= 8 || 'Password must be at least 8 characters',
+        input.length >= 12 || 'Password must be at least 12 characters',
     },
   ])
 
@@ -239,12 +410,32 @@ async function createAdminUser(): Promise<boolean> {
   spinner.start('Creating admin user...')
 
   try {
-    // TODO: Actually create the user
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    const db = await import('@cgk/db')
+
+    // Simple password hashing (in production, use proper library like argon2)
+    // This is a placeholder - actual implementation should use @cgk/auth
+    const crypto = await import('crypto')
+    const passwordHash = crypto
+      .createHash('sha256')
+      .update(answers.password)
+      .digest('hex')
+
+    await db.sql`
+      INSERT INTO public.users (email, name, password_hash, role, status, email_verified)
+      VALUES (${answers.email}, ${answers.name}, ${passwordHash}, 'super_admin', 'active', true)
+      ON CONFLICT (email) DO UPDATE SET
+        name = ${answers.name},
+        password_hash = ${passwordHash},
+        role = 'super_admin'
+    `
+
     spinner.succeed(`Admin user created: ${answers.email}`)
     return true
-  } catch {
+  } catch (error) {
     spinner.fail('Failed to create admin user')
+    if (error instanceof Error) {
+      console.log(chalk.red(`  ${error.message}`))
+    }
     return false
   }
 }
@@ -259,6 +450,37 @@ async function configurePlatform(): Promise<boolean> {
     },
   ])
 
-  console.log(chalk.green(`  Platform configured: ${answers.platformName}`))
-  return true
+  const spinner = ora()
+  spinner.start('Saving platform configuration...')
+
+  try {
+    const db = await import('@cgk/db')
+
+    await db.sql`
+      INSERT INTO public.platform_config (key, value)
+      VALUES ('platform', ${JSON.stringify({ name: answers.platformName })}::jsonb)
+      ON CONFLICT (key) DO UPDATE SET value = ${JSON.stringify({ name: answers.platformName })}::jsonb
+    `
+
+    await db.sql`
+      INSERT INTO public.platform_config (key, value)
+      VALUES ('setup', ${JSON.stringify({
+        completedAt: new Date().toISOString(),
+        version: '0.0.1',
+      })}::jsonb)
+      ON CONFLICT (key) DO UPDATE SET value = ${JSON.stringify({
+        completedAt: new Date().toISOString(),
+        version: '0.0.1',
+      })}::jsonb
+    `
+
+    spinner.succeed(`Platform configured: ${answers.platformName}`)
+    return true
+  } catch (error) {
+    spinner.fail('Failed to save platform configuration')
+    if (error instanceof Error) {
+      console.log(chalk.red(`  ${error.message}`))
+    }
+    return false
+  }
 }
