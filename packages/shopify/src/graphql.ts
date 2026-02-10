@@ -2,9 +2,9 @@
  * GraphQL query helpers
  */
 
-import { createStorefrontClient, type StorefrontClient } from './storefront'
 import { createAdminClient, type AdminClient } from './admin'
-import type { StorefrontConfig, AdminConfig } from './config'
+import type { AdminConfig, StorefrontConfig } from './config'
+import { createStorefrontClient, type StorefrontClient } from './storefront'
 
 let storefrontClientInstance: StorefrontClient | null = null
 let adminClientInstance: AdminClient | null = null

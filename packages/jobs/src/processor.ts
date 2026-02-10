@@ -2,9 +2,9 @@
  * Job processor
  */
 
-import type { Job, JobResult } from './types'
-import type { JobQueue } from './queue'
 import type { JobDefinition, JobHandler } from './define'
+import type { JobQueue } from './queue'
+import type { Job, JobResult } from './types'
 
 export interface ProcessorConfig {
   queue: JobQueue

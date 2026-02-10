@@ -23,7 +23,7 @@
     "build": "tsup src/index.ts --format esm --dts --clean",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/",
+    "lint": "eslint .",
     "clean": "rm -rf dist"
   },
   "dependencies": {
@@ -39,6 +39,7 @@
     "@cgk/typescript-config": "workspace:*",
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
+    "eslint": "^9.18.0",
     "tsup": "^8.0.1",
     "typescript": "^5.3.3"
   }

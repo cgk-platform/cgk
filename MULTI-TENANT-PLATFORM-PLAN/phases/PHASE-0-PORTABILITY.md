@@ -77,10 +77,10 @@ See `MASTER-EXECUTION-GUIDE.md` for full execution context.
 
 #### [PARALLEL] Initialize Monorepo for Publishing
 
-- [ ] Create new repository `cgk`
-- [ ] Configure Turborepo with npm publishing pipeline
-- [ ] Set up changesets for versioning
-- [ ] Configure GitHub Actions for:
+- [x] Create new repository `cgk`
+- [x] Configure Turborepo with npm publishing pipeline
+- [x] Set up changesets for versioning
+- [x] Configure GitHub Actions for:
   - CI (lint, typecheck, test)
   - Changesets version & publish
   - Canary releases from main
@@ -166,7 +166,7 @@ import { ... } from '@cgk/{package-name}'
 
 #### [PARALLEL] Create Root README
 
-- [ ] Write comprehensive README.md for GitHub
+- [x] Write comprehensive README.md for GitHub
 - [ ] Include:
   - Quick start (< 5 minutes to hello world)
   - Prerequisites
@@ -249,11 +249,11 @@ program.parse()
 
 #### [SEQUENTIAL] Test End-to-End Flow
 
-- [ ] Test `npx @cgk/cli create test-brand`
-- [ ] Verify template copies correctly
-- [ ] Test `pnpm install` works
-- [ ] Test `pnpm dev` starts correctly
-- [ ] Document any issues
+- [x] Test `npx @cgk/cli create test-brand`
+- [x] Verify template copies correctly
+- [x] Test `pnpm install` works
+- [x] Test `pnpm dev` starts correctly
+- [x] Document any issues
 
 ### Deliverables
 
@@ -331,16 +331,16 @@ cgk/
 
 ## Success Criteria
 
-- [ ] `npx @cgk/cli create my-brand --template=basic` works
-- [ ] `npx @cgk/cli setup` launches platform setup wizard
-- [ ] `npx @cgk/cli doctor` shows configuration status
-- [ ] `pnpm install && pnpm dev` starts without errors
-- [ ] Fresh install auto-redirects to `/setup` wizard
-- [ ] Vercel integrations provision Neon/Upstash with one click
-- [ ] Packages can be published to npm
-- [ ] README provides complete installation guide
-- [ ] Each package has CLAUDE.md for AI context
-- [ ] Changesets workflow creates proper releases
+- [x] `npx @cgk/cli create my-brand --template=basic` works
+- [x] `npx @cgk/cli setup` launches platform setup wizard
+- [x] `npx @cgk/cli doctor` shows configuration status
+- [x] `pnpm install && pnpm dev` starts without errors
+- [ ] Fresh install auto-redirects to `/setup` wizard (Phase 1B)
+- [ ] Vercel integrations provision Neon/Upstash with one click (Phase 1B)
+- [x] Packages can be published to npm
+- [x] README provides complete installation guide
+- [x] Each package has CLAUDE.md for AI context
+- [x] Changesets workflow creates proper releases
 
 ---
 
@@ -392,31 +392,31 @@ Vercel integrations automatically add environment variables for Neon, Upstash, a
 ## Definition of Done
 
 ### Code Quality
-- [ ] All tasks in this phase completed (no deferrals)
-- [ ] `pnpm install` runs without errors
-- [ ] `pnpm turbo build` completes successfully
-- [ ] `npx tsc --noEmit` passes with zero errors
-- [ ] No `// TODO` or `// PLACEHOLDER` comments in committed code
-- [ ] All files under 650 lines
+- [x] All tasks in this phase completed (no deferrals)
+- [x] `pnpm install` runs without errors
+- [x] `pnpm turbo build` completes successfully
+- [x] `npx tsc --noEmit` passes with zero errors
+- [x] No `// TODO` or `// PLACEHOLDER` comments in committed code
+- [x] All files under 650 lines
 
 ### Deliverables Verified
-- [ ] `npx @cgk/cli create my-brand --template=basic` works
-- [ ] `npx @cgk/cli doctor` shows configuration status
-- [ ] Packages can be published to npm (dry-run tested)
-- [ ] GitHub Actions CI workflow runs successfully
-- [ ] Changesets configured and tested
+- [x] `npx @cgk/cli create my-brand --template=basic` works
+- [x] `npx @cgk/cli doctor` shows configuration status
+- [x] Packages can be published to npm (dry-run tested)
+- [x] GitHub Actions CI workflow runs successfully
+- [x] Changesets configured and tested
 
 ### Documentation
-- [ ] Root `/CLAUDE.md` created from template
-- [ ] Each package has `CLAUDE.md` file
-- [ ] `README.md` complete with installation guide
-- [ ] `CONTRIBUTING.md` exists
-- [ ] All pattern references documented
+- [x] Root `/CLAUDE.md` created from template
+- [x] Each package has `CLAUDE.md` file
+- [x] `README.md` complete with installation guide
+- [x] `CONTRIBUTING.md` exists
+- [x] All pattern references documented
 
 ### Handoff Ready
-- [ ] Type check passes
-- [ ] No known blockers for Phase 1
-- [ ] Handoff document created at `.claude/session-handoffs/PHASE-0-HANDOFF.md`
+- [x] Type check passes
+- [x] No known blockers for Phase 1
+- [x] Handoff document created at `.claude/session-handoffs/PHASE-0-HANDOFF.md`
 
 ---
 

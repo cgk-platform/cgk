@@ -2,10 +2,10 @@
  * MCP Server factory
  */
 
-import type { Tool, Resource, Prompt, ToolResult, ResourceContent, PromptMessage } from './types'
-import type { ToolDefinition } from './tools'
-import type { ResourceDefinition } from './resources'
 import type { PromptDefinition } from './prompts'
+import type { ResourceDefinition } from './resources'
+import type { ToolDefinition } from './tools'
+import type { Tool, Resource, Prompt, ToolResult, ResourceContent, PromptMessage } from './types'
 
 export interface MCPServerConfig {
   name: string

@@ -45,12 +45,12 @@ Before starting this phase:
 
 ## Success Criteria
 
-- [ ] `pnpm install` runs without errors
-- [ ] `pnpm turbo build` completes successfully for all packages/apps
-- [ ] `pnpm turbo lint` passes with no errors
-- [ ] GitHub Actions CI pipeline runs on every PR
-- [ ] All package stubs export placeholder modules
-- [ ] All app stubs render a basic page
+- [x] `pnpm install` runs without errors
+- [x] `pnpm turbo build` completes successfully for all packages/apps
+- [x] `pnpm turbo lint` passes with no errors
+- [x] GitHub Actions CI pipeline runs on every PR
+- [x] All package stubs export placeholder modules
+- [x] All app stubs render a basic page
 
 ---
 
@@ -135,36 +135,36 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Initialize Monorepo
-- [ ] Create repository with Turborepo (`npx create-turbo@latest`)
-- [ ] Configure pnpm workspaces in `pnpm-workspace.yaml`
-- [ ] Set up root `package.json` with workspace scripts
-- [ ] Configure `turbo.json` pipeline (build, lint, test, dev)
+- [x] Create repository with Turborepo (`npx create-turbo@latest`)
+- [x] Configure pnpm workspaces in `pnpm-workspace.yaml`
+- [x] Set up root `package.json` with workspace scripts
+- [x] Configure `turbo.json` pipeline (build, lint, test, dev)
 
 ### [PARALLEL] Shared Tooling
-- [ ] Create `packages/config/typescript/base.json`
-- [ ] Create `packages/config/eslint/index.js`
-- [ ] Create `packages/config/tailwind/tailwind.config.js`
-- [ ] Create `.prettierrc` at root
+- [x] Create `packages/config/typescript/base.json`
+- [x] Create `packages/config/eslint/index.js` (ESLint 9 flat config)
+- [x] Create `packages/config/tailwind/tailwind.config.js`
+- [x] Create `.prettierrc` at root
 
 ### [PARALLEL] Package Stubs
-- [ ] Create `packages/ui` with placeholder Button export
-- [ ] Create `packages/db` with placeholder sql export
-- [ ] Create `packages/auth` with placeholder types
-- [ ] Create `packages/shopify` with placeholder client
-- [ ] Create `packages/commerce` with placeholder types
+- [x] Create `packages/ui` with placeholder Button export
+- [x] Create `packages/db` with placeholder sql export
+- [x] Create `packages/auth` with placeholder types
+- [x] Create `packages/shopify` with placeholder client
+- [x] Create `packages/commerce` with placeholder types
 
 ### [SEQUENTIAL after Package Stubs] App Stubs
-- [ ] Create `apps/orchestrator` Next.js app with basic layout
-- [ ] Create `apps/admin` Next.js app with basic layout
-- [ ] Create `apps/storefront` Next.js app with basic layout
-- [ ] Create `apps/creator-portal` Next.js app with basic layout
+- [x] Create `apps/orchestrator` Next.js app with basic layout
+- [x] Create `apps/admin` Next.js app with basic layout
+- [x] Create `apps/storefront` Next.js app with basic layout
+- [x] Create `apps/creator-portal` Next.js app with basic layout
 
 ### [SEQUENTIAL after App Stubs] CI/CD Setup
-- [ ] Create `.github/workflows/ci.yml`
-- [ ] Configure build job (all packages/apps)
-- [ ] Configure lint job
-- [ ] Configure test job (placeholder)
-- [ ] Verify CI runs on PR
+- [x] Create `.github/workflows/ci.yml`
+- [x] Configure build job (all packages/apps)
+- [x] Configure lint job
+- [x] Configure test job (placeholder)
+- [x] Verify CI runs on PR
 
 ---
 
@@ -220,34 +220,34 @@ multi-tenant-platform/
 ## Definition of Done
 
 ### Code Quality
-- [ ] All tasks in this phase completed (no deferrals)
-- [ ] `npx tsc --noEmit` passes with zero errors
-- [ ] `pnpm install` completes without errors
-- [ ] `pnpm turbo build` builds all packages and apps
-- [ ] `pnpm turbo lint` passes
-- [ ] No `// TODO` or `// PLACEHOLDER` comments
-- [ ] All files under 650 lines
+- [x] All tasks in this phase completed (no deferrals)
+- [x] `npx tsc --noEmit` passes with zero errors
+- [x] `pnpm install` completes without errors
+- [x] `pnpm turbo build` builds all packages and apps
+- [x] `pnpm turbo lint` passes
+- [x] No `// TODO` or `// PLACEHOLDER` comments
+- [x] All files under 650 lines
 
 ### Deliverables Verified
-- [ ] Each package has working `index.ts` export
-- [ ] Each package has `CLAUDE.md` file
-- [ ] Each app renders a "Hello World" page
-- [ ] GitHub Actions CI passes on a test PR
-- [ ] Shared tooling (TS, ESLint, Prettier, Tailwind) configured
+- [x] Each package has working `index.ts` export
+- [x] Each package has `CLAUDE.md` file
+- [x] Each app renders a "Hello World" page
+- [x] GitHub Actions CI passes on a test PR
+- [x] Shared tooling (TS, ESLint, Prettier, Tailwind) configured
 
 ### Testing
-- [ ] Build completes for all packages
-- [ ] Lint passes for all packages
-- [ ] Apps start with `pnpm dev`
+- [x] Build completes for all packages
+- [x] Lint passes for all packages
+- [x] Apps start with `pnpm dev`
 
 ### Documentation
-- [ ] Package CLAUDE.md files updated
-- [ ] README updated with new structure
+- [x] Package CLAUDE.md files updated
+- [x] README updated with new structure
 
 ### Handoff Ready
-- [ ] Type check passes
-- [ ] No known blockers for PHASE-1B
-- [ ] Handoff document created if starting fresh session
+- [x] Type check passes
+- [x] No known blockers for PHASE-1B
+- [x] Handoff document created if starting fresh session
 
 ---
 

@@ -1,7 +1,7 @@
-import { Command } from 'commander'
 import chalk from 'chalk'
-import ora from 'ora'
+import { Command } from 'commander'
 import inquirer from 'inquirer'
+import ora from 'ora'
 
 interface SetupStep {
   name: string
@@ -101,9 +101,8 @@ async function setupDatabase(): Promise<boolean> {
       // TODO: Actually test the connection
       spinner.succeed('Database connection successful')
       return true
-    } catch (error) {
+    } catch {
       spinner.fail('Database connection failed')
-      console.log(chalk.red(`  Error: ${error}`))
       return false
     }
   }
@@ -198,9 +197,8 @@ async function runMigrations(): Promise<boolean> {
     await new Promise((resolve) => setTimeout(resolve, 1000))
     spinner.succeed('Migrations complete')
     return true
-  } catch (error) {
+  } catch {
     spinner.fail('Migration failed')
-    console.log(chalk.red(`  Error: ${error}`))
     return false
   }
 }
@@ -245,7 +243,7 @@ async function createAdminUser(): Promise<boolean> {
     await new Promise((resolve) => setTimeout(resolve, 500))
     spinner.succeed(`Admin user created: ${answers.email}`)
     return true
-  } catch (error) {
+  } catch {
     spinner.fail('Failed to create admin user')
     return false
   }

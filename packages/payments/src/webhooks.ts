@@ -2,8 +2,9 @@
  * Payment webhook verification
  */
 
-import Stripe from 'stripe'
 import { createHmac } from 'crypto'
+
+import Stripe from 'stripe'
 
 /**
  * Verify a Stripe webhook signature

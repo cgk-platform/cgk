@@ -1,5 +1,5 @@
-import { Command } from 'commander'
 import chalk from 'chalk'
+import { Command } from 'commander'
 import ora from 'ora'
 
 export const migrateCommand = new Command('migrate')
@@ -32,9 +32,8 @@ export const migrateCommand = new Command('migrate')
         // TODO: Actually rollback
         await new Promise((resolve) => setTimeout(resolve, 1000))
         spinner.succeed('Rollback complete: 003_add_users')
-      } catch (error) {
+      } catch {
         spinner.fail('Rollback failed')
-        console.log(chalk.red(`  Error: ${error}`))
         process.exit(1)
       }
       return
@@ -56,9 +55,8 @@ export const migrateCommand = new Command('migrate')
       try {
         await new Promise((resolve) => setTimeout(resolve, 500))
         spinner.succeed(`Applied: ${migration}`)
-      } catch (error) {
+      } catch {
         spinner.fail(`Failed: ${migration}`)
-        console.log(chalk.red(`  Error: ${error}`))
         process.exit(1)
       }
     }

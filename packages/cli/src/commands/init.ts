@@ -1,9 +1,11 @@
-import { Command } from 'commander'
-import chalk from 'chalk'
-import ora from 'ora'
-import inquirer from 'inquirer'
-import fs from 'fs-extra'
 import path from 'path'
+
+import chalk from 'chalk'
+import { Command } from 'commander'
+import fs from 'fs-extra'
+import inquirer from 'inquirer'
+import ora from 'ora'
+
 
 export const initCommand = new Command('init')
   .description('Initialize CGK in an existing project')

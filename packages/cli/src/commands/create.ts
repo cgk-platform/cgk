@@ -1,9 +1,11 @@
-import { Command } from 'commander'
-import chalk from 'chalk'
-import ora from 'ora'
-import inquirer from 'inquirer'
-import fs from 'fs-extra'
 import path from 'path'
+
+import chalk from 'chalk'
+import { Command } from 'commander'
+import fs from 'fs-extra'
+import inquirer from 'inquirer'
+import ora from 'ora'
+
 
 export const createCommand = new Command('create')
   .description('Create a new CGK brand site')
@@ -95,9 +97,9 @@ export const createCommand = new Command('create')
       console.log('')
       console.log('Documentation: https://cgk.dev/docs')
       console.log('')
-    } catch (error) {
+    } catch (err) {
       spinner.fail('Failed to create project')
-      console.error(chalk.red(error))
+      console.error(chalk.red(err instanceof Error ? err.message : String(err)))
       process.exit(1)
     }
   })

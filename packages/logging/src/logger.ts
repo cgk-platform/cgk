@@ -2,12 +2,12 @@
  * Logger implementation
  */
 
-import { LogLevel, type LogLevelName, nameToLevel, shouldLog } from './levels'
+import type { ChildLoggerOptions } from './child'
 import { jsonFormatter, type LogFormatter } from './formatters'
+import { LogLevel, type LogLevelName, nameToLevel, shouldLog } from './levels'
 import { consoleTransport, type LogTransport } from './transports'
 import type { LogEntry, LogMeta } from './types'
 import { serializeError } from './types'
-import type { ChildLoggerOptions } from './child'
 
 export interface LoggerConfig {
   level?: LogLevelName

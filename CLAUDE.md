@@ -327,7 +327,8 @@ INNGEST_SIGNING_KEY=...
 | Phase | Status | Notes |
 |-------|--------|-------|
 | **Phase 0** | ✅ Complete | Monorepo, CLI, starters, docs |
-| **Phase 1** | 🔜 Next | Foundation (database, auth, core packages) |
+| **Phase 1A** | ✅ Complete | App stubs (orchestrator, admin, storefront, creator-portal) |
+| **Phase 1B** | 🔜 Next | Database Foundation (schema-per-tenant, migrations) |
 | Phase 2+ | Pending | See PLAN.md for full timeline |
 
 ---
