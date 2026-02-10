@@ -55,3 +55,4 @@ export {
 
 // Types
 export type { QueryConfig, QueryResult } from './types.js'
+
