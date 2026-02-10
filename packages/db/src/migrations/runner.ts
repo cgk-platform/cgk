@@ -27,30 +27,27 @@ function validateTenantSlug(slug: string): void {
  * Ensure the schema_migrations table exists in a schema
  */
 async function ensureMigrationTable(schema: string): Promise<void> {
-  // Set search path to target schema
-  await sql`SELECT set_config('search_path', ${schema}, true)`
-
   // Create the tracking table if it doesn't exist
-  await sql`
+  // IMPORTANT: With Neon's connection pooler, search_path must be in the same query
+  await sql.query(`
+    SET search_path TO ${schema};
     CREATE TABLE IF NOT EXISTS schema_migrations (
       version INTEGER PRIMARY KEY,
       name TEXT NOT NULL,
       applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
-  `
+  `)
 }
 
 /**
  * Get applied migrations for a schema
  */
 async function getAppliedMigrations(schema: string): Promise<MigrationRecord[]> {
-  await sql`SELECT set_config('search_path', ${schema}, true)`
-
-  const result = await sql<MigrationRecord>`
-    SELECT version, name, applied_at
-    FROM schema_migrations
-    ORDER BY version ASC
-  `
+  // Use raw query with schema-qualified table name
+  // This avoids search_path issues with Neon's connection pooler
+  const result = await sql.query<MigrationRecord>(
+    `SELECT version, name, applied_at FROM ${schema}.schema_migrations ORDER BY version ASC`
+  )
 
   return result.rows
 }
@@ -66,9 +63,6 @@ async function applyMigration(
   const startTime = Date.now()
 
   try {
-    // Set search path
-    await sql`SELECT set_config('search_path', ${schema}, true)`
-
     if (dryRun) {
       return {
         migration,
@@ -77,16 +71,19 @@ async function applyMigration(
       }
     }
 
-    // Execute the migration SQL
-    // Note: We use sql.query for raw SQL execution
-    await sql.query(migration.sql)
+    // Execute the migration SQL with search_path prepended
+    // IMPORTANT: With Neon's connection pooler, search_path must be in the same query
+    // because each sql call may use a different connection from the pool
+    const sqlWithSchema = `SET search_path TO ${schema};\n${migration.sql}`
+    await sql.query(sqlWithSchema)
 
-    // Record the migration
-    await sql`
+    // Record the migration (include SET search_path for pooler compatibility)
+    await sql.query(`
+      SET search_path TO ${schema};
       INSERT INTO schema_migrations (version, name, applied_at)
-      VALUES (${migration.version}, ${migration.name}, NOW())
+      VALUES (${migration.version}, '${migration.name}', NOW())
       ON CONFLICT (version) DO NOTHING
-    `
+    `)
 
     return {
       migration,
@@ -144,8 +141,7 @@ async function runMigrationsForSchema(
     }
   }
 
-  // Reset search path to public
-  await sql`SELECT set_config('search_path', 'public', true)`
+  // Note: No need to reset search_path since each query sets its own with Neon pooler
 
   return results
 }
@@ -245,13 +241,9 @@ export async function getMigrationStatus(
     const appliedVersions = new Set(applied.map((m) => m.version))
     const pending = migrations.filter((m) => !appliedVersions.has(m.version))
 
-    // Reset search path
-    await sql`SELECT set_config('search_path', 'public', true)`
-
     return { applied, pending }
   } catch {
     // Schema might not exist yet
-    await sql`SELECT set_config('search_path', 'public', true)`
     return { applied: [], pending: migrations }
   }
 }

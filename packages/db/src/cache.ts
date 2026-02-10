@@ -158,11 +158,12 @@ class UpstashRedisCache implements TenantCache {
     public readonly tenantSlug: string,
     public readonly keyPrefix: string
   ) {
-    const url = process.env.UPSTASH_REDIS_REST_URL
-    const token = process.env.UPSTASH_REDIS_REST_TOKEN
+    // Support both Vercel's KV_* naming and direct UPSTASH_* naming
+    const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+    const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
 
     if (!url || !token) {
-      throw new Error('UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN required')
+      throw new Error('KV_REST_API_URL/TOKEN or UPSTASH_REDIS_REST_URL/TOKEN required')
     }
 
     this.baseUrl = url
@@ -264,13 +265,18 @@ export function createTenantCache(tenantSlug: string): TenantCache {
   const keyPrefix = `tenant:${tenantSlug}`
 
   // Use Upstash if configured, otherwise fall back to in-memory
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  // Support both Vercel's KV_* naming and direct UPSTASH_* naming
+  const hasRedisConfig =
+    (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) ||
+    (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+
+  if (hasRedisConfig) {
     return new UpstashRedisCache(tenantSlug, keyPrefix)
   }
 
   // Fall back to in-memory cache (for development/testing)
   console.warn(
-    `[cache] Using in-memory cache for tenant ${tenantSlug}. Set UPSTASH_REDIS_REST_URL for production.`
+    `[cache] Using in-memory cache for tenant ${tenantSlug}. Set KV_REST_API_URL for production.`
   )
   return new InMemoryCache(tenantSlug, keyPrefix)
 }
@@ -289,7 +295,11 @@ export function createTenantCache(tenantSlug: string): TenantCache {
 export function createGlobalCache(): TenantCache {
   const keyPrefix = 'platform'
 
-  if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  const hasRedisConfig =
+    (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) ||
+    (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN)
+
+  if (hasRedisConfig) {
     return new UpstashRedisCache('_global', keyPrefix)
   }
 
