@@ -1,0 +1,31 @@
+{
+  "name": "@cgk/core",
+  "version": "0.0.0",
+  "description": "Core utilities, types, and configuration schemas for CGK platform",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "@cgk/eslint-config": "workspace:*",
+    "@cgk/typescript-config": "workspace:*",
+    "tsup": "^8.3.0",
+    "typescript": "^5.9.0"
+  }
+}

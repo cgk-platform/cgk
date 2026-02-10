@@ -1,0 +1,35 @@
+{
+  "name": "@cgk/mcp",
+  "version": "0.0.0",
+  "description": "MCP (Model Context Protocol) server utilities for CGK platform",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cgk/core": "workspace:*",
+    "@cgk/db": "workspace:*",
+    "@cgk/auth": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@cgk/eslint-config": "workspace:*",
+    "@cgk/typescript-config": "workspace:*",
+    "tsup": "^8.3.0",
+    "typescript": "^5.9.0"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@cgk/auth",
+  "version": "0.0.0",
+  "description": "Authentication utilities for CGK platform - JWT, sessions, middleware",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cgk/core": "workspace:*",
+    "@cgk/db": "workspace:*",
+    "jose": "^5.2.0"
+  },
+  "devDependencies": {
+    "@cgk/eslint-config": "workspace:*",
+    "@cgk/typescript-config": "workspace:*",
+    "tsup": "^8.3.0",
+    "typescript": "^5.9.0"
+  }
+}
