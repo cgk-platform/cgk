@@ -46,9 +46,9 @@ const createTenantCommand = new Command('tenant:create')
       return
     }
 
-    // Check DATABASE_URL
-    if (!process.env.DATABASE_URL) {
-      console.log(chalk.red('\n❌ DATABASE_URL not set'))
+    // Check POSTGRES_URL (Vercel/Neon) or DATABASE_URL
+    if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
+      console.log(chalk.red('\n❌ POSTGRES_URL not set'))
       console.log(chalk.dim('   Run: npx @cgk/cli setup:database'))
       process.exit(1)
     }
@@ -125,9 +125,9 @@ const listTenantsCommand = new Command('tenant:list')
   .option('--status <status>', 'Filter by status (active, suspended, onboarding)')
   .option('--json', 'Output as JSON')
   .action(async (options) => {
-    // Check DATABASE_URL
-    if (!process.env.DATABASE_URL) {
-      console.log(chalk.red('\n❌ DATABASE_URL not set'))
+    // Check POSTGRES_URL (Vercel/Neon) or DATABASE_URL
+    if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
+      console.log(chalk.red('\n❌ POSTGRES_URL not set'))
       console.log(chalk.dim('   Run: npx @cgk/cli setup:database'))
       process.exit(1)
     }

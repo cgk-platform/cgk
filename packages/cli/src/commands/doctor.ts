@@ -35,21 +35,32 @@ export const doctorCommand = new Command('doctor')
     })
 
     // Check environment variables
-    const envVars = [
-      { name: 'DATABASE_URL', required: true },
-      { name: 'REDIS_URL', required: false },
-      { name: 'JWT_SECRET', required: true },
-    ]
+    // Check POSTGRES_URL (Vercel/Neon standard) or DATABASE_URL fallback
+    const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
+    results.push({
+      name: 'Env: POSTGRES_URL',
+      status: dbUrl ? 'pass' : 'fail',
+      message: dbUrl ? (process.env.POSTGRES_URL ? 'Set' : 'Set (as DATABASE_URL)') : 'Not set',
+      details: !dbUrl ? 'Required: Add Neon via Vercel Storage, then run vercel env pull' : undefined,
+    })
 
-    for (const { name, required } of envVars) {
-      const value = process.env[name]
-      results.push({
-        name: `Env: ${name}`,
-        status: value ? 'pass' : required ? 'fail' : 'warn',
-        message: value ? 'Set' : 'Not set',
-        details: !value && required ? `Required: Set ${name} in .env.local` : undefined,
-      })
-    }
+    // Check Redis (Upstash)
+    const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+    results.push({
+      name: 'Env: UPSTASH_REDIS_REST_URL',
+      status: redisUrl ? 'pass' : 'warn',
+      message: redisUrl ? 'Set' : 'Not set',
+      details: !redisUrl ? 'Optional: Add Upstash via Vercel Storage for Redis cache' : undefined,
+    })
+
+    // Check JWT_SECRET
+    const jwtSecret = process.env.JWT_SECRET
+    results.push({
+      name: 'Env: JWT_SECRET',
+      status: jwtSecret ? 'pass' : 'warn',
+      message: jwtSecret ? 'Set' : 'Not set',
+      details: !jwtSecret ? 'Needed for auth (will be required in Phase 1C)' : undefined,
+    })
 
     // Check if we're in a CGK project
     const fs = await import('fs-extra')

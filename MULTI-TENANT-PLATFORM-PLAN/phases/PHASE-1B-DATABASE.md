@@ -43,7 +43,7 @@ npx @cgk/cli tenant:create <slug>
 
 ### Environment Variables
 ```bash
-DATABASE_URL=postgresql://...  # Only required env var
+POSTGRES_URL=postgresql://...  # Required (auto-provisioned by Vercel/Neon)
 ```
 
 ---
@@ -54,7 +54,7 @@ DATABASE_URL=postgresql://...  # Only required env var
 - [x] Tenant schema template can be provisioned for new tenants
 - [x] `withTenant()` utility correctly sets PostgreSQL search_path
 - [x] Migration runner works for both public and tenant schemas
-- [ ] Tenant isolation verified via unit tests (deferred to testing phase)
+- [x] Tenant isolation verified via unit tests
 - [x] Can create a new tenant via CLI script
 
 ---
@@ -203,8 +203,9 @@ The implementing agent should determine the best approach for:
 - [x] Update doctor command to check database status
 
 ### [SEQUENTIAL after All] Testing & Docs ✅
-- [ ] Write tenant isolation tests (deferred)
-- [ ] Write migration runner tests (deferred)
+- [x] Write tenant isolation tests
+- [x] Write migration loader tests
+- [x] Write cache isolation tests
 - [x] Verify search_path switching works correctly
 - [x] Create `docs/setup/DATABASE.md`
 
@@ -313,7 +314,7 @@ magic_links
 - [x] `withTenant()` correctly switches search_path
 - [x] `getTenantFromRequest()` extracts tenant from headers
 - [x] CLI `tenant:create` command provisions new tenant
-- [ ] All database tests pass (deferred to testing phase)
+- [x] All database tests pass
 - [x] `npx tsc --noEmit` passes for packages/db
 
 ---

@@ -95,25 +95,27 @@ export const setupDatabaseCommand = new Command('setup:database')
 
     const spinner = ora()
 
-    // Step 1: Check DATABASE_URL
+    // Step 1: Check POSTGRES_URL (Vercel/Neon standard) or DATABASE_URL (fallback)
     console.log(chalk.bold('Step 1: Checking environment'))
 
-    if (!process.env.DATABASE_URL) {
-      console.log(chalk.red('  ✗ DATABASE_URL not set'))
+    const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
+    if (!dbUrl) {
+      console.log(chalk.red('  ✗ POSTGRES_URL not set'))
       console.log('')
       console.log(chalk.dim('  To set up your database:'))
-      console.log(chalk.dim('  1. Create a database at https://neon.tech'))
-      console.log(chalk.dim('  2. Copy the connection string'))
-      console.log(chalk.dim('  3. Add to .env.local:'))
-      console.log(chalk.cyan('     DATABASE_URL=postgresql://...'))
+      console.log(chalk.dim('  1. Add Neon integration in Vercel dashboard, OR'))
+      console.log(chalk.dim('  2. Create a database at https://neon.tech'))
+      console.log(chalk.dim('  3. Run: vercel env pull .env.local'))
+      console.log(chalk.dim('  4. Or add to .env.local manually:'))
+      console.log(chalk.cyan('     POSTGRES_URL=postgresql://...'))
       console.log('')
       process.exit(1)
     }
 
-    console.log(chalk.green('  ✓ DATABASE_URL is set'))
+    const envVarName = process.env.POSTGRES_URL ? 'POSTGRES_URL' : 'DATABASE_URL'
+    console.log(chalk.green(`  ✓ ${envVarName} is set`))
 
     // Mask the connection string for display
-    const dbUrl = process.env.DATABASE_URL
     const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':***@')
     console.log(chalk.dim(`    ${maskedUrl}`))
 
@@ -235,10 +237,13 @@ async function setupDatabase(): Promise<boolean> {
   const spinner = ora()
 
   // Check for existing DATABASE_URL
-  if (process.env.DATABASE_URL) {
-    console.log(chalk.green('  DATABASE_URL already set'))
+  // Check for POSTGRES_URL (Vercel/Neon) or DATABASE_URL (fallback)
+  const existingUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
+  if (existingUrl) {
+    const envVarName = process.env.POSTGRES_URL ? 'POSTGRES_URL' : 'DATABASE_URL'
+    console.log(chalk.green(`  ${envVarName} already set`))
 
-    if (!process.env.DATABASE_URL.includes('neon')) {
+    if (!existingUrl.includes('neon') && !existingUrl.includes('postgres')) {
       console.log(
         chalk.yellow('  ⚠ Warning: Expected Neon PostgreSQL URL')
       )
@@ -257,15 +262,15 @@ async function setupDatabase(): Promise<boolean> {
     }
   }
 
-  // No DATABASE_URL - prompt for it
+  // No database URL - prompt for it
   const { connectionType } = await inquirer.prompt([
     {
       type: 'list',
       name: 'connectionType',
       message: 'How would you like to configure the database?',
       choices: [
-        { name: 'Enter connection URL manually', value: 'manual' },
         { name: 'Use Vercel Integration (recommended)', value: 'vercel' },
+        { name: 'Enter connection URL manually', value: 'manual' },
         { name: 'Skip for now', value: 'skip' },
       ],
     },
@@ -279,9 +284,10 @@ async function setupDatabase(): Promise<boolean> {
   if (connectionType === 'vercel') {
     console.log(chalk.cyan('\n  To use Vercel Integration:'))
     console.log('  1. Go to your Vercel project settings')
-    console.log('  2. Navigate to Integrations')
-    console.log('  3. Add Neon Postgres')
-    console.log('  4. Re-run this setup')
+    console.log('  2. Navigate to Storage → Create Database → Neon Postgres')
+    console.log('  3. Connect to your project')
+    console.log('  4. Run: vercel env pull .env.local')
+    console.log('  5. Re-run this setup')
     return true
   }
 
@@ -304,13 +310,14 @@ async function setupDatabase(): Promise<boolean> {
   let envContent = ''
   if (await fs.pathExists(envPath)) {
     envContent = await fs.readFile(envPath, 'utf-8')
+    envContent = envContent.replace(/POSTGRES_URL=.*\n?/g, '')
     envContent = envContent.replace(/DATABASE_URL=.*\n?/g, '')
   }
 
-  envContent += `\nDATABASE_URL=${url}\n`
+  envContent += `\nPOSTGRES_URL=${url}\n`
   await fs.writeFile(envPath, envContent)
 
-  console.log(chalk.green('  DATABASE_URL saved to .env.local'))
+  console.log(chalk.green('  POSTGRES_URL saved to .env.local'))
   return true
 }
 

@@ -10,14 +10,24 @@ This guide walks you through setting up the database for your CGK platform.
 
 ## Quick Start
 
-### Option 1: Vercel Deploy (Recommended)
+### Option 1: Vercel Storage (Recommended)
 
-If you're deploying to Vercel, the database is automatically provisioned:
+The easiest way to set up the database:
 
-1. Click the "Deploy with Vercel" button in the repository
-2. Vercel will prompt you to add the Neon PostgreSQL integration
-3. Environment variables are automatically configured
-4. Run the setup after deployment completes
+1. Go to your Vercel project dashboard
+2. Navigate to **Storage** tab
+3. Click **Create Database** → **Neon Postgres**
+4. Connect it to your project
+5. Pull environment variables locally:
+   ```bash
+   vercel env pull .env.local
+   ```
+6. Run database setup:
+   ```bash
+   npx @cgk/cli setup:database
+   ```
+
+This automatically provisions a Neon PostgreSQL database and sets up all the required environment variables.
 
 ### Option 2: Manual Setup
 
@@ -38,7 +48,7 @@ Add the connection string to your `.env.local`:
 
 ```bash
 # .env.local
-DATABASE_URL=postgresql://user:password@ep-xxx-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
+POSTGRES_URL=postgresql://user:password@ep-xxx-xxx.us-east-2.aws.neon.tech/neondb?sslmode=require
 ```
 
 #### Step 3: Run Database Setup
@@ -236,40 +246,56 @@ Slug must match pattern `^[a-z0-9_]+$`:
 
 ## Environment Variables
 
-### Required
+### Database (Required)
 
 ```bash
-# PostgreSQL connection string (Neon recommended)
-DATABASE_URL=postgresql://user:password@host/database?sslmode=require
+# Via Vercel Storage (auto-provisioned)
+POSTGRES_URL=postgresql://...
+
+# Or manually set
+POSTGRES_URL=postgresql://user:password@host/database?sslmode=require
 ```
 
-### Optional (for cache)
+The `@vercel/postgres` package automatically reads from `POSTGRES_URL`.
+
+### Redis Cache (Optional)
 
 ```bash
-# Upstash Redis (recommended for production)
+# Upstash Redis (via Vercel Storage or upstash.com)
 UPSTASH_REDIS_REST_URL=https://us1-xxx.upstash.io
 UPSTASH_REDIS_REST_TOKEN=AXxx...
-
-# Alternative Redis URL
-REDIS_URL=redis://localhost:6379
 ```
 
-## Vercel Integration
+If not configured, the platform falls back to in-memory caching (suitable for development).
 
-When using Vercel with Neon integration, these are automatically set:
+## Vercel Storage Integration
+
+When using Vercel Storage, these environment variables are automatically configured:
+
+### Neon Postgres
 
 ```bash
-# Auto-populated by Neon integration
-POSTGRES_URL=...
-POSTGRES_PRISMA_URL=...
-POSTGRES_URL_NON_POOLING=...
+POSTGRES_URL=...              # Main connection URL (pooled)
+POSTGRES_PRISMA_URL=...       # For Prisma (pooled)
+POSTGRES_URL_NON_POOLING=...  # Direct connection (for migrations)
 POSTGRES_USER=...
 POSTGRES_HOST=...
 POSTGRES_PASSWORD=...
 POSTGRES_DATABASE=...
 ```
 
-The CLI also accepts `POSTGRES_URL` as an alias for `DATABASE_URL`.
+### Upstash Redis
+
+```bash
+UPSTASH_REDIS_REST_URL=...
+UPSTASH_REDIS_REST_TOKEN=...
+```
+
+After adding integrations in Vercel, pull to local:
+
+```bash
+vercel env pull .env.local
+```
 
 ## Next Steps
 
