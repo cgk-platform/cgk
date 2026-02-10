@@ -44,12 +44,13 @@ export const doctorCommand = new Command('doctor')
       details: !dbUrl ? 'Required: Add Neon via Vercel Storage, then run vercel env pull' : undefined,
     })
 
-    // Check Redis (Upstash)
-    const redisUrl = process.env.UPSTASH_REDIS_REST_URL
+    // Check Redis (Upstash) - Vercel uses KV_REST_API_*, direct Upstash uses UPSTASH_*
+    const redisUrl = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+    const redisEnvName = process.env.KV_REST_API_URL ? 'KV_REST_API_URL' : 'UPSTASH_REDIS_REST_URL'
     results.push({
-      name: 'Env: UPSTASH_REDIS_REST_URL',
+      name: 'Env: Redis (KV)',
       status: redisUrl ? 'pass' : 'warn',
-      message: redisUrl ? 'Set' : 'Not set',
+      message: redisUrl ? `Set (${redisEnvName})` : 'Not set',
       details: !redisUrl ? 'Optional: Add Upstash via Vercel Storage for Redis cache' : undefined,
     })
 

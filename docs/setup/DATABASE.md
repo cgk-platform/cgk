@@ -261,11 +261,16 @@ The `@vercel/postgres` package automatically reads from `POSTGRES_URL`.
 ### Redis Cache (Optional)
 
 ```bash
-# Upstash Redis (via Vercel Storage or upstash.com)
-UPSTASH_REDIS_REST_URL=https://us1-xxx.upstash.io
-UPSTASH_REDIS_REST_TOKEN=AXxx...
+# Via Vercel Storage (auto-provisioned as KV_*)
+KV_REST_API_URL=https://xxx.upstash.io
+KV_REST_API_TOKEN=Axxx...
+
+# Or direct Upstash (upstash.com)
+UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
+UPSTASH_REDIS_REST_TOKEN=Axxx...
 ```
 
+The platform checks for `KV_REST_API_*` first (Vercel naming), then falls back to `UPSTASH_*`.
 If not configured, the platform falls back to in-memory caching (suitable for development).
 
 ## Vercel Storage Integration
@@ -284,11 +289,12 @@ POSTGRES_PASSWORD=...
 POSTGRES_DATABASE=...
 ```
 
-### Upstash Redis
+### Upstash Redis (via Vercel KV)
 
 ```bash
-UPSTASH_REDIS_REST_URL=...
-UPSTASH_REDIS_REST_TOKEN=...
+KV_REST_API_URL=...          # Vercel naming
+KV_REST_API_TOKEN=...
+KV_URL=...                   # Standard Redis URL
 ```
 
 After adding integrations in Vercel, pull to local:

@@ -323,7 +323,8 @@ async function setupDatabase(): Promise<boolean> {
 
 async function setupCache(): Promise<boolean> {
   // Similar to setupDatabase but for Redis/Upstash
-  if (process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL) {
+  // Check for Redis - Vercel uses KV_REST_API_*, direct Upstash uses UPSTASH_*
+  if (process.env.KV_REST_API_URL || process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL) {
     console.log(chalk.green('  Redis/Upstash already configured'))
     return true
   }
