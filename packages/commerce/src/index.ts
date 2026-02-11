@@ -5,20 +5,47 @@
  * @ai-note Provider-agnostic commerce operations
  */
 
-// Provider interface
-export type { CommerceProvider, CommerceConfig } from './types'
+// Provider factory
+export { createCommerceProvider } from './client'
 
-// Operations
-export { createCommerceClient, type CommerceClient } from './client'
+// Shopify provider (direct access)
+export { createShopifyProvider } from './providers'
 
-// Product operations
-export { getProduct, getProducts, type Product, type ProductVariant } from './products'
+// Full interface and operation types
+export type {
+  CommerceProvider,
+  CommerceConfig,
+  ProductOperations,
+  CartOperations,
+  CheckoutOperations,
+  OrderOperations,
+  CustomerOperations,
+  DiscountOperations,
+  WebhookHandler,
+  ListParams,
+  PaginatedResult,
+  PageInfo,
+} from './types'
 
-// Order operations
-export { getOrder, getOrders, type Order, type OrderLineItem } from './orders'
-
-// Cart operations
-export { createCart, addToCart, removeFromCart, type Cart, type CartItem } from './cart'
-
-// Checkout operations
-export { createCheckout, type Checkout, type CheckoutLineItem } from './checkout'
+// Domain model types
+export type {
+  Product,
+  ProductVariant,
+  ProductImage,
+  PriceRange,
+  Money,
+  SelectedOption,
+  Order,
+  OrderLineItem,
+  Customer,
+  Address,
+  Cart,
+  CartCost,
+  CartLine,
+  CartLineCost,
+  CartItemInput,
+  CartAttribute,
+  Checkout,
+  CheckoutLineItem,
+  Discount,
+} from './types'

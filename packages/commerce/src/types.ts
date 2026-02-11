@@ -1,6 +1,13 @@
 /**
- * Commerce provider interface and configuration
+ * Commerce provider interface and types
+ *
+ * Defines the provider-agnostic abstraction layer for commerce operations.
+ * Implementations exist for Shopify (primary) and Custom+Stripe (future).
  */
+
+// ---------------------------------------------------------------------------
+// Configuration
+// ---------------------------------------------------------------------------
 
 export interface CommerceConfig {
   provider: 'shopify' | 'custom'
@@ -9,40 +16,99 @@ export interface CommerceConfig {
   adminAccessToken?: string
 }
 
+// ---------------------------------------------------------------------------
+// Commerce Provider Interface
+// ---------------------------------------------------------------------------
+
 export interface CommerceProvider {
-  readonly name: string
-  readonly config: CommerceConfig
+  readonly name: 'shopify' | 'custom'
 
-  // Product operations
-  getProduct(id: string): Promise<Product | null>
-  getProducts(options?: GetProductsOptions): Promise<Product[]>
-
-  // Order operations
-  getOrder(id: string): Promise<Order | null>
-  getOrders(options?: GetOrdersOptions): Promise<Order[]>
-
-  // Cart operations
-  createCart(): Promise<Cart>
-  addToCart(cartId: string, item: CartItemInput): Promise<Cart>
-  removeFromCart(cartId: string, lineId: string): Promise<Cart>
-
-  // Checkout operations
-  createCheckout(cartId: string): Promise<Checkout>
+  products: ProductOperations
+  cart: CartOperations
+  checkout: CheckoutOperations
+  orders: OrderOperations
+  customers: CustomerOperations
+  discounts: DiscountOperations
+  webhooks: WebhookHandler
 }
 
-export interface GetProductsOptions {
+// ---------------------------------------------------------------------------
+// Operation Interfaces
+// ---------------------------------------------------------------------------
+
+export interface ProductOperations {
+  list(params?: ListParams): Promise<PaginatedResult<Product>>
+  get(id: string): Promise<Product | null>
+  getByHandle(handle: string): Promise<Product | null>
+  search(query: string, params?: ListParams): Promise<PaginatedResult<Product>>
+}
+
+export interface CartOperations {
+  create(): Promise<Cart>
+  get(id: string): Promise<Cart | null>
+  addItem(cartId: string, item: CartItemInput): Promise<Cart>
+  updateItem(cartId: string, lineId: string, quantity: number): Promise<Cart>
+  removeItem(cartId: string, lineId: string): Promise<Cart>
+  setAttributes(cartId: string, attributes: CartAttribute[]): Promise<Cart>
+}
+
+export interface CheckoutOperations {
+  create(cartId: string): Promise<Checkout>
+  getUrl(checkoutId: string): Promise<string>
+  applyDiscount(checkoutId: string, code: string): Promise<Checkout>
+}
+
+export interface OrderOperations {
+  list(params?: ListParams): Promise<PaginatedResult<Order>>
+  get(id: string): Promise<Order | null>
+  cancel(id: string, reason?: string): Promise<Order>
+  refund(id: string, amount: number): Promise<Order>
+}
+
+export interface CustomerOperations {
+  list(params?: ListParams): Promise<PaginatedResult<Customer>>
+  get(id: string): Promise<Customer | null>
+  getOrders(customerId: string, params?: ListParams): Promise<PaginatedResult<Order>>
+}
+
+export interface DiscountOperations {
+  validate(code: string): Promise<Discount | null>
+  getActive(): Promise<Discount[]>
+}
+
+export interface WebhookHandler {
+  handleOrderCreated(payload: unknown): Promise<void>
+  handleOrderUpdated(payload: unknown): Promise<void>
+  handleRefund(payload: unknown): Promise<void>
+}
+
+// ---------------------------------------------------------------------------
+// Shared Params
+// ---------------------------------------------------------------------------
+
+export interface ListParams {
   first?: number
   after?: string
   query?: string
-  sortKey?: 'TITLE' | 'PRICE' | 'CREATED_AT' | 'UPDATED_AT'
+  sortKey?: string
   reverse?: boolean
 }
 
-export interface GetOrdersOptions {
-  first?: number
-  after?: string
-  query?: string
+export interface PaginatedResult<T> {
+  items: T[]
+  pageInfo: PageInfo
 }
+
+export interface PageInfo {
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+  startCursor: string | null
+  endCursor: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Domain Models
+// ---------------------------------------------------------------------------
 
 export interface Product {
   id: string
@@ -121,6 +187,18 @@ export interface OrderLineItem {
   totalPrice: Money
 }
 
+export interface Customer {
+  id: string
+  email?: string
+  firstName?: string
+  lastName?: string
+  phone?: string
+  defaultAddress?: Address
+  addresses: Address[]
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Address {
   firstName?: string
   lastName?: string
@@ -140,7 +218,7 @@ export interface Cart {
   checkoutUrl: string
   totalQuantity: number
   cost: CartCost
-  lines: CartItem[]
+  lines: CartLine[]
   createdAt: string
   updatedAt: string
 }
@@ -151,14 +229,14 @@ export interface CartCost {
   totalTaxAmount?: Money
 }
 
-export interface CartItem {
+export interface CartLine {
   id: string
   quantity: number
   merchandise: ProductVariant
-  cost: CartItemCost
+  cost: CartLineCost
 }
 
-export interface CartItemCost {
+export interface CartLineCost {
   amountPerQuantity: Money
   totalAmount: Money
 }
@@ -166,7 +244,12 @@ export interface CartItemCost {
 export interface CartItemInput {
   merchandiseId: string
   quantity: number
-  attributes?: { key: string; value: string }[]
+  attributes?: CartAttribute[]
+}
+
+export interface CartAttribute {
+  key: string
+  value: string
 }
 
 export interface Checkout {
@@ -186,4 +269,15 @@ export interface CheckoutLineItem {
   quantity: number
   variant?: ProductVariant
   price: Money
+}
+
+export interface Discount {
+  code: string
+  type: 'percentage' | 'fixed_amount' | 'free_shipping'
+  value: number
+  minimumRequirement?: Money
+  startsAt?: string
+  endsAt?: string
+  usageCount: number
+  usageLimit?: number
 }

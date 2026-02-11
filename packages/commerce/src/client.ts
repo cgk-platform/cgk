@@ -1,65 +1,25 @@
 /**
  * Commerce client factory
+ *
+ * Creates a CommerceProvider based on configuration.
+ * Currently supports Shopify; Custom+Stripe provider is planned.
  */
 
-import type { CommerceConfig, CommerceProvider, Product, Order, Cart, Checkout, CartItemInput, GetProductsOptions, GetOrdersOptions } from './types'
-
-export interface CommerceClient {
-  readonly provider: CommerceProvider
-  getProduct(id: string): Promise<Product | null>
-  getProducts(options?: GetProductsOptions): Promise<Product[]>
-  getOrder(id: string): Promise<Order | null>
-  getOrders(options?: GetOrdersOptions): Promise<Order[]>
-  createCart(): Promise<Cart>
-  addToCart(cartId: string, item: CartItemInput): Promise<Cart>
-  removeFromCart(cartId: string, lineId: string): Promise<Cart>
-  createCheckout(cartId: string): Promise<Checkout>
-}
+import type { CommerceConfig, CommerceProvider } from './types'
+import { createShopifyProvider } from './providers/shopify'
 
 /**
- * Create a commerce client for the configured provider
+ * Create a commerce provider for the configured backend
  */
-export function createCommerceClient(config: CommerceConfig): CommerceClient {
-  // TODO: Implement provider-specific clients
-  // For now, return a placeholder that throws
-  const provider: CommerceProvider = {
-    name: config.provider,
-    config,
-    async getProduct(_id) {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-    async getProducts(_options) {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-    async getOrder(_id) {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-    async getOrders(_options) {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-    async createCart() {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-    async addToCart(_cartId, _item) {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-    async removeFromCart(_cartId, _lineId) {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-    async createCheckout(_cartId) {
-      throw new Error(`Commerce provider '${config.provider}' not implemented`)
-    },
-  }
-
-  return {
-    provider,
-    getProduct: (id) => provider.getProduct(id),
-    getProducts: (options) => provider.getProducts(options),
-    getOrder: (id) => provider.getOrder(id),
-    getOrders: (options) => provider.getOrders(options),
-    createCart: () => provider.createCart(),
-    addToCart: (cartId, item) => provider.addToCart(cartId, item),
-    removeFromCart: (cartId, lineId) => provider.removeFromCart(cartId, lineId),
-    createCheckout: (cartId) => provider.createCheckout(cartId),
+export function createCommerceProvider(config: CommerceConfig): CommerceProvider {
+  switch (config.provider) {
+    case 'shopify':
+      return createShopifyProvider(config)
+    case 'custom':
+      throw new Error(
+        'Custom commerce provider is not yet implemented. Use "shopify" provider.'
+      )
+    default:
+      throw new Error(`Unknown commerce provider: ${config.provider}`)
   }
 }

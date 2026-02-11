@@ -328,7 +328,10 @@ INNGEST_SIGNING_KEY=...
 |-------|--------|-------|
 | **Phase 0** | ✅ Complete | Monorepo, CLI, starters, docs |
 | **Phase 1A** | ✅ Complete | App stubs (orchestrator, admin, storefront, creator-portal) |
-| **Phase 1B** | 🔜 Next | Database Foundation (schema-per-tenant, migrations) |
+| **Phase 1B** | ✅ Complete | Database Foundation (schema-per-tenant, migrations) |
+| **Phase 1C** | ✅ Complete | Authentication (JWT, sessions, magic links, middleware) |
+| **Phase 1D** | ✅ Complete | Shared Packages (UI, Shopify, Commerce, testing) |
+| **Phase 2A** | 🔜 Next | Admin Shell |
 | Phase 2+ | Pending | See PLAN.md for full timeline |
 
 ---
