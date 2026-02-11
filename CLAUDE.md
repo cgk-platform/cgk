@@ -270,6 +270,22 @@ export async function GET(req: Request) {
 
 ---
 
+## @cgk/ui Import Pattern (CRITICAL)
+
+All UI components must be imported from the main `@cgk/ui` entry point:
+
+```typescript
+// WRONG - subpath exports don't exist
+import { Button } from '@cgk/ui/button'
+import { Card } from '@cgk/ui/card'
+import { Button } from '@cgk/ui/components/button'
+
+// CORRECT - all exports from main index
+import { Button, Card, Input, Badge } from '@cgk/ui'
+```
+
+---
+
 ## @vercel/postgres SQL Patterns (CRITICAL)
 
 The `sql` template tag from `@vercel/postgres` has specific limitations. Follow these patterns to avoid TypeScript errors:
