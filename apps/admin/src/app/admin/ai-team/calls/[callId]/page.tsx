@@ -2,10 +2,19 @@
 
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Button } from '@cgk/ui/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui/components/card'
-import { Badge } from '@cgk/ui/components/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cgk/ui/components/tabs'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Badge,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@cgk/ui'
 import {
   Loader2,
   ArrowLeft,

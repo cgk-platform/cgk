@@ -2,15 +2,26 @@
 
 import { useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Button } from '@cgk/ui/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui/components/card'
-import { Input } from '@cgk/ui/components/input'
-import { Label } from '@cgk/ui/components/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui/components/select'
-import { Switch } from '@cgk/ui/components/switch'
-import { Slider } from '@cgk/ui/components/slider'
-import { Textarea } from '@cgk/ui/components/textarea'
-import { Alert, AlertDescription } from '@cgk/ui/components/alert'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Switch,
+  Slider,
+  Textarea,
+  Alert,
+  AlertDescription,
+} from '@cgk/ui'
 import { Loader2, Play, Phone, Mic, Volume2, Settings2 } from 'lucide-react'
 
 interface VoiceConfig {

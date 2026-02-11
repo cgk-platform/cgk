@@ -2,11 +2,21 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Button } from '@cgk/ui/components/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui/components/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui/components/select'
-import { Input } from '@cgk/ui/components/input'
-import { Badge } from '@cgk/ui/components/badge'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Input,
+  Badge,
+} from '@cgk/ui'
 import {
   Loader2,
   Phone,
