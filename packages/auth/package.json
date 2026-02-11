@@ -19,19 +19,25 @@
     "build": "tsup src/index.ts --format esm --dts",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "clean": "rm -rf dist"
   },
   "dependencies": {
     "@cgk/core": "workspace:*",
     "@cgk/db": "workspace:*",
-    "jose": "^5.2.0"
+    "bcryptjs": "^3.0.3",
+    "jose": "^5.2.0",
+    "nanoid": "^5.1.6"
   },
   "devDependencies": {
     "@cgk/eslint-config": "workspace:*",
     "@cgk/typescript-config": "workspace:*",
+    "@types/bcryptjs": "^3.0.0",
     "eslint": "^9.18.0",
     "tsup": "^8.3.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.4"
   }
 }
