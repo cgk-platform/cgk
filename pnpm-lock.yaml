@@ -220,6 +220,9 @@ importers:
       '@cgk/logging':
         specifier: workspace:*
         version: link:../../packages/logging
+      '@cgk/onboarding':
+        specifier: workspace:*
+        version: link:../../packages/onboarding
       '@cgk/slack':
         specifier: workspace:*
         version: link:../../packages/slack

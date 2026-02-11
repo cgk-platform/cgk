@@ -16,6 +16,7 @@
     "@cgk/feature-flags": "workspace:*",
     "@cgk/health": "workspace:*",
     "@cgk/logging": "workspace:*",
+    "@cgk/onboarding": "workspace:*",
     "@cgk/slack": "workspace:*",
     "@cgk/ui": "workspace:*",
     "lucide-react": "^0.468.0",
