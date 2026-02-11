@@ -795,6 +795,17 @@ const result = await sql`
 
 ---
 
+## Tech Debt: Underscore Variables
+
+**IMPORTANT**: Before marking this phase complete, address the underscore-prefixed variables documented in:
+`/MULTI-TENANT-PLATFORM-PLAN/UNDERSCORE-VARS-TRACKING.md`
+
+Relevant items for this phase:
+- `_agentId` in `src/autonomy/check.ts` - implement actual DB query
+- `_humor` in `src/personality/prompt-builder.ts` - use humor trait in greeting
+
+---
+
 ## Next Phase
 
 After PHASE-2AI-CORE, proceed to:

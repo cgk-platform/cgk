@@ -1029,6 +1029,20 @@ Unified view of all agent conversations across channels.
 
 ---
 
+## Tech Debt: Underscore Variables
+
+**IMPORTANT**: Before marking this phase complete, address the underscore-prefixed variables documented in:
+`/MULTI-TENANT-PLATFORM-PLAN/UNDERSCORE-VARS-TRACKING.md`
+
+Relevant items for this phase:
+- `_tenantId`, `_eventType` in `src/integrations/router.ts` - implement tenant-scoped routing
+- `_resourceId` in `src/integrations/google/calendar.ts` - validate webhook source
+- `_ctx`, `_payload` in `src/integrations/slack/interactions.ts` - implement shortcut/action handling
+- `_tenantId` in `src/integrations/email/sender.ts` - tenant-scoped email routing
+- `_tenantId` in `src/integrations/sms/handler.ts` - tenant-scoped SMS handling
+
+---
+
 ## Next Phase
 
 After PHASE-2AI-INTEGRATIONS:

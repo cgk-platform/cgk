@@ -33,6 +33,7 @@ This platform is designed to be:
 ├── PHASE-EXECUTION-ORDER.md   <- Visual execution map, parallel tracks
 ├── PHASE-DOD-TEMPLATE.md      <- Definition of Done template for phases
 ├── PLAN-AUDIT-REPORT-*.md     <- Audit findings and recommendations
+├── UNDERSCORE-VARS-TRACKING.md <- Tech debt: variables needing implementation
 ├── phases/                    <- All phase implementation docs
 ├── reference-docs/            <- Pattern references (admin, ads, etc.)
 ├── CODEBASE-ANALYSIS/         <- RAWDOG codebase analysis

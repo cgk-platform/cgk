@@ -365,6 +365,8 @@ const { used, _intentionallySkipped } = config
 
 **Rule**: If you add an underscore prefix, add a comment explaining WHY it's intentionally unused, or remove the variable entirely.
 
+**Tracking**: All underscore variables are tracked in `/MULTI-TENANT-PLATFORM-PLAN/UNDERSCORE-VARS-TRACKING.md`. When adding new underscore prefixes, update this tracking document so future phases properly implement the functionality.
+
 ---
 
 ## Frontend Design Skill
