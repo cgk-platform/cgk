@@ -187,48 +187,6 @@ export async function updateSession(
 ): Promise<OnboardingSession> {
   logger.info('Updating session', { sessionId, updates: Object.keys(updates) })
 
-  let query = sql`
-    UPDATE onboarding_sessions
-    SET last_activity_at = NOW()
-  `
-
-  if (updates.organizationId !== undefined) {
-    query = sql`
-      UPDATE onboarding_sessions
-      SET last_activity_at = NOW(),
-          organization_id = ${updates.organizationId}
-      WHERE id = ${sessionId}
-      RETURNING *
-    `
-  } else if (updates.currentStep !== undefined) {
-    query = sql`
-      UPDATE onboarding_sessions
-      SET last_activity_at = NOW(),
-          current_step = ${updates.currentStep}
-      WHERE id = ${sessionId}
-      RETURNING *
-    `
-  } else if (updates.stepData !== undefined) {
-    query = sql`
-      UPDATE onboarding_sessions
-      SET last_activity_at = NOW(),
-          step_data = ${JSON.stringify(updates.stepData)}::jsonb
-      WHERE id = ${sessionId}
-      RETURNING *
-    `
-  } else if (updates.status !== undefined) {
-    const completedAt = updates.status === 'completed' ? 'NOW()' : null
-    query = sql`
-      UPDATE onboarding_sessions
-      SET last_activity_at = NOW(),
-          status = ${updates.status},
-          completed_at = CASE WHEN ${updates.status} = 'completed' THEN NOW() ELSE completed_at END
-      WHERE id = ${sessionId}
-      RETURNING *
-    `
-  }
-
-  // Fallback to just updating last_activity_at
   const result = await sql`
     UPDATE onboarding_sessions
     SET

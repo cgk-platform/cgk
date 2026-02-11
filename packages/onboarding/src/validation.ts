@@ -128,8 +128,8 @@ export function validatePayments(data: PaymentData | undefined): ValidationResul
 /**
  * Validate Step 5: Integrations (optional step)
  */
-export function validateIntegrations(data: IntegrationsData | undefined): ValidationResult {
-  // Integrations step is optional
+export function validateIntegrations(_data: IntegrationsData | undefined): ValidationResult {
+  // Integrations step is optional - data param required for interface consistency
   return { valid: true, errors: {} }
 }
 
@@ -149,8 +149,8 @@ export function validateFeatures(data: FeaturesData | undefined): ValidationResu
 /**
  * Validate Step 7: Products (optional step)
  */
-export function validateProducts(data: ProductImportData | undefined): ValidationResult {
-  // Products step is optional
+export function validateProducts(_data: ProductImportData | undefined): ValidationResult {
+  // Products step is optional - data param required for interface consistency
   return { valid: true, errors: {} }
 }
 
