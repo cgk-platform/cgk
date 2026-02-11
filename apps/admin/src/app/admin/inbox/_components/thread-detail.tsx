@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import {
   Clock,
   Mail,
-  MessageSquare,
   MoreVertical,
   Send,
   Sparkles,

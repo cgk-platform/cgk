@@ -67,56 +67,60 @@ async function findRequestFromEmail(
   toEmail: string,
   subject: string
 ): Promise<{ requestId: string; tenantSlug: string; treasurerEmail: string } | null> {
-  // Try to extract request ID from subject
-  const requestNumber = extractRequestIdFromSubject(subject)
-
-  if (requestNumber) {
-    // Look up request by request number across all tenants
-    const result = await sql`
-      SELECT
-        dr.id as request_id,
-        o.slug as tenant_slug,
-        dr.treasurer_email
-      FROM public.organizations o
-      JOIN information_schema.schemata s ON s.schema_name = 'tenant_' || o.slug
-      CROSS JOIN LATERAL (
-        SELECT id, treasurer_email
-        FROM tenant_${sql.raw('||o.slug||')}.treasury_draw_requests
-        WHERE request_number = ${requestNumber}
-        AND status = 'pending'
-        LIMIT 1
-      ) dr
-    `
-
-    if (result.rows.length > 0) {
-      return {
-        requestId: result.rows[0].request_id as string,
-        tenantSlug: result.rows[0].tenant_slug as string,
-        treasurerEmail: result.rows[0].treasurer_email as string,
-      }
-    }
-  }
-
-  // Fallback: parse the reply-to address for routing info
+  // Primary approach: parse the reply-to address for routing info
   // Format: treasury-reply+{tenant}+{requestId}@cgk.dev
   const replyMatch = toEmail.match(/treasury-reply\+([^+]+)\+([^@]+)@/)
   if (replyMatch) {
     const [, tenantSlug, requestId] = replyMatch
 
-    // Verify request exists
-    const request = await withTenant(tenantSlug, async () => {
-      const result = await sql`
-        SELECT treasurer_email FROM treasury_draw_requests
-        WHERE id = ${requestId} AND status = 'pending'
-      `
-      return result.rows[0]
-    })
+    if (tenantSlug && requestId) {
+      // Verify request exists
+      const request = await withTenant(tenantSlug, async () => {
+        const result = await sql`
+          SELECT treasurer_email FROM treasury_draw_requests
+          WHERE id = ${requestId} AND status = 'pending'
+        `
+        return result.rows[0]
+      })
 
-    if (request) {
-      return {
-        requestId,
-        tenantSlug,
-        treasurerEmail: request.treasurer_email as string,
+      if (request) {
+        return {
+          requestId,
+          tenantSlug,
+          treasurerEmail: request.treasurer_email as string,
+        }
+      }
+    }
+  }
+
+  // Fallback: try to extract request ID from subject
+  // This requires iterating through active organizations
+  const requestNumber = extractRequestIdFromSubject(subject)
+  if (requestNumber) {
+    // Get all active organizations
+    const orgsResult = await sql`
+      SELECT slug FROM public.organizations WHERE status = 'active'
+    `
+
+    // Check each tenant for a matching pending request
+    for (const org of orgsResult.rows) {
+      const slug = org.slug as string
+      const request = await withTenant(slug, async () => {
+        const result = await sql`
+          SELECT id, treasurer_email FROM treasury_draw_requests
+          WHERE request_number = ${requestNumber}
+          AND status = 'pending'
+          LIMIT 1
+        `
+        return result.rows[0]
+      })
+
+      if (request) {
+        return {
+          requestId: request.id as string,
+          tenantSlug: slug,
+          treasurerEmail: request.treasurer_email as string,
+        }
       }
     }
   }
@@ -150,7 +154,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { from, to, subject, text, html, headers: emailHeaders } = payload
+  const { from, to, subject, text, headers: emailHeaders } = payload
 
   // Validate required fields
   if (!from || !to || !text) {
@@ -206,7 +210,7 @@ export async function POST(request: Request) {
         tenantSlug,
         requestId,
         from,
-        parseResult.extracted_message
+        parseResult.extracted_message ?? undefined
       )
 
       if (success) {

@@ -334,10 +334,11 @@ export async function retryQueueEntries(
   ids: string[],
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
+    const idsArrayLiteral = `{${ids.join(',')}}`
     const result = await sql`
       UPDATE creator_email_queue
       SET status = 'scheduled', scheduled_at = NOW(), error_message = NULL, updated_at = NOW()
-      WHERE id = ANY(${ids}::text[]) AND status = 'failed'
+      WHERE id = ANY(${idsArrayLiteral}::text[]) AND status = 'failed'
       RETURNING id
     `
     return result.rowCount ?? 0
@@ -349,10 +350,11 @@ export async function cancelQueueEntries(
   ids: string[],
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
+    const idsArrayLiteral = `{${ids.join(',')}}`
     const result = await sql`
       UPDATE creator_email_queue
       SET status = 'skipped', skip_reason = 'Manually cancelled', skipped_at = NOW(), updated_at = NOW()
-      WHERE id = ANY(${ids}::text[]) AND status IN ('pending', 'scheduled')
+      WHERE id = ANY(${idsArrayLiteral}::text[]) AND status IN ('pending', 'scheduled')
       RETURNING id
     `
     return result.rowCount ?? 0
@@ -481,7 +483,7 @@ export async function createBulkSend(
         ${input.content_text || null},
         ${recipientCount},
         ${input.recipient_filter ? JSON.stringify(input.recipient_filter) : null},
-        ${input.recipient_ids || null},
+        ${input.recipient_ids ? `{${input.recipient_ids.join(',')}}` : null},
         ${input.scheduled_for ? 'scheduled' : 'draft'},
         ${input.scheduled_for || null},
         ${input.personalize ?? true},
@@ -764,9 +766,8 @@ export async function createConversationMessage(
   return withTenant(tenantSlug, async () => {
     // Get thread info
     const thread = await sql`SELECT * FROM email_threads WHERE id = ${threadId}`
-    if (thread.rows.length === 0) return null
-
     const t = thread.rows[0]
+    if (!t) return null
 
     const result = await sql`
       INSERT INTO thread_messages (
@@ -895,9 +896,9 @@ export async function createConversation(
   return withTenant(tenantSlug, async () => {
     // Get creator info
     const creator = await sql`SELECT id, email, first_name, last_name FROM creators WHERE id = ${creatorId}`
-    if (creator.rows.length === 0) return null
-
     const c = creator.rows[0]
+    if (!c) return null
+
     const creatorName = `${c.first_name} ${c.last_name}`
 
     // Create thread
@@ -917,7 +918,10 @@ export async function createConversation(
       RETURNING id
     `
 
-    const threadId = thread.rows[0].id
+    const threadRow = thread.rows[0]
+    if (!threadRow) return null
+
+    const threadId = threadRow.id
 
     // Create first message
     await sql`

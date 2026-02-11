@@ -63,8 +63,13 @@ export async function POST() {
         SELECT * FROM google_feed_products
       `
 
+      interface OverrideRowBase {
+        shopify_product_id: string
+        [key: string]: unknown
+      }
+
       const overridesMap = new Map(
-        overridesResult.rows.map((o: { shopify_product_id: string }) => [o.shopify_product_id, o])
+        (overridesResult.rows as OverrideRowBase[]).map((o) => [o.shopify_product_id, o])
       )
 
       // Get storefront URL from tenant settings or env

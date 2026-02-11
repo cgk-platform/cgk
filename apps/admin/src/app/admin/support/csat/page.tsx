@@ -213,7 +213,7 @@ export default function CSATDashboardPage() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-800 text-sm font-bold">
-                      {agent.agentName[0].toUpperCase()}
+                      {agent.agentName?.[0]?.toUpperCase() ?? '?'}
                     </div>
                     <div>
                       <div className="font-medium">{agent.agentName}</div>

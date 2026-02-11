@@ -8,7 +8,6 @@ import { getActions, getActionStats, approveAction, rejectAction } from '@/lib/b
 export async function GET(request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
-  const userId = headerList.get('x-user-id')
 
   if (!tenantSlug) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })

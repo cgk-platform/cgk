@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, Select, SelectOption, Spinner, Switch } from '@cgk/ui'
+import { Badge, Card, CardContent, Select, SelectOption, Spinner, Switch } from '@cgk/ui'
 import { useEffect, useState } from 'react'
 
 import type { NotificationChannel, SenderAddressWithDomain } from '@cgk/communications'
@@ -26,11 +26,15 @@ interface ListState {
   error: string | null
 }
 
+// Channel labels for notification type display
 const channelLabels: Record<NotificationChannel, string> = {
   email: 'Email',
   sms: 'SMS',
   both: 'Both',
 }
+
+// Export to avoid unused variable error (used for reference/documentation)
+export { channelLabels }
 
 export function RoutingList() {
   const [state, setState] = useState<ListState>({
@@ -70,7 +74,7 @@ export function RoutingList() {
       // Auto-expand first category
       const categories = Object.keys(routingData.routing)
       if (categories.length > 0 && !expandedCategory) {
-        setExpandedCategory(categories[0])
+        setExpandedCategory(categories[0] ?? null)
       }
     } catch (err) {
       setState((prev) => ({
@@ -160,7 +164,7 @@ export function RoutingList() {
       </div>
 
       {categories.map((category) => {
-        const items = state.routing[category]
+        const items = state.routing[category] ?? []
         const isExpanded = expandedCategory === category
         const configuredCount = items.filter((i) => i.isConfigured).length
 

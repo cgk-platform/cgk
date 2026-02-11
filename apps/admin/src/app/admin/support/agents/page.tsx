@@ -4,7 +4,6 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Plus, Search } from 'lucide-react'
 
-import { AgentList } from '@/components/support/agent-list'
 import { Pagination } from '@/components/commerce/pagination'
 import { parseAgentFilters } from '@/lib/support/filters'
 
@@ -128,10 +127,12 @@ export default async function AgentsPage({ searchParams }: PageProps) {
       {/* Pagination */}
       {result.totalPages > 1 && (
         <Pagination
-          currentPage={result.page}
+          page={result.page}
           totalPages={result.totalPages}
+          totalCount={result.total}
+          limit={filters.limit}
           basePath="/admin/support/agents"
-          params={currentFilters}
+          currentFilters={currentFilters}
         />
       )}
     </div>

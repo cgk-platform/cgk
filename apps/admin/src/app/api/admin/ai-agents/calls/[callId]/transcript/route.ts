@@ -30,9 +30,8 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.calls.view'
   )
   if (permissionDenied) return permissionDenied

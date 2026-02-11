@@ -18,8 +18,8 @@ export function PnlStatusBadge({
   exclusionReason,
   onToggle,
   readOnly = false,
-  itemType,
-  itemId,
+  itemType: _itemType,
+  itemId: _itemId,
 }: PnlStatusBadgeProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showReasonInput, setShowReasonInput] = useState(false)

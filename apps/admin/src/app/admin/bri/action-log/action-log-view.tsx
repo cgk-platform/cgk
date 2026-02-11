@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Clock,
   ChevronRight,
   Check,
   X,
@@ -30,7 +29,7 @@ interface ActionLogViewProps {
   }
 }
 
-export function ActionLogView({ tenantSlug, initialActions, stats }: ActionLogViewProps) {
+export function ActionLogView({ initialActions, stats }: ActionLogViewProps) {
   const [actions, setActions] = useState(initialActions)
   const [filter, setFilter] = useState<'all' | 'pending'>('all')
   const [selectedAction, setSelectedAction] = useState<BriAction | null>(null)

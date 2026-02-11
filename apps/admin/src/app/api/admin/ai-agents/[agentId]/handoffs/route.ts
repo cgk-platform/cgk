@@ -31,9 +31,8 @@ export async function GET(request: Request, { params }: RouteParams) {
 
   // Check permission
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.agents.view'
   )
   if (permissionDenied) return permissionDenied
@@ -74,9 +73,8 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   // Check permission
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.agents.manage'
   )
   if (permissionDenied) return permissionDenied

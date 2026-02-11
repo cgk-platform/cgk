@@ -1,6 +1,5 @@
 'use client'
 
-import { cn } from '@cgk/ui'
 import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'

@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  Badge,
   Alert,
   AlertDescription,
   Select,
@@ -30,7 +29,6 @@ import {
   PieChart,
   Table2,
   Type,
-  Eye,
   GripVertical,
 } from 'lucide-react'
 import { useEffect, useState, useCallback } from 'react'
@@ -494,8 +492,8 @@ export default function DashboardsPage() {
                 <Label>Default Date Range</Label>
                 <Select
                   value={formData.dateRangeDefault ?? 'last_30d'}
-                  onValueChange={(value: DashboardDateRange) =>
-                    setFormData((prev) => ({ ...prev, dateRangeDefault: value }))
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, dateRangeDefault: e.target.value as DashboardDateRange }))
                   }
                 >
                   <SelectTrigger>

@@ -36,7 +36,34 @@ export async function getUGCSubmissions(
   const { status = 'all', limit = 50, offset = 0 } = options
 
   return withTenant(tenantSlug, async () => {
-    const statusFilter = status === 'all' ? sql`1=1` : sql`status = ${status}`
+    if (status === 'all') {
+      const result = await sql`
+        SELECT
+          id,
+          customer_name as "customerName",
+          customer_email as "customerEmail",
+          customer_phone as "customerPhone",
+          before_image_url as "beforeImageUrl",
+          after_image_url as "afterImageUrl",
+          testimonial,
+          products_used as "productsUsed",
+          duration_days as "durationDays",
+          consent_marketing as "consentMarketing",
+          consent_terms as "consentTerms",
+          status,
+          review_notes as "reviewNotes",
+          reviewed_by as "reviewedBy",
+          reviewed_at as "reviewedAt",
+          source,
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM ugc_submissions
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `
+      return result.rows as UGCSubmission[]
+    }
 
     const result = await sql`
       SELECT
@@ -59,7 +86,7 @@ export async function getUGCSubmissions(
         created_at as "createdAt",
         updated_at as "updatedAt"
       FROM ugc_submissions
-      WHERE ${statusFilter}
+      WHERE status = ${status}
       ORDER BY created_at DESC
       LIMIT ${limit}
       OFFSET ${offset}
@@ -214,7 +241,7 @@ export async function createUGCSubmission(
         ${data.beforeImageUrl},
         ${data.afterImageUrl},
         ${data.testimonial || null},
-        ${data.productsUsed || []},
+        ${JSON.stringify(data.productsUsed || [])},
         ${data.durationDays || null},
         ${data.consentMarketing || false},
         ${data.consentTerms || false},
@@ -262,7 +289,32 @@ export async function getStripeTopups(
   const { status = 'all', limit = 50, offset = 0 } = options
 
   return withTenant(tenantSlug, async () => {
-    const statusFilter = status === 'all' ? sql`1=1` : sql`status = ${status}`
+    if (status === 'all') {
+      const result = await sql`
+        SELECT
+          id,
+          stripe_topup_id as "stripeTopupId",
+          stripe_source_id as "stripeSourceId",
+          amount_cents as "amountCents",
+          currency,
+          status,
+          failure_code as "failureCode",
+          failure_message as "failureMessage",
+          expected_available_at as "expectedAvailableAt",
+          completed_at as "completedAt",
+          linked_withdrawal_ids as "linkedWithdrawalIds",
+          statement_descriptor as "statementDescriptor",
+          description,
+          created_by as "createdBy",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM stripe_topups
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `
+      return result.rows as StripeTopup[]
+    }
 
     const result = await sql`
       SELECT
@@ -283,7 +335,7 @@ export async function getStripeTopups(
         created_at as "createdAt",
         updated_at as "updatedAt"
       FROM stripe_topups
-      WHERE ${statusFilter}
+      WHERE status = ${status}
       ORDER BY created_at DESC
       LIMIT ${limit}
       OFFSET ${offset}
@@ -354,7 +406,7 @@ export async function createStripeTopup(
         ${data.statementDescriptor || null},
         ${data.description || null},
         ${data.createdBy || null},
-        ${data.linkedWithdrawalIds || []}
+        ${JSON.stringify(data.linkedWithdrawalIds || [])}
       )
       RETURNING
         id,
@@ -460,9 +512,26 @@ export async function getSyncOperations(
   const { operationType, limit = 20 } = options
 
   return withTenant(tenantSlug, async () => {
-    const typeFilter = operationType
-      ? sql`operation_type = ${operationType}`
-      : sql`1=1`
+    if (operationType) {
+      const result = await sql`
+        SELECT
+          id,
+          operation_type as "operationType",
+          status,
+          preview_data as "previewData",
+          result_data as "resultData",
+          error_message as "errorMessage",
+          started_at as "startedAt",
+          completed_at as "completedAt",
+          run_by as "runBy",
+          created_at as "createdAt"
+        FROM sync_operations
+        WHERE operation_type = ${operationType}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `
+      return result.rows as SyncOperation[]
+    }
 
     const result = await sql`
       SELECT
@@ -477,7 +546,6 @@ export async function getSyncOperations(
         run_by as "runBy",
         created_at as "createdAt"
       FROM sync_operations
-      WHERE ${typeFilter}
       ORDER BY created_at DESC
       LIMIT ${limit}
     `
@@ -625,8 +693,8 @@ export async function getChangelogStats(tenantSlug: string): Promise<ChangelogSt
 
   for (const entry of entries) {
     bySource[entry.source]++
-    const day = entry.timestamp.split('T')[0]
-    dayMap.set(day, (dayMap.get(day) || 0) + 1)
+    const day = entry.timestamp.split('T')[0] ?? 'unknown'
+    dayMap.set(day, (dayMap.get(day) ?? 0) + 1)
   }
 
   const byDay = Array.from(dayMap.entries())

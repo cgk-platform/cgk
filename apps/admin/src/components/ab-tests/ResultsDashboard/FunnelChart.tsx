@@ -1,7 +1,7 @@
 'use client'
 
 import { useFunnelData } from '@/lib/ab-tests/hooks'
-import { Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Card, CardHeader, CardContent } from '@cgk/ui'
 
 interface FunnelChartProps {
   testId: string

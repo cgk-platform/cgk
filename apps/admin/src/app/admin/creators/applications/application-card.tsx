@@ -20,11 +20,11 @@ export function ApplicationCard({ application }: { application: CreatorApplicati
   const [showModal, setShowModal] = useState(false)
   const config = statusConfig[application.status]
 
-  const socialLinks = [
-    application.instagram && { platform: 'Instagram', handle: application.instagram },
-    application.tiktok && { platform: 'TikTok', handle: application.tiktok },
-    application.youtube && { platform: 'YouTube', handle: application.youtube },
-  ].filter(Boolean)
+  const socialLinks: { platform: string; handle: string }[] = [
+    application.instagram ? { platform: 'Instagram', handle: application.instagram } : null,
+    application.tiktok ? { platform: 'TikTok', handle: application.tiktok } : null,
+    application.youtube ? { platform: 'YouTube', handle: application.youtube } : null,
+  ].filter((link): link is { platform: string; handle: string } => link !== null)
 
   const followerDisplay = application.follower_count
     ? application.follower_count >= 1000
@@ -49,9 +49,9 @@ export function ApplicationCard({ application }: { application: CreatorApplicati
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                 <span>{application.email}</span>
                 {socialLinks.map((link) => (
-                  <span key={link?.platform} className="flex items-center gap-1">
-                    <span className="font-medium">{link?.platform}:</span>
-                    <span>@{link?.handle}</span>
+                  <span key={link.platform} className="flex items-center gap-1">
+                    <span className="font-medium">{link.platform}:</span>
+                    <span>@{link.handle}</span>
                   </span>
                 ))}
                 {followerDisplay && (

@@ -3,7 +3,7 @@
  * POST /api/admin/workflows/rules/[id]/test - Test rule execution
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk/auth'
 import {
   computeFields,
   evaluateConditions,

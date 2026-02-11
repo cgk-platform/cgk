@@ -5,7 +5,7 @@
  */
 
 import { Button, Card, CardContent, cn } from '@cgk/ui'
-import { FileStack, MoreHorizontal, Plus } from 'lucide-react'
+import { FileStack, Plus } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -83,7 +83,7 @@ async function TemplatesLoader({
     return <EmptyState />
   }
 
-  const { templates, total } = await listTemplates(tenantSlug, {
+  const { templates } = await listTemplates(tenantSlug, {
     status: status as EsignTemplateStatus | undefined,
     page: page ? parseInt(page, 10) : 1,
     limit: 12,

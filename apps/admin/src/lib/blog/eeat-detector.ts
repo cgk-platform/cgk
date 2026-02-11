@@ -90,7 +90,10 @@ function extractUrls(content: string): string[] {
   // Match markdown links [text](url)
   const markdownLinks = content.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)
   for (const match of markdownLinks) {
-    urls.push(match[2])
+    const url = match[2]
+    if (url) {
+      urls.push(url)
+    }
   }
 
   // Match raw URLs

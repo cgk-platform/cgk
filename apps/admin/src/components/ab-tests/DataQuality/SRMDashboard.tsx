@@ -12,8 +12,6 @@ interface SRMDashboardProps {
 }
 
 export function SRMDashboard({ analyses }: SRMDashboardProps) {
-  const hasIssues = analyses.some((a) => a.hasSRM)
-
   return (
     <Card className="border-slate-200">
       <CardHeader className="border-b border-slate-100">

@@ -8,7 +8,10 @@
 import { getTenantContext } from '@cgk/auth'
 
 import { getPLBreakdown } from '@/lib/analytics'
-import type { PeriodType, PLBreakdown, PLLineItem, PLSection } from '@/lib/analytics'
+import type { PLBreakdown, PLLineItem, PLSection } from '@/lib/analytics'
+
+// P&L breakdown only supports these period types (not 'weekly')
+type PLPeriodType = 'daily' | 'monthly' | 'quarterly' | 'yearly'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -21,7 +24,12 @@ export async function GET(req: Request) {
   }
 
   const url = new URL(req.url)
-  const periodType = (url.searchParams.get('periodType') || 'monthly') as PeriodType
+  const rawPeriodType = url.searchParams.get('periodType') || 'monthly'
+  // Validate and default to 'monthly' if invalid period type for P&L
+  const validPLPeriods: PLPeriodType[] = ['daily', 'monthly', 'quarterly', 'yearly']
+  const periodType: PLPeriodType = validPLPeriods.includes(rawPeriodType as PLPeriodType)
+    ? (rawPeriodType as PLPeriodType)
+    : 'monthly'
   const periodStart = url.searchParams.get('periodStart') || getDefaultPeriodStart(periodType)
 
   // Try to get cached P&L data
@@ -35,7 +43,7 @@ export async function GET(req: Request) {
   return Response.json({ data })
 }
 
-function getDefaultPeriodStart(periodType: PeriodType): string {
+function getDefaultPeriodStart(periodType: PLPeriodType): string {
   const now = new Date()
 
   if (periodType === 'monthly') {
@@ -49,10 +57,10 @@ function getDefaultPeriodStart(periodType: PeriodType): string {
     now.setDate(1)
   }
 
-  return now.toISOString().split('T')[0]
+  return now.toISOString().split('T')[0] ?? ''
 }
 
-function generateSamplePL(periodType: PeriodType, periodStart: string): PLBreakdown {
+function generateSamplePL(periodType: PLPeriodType, periodStart: string): PLBreakdown {
   const endDate = new Date(periodStart)
   if (periodType === 'monthly') {
     endDate.setMonth(endDate.getMonth() + 1)

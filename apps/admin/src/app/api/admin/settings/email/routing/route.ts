@@ -37,7 +37,7 @@ export async function GET(request: Request) {
       if (!grouped[item.category]) {
         grouped[item.category] = []
       }
-      grouped[item.category].push(item)
+      grouped[item.category]!.push(item)
     }
 
     return NextResponse.json({ routing: grouped })

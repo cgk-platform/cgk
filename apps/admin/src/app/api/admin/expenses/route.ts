@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getExpenses, getExpenseSummary, createExpense, getExpense, updateExpense, deleteExpense } from '@/lib/expenses/db'
-import { EXPENSE_CATEGORIES, type ExpenseCategory } from '@/lib/expenses/types'
+import { EXPENSE_CATEGORIES, type ExpenseCategory_Legacy } from '@/lib/expenses/types'
 import { parseExpenseFilters } from '@/lib/search-params'
 
 export async function GET(request: Request) {
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  if (!body.category || !EXPENSE_CATEGORIES.includes(body.category as ExpenseCategory)) {
+  if (!body.category || !EXPENSE_CATEGORIES.includes(body.category as ExpenseCategory_Legacy)) {
     return NextResponse.json(
       { error: `Invalid category. Must be one of: ${EXPENSE_CATEGORIES.join(', ')}` },
       { status: 400 },
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
   }
 
   const expense = await createExpense(tenantSlug, {
-    category: body.category as ExpenseCategory,
+    category: body.category as ExpenseCategory_Legacy,
     vendor: body.vendor,
     description: body.description,
     amount_cents: body.amount_cents,
@@ -163,13 +163,13 @@ export async function PATCH(request: Request) {
   const updates: Parameters<typeof updateExpense>[2] = {}
 
   if (body.category !== undefined) {
-    if (!EXPENSE_CATEGORIES.includes(body.category as ExpenseCategory)) {
+    if (!EXPENSE_CATEGORIES.includes(body.category as ExpenseCategory_Legacy)) {
       return NextResponse.json(
         { error: `Invalid category. Must be one of: ${EXPENSE_CATEGORIES.join(', ')}` },
         { status: 400 },
       )
     }
-    updates.category = body.category as ExpenseCategory
+    updates.category = body.category as ExpenseCategory_Legacy
   }
 
   if (body.vendor !== undefined) updates.vendor = body.vendor

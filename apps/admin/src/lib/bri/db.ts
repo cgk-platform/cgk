@@ -570,11 +570,10 @@ export async function getAutonomySettings(tenantSlug: string): Promise<{
       LIMIT 1
     `
 
-    if (settingsResult.rows.length === 0) {
+    const row = settingsResult.rows[0]
+    if (!row) {
       return null
     }
-
-    const row = settingsResult.rows[0]
 
     // Get per-action settings
     const actionsResult = await sql`
@@ -622,11 +621,12 @@ export async function saveAutonomySettings(
       SELECT id FROM ai_agents WHERE is_primary = true LIMIT 1
     `
 
-    if (agentResult.rows.length === 0) {
+    const agentRow = agentResult.rows[0]
+    if (!agentRow) {
       throw new Error('No primary agent found')
     }
 
-    const agentId = agentResult.rows[0].id
+    const agentId = agentRow.id
 
     // Update global settings
     await sql`
@@ -978,9 +978,9 @@ export async function getNotificationSettings(
       LIMIT 1
     `
 
-    if (result.rows.length === 0) return null
-
     const row = result.rows[0]
+    if (!row) return null
+
     return {
       events: (row.eventSettings as Record<string, unknown>).events as NotificationSettings['events'] ?? [],
       defaultSlackChannel: row.defaultSlackChannel as string | null,

@@ -38,12 +38,13 @@ export async function POST() {
         WHERE integration_type = 'meta-ads'
       `
 
-      if (credResult.rows.length === 0) {
+      const credRow = credResult.rows[0]
+      if (!credRow) {
         return
       }
 
-      const credentials = credResult.rows[0].credentials as Record<string, unknown>
-      const metadata = credResult.rows[0].metadata as Record<string, unknown>
+      const credentials = credRow.credentials as Record<string, unknown>
+      const metadata = credRow.metadata as Record<string, unknown>
       const accessToken = credentials.accessToken as string
       const selectedAccountId = metadata.selectedAccountId as string
 

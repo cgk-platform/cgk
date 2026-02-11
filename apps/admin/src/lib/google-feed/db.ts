@@ -10,7 +10,6 @@ import type {
   GoogleFeedSettings,
   GoogleFeedProduct,
   GoogleFeedSyncHistory,
-  GoogleFeedImage,
   GoogleFeedSettingsUpdateRequest,
   GoogleFeedProductUpdateRequest,
 } from './types'

@@ -42,7 +42,7 @@ const HOURS = Array.from({ length: 24 }, (_, i) => ({
 
 export function SlackConfigForm({
   config,
-  surveyId,
+  surveyId: _surveyId,
   onSave,
   onDelete,
   onTest,

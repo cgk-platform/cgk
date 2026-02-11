@@ -54,8 +54,11 @@ export function ConditionBuilder({ conditions, onChange }: ConditionBuilderProps
 
   const updateCondition = (index: number, updates: Partial<Condition>) => {
     const newConditions = [...conditions]
-    newConditions[index] = { ...newConditions[index], ...updates }
-    onChange(newConditions)
+    const currentCondition = newConditions[index]
+    if (currentCondition) {
+      newConditions[index] = { ...currentCondition, ...updates }
+      onChange(newConditions)
+    }
   }
 
   const removeCondition = (index: number) => {

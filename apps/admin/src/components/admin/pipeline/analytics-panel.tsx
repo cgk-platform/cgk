@@ -72,7 +72,7 @@ export function AnalyticsPanel({ analytics, isLoading }: AnalyticsPanelProps) {
               </h4>
               <div className="flex h-32 items-end gap-1">
                 {analytics.throughput.length > 0 ? (
-                  analytics.throughput.map((week, i) => (
+                  analytics.throughput.map((week) => (
                     <div
                       key={week.week}
                       className="group relative flex flex-1 flex-col items-center"

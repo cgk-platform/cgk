@@ -26,6 +26,7 @@ interface ProductData {
   }
   feedData: {
     isExcluded: boolean
+    excludeReason: string | null
     titleOverride: string | null
     descriptionOverride: string | null
     gtin: string | null
@@ -173,7 +174,7 @@ export default function GoogleFeedProductDetailPage() {
     )
   }
 
-  const { product, feedData, effectiveData } = data
+  const { product, feedData } = data
   const isExcluded = feedData?.isExcluded || false
 
   return (

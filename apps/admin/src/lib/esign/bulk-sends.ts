@@ -35,7 +35,7 @@ export async function createBulkSend(
         ${input.name || null},
         ${input.recipients.length},
         ${input.scheduledFor ? 'queued' : 'queued'},
-        ${input.scheduledFor || null},
+        ${input.scheduledFor?.toISOString() || null},
         ${JSON.stringify({ message: input.message, expiresInDays: input.expiresInDays })},
         ${createdBy}
       )
@@ -159,38 +159,70 @@ export async function listBulkSends(
   const offset = (page - 1) * limit
 
   return withTenant(tenantSlug, async () => {
-    const statusCondition = status ? sql`AND status = ${status}` : sql``
+    let countResult
+    let result
 
-    const countResult = await sql`
-      SELECT COUNT(*) as count
-      FROM esign_bulk_sends
-      WHERE 1=1 ${statusCondition}
-    `
+    if (status) {
+      countResult = await sql`
+        SELECT COUNT(*) as count
+        FROM esign_bulk_sends
+        WHERE status = ${status}
+      `
+
+      result = await sql`
+        SELECT
+          id,
+          template_id as "templateId",
+          name,
+          recipient_count as "recipientCount",
+          status,
+          scheduled_for as "scheduledFor",
+          started_at as "startedAt",
+          completed_at as "completedAt",
+          sent_count as "sentCount",
+          failed_count as "failedCount",
+          csv_data as "csvData",
+          error_log as "errorLog",
+          created_by as "createdBy",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM esign_bulk_sends
+        WHERE status = ${status}
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `
+    } else {
+      countResult = await sql`
+        SELECT COUNT(*) as count
+        FROM esign_bulk_sends
+      `
+
+      result = await sql`
+        SELECT
+          id,
+          template_id as "templateId",
+          name,
+          recipient_count as "recipientCount",
+          status,
+          scheduled_for as "scheduledFor",
+          started_at as "startedAt",
+          completed_at as "completedAt",
+          sent_count as "sentCount",
+          failed_count as "failedCount",
+          csv_data as "csvData",
+          error_log as "errorLog",
+          created_by as "createdBy",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM esign_bulk_sends
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `
+    }
+
     const total = Number(countResult.rows[0]?.count || 0)
-
-    const result = await sql`
-      SELECT
-        id,
-        template_id as "templateId",
-        name,
-        recipient_count as "recipientCount",
-        status,
-        scheduled_for as "scheduledFor",
-        started_at as "startedAt",
-        completed_at as "completedAt",
-        sent_count as "sentCount",
-        failed_count as "failedCount",
-        csv_data as "csvData",
-        error_log as "errorLog",
-        created_by as "createdBy",
-        created_at as "createdAt",
-        updated_at as "updatedAt"
-      FROM esign_bulk_sends
-      WHERE 1=1 ${statusCondition}
-      ORDER BY created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `
 
     return {
       bulkSends: result.rows as unknown as EsignBulkSend[],
@@ -217,8 +249,8 @@ export async function updateBulkSendStatus(
     const result = await sql`
       UPDATE esign_bulk_sends
       SET status = ${status},
-          started_at = COALESCE(${updates?.startedAt || null}, started_at),
-          completed_at = COALESCE(${updates?.completedAt || null}, completed_at),
+          started_at = COALESCE(${updates?.startedAt?.toISOString() || null}, started_at),
+          completed_at = COALESCE(${updates?.completedAt?.toISOString() || null}, completed_at),
           sent_count = COALESCE(${updates?.sentCount ?? null}, sent_count),
           failed_count = COALESCE(${updates?.failedCount ?? null}, failed_count)
       WHERE id = ${bulkSendId}
@@ -258,15 +290,27 @@ export async function updateRecipientStatus(
   errorMessage?: string
 ): Promise<boolean> {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      UPDATE esign_bulk_send_recipients
-      SET status = ${status},
-          document_id = COALESCE(${documentId || null}, document_id),
-          error_message = COALESCE(${errorMessage || null}, error_message),
-          sent_at = ${status === 'sent' ? sql`NOW()` : sql`sent_at`}
-      WHERE id = ${recipientId}
-      RETURNING id
-    `
+    let result
+    if (status === 'sent') {
+      result = await sql`
+        UPDATE esign_bulk_send_recipients
+        SET status = ${status},
+            document_id = COALESCE(${documentId || null}, document_id),
+            error_message = COALESCE(${errorMessage || null}, error_message),
+            sent_at = NOW()
+        WHERE id = ${recipientId}
+        RETURNING id
+      `
+    } else {
+      result = await sql`
+        UPDATE esign_bulk_send_recipients
+        SET status = ${status},
+            document_id = COALESCE(${documentId || null}, document_id),
+            error_message = COALESCE(${errorMessage || null}, error_message)
+        WHERE id = ${recipientId}
+        RETURNING id
+      `
+    }
     return result.rows.length > 0
   })
 }

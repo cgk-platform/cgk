@@ -15,6 +15,8 @@ import { sql, withTenant } from '@cgk/db'
 import { executeActions } from './actions'
 import { computeFields, evaluateConditions } from './evaluator'
 import type {
+  Action,
+  ActionType,
   Condition,
   EventTriggerParams,
   ExecutionContext,
@@ -574,8 +576,8 @@ export class WorkflowEngine {
         computed,
       }
 
-      const actionDef = {
-        type: action.action_type as string,
+      const actionDef: Action = {
+        type: action.action_type as ActionType,
         config: action.action_config as Record<string, unknown>,
       }
 
@@ -682,13 +684,14 @@ export class WorkflowEngine {
           AND entity_id = ${entityId}
       `
 
-      if (result.rows.length === 0) {
+      const row = result.rows[0]
+      if (!row) {
         return null
       }
 
       return {
-        executionCount: result.rows[0].execution_count as number,
-        lastExecutionAt: result.rows[0].last_execution_at as Date | null,
+        executionCount: row.execution_count as number,
+        lastExecutionAt: row.last_execution_at as Date | null,
       }
     })
   }
@@ -745,8 +748,11 @@ export class WorkflowEngine {
       `
 
       const row = result.rows[0]
+      if (!row) {
+        throw new Error('Failed to create execution record')
+      }
       return {
-        ...this.mapExecutionFromDb(row),
+        ...this.mapExecutionFromDb(row as Record<string, unknown>),
         ruleName: params.ruleName,
       }
     })
@@ -796,11 +802,12 @@ export class WorkflowEngine {
         WHERE e.id = ${executionId}
       `
 
-      if (result.rows.length === 0) {
+      const row = result.rows[0]
+      if (!row) {
         return null
       }
 
-      return this.mapExecutionFromDb(result.rows[0])
+      return this.mapExecutionFromDb(row as Record<string, unknown>)
     })
   }
 
@@ -809,28 +816,30 @@ export class WorkflowEngine {
     entityId: string
   ): Promise<Record<string, unknown>> {
     return withTenant(this.tenantId, async () => {
-      const table = this.getEntityTable(entityType)
-      if (!table) {
-        return { id: entityId }
-      }
-
-      const result = await sql`
-        SELECT * FROM ${sql(table)} WHERE id = ${entityId}
-      `
-
+      const result = await this.fetchEntityFromTable(entityType, entityId)
       return (result.rows[0] as Record<string, unknown>) || { id: entityId }
     })
   }
 
-  private getEntityTable(entityType: string): string | null {
-    const tables: Record<string, string> = {
-      project: 'projects',
-      task: 'tasks',
-      order: 'orders',
-      creator: 'creators',
-      customer: 'customers',
+  /**
+   * Fetch entity from table - uses explicit queries per entity type
+   */
+  private async fetchEntityFromTable(entityType: string, entityId: string) {
+    switch (entityType) {
+      case 'project':
+        return sql`SELECT * FROM projects WHERE id = ${entityId}`
+      case 'task':
+        return sql`SELECT * FROM tasks WHERE id = ${entityId}`
+      case 'order':
+        return sql`SELECT * FROM orders WHERE id = ${entityId}`
+      case 'creator':
+        return sql`SELECT * FROM creators WHERE id = ${entityId}`
+      case 'customer':
+        return sql`SELECT * FROM customers WHERE id = ${entityId}`
+      default:
+        // Return empty result for unknown entity types
+        return { rows: [] }
     }
-    return tables[entityType] || null
   }
 
   private mapRuleFromDb(row: Record<string, unknown>): WorkflowRule {

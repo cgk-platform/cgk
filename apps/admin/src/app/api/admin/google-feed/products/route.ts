@@ -160,7 +160,7 @@ export async function GET(request: Request) {
       feedUpdatedAt: string | null
     }
 
-    const products = (dataResult.rows as ProductRow[]).map((row) => {
+    const products = (dataResult.rows as ProductRow[]).map((row): GoogleFeedProductListResponse['products'][number] => {
       // Determine effective status
       let effectiveStatus: 'included' | 'excluded' | 'error' = 'included'
       if (row.isExcluded) {
@@ -213,7 +213,7 @@ export async function GET(request: Request) {
         syncStatus: (row.syncStatus || 'pending') as 'pending' | 'synced' | 'error' | 'excluded',
         lastSyncAt: null,
         merchantStatus: row.merchantStatus as 'pending' | 'approved' | 'disapproved' | 'warning' | null,
-        merchantIssues: row.merchantIssues || [],
+        merchantIssues: (row.merchantIssues || []) as Array<{ severity: 'critical' | 'error' | 'warning' | 'info'; description: string }>,
         merchantLastCheckedAt: null,
         createdAt: row.productUpdatedAt,
         updatedAt: row.feedUpdatedAt || row.productUpdatedAt,

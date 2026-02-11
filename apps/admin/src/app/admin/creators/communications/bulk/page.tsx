@@ -1,5 +1,5 @@
 import { Button, Card, CardContent } from '@cgk/ui'
-import { MessageSquare, Plus, Send } from 'lucide-react'
+import { MessageSquare, Plus } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'

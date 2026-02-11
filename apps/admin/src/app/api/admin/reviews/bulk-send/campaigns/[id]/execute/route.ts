@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 import { executeBulkCampaign } from '@/lib/reviews/db'
 
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, Button, Badge, Label, Switch, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@cgk/ui'
+import { Card, CardContent, Button, Badge, Switch, RadixSelect as Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@cgk/ui'
 import { NOTIFICATION_TYPES } from '@cgk/slack'
 
 interface SlackChannel {
@@ -198,7 +198,7 @@ export default function SlackNotificationSettingsPage() {
     if (!acc[type.category]) {
       acc[type.category] = []
     }
-    acc[type.category].push(type)
+    acc[type.category]!.push(type)
     return acc
   }, {} as Record<string, typeof NOTIFICATION_TYPES>)
 

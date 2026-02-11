@@ -115,7 +115,7 @@ function IntegrationCard({
               )}
 
               {status.lastError && (
-                <Alert variant="destructive" className="mt-3">
+                <Alert variant="error" className="mt-3">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>{status.lastError}</AlertDescription>
                 </Alert>
@@ -390,7 +390,7 @@ export default function IntegrationsSettingsPage() {
       </div>
 
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="error">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{error}</AlertDescription>
         </Alert>

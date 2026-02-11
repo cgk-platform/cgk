@@ -23,7 +23,6 @@ import type {
   CreateAttributionOptionInput,
   UpdateSlackConfigInput,
   SurveyStats,
-  QuestionStats,
   AttributionBreakdown,
   NpsTrendData,
   QuestionOption,
@@ -118,7 +117,7 @@ export async function getSurvey(
     `
 
     if (result.rows.length === 0) return null
-    return parseSurveyRow(result.rows[0]) as Survey
+    return parseSurveyRow(result.rows[0] as Record<string, unknown>) as Survey
   })
 }
 
@@ -136,7 +135,7 @@ export async function getSurveyBySlug(
     `
 
     if (result.rows.length === 0) return null
-    return parseSurveyRow(result.rows[0]) as Survey
+    return parseSurveyRow(result.rows[0] as Record<string, unknown>) as Survey
   })
 }
 
@@ -181,7 +180,11 @@ export async function createSurvey(
       )
       RETURNING *
     `
-    return parseSurveyRow(result.rows[0]) as Survey
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create survey')
+    }
+    return parseSurveyRow(row as Record<string, unknown>) as Survey
   })
 }
 
@@ -282,7 +285,7 @@ export async function duplicateSurvey(
 
     if (result.rows.length === 0) return null
 
-    const newSurvey = parseSurveyRow(result.rows[0]) as Survey
+    const newSurvey = parseSurveyRow(result.rows[0] as Record<string, unknown>) as Survey
 
     // Copy questions
     await sql`
@@ -331,7 +334,7 @@ export async function getQuestion(
       LIMIT 1
     `
     if (result.rows.length === 0) return null
-    return parseQuestionRow(result.rows[0]) as SurveyQuestion
+    return parseQuestionRow(result.rows[0] as Record<string, unknown>) as SurveyQuestion
   })
 }
 
@@ -367,7 +370,11 @@ export async function createQuestion(
       )
       RETURNING *
     `
-    return parseQuestionRow(result.rows[0]) as SurveyQuestion
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create question')
+    }
+    return parseQuestionRow(row as Record<string, unknown>) as SurveyQuestion
   })
 }
 
@@ -448,7 +455,7 @@ export async function updateQuestion(
     )
 
     if (result.rows.length === 0) return null
-    return parseQuestionRow(result.rows[0]) as SurveyQuestion
+    return parseQuestionRow(result.rows[0] as Record<string, unknown>) as SurveyQuestion
   })
 }
 
@@ -617,6 +624,7 @@ export async function submitResponse(
     let attributionSource: string | null = null
 
     for (const answer of input.answers) {
+      const answerValuesLiteral = answer.values ? `{${answer.values.map(s => `"${s}"`).join(',')}}` : null
       await sql`
         INSERT INTO survey_answers (
           response_id, question_id, answer_value, answer_values, answer_numeric
@@ -624,12 +632,12 @@ export async function submitResponse(
           ${response.id},
           ${answer.questionId},
           ${answer.value || null},
-          ${answer.values || null},
+          ${answerValuesLiteral}::text[],
           ${answer.numeric || null}
         )
         ON CONFLICT (response_id, question_id) DO UPDATE SET
           answer_value = ${answer.value || null},
-          answer_values = ${answer.values || null},
+          answer_values = ${answerValuesLiteral}::text[],
           answer_numeric = ${answer.numeric || null}
       `
 
@@ -642,6 +650,7 @@ export async function submitResponse(
 
       if (questionResult.rows.length > 0) {
         const question = questionResult.rows[0]
+        if (!question) continue
         if (question.question_type === 'nps' && answer.numeric !== undefined) {
           npsScore = answer.numeric
         }
@@ -688,13 +697,20 @@ export async function getAttributionOptions(
   includeInactive = false,
 ): Promise<AttributionOption[]> {
   return withTenant(tenantSlug, async () => {
-    const activeFilter = includeInactive ? sql`` : sql`WHERE is_active = true`
-    const result = await sql`
-      SELECT * FROM attribution_options
-      ${activeFilter}
-      ORDER BY display_order ASC, label ASC
-    `
-    return result.rows as AttributionOption[]
+    if (includeInactive) {
+      const result = await sql`
+        SELECT * FROM attribution_options
+        ORDER BY display_order ASC, label ASC
+      `
+      return result.rows as AttributionOption[]
+    } else {
+      const result = await sql`
+        SELECT * FROM attribution_options
+        WHERE is_active = true
+        ORDER BY display_order ASC, label ASC
+      `
+      return result.rows as AttributionOption[]
+    }
   })
 }
 
@@ -728,7 +744,9 @@ export async function updateAttributionOption(
     const optionResult = await sql`SELECT is_system FROM attribution_options WHERE id = ${optionId}`
     if (optionResult.rows.length === 0) return null
 
-    const isSystem = optionResult.rows[0].is_system
+    const optionRow = optionResult.rows[0]
+    if (!optionRow) return null
+    const isSystem = optionRow.is_system
 
     const setClauses: string[] = []
     const values: unknown[] = []
@@ -811,16 +829,21 @@ export async function getSlackConfig(
   surveyId?: string,
 ): Promise<SurveySlackConfig | null> {
   return withTenant(tenantSlug, async () => {
-    const surveyFilter = surveyId
-      ? sql`WHERE survey_id = ${surveyId}`
-      : sql`WHERE survey_id IS NULL`
-
-    const result = await sql`
-      SELECT * FROM survey_slack_config
-      ${surveyFilter}
-      LIMIT 1
-    `
-    return (result.rows[0] as SurveySlackConfig) || null
+    if (surveyId) {
+      const result = await sql`
+        SELECT * FROM survey_slack_config
+        WHERE survey_id = ${surveyId}
+        LIMIT 1
+      `
+      return (result.rows[0] as SurveySlackConfig) || null
+    } else {
+      const result = await sql`
+        SELECT * FROM survey_slack_config
+        WHERE survey_id IS NULL
+        LIMIT 1
+      `
+      return (result.rows[0] as SurveySlackConfig) || null
+    }
   })
 }
 
@@ -935,16 +958,21 @@ export async function deleteSlackConfig(
   surveyId?: string,
 ): Promise<boolean> {
   return withTenant(tenantSlug, async () => {
-    const surveyFilter = surveyId
-      ? sql`WHERE survey_id = ${surveyId}`
-      : sql`WHERE survey_id IS NULL`
-
-    const result = await sql`
-      DELETE FROM survey_slack_config
-      ${surveyFilter}
-      RETURNING id
-    `
-    return result.rows.length > 0
+    if (surveyId) {
+      const result = await sql`
+        DELETE FROM survey_slack_config
+        WHERE survey_id = ${surveyId}
+        RETURNING id
+      `
+      return result.rows.length > 0
+    } else {
+      const result = await sql`
+        DELETE FROM survey_slack_config
+        WHERE survey_id IS NULL
+        RETURNING id
+      `
+      return result.rows.length > 0
+    }
   })
 }
 

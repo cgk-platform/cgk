@@ -2,14 +2,12 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button, cn } from '@cgk/ui'
+import { Button } from '@cgk/ui'
 import { Loader2 } from 'lucide-react'
 import type { TicketComment, TicketStatus, TicketPriority } from '@cgk/support'
 
 import { CommentThread } from '@/components/support/comment-thread'
 import { AgentSelector } from '@/components/support/agent-selector'
-import { TicketStatusBadge } from '@/components/support/ticket-status-badge'
-import { TicketPriorityBadge } from '@/components/support/ticket-priority-badge'
 
 interface TicketDetailClientProps {
   ticketId: string

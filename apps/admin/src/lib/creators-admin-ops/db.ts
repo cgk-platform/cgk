@@ -145,10 +145,11 @@ export async function approveCommissions(
   approvedBy: string
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
+    const idsArray = `{${commissionIds.join(',')}}`
     const result = await sql`
       UPDATE commissions
       SET status = 'approved', approved_by = ${approvedBy}, approved_at = NOW(), updated_at = NOW()
-      WHERE id = ANY(${commissionIds}::text[]) AND status = 'pending'
+      WHERE id = ANY(${idsArray}::text[]) AND status = 'pending'
     `
     return result.rowCount || 0
   })
@@ -161,11 +162,12 @@ export async function rejectCommissions(
   rejectedBy: string
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
+    const idsArray = `{${commissionIds.join(',')}}`
     const result = await sql`
       UPDATE commissions
       SET status = 'rejected', rejected_reason = ${reason}, rejected_by = ${rejectedBy},
           rejected_at = NOW(), updated_at = NOW()
-      WHERE id = ANY(${commissionIds}::text[]) AND status = 'pending'
+      WHERE id = ANY(${idsArray}::text[]) AND status = 'pending'
     `
     return result.rowCount || 0
   })
@@ -831,10 +833,11 @@ export async function bulkUpdateSampleStatus(
       additionalUpdates = ', cancelled_at = NOW()'
     }
 
+    const idsArray = `{${sampleIds.join(',')}}`
     const result = await sql`
       UPDATE sample_requests
       SET status = ${status}::sample_status, updated_at = NOW()
-      WHERE id = ANY(${sampleIds}::text[])
+      WHERE id = ANY(${idsArray}::text[])
     `
     return result.rowCount || 0
   })

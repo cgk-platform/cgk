@@ -18,7 +18,6 @@ import type {
   CreatorConversation,
   CreatorMessage,
   ExportConfig,
-  ExportField,
   CreatorTier,
 } from './types'
 
@@ -315,7 +314,7 @@ export async function getCreatorsDirectory(
     if (filters.tags && filters.tags.length > 0) {
       paramIndex++
       conditions.push(`c.tags && $${paramIndex}::text[]`)
-      values.push(filters.tags)
+      values.push(`{${filters.tags.map((s) => `"${s}"`).join(',')}}`)
     }
 
     if (filters.dateFrom) {
@@ -407,7 +406,7 @@ export async function createCreator(
         ${data.tier || null}::creator_tier,
         ${data.commission_percent},
         ${data.discount_code || null},
-        ${data.tags}::text[],
+        ${data.tags?.length ? `{${data.tags.map((s) => `"${s}"`).join(',')}}` : '{}'}::text[],
         ${JSON.stringify(data.social_links || {})}::jsonb,
         ${data.internal_notes || null}
       )
@@ -491,7 +490,7 @@ export async function updateCreatorFull(
     if (data.tags !== undefined) {
       paramIndex++
       setClauses.push(`tags = $${paramIndex}::text[]`)
-      values.push(data.tags)
+      values.push(`{${data.tags.map((s) => `"${s}"`).join(',')}}`)
     }
 
     if (data.social_links !== undefined) {
@@ -547,8 +546,9 @@ export async function getCreatorStats(
   period: '7d' | '30d' | '90d' | 'all' = '30d',
 ): Promise<CreatorStats> {
   return withTenant(tenantSlug, async () => {
-    const periodDays = period === 'all' ? null : parseInt(period)
-    const periodFilter = periodDays ? `AND created_at >= NOW() - INTERVAL '${periodDays} days'` : ''
+    // Period parameter is currently unused - stats are calculated differently
+    // Kept for future use when period-based filtering is implemented
+    void period
 
     const result = await sql`
       SELECT
@@ -678,13 +678,13 @@ export async function bulkUpdateCreators(
         if (updates.addTags && updates.addTags.length > 0) {
           paramIndex++
           setClauses.push(`tags = array_cat(COALESCE(tags, '{}'), $${paramIndex}::text[])`)
-          values.push(updates.addTags)
+          values.push(`{${updates.addTags.map((s) => `"${s}"`).join(',')}}`)
         }
 
         if (updates.removeTags && updates.removeTags.length > 0) {
           paramIndex++
           setClauses.push(`tags = array_remove_all(COALESCE(tags, '{}'), $${paramIndex}::text[])`)
-          values.push(updates.removeTags)
+          values.push(`{${updates.removeTags.map((s) => `"${s}"`).join(',')}}`)
         }
 
         if (setClauses.length > 1) {
@@ -719,7 +719,7 @@ export async function getCreatorsForExport(
     if (config.selectedIds && config.selectedIds.length > 0) {
       paramIndex++
       conditions.push(`c.id = ANY($${paramIndex}::text[])`)
-      values.push(config.selectedIds)
+      values.push(`{${config.selectedIds.map((s) => `"${s}"`).join(',')}}`)
     }
 
     if (config.filters.status) {
@@ -885,8 +885,6 @@ export async function sendConversationMessage(
   },
 ): Promise<CreatorMessage | null> {
   return withTenant(tenantSlug, async () => {
-    const sentAt = message.scheduledFor ? null : 'NOW()'
-
     const result = await sql`
       INSERT INTO creator_conversation_messages (
         conversation_id, sender_type, sender_id, sender_name,

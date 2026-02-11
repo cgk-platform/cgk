@@ -26,9 +26,8 @@ export async function POST(request: Request) {
 
   // Check permission - requires team management
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'team.manage'
   )
   if (permissionDenied) return permissionDenied

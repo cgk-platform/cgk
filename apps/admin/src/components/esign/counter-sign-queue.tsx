@@ -60,11 +60,6 @@ function CounterSignCard({ document }: { document: EsignDocumentWithSigners }) {
     (s) => !s.isInternal && s.status === 'signed'
   )
 
-  // Find the internal signer (counter-signer)
-  const counterSigner = document.signers.find(
-    (s) => s.isInternal && s.status === 'pending'
-  )
-
   return (
     <Card
       className={cn(

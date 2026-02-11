@@ -27,9 +27,8 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.voice.manage'
   )
   if (permissionDenied) return permissionDenied
@@ -39,7 +38,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const { testType, provider, voiceId, audioUrl, sampleText } = body
 
     if (testType === 'tts') {
-      const { testTTSConfig, type TTSProviderType } = await import('@cgk/ai-agents')
+      const { testTTSConfig } = await import('@cgk/ai-agents')
 
       if (!provider || !voiceId) {
         return NextResponse.json(
@@ -50,7 +49,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
       const result = await testTTSConfig(
         tenantId,
-        provider as TTSProviderType,
+        provider as 'elevenlabs' | 'openai' | 'google',
         voiceId,
         sampleText || 'Hello! This is a test of the text-to-speech configuration.'
       )
@@ -59,7 +58,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     if (testType === 'stt') {
-      const { testSTTConfig, type STTProviderType } = await import('@cgk/ai-agents')
+      const { testSTTConfig } = await import('@cgk/ai-agents')
 
       if (!provider || !audioUrl) {
         return NextResponse.json(
@@ -68,7 +67,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         )
       }
 
-      const result = await testSTTConfig(tenantId, provider as STTProviderType, audioUrl)
+      const result = await testSTTConfig(tenantId, provider as 'assemblyai' | 'whisper' | 'google', audioUrl)
 
       return NextResponse.json(result)
     }

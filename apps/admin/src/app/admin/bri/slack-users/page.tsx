@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button, Card, CardContent, CardHeader, Input, Badge, Alert, AlertDescription } from '@cgk/ui'
-import { Slack, Search, Link2, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { Search, AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 interface TeamMember {
   id: string
@@ -121,7 +121,7 @@ export default function SlackUsersPage() {
           <p className="text-sm text-muted-foreground">Map Slack users to internal team members</p>
         </div>
 
-        <Alert variant="destructive">
+        <Alert variant="error">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             Slack is not connected. Please{' '}

@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Card, CardContent, cn, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger, Textarea } from '@cgk/ui'
-import { ArrowLeft, Clock, Code, Eye, History, Save, Send, Variable } from 'lucide-react'
+import { ArrowLeft, Code, Eye, History, Save, Send, Variable } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -19,7 +19,7 @@ interface TemplateEditorProps {
 
 export function TemplateEditor({ template, versions }: TemplateEditorProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<'edit' | 'preview' | 'history'>('edit')
 

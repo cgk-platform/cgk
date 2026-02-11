@@ -4,7 +4,7 @@
  * PATCH /api/admin/inbox/threads/[id] - Update thread
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk/auth'
 import {
   getThread,
   markThreadAsRead,

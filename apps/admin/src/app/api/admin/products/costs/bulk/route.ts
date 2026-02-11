@@ -54,6 +54,12 @@ export async function PUT(request: Request) {
   // Validate each product entry
   for (let i = 0; i < body.products.length; i++) {
     const p = body.products[i]
+    if (!p) {
+      return NextResponse.json(
+        { error: `Product at index ${i} is undefined` },
+        { status: 400 },
+      )
+    }
     if (!p.productId) {
       return NextResponse.json(
         { error: `Product at index ${i} is missing productId` },

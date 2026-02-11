@@ -4,7 +4,7 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui
 import { Plus, Trash2, GripVertical, Eye, EyeOff } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 
-import type { AttributionOption, CreateAttributionOptionInput } from '@/lib/surveys'
+import type { AttributionOption, AttributionCategory, CreateAttributionOptionInput } from '@/lib/surveys'
 import { ATTRIBUTION_CATEGORY_LABELS } from '@/lib/surveys'
 
 export default function AttributionOptionsPage() {
@@ -286,7 +286,7 @@ function OptionEditor({
       label: formData.label,
       value: formData.value,
       icon: formData.icon || undefined,
-      category: formData.category as CreateAttributionOptionInput['category'],
+      category: formData.category as CreateAttributionOptionInput['category'] | undefined,
     })
   }
 
@@ -339,7 +339,7 @@ function OptionEditor({
           <label className="text-xs font-medium text-muted-foreground">Category</label>
           <select
             value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value as AttributionCategory })}
             className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             {Object.entries(ATTRIBUTION_CATEGORY_LABELS).map(([value, label]) => (

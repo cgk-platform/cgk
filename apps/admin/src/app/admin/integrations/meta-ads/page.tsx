@@ -3,7 +3,6 @@
 import { Button, Card, CardContent, Badge, Input, Label, cn } from '@cgk/ui'
 import {
   Facebook,
-  ExternalLink,
   RefreshCw,
   Building2,
   Code,
@@ -13,8 +12,8 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { ConnectionStatusBadge, OAuthConnectButton, TestConnectionResult } from '@/components/integrations'
-import type { MetaAdsStatus, MetaAdAccount } from '@/lib/integrations/types'
+import { ConnectionStatusBadge, OAuthConnectButton } from '@/components/integrations'
+import type { MetaAdsStatus } from '@/lib/integrations/types'
 
 export default function MetaAdsPage() {
   const [status, setStatus] = useState<MetaAdsStatus | null>(null)

@@ -3,7 +3,7 @@
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
 import { ArrowLeft, Settings, MessageSquare, BarChart3, Palette, Target, Save } from 'lucide-react'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { useState, useEffect, useCallback } from 'react'
 
 import type { Survey, SurveyStatus, SurveyType, UpdateSurveyInput } from '@/lib/surveys'
@@ -19,7 +19,6 @@ const TABS = [
 
 export default function SurveyEditorPage() {
   const params = useParams()
-  const router = useRouter()
   const surveyId = params.id as string
 
   const [survey, setSurvey] = useState<Survey | null>(null)

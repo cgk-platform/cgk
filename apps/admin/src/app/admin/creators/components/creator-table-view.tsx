@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, cn } from '@cgk/ui'
+import { cn } from '@cgk/ui'
 import { MoreHorizontal, Mail, Eye, Edit, Power, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -270,26 +270,3 @@ export function CreatorTableView({ creators }: CreatorTableViewProps) {
   )
 }
 
-function CreatorAvatar({ name, avatarUrl }: { name: string; avatarUrl: string | null }) {
-  const initials = name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-
-  return (
-    <div
-      className={cn(
-        'flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium',
-        avatarUrl ? '' : 'bg-muted text-muted-foreground',
-      )}
-    >
-      {avatarUrl ? (
-        <img src={avatarUrl} alt={name} className="h-10 w-10 rounded-full object-cover" />
-      ) : (
-        initials
-      )}
-    </div>
-  )
-}

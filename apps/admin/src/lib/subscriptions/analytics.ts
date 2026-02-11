@@ -105,8 +105,9 @@ export async function getCohortAnalysis(
   months: number = 12
 ): Promise<CohortData[]> {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      WITH cohorts AS (
+    // Use parameterized query to handle the months interval
+    const result = await sql.query(
+      `WITH cohorts AS (
         SELECT
           DATE_TRUNC('month', started_at) as cohort_month,
           id,
@@ -114,7 +115,7 @@ export async function getCohortAnalysis(
           cancelled_at,
           (price_cents - discount_cents) * quantity as monthly_value
         FROM subscriptions
-        WHERE started_at >= NOW() - INTERVAL '${sql.raw(String(months))} months'
+        WHERE started_at >= NOW() - ($1 || ' months')::interval
       ),
       cohort_sizes AS (
         SELECT
@@ -141,8 +142,9 @@ export async function getCohortAnalysis(
         ROUND(r.retained::numeric / NULLIF(cs.subscribers, 0) * 100, 1) as retention_rate
       FROM cohort_sizes cs
       LEFT JOIN retention r ON cs.cohort_month = r.cohort_month
-      ORDER BY cs.cohort_month DESC, r.months_since ASC
-    `
+      ORDER BY cs.cohort_month DESC, r.months_since ASC`,
+      [String(months)]
+    )
 
     // Group results by cohort month
     const cohortMap = new Map<string, CohortData>()
@@ -189,9 +191,9 @@ export async function getChurnAnalysis(
   days: number = 90
 ): Promise<ChurnAnalysis> {
   return withTenant(tenantSlug, async () => {
-    // Churn trend over time
-    const trendResult = await sql`
-      SELECT
+    // Churn trend over time - using parameterized query
+    const trendResult = await sql.query(
+      `SELECT
         DATE_TRUNC('day', cancelled_at) as date,
         COUNT(*) as churned,
         (
@@ -201,11 +203,12 @@ export async function getChurnAnalysis(
             AND s2.created_at <= DATE_TRUNC('day', s.cancelled_at)
         ) as active_at_time
       FROM subscriptions s
-      WHERE cancelled_at >= NOW() - INTERVAL '${sql.raw(String(days))} days'
+      WHERE cancelled_at >= NOW() - ($1 || ' days')::interval
         AND cancelled_at IS NOT NULL
       GROUP BY DATE_TRUNC('day', cancelled_at)
-      ORDER BY date ASC
-    `
+      ORDER BY date ASC`,
+      [String(days)]
+    )
 
     const trend = trendResult.rows.map((row) => ({
       date: (row.date as Date).toISOString().slice(0, 10),
@@ -214,17 +217,18 @@ export async function getChurnAnalysis(
         : 0,
     }))
 
-    // Churn by reason
-    const reasonResult = await sql`
-      SELECT
+    // Churn by reason - using parameterized query
+    const reasonResult = await sql.query(
+      `SELECT
         COALESCE(cancel_reason, 'Not specified') as reason,
         COUNT(*) as count
       FROM subscriptions
-      WHERE cancelled_at >= NOW() - INTERVAL '${sql.raw(String(days))} days'
+      WHERE cancelled_at >= NOW() - ($1 || ' days')::interval
         AND cancelled_at IS NOT NULL
       GROUP BY cancel_reason
-      ORDER BY count DESC
-    `
+      ORDER BY count DESC`,
+      [String(days)]
+    )
 
     const totalChurned = reasonResult.rows.reduce((sum, row) => sum + Number(row.count), 0)
     const byReason = reasonResult.rows.map((row) => ({
@@ -233,18 +237,19 @@ export async function getChurnAnalysis(
       percentage: totalChurned > 0 ? (Number(row.count) / totalChurned) * 100 : 0,
     }))
 
-    // Churn by product
-    const productResult = await sql`
-      SELECT
+    // Churn by product - using parameterized query
+    const productResult = await sql.query(
+      `SELECT
         product_id,
         product_title,
-        COUNT(*) FILTER (WHERE cancelled_at >= NOW() - INTERVAL '${sql.raw(String(days))} days') as churned,
-        COUNT(*) FILTER (WHERE status = 'active' OR cancelled_at >= NOW() - INTERVAL '${sql.raw(String(days))} days') as total
+        COUNT(*) FILTER (WHERE cancelled_at >= NOW() - ($1 || ' days')::interval) as churned,
+        COUNT(*) FILTER (WHERE status = 'active' OR cancelled_at >= NOW() - ($1 || ' days')::interval) as total
       FROM subscriptions
       GROUP BY product_id, product_title
-      HAVING COUNT(*) FILTER (WHERE cancelled_at >= NOW() - INTERVAL '${sql.raw(String(days))} days') > 0
-      ORDER BY churned DESC
-    `
+      HAVING COUNT(*) FILTER (WHERE cancelled_at >= NOW() - ($1 || ' days')::interval) > 0
+      ORDER BY churned DESC`,
+      [String(days)]
+    )
 
     const byProduct = productResult.rows.map((row) => ({
       productId: row.product_id as string,
@@ -334,13 +339,14 @@ export async function getGrowthMetrics(
   days: number = 30
 ): Promise<GrowthMetrics> {
   return withTenant(tenantSlug, async () => {
-    // Summary metrics
-    const summaryResult = await sql`
-      SELECT
-        COUNT(*) FILTER (WHERE started_at >= NOW() - INTERVAL '${sql.raw(String(days))} days' AND status = 'active') as new_subscribers,
-        COUNT(*) FILTER (WHERE cancelled_at >= NOW() - INTERVAL '${sql.raw(String(days))} days') as churned_subscribers
-      FROM subscriptions
-    `
+    // Summary metrics - using parameterized query
+    const summaryResult = await sql.query(
+      `SELECT
+        COUNT(*) FILTER (WHERE started_at >= NOW() - ($1 || ' days')::interval AND status = 'active') as new_subscribers,
+        COUNT(*) FILTER (WHERE cancelled_at >= NOW() - ($1 || ' days')::interval) as churned_subscribers
+      FROM subscriptions`,
+      [String(days)]
+    )
 
     const summary = summaryResult.rows[0] || {}
     const newSubscribers = Number(summary.new_subscribers || 0)
@@ -350,11 +356,11 @@ export async function getGrowthMetrics(
     // Calculate velocity (average daily net growth)
     const velocity = netGrowth / days
 
-    // Trend data
-    const trendResult = await sql`
-      WITH dates AS (
+    // Trend data - using parameterized query
+    const trendResult = await sql.query(
+      `WITH dates AS (
         SELECT generate_series(
-          NOW() - INTERVAL '${sql.raw(String(days))} days',
+          NOW() - ($1 || ' days')::interval,
           NOW(),
           '1 day'::interval
         )::date as date
@@ -366,8 +372,9 @@ export async function getGrowthMetrics(
       FROM dates d
       LEFT JOIN subscriptions s ON true
       GROUP BY d.date
-      ORDER BY d.date ASC
-    `
+      ORDER BY d.date ASC`,
+      [String(days)]
+    )
 
     const trend = trendResult.rows.map((row) => {
       const newCount = Number(row.new || 0)

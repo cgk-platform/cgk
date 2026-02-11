@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader } from '@cgk/ui'
 import { getTicketMetrics, getUnacknowledgedAlerts, type TicketMetrics } from '@cgk/support'
-import { withTenant } from '@cgk/db'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import {

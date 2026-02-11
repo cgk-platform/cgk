@@ -558,6 +558,7 @@ export async function getSettings(tenantSlug: string): Promise<SubscriptionSetti
     if (result.rows.length === 0) return null
 
     const row = result.rows[0]
+    if (!row) return null
     return {
       id: row.id as string,
       primaryProvider: row.primary_provider as SubscriptionSettings['primaryProvider'],
@@ -671,7 +672,7 @@ export async function getStatusCounts(
       const status = row.status as string
       const count = Number(row.count)
       counts[status] = count
-      counts.all += count
+      counts['all'] = (counts['all'] ?? 0) + count
     }
 
     return counts as Record<SubscriptionStatus | 'all', number>

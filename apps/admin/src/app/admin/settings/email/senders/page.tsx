@@ -132,7 +132,9 @@ export default function SendersPage() {
         <div className="space-y-6">
           {domains.map((domainKey) => {
             const addresses = grouped[domainKey]
+            if (!addresses || addresses.length === 0) return null
             const firstAddr = addresses[0]
+            if (!firstAddr) return null
 
             return (
               <Card key={domainKey}>

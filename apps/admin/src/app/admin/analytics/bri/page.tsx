@@ -12,7 +12,7 @@ export default function BRIAnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>({
     preset: '30d',
     startDate: getDefaultStartDate('30d'),
-    endDate: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0] ?? '',
   })
   const [data, setData] = useState<BRIAnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -314,5 +314,5 @@ function getDefaultStartDate(preset: string): string {
   const days = { '7d': 7, '14d': 14, '28d': 28, '30d': 30, '90d': 90 }[preset] || 30
   const start = new Date(now)
   start.setDate(start.getDate() - days)
-  return start.toISOString().split('T')[0]
+  return start.toISOString().split('T')[0] ?? ''
 }

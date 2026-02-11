@@ -74,7 +74,6 @@ const QUICK_LINKS = [
 ]
 
 export function BriDashboard({
-  tenantSlug,
   initialSettings,
   stats,
   recentActions,

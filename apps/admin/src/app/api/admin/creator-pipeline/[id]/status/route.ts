@@ -6,7 +6,7 @@
 import { headers } from 'next/headers'
 
 import { updateProjectStatus } from '@/lib/pipeline/db'
-import { isValidTransition, VALID_TRANSITIONS, type ProjectStatus } from '@/lib/pipeline/types'
+import { VALID_TRANSITIONS, type ProjectStatus } from '@/lib/pipeline/types'
 
 export const dynamic = 'force-dynamic'
 

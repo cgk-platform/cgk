@@ -25,9 +25,8 @@ export async function GET(request: Request) {
   }
 
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.actions.view'
   )
   if (permissionDenied) return permissionDenied
@@ -36,9 +35,9 @@ export async function GET(request: Request) {
     const url = new URL(request.url)
     const aiAgents = await import('@cgk/ai-agents')
     const listActions = aiAgents.listActions
-    type ActionLogFilters = Parameters<typeof listActions>[0]
+    type ActionLogFiltersType = NonNullable<Parameters<typeof listActions>[0]>
 
-    const filters: Partial<ActionLogFilters> = {}
+    const filters: Partial<ActionLogFiltersType> = {}
 
     // Parse query parameters
     const agentId = url.searchParams.get('agentId')
@@ -48,7 +47,7 @@ export async function GET(request: Request) {
     if (actionType) filters.actionType = actionType
 
     const actionCategory = url.searchParams.get('actionCategory')
-    if (actionCategory) filters.actionCategory = actionCategory as ActionLogFilters['actionCategory']
+    if (actionCategory) filters.actionCategory = actionCategory as ActionLogFiltersType['actionCategory']
 
     const creatorId = url.searchParams.get('creatorId')
     if (creatorId) filters.creatorId = creatorId
@@ -57,7 +56,7 @@ export async function GET(request: Request) {
     if (projectId) filters.projectId = projectId
 
     const approvalStatus = url.searchParams.get('approvalStatus')
-    if (approvalStatus) filters.approvalStatus = approvalStatus as ActionLogFilters['approvalStatus']
+    if (approvalStatus) filters.approvalStatus = approvalStatus as ActionLogFiltersType['approvalStatus']
 
     const success = url.searchParams.get('success')
     if (success !== null) filters.success = success === 'true'

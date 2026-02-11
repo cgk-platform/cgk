@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Badge, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Badge } from '@cgk/ui'
 import {
   Download,
   Filter,
@@ -9,9 +9,6 @@ import {
   ChevronRight,
   Phone,
   Mail,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'

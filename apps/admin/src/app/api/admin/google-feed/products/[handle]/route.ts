@@ -13,7 +13,7 @@ import type { GoogleFeedProductUpdateRequest } from '@/lib/google-feed/types'
  * Get product details with Google Feed data
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ handle: string }> }
 ) {
   const { handle } = await params

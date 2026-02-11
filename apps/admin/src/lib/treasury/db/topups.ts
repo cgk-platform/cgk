@@ -134,7 +134,7 @@ export async function createTopup(
         ${input.source_id || null},
         ${input.source_last4 || null},
         ${input.source_bank_name || null},
-        ${input.linked_withdrawal_ids || []},
+        ${input.linked_withdrawal_ids ? `{${input.linked_withdrawal_ids.map(s => `"${s}"`).join(',')}}` : '{}'}::text[],
         ${createdBy}
       )
       RETURNING *
@@ -255,7 +255,7 @@ export async function linkWithdrawalsToTopup(
     const result = await sql`
       UPDATE stripe_topups
       SET
-        linked_withdrawal_ids = linked_withdrawal_ids || ${withdrawalIds}::text[],
+        linked_withdrawal_ids = linked_withdrawal_ids || ${`{${withdrawalIds.map(s => `"${s}"`).join(',')}}`}::text[],
         updated_at = NOW()
       WHERE id = ${topupId}
       RETURNING id
@@ -274,7 +274,7 @@ export async function getTopupsForWithdrawals(
   return withTenant(tenantSlug, async () => {
     const result = await sql`
       SELECT * FROM stripe_topups
-      WHERE linked_withdrawal_ids && ${withdrawalIds}::text[]
+      WHERE linked_withdrawal_ids && ${`{${withdrawalIds.map(s => `"${s}"`).join(',')}}`}::text[]
       ORDER BY created_at DESC
     `
     return result.rows as StripeTopup[]

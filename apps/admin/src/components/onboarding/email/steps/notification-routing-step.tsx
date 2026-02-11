@@ -4,9 +4,8 @@ import { useState, useCallback, useEffect } from 'react'
 import { Button } from '@cgk/ui'
 import { Card, CardContent, CardHeader } from '@cgk/ui'
 import { Switch } from '@cgk/ui'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
+import { RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
 
-import type { SenderAddressWithDomain } from '@cgk/communications'
 import type { NotificationRoutingStepProps } from '../types'
 
 interface RoutingItem {
@@ -61,10 +60,9 @@ export function NotificationRoutingStep({
           // Group by category
           const grouped: Record<string, RoutingItem[]> = {}
           data.routing.forEach((item: RoutingItem) => {
-            if (!grouped[item.category]) {
-              grouped[item.category] = []
-            }
-            grouped[item.category].push(item)
+            const categoryItems = grouped[item.category] ?? []
+            categoryItems.push(item)
+            grouped[item.category] = categoryItems
           })
           setGroupedRouting(grouped)
         }
@@ -101,10 +99,9 @@ export function NotificationRoutingStep({
         setRouting(reloadData.routing)
         const grouped: Record<string, RoutingItem[]> = {}
         reloadData.routing.forEach((item: RoutingItem) => {
-          if (!grouped[item.category]) {
-            grouped[item.category] = []
-          }
-          grouped[item.category].push(item)
+          const categoryItems = grouped[item.category] ?? []
+          categoryItems.push(item)
+          grouped[item.category] = categoryItems
         })
         setGroupedRouting(grouped)
       }
@@ -119,7 +116,7 @@ export function NotificationRoutingStep({
   }, [])
 
   const handleChange = useCallback(
-    (type: string, field: 'senderAddressId' | 'isEnabled', value: string | boolean) => {
+    (type: string, field: 'senderAddressId' | 'isEnabled', value: string | boolean | null) => {
       setLocalChanges((prev) => {
         const current = prev[type] || {
           senderAddressId: routing.find((r) => r.notificationType === type)?.senderAddressId ?? null,
@@ -217,7 +214,7 @@ export function NotificationRoutingStep({
                     <span className="text-sm font-medium">{item.label}</span>
                   </div>
 
-                  <Select
+                  <RadixSelect
                     value={current.senderAddressId || 'none'}
                     onValueChange={(value) =>
                       handleChange(
@@ -238,7 +235,7 @@ export function NotificationRoutingStep({
                         </SelectItem>
                       ))}
                     </SelectContent>
-                  </Select>
+                  </RadixSelect>
 
                   <Switch
                     checked={current.isEnabled}

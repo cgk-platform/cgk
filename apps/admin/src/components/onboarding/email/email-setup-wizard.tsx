@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@cgk/ui'
 import { Button } from '@cgk/ui'
 
@@ -23,7 +23,7 @@ import { EMAIL_SETUP_STEPS, type EmailSetupWizardProps } from './types'
  * Step 5 of tenant onboarding - guides through Resend email configuration.
  */
 export function EmailSetupWizard({
-  tenantId,
+  tenantId: _tenantId,
   primaryDomain,
   brandName,
   onComplete,

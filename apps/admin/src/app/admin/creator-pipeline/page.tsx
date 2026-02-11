@@ -1,4 +1,3 @@
-import { Card, CardContent } from '@cgk/ui'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 

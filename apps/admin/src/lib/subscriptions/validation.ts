@@ -23,7 +23,11 @@ export async function runValidation(
       VALUES (${userId || null}, 'manual', 'running')
       RETURNING id
     `
-    const validationId = runResult.rows[0].id as string
+    const validationRow = runResult.rows[0]
+    if (!validationRow) {
+      throw new Error('Failed to create validation run')
+    }
+    const validationId = validationRow.id as string
 
     const issues: ValidationIssue[] = []
     let totalChecked = 0
@@ -277,6 +281,9 @@ async function createIssue(
   `
 
   const row = result.rows[0]
+  if (!row) {
+    throw new Error('Failed to create validation issue')
+  }
   return {
     id: row.id as string,
     validationId: row.validation_id as string,
@@ -436,6 +443,11 @@ export async function autoFixIssues(
       }
 
       const issue = issueResult.rows[0]
+      if (!issue) {
+        errors.push(`Issue ${issueId} not found`)
+        failed++
+        continue
+      }
       const subscriptionId = issue.subscription_id as string | null
       const issueType = issue.issue_type as string
 

@@ -17,12 +17,8 @@ import type {
   TimeSeriesDataPoint,
   FunnelStep,
   SRMAnalysis,
-  NoveltyAnalysis,
-  DriftAnalysis,
   DataQualityOverview,
   Guardrail,
-  CUPEDResult,
-  LTVSettings,
   TemplateABTest,
   ABTestFilters,
 } from './types'
@@ -88,8 +84,9 @@ export async function getABTest(
     const result = await sql`
       SELECT * FROM ab_tests WHERE id = ${testId}
     `
-    if (result.rows.length === 0) return null
-    return mapRowToABTest(result.rows[0])
+    const row = result.rows[0]
+    if (!row) return null
+    return mapRowToABTest(row as Record<string, unknown>)
   })
 }
 
@@ -112,11 +109,13 @@ export async function createABTest(
         ${data.testType}, ${data.goalEvent}, ${data.optimizationMetric},
         ${data.confidenceLevel}, ${data.baseUrl}, ${data.scheduleTimezone},
         ${data.autoStart}, ${data.autoEnd},
-        ${data.scheduledStartAt ?? null}, ${data.scheduledEndAt ?? null}
+        ${data.scheduledStartAt?.toISOString() ?? null}, ${data.scheduledEndAt?.toISOString() ?? null}
       )
       RETURNING *
     `
-    return mapRowToABTest(result.rows[0])
+    const row = result.rows[0]
+    if (!row) throw new Error('Failed to create A/B test')
+    return mapRowToABTest(row as Record<string, unknown>)
   })
 }
 
@@ -226,7 +225,9 @@ export async function createVariant(
       )
       RETURNING *
     `
-    return mapRowToVariant(result.rows[0])
+    const row = result.rows[0]
+    if (!row) throw new Error('Failed to create variant')
+    return mapRowToVariant(row as Record<string, unknown>)
   })
 }
 
@@ -330,9 +331,6 @@ export async function getTestResults(
     const controlRow = variantsResult.rows.find((r) => r.is_control)
     const controlRate = controlRow
       ? Number(controlRow.conversions) / Math.max(Number(controlRow.visitors), 1)
-      : 0
-    const controlRpv = controlRow
-      ? Number(controlRow.revenue_cents) / 100 / Math.max(Number(controlRow.visitors), 1)
       : 0
 
     const variants: VariantResult[] = variantsResult.rows.map((row) => {
@@ -472,17 +470,20 @@ export async function getFunnelData(
       }
 
       for (let i = 0; i < stepLabels.length; i++) {
-        const { step, label } = stepLabels[i]
-        const count = counts[step]
-        const prevCount = i === 0 ? count : counts[stepLabels[i - 1].step]
+        const stepInfo = stepLabels[i]
+        if (!stepInfo) continue
+        const { step, label } = stepInfo
+        const count = counts[step] ?? 0
+        const prevStepInfo = i === 0 ? null : stepLabels[i - 1]
+        const prevCount = i === 0 ? count : (prevStepInfo ? counts[prevStepInfo.step] ?? 0 : 0)
         const rate = prevCount > 0 ? count / prevCount : 0
         const dropoff = prevCount > 0 ? 1 - rate : 0
 
         steps.push({
           step,
           label,
-          variantId: row.variant_id,
-          variantName: row.variant_name,
+          variantId: row.variant_id as string,
+          variantName: row.variant_name as string,
           count,
           rate,
           dropoff,

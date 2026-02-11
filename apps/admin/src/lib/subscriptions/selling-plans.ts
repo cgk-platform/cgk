@@ -35,7 +35,7 @@ export async function getSellingPlan(
       SELECT * FROM subscription_selling_plans WHERE id = ${planId}
     `
     if (result.rows.length === 0) return null
-    return mapRowToSellingPlan(result.rows[0])
+    return mapRowToSellingPlan(result.rows[0] as Record<string, unknown>)
   })
 }
 
@@ -82,13 +82,17 @@ export async function createSellingPlan(
         ${data.trialDays || null},
         ${data.minCycles || null},
         ${data.maxCycles || null},
-        ${data.productIds || []},
+        ${data.productIds ? `{${data.productIds.map(s => `"${s}"`).join(',')}}` : '{}'}::text[],
         ${data.isActive ?? true}
       )
       RETURNING *
     `
 
-    return mapRowToSellingPlan(result.rows[0])
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create selling plan')
+    }
+    return mapRowToSellingPlan(row as Record<string, unknown>)
   })
 }
 
@@ -163,7 +167,7 @@ export async function updateSellingPlan(
     )
 
     if (result.rows.length === 0) return null
-    return mapRowToSellingPlan(result.rows[0])
+    return mapRowToSellingPlan(result.rows[0] as Record<string, unknown>)
   })
 }
 
@@ -210,7 +214,7 @@ export async function associateProducts(
   await withTenant(tenantSlug, async () => {
     await sql`
       UPDATE subscription_selling_plans
-      SET product_ids = ${productIds}, updated_at = NOW()
+      SET product_ids = ${`{${productIds.map(s => `"${s}"`).join(',')}}`}::text[], updated_at = NOW()
       WHERE id = ${planId}
     `
   })

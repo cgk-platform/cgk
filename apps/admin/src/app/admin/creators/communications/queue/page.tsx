@@ -1,11 +1,9 @@
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+import { Button, Card, CardContent } from '@cgk/ui'
 import {
   AlertCircle,
-  Check,
   CheckCircle2,
   Clock,
   Mail,
-  RefreshCcw,
   Send,
   XCircle,
 } from 'lucide-react'
@@ -209,7 +207,7 @@ async function QueueLoader({ filters }: { filters: QueueFilters }) {
         totalCount={totalCount}
         limit={filters.limit}
         basePath="/admin/creators/communications/queue"
-        currentFilters={{ status: filters.status }}
+        currentFilters={{ status: filters.status as string | undefined }}
       />
     </div>
   )

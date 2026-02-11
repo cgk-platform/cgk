@@ -60,11 +60,16 @@ export async function POST(request: Request) {
       RETURNING id, name, key_prefix as prefix, created_at as "createdAt"
     `
 
+    const row = insertResult.rows[0]
+    if (!row) {
+      throw new Error('Failed to insert API key')
+    }
+
     return {
-      id: insertResult.rows[0].id,
-      name: insertResult.rows[0].name,
-      prefix: insertResult.rows[0].prefix,
-      createdAt: insertResult.rows[0].createdAt,
+      id: row.id,
+      name: row.name,
+      prefix: row.prefix,
+      createdAt: row.createdAt,
       key, // Return the full key only on creation
     }
   })

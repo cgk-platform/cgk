@@ -4,7 +4,7 @@
  * Handles sending approval request emails to treasurers
  */
 
-import type { DrawRequestWithItems, TreasuryCommunication } from './types'
+import type { DrawRequestWithItems } from './types'
 
 // Email templates
 const APPROVAL_REQUEST_SUBJECT = (requestNumber: string) =>
@@ -245,7 +245,7 @@ export function verifyActionToken(
       return false
     }
 
-    const tokenTime = parseInt(timestamp, 10)
+    const tokenTime = parseInt(timestamp || '', 10)
     if (Date.now() - tokenTime > maxAgeMs) {
       return false
     }

@@ -24,7 +24,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
     onChange({
       preset: typedPreset,
       startDate: getStartDate(typedPreset),
-      endDate: new Date().toISOString().split('T')[0],
+      endDate: new Date().toISOString().split('T')[0] ?? '',
     })
   }
 
@@ -52,8 +52,8 @@ function getStartDate(preset: DateRangePreset): string {
     return `${now.getFullYear()}-01-01`
   }
 
-  const days = { '7d': 7, '14d': 14, '28d': 28, '30d': 30, '90d': 90 }[preset] || 30
+  const days = { '7d': 7, '14d': 14, '28d': 28, '30d': 30, '90d': 90, 'custom': 30 }[preset] || 30
   const start = new Date(now)
   start.setDate(start.getDate() - days)
-  return start.toISOString().split('T')[0]
+  return start.toISOString().split('T')[0] ?? ''
 }

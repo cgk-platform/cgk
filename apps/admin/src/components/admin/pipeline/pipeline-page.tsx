@@ -61,7 +61,7 @@ export function PipelinePage({
   const [isFilterExpanded, setIsFilterExpanded] = useState(false)
   const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([])
   const [creators, setCreators] = useState<Array<{ id: string; name: string }>>([])
-  const [analytics, setAnalytics] = useState<PipelineAnalytics | null>(null)
+  const [analytics] = useState<PipelineAnalytics | null>(null)
   const [sort, setSort] = useState<PipelineSort>({
     field: 'dueDate',
     direction: 'asc',
@@ -92,18 +92,6 @@ export function PipelinePage({
     fetchFiltersData()
   }, [])
 
-  // Fetch analytics when panel is opened
-  const fetchAnalytics = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/creator-pipeline/analytics?period=30d')
-      if (res.ok) {
-        const data = await res.json()
-        setAnalytics(data)
-      }
-    } catch (error) {
-      console.error('Failed to fetch analytics:', error)
-    }
-  }, [])
 
   // Refetch projects when filters change
   const refetchProjects = useCallback(async () => {

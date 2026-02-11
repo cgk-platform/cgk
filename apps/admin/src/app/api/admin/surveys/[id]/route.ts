@@ -65,7 +65,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const { id } = await params

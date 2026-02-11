@@ -61,7 +61,17 @@ export function Step4Schedule({ data, updateData }: Step4Props) {
   const updateGuardrail = useCallback(
     (index: number, changes: Partial<Guardrail>) => {
       const newGuardrails = [...step4.guardrails]
-      newGuardrails[index] = { ...newGuardrails[index], ...changes }
+      const current = newGuardrails[index]
+      if (!current) return
+      newGuardrails[index] = {
+        id: changes.id ?? current.id,
+        name: changes.name ?? current.name,
+        metric: changes.metric ?? current.metric,
+        threshold: changes.threshold ?? current.threshold,
+        direction: changes.direction ?? current.direction,
+        isTriggered: changes.isTriggered ?? current.isTriggered,
+        currentValue: changes.currentValue ?? current.currentValue,
+      }
       update({ guardrails: newGuardrails })
     },
     [step4.guardrails, update]

@@ -6,9 +6,10 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import {
-  getPlatformConnection,
+  getSecondaryPlatformConnection,
   recordPlatformSync,
   type SecondaryPlatform,
+  type SecondaryPlatformConnection,
 } from '@/lib/attribution'
 
 const VALID_PLATFORMS: SecondaryPlatform[] = [
@@ -23,7 +24,7 @@ interface RouteParams {
   params: Promise<{ platform: string }>
 }
 
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')
@@ -40,8 +41,8 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   // Check if platform is connected
   const connection = await withTenant(tenantSlug, () =>
-    getPlatformConnection(tenantId, platform as SecondaryPlatform)
-  )
+    getSecondaryPlatformConnection(tenantId, platform as SecondaryPlatform)
+  ) as SecondaryPlatformConnection | null
 
   if (!connection || connection.status !== 'connected') {
     return NextResponse.json(

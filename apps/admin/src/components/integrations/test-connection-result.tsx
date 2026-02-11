@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@cgk/ui'
-import { CheckCircle2, XCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 
 interface TestConnectionResultProps {
   status: 'idle' | 'testing' | 'success' | 'error'

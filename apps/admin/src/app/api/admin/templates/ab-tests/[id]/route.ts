@@ -11,7 +11,7 @@ interface RouteContext {
  * GET /api/admin/templates/ab-tests/[id]
  * Get a single template A/B test
  */
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -84,7 +84,7 @@ export async function PATCH(request: Request, context: RouteContext) {
  * DELETE /api/admin/templates/ab-tests/[id]
  * Delete a template A/B test
  */
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -92,7 +92,7 @@ export async function DELETE(request: Request, context: RouteContext) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const { id } = await context.params
+  const { id: _id } = await context.params
 
   // In a real implementation, delete from database
   return NextResponse.json({ success: true })

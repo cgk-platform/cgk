@@ -5,9 +5,7 @@ import { NextResponse } from 'next/server'
 
 import {
   createBulkSend,
-  getBulkSendById,
   getBulkSends,
-  updateBulkSendStatus,
 } from '@/lib/creator-communications/db'
 
 export async function GET(request: Request) {

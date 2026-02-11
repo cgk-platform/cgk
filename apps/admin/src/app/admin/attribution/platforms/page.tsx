@@ -7,7 +7,7 @@ import {
   Badge,
   Alert,
   AlertDescription,
-  Select,
+  RadixSelect as Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -26,15 +26,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState, useCallback } from 'react'
 
-import type { PlatformConnection, SecondaryPlatform, SyncFrequency } from '@/lib/attribution'
-
-const PLATFORM_ICONS: Record<SecondaryPlatform, string> = {
-  snapchat: 'Snapchat',
-  pinterest: 'Pinterest',
-  linkedin: 'LinkedIn',
-  mntn: 'MNTN',
-  affiliate: 'Affiliate',
-}
+import type { SecondaryPlatformConnection, SecondaryPlatform, SyncFrequency } from '@/lib/attribution'
 
 const PLATFORM_DESCRIPTIONS: Record<SecondaryPlatform, string> = {
   snapchat: 'Connect Snapchat Ads for attribution data',
@@ -45,7 +37,7 @@ const PLATFORM_DESCRIPTIONS: Record<SecondaryPlatform, string> = {
 }
 
 export default function PlatformsPage() {
-  const [connections, setConnections] = useState<PlatformConnection[]>([])
+  const [connections, setConnections] = useState<SecondaryPlatformConnection[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
@@ -149,25 +141,6 @@ export default function PlatformsPage() {
     }
   }
 
-  const handleToggleEnabled = async (platform: SecondaryPlatform, enabled: boolean) => {
-    try {
-      const response = await fetch(`/api/admin/attribution/platforms/${platform}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to toggle sync')
-      }
-
-      await fetchConnections()
-    } catch (err) {
-      setError(`Failed to update sync settings`)
-      console.error(err)
-    }
-  }
-
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'connected':
@@ -179,7 +152,7 @@ export default function PlatformsPage() {
     }
   }
 
-  const getStatusBadge = (connection: PlatformConnection) => {
+  const getStatusBadge = (connection: SecondaryPlatformConnection) => {
     switch (connection.status) {
       case 'connected':
         return (

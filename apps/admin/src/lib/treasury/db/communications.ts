@@ -65,7 +65,7 @@ export async function createCommunication(
         ${input.to_email || null},
         ${input.parsed_status ? `${input.parsed_status}::parsed_status` : null},
         ${input.parsed_confidence ? `${input.parsed_confidence}::parsed_confidence` : null},
-        ${input.matched_keywords || []}
+        ${input.matched_keywords ? `{${input.matched_keywords.map(s => `"${s}"`).join(',')}}` : '{}'}::text[]
       )
       RETURNING *
     `
@@ -113,7 +113,7 @@ export async function logInboundEmail(
     request_id: requestId,
     direction: 'inbound',
     channel: 'email',
-    subject,
+    subject: subject ?? undefined,
     body,
     from_email: fromEmail,
     to_email: toEmail,

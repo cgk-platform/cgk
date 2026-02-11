@@ -48,7 +48,10 @@ export function StageConfigModal({
   const updateStage = (index: number, updates: Partial<StageConfig>) => {
     setStages((prev) => {
       const newStages = [...prev]
-      newStages[index] = { ...newStages[index], ...updates }
+      const currentStage = newStages[index]
+      if (currentStage) {
+        newStages[index] = { ...currentStage, ...updates }
+      }
       return newStages
     })
   }

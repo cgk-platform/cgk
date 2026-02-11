@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { sql } from '@cgk/db'
+import { setTenantSchema, sql } from '@cgk/db'
 import { NextResponse } from 'next/server'
 
 import { generateGoogleFeed, type ShopifyProductData } from '@cgk/commerce'
@@ -12,7 +12,7 @@ import { generateGoogleFeed, type ShopifyProductData } from '@cgk/commerce'
  * Authenticated by unique feed token per tenant
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
@@ -22,46 +22,7 @@ export async function GET(
   }
 
   try {
-    // Find tenant by feed token
-    // Note: This queries across tenants, so we need to find the right schema first
-    const tenantResult = await sql`
-      SELECT
-        o.id,
-        o.slug,
-        gfs.feed_name as "feedName",
-        gfs.target_country as "targetCountry",
-        gfs.language,
-        gfs.currency,
-        gfs.default_brand as "defaultBrand",
-        gfs.default_availability as "defaultAvailability",
-        gfs.default_condition as "defaultCondition",
-        gfs.exclusion_rules as "exclusionRules",
-        gfs.category_mapping as "categoryMapping",
-        gfs.custom_label_rules as "customLabelRules",
-        gfs.include_variants as "includeVariants",
-        gfs.include_out_of_stock as "includeOutOfStock",
-        gfs.minimum_price_cents as "minimumPriceCents",
-        gfs.tax_settings as "taxSettings",
-        gfs.shipping_overrides as "shippingOverrides"
-      FROM public.organizations o
-      CROSS JOIN LATERAL (
-        SELECT * FROM pg_catalog.pg_tables
-        WHERE schemaname = 'tenant_' || o.slug
-          AND tablename = 'google_feed_settings'
-        LIMIT 1
-      ) schema_check
-      CROSS JOIN LATERAL (
-        SELECT *
-        FROM tenant_${sql.unsafe('$1')}.google_feed_settings
-        WHERE feed_token = ${token}
-        LIMIT 1
-      ) gfs
-      WHERE o.is_active = true
-      LIMIT 1
-    `
-
-    // Fallback: Search through known tenants
-    // In production, this should use a more efficient lookup
+    // Find tenant by feed token by searching through known tenants
     const orgsResult = await sql`
       SELECT slug FROM public.organizations WHERE is_active = true
     `
@@ -72,6 +33,8 @@ export async function GET(
     for (const org of orgsResult.rows) {
       const slug = (org as { slug: string }).slug
       try {
+        // Set tenant schema before querying
+        await setTenantSchema(slug)
         const settingsResult = await sql`
           SELECT
             id,
@@ -92,7 +55,7 @@ export async function GET(
             minimum_price_cents as "minimumPriceCents",
             tax_settings as "taxSettings",
             shipping_overrides as "shippingOverrides"
-          FROM tenant_${sql.unsafe(slug)}.google_feed_settings
+          FROM google_feed_settings
           WHERE feed_token = ${token}
           LIMIT 1
         `
@@ -140,7 +103,7 @@ export async function GET(
     // Fetch overrides
     const overridesResult = await sql`SELECT * FROM google_feed_products`
     const overridesMap = new Map(
-      overridesResult.rows.map((o: { shopify_product_id: string }) => [o.shopify_product_id, o])
+      (overridesResult.rows as Array<{ shopify_product_id: string }>).map((o) => [o.shopify_product_id, o])
     )
 
     // Get storefront URL

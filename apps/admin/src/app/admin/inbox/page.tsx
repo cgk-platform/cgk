@@ -35,7 +35,7 @@ async function getThreads(
   return res.json()
 }
 
-async function getStats(tenantId: string) {
+async function getStats(_tenantId: string) {
   // For now, return mock stats - would call a stats API endpoint
   return {
     openThreads: 12,

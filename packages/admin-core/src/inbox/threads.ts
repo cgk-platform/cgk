@@ -295,9 +295,9 @@ export async function updateThread(
     }
 
     const row = current.rows[0] as Record<string, unknown>
-    const threadType = input.threadType ?? row.thread_type
-    const subject = input.subject !== undefined ? input.subject : row.subject
-    const priority = input.priority ?? row.priority
+    const threadType = (input.threadType ?? row.thread_type) as string
+    const subject = (input.subject !== undefined ? input.subject : row.subject) as string | null
+    const priority = (input.priority ?? row.priority) as string
     const tags = input.tags ?? (row.tags as string[] || [])
     const tagsArray = `{${tags.map((t: string) => `"${t}"`).join(',')}}`
 

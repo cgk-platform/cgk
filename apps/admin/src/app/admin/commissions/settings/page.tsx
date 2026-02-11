@@ -10,7 +10,7 @@ import { DEFAULT_TIER_RATES } from '@/lib/creators-admin-ops'
 import { formatMoney } from '@/lib/format'
 
 export default function CommissionSettingsPage() {
-  const [config, setConfig] = useState<CommissionConfig | null>(null)
+  const [, setConfig] = useState<CommissionConfig | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -69,8 +69,11 @@ export default function CommissionSettingsPage() {
 
   const updateTierRate = (index: number, field: keyof TierRate, value: string | number) => {
     const updated = [...tierRates]
-    updated[index] = { ...updated[index], [field]: value }
-    setTierRates(updated)
+    const tier = updated[index]
+    if (tier) {
+      updated[index] = { ...tier, [field]: value }
+      setTierRates(updated)
+    }
   }
 
   if (loading) {

@@ -259,7 +259,6 @@ async function CommissionsLoader({
         currentFilters={currentFilters}
         currentSort="order_date"
         currentDir="desc"
-        selectable
       />
       <Pagination
         page={filters.page}

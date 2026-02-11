@@ -1,5 +1,5 @@
 import { Button, Card, CardContent } from '@cgk/ui'
-import { Archive, Filter, MessageSquare, Plus, Star } from 'lucide-react'
+import { Archive, MessageSquare, Plus, Star } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'

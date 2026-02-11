@@ -84,8 +84,9 @@ export default function IntegrationsHubPage() {
   ).length
 
   // Build full integration cards with status
-  const getIntegrationCard = (id: string): IntegrationCardType => {
+  const getIntegrationCard = (id: string): IntegrationCardType | null => {
     const definition = INTEGRATION_DEFINITIONS[id]
+    if (!definition) return null
     const statusData = statuses[id]
 
     return {
@@ -201,9 +202,10 @@ export default function IntegrationsHubPage() {
                       </CardContent>
                     </Card>
                   ))
-                : category.integrations.map((id) => (
-                    <IntegrationCard key={id} integration={getIntegrationCard(id)} />
-                  ))}
+                : category.integrations.map((id) => {
+                    const card = getIntegrationCard(id)
+                    return card ? <IntegrationCard key={id} integration={card} /> : null
+                  })}
             </div>
           </div>
         )

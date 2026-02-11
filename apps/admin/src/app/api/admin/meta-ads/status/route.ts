@@ -57,7 +57,14 @@ export async function GET() {
     }
 
     const row = credResult.rows[0]
-    const credentials = row.credentials as Record<string, unknown>
+    if (!row) {
+      return {
+        connected: false,
+        accounts: [],
+        capiConfigured: false,
+        syncStatus: 'idle' as const,
+      }
+    }
     const metadata = row.metadata as Record<string, unknown> | null
 
     return {

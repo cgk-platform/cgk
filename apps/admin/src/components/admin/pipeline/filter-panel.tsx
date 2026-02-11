@@ -18,7 +18,7 @@ import type {
   ProjectStatus,
   RiskLevel,
 } from '@/lib/pipeline/types'
-import { PIPELINE_STAGES, getStageColor } from '@/lib/pipeline/types'
+import { PIPELINE_STAGES } from '@/lib/pipeline/types'
 
 interface FilterPanelProps {
   filters: PipelineFilters

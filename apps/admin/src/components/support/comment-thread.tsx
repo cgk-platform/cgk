@@ -46,7 +46,7 @@ function getAuthorIcon(authorType: TicketComment['authorType']) {
 }
 
 export function CommentThread({
-  ticketId,
+  ticketId: _ticketId,
   comments,
   onAddComment,
   className,

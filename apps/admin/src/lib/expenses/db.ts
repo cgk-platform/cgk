@@ -4,7 +4,7 @@
 
 import { sql, withTenant } from '@cgk/db'
 
-import type { Expense, ExpenseFilters, ExpenseSummary, ExpenseCategory } from './types'
+import type { Expense, ExpenseFilters, ExpenseSummary, ExpenseCategory_Legacy } from './types'
 
 export async function getExpenses(
   tenantSlug: string,
@@ -126,7 +126,7 @@ export async function getExpenseSummary(tenantSlug: string): Promise<ExpenseSumm
 export async function createExpense(
   tenantSlug: string,
   expense: {
-    category: ExpenseCategory
+    category: ExpenseCategory_Legacy
     vendor: string
     description: string
     amount_cents: number

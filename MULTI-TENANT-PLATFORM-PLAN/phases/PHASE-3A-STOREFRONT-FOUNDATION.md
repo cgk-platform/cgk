@@ -1,5 +1,7 @@
 # PHASE-3A: Storefront Foundation
 
+**Status**: ✅ COMPLETE (2026-02-11)
+
 **Duration**: 1 week (Week 11)
 **Depends On**: PHASE-1D-PACKAGES (Commerce Provider interface), PHASE-2PO-FLAGS (Feature flags)
 **Parallel With**: None
@@ -29,15 +31,15 @@ Build the multi-tenant storefront app foundation with Commerce Provider integrat
 
 ## Success Criteria
 
-- [ ] Storefront app scaffolded with tenant-aware Next.js configuration
-- [ ] Commerce Provider factory integrated and respecting `commerce.provider` feature flag
-- [ ] **Product reads from LOCAL PostgreSQL database (not Shopify API on every request)**
-- [ ] Product listing page renders products from local DB with < 100ms query time
-- [ ] Product detail page displays full product info with variants from local DB
-- [ ] Provider-agnostic components work identically with Shopify (Custom ready)
-- [ ] Full-text search queries local DB
-- [ ] Fallback to Shopify API if product not in local DB (race condition handling)
-- [ ] `npx tsc --noEmit` passes
+- [x] Storefront app scaffolded with tenant-aware Next.js configuration
+- [x] Commerce Provider factory integrated and respecting `commerce.provider` feature flag
+- [x] **Product reads from LOCAL PostgreSQL database (not Shopify API on every request)**
+- [x] Product listing page renders products from local DB with < 100ms query time
+- [x] Product detail page displays full product info with variants from local DB
+- [x] Provider-agnostic components work identically with Shopify (Custom ready)
+- [x] Full-text search queries local DB
+- [x] Fallback to Shopify API if product not in local DB (race condition handling)
+- [x] `npx tsc --noEmit` passes
 
 ---
 
@@ -317,45 +319,45 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Storefront App Scaffold
-- [ ] Create `apps/storefront/` Next.js app with TypeScript
-- [ ] Configure middleware for tenant detection
-- [ ] Set up root layout with tenant context
-- [ ] Add homepage placeholder
+- [x] Create `apps/storefront/` Next.js app with TypeScript
+- [x] Configure middleware for tenant detection
+- [x] Set up root layout with tenant context
+- [x] Add homepage placeholder
 
 ### [PARALLEL] Local Product Database
-- [ ] Verify tenant `products` table exists (created during onboarding)
-- [ ] Implement product queries from local DB
-- [ ] Implement full-text search query
-- [ ] Implement pagination with cursor-based approach
-- [ ] Create `mapLocalProductToCommerceType()` mapper
+- [x] Verify tenant `products` table exists (created during onboarding)
+- [x] Implement product queries from local DB
+- [x] Implement full-text search query
+- [x] Implement pagination with cursor-based approach
+- [x] Create `mapLocalProductToCommerceType()` mapper
 
 ### [PARALLEL] Shopify Client (Fallback)
-- [ ] Implement `ShopifyStorefrontClient` class
-- [ ] Create product GraphQL queries (for fallback only)
-- [ ] Create collection GraphQL queries
-- [ ] Implement type mappers (Shopify -> unified types)
-- [ ] Add async trigger to sync product to local DB on fallback
+- [x] Implement `ShopifyStorefrontClient` class
+- [x] Create product GraphQL queries (for fallback only)
+- [x] Create collection GraphQL queries
+- [x] Implement type mappers (Shopify -> unified types)
+- [x] Add async trigger to sync product to local DB on fallback
 
 ### [SEQUENTIAL after parallel tasks] Commerce Provider Integration
-- [ ] Create `apps/storefront/src/lib/commerce.ts`
-- [ ] Implement `getCommerceProvider()` with caching
-- [ ] Implement `useCommerceProvider()` client hook
-- [ ] Wire up tenant config to provider factory
+- [x] Create `apps/storefront/src/lib/commerce.ts`
+- [x] Implement `getCommerceProvider()` with caching
+- [x] Implement `useCommerceProvider()` client hook
+- [x] Wire up tenant config to provider factory
 
 ### [SEQUENTIAL after provider integration] Product Pages
-- [ ] Build product listing page `/products`
-- [ ] Build product detail page `/products/[handle]`
-- [ ] Build collection page `/collections/[handle]`
-- [ ] Create provider-agnostic components (ProductCard, VariantSelector, etc.)
+- [x] Build product listing page `/products`
+- [x] Build product detail page `/products/[handle]`
+- [x] Build collection page `/collections/[handle]`
+- [x] Create provider-agnostic components (ProductCard, VariantSelector, etc.)
 
 ---
 
 ## Definition of Done
 
-- [ ] `apps/storefront/` app runs with `npm run dev`
-- [ ] Product listing page shows products from Shopify
-- [ ] Product detail page displays full product with variants
-- [ ] Changing feature flag `commerce.provider` logs correct provider type
-- [ ] All components use unified Commerce types, not Shopify types
-- [ ] `npx tsc --noEmit` passes
-- [ ] Mobile responsive (390px) and desktop (1440px) layouts work
+- [x] `apps/storefront/` app runs with `npm run dev`
+- [x] Product listing page shows products from Shopify
+- [x] Product detail page displays full product with variants
+- [x] Changing feature flag `commerce.provider` logs correct provider type
+- [x] All components use unified Commerce types, not Shopify types
+- [x] `npx tsc --noEmit` passes
+- [x] Mobile responsive (390px) and desktop (1440px) layouts work

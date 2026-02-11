@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Checkbox, cn } from '@cgk/ui'
+import { Button, Checkbox, cn } from '@cgk/ui'
 import { AlertCircle, Check, Clock, Eye, MoreHorizontal, RefreshCcw, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
@@ -13,7 +13,7 @@ interface QueueTableProps {
 
 export function QueueTable({ entries }: QueueTableProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [isProcessing, setIsProcessing] = useState(false)
 

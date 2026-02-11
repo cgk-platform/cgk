@@ -41,11 +41,10 @@ export default function SurveyAnalyticsPage() {
     else setLoading(true)
 
     try {
-      const [surveyRes, analyticsRes, responsesRes, attributionRes] = await Promise.all([
+      const [surveyRes, analyticsRes, responsesRes] = await Promise.all([
         fetch(`/api/admin/surveys/${surveyId}`),
         fetch(`/api/admin/surveys/${surveyId}/analytics`),
         fetch(`/api/admin/surveys/${surveyId}/responses?limit=10`),
-        fetch(`/api/admin/surveys/attribution-options`),
       ])
 
       const [surveyData, analyticsData, responsesData] = await Promise.all([

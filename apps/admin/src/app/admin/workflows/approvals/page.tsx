@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Check, Clock, X } from 'lucide-react'
 
 import { Button } from '@cgk/ui'
-import { cn } from '@cgk/ui'
 
 interface PendingApproval {
   id: string

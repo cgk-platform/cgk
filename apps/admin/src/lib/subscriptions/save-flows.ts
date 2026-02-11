@@ -52,6 +52,7 @@ export async function getSaveFlow(
     if (result.rows.length === 0) return null
 
     const row = result.rows[0]
+    if (!row) return null
     return {
       id: row.id as string,
       name: row.name as string,
@@ -107,6 +108,9 @@ export async function createSaveFlow(
     `
 
     const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create save flow')
+    }
     return {
       id: row.id as string,
       name: row.name as string,
@@ -281,6 +285,9 @@ export async function createSaveAttempt(
     `
 
     const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create save attempt')
+    }
     return {
       id: row.id as string,
       subscriptionId: row.subscription_id as string,
@@ -325,8 +332,9 @@ export async function completeSaveAttempt(
     `
 
     // Update flow stats if saved
-    if (data.outcome === 'saved' && result.rows.length > 0) {
-      const flowId = result.rows[0].flow_id as string
+    const resultRow = result.rows[0]
+    if (data.outcome === 'saved' && resultRow) {
+      const flowId = resultRow.flow_id as string
       await sql`
         UPDATE subscription_save_flows
         SET

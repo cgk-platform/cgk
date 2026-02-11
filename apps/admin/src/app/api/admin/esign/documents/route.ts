@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { templateId, creatorId, signers, message, expiresAt, reminderEnabled, reminderDays } = body
+    const { templateId, signers } = body
 
     if (!templateId) {
       return NextResponse.json({ error: 'Template ID required' }, { status: 400 })

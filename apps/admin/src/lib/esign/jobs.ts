@@ -4,14 +4,12 @@
  * Job definitions for processing bulk sends, webhooks, reminders, and expirations.
  */
 
-import { defineJob } from '@cgk/jobs'
 import { withTenant, sql } from '@cgk/db'
 import {
   getScheduledBulkSends,
   getPendingRecipients,
   updateBulkSendStatus,
   updateRecipientStatus,
-  incrementBulkSendCounters,
   addBulkSendError,
   getActiveWebhooksForEvent,
   logWebhookDelivery,
@@ -21,6 +19,54 @@ import {
   expireOldSessions,
 } from './index'
 import type { EsignWebhookEvent, EsignWebhookPayload } from './types'
+
+// Local type definitions for job system (until @cgk/jobs module resolution is fixed)
+interface Job<T = unknown> {
+  id: string
+  name: string
+  payload: T
+  status: string
+  attempts: number
+  maxAttempts: number
+  priority: number
+  scheduledAt: Date
+  startedAt?: Date
+  completedAt?: Date
+  failedAt?: Date
+  error?: { message: string; code?: string; stack?: string; retryable: boolean }
+  result?: unknown
+  tenantId?: string
+  metadata?: Record<string, unknown>
+  createdAt: Date
+  updatedAt: Date
+}
+
+interface JobResult<T = unknown> {
+  success: boolean
+  data?: T
+  error?: { message: string; code?: string; stack?: string; retryable: boolean }
+}
+
+type JobHandler<T = unknown, R = unknown> = (job: Job<T>) => Promise<JobResult<R>>
+
+interface JobDefinition<T = unknown, R = unknown> {
+  name: string
+  handler: JobHandler<T, R>
+  options?: { maxAttempts?: number }
+  retry?: { maxAttempts?: number; backoff?: 'fixed' | 'exponential' }
+}
+
+function defineJob<T = unknown, R = unknown>(
+  definition: JobDefinition<T, R>
+): JobDefinition<T, R> {
+  return {
+    ...definition,
+    options: {
+      maxAttempts: definition.retry?.maxAttempts ?? 3,
+      ...definition.options,
+    },
+  }
+}
 
 /**
  * Process bulk send batches
@@ -227,8 +273,9 @@ export const retryEsignWebhooks = defineJob({
 
       try {
         const payloadString = JSON.stringify(delivery.payload)
+        const webhookPayload = delivery.payload as unknown as EsignWebhookPayload
 
-        const response = await fetch(delivery.payload.data?.documentId ? '' : '', {
+        const response = await fetch(webhookPayload.data?.documentId ? '' : '', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -9,17 +9,13 @@
 import { sql } from '@cgk/db'
 
 import type {
-  AttributionModel,
-  AttributionWindow,
   CustomDashboard,
   CustomDashboardCreate,
   CustomDashboardUpdate,
-  DashboardWidget,
   ExportConfiguration,
   ExportConfigurationCreate,
   ExportConfigurationUpdate,
   ExportHistory,
-  ExportableTable,
   Influencer,
   InfluencerCreate,
   InfluencerMetrics,
@@ -31,13 +27,13 @@ import type {
   PixelFailure,
   PixelHealthMetrics,
   PixelPlatform,
-  PlatformConnection,
-  PlatformConnectionCreate,
-  PlatformConnectionUpdate,
   ScheduledReport,
   ScheduledReportCreate,
   ScheduledReportUpdate,
   SecondaryPlatform,
+  SecondaryPlatformConnection,
+  SecondaryPlatformConnectionCreate,
+  SecondaryPlatformConnectionUpdate,
 } from './types'
 
 // ============================================================
@@ -52,7 +48,7 @@ const PLATFORM_DISPLAY_NAMES: Record<SecondaryPlatform, string> = {
   affiliate: 'Affiliate Networks',
 }
 
-export async function getPlatformConnections(tenantId: string): Promise<PlatformConnection[]> {
+export async function getSecondaryPlatformConnections(tenantId: string): Promise<SecondaryPlatformConnection[]> {
   const result = await sql`
     SELECT
       id,
@@ -77,13 +73,13 @@ export async function getPlatformConnections(tenantId: string): Promise<Platform
   `
 
   // Return all supported platforms, filling in defaults for unconfigured ones
-  const configuredPlatforms = new Map(
-    result.rows.map((r) => [(r as PlatformConnection).platform, r as PlatformConnection])
+  const configuredPlatforms = new Map<SecondaryPlatform, SecondaryPlatformConnection>(
+    result.rows.map((r) => [(r as SecondaryPlatformConnection).platform, r as SecondaryPlatformConnection])
   )
 
   const allPlatforms: SecondaryPlatform[] = ['snapchat', 'pinterest', 'linkedin', 'mntn', 'affiliate']
 
-  return allPlatforms.map((platform) => {
+  return allPlatforms.map((platform): SecondaryPlatformConnection => {
     const existing = configuredPlatforms.get(platform)
     if (existing) return existing
 
@@ -92,14 +88,14 @@ export async function getPlatformConnections(tenantId: string): Promise<Platform
       tenantId,
       platform,
       displayName: PLATFORM_DISPLAY_NAMES[platform],
-      status: 'not_connected' as const,
+      status: 'not_connected',
       connectedAt: null,
       lastSyncAt: null,
       lastSyncStatus: null,
       recordsSynced: null,
       errorMessage: null,
       enabled: false,
-      syncFrequency: 'daily' as const,
+      syncFrequency: 'daily',
       accountId: null,
       accountName: null,
       createdAt: new Date().toISOString(),
@@ -108,10 +104,10 @@ export async function getPlatformConnections(tenantId: string): Promise<Platform
   })
 }
 
-export async function getPlatformConnection(
+export async function getSecondaryPlatformConnection(
   tenantId: string,
   platform: SecondaryPlatform
-): Promise<PlatformConnection | null> {
+): Promise<SecondaryPlatformConnection | null> {
   const result = await sql`
     SELECT
       id,
@@ -135,13 +131,13 @@ export async function getPlatformConnection(
       AND platform = ${platform}
   `
 
-  return (result.rows[0] as PlatformConnection | undefined) ?? null
+  return (result.rows[0] as SecondaryPlatformConnection | undefined) ?? null
 }
 
-export async function createPlatformConnection(
+export async function createSecondaryPlatformConnection(
   tenantId: string,
-  data: PlatformConnectionCreate
-): Promise<PlatformConnection> {
+  data: SecondaryPlatformConnectionCreate
+): Promise<SecondaryPlatformConnection> {
   const displayName = data.displayName ?? PLATFORM_DISPLAY_NAMES[data.platform]
 
   const result = await sql`
@@ -181,14 +177,14 @@ export async function createPlatformConnection(
       updated_at as "updatedAt"
   `
 
-  return result.rows[0] as PlatformConnection
+  return result.rows[0] as SecondaryPlatformConnection
 }
 
-export async function updatePlatformConnection(
+export async function updateSecondaryPlatformConnection(
   tenantId: string,
   platform: SecondaryPlatform,
-  data: PlatformConnectionUpdate
-): Promise<PlatformConnection | null> {
+  data: SecondaryPlatformConnectionUpdate
+): Promise<SecondaryPlatformConnection | null> {
   const result = await sql`
     UPDATE attribution_platform_connections
     SET
@@ -217,7 +213,7 @@ export async function updatePlatformConnection(
       updated_at as "updatedAt"
   `
 
-  return (result.rows[0] as PlatformConnection | undefined) ?? null
+  return (result.rows[0] as SecondaryPlatformConnection | undefined) ?? null
 }
 
 export async function disconnectPlatform(
@@ -459,10 +455,10 @@ export async function deleteInfluencer(tenantId: string, influencerId: string): 
 }
 
 export async function getInfluencerMetrics(
-  tenantId: string,
-  influencerId: string,
-  startDate: string,
-  endDate: string
+  _tenantId: string,
+  _influencerId: string,
+  _startDate: string,
+  _endDate: string
 ): Promise<InfluencerMetrics> {
   // For now, return placeholder metrics
   // In production, this would query attribution_results joined with orders
@@ -839,9 +835,9 @@ export async function recordExportRun(
 }
 
 export async function getExportHistory(
-  tenantId: string,
-  exportId: string,
-  limit: number = 10
+  _tenantId: string,
+  _exportId: string,
+  _limit: number = 10
 ): Promise<ExportHistory[]> {
   // Placeholder - would need an export_history table
   return []
@@ -1024,7 +1020,7 @@ export async function deleteCustomDashboard(
 // Pixel Monitoring
 // ============================================================
 
-export async function getPixelHealthMetrics(tenantId: string): Promise<PixelHealthMetrics[]> {
+export async function getPixelHealthMetrics(_tenantId: string): Promise<PixelHealthMetrics[]> {
   // Calculate health metrics for each platform based on recent data
   const platforms: PixelPlatform[] = ['ga4', 'meta', 'tiktok']
 
@@ -1039,8 +1035,8 @@ export async function getPixelHealthMetrics(tenantId: string): Promise<PixelHeal
 }
 
 export async function getPixelEvents(
-  tenantId: string,
-  options?: {
+  _tenantId: string,
+  _options?: {
     platform?: PixelPlatform
     eventType?: string
     matchStatus?: string
@@ -1055,7 +1051,7 @@ export async function getPixelEvents(
   return { events: [], total: 0 }
 }
 
-export async function getMetaEMQMetrics(tenantId: string): Promise<MetaEMQMetrics> {
+export async function getMetaEMQMetrics(_tenantId: string): Promise<MetaEMQMetrics> {
   // Placeholder - would fetch from Meta's API or cached metrics
   return {
     overallScore: 0,
@@ -1064,23 +1060,23 @@ export async function getMetaEMQMetrics(tenantId: string): Promise<MetaEMQMetric
   }
 }
 
-export async function getPixelAlertConfigs(tenantId: string): Promise<PixelAlertConfig[]> {
+export async function getPixelAlertConfigs(_tenantId: string): Promise<PixelAlertConfig[]> {
   // Placeholder - would need pixel_alert_configs table
   return []
 }
 
 export async function updatePixelAlertConfig(
-  tenantId: string,
-  platform: PixelPlatform,
-  data: PixelAlertConfigUpdate
+  _tenantId: string,
+  _platform: PixelPlatform,
+  _data: PixelAlertConfigUpdate
 ): Promise<PixelAlertConfig | null> {
   // Placeholder
   return null
 }
 
 export async function getPixelFailures(
-  tenantId: string,
-  options?: {
+  _tenantId: string,
+  _options?: {
     platform?: PixelPlatform
     resolved?: boolean
     limit?: number
@@ -1091,8 +1087,8 @@ export async function getPixelFailures(
 }
 
 export async function retryPixelEvent(
-  tenantId: string,
-  failureId: string
+  _tenantId: string,
+  _failureId: string
 ): Promise<boolean> {
   // Placeholder - would trigger retry job
   return true

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { sql } from '@cgk/db'
+import { setTenantSchema, sql } from '@cgk/db'
 import { NextResponse } from 'next/server'
 
 import { generateGoogleFeed, type ShopifyProductData } from '@cgk/commerce'
@@ -12,7 +12,7 @@ import { generateGoogleFeed, type ShopifyProductData } from '@cgk/commerce'
  * Authenticated by unique feed token per tenant
  */
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
@@ -33,6 +33,8 @@ export async function GET(
     for (const org of orgsResult.rows) {
       const slug = (org as { slug: string }).slug
       try {
+        // Set tenant schema before querying
+        await setTenantSchema(slug)
         const settingsResult = await sql`
           SELECT
             id,
@@ -53,7 +55,7 @@ export async function GET(
             minimum_price_cents as "minimumPriceCents",
             tax_settings as "taxSettings",
             shipping_overrides as "shippingOverrides"
-          FROM tenant_${sql.unsafe(slug)}.google_feed_settings
+          FROM google_feed_settings
           WHERE feed_token = ${token}
           LIMIT 1
         `
@@ -100,7 +102,7 @@ export async function GET(
     // Fetch overrides
     const overridesResult = await sql`SELECT * FROM google_feed_products`
     const overridesMap = new Map(
-      overridesResult.rows.map((o: { shopify_product_id: string }) => [o.shopify_product_id, o])
+      (overridesResult.rows as Array<{ shopify_product_id: string }>).map((o) => [o.shopify_product_id, o])
     )
 
     const storefrontUrl = process.env.STOREFRONT_URL || `https://${tenantSlug}.example.com`

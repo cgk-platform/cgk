@@ -82,7 +82,15 @@ export function Step3Targeting({ data, updateData }: Step3Props) {
   const updateRule = useCallback(
     (index: number, changes: Partial<RuleData>) => {
       const newRules = [...step3.targetingRules]
-      newRules[index] = { ...newRules[index], ...changes }
+      const current = newRules[index]
+      if (!current) return
+      newRules[index] = {
+        name: changes.name ?? current.name,
+        conditions: changes.conditions ?? current.conditions,
+        logic: changes.logic ?? current.logic,
+        action: changes.action ?? current.action,
+        assignedVariantId: changes.assignedVariantId ?? current.assignedVariantId,
+      }
       update({ targetingRules: newRules })
     },
     [step3.targetingRules, update]
@@ -174,7 +182,14 @@ interface RuleCardProps {
 function RuleCard({ rule, index, variants, onUpdate, onRemove }: RuleCardProps) {
   const updateCondition = (condIndex: number, changes: Partial<TargetingCondition>) => {
     const newConditions = [...rule.conditions]
-    newConditions[condIndex] = { ...newConditions[condIndex], ...changes }
+    const current = newConditions[condIndex]
+    if (!current) return
+    newConditions[condIndex] = {
+      field: changes.field ?? current.field,
+      operator: changes.operator ?? current.operator,
+      value: changes.value ?? current.value,
+      key: changes.key ?? current.key,
+    }
     onUpdate({ conditions: newConditions })
   }
 

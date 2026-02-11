@@ -82,7 +82,7 @@ export async function POST(
     // Update application status
     await updateApplicationStatus(tenantSlug, id, 'approved', userId, {
       internalNotes: notes,
-      creatorId: creator.id,
+      creatorId: creator?.id,
     })
 
     // TODO: Send notification email if sendNotification is true

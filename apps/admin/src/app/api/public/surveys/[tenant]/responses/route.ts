@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 
-import { submitResponse, checkResponseExists } from '@/lib/surveys'
+import { submitResponse } from '@/lib/surveys'
 import type { SubmitResponseInput } from '@/lib/surveys'
 
 interface RouteParams {

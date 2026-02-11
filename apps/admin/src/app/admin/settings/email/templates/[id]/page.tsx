@@ -49,6 +49,7 @@ type ViewportMode = 'desktop' | 'mobile'
 export default function TemplateEditorPage() {
   const params = useParams()
   const router = useRouter()
+  void router // Router available for future navigation needs
   const templateId = params.id as string
 
   const [template, setTemplate] = useState<EmailTemplate | null>(null)

@@ -18,7 +18,7 @@ export function CreatorModal({ mode, creatorId, onClose, onSuccess }: CreatorMod
   const [isLoading, setIsLoading] = useState(mode === 'edit')
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showAddress, setShowAddress] = useState(false)
+  const [_showAddress, _setShowAddress] = useState(false)
   const [showSocial, setShowSocial] = useState(false)
 
   const [form, setForm] = useState<Partial<CreatorProfile>>({

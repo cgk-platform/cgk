@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
   // Deserialize and validate state
   const oauthState = deserializeOAuthState(state)
-  if (!validateOAuthState(oauthState)) {
+  if (!validateOAuthState(oauthState) || !oauthState) {
     const redirectUrl = new URL('/admin/settings/integrations', url.origin)
     redirectUrl.searchParams.set('slack_error', 'invalid_state')
     return NextResponse.redirect(redirectUrl)
@@ -95,8 +95,8 @@ export async function GET(request: Request) {
           ${processed.userTokenEncrypted},
           ${userId},
           ${processed.connectedBySlackUserId},
-          ${processed.botScopes},
-          ${processed.userScopes},
+          ${JSON.stringify(processed.botScopes)},
+          ${processed.userScopes ? JSON.stringify(processed.userScopes) : null},
           true,
           NOW()
         )

@@ -7,15 +7,36 @@
 
 // Utilities
 export { cn } from './utils/cn'
+export { formatCurrency, formatPercent, formatNumber, formatCompact, formatBytes } from './utils/format'
 
 // Component primitives
 export { Button, buttonVariants, type ButtonProps } from './components/button'
-export { Card, CardHeader, CardContent, CardFooter, type CardProps } from './components/card'
+export { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription, type CardProps } from './components/card'
 export { Input, type InputProps } from './components/input'
 export { Label, type LabelProps } from './components/label'
 export { Select, SelectOption, selectVariants, type SelectProps } from './components/select'
 export { Switch, type SwitchProps } from './components/switch'
 export { Textarea, type TextareaProps } from './components/textarea'
+
+// Radix Select components (for complex dropdowns)
+export {
+  RadixSelect,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+} from './components/radix-select'
+
+// Tabs
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/tabs'
+
+// Form components
+export { Checkbox } from './components/checkbox'
+export { Slider } from './components/slider'
+export { Progress } from './components/progress'
 
 // Feedback components
 export { Alert, AlertTitle, AlertDescription, alertVariants, type AlertProps } from './components/alert'

@@ -35,7 +35,7 @@ async function getThreads(
   return res.json()
 }
 
-async function getStats(tenantId: string) {
+async function getStats(_tenantId: string) {
   return {
     openThreads: 12,
     snoozedThreads: 3,

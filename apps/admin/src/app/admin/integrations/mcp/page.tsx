@@ -7,19 +7,17 @@ import {
   Plus,
   Copy,
   Trash2,
-  ExternalLink,
   Apple,
   Monitor,
   BarChart3,
   AlertTriangle,
   CheckCircle2,
   Settings,
-  RefreshCw,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import { ConnectionStatusBadge, SecureApiKeyInput } from '@/components/integrations'
+import { ConnectionStatusBadge } from '@/components/integrations'
 import type { McpApiKey, McpCapability } from '@/lib/integrations/types'
 
 const MCP_CAPABILITIES: McpCapability[] = [

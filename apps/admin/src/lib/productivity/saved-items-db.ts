@@ -34,7 +34,7 @@ export async function saveItem(
         ${data.description || null},
         ${data.thumbnail_url || null},
         ${data.folder || 'starred'},
-        ${data.tags || []}::text[],
+        ${`{${(data.tags || []).map((s) => `"${s}"`).join(',')}}`}::text[],
         ${JSON.stringify(data.metadata || {})}::jsonb
       )
       RETURNING *
@@ -146,7 +146,7 @@ export async function updateSavedItemTags(
   return withTenant(tenantSlug, async () => {
     const result = await sql`
       UPDATE saved_items
-      SET tags = ${tags}::text[]
+      SET tags = ${`{${tags.map((s) => `"${s}"`).join(',')}}`}::text[]
       WHERE id = ${itemId} AND user_id = ${userId}
       RETURNING *
     `
@@ -257,7 +257,7 @@ export async function bulkDeleteSavedItems(
   return withTenant(tenantSlug, async () => {
     const result = await sql`
       DELETE FROM saved_items
-      WHERE id = ANY(${itemIds}::uuid[])
+      WHERE id = ANY(${`{${itemIds.join(',')}}`}::uuid[])
         AND user_id = ${userId}
     `
     return result.rowCount ?? 0
@@ -277,7 +277,7 @@ export async function bulkMoveSavedItems(
     const result = await sql`
       UPDATE saved_items
       SET folder = ${folder}
-      WHERE id = ANY(${itemIds}::uuid[])
+      WHERE id = ANY(${`{${itemIds.join(',')}}`}::uuid[])
         AND user_id = ${userId}
     `
     return result.rowCount ?? 0

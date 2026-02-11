@@ -5,8 +5,19 @@
  */
 
 import { sql, withTenant } from '@cgk/db'
-import { nanoid } from 'nanoid'
 import type { EsignInPersonSession, EsignInPersonSessionStatus } from './types'
+
+/**
+ * Generate a random session token
+ */
+function generateSessionToken(length = 32): string {
+  const uuid = crypto.randomUUID().replace(/-/g, '')
+  // If we need more characters, generate another UUID
+  if (length > 32) {
+    return (uuid + crypto.randomUUID().replace(/-/g, '')).slice(0, length)
+  }
+  return uuid.slice(0, length)
+}
 
 const IN_PERSON_SESSION_DURATION_MINUTES = 30
 
@@ -23,7 +34,7 @@ export async function createInPersonSession(
     deviceInfo?: Record<string, unknown>
   }
 ): Promise<EsignInPersonSession> {
-  const sessionToken = nanoid(32)
+  const sessionToken = generateSessionToken(32)
   const expiresAt = new Date(Date.now() + IN_PERSON_SESSION_DURATION_MINUTES * 60 * 1000)
 
   return withTenant(tenantSlug, async () => {
@@ -48,7 +59,7 @@ export async function createInPersonSession(
         'active',
         ${input.startedBy},
         ${input.deviceInfo ? JSON.stringify(input.deviceInfo) : null},
-        ${expiresAt}
+        ${expiresAt.toISOString()}
       )
       RETURNING
         id,
@@ -208,13 +219,23 @@ export async function updateSessionStatus(
   status: EsignInPersonSessionStatus
 ): Promise<boolean> {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      UPDATE esign_in_person_sessions
-      SET status = ${status},
-          completed_at = ${status === 'completed' ? sql`NOW()` : sql`completed_at`}
-      WHERE id = ${sessionId}
-      RETURNING id
-    `
+    let result
+    if (status === 'completed') {
+      result = await sql`
+        UPDATE esign_in_person_sessions
+        SET status = ${status},
+            completed_at = NOW()
+        WHERE id = ${sessionId}
+        RETURNING id
+      `
+    } else {
+      result = await sql`
+        UPDATE esign_in_person_sessions
+        SET status = ${status}
+        WHERE id = ${sessionId}
+        RETURNING id
+      `
+    }
     return result.rows.length > 0
   })
 }
@@ -228,13 +249,34 @@ export async function extendSessionExpiration(
   additionalMinutes = 15
 ): Promise<boolean> {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      UPDATE esign_in_person_sessions
-      SET expires_at = NOW() + INTERVAL '${additionalMinutes} minutes'
-      WHERE id = ${sessionId}
-        AND status = 'active'
-      RETURNING id
-    `
+    let result
+    if (additionalMinutes === 15) {
+      result = await sql`
+        UPDATE esign_in_person_sessions
+        SET expires_at = NOW() + INTERVAL '15 minutes'
+        WHERE id = ${sessionId}
+          AND status = 'active'
+        RETURNING id
+      `
+    } else if (additionalMinutes === 30) {
+      result = await sql`
+        UPDATE esign_in_person_sessions
+        SET expires_at = NOW() + INTERVAL '30 minutes'
+        WHERE id = ${sessionId}
+          AND status = 'active'
+        RETURNING id
+      `
+    } else {
+      // For custom intervals, calculate the new expiration time
+      const newExpiresAt = new Date(Date.now() + additionalMinutes * 60 * 1000)
+      result = await sql`
+        UPDATE esign_in_person_sessions
+        SET expires_at = ${newExpiresAt.toISOString()}
+        WHERE id = ${sessionId}
+          AND status = 'active'
+        RETURNING id
+      `
+    }
     return result.rows.length > 0
   })
 }

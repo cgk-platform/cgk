@@ -54,7 +54,7 @@ export async function GET(request: Request) {
     // Fetch overrides
     const overridesResult = await sql`SELECT * FROM google_feed_products`
     const overridesMap = new Map(
-      overridesResult.rows.map((o: { shopify_product_id: string }) => [o.shopify_product_id, o])
+      overridesResult.rows.map((o) => [(o as { shopify_product_id: string }).shopify_product_id, o])
     )
 
     // Get storefront URL

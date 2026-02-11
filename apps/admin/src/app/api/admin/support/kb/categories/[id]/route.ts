@@ -14,7 +14,7 @@ interface RouteParams {
 /**
  * GET /api/admin/support/kb/categories/[id] - Get a single category
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const userId = headerList.get('x-user-id')
@@ -93,7 +93,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 /**
  * DELETE /api/admin/support/kb/categories/[id] - Delete a category
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const userId = headerList.get('x-user-id')

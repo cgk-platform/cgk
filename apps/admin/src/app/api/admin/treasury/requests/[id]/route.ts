@@ -27,7 +27,7 @@ interface RouteParams {
  * GET /api/admin/treasury/requests/[id]
  * Get a single draw request with full details
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -222,7 +222,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
  * DELETE /api/admin/treasury/requests/[id]
  * Delete a draft draw request
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const userId = headerList.get('x-user-id')

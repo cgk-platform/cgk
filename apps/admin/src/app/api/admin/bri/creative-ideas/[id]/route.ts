@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 import { getCreativeIdea, updateCreativeIdea } from '@/lib/bri/db'
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const headerList = await headers()

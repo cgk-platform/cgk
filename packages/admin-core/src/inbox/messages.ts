@@ -351,6 +351,7 @@ export async function sendDraft(
     const finalContent = editedContent || (draft.body as string)
 
     // Create message
+    const threadId = draft.thread_id as string
     const messageResult = await sql`
       INSERT INTO inbox_messages (
         thread_id, direction, channel,
@@ -359,7 +360,7 @@ export async function sendDraft(
         ai_drafted, ai_confidence, ai_was_edited, original_ai_draft,
         status
       ) VALUES (
-        ${draft.thread_id},
+        ${threadId},
         'outbound',
         ${(draft.suggested_channel as string) || 'email'},
         ${finalContent},
@@ -367,7 +368,7 @@ export async function sendDraft(
         'team_member',
         ${userId},
         true,
-        ${draft.confidence},
+        ${draft.confidence as number},
         ${wasEdited},
         ${wasEdited ? (draft.body as string) : null},
         'pending'
@@ -480,6 +481,7 @@ async function queueMessageForDelivery(
 
   if (channel === 'email' && contact.email) {
     // Queue via communications package
+    const toAddress = contact.email as string
     try {
       await sql`
         INSERT INTO email_queue (
@@ -491,7 +493,7 @@ async function queueMessageForDelivery(
           source_id,
           priority
         ) VALUES (
-          ${contact.email},
+          ${toAddress},
           ${message.subject || (contact.subject as string) || 'Message'},
           ${message.body},
           ${message.bodyHtml || message.body},

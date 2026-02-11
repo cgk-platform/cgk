@@ -195,6 +195,7 @@ function MessageBubble({ message }: { message: ConversationMessage }) {
 function getLastMessagePreview(messages: ConversationMessage[]): string {
   if (messages.length === 0) return 'No messages'
   const last = messages[messages.length - 1]
+  if (!last) return 'No messages'
   return last.content.slice(0, 50) + (last.content.length > 50 ? '...' : '')
 }
 

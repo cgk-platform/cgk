@@ -15,7 +15,7 @@ const OAUTH_STATE_TTL = 600 // 10 minutes
  * POST /api/admin/integrations/slack/connect
  * Initiates Slack OAuth flow
  */
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const userId = headerList.get('x-user-id')

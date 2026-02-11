@@ -70,6 +70,9 @@ export async function createWebhook(
         updated_at as "updatedAt"
     `
     const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create webhook')
+    }
     return {
       ...row,
       events: row.events as EsignWebhookEvent[],
@@ -99,8 +102,8 @@ export async function getWebhook(
       FROM esign_webhooks
       WHERE id = ${webhookId}
     `
-    if (result.rows.length === 0) return null
     const row = result.rows[0]
+    if (!row) return null
     return {
       ...row,
       events: row.events as EsignWebhookEvent[],
@@ -163,8 +166,8 @@ export async function updateWebhook(
         created_at as "createdAt",
         updated_at as "updatedAt"
     `
-    if (result.rows.length === 0) return null
     const row = result.rows[0]
+    if (!row) return null
     return {
       ...row,
       events: row.events as EsignWebhookEvent[],
@@ -286,7 +289,7 @@ export async function logWebhookDelivery(
         ${delivery.success},
         ${delivery.durationMs || null},
         ${delivery.retryCount || 0},
-        ${delivery.nextRetryAt || null}
+        ${delivery.nextRetryAt?.toISOString() || null}
       )
       RETURNING
         id,
@@ -421,7 +424,7 @@ export async function updateDeliveryRetry(
           response_status = COALESCE(${responseStatus || null}, response_status),
           response_body = COALESCE(${responseBody || null}, response_body),
           retry_count = retry_count + 1,
-          next_retry_at = ${nextRetryAt || null}
+          next_retry_at = ${nextRetryAt?.toISOString() || null}
       WHERE id = ${deliveryId}
     `
   })

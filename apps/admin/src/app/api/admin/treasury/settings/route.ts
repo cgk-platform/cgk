@@ -18,7 +18,7 @@ import type {
  * GET /api/admin/treasury/settings
  * Get treasury and topup settings
  */
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 

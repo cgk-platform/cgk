@@ -19,7 +19,7 @@ export interface TemplateAnalyticsChartProps {
 export function TemplateAnalyticsChart({
   data,
   metric,
-  period,
+  period: _period,
 }: TemplateAnalyticsChartProps) {
   const { maxValue, chartData } = useMemo(() => {
     const values = data.map((d) => d[metric])
@@ -81,11 +81,11 @@ export function TemplateAnalyticsChart({
 
       {/* X-axis labels (show every nth label based on data length) */}
       <div className="flex justify-between text-xs text-muted-foreground">
-        {chartData.length > 0 && (
+        {chartData.length > 0 && chartData[0] && (
           <>
             <span>{formatDate(chartData[0].date)}</span>
             {chartData.length > 1 && (
-              <span>{formatDate(chartData[chartData.length - 1].date)}</span>
+              <span>{formatDate(chartData[chartData.length - 1]?.date ?? '')}</span>
             )}
           </>
         )}

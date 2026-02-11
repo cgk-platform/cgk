@@ -3,15 +3,17 @@
 import { useState } from 'react'
 import { Card, CardContent, CardHeader } from '@cgk/ui'
 
+import type { DateRange } from '@/lib/analytics'
+
 import { AnalyticsTabs } from './components/analytics-tabs'
 import { DateRangePicker } from './components/date-range-picker'
 import { OverviewKPIs } from './components/overview-kpis'
 
 export default function AnalyticsPage() {
-  const [dateRange, setDateRange] = useState({
-    preset: '30d' as const,
+  const [dateRange, setDateRange] = useState<DateRange>({
+    preset: '30d',
     startDate: getDefaultStartDate('30d'),
-    endDate: new Date().toISOString().split('T')[0],
+    endDate: new Date().toISOString().split('T')[0] ?? '',
   })
 
   return (
@@ -43,5 +45,5 @@ function getDefaultStartDate(preset: string): string {
   const days = { '7d': 7, '14d': 14, '28d': 28, '30d': 30, '90d': 90 }[preset] || 30
   const start = new Date(now)
   start.setDate(start.getDate() - days)
-  return start.toISOString().split('T')[0]
+  return start.toISOString().split('T')[0] ?? ''
 }

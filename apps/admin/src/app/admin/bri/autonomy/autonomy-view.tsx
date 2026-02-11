@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Badge, Button, Card, CardContent, CardHeader, Input, Switch } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Switch } from '@cgk/ui'
 import {
   Brain,
   Shield,
@@ -65,7 +65,7 @@ const ALL_ACTIONS = [
   ...HUMAN_REQUIRED_ACTIONS.map((a) => ({ type: a, defaultLevel: 'human_required' as const })),
 ]
 
-export function AutonomyView({ tenantSlug, initialData }: AutonomyViewProps) {
+export function AutonomyView({ initialData }: AutonomyViewProps) {
   const [settings, setSettings] = useState<AutonomySettings>(
     initialData?.settings ?? DEFAULT_SETTINGS
   )

@@ -24,7 +24,7 @@ interface ThreadViewProps {
 
 export function ThreadView({ conversation, messages }: ThreadViewProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [content, setContent] = useState('')
   const [isInternal, setIsInternal] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -82,13 +82,6 @@ export function ThreadView({ conversation, messages }: ThreadViewProps) {
     })
   }
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-    })
-  }
 
   // Group messages by date
   const groupedMessages = messages.reduce(

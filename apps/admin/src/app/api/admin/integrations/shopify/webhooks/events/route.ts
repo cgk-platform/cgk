@@ -37,14 +37,15 @@ export async function GET(req: Request): Promise<Response> {
       `
     })
 
-    if (shopResult.rows.length === 0) {
+    const shopRow = shopResult.rows[0]
+    if (!shopRow) {
       return Response.json(
         { error: 'No active Shopify connection found' },
         { status: 404 }
       )
     }
 
-    const shop = shopResult.rows[0].shop as string
+    const shop = shopRow.shop as string
 
     // Get events
     const { events, total } = await getRecentWebhookEvents(tenantId, shop, {

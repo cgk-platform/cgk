@@ -83,7 +83,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
  * DELETE /api/admin/finance/expense-categories/[id]
  * Delete an expense category (non-system only)
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const { id: categoryId } = await params
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')

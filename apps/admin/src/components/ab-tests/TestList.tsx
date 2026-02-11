@@ -184,8 +184,10 @@ export function ABTestList({
       {/* Pagination */}
       {totalPages > 1 && (
         <Pagination
-          currentPage={page}
+          page={page}
           totalPages={totalPages}
+          totalCount={total}
+          limit={limit}
           basePath="/admin/ab-tests"
           currentFilters={currentFilters}
         />

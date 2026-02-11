@@ -284,13 +284,16 @@ export async function getPipelineAnalytics(
     `
     const wipLimits = (configResult.rows[0]?.wip_limits as Record<string, number>) || {}
 
-    const bottlenecks = stageResult.rows.map((row) => ({
-      stage: row.stage as ProjectStatus,
-      avgDuration: Number(row.avgDurationDays) || 0,
-      wipViolation: wipLimits[row.stage]
-        ? Number(row.currentCount) > wipLimits[row.stage]
-        : false,
-    }))
+    const bottlenecks = stageResult.rows.map((row) => {
+      const wipLimit = wipLimits[row.stage]
+      return {
+        stage: row.stage as ProjectStatus,
+        avgDuration: Number(row.avgDurationDays) || 0,
+        wipViolation: wipLimit !== undefined
+          ? Number(row.currentCount) > wipLimit
+          : false,
+      }
+    })
 
     // Risk distribution
     const allProjects = await sql`
@@ -355,7 +358,7 @@ export async function updateProjectStatus(
       return null
     }
 
-    const fromStatus = current.rows[0].status
+    const fromStatus = current.rows[0]?.status
 
     // Update project
     const updateFields: Record<string, unknown> = {
@@ -423,6 +426,9 @@ export async function updateProjectStatus(
     }
 
     const project = projectResult.rows[0]
+    if (!project) {
+      return null
+    }
     const riskLevel = calculateRiskLevel(project.dueDate, project.status as ProjectStatus)
 
     return {
@@ -490,10 +496,11 @@ export async function getPipelineConfig(tenantSlug: string): Promise<PipelineCon
       }
     }
 
+    const configRow = result.rows[0]
     return {
-      stages: result.rows[0].stages as StageConfig[],
-      defaultFilters: result.rows[0].default_filters as PipelineFilters | undefined,
-      wipLimits: (result.rows[0].wip_limits as Record<string, number>) || {},
+      stages: configRow?.stages as StageConfig[],
+      defaultFilters: configRow?.default_filters as PipelineFilters | undefined,
+      wipLimits: (configRow?.wip_limits as Record<string, number>) || {},
     }
   })
 }

@@ -31,9 +31,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   // Check permission
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.teams.manage'
   )
   if (permissionDenied) return permissionDenied
@@ -84,9 +83,8 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
   // Check permission
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.teams.manage'
   )
   if (permissionDenied) return permissionDenied

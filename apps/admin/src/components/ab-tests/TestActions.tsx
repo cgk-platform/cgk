@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Play, Pause, StopCircle, Trophy, Download } from 'lucide-react'
 
-import { Button, Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Button, Card, CardHeader, CardContent } from '@cgk/ui'
 
 import { useTestActions } from '@/lib/ab-tests/hooks'
 import type { ABTest } from '@/lib/ab-tests/types'

@@ -681,7 +681,7 @@ function analyzeFormatting(post: BlogPost): QualityCategoryScore {
 function calculateAIModifiers(
   post: BlogPost,
   author: BlogAuthor | null,
-  eeatScore: number
+  _eeatScore: number
 ): AIModifier[] {
   const modifiers: AIModifier[] = []
 

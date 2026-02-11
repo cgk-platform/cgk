@@ -18,7 +18,7 @@ interface RouteParams {
  * GET /api/admin/sms/queue/[id]
  * Get a single SMS queue entry
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const { id } = await params

@@ -1,23 +1,20 @@
 'use client'
 
 import { Button } from '@cgk/ui'
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Card, CardContent } from '@cgk/ui'
 import { Input } from '@cgk/ui'
 import { Label } from '@cgk/ui'
 import {
   FileText,
   Upload,
   Search,
-  Filter,
   X,
   Eye,
-  Trash2,
   CheckCircle2,
   Archive,
   Loader2,
   Calendar,
   DollarSign,
-  Building,
 } from 'lucide-react'
 import { useState, useRef, useCallback, useEffect } from 'react'
 

@@ -26,9 +26,8 @@ export async function GET(request: Request) {
   }
 
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.calls.view'
   )
   if (permissionDenied) return permissionDenied
@@ -51,7 +50,7 @@ export async function GET(request: Request) {
       const calls = await listVoiceCalls({
         agentId,
         direction,
-        status: status as Parameters<typeof listVoiceCalls>[0]['status'],
+        status: status as NonNullable<Parameters<typeof listVoiceCalls>[0]>['status'],
         creatorId,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,

@@ -61,9 +61,9 @@ export async function getAnalyticsSettings(tenantSlug: string): Promise<Analytic
       LIMIT 1
     `
 
-    if (result.rows.length === 0) return null
-
     const row = result.rows[0]
+    if (!row) return null
+
     return {
       id: row.id as string,
       dataSources: {
@@ -174,11 +174,12 @@ export async function updateAnalyticsSettings(
     }
 
     if (values.length > 0) {
-      await sql`
+      const query = `
         UPDATE analytics_settings
-        SET ${sql.raw(setClauses.join(', '))}
+        SET ${setClauses.join(', ')}
         WHERE id = (SELECT id FROM analytics_settings LIMIT 1)
       `
+      await sql.query(query, values)
     }
   })
 }
@@ -221,7 +222,7 @@ export async function createAnalyticsTarget(
       RETURNING id, metric, target_value, period, period_start, notes, created_at, updated_at
     `
 
-    const row = result.rows[0]
+    const row = result.rows[0]!
     return {
       id: row.id as string,
       metric: row.metric as TargetMetric['metric'],
@@ -297,7 +298,7 @@ export async function createSlackAlert(
       RETURNING id, alert_type, channel_id, channel_name, config, is_enabled, last_triggered_at, created_at, updated_at
     `
 
-    const row = result.rows[0]
+    const row = result.rows[0]!
     return {
       id: row.id as string,
       alertType: row.alert_type as SlackAlert['alertType'],
@@ -319,16 +320,32 @@ export async function updateSlackAlert(
 ): Promise<void> {
   await withTenant(tenantSlug, async () => {
     const updates: string[] = ['updated_at = NOW()']
-    if (data.channelId !== undefined) updates.push(`channel_id = '${data.channelId}'`)
-    if (data.channelName !== undefined) updates.push(`channel_name = '${data.channelName}'`)
-    if (data.config !== undefined) updates.push(`config = '${JSON.stringify(data.config)}'::jsonb`)
-    if (data.isEnabled !== undefined) updates.push(`is_enabled = ${data.isEnabled}`)
+    const values: unknown[] = []
+    let paramIndex = 1
 
-    await sql`
+    if (data.channelId !== undefined) {
+      updates.push(`channel_id = $${paramIndex++}`)
+      values.push(data.channelId)
+    }
+    if (data.channelName !== undefined) {
+      updates.push(`channel_name = $${paramIndex++}`)
+      values.push(data.channelName)
+    }
+    if (data.config !== undefined) {
+      updates.push(`config = $${paramIndex++}::jsonb`)
+      values.push(JSON.stringify(data.config))
+    }
+    if (data.isEnabled !== undefined) {
+      updates.push(`is_enabled = $${paramIndex++}`)
+      values.push(data.isEnabled)
+    }
+
+    const query = `
       UPDATE analytics_slack_alerts
-      SET ${sql.raw(updates.join(', '))}
-      WHERE id = ${id}
+      SET ${updates.join(', ')}
+      WHERE id = $${paramIndex}
     `
+    await sql.query(query, [...values, id])
   })
 }
 
@@ -379,9 +396,9 @@ export async function getAnalyticsReportById(
       WHERE id = ${id}
     `
 
-    if (result.rows.length === 0) return null
-
     const row = result.rows[0]
+    if (!row) return null
+
     return {
       id: row.id as string,
       name: row.name as string,
@@ -414,7 +431,7 @@ export async function createAnalyticsReport(
       RETURNING id, name, type, config, schedule, created_by, last_run_at, created_at, updated_at
     `
 
-    const row = result.rows[0]
+    const row = result.rows[0]!
     return {
       id: row.id as string,
       name: row.name as string,
@@ -435,15 +452,29 @@ export async function updateAnalyticsReport(
   data: ReportUpdate
 ): Promise<void> {
   await withTenant(tenantSlug, async () => {
-    await sql`
+    const updates: string[] = ['updated_at = NOW()']
+    const values: unknown[] = []
+    let paramIndex = 1
+
+    if (data.name !== undefined) {
+      updates.push(`name = $${paramIndex++}`)
+      values.push(data.name)
+    }
+    if (data.config !== undefined) {
+      updates.push(`config = $${paramIndex++}::jsonb`)
+      values.push(JSON.stringify(data.config))
+    }
+    if (data.schedule !== undefined) {
+      updates.push(`schedule = $${paramIndex++}::jsonb`)
+      values.push(data.schedule ? JSON.stringify(data.schedule) : null)
+    }
+
+    const query = `
       UPDATE analytics_reports
-      SET
-        name = COALESCE(${data.name ?? null}, name),
-        config = COALESCE(${data.config ? JSON.stringify(data.config) : null}::jsonb, config),
-        schedule = ${data.schedule !== undefined ? (data.schedule ? JSON.stringify(data.schedule) : null) : sql.raw('schedule')},
-        updated_at = NOW()
-      WHERE id = ${id}
+      SET ${updates.join(', ')}
+      WHERE id = $${paramIndex}
     `
+    await sql.query(query, [...values, id])
   })
 }
 
@@ -493,7 +524,7 @@ export async function createReportRun(tenantSlug: string, reportId: string): Pro
     // Update last_run_at on the report
     await sql`UPDATE analytics_reports SET last_run_at = NOW() WHERE id = ${reportId}`
 
-    const row = result.rows[0]
+    const row = result.rows[0]!
     return {
       id: row.id as string,
       reportId: row.report_id as string,
@@ -545,9 +576,9 @@ export async function getPLBreakdown(
       WHERE period_type = ${periodType} AND period_start = ${periodStart}
     `
 
-    if (result.rows.length === 0) return null
-
     const row = result.rows[0]
+    if (!row) return null
+
     return {
       period: `${row.period_start} to ${row.period_end}`,
       periodType,
@@ -731,20 +762,37 @@ export async function getPipelineMetrics(
   }>
 > {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      SELECT
-        date, source,
-        website_visitors,
-        product_page_views,
-        add_to_cart,
-        checkout_initiated,
-        purchases,
-        conversion_rate
-      FROM analytics_pipeline_metrics
-      WHERE date >= ${dateRange.startDate} AND date <= ${dateRange.endDate}
-        ${source ? sql`AND source = ${source}` : sql``}
-      ORDER BY date DESC
-    `
+    let result
+    if (source) {
+      result = await sql`
+        SELECT
+          date, source,
+          website_visitors,
+          product_page_views,
+          add_to_cart,
+          checkout_initiated,
+          purchases,
+          conversion_rate
+        FROM analytics_pipeline_metrics
+        WHERE date >= ${dateRange.startDate} AND date <= ${dateRange.endDate}
+          AND source = ${source}
+        ORDER BY date DESC
+      `
+    } else {
+      result = await sql`
+        SELECT
+          date, source,
+          website_visitors,
+          product_page_views,
+          add_to_cart,
+          checkout_initiated,
+          purchases,
+          conversion_rate
+        FROM analytics_pipeline_metrics
+        WHERE date >= ${dateRange.startDate} AND date <= ${dateRange.endDate}
+        ORDER BY date DESC
+      `
+    }
 
     return result.rows.map((row) => ({
       date: row.date as string,

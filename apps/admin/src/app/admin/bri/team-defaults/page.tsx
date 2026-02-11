@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardHeader, Badge } from '@cgk/ui'
-import { Users, Save, User, Star, DollarSign, Eye } from 'lucide-react'
+import { Users, Save, Star, DollarSign, Eye } from 'lucide-react'
 
 interface TeamMember {
   id: string

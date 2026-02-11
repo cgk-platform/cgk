@@ -11,7 +11,7 @@ import {
   CardTitle,
   Input,
   Label,
-  Select,
+  RadixSelect,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -224,7 +224,7 @@ export default function VoiceSettingsPage() {
       </div>
 
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="error">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -250,9 +250,9 @@ export default function VoiceSettingsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Provider</Label>
-              <Select
+              <RadixSelect
                 value={formData.ttsProvider || 'elevenlabs'}
-                onValueChange={(value) => setFormData({ ...formData, ttsProvider: value, ttsVoiceId: null })}
+                onValueChange={(value: string) => setFormData({ ...formData, ttsProvider: value, ttsVoiceId: null })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -267,14 +267,14 @@ export default function VoiceSettingsPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
 
             <div className="space-y-2">
               <Label>Voice</Label>
-              <Select
+              <RadixSelect
                 value={formData.ttsVoiceId || ''}
-                onValueChange={(value) => {
+                onValueChange={(value: string) => {
                   const voice = voices.find((v) => v.id === value)
                   setFormData({
                     ...formData,
@@ -298,7 +298,7 @@ export default function VoiceSettingsPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
           </div>
 
@@ -328,9 +328,9 @@ export default function VoiceSettingsPage() {
 
           <div className="space-y-2">
             <Label>Fallback Provider</Label>
-            <Select
+            <RadixSelect
               value={formData.ttsFallbackProvider || ''}
-              onValueChange={(value) => setFormData({ ...formData, ttsFallbackProvider: value || null })}
+              onValueChange={(value: string) => setFormData({ ...formData, ttsFallbackProvider: value || null })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="No fallback" />
@@ -343,7 +343,7 @@ export default function VoiceSettingsPage() {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+            </RadixSelect>
           </div>
 
           <Button
@@ -376,9 +376,9 @@ export default function VoiceSettingsPage() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Provider</Label>
-              <Select
+              <RadixSelect
                 value={formData.sttProvider || 'assemblyai'}
-                onValueChange={(value) => setFormData({ ...formData, sttProvider: value })}
+                onValueChange={(value: string) => setFormData({ ...formData, sttProvider: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -393,14 +393,14 @@ export default function VoiceSettingsPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
 
             <div className="space-y-2">
               <Label>Language</Label>
-              <Select
+              <RadixSelect
                 value={formData.sttLanguage || 'en'}
-                onValueChange={(value) => setFormData({ ...formData, sttLanguage: value })}
+                onValueChange={(value: string) => setFormData({ ...formData, sttLanguage: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -412,7 +412,7 @@ export default function VoiceSettingsPage() {
                     </SelectItem>
                   ))}
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
           </div>
         </CardContent>

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { Button } from '@cgk/ui'
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Card, CardHeader } from '@cgk/ui'
 import { Switch } from '@cgk/ui'
 import { Badge } from '@cgk/ui'
 
@@ -22,7 +22,7 @@ interface InboundAddress {
  * Configure inbound email handling for replies.
  */
 export function InboundEmailStep({
-  senderAddresses,
+  senderAddresses: _senderAddresses,
   onComplete,
   onSkip,
   onBack,

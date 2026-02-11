@@ -8,7 +8,7 @@ interface RouteParams {
   params: Promise<{ tenant: string; slug: string }>
 }
 
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const { tenant: tenantSlug, slug } = await params
 
   // Add CORS headers for Shopify extension

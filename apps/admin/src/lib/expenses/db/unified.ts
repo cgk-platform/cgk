@@ -22,7 +22,6 @@ export async function getUnifiedExpenses(
   filters: UnifiedExpenseFilters
 ): Promise<{ rows: UnifiedExpense[]; totalCount: number }> {
   return withTenant(tenantSlug, async () => {
-    const conditions: string[] = []
     const values: unknown[] = []
     let paramIndex = 0
 
@@ -364,6 +363,15 @@ export async function getUnifiedExpensesSummary(
     `
 
     const row = result.rows[0]
+    if (!row) {
+      return {
+        total_cents: 0,
+        total_included_cents: 0,
+        total_excluded_cents: 0,
+        by_source: [] as UnifiedExpenseSummary['by_source'],
+        by_category_type: [] as UnifiedExpenseSummary['by_category_type'],
+      }
+    }
     return {
       total_cents: Number(row.total_cents || 0),
       total_included_cents: Number(row.total_included_cents || 0),

@@ -109,7 +109,7 @@ function generateSuggestedAnchor(targetPost: BlogPostRow): string {
 export function generateLinkSuggestions(
   sourcePost: BlogPost,
   allPosts: BlogPostRow[],
-  clusters: BlogCluster[],
+  _clusters: BlogCluster[],
   postClusterMap: Map<string, { clusterId: string; role: string }>,
   maxSuggestions: number = 5
 ): LinkSuggestion[] {
@@ -121,9 +121,6 @@ export function generateLinkSuggestions(
 
   // Get source post cluster info
   const sourceClusterInfo = postClusterMap.get(sourcePost.id)
-  const sourceCluster = sourceClusterInfo
-    ? clusters.find((c) => c.id === sourceClusterInfo.clusterId)
-    : null
 
   // Analyze each potential target post
   for (const targetPost of allPosts) {

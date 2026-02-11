@@ -28,8 +28,8 @@ export async function GET(req: Request) {
 
   const dateRange: DateRange = {
     preset: preset as DateRange['preset'],
-    startDate: startDate || getDefaultStartDate(preset),
-    endDate: endDate || new Date().toISOString().split('T')[0],
+    startDate: startDate ?? getDefaultStartDate(preset),
+    endDate: endDate ?? new Date().toISOString().split('T')[0] ?? '',
   }
 
   const data = await getPipelineData(tenantId, dateRange, source)
@@ -49,5 +49,5 @@ function getDefaultStartDate(preset: string): string {
 
   const start = new Date(now)
   start.setDate(start.getDate() - days)
-  return start.toISOString().split('T')[0]
+  return start.toISOString().split('T')[0] ?? ''
 }

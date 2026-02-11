@@ -5,10 +5,28 @@
  * in all event payloads for proper tenant isolation.
  */
 
-import { defineJob } from '@cgk/jobs'
+import { defineJob, type Job } from '@cgk/jobs'
 import { withTenant, sql } from '@cgk/db'
 
-import type { SampleRequest } from './types'
+import type { SampleStatus } from './types'
+
+// Job payload types
+interface TenantJobPayload {
+  tenantId: string
+}
+
+interface RetroactiveJobPayload extends TenantJobPayload {
+  lookbackDays?: number
+}
+
+// SQL result row type for sample requests
+interface SampleRequestRow {
+  id: string
+  tracking_carrier: string | null
+  tracking_number: string | null
+  tracking_url: string | null
+  status: SampleStatus
+}
 
 // ============================================================================
 // Commission Sync Job
@@ -22,8 +40,8 @@ import type { SampleRequest } from './types'
  */
 export const syncOrderCommissionsJob = defineJob({
   name: 'sync-order-commissions',
-  handler: async (job) => {
-    const { tenantId } = job.payload as { tenantId: string }
+  handler: async (job: Job<TenantJobPayload>) => {
+    const { tenantId } = job.payload
 
     if (!tenantId) {
       throw new Error('tenantId required in event payload')
@@ -127,8 +145,8 @@ export const syncOrderCommissionsJob = defineJob({
  */
 export const sendOnboardingRemindersJob = defineJob({
   name: 'send-onboarding-reminders',
-  handler: async (job) => {
-    const { tenantId } = job.payload as { tenantId: string }
+  handler: async (job: Job<TenantJobPayload>) => {
+    const { tenantId } = job.payload
 
     if (!tenantId) {
       throw new Error('tenantId required in event payload')
@@ -140,11 +158,12 @@ export const sendOnboardingRemindersJob = defineJob({
         SELECT steps FROM onboarding_config LIMIT 1
       `
 
-      if (configResult.rows.length === 0) {
+      const configRow = configResult.rows[0]
+      if (!configRow) {
         return { success: true, data: { sent: 0, reason: 'No config' } }
       }
 
-      const steps = configResult.rows[0].steps as Array<{
+      const steps = configRow.steps as Array<{
         id: string
         name: string
         reminderDays: number[]
@@ -198,19 +217,27 @@ export const sendOnboardingRemindersJob = defineJob({
           const nextReminderDay = reminderDays.find(
             (d: number) => d > daysSinceStart
           )
-          await sql`
-            UPDATE creator_onboarding
-            SET
-              reminder_count = reminder_count + 1,
-              last_reminder_at = NOW(),
-              next_reminder_at = ${
-                nextReminderDay
-                  ? sql`created_at + INTERVAL '1 day' * ${nextReminderDay}`
-                  : null
-              },
-              updated_at = NOW()
-            WHERE id = ${row.id as string}
-          `
+          if (nextReminderDay !== undefined) {
+            await sql`
+              UPDATE creator_onboarding
+              SET
+                reminder_count = reminder_count + 1,
+                last_reminder_at = NOW(),
+                next_reminder_at = created_at + INTERVAL '1 day' * ${nextReminderDay},
+                updated_at = NOW()
+              WHERE id = ${row.id as string}
+            `
+          } else {
+            await sql`
+              UPDATE creator_onboarding
+              SET
+                reminder_count = reminder_count + 1,
+                last_reminder_at = NOW(),
+                next_reminder_at = NULL,
+                updated_at = NOW()
+              WHERE id = ${row.id as string}
+            `
+          }
 
           sent++
         }
@@ -239,8 +266,8 @@ export const sendOnboardingRemindersJob = defineJob({
  */
 export const checkSampleDeliveriesJob = defineJob({
   name: 'check-sample-deliveries',
-  handler: async (job) => {
-    const { tenantId } = job.payload as { tenantId: string }
+  handler: async (job: Job<TenantJobPayload>) => {
+    const { tenantId } = job.payload
 
     if (!tenantId) {
       throw new Error('tenantId required in event payload')
@@ -259,7 +286,7 @@ export const checkSampleDeliveriesJob = defineJob({
 
       let updated = 0
 
-      for (const sample of samplesResult.rows as SampleRequest[]) {
+      for (const sample of samplesResult.rows as SampleRequestRow[]) {
         // TODO: Integrate with carrier APIs (EasyPost, etc.) to check status
         // For now, we'll just mark samples as in_transit if they've been
         // shipped for more than 1 day
@@ -326,11 +353,8 @@ async function checkTrackingStatus(
  */
 export const applyRetroactiveCommissionsJob = defineJob({
   name: 'apply-retroactive-commissions',
-  handler: async (job) => {
-    const { tenantId, lookbackDays } = job.payload as {
-      tenantId: string
-      lookbackDays?: number
-    }
+  handler: async (job: Job<RetroactiveJobPayload>) => {
+    const { tenantId, lookbackDays } = job.payload
 
     if (!tenantId) {
       throw new Error('tenantId required in event payload')
@@ -405,9 +429,9 @@ export const applyRetroactiveCommissionsJob = defineJob({
                 ${netSalesCents},
                 ${creator.rate},
                 ${commissionCents},
-                ${order.currency as string || 'USD'},
+                ${(order.currency as string) || 'USD'},
                 'pending',
-                ${{ retroactive: true, appliedAt: new Date().toISOString() }}
+                ${JSON.stringify({ retroactive: true, appliedAt: new Date().toISOString() })}
               )
               ON CONFLICT (order_id) DO NOTHING
             `

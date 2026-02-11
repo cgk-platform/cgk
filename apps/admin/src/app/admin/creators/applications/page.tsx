@@ -5,13 +5,10 @@ import { Suspense } from 'react'
 
 import { SearchInput } from '@/components/commerce/search-input'
 import { Pagination } from '@/components/commerce/pagination'
-import { formatDateTime } from '@/lib/format'
 import {
   getApplications,
   getApplicationStatusCounts,
   parseApplicationFilters,
-  type CreatorApplication,
-  APPLICATION_STATUSES,
 } from '@/lib/creators-admin-ops'
 import { buildFilterUrl } from '@/lib/search-params'
 
@@ -104,9 +101,7 @@ function StatusTabsSkeleton() {
   )
 }
 
-function ApplicationFilterBar({
-  filters,
-}: {
+function ApplicationFilterBar({}: {
   filters: ReturnType<typeof parseApplicationFilters>
 }) {
   return (

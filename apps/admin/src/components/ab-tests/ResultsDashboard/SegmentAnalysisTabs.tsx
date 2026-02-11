@@ -145,17 +145,19 @@ function SegmentRow({ data }: { data: SegmentData }) {
   )
 }
 
-function formatSegmentValue(value: string): string {
-  if (value === 'unknown' || !value) return 'Unknown'
+function formatSegmentValue(value: string | undefined): string {
+  if (!value || value === 'unknown') return 'Unknown'
 
+  const lowercaseValue = value.toLowerCase()
   const deviceLabels: Record<string, string> = {
     desktop: 'Desktop',
     mobile: 'Mobile',
     tablet: 'Tablet',
   }
 
-  if (deviceLabels[value.toLowerCase()]) {
-    return deviceLabels[value.toLowerCase()]
+  const deviceLabel = deviceLabels[lowercaseValue]
+  if (deviceLabel) {
+    return deviceLabel
   }
 
   return value.charAt(0).toUpperCase() + value.slice(1)

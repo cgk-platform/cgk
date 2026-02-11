@@ -6,11 +6,10 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import {
-  createPlatformConnection,
-  getPlatformConnection,
+  createSecondaryPlatformConnection,
   disconnectPlatform,
   type SecondaryPlatform,
-  type PlatformConnectionCreate,
+  type SecondaryPlatformConnectionCreate,
 } from '@/lib/attribution'
 
 const VALID_PLATFORMS: SecondaryPlatform[] = [
@@ -40,7 +39,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Invalid platform' }, { status: 400 })
   }
 
-  let body: Partial<PlatformConnectionCreate>
+  let body: Partial<SecondaryPlatformConnectionCreate>
   try {
     body = await request.json()
   } catch {
@@ -53,7 +52,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   // 3. Return an OAuth redirect URL or success status
 
   const connection = await withTenant(tenantSlug, () =>
-    createPlatformConnection(tenantId, {
+    createSecondaryPlatformConnection(tenantId, {
       platform: platform as SecondaryPlatform,
       displayName: body.displayName,
       accountId: body.accountId,
@@ -65,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   return NextResponse.json({ connection })
 }
 
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')

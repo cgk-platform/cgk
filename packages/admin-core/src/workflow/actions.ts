@@ -339,7 +339,7 @@ async function executeScheduleFollowup(
   action: Action,
   context: ExecutionContext
 ): Promise<ActionResult> {
-  const config = action.config as ScheduleFollowupConfig
+  const config = action.config as unknown as ScheduleFollowupConfig
 
   const delayMs = ((config.delayHours || 0) * 60 * 60 + (config.delayDays || 0) * 24 * 60 * 60) * 1000
   const scheduledFor = new Date(Date.now() + delayMs)
@@ -392,14 +392,7 @@ async function executeUpdateStatus(
 
   // Update entity status based on entity type
   await withTenant(context.tenantId, async () => {
-    const table = getEntityTable(context.entityType)
-    if (table) {
-      await sql`
-        UPDATE ${sql(table)}
-        SET status = ${newStatus}, updated_at = NOW()
-        WHERE id = ${context.entityId}
-      `
-    }
+    await updateEntityStatus(context.entityType, context.entityId, newStatus)
   })
 
   return {
@@ -430,24 +423,14 @@ async function executeUpdateField(
   }
 
   await withTenant(context.tenantId, async () => {
-    const table = getEntityTable(context.entityType)
-    if (table) {
-      // Use JSONB set for nested fields, otherwise direct update
-      if (config.field!.includes('.')) {
-        const path = config.field!.split('.')
-        await sql`
-          UPDATE ${sql(table)}
-          SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), ${path}, ${JSON.stringify(value)}::jsonb),
-              updated_at = NOW()
-          WHERE id = ${context.entityId}
-        `
-      } else {
-        await sql`
-          UPDATE ${sql(table)}
-          SET ${sql(config.field!)} = ${value}, updated_at = NOW()
-          WHERE id = ${context.entityId}
-        `
-      }
+    // Use JSONB set for nested fields, otherwise direct update
+    if (config.field!.includes('.')) {
+      const path = config.field!.split('.')
+      await updateEntityMetadata(context.entityType, context.entityId, path, value)
+    } else {
+      // Note: For direct field updates, we update the metadata column with the field as key
+      // This avoids dynamic column names which aren't supported
+      await updateEntityMetadata(context.entityType, context.entityId, [config.field!], value)
     }
   })
 
@@ -555,14 +538,7 @@ async function executeAssignTo(
   }
 
   await withTenant(context.tenantId, async () => {
-    const table = getEntityTable(context.entityType)
-    if (table) {
-      await sql`
-        UPDATE ${sql(table)}
-        SET assigned_to = ${assigneeId}, assigned_at = NOW(), updated_at = NOW()
-        WHERE id = ${context.entityId}
-      `
-    }
+    await updateEntityAssignment(context.entityType, context.entityId, assigneeId!)
   })
 
   return {
@@ -639,7 +615,7 @@ async function executeWebhook(
 
 async function executeGenerateReport(
   action: Action,
-  context: ExecutionContext
+  _context: ExecutionContext
 ): Promise<ActionResult> {
   const config = action.config as {
     reportType?: string
@@ -745,7 +721,7 @@ function getFirstName(name: string | undefined): string {
 function getLastName(name: string | undefined): string {
   if (!name) return ''
   const parts = name.split(' ')
-  return parts.length > 1 ? parts[parts.length - 1] : ''
+  return parts.length > 1 ? (parts[parts.length - 1] ?? '') : ''
 }
 
 function formatDate(date: unknown): string {
@@ -783,18 +759,93 @@ export function escapeHtml(str: string): string {
 }
 
 /**
- * Get database table name for entity type
+ * Update entity status - uses explicit queries per entity type for type safety
  */
-function getEntityTable(entityType: string): string | null {
-  const tables: Record<string, string> = {
-    project: 'projects',
-    task: 'tasks',
-    order: 'orders',
-    creator: 'creators',
-    customer: 'customers',
-    thread: 'inbox_threads',
-    contact: 'inbox_contacts',
+async function updateEntityStatus(entityType: string, entityId: string, newStatus: string): Promise<void> {
+  switch (entityType) {
+    case 'project':
+      await sql`UPDATE projects SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'task':
+      await sql`UPDATE tasks SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'order':
+      await sql`UPDATE orders SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'creator':
+      await sql`UPDATE creators SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'customer':
+      await sql`UPDATE customers SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'thread':
+      await sql`UPDATE inbox_threads SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'contact':
+      await sql`UPDATE inbox_contacts SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
+      break
+    default:
+      // Unknown entity type - silently skip
+      break
   }
+}
 
-  return tables[entityType] || null
+/**
+ * Update entity metadata field using JSONB
+ */
+async function updateEntityMetadata(
+  entityType: string,
+  entityId: string,
+  path: string[],
+  value: unknown
+): Promise<void> {
+  const jsonValue = JSON.stringify(value)
+  const jsonPath = `{${path.join(',')}}`
+
+  switch (entityType) {
+    case 'project':
+      await sql`UPDATE projects SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), ${jsonPath}::text[], ${jsonValue}::jsonb), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'task':
+      await sql`UPDATE tasks SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), ${jsonPath}::text[], ${jsonValue}::jsonb), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'order':
+      await sql`UPDATE orders SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), ${jsonPath}::text[], ${jsonValue}::jsonb), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'creator':
+      await sql`UPDATE creators SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), ${jsonPath}::text[], ${jsonValue}::jsonb), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'customer':
+      await sql`UPDATE customers SET metadata = jsonb_set(COALESCE(metadata, '{}'::jsonb), ${jsonPath}::text[], ${jsonValue}::jsonb), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    default:
+      // Unknown entity type - silently skip
+      break
+  }
+}
+
+/**
+ * Update entity assignment
+ */
+async function updateEntityAssignment(entityType: string, entityId: string, assigneeId: string): Promise<void> {
+  switch (entityType) {
+    case 'project':
+      await sql`UPDATE projects SET assigned_to = ${assigneeId}, assigned_at = NOW(), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'task':
+      await sql`UPDATE tasks SET assigned_to = ${assigneeId}, assigned_at = NOW(), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'order':
+      await sql`UPDATE orders SET assigned_to = ${assigneeId}, assigned_at = NOW(), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'creator':
+      await sql`UPDATE creators SET assigned_to = ${assigneeId}, assigned_at = NOW(), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    case 'thread':
+      await sql`UPDATE inbox_threads SET assigned_to = ${assigneeId}, assigned_at = NOW(), updated_at = NOW() WHERE id = ${entityId}`
+      break
+    default:
+      // Unknown entity type - silently skip
+      break
+  }
 }

@@ -3,14 +3,12 @@
 import { Button, Card, CardContent, Badge, cn } from '@cgk/ui'
 import {
   MessageSquare,
-  Hash,
   Settings,
   Bot,
   Users,
   ShoppingCart,
   Megaphone,
   AlertTriangle,
-  Wrench,
   Clock,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -162,7 +160,7 @@ export default function SlackPage() {
     setNotificationConfig(prev => ({
       ...prev,
       [notificationId]: {
-        ...prev[notificationId],
+        enabled: prev[notificationId]?.enabled ?? false,
         channelId,
       },
     }))

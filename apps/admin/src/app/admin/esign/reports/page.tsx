@@ -12,7 +12,6 @@ import {
   Download,
   FileCheck,
   FileX,
-  TrendingUp,
 } from 'lucide-react'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'

@@ -6,7 +6,6 @@ import { Label } from '@cgk/ui'
 import { Switch } from '@cgk/ui'
 import { Button } from '@cgk/ui'
 import {
-  Settings,
   Save,
   AlertTriangle,
   Mail,
@@ -14,7 +13,6 @@ import {
   DollarSign,
   Bell,
   ArrowLeft,
-  Users,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -22,8 +20,8 @@ import { useEffect, useState } from 'react'
 import type { TreasurySettings, TopupSettings } from '@/lib/treasury/types'
 
 export default function TreasurySettingsPage() {
-  const [treasurySettings, setTreasurySettings] = useState<TreasurySettings | null>(null)
-  const [topupSettings, setTopupSettings] = useState<TopupSettings | null>(null)
+  const [, setTreasurySettings] = useState<TreasurySettings | null>(null)
+  const [, setTopupSettings] = useState<TopupSettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)

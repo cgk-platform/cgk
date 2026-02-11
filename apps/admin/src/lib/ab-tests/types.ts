@@ -15,6 +15,8 @@ import type {
   AllocationMode,
   TargetingCondition,
   TargetingAction,
+  ConditionField,
+  ConditionOperator,
 } from '@cgk/ab-testing'
 
 export type {
@@ -28,6 +30,8 @@ export type {
   AllocationMode,
   TargetingCondition,
   TargetingAction,
+  ConditionField,
+  ConditionOperator,
 }
 
 /**

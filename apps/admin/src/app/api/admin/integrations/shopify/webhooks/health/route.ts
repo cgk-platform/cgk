@@ -29,14 +29,15 @@ export async function GET(req: Request): Promise<Response> {
       `
     })
 
-    if (shopResult.rows.length === 0) {
+    const shopRow = shopResult.rows[0]
+    if (!shopRow) {
       return Response.json(
         { error: 'No active Shopify connection found' },
         { status: 404 }
       )
     }
 
-    const shop = shopResult.rows[0].shop as string
+    const shop = shopRow.shop as string
 
     // Get webhook health status
     const health = await getWebhookHealth(tenantId, shop)

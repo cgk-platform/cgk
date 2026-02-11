@@ -26,9 +26,8 @@ export async function GET(request: Request) {
 
   // Check permission
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.agents.view'
   )
   if (permissionDenied) return permissionDenied

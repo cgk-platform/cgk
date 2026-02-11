@@ -6,10 +6,10 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import {
-  getPlatformConnection,
-  updatePlatformConnection,
+  getSecondaryPlatformConnection,
+  updateSecondaryPlatformConnection,
   type SecondaryPlatform,
-  type PlatformConnectionUpdate,
+  type SecondaryPlatformConnectionUpdate,
 } from '@/lib/attribution'
 
 const VALID_PLATFORMS: SecondaryPlatform[] = [
@@ -24,7 +24,7 @@ interface RouteParams {
   params: Promise<{ platform: string }>
 }
 
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')
@@ -40,7 +40,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   const connection = await withTenant(tenantSlug, () =>
-    getPlatformConnection(tenantId, platform as SecondaryPlatform)
+    getSecondaryPlatformConnection(tenantId, platform as SecondaryPlatform)
   )
 
   return NextResponse.json({ connection })
@@ -61,7 +61,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Invalid platform' }, { status: 400 })
   }
 
-  let body: PlatformConnectionUpdate
+  let body: SecondaryPlatformConnectionUpdate
   try {
     body = await request.json()
   } catch {
@@ -69,7 +69,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 
   const connection = await withTenant(tenantSlug, () =>
-    updatePlatformConnection(tenantId, platform as SecondaryPlatform, body)
+    updateSecondaryPlatformConnection(tenantId, platform as SecondaryPlatform, body)
   )
 
   if (!connection) {

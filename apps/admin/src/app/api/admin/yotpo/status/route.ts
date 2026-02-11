@@ -63,6 +63,12 @@ export async function GET() {
     }
 
     const row = credResult.rows[0]
+    if (!row) {
+      return {
+        connected: false,
+        authSource: 'database' as const,
+      }
+    }
     const credentials = row.credentials as Record<string, unknown>
     const metadata = row.metadata as Record<string, unknown> | null
 

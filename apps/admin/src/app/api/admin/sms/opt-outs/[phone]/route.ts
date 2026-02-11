@@ -17,7 +17,7 @@ interface RouteParams {
  * DELETE /api/admin/sms/opt-outs/[phone]
  * Remove an opt-out (opt back in)
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const { phone } = await params

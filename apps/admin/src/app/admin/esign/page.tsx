@@ -4,7 +4,6 @@
  * Main dashboard for e-signature management.
  */
 
-import { withTenant } from '@cgk/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 import {

@@ -29,9 +29,8 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.calls.view'
   )
   if (permissionDenied) return permissionDenied
@@ -52,7 +51,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       return listVoiceCalls({
         agentId,
         direction,
-        status: status as Parameters<typeof listVoiceCalls>[0]['status'],
+        status: status as NonNullable<Parameters<typeof listVoiceCalls>[0]>['status'],
         creatorId,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
@@ -89,9 +88,8 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.calls.initiate'
   )
   if (permissionDenied) return permissionDenied

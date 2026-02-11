@@ -69,7 +69,7 @@ export function SlackNotificationsTab() {
     }
   }
 
-  async function testAlert(id: string, alertType: string, channelId: string) {
+  async function testAlert(_id: string, alertType: string, channelId: string) {
     try {
       const res = await fetch('/api/admin/analytics/slack-alerts/test', {
         method: 'POST',

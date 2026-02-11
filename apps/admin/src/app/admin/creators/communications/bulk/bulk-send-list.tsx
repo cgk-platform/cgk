@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, cn, Progress } from '@cgk/ui'
+import { Button, Card, CardContent, cn, Progress } from '@cgk/ui'
 import { Calendar, Check, Clock, MoreHorizontal, Send, Users, X } from 'lucide-react'
 import Link from 'next/link'
 
@@ -12,7 +12,7 @@ interface BulkSendListProps {
   page: number
 }
 
-export function BulkSendList({ bulkSends, totalCount, page }: BulkSendListProps) {
+export function BulkSendList({ bulkSends, totalCount }: BulkSendListProps) {
   const getStatusBadge = (status: BulkSendStatus) => {
     const variants: Record<BulkSendStatus, { color: string; icon: React.ReactNode; label: string }> = {
       draft: {

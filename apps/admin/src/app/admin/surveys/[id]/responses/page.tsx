@@ -8,7 +8,7 @@ import { useState, useEffect, useCallback } from 'react'
 
 import { Pagination } from '@/components/commerce/pagination'
 import { formatDate } from '@/lib/format'
-import type { Survey, SurveyResponse, SurveyAnswer } from '@/lib/surveys'
+import type { Survey, SurveyResponse } from '@/lib/surveys'
 
 export default function ResponsesPage() {
   const params = useParams()

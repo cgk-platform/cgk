@@ -11,7 +11,6 @@
 
 import type {
   Condition,
-  ConditionOperator,
   ConditionResult,
   EvaluationContext,
 } from './types'

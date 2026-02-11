@@ -7,7 +7,7 @@ import {
   Badge,
   Alert,
   AlertDescription,
-  Select,
+  RadixSelect as Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -24,20 +24,16 @@ import {
   Trash2,
   User,
   DollarSign,
-  ShoppingCart,
-  TrendingUp,
   X,
   Loader2,
   Link,
   Tag,
-  ExternalLink,
 } from 'lucide-react'
 import { useEffect, useState, useCallback } from 'react'
 
 import type {
   Influencer,
   InfluencerCreate,
-  InfluencerUpdate,
 } from '@/lib/attribution'
 
 export default function InfluencersPage() {
@@ -50,7 +46,7 @@ export default function InfluencersPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<string>('name')
-  const [sortOrder, setSortOrder] = useState<string>('asc')
+  const [sortOrder] = useState<string>('asc')
   const [currentPage, setCurrentPage] = useState(0)
   const pageSize = 20
 

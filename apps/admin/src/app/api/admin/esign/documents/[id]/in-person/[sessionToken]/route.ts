@@ -94,8 +94,8 @@ export async function POST(
     }
 
     const { id: documentId, sessionToken } = await params
-    const body = await request.json()
-    const { fields, signatureData } = body
+    // Body may contain fields and signatureData for future use
+    await request.json()
 
     const session = await getInPersonSessionByToken(auth.tenantId, sessionToken)
     if (!session || session.documentId !== documentId || session.status !== 'active') {

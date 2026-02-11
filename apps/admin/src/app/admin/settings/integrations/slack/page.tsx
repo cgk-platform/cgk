@@ -170,7 +170,7 @@ export default function SlackIntegrationPage() {
       </div>
 
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="error">
           <p>{error}</p>
         </Alert>
       )}

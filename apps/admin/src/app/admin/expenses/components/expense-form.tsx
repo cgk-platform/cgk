@@ -5,7 +5,7 @@ import { X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import { EXPENSE_CATEGORIES, type ExpenseCategory, type Expense } from '@/lib/expenses/types'
+import { EXPENSE_CATEGORIES, type ExpenseCategory_Legacy, type Expense } from '@/lib/expenses/types'
 
 interface ExpenseFormProps {
   expense?: Expense
@@ -17,8 +17,8 @@ export function ExpenseForm({ expense, onClose }: ExpenseFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const [category, setCategory] = useState<ExpenseCategory>(
-    (expense?.category as ExpenseCategory) || 'other',
+  const [category, setCategory] = useState<ExpenseCategory_Legacy>(
+    expense?.category || 'other',
   )
   const [vendor, setVendor] = useState(expense?.vendor || '')
   const [description, setDescription] = useState(expense?.description || '')
@@ -126,7 +126,7 @@ export function ExpenseForm({ expense, onClose }: ExpenseFormProps) {
               <select
                 id="category"
                 value={category}
-                onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+                onChange={(e) => setCategory(e.target.value as ExpenseCategory_Legacy)}
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm"
               >
                 {EXPENSE_CATEGORIES.map((cat) => (

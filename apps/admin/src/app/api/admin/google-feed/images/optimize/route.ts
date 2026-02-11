@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { productIds, options } = body
+  const { productIds, options: _options } = body
 
   if (!productIds || productIds.length === 0) {
     return NextResponse.json({ error: 'productIds required' }, { status: 400 })

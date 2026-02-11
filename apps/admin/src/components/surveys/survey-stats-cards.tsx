@@ -6,8 +6,6 @@ import {
   CheckCircle,
   Clock,
   MessageSquare,
-  TrendingDown,
-  TrendingUp,
 } from 'lucide-react'
 
 import type { SurveyStats } from '@/lib/surveys'

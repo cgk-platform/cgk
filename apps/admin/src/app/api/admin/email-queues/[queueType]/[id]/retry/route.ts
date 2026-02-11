@@ -37,7 +37,7 @@ export async function POST(
   { params }: { params: Promise<{ queueType: string; id: string }> }
 ) {
   try {
-    const { tenantId, userId } = await getTenantContext(req)
+    const { tenantId } = await getTenantContext(req)
 
     if (!tenantId) {
       return NextResponse.json(

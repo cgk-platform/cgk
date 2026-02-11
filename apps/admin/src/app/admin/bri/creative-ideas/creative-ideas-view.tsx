@@ -6,12 +6,10 @@ import {
   Lightbulb,
   Plus,
   Search,
-  Filter,
   Star,
   TrendingUp,
   X,
   Save,
-  Trash2,
 } from 'lucide-react'
 
 import type { CreativeIdea, CreativeIdeaType, CreativeIdeaStatus } from '@/lib/bri/types'
@@ -50,7 +48,7 @@ const STATUS_COLORS: Record<CreativeIdeaStatus, 'secondary' | 'info' | 'warning'
   rejected: 'destructive',
 }
 
-export function CreativeIdeasView({ tenantSlug, initialIdeas }: CreativeIdeasViewProps) {
+export function CreativeIdeasView({ initialIdeas }: CreativeIdeasViewProps) {
   const [ideas, setIdeas] = useState(initialIdeas)
   const [selectedIdea, setSelectedIdea] = useState<CreativeIdea | null>(null)
   const [isEditing, setIsEditing] = useState(false)

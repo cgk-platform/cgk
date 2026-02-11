@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { getABTest, getTestResults, getTimeSeriesData } from '@/lib/ab-tests/db'
+import { getABTest, getTestResults } from '@/lib/ab-tests/db'
+import type { ABTest, TestResults } from '@/lib/ab-tests/types'
 
 interface RouteContext {
   params: Promise<{ testId: string }>
@@ -53,29 +54,19 @@ export async function GET(request: Request, context: RouteContext) {
   })
 }
 
-function generateCSV(test: Record<string, unknown>, results: Record<string, unknown>): string {
+function generateCSV(test: ABTest, results: TestResults): string {
   const rows: string[] = []
 
   // Header
   rows.push('A/B Test Results Export')
-  rows.push(`Test Name,${(test as { name: string }).name}`)
+  rows.push(`Test Name,${test.name}`)
   rows.push(`Generated,${new Date().toISOString()}`)
   rows.push('')
 
   // Variant Results
   rows.push('Variant,Visitors,Conversions,Conversion Rate,Revenue,RPV,Improvement')
 
-  const variants = (results as { variants: Array<{
-    variantName: string
-    visitors: number
-    conversions: number
-    conversionRate: number
-    revenue: number
-    revenuePerVisitor: number
-    improvement?: number
-  }> }).variants || []
-
-  for (const variant of variants) {
+  for (const variant of results.variants) {
     rows.push([
       variant.variantName,
       variant.visitors,

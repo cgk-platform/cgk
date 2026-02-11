@@ -10,10 +10,7 @@ import { Button, Card, CardContent, Input, Switch, cn } from '@cgk/ui'
 import {
   Check,
   Copy,
-  Eye,
-  EyeOff,
   Globe,
-  MoreHorizontal,
   Plus,
   RefreshCw,
   Trash2,

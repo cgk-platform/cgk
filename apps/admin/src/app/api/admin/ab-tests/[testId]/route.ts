@@ -13,7 +13,7 @@ interface RouteContext {
  * GET /api/admin/ab-tests/[testId]
  * Get a single A/B test with variants
  */
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -69,7 +69,7 @@ export async function PATCH(request: Request, context: RouteContext) {
  * DELETE /api/admin/ab-tests/[testId]
  * Delete an A/B test
  */
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 

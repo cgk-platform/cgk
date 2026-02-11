@@ -29,17 +29,16 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.voice.view'
   )
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getAvailableVoices, type TTSProviderType } = await import('@cgk/ai-agents')
+    const { getAvailableVoices } = await import('@cgk/ai-agents')
 
-    const voices = await getAvailableVoices(tenantId, provider as TTSProviderType)
+    const voices = await getAvailableVoices(tenantId, provider as 'elevenlabs' | 'openai' | 'google')
 
     return NextResponse.json({ voices, provider })
   } catch (error) {

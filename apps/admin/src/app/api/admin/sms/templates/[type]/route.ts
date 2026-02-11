@@ -19,7 +19,7 @@ interface RouteParams {
  * GET /api/admin/sms/templates/[type]
  * Get an SMS template by notification type
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const { type } = await params
@@ -107,7 +107,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
  * DELETE /api/admin/sms/templates/[type]
  * Delete an SMS template
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const { type } = await params

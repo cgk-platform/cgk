@@ -160,7 +160,7 @@ function DocumentSection({
                   </p>
                   <p className="text-sm text-slate-500">
                     {doc.signers.length === 1
-                      ? doc.signers[0].name
+                      ? doc.signers[0]?.name
                       : `${doc.signers.length} signers`}
                     {doc.templateName && ` - ${doc.templateName}`}
                   </p>

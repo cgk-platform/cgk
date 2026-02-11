@@ -13,7 +13,7 @@ interface RouteContext {
  * GET /api/admin/ab-tests/[testId]/guardrails
  * Get guardrails for a test
  */
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 

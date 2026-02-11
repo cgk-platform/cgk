@@ -9,7 +9,6 @@ import type {
   FormulaPreviewInput,
   FormulaPreviewResult,
   VariableCostConfig,
-  DEFAULT_VARIABLE_COST_CONFIG,
 } from './types'
 
 /**

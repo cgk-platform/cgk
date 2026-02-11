@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { AlertTriangle, ExternalLink } from 'lucide-react'
 
-import { Badge, Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardHeader, CardContent } from '@cgk/ui'
 
 import type { ABTest } from '@/lib/ab-tests/types'
 

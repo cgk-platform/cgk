@@ -69,6 +69,12 @@ export async function POST(request: Request) {
     const row = body.rows[i]
     const rowNum = i + 1
 
+    // Skip undefined rows
+    if (!row) {
+      errors.push({ row: rowNum, error: 'Empty row' })
+      continue
+    }
+
     // Must have at least one identifier
     if (!row.sku && !row.variantId && !row.productId) {
       errors.push({ row: rowNum, error: 'Must have sku, variantId, or productId' })

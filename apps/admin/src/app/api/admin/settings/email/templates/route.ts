@@ -5,7 +5,6 @@ import {
   seedDefaultTemplates,
   type TemplateFilters,
 } from '@cgk/communications'
-import { withTenant } from '@cgk/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

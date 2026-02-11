@@ -272,7 +272,7 @@ export async function getPendingDocuments(
  */
 export async function getCounterSignQueue(
   tenantSlug: string,
-  adminEmail: string
+  _adminEmail: string
 ): Promise<EsignDocumentWithSigners[]> {
   return withTenant(tenantSlug, async () => {
     const result = await sql`
@@ -493,8 +493,9 @@ export async function markSignerSigned(
       RETURNING document_id as "documentId"
     `
 
-    if (result.rows.length > 0) {
-      const documentId = result.rows[0].documentId as string
+    const row = result.rows[0]
+    if (row) {
+      const documentId = row.documentId as string
       // Check if all signers have signed
       const pendingResult = await sql`
         SELECT COUNT(*) as count

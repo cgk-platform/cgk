@@ -9,13 +9,12 @@ import {
   File,
   MessageCircle,
   Tag,
-  User,
   X,
 } from 'lucide-react'
 import { useEffect } from 'react'
 
 import type { PipelineProject, ProjectStatus } from '@/lib/pipeline/types'
-import { PIPELINE_STAGES, getStageColor, getStageLabel, VALID_TRANSITIONS } from '@/lib/pipeline/types'
+import { PIPELINE_STAGES, VALID_TRANSITIONS } from '@/lib/pipeline/types'
 
 interface ProjectDetailModalProps {
   project: PipelineProject
@@ -151,7 +150,7 @@ export function ProjectDetailModal({
                       color: stage.color,
                       borderColor: stage.color,
                       border: `1px solid ${stage.color}40`,
-                      ringColor: isCurrentStatus ? stage.color : undefined,
+                      ['--tw-ring-color' as string]: isCurrentStatus ? stage.color : undefined,
                     }}
                   >
                     {stage.label}

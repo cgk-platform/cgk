@@ -16,7 +16,7 @@ interface QueueStats {
   avgWaitTimeSeconds: number | null
 }
 
-export function ChatQueue({ tenantId }: ChatQueueProps) {
+export function ChatQueue({ tenantId: _tenantId }: ChatQueueProps) {
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [stats, setStats] = useState<QueueStats | null>(null)
   const [loading, setLoading] = useState(true)

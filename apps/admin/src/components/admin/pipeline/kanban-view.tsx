@@ -19,10 +19,9 @@ import { useState, useOptimistic, useTransition, useCallback } from 'react'
 import type {
   PipelineProject,
   ProjectStatus,
-  StageConfig,
   PipelineConfig,
 } from '@/lib/pipeline/types'
-import { VALID_TRANSITIONS, LOCKED_STATUSES, isValidTransition } from '@/lib/pipeline/types'
+import { LOCKED_STATUSES, isValidTransition } from '@/lib/pipeline/types'
 
 import { KanbanColumn } from './kanban-column'
 import { ProjectCard } from './project-card'

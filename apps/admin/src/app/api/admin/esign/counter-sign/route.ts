@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { documentId, signerId, fields, signatureData } = body
+    const { documentId, signerId } = body
 
     if (!documentId || !signerId) {
       return NextResponse.json(

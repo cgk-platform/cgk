@@ -16,7 +16,7 @@ interface RouteParams {
   params: Promise<{ id: string }>
 }
 
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')
@@ -67,7 +67,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   return NextResponse.json({ export: exportConfig })
 }
 
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')

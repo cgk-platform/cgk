@@ -25,55 +25,246 @@ export async function GET(request: Request) {
   const offset = (page - 1) * limit
 
   const result = await withTenant(tenantSlug, async () => {
-    // Build query conditions
-    const conditions: string[] = ["p.status = 'active'"]
+    // Helper to run the appropriate query based on filters
+    async function getImagesQuery() {
+      // Base case: status = 'all', missingOnly = false
+      if (!missingOnly && status === 'all') {
+        return sql`
+          SELECT
+            p.id as "productId",
+            p.title as "productTitle",
+            p.handle,
+            p.featured_image_url as "imageUrl",
+            p.images,
+            gfi.id as "feedImageId",
+            gfi.original_url as "originalUrl",
+            gfi.optimized_url as "optimizedUrl",
+            gfi.original_width as "originalWidth",
+            gfi.original_height as "originalHeight",
+            gfi.optimized_width as "optimizedWidth",
+            gfi.optimized_height as "optimizedHeight",
+            gfi.status,
+            gfi.google_status as "googleStatus",
+            gfi.google_issues as "googleIssues",
+            gfi.compression_applied as "compressionApplied",
+            gfi.background_removed as "backgroundRemoved"
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active'
+          ORDER BY p.updated_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      }
 
-    if (missingOnly) {
-      conditions.push('p.featured_image_url IS NULL')
+      // missingOnly = true, status = 'all'
+      if (missingOnly && status === 'all') {
+        return sql`
+          SELECT
+            p.id as "productId",
+            p.title as "productTitle",
+            p.handle,
+            p.featured_image_url as "imageUrl",
+            p.images,
+            gfi.id as "feedImageId",
+            gfi.original_url as "originalUrl",
+            gfi.optimized_url as "optimizedUrl",
+            gfi.original_width as "originalWidth",
+            gfi.original_height as "originalHeight",
+            gfi.optimized_width as "optimizedWidth",
+            gfi.optimized_height as "optimizedHeight",
+            gfi.status,
+            gfi.google_status as "googleStatus",
+            gfi.google_issues as "googleIssues",
+            gfi.compression_applied as "compressionApplied",
+            gfi.background_removed as "backgroundRemoved"
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND p.featured_image_url IS NULL
+          ORDER BY p.updated_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      }
+
+      // status = 'approved', missingOnly = false
+      if (!missingOnly && status === 'approved') {
+        return sql`
+          SELECT
+            p.id as "productId",
+            p.title as "productTitle",
+            p.handle,
+            p.featured_image_url as "imageUrl",
+            p.images,
+            gfi.id as "feedImageId",
+            gfi.original_url as "originalUrl",
+            gfi.optimized_url as "optimizedUrl",
+            gfi.original_width as "originalWidth",
+            gfi.original_height as "originalHeight",
+            gfi.optimized_width as "optimizedWidth",
+            gfi.optimized_height as "optimizedHeight",
+            gfi.status,
+            gfi.google_status as "googleStatus",
+            gfi.google_issues as "googleIssues",
+            gfi.compression_applied as "compressionApplied",
+            gfi.background_removed as "backgroundRemoved"
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND gfi.status = 'approved'
+          ORDER BY p.updated_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      }
+
+      // status = 'approved', missingOnly = true
+      if (missingOnly && status === 'approved') {
+        return sql`
+          SELECT
+            p.id as "productId",
+            p.title as "productTitle",
+            p.handle,
+            p.featured_image_url as "imageUrl",
+            p.images,
+            gfi.id as "feedImageId",
+            gfi.original_url as "originalUrl",
+            gfi.optimized_url as "optimizedUrl",
+            gfi.original_width as "originalWidth",
+            gfi.original_height as "originalHeight",
+            gfi.optimized_width as "optimizedWidth",
+            gfi.optimized_height as "optimizedHeight",
+            gfi.status,
+            gfi.google_status as "googleStatus",
+            gfi.google_issues as "googleIssues",
+            gfi.compression_applied as "compressionApplied",
+            gfi.background_removed as "backgroundRemoved"
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND p.featured_image_url IS NULL AND gfi.status = 'approved'
+          ORDER BY p.updated_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      }
+
+      // status = 'issues', missingOnly = false
+      if (!missingOnly && status === 'issues') {
+        return sql`
+          SELECT
+            p.id as "productId",
+            p.title as "productTitle",
+            p.handle,
+            p.featured_image_url as "imageUrl",
+            p.images,
+            gfi.id as "feedImageId",
+            gfi.original_url as "originalUrl",
+            gfi.optimized_url as "optimizedUrl",
+            gfi.original_width as "originalWidth",
+            gfi.original_height as "originalHeight",
+            gfi.optimized_width as "optimizedWidth",
+            gfi.optimized_height as "optimizedHeight",
+            gfi.status,
+            gfi.google_status as "googleStatus",
+            gfi.google_issues as "googleIssues",
+            gfi.compression_applied as "compressionApplied",
+            gfi.background_removed as "backgroundRemoved"
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND (gfi.status IN ('disapproved', 'failed') OR gfi.status IS NULL)
+          ORDER BY p.updated_at DESC
+          LIMIT ${limit} OFFSET ${offset}
+        `
+      }
+
+      // status = 'issues', missingOnly = true
+      return sql`
+        SELECT
+          p.id as "productId",
+          p.title as "productTitle",
+          p.handle,
+          p.featured_image_url as "imageUrl",
+          p.images,
+          gfi.id as "feedImageId",
+          gfi.original_url as "originalUrl",
+          gfi.optimized_url as "optimizedUrl",
+          gfi.original_width as "originalWidth",
+          gfi.original_height as "originalHeight",
+          gfi.optimized_width as "optimizedWidth",
+          gfi.optimized_height as "optimizedHeight",
+          gfi.status,
+          gfi.google_status as "googleStatus",
+          gfi.google_issues as "googleIssues",
+          gfi.compression_applied as "compressionApplied",
+          gfi.background_removed as "backgroundRemoved"
+        FROM products p
+        LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+        WHERE p.status = 'active' AND p.featured_image_url IS NULL AND (gfi.status IN ('disapproved', 'failed') OR gfi.status IS NULL)
+        ORDER BY p.updated_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
     }
 
-    if (status === 'approved') {
-      conditions.push(`gfi.status = 'approved'`)
-    } else if (status === 'issues') {
-      conditions.push(`(gfi.status IN ('disapproved', 'failed') OR gfi.status IS NULL)`)
-    }
+    async function getCountQuery() {
+      // Base case: status = 'all', missingOnly = false
+      if (!missingOnly && status === 'all') {
+        return sql`
+          SELECT COUNT(*) as count
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active'
+        `
+      }
 
-    const whereClause = `WHERE ${conditions.join(' AND ')}`
+      // missingOnly = true, status = 'all'
+      if (missingOnly && status === 'all') {
+        return sql`
+          SELECT COUNT(*) as count
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND p.featured_image_url IS NULL
+        `
+      }
+
+      // status = 'approved', missingOnly = false
+      if (!missingOnly && status === 'approved') {
+        return sql`
+          SELECT COUNT(*) as count
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND gfi.status = 'approved'
+        `
+      }
+
+      // status = 'approved', missingOnly = true
+      if (missingOnly && status === 'approved') {
+        return sql`
+          SELECT COUNT(*) as count
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND p.featured_image_url IS NULL AND gfi.status = 'approved'
+        `
+      }
+
+      // status = 'issues', missingOnly = false
+      if (!missingOnly && status === 'issues') {
+        return sql`
+          SELECT COUNT(*) as count
+          FROM products p
+          LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+          WHERE p.status = 'active' AND (gfi.status IN ('disapproved', 'failed') OR gfi.status IS NULL)
+        `
+      }
+
+      // status = 'issues', missingOnly = true
+      return sql`
+        SELECT COUNT(*) as count
+        FROM products p
+        LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
+        WHERE p.status = 'active' AND p.featured_image_url IS NULL AND (gfi.status IN ('disapproved', 'failed') OR gfi.status IS NULL)
+      `
+    }
 
     // Get images with product info
-    const imagesResult = await sql`
-      SELECT
-        p.id as "productId",
-        p.title as "productTitle",
-        p.handle,
-        p.featured_image_url as "imageUrl",
-        p.images,
-        gfi.id as "feedImageId",
-        gfi.original_url as "originalUrl",
-        gfi.optimized_url as "optimizedUrl",
-        gfi.original_width as "originalWidth",
-        gfi.original_height as "originalHeight",
-        gfi.optimized_width as "optimizedWidth",
-        gfi.optimized_height as "optimizedHeight",
-        gfi.status,
-        gfi.google_status as "googleStatus",
-        gfi.google_issues as "googleIssues",
-        gfi.compression_applied as "compressionApplied",
-        gfi.background_removed as "backgroundRemoved"
-      FROM products p
-      LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
-      ${sql.unsafe(whereClause)}
-      ORDER BY p.updated_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `
+    const imagesResult = await getImagesQuery()
 
     // Get total count
-    const countResult = await sql`
-      SELECT COUNT(*) as count
-      FROM products p
-      LEFT JOIN google_feed_images gfi ON gfi.shopify_product_id = p.shopify_product_id
-      ${sql.unsafe(whereClause)}
-    `
+    const countResult = await getCountQuery()
 
     const total = Number(countResult.rows[0]?.count || 0)
 

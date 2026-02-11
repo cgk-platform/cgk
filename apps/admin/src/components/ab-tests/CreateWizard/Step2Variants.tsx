@@ -46,7 +46,18 @@ export function Step2Variants({ data, updateData }: Step2Props) {
   const updateVariant = useCallback(
     (index: number, changes: Partial<VariantData>) => {
       const newVariants = [...step2.variants]
-      newVariants[index] = { ...newVariants[index], ...changes }
+      const current = newVariants[index]
+      if (!current) return
+      newVariants[index] = {
+        name: changes.name ?? current.name,
+        url: changes.url ?? current.url,
+        urlType: changes.urlType ?? current.urlType,
+        landingPageId: changes.landingPageId ?? current.landingPageId,
+        trafficAllocation: changes.trafficAllocation ?? current.trafficAllocation,
+        isControl: changes.isControl ?? current.isControl,
+        shippingSuffix: changes.shippingSuffix ?? current.shippingSuffix,
+        shippingPriceCents: changes.shippingPriceCents ?? current.shippingPriceCents,
+      }
       update({ variants: newVariants })
     },
     [step2.variants, update]
@@ -210,7 +221,6 @@ interface VariantCardProps {
 
 function VariantCard({
   variant,
-  index,
   isShippingTest,
   onUpdate,
   onRemove,

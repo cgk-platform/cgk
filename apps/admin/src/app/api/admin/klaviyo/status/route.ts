@@ -50,14 +50,14 @@ export async function GET() {
       WHERE integration_type = 'klaviyo'
     `
 
-    if (credResult.rows.length === 0) {
+    const row = credResult.rows[0]
+    if (!row) {
       return {
         connected: false,
         authSource: 'database' as const,
       }
     }
 
-    const row = credResult.rows[0]
     const metadata = row.metadata as Record<string, unknown> | null
 
     return {

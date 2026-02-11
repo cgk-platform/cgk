@@ -221,7 +221,7 @@ export async function createProject(
         ${data.start_date || null}::date,
         ${data.due_date || null}::date,
         ${data.project_type || null}::project_type,
-        ${data.tags || []}::text[],
+        ${`{${(data.tags || []).map((s) => `"${s}"`).join(',')}}`}::text[],
         ${data.pipeline_stage || 'backlog'}::project_pipeline_stage,
         ${nextOrder},
         ${data.external_id || null},
@@ -233,10 +233,12 @@ export async function createProject(
       RETURNING *
     `
 
-    // Log the action
-    await logProjectAction(tenantSlug, userId, 'project.created', result.rows[0].id as string, null, data)
+    const createdProject = result.rows[0] as Project
 
-    return result.rows[0] as Project
+    // Log the action
+    await logProjectAction(tenantSlug, userId, 'project.created', createdProject.id, null, data)
+
+    return createdProject
   })
 }
 
@@ -572,15 +574,20 @@ export async function removeTaskFromProject(
   taskId: string,
 ): Promise<void> {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
+    // Get the project_id before removing
+    const projectResult = await sql`
+      SELECT project_id FROM tasks WHERE id = ${taskId}
+    `
+    const projectId = projectResult.rows[0]?.project_id as string | null
+
+    await sql`
       UPDATE tasks
       SET project_id = NULL, updated_at = NOW()
       WHERE id = ${taskId}
-      RETURNING project_id
     `
 
-    if (result.rows.length > 0 && result.rows[0].project_id) {
-      await logProjectAction(tenantSlug, userId, 'project.task_removed', result.rows[0].project_id as string, null, { taskId })
+    if (projectId) {
+      await logProjectAction(tenantSlug, userId, 'project.task_removed', projectId, null, { taskId })
     }
   })
 }

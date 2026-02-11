@@ -9,6 +9,8 @@ import { withTenant, sql } from '@cgk/db'
 
 import type { SubscriptionEmailTemplate } from './types'
 
+type DbRow = Record<string, unknown>
+
 /**
  * List all subscription email templates
  */
@@ -38,8 +40,9 @@ export async function getEmailTemplate(
       SELECT * FROM email_templates
       WHERE id = ${templateId} AND notification_type = 'subscription'
     `
-    if (result.rows.length === 0) return null
-    return mapRowToTemplate(result.rows[0])
+    const row = result.rows[0]
+    if (!row) return null
+    return mapRowToTemplate(row as DbRow)
   })
 }
 
@@ -55,8 +58,9 @@ export async function getEmailTemplateByKey(
       SELECT * FROM email_templates
       WHERE notification_type = 'subscription' AND template_key = ${templateKey}
     `
-    if (result.rows.length === 0) return null
-    return mapRowToTemplate(result.rows[0])
+    const row = result.rows[0]
+    if (!row) return null
+    return mapRowToTemplate(row as DbRow)
   })
 }
 
@@ -174,20 +178,19 @@ export async function resetTemplateToDefault(
       WHERE template_id = ${templateId} AND version = 1
     `
 
-    if (originalResult.rows.length === 0) {
+    const original = originalResult.rows[0]
+    if (!original) {
       // No version history, cannot reset
       return null
     }
-
-    const original = originalResult.rows[0]
 
     // Update to original values
     const result = await sql`
       UPDATE email_templates
       SET
-        subject = ${original.subject},
-        body_html = ${original.body_html},
-        body_text = ${original.body_text},
+        subject = ${original.subject as string},
+        body_html = ${original.body_html as string},
+        body_text = ${original.body_text as string | null},
         is_default = true,
         version = version + 1,
         last_edited_by = ${userId || null},
@@ -197,8 +200,9 @@ export async function resetTemplateToDefault(
       RETURNING *
     `
 
-    if (result.rows.length === 0) return null
-    return mapRowToTemplate(result.rows[0])
+    const resultRow = result.rows[0]
+    if (!resultRow) return null
+    return mapRowToTemplate(resultRow as DbRow)
   })
 }
 
@@ -366,24 +370,24 @@ export function getTemplateVariables(templateKey: string): string[] {
 }
 
 // Helper function to map database row to SubscriptionEmailTemplate
-function mapRowToTemplate(row: Record<string, unknown>): SubscriptionEmailTemplate {
+function mapRowToTemplate(row: DbRow): SubscriptionEmailTemplate {
   return {
     id: row.id as string,
     notificationType: 'subscription',
     templateKey: row.template_key as string,
     name: row.name as string,
-    description: row.description as string | null,
+    description: (row.description as string | null) ?? null,
     subject: row.subject as string,
     bodyHtml: row.body_html as string,
-    bodyText: row.body_text as string | null,
-    senderName: row.sender_name as string | null,
-    senderEmail: row.sender_email as string | null,
-    replyToEmail: row.reply_to_email as string | null,
+    bodyText: (row.body_text as string | null) ?? null,
+    senderName: (row.sender_name as string | null) ?? null,
+    senderEmail: (row.sender_email as string | null) ?? null,
+    replyToEmail: (row.reply_to_email as string | null) ?? null,
     isActive: row.is_active as boolean,
     version: row.version as number,
     isDefault: row.is_default as boolean,
-    lastEditedBy: row.last_edited_by as string | null,
-    lastEditedAt: row.last_edited_at as string | null,
+    lastEditedBy: (row.last_edited_by as string | null) ?? null,
+    lastEditedAt: (row.last_edited_at as string | null) ?? null,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   }

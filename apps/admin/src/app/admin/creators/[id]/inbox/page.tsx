@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader } from '@cgk/ui'
-import { ArrowLeft, Send, MessageSquare } from 'lucide-react'
+import { Card, CardContent } from '@cgk/ui'
+import { ArrowLeft } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -12,7 +12,6 @@ import {
   getCreatorConversations,
   getConversationMessages,
 } from '@/lib/creators/db'
-import { formatDateTime } from '@/lib/format'
 
 export default async function CreatorInboxPage({
   params,

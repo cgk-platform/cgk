@@ -264,5 +264,5 @@ function getDefaultPeriodStart(periodType: PeriodType): string {
     now.setDate(1)
   }
 
-  return now.toISOString().split('T')[0]
+  return now.toISOString().split('T')[0] ?? ''
 }

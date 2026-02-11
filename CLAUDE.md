@@ -336,13 +336,65 @@ return row ? (toCamelCase(row as Record<string, unknown>) as unknown as MyType) 
 const filter = sql`AND status = ${status}`
 sql`SELECT * FROM items WHERE active = true ${filter}`
 
-// CORRECT - Use conditional queries
+// CORRECT - Use conditional queries (if/else branches)
 const result = status
   ? await sql`SELECT * FROM items WHERE active = true AND status = ${status}`
   : await sql`SELECT * FROM items WHERE active = true`
 ```
 
-### 5. Unused Variables → Remove or Underscore
+### 5. No Dynamic Table Names - Use Switch/Case
+
+```typescript
+// WRONG - sql(tableName) is not valid
+const table = getTableName(entityType)
+sql`UPDATE ${sql(table)} SET status = ${status} WHERE id = ${id}`
+
+// WRONG - sql.raw() doesn't exist on @vercel/postgres
+sql`UPDATE ${sql.raw(table)} SET ...`
+
+// CORRECT - Use explicit switch/case for each table
+async function updateEntityStatus(entityType: string, id: string, status: string) {
+  switch (entityType) {
+    case 'project':
+      return sql`UPDATE projects SET status = ${status} WHERE id = ${id}`
+    case 'task':
+      return sql`UPDATE tasks SET status = ${status} WHERE id = ${id}`
+    case 'order':
+      return sql`UPDATE orders SET status = ${status} WHERE id = ${id}`
+    default:
+      throw new Error(`Unknown entity type: ${entityType}`)
+  }
+}
+```
+
+### 6. QueryResultRow Undefined Checks
+
+```typescript
+// WRONG - result.rows[0] may be undefined
+return mapToEntity(result.rows[0])
+
+// CORRECT - Check before using
+const row = result.rows[0]
+if (!row) return null  // or throw new Error('Not found')
+return mapToEntity(row as Record<string, unknown>)
+
+// For non-null returns (e.g., INSERT RETURNING)
+const row = result.rows[0]
+if (!row) throw new Error('Failed to insert record')
+return mapToEntity(row as Record<string, unknown>)
+```
+
+### 7. Type Casts for Config Objects
+
+```typescript
+// WRONG - Direct cast fails type check
+const config = action.config as ScheduleFollowupConfig
+
+// CORRECT - Double cast through unknown
+const config = action.config as unknown as ScheduleFollowupConfig
+```
+
+### 8. Unused Variables → Remove or Underscore
 
 **First ask: Is this variable actually needed?**
 
@@ -366,6 +418,104 @@ const { used, _intentionallySkipped } = config
 **Rule**: If you add an underscore prefix, add a comment explaining WHY it's intentionally unused, or remove the variable entirely.
 
 **Tracking**: All underscore variables are tracked in `/MULTI-TENANT-PLATFORM-PLAN/UNDERSCORE-VARS-TRACKING.md`. When adding new underscore prefixes, update this tracking document so future phases properly implement the functionality.
+
+---
+
+## @cgk/auth Permission Patterns (CRITICAL)
+
+### checkPermissionOrRespond Signature
+
+The `checkPermissionOrRespond` function takes exactly **3 arguments**:
+
+```typescript
+// WRONG - 4 arguments (request is NOT needed)
+const permissionDenied = await checkPermissionOrRespond(
+  request,           // ❌ Not a parameter!
+  auth.tenantId,
+  auth.userId,
+  'permission.name'
+)
+
+// CORRECT - 3 arguments
+const permissionDenied = await checkPermissionOrRespond(
+  auth.userId,       // 1. userId
+  auth.tenantId,     // 2. tenantId
+  'permission.name'  // 3. permission string
+)
+if (permissionDenied) return permissionDenied
+```
+
+### requireAuth Returns AuthContext
+
+```typescript
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
+
+export async function GET(request: Request) {
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Now use auth.userId and auth.tenantId
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    auth.tenantId || '',
+    'resource.action'
+  )
+  if (permissionDenied) return permissionDenied
+
+  // Continue with authorized logic...
+}
+```
+
+---
+
+## Dynamic SQL Without sql.unsafe() (CRITICAL)
+
+The `@vercel/postgres` sql tag has **NO** `.unsafe()` method. For dynamic WHERE clauses, create separate query functions:
+
+```typescript
+// WRONG - sql.unsafe() doesn't exist
+const whereClause = status ? `AND status = '${status}'` : ''
+await sql`SELECT * FROM items WHERE active = true ${sql.unsafe(whereClause)}`
+
+// CORRECT - Separate query functions for each filter combination
+async function getItems(filters: { status?: string; category?: string }) {
+  const { status, category } = filters
+
+  if (status && category) {
+    return sql`SELECT * FROM items WHERE status = ${status} AND category = ${category}`
+  } else if (status) {
+    return sql`SELECT * FROM items WHERE status = ${status}`
+  } else if (category) {
+    return sql`SELECT * FROM items WHERE category = ${category}`
+  } else {
+    return sql`SELECT * FROM items`
+  }
+}
+
+// For pagination with filters, create dedicated query builders
+function getImagesQuery(options: { status?: string; offset: number; limit: number }) {
+  const { status, offset, limit } = options
+
+  if (status) {
+    return sql`
+      SELECT * FROM images
+      WHERE status = ${status}
+      ORDER BY created_at DESC
+      OFFSET ${offset} LIMIT ${limit}
+    `
+  }
+
+  return sql`
+    SELECT * FROM images
+    ORDER BY created_at DESC
+    OFFSET ${offset} LIMIT ${limit}
+  `
+}
+```
 
 ---
 

@@ -3,7 +3,6 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk/db'
-import type { SlackTemplate } from '@cgk/slack'
 
 interface TemplateRecord {
   id: string

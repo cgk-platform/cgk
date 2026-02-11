@@ -1,7 +1,5 @@
 import { Suspense } from 'react'
-import { headers } from 'next/headers'
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 
 import { Badge, Card, CardHeader, CardContent, cn } from '@cgk/ui'
@@ -47,12 +45,7 @@ export default async function TemplateTestDetailPage({ params }: PageProps) {
   )
 }
 
-async function getTenantSlug(): Promise<string | null> {
-  const headerList = await headers()
-  return headerList.get('x-tenant-slug')
-}
-
-async function TemplateTestHeader({ testId }: { testId: string }) {
+async function TemplateTestHeader({ testId: _testId }: { testId: string }) {
   // In a real implementation, fetch the test data
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-6">
@@ -85,7 +78,7 @@ async function TemplateTestHeader({ testId }: { testId: string }) {
   )
 }
 
-async function TemplatePreviewsLoader({ testId }: { testId: string }) {
+async function TemplatePreviewsLoader({ testId: _testId }: { testId: string }) {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <TemplatePreviewCard
@@ -168,7 +161,7 @@ function TemplatePreviewCard({
   )
 }
 
-async function TemplateResultsLoader({ testId }: { testId: string }) {
+async function TemplateResultsLoader({ testId: _testId }: { testId: string }) {
   return (
     <Card className="border-slate-200">
       <CardHeader className="border-b border-slate-100">
@@ -250,7 +243,7 @@ async function TemplateResultsLoader({ testId }: { testId: string }) {
   )
 }
 
-async function EngagementChartLoader({ testId }: { testId: string }) {
+async function EngagementChartLoader({ testId: _testId }: { testId: string }) {
   return (
     <Card className="border-slate-200">
       <CardHeader className="border-b border-slate-100">

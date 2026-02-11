@@ -110,7 +110,9 @@ export function ActionList({ actions, onChange }: ActionListProps) {
 
   const updateAction = (index: number, updates: Partial<Action>) => {
     const newActions = [...actions]
-    newActions[index] = { ...newActions[index], ...updates }
+    const currentAction = newActions[index]
+    if (!currentAction) return
+    newActions[index] = { ...currentAction, ...updates }
     onChange(newActions)
   }
 
@@ -126,7 +128,11 @@ export function ActionList({ actions, onChange }: ActionListProps) {
     if (newIndex < 0 || newIndex >= actions.length) return
 
     const newActions = [...actions]
-    ;[newActions[index], newActions[newIndex]] = [newActions[newIndex], newActions[index]]
+    const currentAction = newActions[index]
+    const targetAction = newActions[newIndex]
+    if (!currentAction || !targetAction) return
+    newActions[index] = targetAction
+    newActions[newIndex] = currentAction
     onChange(newActions)
     setExpandedAction(newIndex)
   }

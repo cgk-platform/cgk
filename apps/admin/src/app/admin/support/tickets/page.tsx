@@ -7,7 +7,6 @@ import { Plus, Filter, Search } from 'lucide-react'
 import { TicketList } from '@/components/support/ticket-list'
 import { Pagination } from '@/components/commerce/pagination'
 import { parseTicketFilters } from '@/lib/support/filters'
-import { buildFilterUrl } from '@/lib/search-params'
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -175,10 +174,12 @@ export default async function TicketsPage({ searchParams }: PageProps) {
       {/* Pagination */}
       {result.totalPages > 1 && (
         <Pagination
-          currentPage={result.page}
+          page={result.page}
           totalPages={result.totalPages}
+          totalCount={result.total}
+          limit={filters.limit}
           basePath="/admin/support/tickets"
-          params={currentFilters}
+          currentFilters={currentFilters}
         />
       )}
     </div>

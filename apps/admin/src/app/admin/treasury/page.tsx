@@ -86,7 +86,7 @@ async function TreasuryDashboard() {
     )
   }
 
-  const [summary, alerts, drawRequests, { receipts, totalCount: receiptCount }, receiptSummary] =
+  const [summary, alerts, drawRequests, { receipts }, receiptSummary] =
     await Promise.all([
       getTreasurySummary(tenantSlug),
       getLowBalanceAlerts(tenantSlug),

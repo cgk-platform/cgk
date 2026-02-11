@@ -116,7 +116,7 @@ export default function ChatManagementPage() {
                     >
                       {/* Avatar */}
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold text-emerald-400">
-                        {(session.visitorName || 'A')[0].toUpperCase()}
+                        {(session.visitorName || 'A').charAt(0).toUpperCase()}
                       </div>
 
                       {/* Info */}

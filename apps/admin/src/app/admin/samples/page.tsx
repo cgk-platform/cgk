@@ -12,7 +12,6 @@ import {
   getSampleStats,
   parseSampleFilters,
   type SampleRequest,
-  SAMPLE_STATUSES,
 } from '@/lib/creators-admin-ops'
 import { buildFilterUrl } from '@/lib/search-params'
 
@@ -244,7 +243,6 @@ async function SamplesLoader({
         currentFilters={currentFilters}
         currentSort="requested_at"
         currentDir="desc"
-        selectable
       />
       <Pagination
         page={filters.page}

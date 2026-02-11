@@ -6,9 +6,9 @@ import { Input } from '@cgk/ui'
 import { Label } from '@cgk/ui'
 import { Card, CardContent, CardHeader } from '@cgk/ui'
 import { Badge } from '@cgk/ui'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
+import { RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
 
-import type { DomainConfigStatus, SenderAddressWithDomain, SenderPurpose } from '@cgk/communications'
+import type { SenderAddressWithDomain, SenderPurpose } from '@cgk/communications'
 import type { SenderAddressStepProps } from '../types'
 
 interface RecommendedSender {
@@ -285,7 +285,7 @@ export function SenderAddressStep({
               </div>
               <div className="space-y-2">
                 <Label>Domain</Label>
-                <Select value={customDomainId} onValueChange={setCustomDomainId}>
+                <RadixSelect value={customDomainId} onValueChange={setCustomDomainId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select domain" />
                   </SelectTrigger>
@@ -296,7 +296,7 @@ export function SenderAddressStep({
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+                </RadixSelect>
               </div>
             </div>
             <div className="space-y-2">
@@ -309,7 +309,7 @@ export function SenderAddressStep({
             </div>
             <div className="space-y-2">
               <Label>Purpose</Label>
-              <Select
+              <RadixSelect
                 value={customPurpose}
                 onValueChange={(v) => setCustomPurpose(v as SenderPurpose)}
               >
@@ -323,7 +323,7 @@ export function SenderAddressStep({
                   <SelectItem value="treasury">Treasury</SelectItem>
                   <SelectItem value="system">System</SelectItem>
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowCustomForm(false)}>

@@ -22,6 +22,7 @@ import type {
   GeographyData,
   MetricWithTrend,
   PipelineData,
+  PipelineStageMetrics,
   PlatformData,
   SpendSensitivityData,
   TrendDirection,
@@ -66,8 +67,8 @@ function getDateRangeBounds(dateRange: DateRange): {
   return {
     current: { start: dateRange.startDate, end: dateRange.endDate },
     previous: {
-      start: previousStart.toISOString().split('T')[0],
-      end: previousEnd.toISOString().split('T')[0],
+      start: previousStart.toISOString().split('T')[0] ?? '',
+      end: previousEnd.toISOString().split('T')[0] ?? '',
     },
   }
 }
@@ -471,7 +472,7 @@ function getCountryLng(code: string): number {
 
 export async function getBurnRate(
   tenantSlug: string,
-  dateRange: DateRange
+  _dateRange: DateRange
 ): Promise<BurnRateData> {
   const burnData = await getBurnRateData(tenantSlug, 'monthly', 12)
 
@@ -713,17 +714,17 @@ export async function getPipelineData(
     { visitors: 0, productViews: 0, addToCart: 0, checkoutInitiated: 0, purchases: 0 }
   )
 
-  const stages = [
+  const stages: PipelineStageMetrics[] = [
     {
-      stage: 'awareness' as const,
-      metrics: { visitors: totals.visitors },
+      stage: 'awareness',
+      metrics: { visitors: totals.visitors } as Record<string, number>,
       conversionToNext: totals.visitors > 0 ? (totals.productViews / totals.visitors) * 100 : 0,
       dropOffRate: totals.visitors > 0 ? 100 - (totals.productViews / totals.visitors) * 100 : 0,
       avgVelocityDays: 0,
     },
     {
-      stage: 'interest' as const,
-      metrics: { productViews: totals.productViews },
+      stage: 'interest',
+      metrics: { productViews: totals.productViews } as Record<string, number>,
       conversionToNext:
         totals.productViews > 0 ? (totals.addToCart / totals.productViews) * 100 : 0,
       dropOffRate:
@@ -731,8 +732,8 @@ export async function getPipelineData(
       avgVelocityDays: 1,
     },
     {
-      stage: 'consideration' as const,
-      metrics: { addToCart: totals.addToCart },
+      stage: 'consideration',
+      metrics: { addToCart: totals.addToCart } as Record<string, number>,
       conversionToNext:
         totals.addToCart > 0 ? (totals.checkoutInitiated / totals.addToCart) * 100 : 0,
       dropOffRate:
@@ -740,8 +741,8 @@ export async function getPipelineData(
       avgVelocityDays: 0.5,
     },
     {
-      stage: 'conversion' as const,
-      metrics: { checkoutInitiated: totals.checkoutInitiated, purchases: totals.purchases },
+      stage: 'conversion',
+      metrics: { checkoutInitiated: totals.checkoutInitiated, purchases: totals.purchases } as Record<string, number>,
       conversionToNext:
         totals.checkoutInitiated > 0 ? (totals.purchases / totals.checkoutInitiated) * 100 : 0,
       dropOffRate:
@@ -751,8 +752,8 @@ export async function getPipelineData(
       avgVelocityDays: 0.1,
     },
     {
-      stage: 'retention' as const,
-      metrics: { repeatPurchases: Math.round(totals.purchases * 0.25) },
+      stage: 'retention',
+      metrics: { repeatPurchases: Math.round(totals.purchases * 0.25) } as Record<string, number>,
       conversionToNext: 25,
       dropOffRate: 75,
       avgVelocityDays: 30,

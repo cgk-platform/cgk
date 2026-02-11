@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, Button } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk/ui'
 import { getAllSLAConfigs } from '@cgk/support'
 import { headers } from 'next/headers'
 import { Clock, AlertTriangle, Timer } from 'lucide-react'

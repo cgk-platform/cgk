@@ -53,10 +53,11 @@ export async function GET(request: Request) {
 
   // Parse query parameters
   const status = url.searchParams.get('status') as ReceiptStatus | undefined
-  const fromAddress = url.searchParams.get('from') || undefined
-  const dateFrom = url.searchParams.get('dateFrom') || undefined
-  const dateTo = url.searchParams.get('dateTo') || undefined
-  const search = url.searchParams.get('search') || undefined
+  // Note: fromAddress, dateFrom, dateTo, search are reserved for future advanced filtering
+  void url.searchParams.get('from')
+  void url.searchParams.get('dateFrom')
+  void url.searchParams.get('dateTo')
+  void url.searchParams.get('search')
   const page = parseInt(url.searchParams.get('page') || '1', 10)
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50', 10), 100)
   const offset = (page - 1) * limit

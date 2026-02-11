@@ -786,7 +786,7 @@ export interface ModelComparisonData {
 }
 
 // ============================================================
-// Platform Connection Types (Phase 2AT-D)
+// Secondary Platform Connection Types (Phase 2AT-D)
 // ============================================================
 
 export type SecondaryPlatform = 'snapchat' | 'pinterest' | 'linkedin' | 'mntn' | 'affiliate'
@@ -794,7 +794,7 @@ export type ConnectionStatus = 'connected' | 'not_connected' | 'error'
 export type SyncStatus = 'success' | 'partial' | 'failed'
 export type SyncFrequency = 'hourly' | 'daily' | 'weekly'
 
-export interface PlatformConnection {
+export interface SecondaryPlatformConnection {
   id: string
   tenantId: string
   platform: SecondaryPlatform
@@ -813,7 +813,7 @@ export interface PlatformConnection {
   updatedAt: string
 }
 
-export interface PlatformConnectionCreate {
+export interface SecondaryPlatformConnectionCreate {
   platform: SecondaryPlatform
   displayName?: string
   accountId?: string
@@ -821,7 +821,7 @@ export interface PlatformConnectionCreate {
   syncFrequency?: SyncFrequency
 }
 
-export interface PlatformConnectionUpdate {
+export interface SecondaryPlatformConnectionUpdate {
   enabled?: boolean
   syncFrequency?: SyncFrequency
   displayName?: string

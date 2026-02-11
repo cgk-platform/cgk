@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext } from '@cgk/auth'
+import { requireAuth } from '@cgk/auth'
 import { getTicketMetrics, getUnacknowledgedAlerts, getAllSLAConfigs } from '@cgk/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -17,9 +17,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  let auth: AuthContext
   try {
-    auth = await requireAuth(request)
+    await requireAuth(request)
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

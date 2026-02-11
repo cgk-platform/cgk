@@ -30,7 +30,7 @@ export async function calculatePLStatement(
         AND financial_status NOT IN ('cancelled', 'voided')
     `
 
-    const revenue = revenueResult.rows[0]
+    const revenue = revenueResult.rows[0] ?? {}
     const grossSalesCents = Number(revenue.gross_sales_cents || 0)
     const discountsCents = Number(revenue.discounts_cents || 0)
     const returnsCents = Number(revenue.returns_cents || 0)
@@ -290,15 +290,15 @@ export async function calculatePLComparison(
     compStart.setFullYear(compStart.getFullYear() - 1)
     const compEnd = new Date(endDateObj)
     compEnd.setFullYear(compEnd.getFullYear() - 1)
-    compStartDate = compStart.toISOString().split('T')[0]
-    compEndDate = compEnd.toISOString().split('T')[0]
+    compStartDate = compStart.toISOString().split('T')[0] ?? ''
+    compEndDate = compEnd.toISOString().split('T')[0] ?? ''
   } else {
     const compEnd = new Date(startDateObj)
     compEnd.setDate(compEnd.getDate() - 1)
     const compStart = new Date(compEnd)
     compStart.setDate(compStart.getDate() - periodDays + 1)
-    compStartDate = compStart.toISOString().split('T')[0]
-    compEndDate = compEnd.toISOString().split('T')[0]
+    compStartDate = compStart.toISOString().split('T')[0] ?? ''
+    compEndDate = compEnd.toISOString().split('T')[0] ?? ''
   }
 
   const comparison = await calculatePLStatement(tenantSlug, compStartDate, compEndDate)
@@ -361,32 +361,32 @@ export function getPresetDateRanges(): Array<{
   end_date: string
 }> {
   const now = new Date()
-  const today = now.toISOString().split('T')[0]
+  const today = now.toISOString().split('T')[0] ?? ''
 
   // This month
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-  const thisMonthStartStr = thisMonthStart.toISOString().split('T')[0]
+  const thisMonthStartStr = thisMonthStart.toISOString().split('T')[0] ?? ''
 
   // Last month
   const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
   const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const lastMonthStartStr = lastMonthStart.toISOString().split('T')[0]
-  const lastMonthEndStr = lastMonthEnd.toISOString().split('T')[0]
+  const lastMonthStartStr = lastMonthStart.toISOString().split('T')[0] ?? ''
+  const lastMonthEndStr = lastMonthEnd.toISOString().split('T')[0] ?? ''
 
   // This quarter
   const currentQuarter = Math.floor(now.getMonth() / 3)
   const thisQuarterStart = new Date(now.getFullYear(), currentQuarter * 3, 1)
-  const thisQuarterStartStr = thisQuarterStart.toISOString().split('T')[0]
+  const thisQuarterStartStr = thisQuarterStart.toISOString().split('T')[0] ?? ''
 
   // YTD
   const ytdStart = new Date(now.getFullYear(), 0, 1)
-  const ytdStartStr = ytdStart.toISOString().split('T')[0]
+  const ytdStartStr = ytdStart.toISOString().split('T')[0] ?? ''
 
   // Last year
   const lastYearStart = new Date(now.getFullYear() - 1, 0, 1)
   const lastYearEnd = new Date(now.getFullYear() - 1, 11, 31)
-  const lastYearStartStr = lastYearStart.toISOString().split('T')[0]
-  const lastYearEndStr = lastYearEnd.toISOString().split('T')[0]
+  const lastYearStartStr = lastYearStart.toISOString().split('T')[0] ?? ''
+  const lastYearEndStr = lastYearEnd.toISOString().split('T')[0] ?? ''
 
   return [
     { id: 'this_month', label: 'This Month', start_date: thisMonthStartStr, end_date: today },

@@ -12,7 +12,7 @@ import type { ResendAccountStepProps } from '../types'
  *
  * Guides user to create/connect their Resend account and verify API key.
  */
-export function ResendAccountStep({ onApiKeyVerified, onBack }: ResendAccountStepProps) {
+export function ResendAccountStep({ onApiKeyVerified, onBack: _onBack }: ResendAccountStepProps) {
   const [apiKey, setApiKey] = useState('')
   const [fullAccessKey, setFullAccessKey] = useState('')
   const [showKey, setShowKey] = useState(false)

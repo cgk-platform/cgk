@@ -13,7 +13,7 @@ interface RouteContext {
  * POST /api/admin/ab-tests/[testId]/start
  * Start or resume an A/B test
  */
-export async function POST(request: Request, context: RouteContext) {
+export async function POST(_request: Request, context: RouteContext) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 

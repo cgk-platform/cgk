@@ -6,15 +6,11 @@ import {
   Button,
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Select,
+  RadixSelect,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Input,
   Badge,
 } from '@cgk/ui'
 import {
@@ -29,7 +25,7 @@ import {
   TrendingDown,
   Minus,
 } from 'lucide-react'
-import { formatDistanceToNow, format } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 
 interface VoiceCall {
   id: string
@@ -93,7 +89,7 @@ export default function CallHistoryPage() {
   const [calls, setCalls] = useState<VoiceCall[]>([])
   const [stats, setStats] = useState<CallStats | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [, setError] = useState<string | null>(null)
 
   // Filters
   const [agentId, setAgentId] = useState(searchParams.get('agentId') || '')
@@ -228,18 +224,18 @@ export default function CallHistoryPage() {
           <div className="flex gap-4 items-end">
             <div className="space-y-2">
               <label className="text-sm font-medium">Agent</label>
-              <Select value={agentId} onValueChange={setAgentId}>
+              <RadixSelect value={agentId} onValueChange={setAgentId}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="All agents" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">All agents</SelectItem>
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Direction</label>
-              <Select value={direction} onValueChange={setDirection}>
+              <RadixSelect value={direction} onValueChange={setDirection}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
@@ -248,11 +244,11 @@ export default function CallHistoryPage() {
                   <SelectItem value="inbound">Inbound</SelectItem>
                   <SelectItem value="outbound">Outbound</SelectItem>
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
-              <Select value={status} onValueChange={setStatus}>
+              <RadixSelect value={status} onValueChange={setStatus}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
@@ -263,11 +259,11 @@ export default function CallHistoryPage() {
                   <SelectItem value="failed">Failed</SelectItem>
                   <SelectItem value="voicemail">Voicemail</SelectItem>
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Date Range</label>
-              <Select value={dateRange} onValueChange={setDateRange}>
+              <RadixSelect value={dateRange} onValueChange={setDateRange}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
@@ -277,7 +273,7 @@ export default function CallHistoryPage() {
                   <SelectItem value="30days">Last 30 days</SelectItem>
                   <SelectItem value="90days">Last 90 days</SelectItem>
                 </SelectContent>
-              </Select>
+              </RadixSelect>
             </div>
           </div>
         </CardContent>

@@ -74,7 +74,7 @@ function ProjectEvent({ project, onClick }: ProjectEventProps) {
 export function CalendarView({
   projects,
   onProjectClick,
-  onDueDateChange,
+  onDueDateChange: _onDueDateChange,
 }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [viewMode, setViewMode] = useState<ViewMode>('month')
@@ -89,11 +89,13 @@ export function CalendarView({
   const projectsByDate = useMemo(() => {
     const map = new Map<string, PipelineProject[]>()
     for (const project of projectsWithDates) {
-      const dateKey = project.dueDate!.split('T')[0]
+      const dueDate = project.dueDate
+      if (!dueDate) continue
+      const dateKey = dueDate.split('T')[0] ?? dueDate
       if (!map.has(dateKey)) {
         map.set(dateKey, [])
       }
-      map.get(dateKey)!.push(project)
+      map.get(dateKey)?.push(project)
     }
     return map
   }, [projectsWithDates])
@@ -232,8 +234,8 @@ export function CalendarView({
       {/* Calendar grid */}
       <div className="grid grid-cols-7">
         {calendarDays.map(({ date, isCurrentMonth }, index) => {
-          const dateKey = date.toISOString().split('T')[0]
-          const dayProjects = projectsByDate.get(dateKey) || []
+          const dateKey = date.toISOString().split('T')[0] ?? ''
+          const dayProjects = projectsByDate.get(dateKey) ?? []
           const isCurrentDay = isToday(date)
 
           return (

@@ -102,6 +102,9 @@ export async function isEligibleForAutoSend(
     }
 
     const request = result.rows[0]
+    if (!request) {
+      return { eligible: false, reason: 'Request not found' }
+    }
 
     if (request.status !== 'approved') {
       return { eligible: false, reason: `Request is ${request.status}, not approved` }
@@ -111,7 +114,7 @@ export async function isEligibleForAutoSend(
       return { eligible: false, reason: 'Request has no approval timestamp' }
     }
 
-    const approvedAt = new Date(request.approved_at)
+    const approvedAt = new Date(request.approved_at as string)
     const delayMs = config.delayHours * 60 * 60 * 1000
     const eligibleAt = new Date(approvedAt.getTime() + delayMs)
 
@@ -120,7 +123,7 @@ export async function isEligibleForAutoSend(
       return { eligible: false, reason: `Delay period not complete (${hoursRemaining}h remaining)` }
     }
 
-    if (config.maxAmountCents !== null && request.total_amount_cents > config.maxAmountCents) {
+    if (config.maxAmountCents !== null && (request.total_amount_cents as number) > config.maxAmountCents) {
       return {
         eligible: false,
         reason: `Amount exceeds auto-send limit ($${(config.maxAmountCents / 100).toFixed(2)})`,
@@ -160,13 +163,14 @@ export async function processAutoSend(
       return { success: false, processedWithdrawals: 0, error: 'No withdrawals found in request' }
     }
 
-    const withdrawalIds = items.rows.map((row) => row.withdrawal_id)
+    const withdrawalIds = items.rows.map((row) => row.withdrawal_id as string)
+    const withdrawalIdsLiteral = `{${withdrawalIds.map(s => `"${s}"`).join(',')}}`
 
     // Update withdrawals to processing status
     const updateResult = await sql`
       UPDATE withdrawals
       SET status = 'processing'::withdrawal_status, updated_at = NOW()
-      WHERE id = ANY(${withdrawalIds}::text[])
+      WHERE id = ANY(${withdrawalIdsLiteral}::text[])
       AND status = 'approved'
       RETURNING id
     `

@@ -13,7 +13,7 @@ interface RouteParams {
 /**
  * POST /api/admin/support/kb/[id]/publish - Publish a KB article
  */
-export async function POST(request: Request, { params }: RouteParams) {
+export async function POST(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const userId = headerList.get('x-user-id')
@@ -40,7 +40,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 /**
  * DELETE /api/admin/support/kb/[id]/publish - Unpublish a KB article
  */
-export async function DELETE(request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const userId = headerList.get('x-user-id')

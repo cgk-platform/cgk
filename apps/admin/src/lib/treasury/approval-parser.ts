@@ -255,7 +255,7 @@ export function extractRequestIdFromSubject(subject: string): string | null {
   for (const pattern of patterns) {
     const match = subject.match(pattern)
     if (match) {
-      return match[0] || match[1]
+      return match[0] || match[1] || null
     }
   }
 

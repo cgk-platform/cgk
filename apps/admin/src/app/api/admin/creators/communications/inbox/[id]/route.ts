@@ -14,7 +14,7 @@ import {
 } from '@/lib/creator-communications/db'
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const headerList = await headers()

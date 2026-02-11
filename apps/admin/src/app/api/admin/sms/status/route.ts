@@ -53,8 +53,9 @@ export async function GET() {
       WHERE integration_type = 'sms'
     `
 
-    const connected = credResult.rows.length > 0 && credResult.rows[0].status === 'active'
-    const metadata = credResult.rows[0]?.metadata as Record<string, unknown> || {}
+    const credRow = credResult.rows[0]
+    const connected = credRow?.status === 'active'
+    const metadata = credRow?.metadata as Record<string, unknown> || {}
 
     // Get consent stats - check if sms_consent table exists
     const consentTableCheck = await sql`

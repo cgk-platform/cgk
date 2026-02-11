@@ -9,7 +9,7 @@ import { withTenant, sql } from '@cgk/db'
  * Resets a template to default (deletes custom template)
  */
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ type: string }> },
 ) {
   const { type } = await params

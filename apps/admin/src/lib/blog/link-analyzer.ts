@@ -117,8 +117,8 @@ export function extractLinksFromContent(
   let match
 
   while ((match = markdownLinkPattern.exec(content)) !== null) {
-    const text = match[1]
-    const url = match[2].split(' ')[0] // Remove title if present
+    const text = match[1] ?? ''
+    const url = (match[2] ?? '').split(' ')[0] // Remove title if present
 
     // Skip anchor-only links and empty URLs
     if (!url || url === '#') continue
@@ -132,7 +132,7 @@ export function extractLinksFromContent(
       text,
       isInternal,
       isAuthoritative,
-      domain,
+      domain: domain ?? null,
     })
   }
 

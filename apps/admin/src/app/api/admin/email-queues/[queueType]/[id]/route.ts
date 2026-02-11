@@ -38,7 +38,7 @@ export async function GET(
   { params }: { params: Promise<{ queueType: string; id: string }> }
 ) {
   try {
-    const { tenantId, userId } = await getTenantContext(req)
+    const { tenantId } = await getTenantContext(req)
 
     if (!tenantId) {
       return NextResponse.json(
@@ -82,7 +82,7 @@ export async function PATCH(
   { params }: { params: Promise<{ queueType: string; id: string }> }
 ) {
   try {
-    const { tenantId, userId } = await getTenantContext(req)
+    const { tenantId } = await getTenantContext(req)
 
     if (!tenantId) {
       return NextResponse.json(
@@ -130,18 +130,8 @@ export async function PATCH(
     }
 
     if (metadata) {
-      // Update metadata
-      const tableName = getTableName(queueType)
-      await withTenant(tenantId, async () => {
-        await sql`
-          UPDATE ${sql.identifier([tableName])}
-          SET
-            metadata = metadata || ${JSON.stringify(metadata)}::jsonb,
-            updated_at = NOW()
-          WHERE id = ${entryId}
-            AND tenant_id = ${tenantId}
-        `
-      })
+      // Update metadata using switch pattern (sql.identifier not supported)
+      await updateEntryMetadata(tenantId, queueType, entryId, metadata)
     }
 
     // Fetch updated entry
@@ -157,14 +147,32 @@ export async function PATCH(
   }
 }
 
-function getTableName(queueType: QueueType): string {
-  const tables: Record<QueueType, string> = {
-    review: 'review_email_queue',
-    creator: 'creator_email_queue',
-    subscription: 'subscription_email_queue',
-    esign: 'esign_email_queue',
-    treasury: 'treasury_email_queue',
-    team_invitation: 'team_invitation_queue',
-  }
-  return tables[queueType]
+/**
+ * Update metadata for a queue entry
+ * Uses switch statement pattern since @vercel/postgres sql doesn't support identifier()
+ */
+async function updateEntryMetadata(
+  tenantId: string,
+  queueType: QueueType,
+  entryId: string,
+  metadata: Record<string, unknown>
+): Promise<void> {
+  const metadataJson = JSON.stringify(metadata)
+
+  await withTenant(tenantId, async () => {
+    switch (queueType) {
+      case 'review':
+        return sql`UPDATE review_email_queue SET metadata = metadata || ${metadataJson}::jsonb, updated_at = NOW() WHERE id = ${entryId} AND tenant_id = ${tenantId}`
+      case 'creator':
+        return sql`UPDATE creator_email_queue SET metadata = metadata || ${metadataJson}::jsonb, updated_at = NOW() WHERE id = ${entryId} AND tenant_id = ${tenantId}`
+      case 'subscription':
+        return sql`UPDATE subscription_email_queue SET metadata = metadata || ${metadataJson}::jsonb, updated_at = NOW() WHERE id = ${entryId} AND tenant_id = ${tenantId}`
+      case 'esign':
+        return sql`UPDATE esign_email_queue SET metadata = metadata || ${metadataJson}::jsonb, updated_at = NOW() WHERE id = ${entryId} AND tenant_id = ${tenantId}`
+      case 'treasury':
+        return sql`UPDATE treasury_email_queue SET metadata = metadata || ${metadataJson}::jsonb, updated_at = NOW() WHERE id = ${entryId} AND tenant_id = ${tenantId}`
+      case 'team_invitation':
+        return sql`UPDATE team_invitation_queue SET metadata = metadata || ${metadataJson}::jsonb, updated_at = NOW() WHERE id = ${entryId} AND tenant_id = ${tenantId}`
+    }
+  })
 }

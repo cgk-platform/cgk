@@ -1,9 +1,8 @@
 'use client'
 
-import { Button, Card, CardContent, Badge, Input, Label, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Input, Label, cn } from '@cgk/ui'
 import {
   Mail,
-  Building2,
   MessageSquare,
   Database,
   Server,

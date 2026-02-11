@@ -12,7 +12,7 @@ import { setProductExcluded } from '@/lib/google-feed/db'
  * Include a product in the Google Feed (remove exclusion)
  */
 export async function POST(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ handle: string }> }
 ) {
   const { handle } = await params

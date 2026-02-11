@@ -26,9 +26,8 @@ export async function GET(request: Request) {
 
   // Check permission
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.teams.view'
   )
   if (permissionDenied) return permissionDenied
@@ -68,9 +67,8 @@ export async function POST(request: Request) {
 
   // Check permission
   const permissionDenied = await checkPermissionOrRespond(
-    request,
-    auth.tenantId || '',
     auth.userId,
+    auth.tenantId || '',
     'ai.teams.manage'
   )
   if (permissionDenied) return permissionDenied

@@ -70,6 +70,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     const receipt = receiptResult.rows[0]
 
+    if (!receipt) {
+      return { error: 'Receipt not found', status: 404 }
+    }
+
     // Check if already linked
     if (receipt.linked_expense_id) {
       return { error: 'Receipt is already linked to an expense', status: 400 }

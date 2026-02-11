@@ -94,7 +94,9 @@ function hasProperHeadingHierarchy(text: string): boolean {
   const levels: number[] = []
 
   for (const match of headingMatches) {
-    levels.push(match[1].length)
+    if (match[1]) {
+      levels.push(match[1].length)
+    }
   }
 
   if (levels.length === 0) return true // No headings is acceptable
@@ -104,7 +106,7 @@ function hasProperHeadingHierarchy(text: string): boolean {
     const prevLevel = levels[i - 1]
     const currentLevel = levels[i]
     // Skipping more than one level is bad (e.g., H2 -> H4)
-    if (currentLevel > prevLevel + 1) {
+    if (prevLevel !== undefined && currentLevel !== undefined && currentLevel > prevLevel + 1) {
       return false
     }
   }

@@ -29,34 +29,104 @@ export async function getWorkflowRules(
   }
 ): Promise<WorkflowRule[]> {
   return withTenant(tenantId, async () => {
-    let query = sql`
-      SELECT
-        r.*,
-        u1.name as created_by_name,
-        u2.name as updated_by_name
-      FROM workflow_rules r
-      LEFT JOIN public.users u1 ON u1.id = r.created_by
-      LEFT JOIN public.users u2 ON u2.id = r.updated_by
-      WHERE 1=1
-    `
+    // Use explicit query branches since @vercel/postgres doesn't support dynamic SQL composition
+    if (filters?.isActive !== undefined && filters?.triggerType && filters?.entityType) {
+      const result = await sql`
+        SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+        FROM workflow_rules r
+        LEFT JOIN public.users u1 ON u1.id = r.created_by
+        LEFT JOIN public.users u2 ON u2.id = r.updated_by
+        WHERE r.is_active = ${filters.isActive}
+          AND r.trigger_type = ${filters.triggerType}
+          AND (r.entity_types = '{}' OR ${filters.entityType} = ANY(r.entity_types))
+        ORDER BY r.priority DESC, r.created_at ASC
+      `
+      return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
+    }
+
+    if (filters?.isActive !== undefined && filters?.triggerType) {
+      const result = await sql`
+        SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+        FROM workflow_rules r
+        LEFT JOIN public.users u1 ON u1.id = r.created_by
+        LEFT JOIN public.users u2 ON u2.id = r.updated_by
+        WHERE r.is_active = ${filters.isActive} AND r.trigger_type = ${filters.triggerType}
+        ORDER BY r.priority DESC, r.created_at ASC
+      `
+      return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
+    }
+
+    if (filters?.isActive !== undefined && filters?.entityType) {
+      const result = await sql`
+        SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+        FROM workflow_rules r
+        LEFT JOIN public.users u1 ON u1.id = r.created_by
+        LEFT JOIN public.users u2 ON u2.id = r.updated_by
+        WHERE r.is_active = ${filters.isActive}
+          AND (r.entity_types = '{}' OR ${filters.entityType} = ANY(r.entity_types))
+        ORDER BY r.priority DESC, r.created_at ASC
+      `
+      return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
+    }
+
+    if (filters?.triggerType && filters?.entityType) {
+      const result = await sql`
+        SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+        FROM workflow_rules r
+        LEFT JOIN public.users u1 ON u1.id = r.created_by
+        LEFT JOIN public.users u2 ON u2.id = r.updated_by
+        WHERE r.trigger_type = ${filters.triggerType}
+          AND (r.entity_types = '{}' OR ${filters.entityType} = ANY(r.entity_types))
+        ORDER BY r.priority DESC, r.created_at ASC
+      `
+      return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
+    }
 
     if (filters?.isActive !== undefined) {
-      query = sql`${query} AND r.is_active = ${filters.isActive}`
+      const result = await sql`
+        SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+        FROM workflow_rules r
+        LEFT JOIN public.users u1 ON u1.id = r.created_by
+        LEFT JOIN public.users u2 ON u2.id = r.updated_by
+        WHERE r.is_active = ${filters.isActive}
+        ORDER BY r.priority DESC, r.created_at ASC
+      `
+      return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
     }
 
     if (filters?.triggerType) {
-      query = sql`${query} AND r.trigger_type = ${filters.triggerType}`
+      const result = await sql`
+        SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+        FROM workflow_rules r
+        LEFT JOIN public.users u1 ON u1.id = r.created_by
+        LEFT JOIN public.users u2 ON u2.id = r.updated_by
+        WHERE r.trigger_type = ${filters.triggerType}
+        ORDER BY r.priority DESC, r.created_at ASC
+      `
+      return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
     }
 
     if (filters?.entityType) {
-      query = sql`${query} AND (r.entity_types = '{}' OR ${filters.entityType} = ANY(r.entity_types))`
+      const result = await sql`
+        SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+        FROM workflow_rules r
+        LEFT JOIN public.users u1 ON u1.id = r.created_by
+        LEFT JOIN public.users u2 ON u2.id = r.updated_by
+        WHERE r.entity_types = '{}' OR ${filters.entityType} = ANY(r.entity_types)
+        ORDER BY r.priority DESC, r.created_at ASC
+      `
+      return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
     }
 
-    query = sql`${query} ORDER BY r.priority DESC, r.created_at ASC`
-
-    const result = await query
-
-    return result.rows.map(mapRuleFromDb)
+    // No filters - return all
+    const result = await sql`
+      SELECT r.*, u1.name as created_by_name, u2.name as updated_by_name
+      FROM workflow_rules r
+      LEFT JOIN public.users u1 ON u1.id = r.created_by
+      LEFT JOIN public.users u2 ON u2.id = r.updated_by
+      ORDER BY r.priority DESC, r.created_at ASC
+    `
+    return result.rows.map((row) => mapRuleFromDb(row as Record<string, unknown>))
   })
 }
 
@@ -83,7 +153,7 @@ export async function getWorkflowRule(
       return null
     }
 
-    return mapRuleFromDb(result.rows[0])
+    return mapRuleFromDb(result.rows[0] as Record<string, unknown>)
   })
 }
 
@@ -115,18 +185,19 @@ export async function createWorkflowRule(
         ${input.maxExecutions || null},
         ${input.requiresApproval ?? false},
         ${input.approverRole || null},
-        ${input.entityTypes || []},
+        ${`{${(input.entityTypes || []).map(t => `"${t}"`).join(',')}}`}::text[],
         ${userId}
       )
       RETURNING *
     `
 
-    return mapRuleFromDb(result.rows[0])
+    return mapRuleFromDb(result.rows[0] as Record<string, unknown>)
   })
 }
 
 /**
  * Update a workflow rule
+ * Note: Uses fetch-then-update pattern since @vercel/postgres doesn't support dynamic SET clauses
  */
 export async function updateWorkflowRule(
   tenantId: string,
@@ -135,98 +206,63 @@ export async function updateWorkflowRule(
   userId: string
 ): Promise<WorkflowRule | null> {
   return withTenant(tenantId, async () => {
-    // Build update query dynamically
-    const updates: string[] = []
-    const values: unknown[] = []
-
-    if (input.name !== undefined) {
-      values.push(input.name)
-      updates.push(`name = $${values.length}`)
+    // Fetch current rule to merge with updates
+    const current = await sql`SELECT * FROM workflow_rules WHERE id = ${ruleId}`
+    if (current.rows.length === 0) {
+      return null
     }
 
-    if (input.description !== undefined) {
-      values.push(input.description)
-      updates.push(`description = $${values.length}`)
-    }
+    const row = current.rows[0] as Record<string, unknown>
 
-    if (input.isActive !== undefined) {
-      values.push(input.isActive)
-      updates.push(`is_active = $${values.length}`)
-    }
-
-    if (input.priority !== undefined) {
-      values.push(input.priority)
-      updates.push(`priority = $${values.length}`)
-    }
-
-    if (input.triggerType !== undefined) {
-      values.push(input.triggerType)
-      updates.push(`trigger_type = $${values.length}`)
-    }
-
-    if (input.triggerConfig !== undefined) {
-      values.push(JSON.stringify(input.triggerConfig))
-      updates.push(`trigger_config = $${values.length}`)
-    }
-
-    if (input.conditions !== undefined) {
-      values.push(JSON.stringify(input.conditions))
-      updates.push(`conditions = $${values.length}`)
-    }
-
-    if (input.actions !== undefined) {
-      values.push(JSON.stringify(input.actions))
-      updates.push(`actions = $${values.length}`)
-    }
-
-    if (input.cooldownHours !== undefined) {
-      values.push(input.cooldownHours)
-      updates.push(`cooldown_hours = $${values.length}`)
-    }
-
-    if (input.maxExecutions !== undefined) {
-      values.push(input.maxExecutions)
-      updates.push(`max_executions = $${values.length}`)
-    }
-
-    if (input.requiresApproval !== undefined) {
-      values.push(input.requiresApproval)
-      updates.push(`requires_approval = $${values.length}`)
-    }
-
-    if (input.approverRole !== undefined) {
-      values.push(input.approverRole)
-      updates.push(`approver_role = $${values.length}`)
-    }
-
-    if (input.entityTypes !== undefined) {
-      values.push(input.entityTypes)
-      updates.push(`entity_types = $${values.length}`)
-    }
-
-    if (updates.length === 0) {
-      return getWorkflowRule(tenantId, ruleId)
-    }
-
-    // Add updated_by
-    values.push(userId)
-    updates.push(`updated_by = $${values.length}`)
-
-    // Add updated_at
-    updates.push('updated_at = NOW()')
+    // Merge with input (input takes precedence), casting row values to proper types
+    const name = (input.name ?? row.name) as string
+    const description = (input.description !== undefined ? input.description : row.description) as string | null
+    const isActive = (input.isActive ?? row.is_active) as boolean
+    const priority = (input.priority ?? row.priority) as number
+    const triggerType = (input.triggerType ?? row.trigger_type) as string
+    const triggerConfig = input.triggerConfig !== undefined
+      ? JSON.stringify(input.triggerConfig)
+      : (typeof row.trigger_config === 'string' ? row.trigger_config : JSON.stringify(row.trigger_config))
+    const conditions = input.conditions !== undefined
+      ? JSON.stringify(input.conditions)
+      : (typeof row.conditions === 'string' ? row.conditions : JSON.stringify(row.conditions))
+    const actions = input.actions !== undefined
+      ? JSON.stringify(input.actions)
+      : (typeof row.actions === 'string' ? row.actions : JSON.stringify(row.actions))
+    const cooldownHours = (input.cooldownHours !== undefined ? input.cooldownHours : row.cooldown_hours) as number | null
+    const maxExecutions = (input.maxExecutions !== undefined ? input.maxExecutions : row.max_executions) as number | null
+    const requiresApproval = (input.requiresApproval ?? row.requires_approval) as boolean
+    const approverRole = (input.approverRole !== undefined ? input.approverRole : row.approver_role) as string | null
+    const entityTypesArr = (input.entityTypes ?? row.entity_types) as string[]
+    const entityTypesStr = `{${entityTypesArr.map(t => `"${t}"`).join(',')}}`
 
     const result = await sql`
-      UPDATE workflow_rules
-      SET ${sql.raw(updates.join(', '))}
+      UPDATE workflow_rules SET
+        name = ${name},
+        description = ${description},
+        is_active = ${isActive},
+        priority = ${priority},
+        trigger_type = ${triggerType},
+        trigger_config = ${triggerConfig}::jsonb,
+        conditions = ${conditions}::jsonb,
+        actions = ${actions}::jsonb,
+        cooldown_hours = ${cooldownHours},
+        max_executions = ${maxExecutions},
+        requires_approval = ${requiresApproval},
+        approver_role = ${approverRole},
+        entity_types = ${entityTypesStr}::text[],
+        updated_by = ${userId},
+        updated_at = NOW()
       WHERE id = ${ruleId}
       RETURNING *
     `
 
-    if (result.rows.length === 0) {
+    const updatedRow = result.rows[0]
+    if (!updatedRow) {
       return null
     }
 
-    return mapRuleFromDb(result.rows[0])
+    return mapRuleFromDb(updatedRow as Record<string, unknown>)
   })
 }
 
@@ -266,52 +302,103 @@ export async function getWorkflowExecutions(
     offset?: number
   }
 ): Promise<{ executions: WorkflowExecution[]; total: number }> {
+  const limit = filters?.limit || 50
+  const offset = filters?.offset || 0
+
   return withTenant(tenantId, async () => {
-    let whereClause = sql`WHERE 1=1`
+    // Handle filter combinations with explicit queries
+    if (filters?.ruleId && filters?.entityType && filters?.entityId && filters?.result) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM workflow_executions e
+        WHERE e.rule_id = ${filters.ruleId}
+          AND e.entity_type = ${filters.entityType}
+          AND e.entity_id = ${filters.entityId}
+          AND e.result = ${filters.result}
+      `
+      const result = await sql`
+        SELECT e.*, r.name as rule_name
+        FROM workflow_executions e
+        JOIN workflow_rules r ON r.id = e.rule_id
+        WHERE e.rule_id = ${filters.ruleId}
+          AND e.entity_type = ${filters.entityType}
+          AND e.entity_id = ${filters.entityId}
+          AND e.result = ${filters.result}
+        ORDER BY e.started_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      return {
+        executions: result.rows.map((row) => mapExecutionFromDb(row as Record<string, unknown>)),
+        total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
+      }
+    }
 
     if (filters?.ruleId) {
-      whereClause = sql`${whereClause} AND e.rule_id = ${filters.ruleId}`
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM workflow_executions e WHERE e.rule_id = ${filters.ruleId}
+      `
+      const result = await sql`
+        SELECT e.*, r.name as rule_name
+        FROM workflow_executions e
+        JOIN workflow_rules r ON r.id = e.rule_id
+        WHERE e.rule_id = ${filters.ruleId}
+        ORDER BY e.started_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      return {
+        executions: result.rows.map((row) => mapExecutionFromDb(row as Record<string, unknown>)),
+        total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
+      }
     }
 
-    if (filters?.entityType) {
-      whereClause = sql`${whereClause} AND e.entity_type = ${filters.entityType}`
-    }
-
-    if (filters?.entityId) {
-      whereClause = sql`${whereClause} AND e.entity_id = ${filters.entityId}`
+    if (filters?.entityType && filters?.entityId) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM workflow_executions e
+        WHERE e.entity_type = ${filters.entityType} AND e.entity_id = ${filters.entityId}
+      `
+      const result = await sql`
+        SELECT e.*, r.name as rule_name
+        FROM workflow_executions e
+        JOIN workflow_rules r ON r.id = e.rule_id
+        WHERE e.entity_type = ${filters.entityType} AND e.entity_id = ${filters.entityId}
+        ORDER BY e.started_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      return {
+        executions: result.rows.map((row) => mapExecutionFromDb(row as Record<string, unknown>)),
+        total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
+      }
     }
 
     if (filters?.result) {
-      whereClause = sql`${whereClause} AND e.result = ${filters.result}`
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM workflow_executions e WHERE e.result = ${filters.result}
+      `
+      const result = await sql`
+        SELECT e.*, r.name as rule_name
+        FROM workflow_executions e
+        JOIN workflow_rules r ON r.id = e.rule_id
+        WHERE e.result = ${filters.result}
+        ORDER BY e.started_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      return {
+        executions: result.rows.map((row) => mapExecutionFromDb(row as Record<string, unknown>)),
+        total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
+      }
     }
 
-    // Get total count
-    const countResult = await sql`
-      SELECT COUNT(*) as count
-      FROM workflow_executions e
-      ${whereClause}
-    `
-    const total = parseInt(countResult.rows[0].count as string, 10)
-
-    // Get executions
-    const limit = filters?.limit || 50
-    const offset = filters?.offset || 0
-
+    // No filters - return all
+    const countResult = await sql`SELECT COUNT(*) as count FROM workflow_executions`
     const result = await sql`
-      SELECT
-        e.*,
-        r.name as rule_name
+      SELECT e.*, r.name as rule_name
       FROM workflow_executions e
       JOIN workflow_rules r ON r.id = e.rule_id
-      ${whereClause}
       ORDER BY e.started_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
+      LIMIT ${limit} OFFSET ${offset}
     `
-
     return {
-      executions: result.rows.map(mapExecutionFromDb),
-      total,
+      executions: result.rows.map((row) => mapExecutionFromDb(row as Record<string, unknown>)),
+      total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
     }
   })
 }
@@ -341,7 +428,7 @@ export async function getWorkflowExecution(
       return null
     }
 
-    return mapExecutionFromDb(result.rows[0])
+    return mapExecutionFromDb(result.rows[0] as Record<string, unknown>)
   })
 }
 
@@ -362,45 +449,75 @@ export async function getScheduledActions(
     offset?: number
   }
 ): Promise<{ actions: ScheduledAction[]; total: number }> {
+  const limit = filters?.limit || 50
+  const offset = filters?.offset || 0
+
   return withTenant(tenantId, async () => {
-    let whereClause = sql`WHERE 1=1`
+    // Handle filter combinations with explicit queries
+    if (filters?.status && filters?.entityType && filters?.entityId) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM scheduled_actions
+        WHERE status = ${filters.status}
+          AND entity_type = ${filters.entityType}
+          AND entity_id = ${filters.entityId}
+      `
+      const result = await sql`
+        SELECT * FROM scheduled_actions
+        WHERE status = ${filters.status}
+          AND entity_type = ${filters.entityType}
+          AND entity_id = ${filters.entityId}
+        ORDER BY scheduled_for ASC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      return {
+        actions: result.rows.map((row) => mapScheduledActionFromDb(row as Record<string, unknown>)),
+        total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
+      }
+    }
 
     if (filters?.status) {
-      whereClause = sql`${whereClause} AND status = ${filters.status}`
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM scheduled_actions WHERE status = ${filters.status}
+      `
+      const result = await sql`
+        SELECT * FROM scheduled_actions
+        WHERE status = ${filters.status}
+        ORDER BY scheduled_for ASC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      return {
+        actions: result.rows.map((row) => mapScheduledActionFromDb(row as Record<string, unknown>)),
+        total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
+      }
     }
 
-    if (filters?.entityType) {
-      whereClause = sql`${whereClause} AND entity_type = ${filters.entityType}`
+    if (filters?.entityType && filters?.entityId) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM scheduled_actions
+        WHERE entity_type = ${filters.entityType} AND entity_id = ${filters.entityId}
+      `
+      const result = await sql`
+        SELECT * FROM scheduled_actions
+        WHERE entity_type = ${filters.entityType} AND entity_id = ${filters.entityId}
+        ORDER BY scheduled_for ASC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      return {
+        actions: result.rows.map((row) => mapScheduledActionFromDb(row as Record<string, unknown>)),
+        total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
+      }
     }
 
-    if (filters?.entityId) {
-      whereClause = sql`${whereClause} AND entity_id = ${filters.entityId}`
-    }
-
-    // Get total count
-    const countResult = await sql`
-      SELECT COUNT(*) as count
-      FROM scheduled_actions
-      ${whereClause}
-    `
-    const total = parseInt(countResult.rows[0].count as string, 10)
-
-    // Get actions
-    const limit = filters?.limit || 50
-    const offset = filters?.offset || 0
-
+    // No filters - return all
+    const countResult = await sql`SELECT COUNT(*) as count FROM scheduled_actions`
     const result = await sql`
-      SELECT *
-      FROM scheduled_actions
-      ${whereClause}
+      SELECT * FROM scheduled_actions
       ORDER BY scheduled_for ASC
-      LIMIT ${limit}
-      OFFSET ${offset}
+      LIMIT ${limit} OFFSET ${offset}
     `
-
     return {
-      actions: result.rows.map(mapScheduledActionFromDb),
-      total,
+      actions: result.rows.map((row) => mapScheduledActionFromDb(row as Record<string, unknown>)),
+      total: parseInt(String(countResult.rows[0]?.count || '0'), 10),
     }
   })
 }

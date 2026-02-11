@@ -79,7 +79,7 @@ export function RecentDocuments({ documents }: RecentDocumentsProps) {
                 <span className="flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5" />
                   {doc.signers.length === 1
-                    ? doc.signers[0].name
+                    ? doc.signers[0]?.name
                     : `${doc.signers.length} signers`}
                 </span>
                 {doc.templateName && (

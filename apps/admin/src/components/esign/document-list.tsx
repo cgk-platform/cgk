@@ -6,16 +6,14 @@
 
 'use client'
 
-import { Button, Card, CardContent, Input, Select, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Input, Select } from '@cgk/ui'
 import {
   ChevronLeft,
   ChevronRight,
-  MoreHorizontal,
   RefreshCw,
   RotateCcw,
   Search,
   User,
-  XCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -24,7 +22,6 @@ import { DocumentStatusBadge } from './document-status-badge'
 import type {
   EsignDocumentStatus,
   EsignDocumentWithSigners,
-  EsignTemplate,
 } from '@/lib/esign/types'
 
 interface DocumentListProps {
@@ -207,7 +204,7 @@ export function DocumentList({
                         <User className="h-4 w-4 text-slate-400" />
                         <span className="text-sm text-slate-600 dark:text-slate-400">
                           {doc.signers.length === 1
-                            ? doc.signers[0].name
+                            ? doc.signers[0]?.name
                             : `${doc.signers.length} signers`}
                         </span>
                       </div>

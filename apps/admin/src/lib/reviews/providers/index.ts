@@ -138,7 +138,7 @@ export async function getReviewProvider(
   const settings = await db.getSettings(tenantSlug)
 
   if (settings.provider === 'yotpo' && settings.provider_credentials) {
-    const credentials = settings.provider_credentials as YotpoCredentials
+    const credentials = settings.provider_credentials as unknown as YotpoCredentials
     if (credentials.app_key && credentials.secret_key) {
       return new YotpoReviewProvider(tenantSlug, credentials)
     }

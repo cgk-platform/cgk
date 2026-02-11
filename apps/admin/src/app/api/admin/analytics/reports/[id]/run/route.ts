@@ -63,7 +63,7 @@ export async function POST(
   }
 }
 
-async function executeReport(config: unknown): Promise<unknown> {
+async function executeReport(_config: unknown): Promise<unknown> {
   // Simplified report execution - returns sample data
   // In production, this would use the config to generate SQL queries
   // and aggregate the results

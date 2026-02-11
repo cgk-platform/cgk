@@ -17,9 +17,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  let auth: AuthContext
   try {
-    auth = await requireAuth(request)
+    await requireAuth(request)
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

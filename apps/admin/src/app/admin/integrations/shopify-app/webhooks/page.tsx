@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, Button, Badge } from '@cgk/ui'
-import type { WebhookHealthStatus, WebhookEvent, WebhookEventStatus, WebhookTopic } from '@cgk/shopify/webhooks'
+import type { WebhookHealthStatus, WebhookEvent, WebhookEventStatus } from '@cgk/shopify/webhooks'
 
 interface EventsByTopic {
   topic: string

@@ -52,14 +52,28 @@ export default function GoogleFeedSettingsPage() {
   const [testing, setTesting] = useState(false)
   const [testResult, setTestResult] = useState<{ success: boolean; error?: string } | null>(null)
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    merchantId: string
+    feedName: string
+    targetCountry: string
+    language: string
+    currency: string
+    updateFrequency: 'hourly' | 'daily' | 'weekly'
+    feedFormat: 'xml' | 'json' | 'tsv'
+    defaultBrand: string
+    defaultAvailability: string
+    defaultCondition: string
+    includeVariants: boolean
+    includeOutOfStock: boolean
+    minimumPriceCents: number
+  }>({
     merchantId: '',
     feedName: 'Product Feed',
     targetCountry: 'US',
     language: 'en',
     currency: 'USD',
-    updateFrequency: 'daily' as const,
-    feedFormat: 'xml' as const,
+    updateFrequency: 'daily',
+    feedFormat: 'xml',
     defaultBrand: '',
     defaultAvailability: 'in_stock',
     defaultCondition: 'new',
@@ -151,10 +165,13 @@ export default function GoogleFeedSettingsPage() {
     ])
   }
 
-  const updateExclusionRule = (index: number, field: string, value: unknown) => {
+  const updateExclusionRule = (index: number, field: keyof (typeof exclusionRules)[number], value: string | boolean) => {
     const updated = [...exclusionRules]
-    updated[index] = { ...updated[index], [field]: value }
-    setExclusionRules(updated)
+    const currentRule = updated[index]
+    if (currentRule) {
+      updated[index] = { ...currentRule, [field]: value }
+      setExclusionRules(updated)
+    }
   }
 
   const removeExclusionRule = (index: number) => {

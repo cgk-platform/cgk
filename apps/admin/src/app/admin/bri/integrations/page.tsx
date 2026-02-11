@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, Badge, Button } from '@cgk/ui'
-import { Slack, Mail, Phone, CheckCircle2, XCircle, ExternalLink, Settings } from 'lucide-react'
+import { Slack, Mail, Phone, CheckCircle2, XCircle, Settings } from 'lucide-react'
 
 import { getIntegrationStatus } from '@/lib/bri/db'
 

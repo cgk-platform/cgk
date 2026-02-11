@@ -1,7 +1,6 @@
 'use client'
 
 import { Badge, Button, Card, CardContent, CardHeader, Input } from '@cgk/ui'
-import { cn } from '@cgk/ui'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
@@ -19,10 +18,12 @@ interface EmailTemplate {
   updatedAt: string
 }
 
+// Category labels for potential future use in template filtering display
 const categoryLabels: Record<string, string> = {
   transactional: 'Transactional',
   marketing: 'Marketing',
 }
+void categoryLabels
 
 const notificationTypeLabels: Record<string, string> = {
   review_request: 'Review Request',

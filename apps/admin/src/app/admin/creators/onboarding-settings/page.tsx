@@ -8,7 +8,7 @@ import type { OnboardingConfig, OnboardingStep } from '@/lib/creators-admin-ops'
 import { DEFAULT_ONBOARDING_STEPS } from '@/lib/creators-admin-ops'
 
 export default function OnboardingSettingsPage() {
-  const [config, setConfig] = useState<OnboardingConfig | null>(null)
+  const [, setConfig] = useState<OnboardingConfig | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -69,8 +69,11 @@ export default function OnboardingSettingsPage() {
 
   const updateStep = (index: number, field: keyof OnboardingStep, value: unknown) => {
     const updated = [...steps]
-    updated[index] = { ...updated[index], [field]: value }
-    setSteps(updated)
+    const currentStep = updated[index]
+    if (currentStep) {
+      updated[index] = { ...currentStep, [field]: value } as OnboardingStep
+      setSteps(updated)
+    }
   }
 
   const moveStep = (index: number, direction: 'up' | 'down') => {
@@ -78,14 +81,14 @@ export default function OnboardingSettingsPage() {
     if (newIndex < 0 || newIndex >= steps.length) return
 
     const updated = [...steps]
-    const temp = updated[index]
-    updated[index] = updated[newIndex]
-    updated[newIndex] = temp
-    // Update order values
-    updated.forEach((step, i) => {
-      step.order = i + 1
-    })
-    setSteps(updated)
+    const currentStep = updated[index]
+    const swapStep = updated[newIndex]
+    if (currentStep && swapStep) {
+      updated[index] = swapStep
+      updated[newIndex] = currentStep
+      // Update order values
+      setSteps(updated.map((step, i) => ({ ...step, order: i + 1 })))
+    }
   }
 
   if (loading) {

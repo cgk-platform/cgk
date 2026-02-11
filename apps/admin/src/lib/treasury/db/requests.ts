@@ -184,7 +184,7 @@ export async function createDrawRequest(
         w.notes as project_description
       FROM withdrawals w
       JOIN creators c ON c.id = w.creator_id
-      WHERE w.id = ANY(${input.withdrawal_ids}::text[])
+      WHERE w.id = ANY(${`{${input.withdrawal_ids.map(s => `"${s}"`).join(',')}}`}::text[])
       AND w.status IN ('pending', 'approved')
     `
 
@@ -210,7 +210,7 @@ export async function createDrawRequest(
         'USD',
         ${input.treasurer_name},
         ${input.treasurer_email},
-        ${input.signers || []},
+        ${input.signers ? `{${input.signers.map(s => `"${s}"`).join(',')}}` : '{}'}::text[],
         ${input.due_date || null},
         ${input.is_draft || false},
         ${createdBy}

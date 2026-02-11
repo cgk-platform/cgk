@@ -46,7 +46,7 @@ function mapRowToReceipt(row: Record<string, unknown>): TreasuryReceipt {
   }
 }
 
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 

@@ -27,34 +27,62 @@ export async function listTemplates(
   const offset = (page - 1) * limit
 
   return withTenant(tenantSlug, async () => {
-    const statusCondition = status ? sql`AND status = ${status}` : sql``
+    let countResult
+    let result
 
-    const countResult = await sql`
-      SELECT COUNT(*) as count
-      FROM esign_templates
-      WHERE 1=1 ${statusCondition}
-    `
+    if (status) {
+      countResult = await sql`
+        SELECT COUNT(*) as count
+        FROM esign_templates
+        WHERE status = ${status}
+      `
+
+      result = await sql`
+        SELECT
+          id,
+          name,
+          description,
+          file_url as "fileUrl",
+          file_size as "fileSize",
+          page_count as "pageCount",
+          thumbnail_url as "thumbnailUrl",
+          status,
+          created_by as "createdBy",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM esign_templates
+        WHERE status = ${status}
+        ORDER BY updated_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `
+    } else {
+      countResult = await sql`
+        SELECT COUNT(*) as count
+        FROM esign_templates
+      `
+
+      result = await sql`
+        SELECT
+          id,
+          name,
+          description,
+          file_url as "fileUrl",
+          file_size as "fileSize",
+          page_count as "pageCount",
+          thumbnail_url as "thumbnailUrl",
+          status,
+          created_by as "createdBy",
+          created_at as "createdAt",
+          updated_at as "updatedAt"
+        FROM esign_templates
+        ORDER BY updated_at DESC
+        LIMIT ${limit}
+        OFFSET ${offset}
+      `
+    }
+
     const total = Number(countResult.rows[0]?.count || 0)
-
-    const result = await sql`
-      SELECT
-        id,
-        name,
-        description,
-        file_url as "fileUrl",
-        file_size as "fileSize",
-        page_count as "pageCount",
-        thumbnail_url as "thumbnailUrl",
-        status,
-        created_by as "createdBy",
-        created_at as "createdAt",
-        updated_at as "updatedAt"
-      FROM esign_templates
-      WHERE 1=1 ${statusCondition}
-      ORDER BY updated_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `
 
     return {
       templates: result.rows as unknown as EsignTemplate[],

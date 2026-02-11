@@ -13,7 +13,7 @@ interface GlobalSettingsFormProps {
 
 export function GlobalSettingsForm({ settings }: GlobalSettingsFormProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [isSaving, setIsSaving] = useState(false)
 
   const [formData, setFormData] = useState({

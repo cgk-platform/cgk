@@ -53,6 +53,12 @@ export async function GET() {
     }
 
     const row = credResult.rows[0]
+    if (!row) {
+      return {
+        connected: false,
+        eventsApiConfigured: false,
+      }
+    }
     const metadata = row.metadata as Record<string, unknown> | null
 
     return {

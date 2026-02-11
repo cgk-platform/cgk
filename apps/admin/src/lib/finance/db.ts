@@ -25,6 +25,9 @@ import type {
   ProductCOGSUpdate,
   VariableCostConfig,
   VariableCostConfigUpdate,
+} from './types'
+
+import {
   DEFAULT_VARIABLE_COST_CONFIG,
   DEFAULT_COGS_CONFIG,
   DEFAULT_PL_FORMULA_CONFIG,
@@ -64,9 +67,9 @@ export async function getVariableCostConfig(
       WHERE tenant_id = ${tenantId}
     `
 
-    if (result.rows.length === 0) return null
-
     const row = result.rows[0]
+    if (!row) return null
+
     return {
       id: row.id as string,
       tenantId: row.tenantId as string,
@@ -185,7 +188,7 @@ export async function upsertVariableCostConfig(
         updated_by as "updatedBy"
     `
 
-    const row = result.rows[0]
+    const row = result.rows[0]!
     return {
       id: row.id as string,
       tenantId: row.tenantId as string,
@@ -259,9 +262,9 @@ export async function getCOGSConfig(
       WHERE tenant_id = ${tenantId}
     `
 
-    if (result.rows.length === 0) return null
-
     const row = result.rows[0]
+    if (!row) return null
+
     return {
       id: row.id as string,
       tenantId: row.tenantId as string,
@@ -339,7 +342,7 @@ export async function upsertCOGSConfig(
         updated_by as "updatedBy"
     `
 
-    const row = result.rows[0]
+    const row = result.rows[0]!
     return {
       id: row.id as string,
       tenantId: row.tenantId as string,
@@ -659,9 +662,9 @@ export async function getPLFormulaConfig(
       WHERE tenant_id = ${tenantId}
     `
 
-    if (result.rows.length === 0) return null
-
     const row = result.rows[0]
+    if (!row) return null
+
     return {
       id: row.id as string,
       tenantId: row.tenantId as string,
@@ -729,7 +732,7 @@ export async function upsertPLFormulaConfig(
     const mkt = { ...d.marketing, ...data.marketing }
     const opex = { ...d.operatingExpenses, ...data.operatingExpenses }
 
-    const result = await sql`
+    await sql`
       INSERT INTO pl_formula_config (
         tenant_id,
         revenue_include_shipping,
@@ -833,7 +836,6 @@ export async function upsertPLFormulaConfig(
         net_profit_label = EXCLUDED.net_profit_label,
         updated_by = EXCLUDED.updated_by,
         updated_at = NOW()
-      RETURNING *
     `
 
     // Re-fetch to get proper structure

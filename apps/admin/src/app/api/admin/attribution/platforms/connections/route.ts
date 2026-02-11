@@ -5,7 +5,7 @@ import { withTenant } from '@cgk/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { getPlatformConnections } from '@/lib/attribution'
+import { getSecondaryPlatformConnections } from '@/lib/attribution'
 
 export async function GET() {
   const headerList = await headers()
@@ -16,7 +16,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const connections = await withTenant(tenantSlug, () => getPlatformConnections(tenantId))
+  const connections = await withTenant(tenantSlug, () => getSecondaryPlatformConnections(tenantId))
 
   return NextResponse.json({ connections })
 }

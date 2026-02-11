@@ -16,7 +16,6 @@ import type {
   EmailQueueFilters,
   ReviewBulkSendTemplate,
   ReviewBulkCampaign,
-  BulkCampaignRecipient,
   BulkSendPreview,
   BulkCampaignFilters,
   ReviewIncentiveCode,
@@ -42,12 +41,6 @@ import type {
 // =============================================================================
 // REVIEWS
 // =============================================================================
-
-const REVIEW_SORT_COLUMNS: Record<string, string> = {
-  created_at: 'r.created_at',
-  rating: 'r.rating',
-  helpful_votes: 'r.helpful_votes',
-}
 
 export async function getReviews(
   tenantSlug: string,
@@ -143,22 +136,39 @@ export async function getPendingReviews(
   productId?: string,
 ): Promise<ReviewWithMedia[]> {
   return withTenant(tenantSlug, async () => {
-    const productFilter = productId ? sql`AND r.product_id = ${productId}` : sql``
+    let reviewsResult
 
-    const reviewsResult = await sql`
-      SELECT r.id, r.product_id, p.title as product_title,
-             r.order_id, r.author_name, r.author_email, r.is_verified_purchase,
-             r.rating, r.title, r.body, r.status,
-             r.verification_token, r.verified_at,
-             r.helpful_votes, r.unhelpful_votes,
-             r.imported_from, r.original_id,
-             r.response_body, r.response_author, r.responded_at,
-             r.created_at, r.updated_at
-      FROM reviews r
-      LEFT JOIN products p ON p.id = r.product_id
-      WHERE r.status = 'pending' ${productFilter}
-      ORDER BY r.created_at ASC
-    `
+    if (productId) {
+      reviewsResult = await sql`
+        SELECT r.id, r.product_id, p.title as product_title,
+               r.order_id, r.author_name, r.author_email, r.is_verified_purchase,
+               r.rating, r.title, r.body, r.status,
+               r.verification_token, r.verified_at,
+               r.helpful_votes, r.unhelpful_votes,
+               r.imported_from, r.original_id,
+               r.response_body, r.response_author, r.responded_at,
+               r.created_at, r.updated_at
+        FROM reviews r
+        LEFT JOIN products p ON p.id = r.product_id
+        WHERE r.status = 'pending' AND r.product_id = ${productId}
+        ORDER BY r.created_at ASC
+      `
+    } else {
+      reviewsResult = await sql`
+        SELECT r.id, r.product_id, p.title as product_title,
+               r.order_id, r.author_name, r.author_email, r.is_verified_purchase,
+               r.rating, r.title, r.body, r.status,
+               r.verification_token, r.verified_at,
+               r.helpful_votes, r.unhelpful_votes,
+               r.imported_from, r.original_id,
+               r.response_body, r.response_author, r.responded_at,
+               r.created_at, r.updated_at
+        FROM reviews r
+        LEFT JOIN products p ON p.id = r.product_id
+        WHERE r.status = 'pending'
+        ORDER BY r.created_at ASC
+      `
+    }
 
     const reviews = reviewsResult.rows as Review[]
 
@@ -167,14 +177,15 @@ export async function getPendingReviews(
     }
 
     const reviewIds = reviews.map((r) => r.id)
-    const mediaResult = await sql`
-      SELECT id, review_id, media_type, url, thumbnail_url,
+    const mediaResult = await sql.query(
+      `SELECT id, review_id, media_type, url, thumbnail_url,
              mux_asset_id, mux_playback_id, duration_seconds,
              width, height, file_size_bytes, sort_order, created_at
       FROM review_media
-      WHERE review_id = ANY(${reviewIds})
-      ORDER BY sort_order ASC
-    `
+      WHERE review_id = ANY($1)
+      ORDER BY sort_order ASC`,
+      [reviewIds]
+    )
 
     const mediaByReview = new Map<string, ReviewMedia[]>()
     for (const media of mediaResult.rows as ReviewMedia[]) {
@@ -282,15 +293,18 @@ export async function bulkModerateReviews(
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
     if (action === 'delete') {
-      const result = await sql`DELETE FROM reviews WHERE id = ANY(${reviewIds})`
+      const result = await sql.query(
+        `DELETE FROM reviews WHERE id = ANY($1)`,
+        [reviewIds]
+      )
       return result.rowCount ?? 0
     }
 
     if (action === 'verify' || action === 'unverify') {
-      const result = await sql`
-        UPDATE reviews SET is_verified_purchase = ${action === 'verify'}, updated_at = NOW()
-        WHERE id = ANY(${reviewIds})
-      `
+      const result = await sql.query(
+        `UPDATE reviews SET is_verified_purchase = $1, updated_at = NOW() WHERE id = ANY($2)`,
+        [action === 'verify', reviewIds]
+      )
       return result.rowCount ?? 0
     }
 
@@ -534,10 +548,10 @@ export async function cancelEmailQueueItems(
   queueIds: string[],
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      DELETE FROM review_email_queue
-      WHERE id = ANY(${queueIds}) AND status = 'pending'
-    `
+    const result = await sql.query(
+      `DELETE FROM review_email_queue WHERE id = ANY($1) AND status = 'pending'`,
+      [queueIds]
+    )
     return result.rowCount ?? 0
   })
 }
@@ -547,11 +561,10 @@ export async function retryEmailQueueItems(
   queueIds: string[],
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      UPDATE review_email_queue
-      SET status = 'pending', error_message = NULL, scheduled_at = NOW()
-      WHERE id = ANY(${queueIds}) AND status IN ('failed', 'bounced')
-    `
+    const result = await sql.query(
+      `UPDATE review_email_queue SET status = 'pending', error_message = NULL, scheduled_at = NOW() WHERE id = ANY($1) AND status IN ('failed', 'bounced')`,
+      [queueIds]
+    )
     return result.rowCount ?? 0
   })
 }
@@ -563,19 +576,31 @@ export async function getEmailLogs(
   offset = 0,
 ): Promise<{ rows: ReviewEmailLog[]; totalCount: number }> {
   return withTenant(tenantSlug, async () => {
-    const queueFilter = queueId ? sql`WHERE queue_id = ${queueId}` : sql``
+    let dataResult
+    let countResult
 
-    const dataResult = await sql`
-      SELECT id, queue_id, event_type, event_data, created_at
-      FROM review_email_logs
-      ${queueFilter}
-      ORDER BY created_at DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `
-
-    const countResult = await sql`
-      SELECT COUNT(*) as count FROM review_email_logs ${queueFilter}
-    `
+    if (queueId) {
+      dataResult = await sql`
+        SELECT id, queue_id, event_type, event_data, created_at
+        FROM review_email_logs
+        WHERE queue_id = ${queueId}
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      countResult = await sql`
+        SELECT COUNT(*) as count FROM review_email_logs WHERE queue_id = ${queueId}
+      `
+    } else {
+      dataResult = await sql`
+        SELECT id, queue_id, event_type, event_data, created_at
+        FROM review_email_logs
+        ORDER BY created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      countResult = await sql`
+        SELECT COUNT(*) as count FROM review_email_logs
+      `
+    }
 
     return {
       rows: dataResult.rows as ReviewEmailLog[],
@@ -590,26 +615,40 @@ export async function getEmailStats(
   dateTo?: string,
 ): Promise<ReviewEmailStats> {
   return withTenant(tenantSlug, async () => {
-    const dateFilter = dateFrom && dateTo
-      ? sql`WHERE created_at >= ${dateFrom}::timestamptz AND created_at <= ${dateTo}::timestamptz`
-      : sql``
+    let result
+    let reviewedResult
 
-    const result = await sql`
-      SELECT
-        COUNT(*) FILTER (WHERE status != 'pending') as total_sent,
-        COUNT(*) FILTER (WHERE status IN ('delivered', 'opened', 'clicked')) as total_delivered,
-        COUNT(*) FILTER (WHERE status IN ('opened', 'clicked')) as total_opened,
-        COUNT(*) FILTER (WHERE status = 'clicked') as total_clicked
-      FROM review_email_queue
-      ${dateFilter}
-    `
-
-    const reviewedResult = await sql`
-      SELECT COUNT(DISTINCT r.author_email) as total_reviewed
-      FROM reviews r
-      INNER JOIN review_email_queue eq ON eq.customer_email = r.author_email AND eq.product_id = r.product_id
-      ${dateFilter}
-    `
+    if (dateFrom && dateTo) {
+      result = await sql`
+        SELECT
+          COUNT(*) FILTER (WHERE status != 'pending') as total_sent,
+          COUNT(*) FILTER (WHERE status IN ('delivered', 'opened', 'clicked')) as total_delivered,
+          COUNT(*) FILTER (WHERE status IN ('opened', 'clicked')) as total_opened,
+          COUNT(*) FILTER (WHERE status = 'clicked') as total_clicked
+        FROM review_email_queue
+        WHERE created_at >= ${dateFrom}::timestamptz AND created_at <= ${dateTo}::timestamptz
+      `
+      reviewedResult = await sql`
+        SELECT COUNT(DISTINCT r.author_email) as total_reviewed
+        FROM reviews r
+        INNER JOIN review_email_queue eq ON eq.customer_email = r.author_email AND eq.product_id = r.product_id
+        WHERE eq.created_at >= ${dateFrom}::timestamptz AND eq.created_at <= ${dateTo}::timestamptz
+      `
+    } else {
+      result = await sql`
+        SELECT
+          COUNT(*) FILTER (WHERE status != 'pending') as total_sent,
+          COUNT(*) FILTER (WHERE status IN ('delivered', 'opened', 'clicked')) as total_delivered,
+          COUNT(*) FILTER (WHERE status IN ('opened', 'clicked')) as total_opened,
+          COUNT(*) FILTER (WHERE status = 'clicked') as total_clicked
+        FROM review_email_queue
+      `
+      reviewedResult = await sql`
+        SELECT COUNT(DISTINCT r.author_email) as total_reviewed
+        FROM reviews r
+        INNER JOIN review_email_queue eq ON eq.customer_email = r.author_email AND eq.product_id = r.product_id
+      `
+    }
 
     const stats = result.rows[0]
     const totalSent = Number(stats?.total_sent || 0)
@@ -641,16 +680,26 @@ export async function getBulkSendTemplates(
   includeArchived = false,
 ): Promise<ReviewBulkSendTemplate[]> {
   return withTenant(tenantSlug, async () => {
-    const archiveFilter = includeArchived ? sql`` : sql`WHERE is_archived = false`
+    let result
 
-    const result = await sql`
-      SELECT id, name, description, subject, body_html, body_text,
-             include_incentive, times_used, total_sent, total_reviewed,
-             is_archived, created_at, updated_at
-      FROM review_bulk_send_templates
-      ${archiveFilter}
-      ORDER BY created_at DESC
-    `
+    if (includeArchived) {
+      result = await sql`
+        SELECT id, name, description, subject, body_html, body_text,
+               include_incentive, times_used, total_sent, total_reviewed,
+               is_archived, created_at, updated_at
+        FROM review_bulk_send_templates
+        ORDER BY created_at DESC
+      `
+    } else {
+      result = await sql`
+        SELECT id, name, description, subject, body_html, body_text,
+               include_incentive, times_used, total_sent, total_reviewed,
+               is_archived, created_at, updated_at
+        FROM review_bulk_send_templates
+        WHERE is_archived = false
+        ORDER BY created_at DESC
+      `
+    }
     return result.rows as ReviewBulkSendTemplate[]
   })
 }
@@ -1121,11 +1170,10 @@ export async function getQuestions(
     // Load answers for answered questions
     const answeredIds = questions.filter((q) => q.status === 'answered').map((q) => q.id)
     if (answeredIds.length > 0) {
-      const answersResult = await sql`
-        SELECT id, question_id, answer, answered_by, created_at
-        FROM product_answers
-        WHERE question_id = ANY(${answeredIds})
-      `
+      const answersResult = await sql.query(
+        `SELECT id, question_id, answer, answered_by, created_at FROM product_answers WHERE question_id = ANY($1)`,
+        [answeredIds]
+      )
 
       const answersByQuestion = new Map<string, ProductAnswer>()
       for (const answer of answersResult.rows as ProductAnswer[]) {
@@ -1353,26 +1401,72 @@ export async function getReviewAnalytics(
   dateTo?: string,
 ): Promise<ReviewAnalytics> {
   return withTenant(tenantSlug, async () => {
-    const dateFilter = dateFrom && dateTo
-      ? sql`AND created_at >= ${dateFrom}::timestamptz AND created_at <= ${dateTo}::timestamptz`
-      : sql``
+    let statsResult
+    let ratingResult
+    let responseTimeResult
 
-    // Total reviews and status breakdown
-    const statsResult = await sql`
-      SELECT
-        COUNT(*) as total_reviews,
-        COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
-        COUNT(*) FILTER (WHERE status = 'approved') as approved_count,
-        COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count,
-        COUNT(*) FILTER (WHERE status = 'spam') as spam_count,
-        COALESCE(AVG(rating), 0) as average_rating,
-        COUNT(*) FILTER (WHERE EXISTS (
-          SELECT 1 FROM review_media rm WHERE rm.review_id = reviews.id
-        )) as reviews_with_media,
-        COUNT(*) FILTER (WHERE response_body IS NOT NULL) as reviews_with_response
-      FROM reviews
-      WHERE 1=1 ${dateFilter}
-    `
+    if (dateFrom && dateTo) {
+      // Total reviews and status breakdown with date filter
+      statsResult = await sql`
+        SELECT
+          COUNT(*) as total_reviews,
+          COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+          COUNT(*) FILTER (WHERE status = 'approved') as approved_count,
+          COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count,
+          COUNT(*) FILTER (WHERE status = 'spam') as spam_count,
+          COALESCE(AVG(rating), 0) as average_rating,
+          COUNT(*) FILTER (WHERE EXISTS (
+            SELECT 1 FROM review_media rm WHERE rm.review_id = reviews.id
+          )) as reviews_with_media,
+          COUNT(*) FILTER (WHERE response_body IS NOT NULL) as reviews_with_response
+        FROM reviews
+        WHERE created_at >= ${dateFrom}::timestamptz AND created_at <= ${dateTo}::timestamptz
+      `
+      // Rating distribution with date filter
+      ratingResult = await sql`
+        SELECT rating, COUNT(*) as count
+        FROM reviews
+        WHERE created_at >= ${dateFrom}::timestamptz AND created_at <= ${dateTo}::timestamptz
+        GROUP BY rating
+        ORDER BY rating DESC
+      `
+      // Average response time with date filter
+      responseTimeResult = await sql`
+        SELECT AVG(EXTRACT(EPOCH FROM (responded_at - created_at)) / 3600) as avg_hours
+        FROM reviews
+        WHERE response_body IS NOT NULL
+          AND created_at >= ${dateFrom}::timestamptz AND created_at <= ${dateTo}::timestamptz
+      `
+    } else {
+      // Total reviews and status breakdown without date filter
+      statsResult = await sql`
+        SELECT
+          COUNT(*) as total_reviews,
+          COUNT(*) FILTER (WHERE status = 'pending') as pending_count,
+          COUNT(*) FILTER (WHERE status = 'approved') as approved_count,
+          COUNT(*) FILTER (WHERE status = 'rejected') as rejected_count,
+          COUNT(*) FILTER (WHERE status = 'spam') as spam_count,
+          COALESCE(AVG(rating), 0) as average_rating,
+          COUNT(*) FILTER (WHERE EXISTS (
+            SELECT 1 FROM review_media rm WHERE rm.review_id = reviews.id
+          )) as reviews_with_media,
+          COUNT(*) FILTER (WHERE response_body IS NOT NULL) as reviews_with_response
+        FROM reviews
+      `
+      // Rating distribution without date filter
+      ratingResult = await sql`
+        SELECT rating, COUNT(*) as count
+        FROM reviews
+        GROUP BY rating
+        ORDER BY rating DESC
+      `
+      // Average response time without date filter
+      responseTimeResult = await sql`
+        SELECT AVG(EXTRACT(EPOCH FROM (responded_at - created_at)) / 3600) as avg_hours
+        FROM reviews
+        WHERE response_body IS NOT NULL
+      `
+    }
 
     // This month's reviews
     const thisMonthResult = await sql`
@@ -1385,22 +1479,6 @@ export async function getReviewAnalytics(
       SELECT COUNT(*) as count FROM reviews
       WHERE created_at >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month')
         AND created_at < date_trunc('month', CURRENT_DATE)
-    `
-
-    // Rating distribution
-    const ratingResult = await sql`
-      SELECT rating, COUNT(*) as count
-      FROM reviews
-      WHERE 1=1 ${dateFilter}
-      GROUP BY rating
-      ORDER BY rating DESC
-    `
-
-    // Average response time
-    const responseTimeResult = await sql`
-      SELECT AVG(EXTRACT(EPOCH FROM (responded_at - created_at)) / 3600) as avg_hours
-      FROM reviews
-      WHERE response_body IS NOT NULL ${dateFilter}
     `
 
     const stats = statsResult.rows[0]
@@ -1459,12 +1537,10 @@ export async function getProductReviewStats(
 
     // Get rating distribution for each product
     const productIds = products.map((p) => p.product_id)
-    const distributionResult = await sql`
-      SELECT product_id, rating, COUNT(*) as count
-      FROM reviews
-      WHERE product_id = ANY(${productIds}) AND status = 'approved'
-      GROUP BY product_id, rating
-    `
+    const distributionResult = await sql.query(
+      `SELECT product_id, rating, COUNT(*) as count FROM reviews WHERE product_id = ANY($1) AND status = 'approved' GROUP BY product_id, rating`,
+      [productIds]
+    )
 
     const distributionsByProduct = new Map<string, Record<number, number>>()
     for (const row of distributionResult.rows as Array<{ product_id: string; rating: number; count: string }>) {
@@ -1549,15 +1625,25 @@ export async function updateMigrationProgress(
   status?: 'in_progress' | 'completed' | 'failed',
 ): Promise<void> {
   return withTenant(tenantSlug, async () => {
-    if (status) {
+    if (status === 'in_progress') {
       await sql`
         UPDATE review_migrations
         SET processed_records = ${processed},
             success_records = ${success},
             error_records = ${errors},
             status = ${status},
-            ${status === 'in_progress' ? sql`started_at = COALESCE(started_at, NOW()),` : sql``}
-            ${status === 'completed' || status === 'failed' ? sql`completed_at = NOW(),` : sql``}
+            started_at = COALESCE(started_at, NOW()),
+            updated_at = NOW()
+        WHERE id = ${migrationId}
+      `
+    } else if (status === 'completed' || status === 'failed') {
+      await sql`
+        UPDATE review_migrations
+        SET processed_records = ${processed},
+            success_records = ${success},
+            error_records = ${errors},
+            status = ${status},
+            completed_at = NOW(),
             updated_at = NOW()
         WHERE id = ${migrationId}
       `

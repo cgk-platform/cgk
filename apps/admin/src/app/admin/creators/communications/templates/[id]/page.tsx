@@ -1,6 +1,5 @@
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
-import { Suspense } from 'react'
 
 import { getTemplateById, getTemplateVersions } from '@/lib/creator-communications/db'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, cn } from '@cgk/ui'
+import { cn } from '@cgk/ui'
 import { ChevronDown, User, UserCheck, Users } from 'lucide-react'
 import type { SupportAgent } from '@cgk/support'
 

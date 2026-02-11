@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Card, CardContent, CardHeader, CardTitle, Checkbox, cn, Input, Label, Textarea } from '@cgk/ui'
-import { ArrowLeft, Calendar, Check, Send, Users } from 'lucide-react'
+import { ArrowLeft, Check, Send, Users } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -30,7 +30,7 @@ export function BulkSendComposer() {
     send_as_separate_threads: false,
   })
 
-  const [recipientCount, setRecipientCount] = useState<number | null>(null)
+  const [_recipientCount] = useState<number | null>(null)
 
   const toggleFilter = (type: 'status' | 'tier', value: string) => {
     setRecipientFilter((prev) => {

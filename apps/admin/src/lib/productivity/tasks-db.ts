@@ -11,7 +11,6 @@ import type {
   TaskFilters,
   TaskStats,
   TaskStatus,
-  TaskPriority,
   CreateTaskInput,
   UpdateTaskInput,
   AddCommentInput,
@@ -236,9 +235,9 @@ export async function createTask(
         ${data.priority || 'medium'}::task_priority,
         ${data.assigned_to || null},
         ${data.assigned_to ? userId : null},
-        ${data.assigned_to ? sql`NOW()` : null},
+        ${data.assigned_to ? new Date().toISOString() : null}::timestamptz,
         ${data.due_date || null}::timestamptz,
-        ${data.tags || []}::text[],
+        ${`{${(data.tags || []).map(t => `"${t}"`).join(',')}}`}::text[],
         ${data.project_id || null},
         ${data.parent_task_id || null},
         ${data.source_type || 'manual'}::task_source_type,
@@ -252,10 +251,12 @@ export async function createTask(
       RETURNING *
     `
 
-    // Log the action
-    await logProductivityAction(tenantSlug, userId, 'task.created', 'task', result.rows[0].id as string, null, data)
+    const createdTask = result.rows[0] as Task
 
-    return result.rows[0] as Task
+    // Log the action
+    await logProductivityAction(tenantSlug, userId, 'task.created', 'task', createdTask.id, null, data)
+
+    return createdTask
   })
 }
 

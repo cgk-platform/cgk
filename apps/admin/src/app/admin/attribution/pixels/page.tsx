@@ -7,7 +7,7 @@ import {
   Badge,
   Alert,
   AlertDescription,
-  Select,
+  RadixSelect as Select,
   SelectContent,
   SelectItem,
   SelectTrigger,

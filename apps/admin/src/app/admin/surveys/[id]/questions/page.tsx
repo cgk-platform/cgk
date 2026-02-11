@@ -134,6 +134,7 @@ export default function QuestionsPage() {
   const handleReorder = async (startIndex: number, endIndex: number) => {
     const reordered = [...questions]
     const [removed] = reordered.splice(startIndex, 1)
+    if (!removed) return
     reordered.splice(endIndex, 0, removed)
 
     setQuestions(reordered)
@@ -407,9 +408,11 @@ function QuestionEditor({
 
   const updateOption = (index: number, field: keyof QuestionOption, value: string | boolean) => {
     const options = [...formData.options]
-    options[index] = { ...options[index], [field]: value }
+    const currentOption = options[index]
+    if (!currentOption) return
+    options[index] = { ...currentOption, [field]: value }
     if (field === 'label' && typeof value === 'string') {
-      options[index].value = value.toLowerCase().replace(/[^a-z0-9]+/g, '_')
+      options[index]!.value = value.toLowerCase().replace(/[^a-z0-9]+/g, '_')
     }
     setFormData({ ...formData, options })
   }

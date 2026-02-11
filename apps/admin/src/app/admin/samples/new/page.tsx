@@ -15,7 +15,7 @@ export default function NewSampleRequestPage() {
   const [creatorId, setCreatorId] = useState('')
   const [creatorSearch, setCreatorSearch] = useState('')
   const [products, setProducts] = useState<SampleProduct[]>([
-    { productId: '', productName: '', quantity: 1 },
+    { productId: '', productName: '', variant: '', quantity: 1 },
   ])
   const [priority, setPriority] = useState<'normal' | 'rush'>('normal')
   const [notes, setNotes] = useState('')
@@ -33,12 +33,15 @@ export default function NewSampleRequestPage() {
 
   const updateProduct = (index: number, field: keyof SampleProduct, value: string | number) => {
     const updated = [...products]
-    updated[index] = { ...updated[index], [field]: value }
-    setProducts(updated)
+    const product = updated[index]
+    if (product) {
+      updated[index] = { ...product, [field]: value }
+      setProducts(updated)
+    }
   }
 
   const addProduct = () => {
-    setProducts([...products, { productId: '', productName: '', quantity: 1 }])
+    setProducts([...products, { productId: '', productName: '', variant: '', quantity: 1 }])
   }
 
   const removeProduct = (index: number) => {

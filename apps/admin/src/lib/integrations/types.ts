@@ -22,14 +22,14 @@ export interface IntegrationCard {
   expiresAt?: string
 }
 
-export interface IntegrationCategory {
-  id: string
+export interface IntegrationCategoryConfig {
+  id: IntegrationCategory
   label: string
   description: string
   integrations: string[]
 }
 
-export const INTEGRATION_CATEGORIES: IntegrationCategory[] = [
+export const INTEGRATION_CATEGORIES: IntegrationCategoryConfig[] = [
   {
     id: 'commerce',
     label: 'E-Commerce',

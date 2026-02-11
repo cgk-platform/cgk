@@ -44,7 +44,7 @@ const TTS_MODELS = [
   { id: 'eleven_monolingual_v1', name: 'Eleven Monolingual v1' },
 ]
 
-export function VoiceConfigView({ tenantSlug, initialConfig }: VoiceConfigViewProps) {
+export function VoiceConfigView({ initialConfig }: VoiceConfigViewProps) {
   const [config, setConfig] = useState<VoiceConfig>(initialConfig ?? DEFAULT_CONFIG)
   const [saving, setSaving] = useState(false)
   const [newAcknowledgment, setNewAcknowledgment] = useState('')

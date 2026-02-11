@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Card, CardContent, CardHeader, CardTitle, cn, Switch } from '@cgk/ui'
-import { Bell, Mail, MessageSquare, Save, Smartphone } from 'lucide-react'
+import { Bell, Mail, MessageSquare, Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
@@ -13,7 +13,7 @@ interface NotificationSettingsFormProps {
 
 export function NotificationSettingsForm({ notifications }: NotificationSettingsFormProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [isSaving, setIsSaving] = useState(false)
   const [settings, setSettings] = useState(notifications)
 
