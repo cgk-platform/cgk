@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Button } from '@cgk/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui/card'
-import { Input } from '@cgk/ui/input'
-import { Label } from '@cgk/ui/label'
-import { Switch } from '@cgk/ui/switch'
-import { Textarea } from '@cgk/ui/textarea'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Switch,
+  Textarea,
+} from '@cgk/ui'
 
 import type { ChatWidgetConfig } from '@cgk/support'
 

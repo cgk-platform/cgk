@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-import { Badge } from '@cgk/ui/badge'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui/card'
+import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui'
 
 import type { AgentCSATScore, CSATMetrics } from '@cgk/support'
 

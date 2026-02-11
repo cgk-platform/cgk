@@ -3,10 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Badge } from '@cgk/ui/badge'
-import { Button } from '@cgk/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@cgk/ui/card'
-import { Input } from '@cgk/ui/input'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from '@cgk/ui'
 
 import type { ConsentRecord, ConsentType } from '@cgk/support'
 
