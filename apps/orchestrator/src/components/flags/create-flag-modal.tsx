@@ -1,9 +1,8 @@
 'use client'
 
+import { isValidFlagKey, type FlagType } from '@cgk/feature-flags'
 import { Button, Card, CardContent, CardHeader, Input, Label, Select, SelectOption, Textarea } from '@cgk/ui'
 import { useState } from 'react'
-
-import { isValidFlagKey, type FlagType } from '@cgk/feature-flags'
 
 interface CreateFlagModalProps {
   onClose: () => void

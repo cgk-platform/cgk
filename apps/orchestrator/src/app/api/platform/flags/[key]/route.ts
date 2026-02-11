@@ -7,16 +7,16 @@
  */
 
 import { requireAuth } from '@cgk/auth'
+import type { UpdateFlagInput } from '@cgk/feature-flags'
 import {
   deleteFlag,
   getAuditLog,
   getFlagByKey,
   getOverridesForFlag,
+  invalidateFlag,
   killFlag,
   updateFlag,
-  type UpdateFlagInput,
-} from '@cgk/feature-flags'
-import { invalidateFlag } from '@cgk/feature-flags/server'
+} from '@cgk/feature-flags/server'
 import { createLogger } from '@cgk/logging'
 
 export const dynamic = 'force-dynamic'

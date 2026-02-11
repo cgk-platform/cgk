@@ -5,7 +5,7 @@
  */
 
 import { requireAuth } from '@cgk/auth'
-import { getAllAuditEntries } from '@cgk/feature-flags'
+import { getAllAuditEntries } from '@cgk/feature-flags/server'
 import { createLogger } from '@cgk/logging'
 
 export const dynamic = 'force-dynamic'

@@ -1,19 +1,17 @@
 export const dynamic = 'force-dynamic'
 
-import { NextResponse } from 'next/server'
 import {
+  buildAuthorizationUrl,
   generateOAuthState,
   serializeOAuthState,
-  buildAuthorizationUrl,
 } from '@cgk/slack'
-
-const OAUTH_STATE_TTL = 600 // 10 minutes
+import { NextResponse } from 'next/server'
 
 /**
  * POST /api/platform/slack/connect
  * Initiates Slack OAuth flow for platform ops workspace
  */
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   // Note: In production, verify super admin auth here
   const userId = 'super-admin' // Would come from auth context
 

@@ -1,5 +1,6 @@
 'use client'
 
+import type { FeatureFlag, FlagAuditEntry, FlagOverride } from '@cgk/feature-flags'
 import {
   Alert,
   AlertDescription,
@@ -14,8 +15,6 @@ import {
   Textarea,
 } from '@cgk/ui'
 import { useCallback, useEffect, useState } from 'react'
-
-import type { FeatureFlag, FlagAuditEntry, FlagOverride } from '@cgk/feature-flags'
 
 interface FlagEditorProps {
   flagKey: string

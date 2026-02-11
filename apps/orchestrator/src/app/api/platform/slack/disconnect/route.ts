@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic'
 
-import { NextResponse } from 'next/server'
 import {
-  getPlatformWorkspace,
-  disconnectPlatformWorkspace,
   decryptToken,
+  disconnectPlatformWorkspace,
+  getPlatformWorkspace,
   revokeToken,
 } from '@cgk/slack'
+import { NextResponse } from 'next/server'
 
 /**
  * DELETE /api/platform/slack/disconnect

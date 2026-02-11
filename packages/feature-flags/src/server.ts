@@ -344,10 +344,68 @@ export async function getVariantWithDefault(
   return variant ?? defaultValue
 }
 
-// Re-export types and utilities
+// =============================================================================
+// Re-export Repository (database operations)
+// =============================================================================
+export {
+  createFlag,
+  createOverride,
+  deleteFlag,
+  deleteOverride,
+  getAllAuditEntries,
+  getAllFlags as getAllFlagsFromDb,
+  getAuditLog,
+  getCategories,
+  getFlagById,
+  getFlagByKey,
+  getFlags,
+  getOverridesForContext,
+  getOverridesForFlag,
+  killFlag,
+  seedFlags,
+  updateFlag,
+} from './repository.js'
+
+// =============================================================================
+// Re-export Cache
+// =============================================================================
+export {
+  createFlagCache,
+  getGlobalFlagCache,
+  MultiLayerFlagCache,
+  resetGlobalFlagCache,
+  type CacheStats,
+  type FlagCache,
+  type FlagCacheConfig,
+} from './cache.js'
+
+// =============================================================================
+// Re-export Seeding
+// =============================================================================
+export {
+  ensurePlatformFlagsExist,
+  needsSeeding,
+  seedPlatformFlags,
+} from './seed.js'
+
+// =============================================================================
+// Re-export Types (for convenience)
+// =============================================================================
 export type {
   BulkEvaluationResult,
+  CreateFlagInput,
+  CreateOverrideInput,
   EvaluationContext,
   EvaluationResult,
   FeatureFlag,
+  FlagAuditEntry,
+  FlagListFilters,
+  FlagListPagination,
+  FlagListResult,
+  FlagOverride,
+  FlagStatus,
+  FlagTargeting,
+  FlagType,
+  FlagVariant,
+  UpdateFlagInput,
 } from './types.js'

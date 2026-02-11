@@ -6,15 +6,8 @@
  */
 
 import { requireAuth } from '@cgk/auth'
-import {
-  createFlag,
-  getCategories,
-  getFlags,
-  isValidFlagKey,
-  type CreateFlagInput,
-  type FlagListFilters,
-} from '@cgk/feature-flags'
-import { invalidateAllFlags } from '@cgk/feature-flags/server'
+import { isValidFlagKey, type CreateFlagInput, type FlagListFilters } from '@cgk/feature-flags'
+import { createFlag, getCategories, getFlags, invalidateAllFlags } from '@cgk/feature-flags/server'
 import { createLogger } from '@cgk/logging'
 
 export const dynamic = 'force-dynamic'

@@ -1,9 +1,8 @@
 'use client'
 
+import type { FeatureFlag, FlagStatus, FlagType } from '@cgk/feature-flags'
 import { Badge, Button, Card, CardContent, Input, Select, SelectOption, Spinner } from '@cgk/ui'
 import { useCallback, useEffect, useState } from 'react'
-
-import type { FeatureFlag, FlagStatus, FlagType } from '@cgk/feature-flags'
 
 interface FlagListProps {
   onSelectFlag: (flag: FeatureFlag) => void

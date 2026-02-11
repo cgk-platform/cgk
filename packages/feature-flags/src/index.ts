@@ -1,14 +1,25 @@
 /**
  * @cgk/feature-flags - Feature Flag System
  *
- * Complete feature flag system with 6 flag types, consistent hashing
- * for stable rollouts, and multi-layer caching.
+ * Client-safe exports only. For server-side operations (database, caching),
+ * import from '@cgk/feature-flags/server'.
  *
- * @ai-pattern feature-flags
- * @ai-note Use isEnabled() for server-side checks, useFlag() for client-side
+ * @example
+ * ```ts
+ * // Client-safe (works in browser and server)
+ * import { type FeatureFlag, isValidFlagKey, evaluateFlag } from '@cgk/feature-flags'
+ *
+ * // Server-only (API routes, server components)
+ * import { isEnabled, getVariant, createFlag } from '@cgk/feature-flags/server'
+ *
+ * // React components
+ * import { useFlag, FlagProvider } from '@cgk/feature-flags/react'
+ * ```
  */
 
-// Types
+// =============================================================================
+// Types (client-safe)
+// =============================================================================
 export {
   FLAG_KEY_REGEX,
   isValidFlagKey,
@@ -34,7 +45,9 @@ export {
   type UpdateFlagInput,
 } from './types.js'
 
-// Hashing
+// =============================================================================
+// Hashing (client-safe - uses Web Crypto API)
+// =============================================================================
 export {
   computeRolloutHash,
   computeRolloutHashSync,
@@ -45,7 +58,9 @@ export {
   selectVariantSync,
 } from './hash.js'
 
-// Evaluation
+// =============================================================================
+// Pure Evaluation Logic (client-safe - no DB/cache deps)
+// =============================================================================
 export {
   evaluateFlag,
   evaluateFlags,
@@ -53,38 +68,9 @@ export {
   isFlagEnabled,
 } from './evaluate.js'
 
-// Cache
-export {
-  createFlagCache,
-  getGlobalFlagCache,
-  MultiLayerFlagCache,
-  resetGlobalFlagCache,
-  type CacheStats,
-  type FlagCache,
-  type FlagCacheConfig,
-} from './cache.js'
-
-// Repository
-export {
-  createFlag,
-  createOverride,
-  deleteFlag,
-  deleteOverride,
-  getAllAuditEntries,
-  getAllFlags,
-  getAuditLog,
-  getCategories,
-  getFlagById,
-  getFlagByKey,
-  getFlags,
-  getOverridesForContext,
-  getOverridesForFlag,
-  killFlag,
-  seedFlags,
-  updateFlag,
-} from './repository.js'
-
-// Platform flags
+// =============================================================================
+// Platform Flag Definitions (client-safe - just constants)
+// =============================================================================
 export {
   getPlatformFlagDefinition,
   getPlatformFlagKeys,
@@ -93,9 +79,14 @@ export {
   PLATFORM_FLAGS,
 } from './platform-flags.js'
 
-// Seeding
-export {
-  ensurePlatformFlagsExist,
-  needsSeeding,
-  seedPlatformFlags,
-} from './seed.js'
+// =============================================================================
+// NOTE: For server-side operations, import from '@cgk/feature-flags/server'
+//
+// Server-only exports (NOT available from main entry):
+// - createFlag, updateFlag, deleteFlag, killFlag (repository)
+// - getFlag, getAllFlags, getFlags (repository)
+// - isEnabled, getVariant, evaluate (server SDK)
+// - seedPlatformFlags, ensurePlatformFlagsExist (seeding)
+// - createFlagCache, getGlobalFlagCache (caching)
+// - invalidateFlag, invalidateAllFlags (cache invalidation)
+// =============================================================================

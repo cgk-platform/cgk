@@ -1,10 +1,10 @@
 export const dynamic = 'force-dynamic'
 
-import { NextResponse } from 'next/server'
 import {
   getPlatformWorkspace,
   updatePlatformChannels,
 } from '@cgk/slack'
+import { NextResponse } from 'next/server'
 
 /**
  * GET /api/platform/slack/channels

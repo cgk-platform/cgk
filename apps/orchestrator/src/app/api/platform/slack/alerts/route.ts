@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { NextResponse } from 'next/server'
 import { getAlertHistory, type AlertSeverity } from '@cgk/slack'
+import { NextResponse } from 'next/server'
 
 /**
  * GET /api/platform/slack/alerts

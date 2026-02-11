@@ -56,7 +56,7 @@ export async function GET(req: Request) {
           ? 'This slug is already taken'
           : 'Slug is available',
     })
-  } catch (error) {
+  } catch {
     return Response.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
