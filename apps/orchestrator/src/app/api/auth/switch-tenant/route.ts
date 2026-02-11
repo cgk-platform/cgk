@@ -1,4 +1,3 @@
-import { sql } from '@cgk/db'
 import {
   getAuthCookie,
   getUserById,
@@ -9,6 +8,7 @@ import {
   validateSessionById,
   verifyJWT,
 } from '@cgk/auth'
+import { sql } from '@cgk/db'
 
 export const dynamic = 'force-dynamic'
 

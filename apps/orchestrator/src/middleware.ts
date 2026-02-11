@@ -1,8 +1,7 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-
 import { getAuthCookie, validateSessionById, verifyJWT } from '@cgk/auth'
 import { sql } from '@cgk/db'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
 /**
  * Public paths that don't require authentication
