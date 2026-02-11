@@ -326,15 +326,28 @@ const result = status
   : await sql`SELECT * FROM items WHERE active = true`
 ```
 
-### 5. Unused Variables → Underscore Prefix
+### 5. Unused Variables → Remove or Underscore
+
+**First ask: Is this variable actually needed?**
 
 ```typescript
-// TypeScript error: 'foo' is declared but never used
-function example(foo: string, bar: string) { return bar }
+// WRONG - Just prefixing to silence errors
+const _data = fetchData()  // Dead code! Delete it.
 
-// CORRECT - Prefix with underscore
-function example(_foo: string, bar: string) { return bar }
+// CORRECT - Remove unused variables entirely
+// (deleted)
+
+// ONLY use underscore for INTENTIONALLY unused parameters
+// (required by interface/signature but not needed in implementation)
+function handleEvent(_event: Event, data: Data) {
+  return processData(data)  // event required by interface but unused here
+}
+
+// Destructuring - skip with underscore only if intentional
+const { used, _intentionallySkipped } = config
 ```
+
+**Rule**: If you add an underscore prefix, add a comment explaining WHY it's intentionally unused, or remove the variable entirely.
 
 ---
 
