@@ -44,7 +44,9 @@ export async function getVoiceConfig(agentId: string): Promise<AgentVoiceConfig 
   const result = await sql`
     SELECT * FROM agent_voice_config WHERE agent_id = ${agentId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentVoiceConfig) : null
+  const row = result.rows[0]
+  if (!row) return null
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentVoiceConfig
 }
 
 /**
@@ -98,7 +100,9 @@ export async function createVoiceConfig(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentVoiceConfig
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create voice config')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentVoiceConfig
 }
 
 /**
@@ -185,7 +189,9 @@ export async function updateVoiceConfig(
     values
   )
 
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentVoiceConfig) : null
+  const row = result.rows[0]
+  if (!row) return null
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentVoiceConfig
 }
 
 // ============================================================================
@@ -220,7 +226,9 @@ export async function createVoiceCall(
     )
     RETURNING *
   `
-  const row = toCamelCase(result.rows[0]) as VoiceCall & { actionItems?: unknown }
+  const dbRow = result.rows[0]
+  if (!dbRow) throw new Error('Failed to create voice call')
+  const row = toCamelCase(dbRow as Record<string, unknown>) as unknown as VoiceCall & { actionItems?: unknown }
   row.actionItems = row.actionItems ? (row.actionItems as VoiceCall['actionItems']) : []
   return row as VoiceCall
 }
@@ -232,8 +240,9 @@ export async function getVoiceCall(callId: string): Promise<VoiceCall | null> {
   const result = await sql`
     SELECT * FROM agent_voice_calls WHERE id = ${callId}
   `
-  if (!result.rows[0]) return null
-  const row = toCamelCase(result.rows[0]) as VoiceCall & { actionItems?: unknown }
+  const dbRow = result.rows[0]
+  if (!dbRow) return null
+  const row = toCamelCase(dbRow as Record<string, unknown>) as unknown as VoiceCall & { actionItems?: unknown }
   row.actionItems = row.actionItems ? (row.actionItems as VoiceCall['actionItems']) : []
   return row as VoiceCall
 }
@@ -245,8 +254,9 @@ export async function getVoiceCallBySid(callSid: string): Promise<VoiceCall | nu
   const result = await sql`
     SELECT * FROM agent_voice_calls WHERE call_sid = ${callSid}
   `
-  if (!result.rows[0]) return null
-  const row = toCamelCase(result.rows[0]) as VoiceCall & { actionItems?: unknown }
+  const dbRow = result.rows[0]
+  if (!dbRow) return null
+  const row = toCamelCase(dbRow as Record<string, unknown>) as unknown as VoiceCall & { actionItems?: unknown }
   row.actionItems = row.actionItems ? (row.actionItems as VoiceCall['actionItems']) : []
   return row as VoiceCall
 }
@@ -309,8 +319,9 @@ export async function updateVoiceCall(
     values
   )
 
-  if (!result.rows[0]) return null
-  const row = toCamelCase(result.rows[0]) as VoiceCall & { actionItems?: unknown }
+  const dbRow = result.rows[0]
+  if (!dbRow) return null
+  const row = toCamelCase(dbRow as Record<string, unknown>) as unknown as VoiceCall & { actionItems?: unknown }
   row.actionItems = row.actionItems ? (row.actionItems as VoiceCall['actionItems']) : []
   return row as VoiceCall
 }
@@ -375,8 +386,8 @@ export async function listVoiceCalls(filters: VoiceCallFilters = {}): Promise<Vo
   `
 
   const result = await sql.query(query, values)
-  return result.rows.map((row) => {
-    const call = toCamelCase(row) as VoiceCall & { actionItems?: unknown }
+  return result.rows.map((dbRow) => {
+    const call = toCamelCase(dbRow as Record<string, unknown>) as unknown as VoiceCall & { actionItems?: unknown }
     call.actionItems = call.actionItems ? (call.actionItems as VoiceCall['actionItems']) : []
     return call as VoiceCall
   })
@@ -427,7 +438,9 @@ export async function getVoiceCallStats(
   `
 
   const result = await sql.query(query, values)
-  return toCamelCase(result.rows[0]) as VoiceCallStats
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to get voice call stats')
+  return toCamelCase(row as Record<string, unknown>) as unknown as VoiceCallStats
 }
 
 // ============================================================================
@@ -460,7 +473,9 @@ export async function createTranscript(
     )
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as VoiceTranscript
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create transcript')
+  return toCamelCase(row as Record<string, unknown>) as unknown as VoiceTranscript
 }
 
 /**
@@ -472,7 +487,7 @@ export async function getCallTranscripts(callId: string): Promise<VoiceTranscrip
     WHERE call_id = ${callId}
     ORDER BY started_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row) as VoiceTranscript)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as VoiceTranscript)
 }
 
 /**
@@ -507,13 +522,15 @@ export async function createVoiceResponse(
       ${input.callId},
       ${input.responseText},
       ${input.sourceTranscript || null},
-      ${input.toolsUsed || []},
+      ${input.toolsUsed ? `{${input.toolsUsed.join(',')}}` : '{}'}::text[],
       ${input.audioUrl || null},
       ${input.audioDurationMs ?? null}
     )
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as VoiceResponse
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create voice response')
+  return toCamelCase(row as Record<string, unknown>) as unknown as VoiceResponse
 }
 
 /**
@@ -525,7 +542,7 @@ export async function getCallResponses(callId: string): Promise<VoiceResponse[]>
     WHERE call_id = ${callId}
     ORDER BY created_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row) as VoiceResponse)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as VoiceResponse)
 }
 
 // ============================================================================
@@ -538,11 +555,12 @@ export async function getCallResponses(callId: string): Promise<VoiceResponse[]>
 export async function getVoiceCredentials(
   tenantId: string
 ): Promise<TenantVoiceCredentials | null> {
-  // This queries the public schema directly since credentials are platform-level
   const result = await sql`
     SELECT * FROM public.tenant_voice_credentials WHERE tenant_id = ${tenantId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as TenantVoiceCredentials) : null
+  const row = result.rows[0]
+  if (!row) return null
+  return toCamelCase(row as Record<string, unknown>) as unknown as TenantVoiceCredentials
 }
 
 /**
@@ -582,5 +600,7 @@ export async function updateVoiceCredentials(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as TenantVoiceCredentials
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to update voice credentials')
+  return toCamelCase(row as Record<string, unknown>) as unknown as TenantVoiceCredentials
 }

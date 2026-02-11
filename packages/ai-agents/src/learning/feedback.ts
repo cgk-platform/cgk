@@ -57,7 +57,11 @@ export async function submitFeedback(input: CreateFeedbackInput): Promise<AgentF
     RETURNING *
   `
 
-  return toCamelCase(result.rows[0]) as AgentFeedback
+  const row = result.rows[0]
+  if (!row) {
+    throw new Error('Failed to create feedback')
+  }
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback
 }
 
 /**
@@ -67,7 +71,7 @@ export async function getFeedback(feedbackId: string): Promise<AgentFeedback | n
   const result = await sql`
     SELECT * FROM agent_feedback WHERE id = ${feedbackId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentFeedback) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AgentFeedback) : null
 }
 
 /**
@@ -107,7 +111,7 @@ export async function listFeedback(
   `
 
   const result = await sql.query(query, values)
-  return result.rows.map((row) => toCamelCase(row) as AgentFeedback)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback)
 }
 
 /**
@@ -119,7 +123,7 @@ export async function getUnprocessedFeedback(agentId: string): Promise<AgentFeed
     WHERE agent_id = ${agentId} AND processed = false
     ORDER BY created_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentFeedback)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback)
 }
 
 /**
@@ -218,6 +222,14 @@ export async function getFeedbackStats(agentId: string): Promise<{
   `
 
   const stats = statsResult.rows[0]
+  if (!stats) {
+    return {
+      total: 0,
+      byType: { positive: 0, negative: 0, correction: 0 },
+      averageRating: null,
+      unprocessed: 0,
+    }
+  }
 
   return {
     total: stats.total as number,
@@ -253,5 +265,5 @@ export async function getFeedbackByConversation(
     WHERE agent_id = ${agentId} AND conversation_id = ${conversationId}
     ORDER BY created_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentFeedback)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback)
 }

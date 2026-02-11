@@ -4,7 +4,6 @@
 
 import {
   getSlackConfig,
-  getAgentSlackApp,
   getOrCreateSlackConversation,
   getSlackUserAssociation,
   upsertSlackUser,
@@ -372,7 +371,7 @@ async function handleAppHomeOpened(
 async function determineAgent(
   ctx: SlackEventContext,
   channelId: string,
-  userId?: string
+  _userId?: string
 ): Promise<string | null> {
   // Check channel-specific agent mapping
   const channelConfig = ctx.config.channelConfig?.[channelId] as

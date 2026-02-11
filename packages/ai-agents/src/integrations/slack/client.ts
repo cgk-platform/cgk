@@ -3,7 +3,7 @@
  */
 
 import * as crypto from 'node:crypto'
-import { decrypt, safeDecrypt } from '../utils/encryption.js'
+import { safeDecrypt } from '../utils/encryption.js'
 import type {
   SlackBlock,
   SlackMessage,
@@ -18,7 +18,7 @@ export interface SlackClientConfig {
   signingSecret?: string
 }
 
-export interface SlackAPIResponse<T = unknown> {
+export interface SlackAPIResponse<_T = unknown> {
   ok: boolean
   error?: string
   warning?: string
@@ -226,8 +226,15 @@ export class SlackClient {
       }
     )
     return {
-      messages: response.messages as ReturnType<SlackClient['getConversationHistory']> extends Promise<infer T> ? T['messages'] : never,
-      has_more: response.has_more,
+      messages: response.messages as Array<{
+        type: string
+        user?: string
+        bot_id?: string
+        text: string
+        ts: string
+        thread_ts?: string
+      }>,
+      has_more: response.has_more as boolean,
     }
   }
 
@@ -258,8 +265,15 @@ export class SlackClient {
       }
     )
     return {
-      messages: response.messages as ReturnType<SlackClient['getThreadReplies']> extends Promise<infer T> ? T['messages'] : never,
-      has_more: response.has_more,
+      messages: response.messages as Array<{
+        type: string
+        user?: string
+        bot_id?: string
+        text: string
+        ts: string
+        thread_ts?: string
+      }>,
+      has_more: response.has_more as boolean,
     }
   }
 
@@ -312,7 +326,7 @@ export class SlackClient {
       }
     )
     return {
-      channels: response.channels as ReturnType<SlackClient['listChannels']> extends Promise<infer T> ? T['channels'] : never,
+      channels: response.channels as Array<{ id: string; name: string; is_member: boolean }>,
       next_cursor: response.response_metadata?.next_cursor,
     }
   }
@@ -395,7 +409,7 @@ export function buildActionButton(
   text: string,
   value: string,
   style?: 'primary' | 'danger'
-): SlackBlock['elements'][0] {
+): NonNullable<SlackBlock['elements']>[0] {
   return {
     type: 'button',
     action_id: actionId,

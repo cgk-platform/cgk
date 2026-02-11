@@ -140,9 +140,9 @@ async function handleApprovalAction(
 
   // Process approval/rejection
   if (status === 'approved') {
-    await approve(requestId, payload.user.id, 'Approved via Slack')
+    await approve(requestId, 'Approved via Slack')
   } else {
-    await reject(requestId, payload.user.id, 'Rejected via Slack')
+    await reject(requestId, 'Rejected via Slack')
   }
 
   // Update the original message to show the result
@@ -292,7 +292,7 @@ async function handleFeedbackSubmission(
  * Handle global shortcuts
  */
 async function handleShortcut(
-  ctx: InteractionContext,
+  _ctx: InteractionContext,
   payload: SlackInteractionPayload
 ): Promise<SlackInteractionResponse> {
   // Handle any global shortcuts here
@@ -304,8 +304,8 @@ async function handleShortcut(
  * Handle message shortcuts (actions on specific messages)
  */
 async function handleMessageAction(
-  ctx: InteractionContext,
-  payload: SlackInteractionPayload
+  _ctx: InteractionContext,
+  _payload: SlackInteractionPayload
 ): Promise<SlackInteractionResponse> {
   // Handle message-level shortcuts here
   console.log(`[slack] Message action triggered`)
@@ -407,7 +407,7 @@ function buildFeedbackModal(messageId: string): SlackView {
  * Send an approval request to Slack
  */
 export async function sendApprovalRequestToSlack(
-  tenantId: string,
+  _tenantId: string,
   request: {
     id: string
     agentId: string

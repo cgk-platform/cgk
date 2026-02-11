@@ -9,7 +9,6 @@ import {
   updateIntegrationEventStatus,
   getSlackConfig,
   getSMSConfig,
-  getAgentEmailConfig,
 } from './db/queries.js'
 import { handleSlackEvent } from './slack/event-handler.js'
 import { handleSlackInteraction } from './slack/interactions.js'
@@ -21,7 +20,6 @@ import type {
   SlackEvent,
   SlackInteractionPayload,
   InboundEmail,
-  TwilioWebhookPayload,
 } from './types.js'
 
 export interface EventRouterConfig {
@@ -108,8 +106,8 @@ async function routeSlackEvent(
  * Route Google Calendar events
  */
 async function routeCalendarEvent(
-  tenantId: string,
-  eventType: string,
+  _tenantId: string,
+  _eventType: string,
   payload: Record<string, unknown>
 ): Promise<RouteResult> {
   const channelId = payload.channelId as string
@@ -151,7 +149,7 @@ async function routeEmailEvent(
  * Route SMS events
  */
 async function routeSMSEvent(
-  tenantId: string,
+  _tenantId: string,
   eventType: string,
   payload: Record<string, unknown>
 ): Promise<RouteResult> {
@@ -248,7 +246,7 @@ export async function getIntegrationStatus(): Promise<{
  * Determine which agent should handle an event
  */
 export async function determineAgentForEvent(
-  tenantId: string,
+  _tenantId: string,
   channel: IntegrationChannel,
   eventData: Record<string, unknown>
 ): Promise<string | null> {

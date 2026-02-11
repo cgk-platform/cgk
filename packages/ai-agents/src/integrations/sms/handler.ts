@@ -14,12 +14,12 @@ import {
   updateSMSConversationOptOut,
   checkAndIncrementRateLimit,
 } from '../db/queries.js'
-import { decrypt, safeDecrypt, encrypt } from '../utils/encryption.js'
+import { decrypt as _decrypt, safeDecrypt, encrypt } from '../utils/encryption.js'
 import { logAction } from '../../actions/logger.js'
 import type {
   TenantSMSConfig,
-  AgentSMSConversation,
-  AgentSMSMessage,
+  AgentSMSConversation as _AgentSMSConversation,
+  AgentSMSMessage as _AgentSMSMessage,
   SendSMSParams,
   SMSResult,
   TwilioWebhookPayload,
@@ -32,10 +32,15 @@ const TWILIO_API_BASE = 'https://api.twilio.com/2010-04-01'
  * SMS integration class
  */
 export class SMSIntegration {
-  private tenantId: string
+  private _tenantId: string
 
   constructor(tenantId: string) {
-    this.tenantId = tenantId
+    this._tenantId = tenantId
+  }
+
+  /** Get tenant ID for this integration */
+  get tenantId(): string {
+    return this._tenantId
   }
 
   /**

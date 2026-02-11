@@ -165,7 +165,9 @@ export async function createFailureLearning(
     RETURNING *
   `
 
-  return toCamelCase(result.rows[0]) as FailureLearning
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create failure learning')
+  return toCamelCase(row as Record<string, unknown>) as unknown as FailureLearning
 }
 
 /**
@@ -175,7 +177,7 @@ export async function getFailureLearning(learningId: string): Promise<FailureLea
   const result = await sql`
     SELECT * FROM agent_failure_learnings WHERE id = ${learningId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as FailureLearning) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as FailureLearning) : null
 }
 
 /**
@@ -215,7 +217,7 @@ export async function listFailureLearnings(
   `
 
   const result = await sql.query(query, values)
-  return result.rows.map((row) => toCamelCase(row) as FailureLearning)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as FailureLearning)
 }
 
 /**
@@ -230,7 +232,7 @@ export async function acknowledgeFailureLearning(learningId: string): Promise<Fa
     WHERE id = ${learningId}
     RETURNING *
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as FailureLearning) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as FailureLearning) : null
 }
 
 /**
@@ -243,7 +245,7 @@ export async function applyFailureLearning(learningId: string): Promise<FailureL
     WHERE id = ${learningId}
     RETURNING *
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as FailureLearning) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as FailureLearning) : null
 }
 
 /**
@@ -255,7 +257,7 @@ export async function getUnacknowledgedFailures(agentId: string): Promise<Failur
     WHERE agent_id = ${agentId} AND acknowledged = false
     ORDER BY created_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row) as FailureLearning)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as FailureLearning)
 }
 
 /**

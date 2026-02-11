@@ -5,7 +5,7 @@
  */
 
 import { sql } from '@cgk/db'
-import { recordMemoryAccess } from '../memory/storage.js'
+import { recordMemoryAccess as _recordMemoryAccess } from '../memory/storage.js'
 import { estimateTokens } from '../memory/embeddings.js'
 import { searchMemories } from './search.js'
 import { rankMemories, diversifyMemories, groupByType, sortGroupsByPriority } from './ranking.js'
@@ -272,7 +272,7 @@ async function recordMemoryAccessBatch(memoryIds: string[]): Promise<void> {
   await sql`
     UPDATE agent_memories
     SET times_used = times_used + 1, last_used_at = NOW()
-    WHERE id = ANY(${memoryIds})
+    WHERE id = ANY(${`{${memoryIds.join(',')}}`}::text[])
   `
 }
 

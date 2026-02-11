@@ -141,7 +141,7 @@ export function generatePersonalityPreview(
       mid: ['Hello', 'Hi', 'Good day'],
       high: ['Good morning', 'Good afternoon', 'Greetings'],
     }
-    greeting = greetings[formalityLevel][0]
+    greeting = greetings[formalityLevel]?.[0] ?? 'Hello'
   }
 
   // Add emoji if appropriate

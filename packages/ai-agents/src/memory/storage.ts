@@ -76,7 +76,11 @@ export async function createMemory(input: CreateMemoryInput): Promise<AgentMemor
     RETURNING *
   `
 
-  return toCamelCase(result.rows[0]) as AgentMemory
+  const row = result.rows[0]
+  if (!row) {
+    throw new Error('Failed to create memory - no row returned')
+  }
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory
 }
 
 /**
@@ -86,7 +90,8 @@ export async function getMemory(memoryId: string): Promise<AgentMemory | null> {
   const result = await sql`
     SELECT * FROM agent_memories WHERE id = ${memoryId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentMemory) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory) : null
 }
 
 /**
@@ -150,7 +155,7 @@ export async function listMemories(filters: MemoryListFilters = {}): Promise<Age
   `
 
   const result = await sql.query(query, values)
-  return result.rows.map((row) => toCamelCase(row) as AgentMemory)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory)
 }
 
 /**
@@ -220,7 +225,8 @@ export async function updateMemory(
     values
   )
 
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentMemory) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory) : null
 }
 
 /**
@@ -270,7 +276,7 @@ export async function getMemoriesBySubject(
       AND is_active = true
     ORDER BY confidence DESC, importance DESC
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentMemory)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory)
 }
 
 /**
@@ -288,7 +294,7 @@ export async function getMemoriesByType(
     ORDER BY confidence DESC, importance DESC
     LIMIT 100
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentMemory)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory)
 }
 
 /**
@@ -301,7 +307,7 @@ export async function getMemoriesWithoutEmbeddings(limit = 100): Promise<AgentMe
     ORDER BY created_at ASC
     LIMIT ${limit}
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentMemory)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory)
 }
 
 /**

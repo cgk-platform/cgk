@@ -8,11 +8,10 @@ import {
   updateAgentGoogleOAuthTokens,
   updateAgentGoogleOAuthWatch,
   upsertCalendarEvent,
-  getAgentUpcomingEvents,
   deleteCalendarEvent,
   getGoogleOAuthByChannelId,
 } from '../db/queries.js'
-import { encrypt, decrypt, safeDecrypt } from '../utils/encryption.js'
+import { encrypt, safeDecrypt } from '../utils/encryption.js'
 import { logAction } from '../../actions/logger.js'
 import type {
   AgentGoogleOAuth,
@@ -211,7 +210,7 @@ export class GoogleCalendarClient {
       actionType: 'create_calendar_event',
       actionCategory: 'scheduling',
       actionDescription: `Created event: ${params.summary}`,
-      inputData: params as Record<string, unknown>,
+      inputData: params as unknown as Record<string, unknown>,
       outputData: { eventId: response.id },
     })
 
@@ -510,7 +509,7 @@ export async function refreshGoogleTokens(
  */
 export async function handleCalendarWebhook(
   channelId: string,
-  resourceId: string
+  _resourceId: string
 ): Promise<void> {
   // Find agent by channel ID
   const oauth = await getGoogleOAuthByChannelId(channelId)

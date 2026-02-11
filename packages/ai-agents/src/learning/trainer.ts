@@ -69,7 +69,11 @@ export async function startTrainingSession(
     RETURNING *
   `
 
-  const session = toCamelCase(sessionResult.rows[0]) as TrainingSession
+  const sessionRow = sessionResult.rows[0]
+  if (!sessionRow) {
+    throw new Error('Failed to create training session')
+  }
+  const session = toCamelCase(sessionRow as Record<string, unknown>) as unknown as TrainingSession
 
   // Create memory from training
   const memoryType = TRAINING_TO_MEMORY_TYPE[input.trainingType]
@@ -124,7 +128,7 @@ export async function getTrainingSession(sessionId: string): Promise<TrainingSes
   const result = await sql`
     SELECT * FROM agent_training_sessions WHERE id = ${sessionId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as TrainingSession) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as TrainingSession) : null
 }
 
 /**
@@ -152,7 +156,7 @@ export async function listTrainingSessions(
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
-    return result.rows.map((row) => toCamelCase(row) as TrainingSession)
+    return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as TrainingSession)
   }
 
   const result = await sql`
@@ -161,7 +165,7 @@ export async function listTrainingSessions(
     ORDER BY created_at DESC
     LIMIT ${limit} OFFSET ${offset}
   `
-  return result.rows.map((row) => toCamelCase(row) as TrainingSession)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as TrainingSession)
 }
 
 /**
@@ -182,7 +186,7 @@ export async function acknowledgeTraining(
     WHERE id = ${sessionId}
     RETURNING *
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as TrainingSession) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as TrainingSession) : null
 }
 
 /**
@@ -197,7 +201,7 @@ export async function getUnacknowledgedTraining(agentId: string): Promise<Traini
     WHERE agent_id = ${agentId} AND acknowledged = false
     ORDER BY created_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row) as TrainingSession)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as TrainingSession)
 }
 
 /**

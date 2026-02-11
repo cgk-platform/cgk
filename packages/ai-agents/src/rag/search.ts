@@ -6,7 +6,7 @@
 
 import { sql } from '@cgk/db'
 import { generateEmbedding } from '../memory/embeddings.js'
-import { recordMemoryAccess } from '../memory/storage.js'
+import { recordMemoryAccess as _recordMemoryAccess } from '../memory/storage.js'
 import type { MemorySearchFilters, MemorySearchResult, MemoryType } from '../memory/types.js'
 
 // Helper to convert snake_case DB rows to camelCase
@@ -108,7 +108,7 @@ export async function searchMemories(
   // Filter by minimum similarity and map to result type
   return result.rows
     .filter((row: Record<string, unknown>) => (row.similarity as number) >= minSimilarity)
-    .map((row: Record<string, unknown>) => toCamelCase(row) as MemorySearchResult)
+    .map((row: Record<string, unknown>) => toCamelCase(row as Record<string, unknown>) as unknown as MemorySearchResult)
 }
 
 /**
@@ -139,7 +139,7 @@ export async function searchMemoriesByText(
     LIMIT ${limit}
   `
 
-  return result.rows.map((row) => toCamelCase(row) as MemorySearchResult)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as MemorySearchResult)
 }
 
 /**
@@ -174,7 +174,7 @@ export async function getSubjectMemories(
     LIMIT ${Math.ceil(limit / 2)}
   `
 
-  const directMemories = directResult.rows.map((row) => toCamelCase(row) as MemorySearchResult)
+  const directMemories = directResult.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as MemorySearchResult)
 
   // If context query provided, also do semantic search
   if (contextQuery) {
@@ -222,7 +222,7 @@ export async function getConversationMemories(
     ORDER BY created_at ASC
   `
 
-  return result.rows.map((row) => toCamelCase(row) as MemorySearchResult)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as MemorySearchResult)
 }
 
 /**
@@ -245,11 +245,11 @@ export async function getRecentMemories(
       FROM agent_memories
       WHERE agent_id = ${agentId}
         AND is_active = true
-        AND memory_type = ANY(${memoryTypes})
+        AND memory_type = ANY(${`{${memoryTypes.join(',')}}`}::text[])
       ORDER BY created_at DESC
       LIMIT ${limit}
     `
-    return result.rows.map((row) => toCamelCase(row) as MemorySearchResult)
+    return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as MemorySearchResult)
   }
 
   const result = await sql`
@@ -262,7 +262,7 @@ export async function getRecentMemories(
     LIMIT ${limit}
   `
 
-  return result.rows.map((row) => toCamelCase(row) as MemorySearchResult)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as MemorySearchResult)
 }
 
 /**
@@ -287,5 +287,5 @@ export async function getMostUsedMemories(
     LIMIT ${limit}
   `
 
-  return result.rows.map((row) => toCamelCase(row) as MemorySearchResult)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as MemorySearchResult)
 }

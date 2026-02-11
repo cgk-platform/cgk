@@ -5,7 +5,7 @@
  */
 
 import { sql } from '@cgk/db'
-import { generateEmbedding, cosineSimilarity } from './embeddings.js'
+import { cosineSimilarity } from './embeddings.js'
 import { createMemory, getMemory } from './storage.js'
 import type { AgentMemory, ConsolidationResult, MemoryType } from './types.js'
 
@@ -55,7 +55,7 @@ export async function findSimilarMemories(
   `
 
   return result.rows.map((row) => {
-    const camelRow = toCamelCase(row) as AgentMemory & { similarity: number }
+    const camelRow = toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory & { similarity: number }
     return camelRow
   })
 }
@@ -82,7 +82,7 @@ export async function findDuplicateMemories(
     ORDER BY created_at ASC
   `
 
-  const memories = result.rows.map((row) => toCamelCase(row) as AgentMemory)
+  const memories = result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentMemory)
 
   // Compare each pair (O(n^2) but limited by memory count)
   for (let i = 0; i < memories.length; i++) {
@@ -90,7 +90,7 @@ export async function findDuplicateMemories(
       const mem1 = memories[i]
       const mem2 = memories[j]
 
-      if (mem1.embedding && mem2.embedding) {
+      if (mem1 && mem2 && mem1.embedding && mem2.embedding) {
         const similarity = cosineSimilarity(
           mem1.embedding as number[],
           mem2.embedding as number[]
@@ -249,16 +249,25 @@ export async function consolidateMemories(
  * @returns Number of memories deactivated
  */
 export async function cleanupExpiredMemories(agentId?: string): Promise<number> {
-  const agentFilter = agentId ? sql`AND agent_id = ${agentId}` : sql``
-
-  const result = await sql`
-    UPDATE agent_memories
-    SET is_active = false, updated_at = NOW()
-    WHERE is_active = true
-      AND expires_at IS NOT NULL
-      AND expires_at < NOW()
-      ${agentFilter}
-  `
+  let result
+  if (agentId) {
+    result = await sql`
+      UPDATE agent_memories
+      SET is_active = false, updated_at = NOW()
+      WHERE is_active = true
+        AND expires_at IS NOT NULL
+        AND expires_at < NOW()
+        AND agent_id = ${agentId}
+    `
+  } else {
+    result = await sql`
+      UPDATE agent_memories
+      SET is_active = false, updated_at = NOW()
+      WHERE is_active = true
+        AND expires_at IS NOT NULL
+        AND expires_at < NOW()
+    `
+  }
 
   return result.rowCount ?? 0
 }

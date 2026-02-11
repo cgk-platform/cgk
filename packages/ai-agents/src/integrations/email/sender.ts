@@ -16,7 +16,6 @@ import { logAction } from '../../actions/logger.js'
 import { getAgent } from '../../agents/registry.js'
 import type {
   AgentEmailConfig,
-  AgentEmailConversation,
   SendAgentEmailParams,
   InboundEmail,
   EmailSendResult,
@@ -161,7 +160,7 @@ export async function sendAgentEmail(
  * Handle inbound email to agent
  */
 export async function handleAgentInboundEmail(
-  tenantId: string,
+  _tenantId: string,
   email: InboundEmail
 ): Promise<{ processed: boolean; agentId?: string; error?: string }> {
   // Determine which agent this email is for

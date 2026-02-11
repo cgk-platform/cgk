@@ -173,7 +173,7 @@ export async function checkAutonomyWithApproval(
 /**
  * Get all action types that require approval for an agent
  */
-export async function getActionsRequiringApproval(agentId: string): Promise<string[]> {
+export async function getActionsRequiringApproval(_agentId: string): Promise<string[]> {
   // This would query all action autonomy settings
   // For now, return default human_required actions
   return Object.entries(DEFAULT_ACTION_AUTONOMY)

@@ -44,14 +44,18 @@ export async function createPattern(input: CreatePatternInput): Promise<AgentPat
       ${input.agentId},
       ${input.queryPattern},
       ${input.responsePattern},
-      ${input.toolsUsed || []},
+      ${input.toolsUsed && input.toolsUsed.length > 0 ? `{${input.toolsUsed.join(',')}}` : '{}'}::text[],
       ${input.feedbackId || null},
       ${input.category || null}
     )
     RETURNING *
   `
 
-  return toCamelCase(result.rows[0]) as AgentPattern
+  const row = result.rows[0]
+  if (!row) {
+    throw new Error('Failed to create pattern')
+  }
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentPattern
 }
 
 /**
@@ -61,7 +65,7 @@ export async function getPattern(patternId: string): Promise<AgentPattern | null
   const result = await sql`
     SELECT * FROM agent_patterns WHERE id = ${patternId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentPattern) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AgentPattern) : null
 }
 
 /**
@@ -101,7 +105,7 @@ export async function listPatterns(
   `
 
   const result = await sql.query(query, values)
-  return result.rows.map((row) => toCamelCase(row) as AgentPattern)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentPattern)
 }
 
 /**
@@ -117,7 +121,7 @@ export async function getTopPatterns(
     ORDER BY times_used DESC, success_rate DESC
     LIMIT ${limit}
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentPattern)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentPattern)
 }
 
 /**
@@ -195,14 +199,14 @@ export async function findSimilarPatterns(
     WHERE agent_id = ${agentId}
       AND success_rate >= 0.6
       AND (
-        query_pattern ILIKE ANY(${patterns})
-        OR response_pattern ILIKE ANY(${patterns})
+        query_pattern ILIKE ANY(${patterns.length > 0 ? `{${patterns.join(',')}}` : '{}'}::text[])
+        OR response_pattern ILIKE ANY(${patterns.length > 0 ? `{${patterns.join(',')}}` : '{}'}::text[])
       )
     ORDER BY success_rate DESC, times_used DESC
     LIMIT 5
   `
 
-  return result.rows.map((row) => toCamelCase(row) as AgentPattern)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentPattern)
 }
 
 /**
@@ -217,7 +221,7 @@ export async function getPatternsByCategory(
     WHERE agent_id = ${agentId} AND category = ${category}
     ORDER BY success_rate DESC, times_used DESC
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentPattern)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentPattern)
 }
 
 /**
@@ -245,7 +249,7 @@ export async function updatePatternCategory(
     WHERE id = ${patternId}
     RETURNING *
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentPattern) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AgentPattern) : null
 }
 
 /**
@@ -311,10 +315,19 @@ export async function getPatternStats(agentId: string): Promise<{
     categoryCounts[row.category as string] = row.count as number
   }
 
+  if (!stats) {
+    return {
+      total: 0,
+      averageSuccessRate: null,
+      totalUsage: 0,
+      categoryCounts,
+    }
+  }
+
   return {
     total: stats.total as number,
     averageSuccessRate: stats.avg_success_rate ? Number(stats.avg_success_rate) : null,
-    totalUsage: stats.total_usage as number,
+    totalUsage: (stats.total_usage as number) ?? 0,
     categoryCounts,
   }
 }

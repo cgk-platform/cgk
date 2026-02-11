@@ -58,15 +58,17 @@ export async function createAgent(input: CreateAgentInput): Promise<AIAgent> {
       ${input.aiModel || 'claude-sonnet-4-20250514'},
       ${input.aiTemperature ?? 0.7},
       ${input.aiMaxTokens ?? 4096},
-      ${input.capabilities || ['slack', 'email']},
-      ${input.toolAccess || []},
+      ${`{${(input.capabilities || ['slack', 'email']).join(',')}}`}::text[],
+      ${`{${(input.toolAccess || []).join(',')}}`}::text[],
       ${input.isPrimary || false},
       ${input.humanManagerId || null}
     )
     RETURNING *
   `
 
-  return toCamelCase(result.rows[0]) as AIAgent
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create agent')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AIAgent
 }
 
 /**
@@ -76,7 +78,7 @@ export async function getAgentById(agentId: string): Promise<AIAgent | null> {
   const result = await sql`
     SELECT * FROM ai_agents WHERE id = ${agentId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AIAgent) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AIAgent) : null
 }
 
 /**
@@ -86,7 +88,7 @@ export async function getAgentByName(name: string): Promise<AIAgent | null> {
   const result = await sql`
     SELECT * FROM ai_agents WHERE name = ${name}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AIAgent) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AIAgent) : null
 }
 
 /**
@@ -98,7 +100,7 @@ export async function getPrimaryAgent(): Promise<AIAgent | null> {
     WHERE is_primary = true AND status = 'active'
     LIMIT 1
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AIAgent) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AIAgent) : null
 }
 
 /**
@@ -286,7 +288,7 @@ export async function updateAgent(
     values
   )
 
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AIAgent) : null
+  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AIAgent) : null
 }
 
 /**
@@ -319,10 +321,14 @@ export async function createDefaultPersonality(agentId: string): Promise<AgentPe
     const existing = await sql`
       SELECT * FROM agent_personality WHERE agent_id = ${agentId}
     `
-    return toCamelCase(existing.rows[0]) as AgentPersonality
+    const row = existing.rows[0]
+    if (!row) throw new Error('Agent personality not found')
+    return toCamelCase(row as Record<string, unknown>) as unknown as AgentPersonality
   }
 
-  return toCamelCase(result.rows[0]) as AgentPersonality
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create agent personality')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentPersonality
 }
 
 /**
@@ -332,7 +338,8 @@ export async function getAgentPersonality(agentId: string): Promise<AgentPersona
   const result = await sql`
     SELECT * FROM agent_personality WHERE agent_id = ${agentId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentPersonality) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentPersonality) : null
 }
 
 /**
@@ -417,7 +424,8 @@ export async function updateAgentPersonality(
     values
   )
 
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentPersonality) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentPersonality) : null
 }
 
 // ============================================================================
@@ -441,10 +449,14 @@ export async function createDefaultAutonomySettings(
     const existing = await sql`
       SELECT * FROM agent_autonomy_settings WHERE agent_id = ${agentId}
     `
-    return toCamelCase(existing.rows[0]) as AgentAutonomySettings
+    const row = existing.rows[0]
+    if (!row) throw new Error('Agent autonomy settings not found')
+    return toCamelCase(row as Record<string, unknown>) as unknown as AgentAutonomySettings
   }
 
-  return toCamelCase(result.rows[0]) as AgentAutonomySettings
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create agent autonomy settings')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentAutonomySettings
 }
 
 /**
@@ -454,7 +466,8 @@ export async function getAutonomySettings(agentId: string): Promise<AgentAutonom
   const result = await sql`
     SELECT * FROM agent_autonomy_settings WHERE agent_id = ${agentId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentAutonomySettings) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentAutonomySettings) : null
 }
 
 /**
@@ -503,7 +516,8 @@ export async function updateAutonomySettings(
     values
   )
 
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentAutonomySettings) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentAutonomySettings) : null
 }
 
 // ============================================================================
@@ -519,7 +533,7 @@ export async function getActionAutonomyList(agentId: string): Promise<AgentActio
     WHERE agent_id = ${agentId}
     ORDER BY action_type ASC
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentActionAutonomy)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentActionAutonomy)
 }
 
 /**
@@ -533,7 +547,8 @@ export async function getActionAutonomy(
     SELECT * FROM agent_action_autonomy
     WHERE agent_id = ${agentId} AND action_type = ${actionType}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentActionAutonomy) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentActionAutonomy) : null
 }
 
 /**
@@ -566,7 +581,9 @@ export async function setActionAutonomy(
       cooldown_hours = EXCLUDED.cooldown_hours
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentActionAutonomy
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to set action autonomy')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentActionAutonomy
 }
 
 // ============================================================================
@@ -593,7 +610,7 @@ export async function logAction(input: LogActionInput): Promise<AgentActionLog> 
       ${input.actionDescription},
       ${input.inputData ? JSON.stringify(input.inputData) : null},
       ${input.outputData ? JSON.stringify(input.outputData) : null},
-      ${input.toolsUsed || []},
+      ${`{${(input.toolsUsed || []).join(',')}}`}::text[],
       ${input.creatorId || null},
       ${input.projectId || null},
       ${input.conversationId || null},
@@ -606,7 +623,9 @@ export async function logAction(input: LogActionInput): Promise<AgentActionLog> 
     )
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentActionLog
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to log action')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentActionLog
 }
 
 /**
@@ -697,7 +716,8 @@ export async function getActionLog(actionId: string): Promise<AgentActionLog | n
   const result = await sql`
     SELECT * FROM agent_action_log WHERE id = ${actionId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentActionLog) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentActionLog) : null
 }
 
 /**
@@ -730,16 +750,18 @@ export async function updateActionApproval(
   status: ApprovalStatus,
   approvedBy?: string
 ): Promise<AgentActionLog | null> {
+  const approvedAt = status === 'approved' || status === 'rejected' ? new Date().toISOString() : null
   const result = await sql`
     UPDATE agent_action_log
     SET
       approval_status = ${status},
       approved_by = ${approvedBy || null},
-      approved_at = ${status === 'approved' || status === 'rejected' ? new Date() : null}
+      approved_at = ${approvedAt}
     WHERE id = ${actionId}
     RETURNING *
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentActionLog) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentActionLog) : null
 }
 
 // ============================================================================
@@ -772,7 +794,9 @@ export async function createApprovalRequest(
     )
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentApprovalRequest
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create approval request')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentApprovalRequest
 }
 
 /**
@@ -831,7 +855,8 @@ export async function getApprovalRequest(requestId: string): Promise<AgentApprov
   const result = await sql`
     SELECT * FROM agent_approval_requests WHERE id = ${requestId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentApprovalRequest) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentApprovalRequest) : null
 }
 
 /**
@@ -852,10 +877,10 @@ export async function respondToApproval(
     RETURNING *
   `
 
-  if (result.rows[0]) {
-    const request = toCamelCase(result.rows[0]) as AgentApprovalRequest
+  const row = result.rows[0]
+  if (row) {
+    const request = toCamelCase(row as Record<string, unknown>) as unknown as AgentApprovalRequest
 
-    // Also update the related action log if exists
     if (request.actionLogId) {
       await updateActionApproval(request.actionLogId, status)
     }

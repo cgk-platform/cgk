@@ -139,22 +139,35 @@ export async function contradictMemory(memoryId: string): Promise<void> {
  */
 export async function applyAgeDecay(agentId?: string): Promise<number> {
   // Calculate weeks since last used and apply decay
-  const agentFilter = agentId ? sql`AND agent_id = ${agentId}` : sql``
-
-  const result = await sql`
-    UPDATE agent_memories
-    SET
-      confidence = GREATEST(
-        0.1,
-        confidence - (
-          EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / (60 * 60 * 24 * 7) * ${DECAY_PER_WEEK}
-        )
-      ),
-      updated_at = NOW()
-    WHERE is_active = true
-      AND confidence > 0.1
-      ${agentFilter}
-  `
+  // Use separate queries to avoid composing SQL fragments (which creates Promise embedding issues)
+  const result = agentId
+    ? await sql`
+        UPDATE agent_memories
+        SET
+          confidence = GREATEST(
+            0.1,
+            confidence - (
+              EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / (60 * 60 * 24 * 7) * ${DECAY_PER_WEEK}
+            )
+          ),
+          updated_at = NOW()
+        WHERE is_active = true
+          AND confidence > 0.1
+          AND agent_id = ${agentId}
+      `
+    : await sql`
+        UPDATE agent_memories
+        SET
+          confidence = GREATEST(
+            0.1,
+            confidence - (
+              EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / (60 * 60 * 24 * 7) * ${DECAY_PER_WEEK}
+            )
+          ),
+          updated_at = NOW()
+        WHERE is_active = true
+          AND confidence > 0.1
+      `
 
   return result.rowCount ?? 0
 }
@@ -168,37 +181,64 @@ export async function applyAgeDecay(agentId?: string): Promise<number> {
  * @returns Number of memories updated
  */
 export async function recalculateAllConfidence(agentId?: string): Promise<number> {
-  const agentFilter = agentId ? sql`AND agent_id = ${agentId}` : sql``
-
   // This is a complex calculation that considers source, reinforcements, contradictions, and age
-  const result = await sql`
-    UPDATE agent_memories
-    SET
-      confidence = GREATEST(0, LEAST(1,
-        -- Source weight
-        CASE source
-          WHEN 'trained' THEN 1.0
-          WHEN 'told' THEN 0.9
-          WHEN 'corrected' THEN 0.85
-          WHEN 'observed' THEN 0.7
-          WHEN 'imported' THEN 0.6
-          WHEN 'inferred' THEN 0.5
-          ELSE 0.5
-        END
-        -- Reinforcement bonus (max 0.2)
-        + LEAST(${MAX_REINFORCEMENT_BONUS}, times_reinforced * ${REINFORCEMENT_BONUS})
-        -- Contradiction penalty (max 0.3)
-        - LEAST(${MAX_CONTRADICTION_PENALTY}, times_contradicted * ${CONTRADICTION_PENALTY})
-        -- Age decay (max 0.2)
-        - LEAST(
-            ${MAX_AGE_DECAY},
-            EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / (60 * 60 * 24 * 7) * ${DECAY_PER_WEEK}
-          )
-      )),
-      updated_at = NOW()
-    WHERE is_active = true
-      ${agentFilter}
-  `
+  // Use separate queries to avoid composing SQL fragments (which creates Promise embedding issues)
+  const result = agentId
+    ? await sql`
+        UPDATE agent_memories
+        SET
+          confidence = GREATEST(0, LEAST(1,
+            -- Source weight
+            CASE source
+              WHEN 'trained' THEN 1.0
+              WHEN 'told' THEN 0.9
+              WHEN 'corrected' THEN 0.85
+              WHEN 'observed' THEN 0.7
+              WHEN 'imported' THEN 0.6
+              WHEN 'inferred' THEN 0.5
+              ELSE 0.5
+            END
+            -- Reinforcement bonus (max 0.2)
+            + LEAST(${MAX_REINFORCEMENT_BONUS}, times_reinforced * ${REINFORCEMENT_BONUS})
+            -- Contradiction penalty (max 0.3)
+            - LEAST(${MAX_CONTRADICTION_PENALTY}, times_contradicted * ${CONTRADICTION_PENALTY})
+            -- Age decay (max 0.2)
+            - LEAST(
+                ${MAX_AGE_DECAY},
+                EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / (60 * 60 * 24 * 7) * ${DECAY_PER_WEEK}
+              )
+          )),
+          updated_at = NOW()
+        WHERE is_active = true
+          AND agent_id = ${agentId}
+      `
+    : await sql`
+        UPDATE agent_memories
+        SET
+          confidence = GREATEST(0, LEAST(1,
+            -- Source weight
+            CASE source
+              WHEN 'trained' THEN 1.0
+              WHEN 'told' THEN 0.9
+              WHEN 'corrected' THEN 0.85
+              WHEN 'observed' THEN 0.7
+              WHEN 'imported' THEN 0.6
+              WHEN 'inferred' THEN 0.5
+              ELSE 0.5
+            END
+            -- Reinforcement bonus (max 0.2)
+            + LEAST(${MAX_REINFORCEMENT_BONUS}, times_reinforced * ${REINFORCEMENT_BONUS})
+            -- Contradiction penalty (max 0.3)
+            - LEAST(${MAX_CONTRADICTION_PENALTY}, times_contradicted * ${CONTRADICTION_PENALTY})
+            -- Age decay (max 0.2)
+            - LEAST(
+                ${MAX_AGE_DECAY},
+                EXTRACT(EPOCH FROM (NOW() - COALESCE(last_used_at, created_at))) / (60 * 60 * 24 * 7) * ${DECAY_PER_WEEK}
+              )
+          )),
+          updated_at = NOW()
+        WHERE is_active = true
+      `
 
   return result.rowCount ?? 0
 }
@@ -238,15 +278,21 @@ export async function deactivateLowConfidenceMemories(
   threshold = 0.2,
   agentId?: string
 ): Promise<number> {
-  const agentFilter = agentId ? sql`AND agent_id = ${agentId}` : sql``
-
-  const result = await sql`
-    UPDATE agent_memories
-    SET is_active = false, updated_at = NOW()
-    WHERE is_active = true
-      AND confidence < ${threshold}
-      ${agentFilter}
-  `
+  // Use separate queries to avoid composing SQL fragments (which creates Promise embedding issues)
+  const result = agentId
+    ? await sql`
+        UPDATE agent_memories
+        SET is_active = false, updated_at = NOW()
+        WHERE is_active = true
+          AND confidence < ${threshold}
+          AND agent_id = ${agentId}
+      `
+    : await sql`
+        UPDATE agent_memories
+        SET is_active = false, updated_at = NOW()
+        WHERE is_active = true
+          AND confidence < ${threshold}
+      `
 
   return result.rowCount ?? 0
 }

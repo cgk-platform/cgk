@@ -37,7 +37,8 @@ function toCamelCase<T extends Record<string, unknown>>(row: T): Record<string, 
 
 export async function getSlackConfig(): Promise<TenantSlackConfig | null> {
   const result = await sql`SELECT * FROM tenant_slack_config LIMIT 1`
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as TenantSlackConfig) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as TenantSlackConfig) : null
 }
 
 export async function upsertSlackConfig(
@@ -63,7 +64,7 @@ export async function upsertSlackConfig(
       ${config.enabled ?? true},
       ${config.defaultAgentId || null},
       ${JSON.stringify(config.channelConfig || {})},
-      ${config.installedAt || null}
+      ${config.installedAt?.toISOString() || null}
     )
     ON CONFLICT ((1))
     DO UPDATE SET
@@ -83,7 +84,9 @@ export async function upsertSlackConfig(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as TenantSlackConfig
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to upsert slack config')
+  return toCamelCase(row as Record<string, unknown>) as unknown as TenantSlackConfig
 }
 
 export async function updateSlackChannelConfig(
@@ -96,7 +99,8 @@ export async function updateSlackChannelConfig(
         updated_at = NOW()
     RETURNING *
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as TenantSlackConfig) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as TenantSlackConfig) : null
 }
 
 // ============================================================================
@@ -107,7 +111,8 @@ export async function getAgentSlackApp(agentId: string): Promise<AgentSlackApp |
   const result = await sql`
     SELECT * FROM agent_slack_apps WHERE agent_id = ${agentId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentSlackApp) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentSlackApp) : null
 }
 
 export async function upsertAgentSlackApp(
@@ -152,7 +157,9 @@ export async function upsertAgentSlackApp(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentSlackApp
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to upsert agent slack app')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentSlackApp
 }
 
 // ============================================================================
@@ -165,14 +172,16 @@ export async function getSlackUserAssociation(
   const result = await sql`
     SELECT * FROM slack_user_associations WHERE slack_user_id = ${slackUserId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as SlackUserAssociation) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as SlackUserAssociation) : null
 }
 
 export async function getSlackUserByEmail(email: string): Promise<SlackUserAssociation | null> {
   const result = await sql`
     SELECT * FROM slack_user_associations WHERE slack_email = ${email}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as SlackUserAssociation) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as SlackUserAssociation) : null
 }
 
 export async function upsertSlackUser(
@@ -193,9 +202,9 @@ export async function upsertSlackUser(
       ${data.platformUserId || null},
       ${data.creatorId || null},
       ${data.associationMethod || null},
-      ${data.associatedAt || null},
+      ${data.associatedAt?.toISOString() || null},
       ${data.slackProfileCached ? JSON.stringify(data.slackProfileCached) : null},
-      ${data.slackCachedAt || new Date()}
+      ${(data.slackCachedAt || new Date()).toISOString()}
     )
     ON CONFLICT (slack_user_id)
     DO UPDATE SET
@@ -210,7 +219,9 @@ export async function upsertSlackUser(
       slack_cached_at = EXCLUDED.slack_cached_at
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as SlackUserAssociation
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to upsert slack user')
+  return toCamelCase(row as Record<string, unknown>) as unknown as SlackUserAssociation
 }
 
 // ============================================================================
@@ -238,7 +249,9 @@ export async function getOrCreateSlackConversation(
       is_active = true
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as SlackConversation
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to get or create slack conversation')
+  return toCamelCase(row as Record<string, unknown>) as unknown as SlackConversation
 }
 
 export async function getSlackConversation(
@@ -250,7 +263,8 @@ export async function getSlackConversation(
     WHERE slack_channel_id = ${channelId}
       AND COALESCE(slack_thread_ts, '') = COALESCE(${threadTs}, '')
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as SlackConversation) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as SlackConversation) : null
 }
 
 export async function updateSlackConversationContext(
@@ -272,7 +286,8 @@ export async function getAgentGoogleOAuth(agentId: string): Promise<AgentGoogleO
   const result = await sql`
     SELECT * FROM agent_google_oauth WHERE agent_id = ${agentId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentGoogleOAuth) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentGoogleOAuth) : null
 }
 
 export async function getGoogleOAuthByChannelId(
@@ -281,7 +296,8 @@ export async function getGoogleOAuthByChannelId(
   const result = await sql`
     SELECT * FROM agent_google_oauth WHERE watch_channel_id = ${channelId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentGoogleOAuth) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentGoogleOAuth) : null
 }
 
 export async function upsertAgentGoogleOAuth(
@@ -303,13 +319,13 @@ export async function upsertAgentGoogleOAuth(
       ${agentId},
       ${oauth.accessTokenEncrypted},
       ${oauth.refreshTokenEncrypted},
-      ${oauth.tokenExpiry},
+      ${oauth.tokenExpiry.toISOString()},
       ${oauth.googleEmail},
       ${oauth.googleAccountId || null},
-      ${oauth.scopes || []},
+      ${oauth.scopes ? `{${oauth.scopes.join(',')}}` : '{}'}::text[],
       ${oauth.watchChannelId || null},
       ${oauth.watchResourceId || null},
-      ${oauth.watchExpiration || null}
+      ${oauth.watchExpiration?.toISOString() || null}
     )
     ON CONFLICT (agent_id)
     DO UPDATE SET
@@ -325,7 +341,9 @@ export async function upsertAgentGoogleOAuth(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentGoogleOAuth
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to upsert agent google oauth')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentGoogleOAuth
 }
 
 export async function updateAgentGoogleOAuthTokens(
@@ -338,7 +356,7 @@ export async function updateAgentGoogleOAuthTokens(
     UPDATE agent_google_oauth
     SET access_token_encrypted = ${accessToken},
         refresh_token_encrypted = ${refreshToken},
-        token_expiry = ${expiry},
+        token_expiry = ${expiry.toISOString()},
         updated_at = NOW()
     WHERE agent_id = ${agentId}
   `
@@ -354,7 +372,7 @@ export async function updateAgentGoogleOAuthWatch(
     UPDATE agent_google_oauth
     SET watch_channel_id = ${watchChannelId},
         watch_resource_id = ${watchResourceId},
-        watch_expiration = ${watchExpiration},
+        watch_expiration = ${watchExpiration.toISOString()},
         updated_at = NOW()
     WHERE agent_id = ${agentId}
   `
@@ -368,7 +386,7 @@ export async function getExpiringCalendarWatches(
     WHERE watch_expiration IS NOT NULL
       AND watch_expiration < NOW() + INTERVAL '${withinHours} hours'
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentGoogleOAuth)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentGoogleOAuth)
 }
 
 // ============================================================================
@@ -396,8 +414,8 @@ export async function upsertCalendarEvent(
       ${event.googleCalendarId},
       ${event.summary || null},
       ${event.description || null},
-      ${event.startTime},
-      ${event.endTime},
+      ${event.startTime.toISOString()},
+      ${event.endTime.toISOString()},
       ${event.location || null},
       ${event.timezone || null},
       ${event.meetLink || null},
@@ -428,7 +446,9 @@ export async function upsertCalendarEvent(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentCalendarEvent
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to upsert calendar event')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentCalendarEvent
 }
 
 export async function getAgentUpcomingEvents(
@@ -436,7 +456,7 @@ export async function getAgentUpcomingEvents(
   limit: number = 10,
   afterDate?: Date
 ): Promise<AgentCalendarEvent[]> {
-  const from = afterDate || new Date()
+  const from = (afterDate || new Date()).toISOString()
   const result = await sql`
     SELECT * FROM agent_calendar_events
     WHERE agent_id = ${agentId}
@@ -445,7 +465,7 @@ export async function getAgentUpcomingEvents(
     ORDER BY start_time ASC
     LIMIT ${limit}
   `
-  return result.rows.map((row) => toCamelCase(row) as AgentCalendarEvent)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentCalendarEvent)
 }
 
 export async function deleteCalendarEvent(agentId: string, googleEventId: string): Promise<void> {
@@ -463,7 +483,8 @@ export async function getAgentEmailConfig(agentId: string): Promise<AgentEmailCo
   const result = await sql`
     SELECT * FROM agent_email_config WHERE agent_id = ${agentId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentEmailConfig) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentEmailConfig) : null
 }
 
 export async function getAgentByInboundEmail(
@@ -506,7 +527,9 @@ export async function upsertAgentEmailConfig(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentEmailConfig
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to upsert agent email config')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentEmailConfig
 }
 
 export async function incrementEmailCount(agentId: string): Promise<void> {
@@ -539,21 +562,21 @@ export async function getOrCreateEmailConversation(
   subject: string,
   threadId?: string
 ): Promise<AgentEmailConversation> {
-  // Try to find existing conversation by thread ID or contact+subject
   if (threadId) {
     const existing = await sql`
       SELECT * FROM agent_email_conversations
       WHERE agent_id = ${agentId} AND thread_id = ${threadId}
     `
-    if (existing.rows[0]) {
+    const existingRow = existing.rows[0]
+    if (existingRow) {
       await sql`
         UPDATE agent_email_conversations
         SET message_count = message_count + 1,
             last_message_at = NOW(),
             is_active = true
-        WHERE id = ${existing.rows[0].id}
+        WHERE id = ${existingRow.id}
       `
-      return toCamelCase(existing.rows[0]) as AgentEmailConversation
+      return toCamelCase(existingRow as Record<string, unknown>) as unknown as AgentEmailConversation
     }
   }
 
@@ -564,7 +587,9 @@ export async function getOrCreateEmailConversation(
     VALUES (${agentId}, ${threadId || null}, ${subject}, ${contactEmail})
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentEmailConversation
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to get or create email conversation')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentEmailConversation
 }
 
 export async function updateEmailConversation(
@@ -586,7 +611,8 @@ export async function updateEmailConversation(
 
 export async function getSMSConfig(): Promise<TenantSMSConfig | null> {
   const result = await sql`SELECT * FROM tenant_sms_config LIMIT 1`
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as TenantSMSConfig) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as TenantSMSConfig) : null
 }
 
 export async function upsertSMSConfig(
@@ -618,7 +644,9 @@ export async function upsertSMSConfig(
       updated_at = NOW()
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as TenantSMSConfig
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to upsert SMS config')
+  return toCamelCase(row as Record<string, unknown>) as unknown as TenantSMSConfig
 }
 
 export async function getAgentPhoneNumber(agentId: string): Promise<string | null> {
@@ -649,7 +677,9 @@ export async function getOrCreateSMSConversation(
       message_count = agent_sms_conversations.message_count + 1
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentSMSConversation
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to get or create SMS conversation')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentSMSConversation
 }
 
 export async function getSMSConversation(
@@ -661,7 +691,8 @@ export async function getSMSConversation(
     WHERE agent_phone_number = ${agentPhoneNumber}
       AND contact_phone_number = ${contactPhoneNumber}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as AgentSMSConversation) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as AgentSMSConversation) : null
 }
 
 export async function updateSMSConversationOptOut(
@@ -671,7 +702,7 @@ export async function updateSMSConversationOptOut(
   await sql`
     UPDATE agent_sms_conversations
     SET opted_out = ${optedOut},
-        opted_out_at = ${optedOut ? new Date() : null}
+        opted_out_at = ${optedOut ? new Date().toISOString() : null}
     WHERE id = ${conversationId}
   `
 }
@@ -704,15 +735,17 @@ export async function createSMSMessage(
       ${message.fromNumber},
       ${message.toNumber},
       ${message.body},
-      ${message.mediaUrls || []},
+      ${message.mediaUrls ? `{${message.mediaUrls.join(',')}}` : '{}'}::text[],
       ${message.providerMessageId || null},
       ${message.status || 'sent'},
       ${message.agentResponseTo || null},
-      ${message.direction === 'outbound' ? new Date() : null}
+      ${message.direction === 'outbound' ? new Date().toISOString() : null}
     )
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as AgentSMSMessage
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to create SMS message')
+  return toCamelCase(row as Record<string, unknown>) as unknown as AgentSMSMessage
 }
 
 export async function updateSMSMessageStatus(
@@ -724,7 +757,7 @@ export async function updateSMSMessageStatus(
   await sql`
     UPDATE agent_sms_messages
     SET status = ${status},
-        delivered_at = ${status === 'delivered' ? new Date() : null},
+        delivered_at = ${status === 'delivered' ? new Date().toISOString() : null},
         error_code = ${errorCode || null},
         error_message = ${errorMessage || null}
     WHERE provider_message_id = ${providerMessageId}
@@ -750,7 +783,9 @@ export async function queueIntegrationEvent(
     )
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as IntegrationEvent
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to queue integration event')
+  return toCamelCase(row as Record<string, unknown>) as unknown as IntegrationEvent
 }
 
 export async function getPendingIntegrationEvents(
@@ -764,7 +799,7 @@ export async function getPendingIntegrationEvents(
     ORDER BY received_at ASC
     LIMIT ${limit}
   `
-  return result.rows.map((row) => toCamelCase(row) as IntegrationEvent)
+  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as IntegrationEvent)
 }
 
 export async function updateIntegrationEventStatus(
@@ -773,12 +808,12 @@ export async function updateIntegrationEventStatus(
   processedPayload?: Record<string, unknown>,
   error?: string
 ): Promise<void> {
-  const nextRetry = status === 'failed' ? new Date(Date.now() + 60000) : null
+  const nextRetry = status === 'failed' ? new Date(Date.now() + 60000).toISOString() : null
   await sql`
     UPDATE integration_event_queue
     SET status = ${status},
         processed_payload = ${processedPayload ? JSON.stringify(processedPayload) : null},
-        processed_at = ${status === 'completed' ? new Date() : null},
+        processed_at = ${status === 'completed' ? new Date().toISOString() : null},
         attempts = attempts + 1,
         last_error = ${error || null},
         next_retry_at = ${nextRetry}
@@ -825,12 +860,13 @@ export async function checkAndIncrementRateLimit(
       END
   `
 
-  // Check current limits
   const check = await sql`
     SELECT * FROM channel_rate_limits
     WHERE agent_id = ${agentId} AND channel = ${channel}
   `
-  const limit = toCamelCase(check.rows[0]) as ChannelRateLimit
+  const checkRow = check.rows[0]
+  if (!checkRow) throw new Error('Rate limit record not found')
+  const limit = toCamelCase(checkRow as Record<string, unknown>) as unknown as ChannelRateLimit
 
   if (limit.countThisMinute >= limit.maxPerMinute) {
     return { allowed: false, remaining: 0, limitType: 'minute' }
@@ -869,7 +905,8 @@ export async function getRateLimitStatus(
     SELECT * FROM channel_rate_limits
     WHERE agent_id = ${agentId} AND channel = ${channel}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0]) as ChannelRateLimit) : null
+  const row = result.rows[0]
+  return row ? (toCamelCase(row as Record<string, unknown>) as unknown as ChannelRateLimit) : null
 }
 
 export async function updateRateLimits(
@@ -886,5 +923,7 @@ export async function updateRateLimits(
     WHERE agent_id = ${agentId} AND channel = ${channel}
     RETURNING *
   `
-  return toCamelCase(result.rows[0]) as ChannelRateLimit
+  const row = result.rows[0]
+  if (!row) throw new Error('Failed to update rate limits')
+  return toCamelCase(row as Record<string, unknown>) as unknown as ChannelRateLimit
 }
