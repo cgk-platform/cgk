@@ -270,6 +270,74 @@ export async function GET(req: Request) {
 
 ---
 
+## @vercel/postgres SQL Patterns (CRITICAL)
+
+The `sql` template tag from `@vercel/postgres` has specific limitations. Follow these patterns to avoid TypeScript errors:
+
+### 1. Arrays → PostgreSQL Array Literals
+
+```typescript
+// WRONG - Arrays cannot be passed directly
+sql`SELECT * FROM items WHERE id = ANY(${ids})`
+
+// CORRECT - Convert to PostgreSQL array format
+sql`SELECT * FROM items WHERE id = ANY(${`{${ids.join(',')}}`}::text[])`
+
+// With empty array handling
+sql`SELECT * FROM items WHERE tags && ${tags.length > 0 ? `{${tags.join(',')}}` : '{}'}::text[]`
+```
+
+### 2. Dates → ISO Strings
+
+```typescript
+// WRONG - Date objects cannot be passed
+sql`UPDATE items SET expires_at = ${someDate}`
+
+// CORRECT - Convert to ISO string
+sql`UPDATE items SET expires_at = ${someDate.toISOString()}`
+```
+
+### 3. Type Conversion with toCamelCase
+
+```typescript
+// WRONG - Direct cast doesn't satisfy TypeScript
+return toCamelCase(result.rows[0]) as MyType
+
+// CORRECT - Double cast through unknown
+const row = result.rows[0]
+if (!row) throw new Error('Not found')
+return toCamelCase(row as Record<string, unknown>) as unknown as MyType
+
+// For nullable returns
+const row = result.rows[0]
+return row ? (toCamelCase(row as Record<string, unknown>) as unknown as MyType) : null
+```
+
+### 4. No SQL Fragment Composition
+
+```typescript
+// WRONG - sql`` returns Promise, not composable fragment
+const filter = sql`AND status = ${status}`
+sql`SELECT * FROM items WHERE active = true ${filter}`
+
+// CORRECT - Use conditional queries
+const result = status
+  ? await sql`SELECT * FROM items WHERE active = true AND status = ${status}`
+  : await sql`SELECT * FROM items WHERE active = true`
+```
+
+### 5. Unused Variables → Underscore Prefix
+
+```typescript
+// TypeScript error: 'foo' is declared but never used
+function example(foo: string, bar: string) { return bar }
+
+// CORRECT - Prefix with underscore
+function example(_foo: string, bar: string) { return bar }
+```
+
+---
+
 ## Frontend Design Skill
 
 **MANDATORY**: Invoke `/frontend-design` before creating ANY React component.
