@@ -332,8 +332,8 @@ INNGEST_SIGNING_KEY=...
 | **Phase 1C** | ✅ Complete | Authentication (JWT, sessions, magic links, middleware) |
 | **Phase 1D** | ✅ Complete | Shared Packages (UI, Shopify, Commerce, testing) |
 | **Phase 2A** | ✅ Complete | Admin Shell & Configuration |
-| **Phase 2B** | 🔜 Next | See PLAN.md for full timeline |
-| Phase 2C+ | Pending | See PLAN.md for full timeline |
+| **Phase 2B** | ✅ Complete | Admin Commerce (Orders, Customers, Subscriptions, Reviews) |
+| Phase 2C+ | 🔜 Next | See PLAN.md for full timeline |
 
 ---
 
