@@ -10,10 +10,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cgk/auth": "workspace:*",
     "@cgk/core": "workspace:*",
     "@cgk/db": "workspace:*",
-    "@cgk/auth": "workspace:*",
+    "@cgk/feature-flags": "workspace:*",
+    "@cgk/health": "workspace:*",
+    "@cgk/logging": "workspace:*",
     "@cgk/ui": "workspace:*",
+    "lucide-react": "^0.468.0",
     "next": "^15.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

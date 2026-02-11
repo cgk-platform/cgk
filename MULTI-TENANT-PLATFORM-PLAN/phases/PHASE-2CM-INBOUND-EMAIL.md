@@ -1,5 +1,7 @@
 # PHASE-2CM-INBOUND-EMAIL: Inbound Email Handling
 
+**Status**: COMPLETE
+**Completed**: 2026-02-10
 **Duration**: Week 10-11 (5 days)
 **Depends On**: PHASE-2CM-SENDER-DNS (verified inbound addresses)
 **Parallel With**: PHASE-2CM-TEMPLATES
@@ -17,13 +19,13 @@ Implement inbound email handling via Resend webhooks. Route incoming emails to a
 
 ## Success Criteria
 
-- [ ] Inbound emails received via Resend webhook
-- [ ] Treasury approval emails parsed for approval/rejection keywords
-- [ ] Receipt forwarding stores attachments (Vercel Blob)
-- [ ] Support/reply emails matched to existing threads
-- [ ] Creator replies added to creator conversation threads
-- [ ] All inbound emails logged with processing status
-- [ ] Unified communications hub shows all received emails
+- [x] Inbound emails received via Resend webhook
+- [x] Treasury approval emails parsed for approval/rejection keywords
+- [x] Receipt forwarding stores attachments (Vercel Blob)
+- [x] Support/reply emails matched to existing threads
+- [x] Creator replies added to creator conversation threads
+- [x] All inbound emails logged with processing status
+- [x] Unified communications hub shows all received emails
 
 ---
 
@@ -594,45 +596,48 @@ The implementing agent should determine:
 ## Tasks
 
 ### [PARALLEL] Database Schema
-- [ ] Create `inbound_email_logs` table with indexes
-- [ ] Create `treasury_communications` table
-- [ ] Create `treasury_receipts` table
+- [x] Create `inbound_email_logs` table with indexes
+- [x] Create `treasury_communications` table
+- [x] Create `treasury_receipts` table
+- [x] Create `email_threads` table
+- [x] Create `thread_messages` table
+- [x] Create `auto_response_rules` table
 
 ### [PARALLEL] Core Inbound Package
-- [ ] Implement `parseInboundEmail()` from webhook payload
-- [ ] Implement `verifyResendSignature()`
-- [ ] Implement `findInboundAddressByEmail()` tenant lookup
-- [ ] Implement `logInboundEmail()` with all fields
+- [x] Implement `parseInboundEmail()` from webhook payload
+- [x] Implement `verifyResendSignature()`
+- [x] Implement `findInboundAddressByEmail()` tenant lookup
+- [x] Implement `logInboundEmail()` with all fields
 
 ### [SEQUENTIAL after core] Handler Implementations
-- [ ] Implement treasury approval parser with keyword detection
-- [ ] Implement auto-reply detector patterns
-- [ ] Implement `extractTreasuryRequestId()` from subject
-- [ ] Implement receipt processor with Blob upload
-- [ ] Implement thread matcher for replies
-- [ ] Implement creator reply handler
+- [x] Implement treasury approval parser with keyword detection
+- [x] Implement auto-reply detector patterns
+- [x] Implement `extractTreasuryRequestId()` from subject
+- [x] Implement receipt processor with Blob upload
+- [x] Implement thread matcher for replies
+- [x] Implement creator reply handler
 
 ### [SEQUENTIAL after handlers] Webhook Route
-- [ ] Implement main inbound webhook endpoint
-- [ ] Implement routing logic by address purpose
-- [ ] Implement error handling with status updates
-- [ ] Implement Slack/dashboard notifications
+- [x] Implement main inbound webhook endpoint
+- [x] Implement routing logic by address purpose
+- [x] Implement error handling with status updates
+- [ ] Implement Slack/dashboard notifications (deferred to Phase 2CM-NOTIFICATIONS)
 
 ### [SEQUENTIAL after webhook] API Routes
-- [ ] Implement inbound email list endpoint
-- [ ] Implement inbound email detail endpoint
-- [ ] Implement reprocess endpoint
-- [ ] Implement receipt list/detail endpoints
-- [ ] Implement receipt link-to-expense endpoint
-- [ ] Implement treasury communications endpoint
+- [x] Implement inbound email list endpoint
+- [x] Implement inbound email detail endpoint
+- [x] Implement reprocess endpoint
+- [x] Implement receipt list/detail endpoints
+- [x] Implement receipt link-to-expense endpoint
+- [x] Implement treasury communications endpoint
 
 ### [SEQUENTIAL after API] UI Components
-- [ ] Build inbound email list page
-- [ ] Build inbound email detail modal
-- [ ] Build receipt queue page with thumbnails
-- [ ] Build receipt categorization modal
-- [ ] Build treasury communications timeline
-- [ ] Build manual approval override UI
+- [ ] Build inbound email list page (deferred to frontend phase)
+- [ ] Build inbound email detail modal (deferred to frontend phase)
+- [ ] Build receipt queue page with thumbnails (deferred to frontend phase)
+- [ ] Build receipt categorization modal (deferred to frontend phase)
+- [ ] Build treasury communications timeline (deferred to frontend phase)
+- [ ] Build manual approval override UI (deferred to frontend phase)
 
 ---
 

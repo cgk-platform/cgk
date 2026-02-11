@@ -1,7 +1,8 @@
-import { getUserById } from '@cgk/auth'
+import { getUserById, getUserTenants, type TenantContext } from '@cgk/auth'
 import { headers } from 'next/headers'
 
 import { AdminShell } from './admin-shell'
+import { AdminProviders } from './admin-providers'
 
 import { getTenantConfig, type TenantConfig } from '@/lib/tenant'
 import { generateThemeCSS } from '@/lib/theme'
@@ -22,6 +23,7 @@ const DEFAULT_TENANT: TenantConfig = {
     subscriptions: true,
     abTesting: false,
     attribution: false,
+    scheduling: true,
   },
   shopifyDomain: null,
   status: 'active',
@@ -64,12 +66,42 @@ export default async function AdminLayout({
     role: userRole,
   }
 
+  // Fetch user's tenants for context switching
+  let userTenants: TenantContext[] = []
+  let currentTenantContext: TenantContext | null = null
+  if (userId) {
+    userTenants = await getUserTenants(userId)
+    // Find current tenant in the list
+    const tenantId = headerList.get('x-tenant-id')
+    if (tenantId) {
+      currentTenantContext = userTenants.find((t) => t.id === tenantId) || null
+    }
+  }
+
+  // Check for impersonation info from headers (set by middleware when impersonation JWT detected)
+  const impersonatorEmail = headerList.get('x-impersonator-email')
+  const impersonatorSessionId = headerList.get('x-impersonator-session-id')
+  const impersonationExpiresAt = headerList.get('x-impersonation-expires-at')
+
+  const impersonationInfo = impersonatorEmail
+    ? {
+        impersonatorEmail,
+        sessionId: impersonatorSessionId || '',
+        expiresAt: impersonationExpiresAt || new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      }
+    : null
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: themeCSS }} />
-      <AdminShell tenant={tenant} user={user}>
-        {children}
-      </AdminShell>
+      <AdminProviders
+        initialTenant={currentTenantContext}
+        initialTenants={userTenants}
+      >
+        <AdminShell tenant={tenant} user={user} impersonationInfo={impersonationInfo}>
+          {children}
+        </AdminShell>
+      </AdminProviders>
     </>
   )
 }

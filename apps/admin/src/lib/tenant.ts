@@ -5,6 +5,7 @@ export interface TenantFeatures {
   subscriptions: boolean
   abTesting: boolean
   attribution: boolean
+  scheduling: boolean
 }
 
 export interface TenantColors {
@@ -36,6 +37,7 @@ const DEFAULT_FEATURES: TenantFeatures = {
   subscriptions: true,
   abTesting: false,
   attribution: false,
+  scheduling: true,
 }
 
 export async function getTenantConfig(tenantSlug: string): Promise<TenantConfig | null> {

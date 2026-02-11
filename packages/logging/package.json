@@ -23,7 +23,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*"
+    "@cgk/core": "workspace:*",
+    "@cgk/db": "workspace:*"
   },
   "devDependencies": {
     "@cgk/eslint-config": "workspace:*",

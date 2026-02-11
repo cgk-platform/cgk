@@ -7,6 +7,8 @@ import {
   Wallet,
   Activity,
   Settings,
+  Calendar,
+  Bot,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -78,6 +80,20 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    label: 'Scheduling',
+    icon: Calendar,
+    href: '/admin/scheduling',
+    featureFlag: 'scheduling',
+    children: [
+      { label: 'Dashboard', href: '/admin/scheduling' },
+      { label: 'Event Types', href: '/admin/scheduling/event-types' },
+      { label: 'Availability', href: '/admin/scheduling/availability' },
+      { label: 'Bookings', href: '/admin/scheduling/bookings' },
+      { label: 'Analytics', href: '/admin/scheduling/analytics' },
+      { label: 'Settings', href: '/admin/scheduling/settings' },
+    ],
+  },
+  {
     label: 'Finance',
     icon: Wallet,
     href: '/admin/finance',
@@ -89,11 +105,23 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    label: 'AI Team',
+    icon: Bot,
+    href: '/admin/ai-team',
+    featureFlag: 'aiAgents',
+    children: [
+      { label: 'Agents', href: '/admin/ai-team' },
+      { label: 'Actions', href: '/admin/ai-team/actions' },
+      { label: 'Approvals', href: '/admin/ai-team/approvals' },
+    ],
+  },
+  {
     label: 'Operations',
     icon: Activity,
     href: '/admin/operations',
     children: [
       { label: 'Dashboard', href: '/admin/operations' },
+      { label: 'Logs', href: '/admin/operations/logs' },
       { label: 'Errors', href: '/admin/operations/errors' },
       { label: 'Health', href: '/admin/operations/health' },
     ],

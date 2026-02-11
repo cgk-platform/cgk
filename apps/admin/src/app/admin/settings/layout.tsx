@@ -6,6 +6,9 @@ import { usePathname } from 'next/navigation'
 
 const settingsTabs = [
   { label: 'General', href: '/admin/settings/general' },
+  { label: 'AI', href: '/admin/settings/ai' },
+  { label: 'Email', href: '/admin/settings/email' },
+  { label: 'Payouts', href: '/admin/settings/payouts' },
   { label: 'Domains', href: '/admin/settings/domains' },
   { label: 'Shopify', href: '/admin/settings/shopify' },
   { label: 'Payments', href: '/admin/settings/payments' },
@@ -36,7 +39,7 @@ export default function SettingsLayout({
             href={tab.href}
             className={cn(
               'whitespace-nowrap border-b-2 px-4 py-2 text-sm transition-colors',
-              pathname === tab.href
+              pathname === tab.href || pathname.startsWith(tab.href + '/')
                 ? 'border-primary font-medium text-primary'
                 : 'border-transparent text-muted-foreground hover:text-foreground'
             )}

@@ -1,10 +1,19 @@
-import { getAuthCookie, validateSessionById, verifyJWT } from '@cgk/auth'
+import {
+  getAuthCookie,
+  isImpersonationToken,
+  updateMembershipActivity,
+  validateImpersonationSession,
+  validateSessionById,
+  verifyImpersonationJWT,
+  verifyJWT,
+} from '@cgk/auth'
 import { sql } from '@cgk/db'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const PUBLIC_PATHS = [
   '/login',
+  '/join',
   '/auth/verify',
   '/api/auth',
 ]
@@ -47,8 +56,47 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
+    // First, try to decode as a regular JWT to check the type
     const payload = await verifyJWT(token)
 
+    // Check if this is an impersonation token
+    if (isImpersonationToken(payload)) {
+      // Verify as impersonation JWT
+      const impersonationPayload = await verifyImpersonationJWT(token)
+
+      // Validate the impersonation session is still active
+      const impersonationSession = await validateImpersonationSession(impersonationPayload.sid)
+      if (!impersonationSession) {
+        const loginUrl = new URL('/login', request.url)
+        loginUrl.searchParams.set('redirect', pathname)
+        loginUrl.searchParams.set('reason', 'impersonation_expired')
+        return NextResponse.redirect(loginUrl)
+      }
+
+      // Set user info from impersonated user
+      requestHeaders.set('x-user-id', impersonationPayload.sub)
+      requestHeaders.set('x-session-id', impersonationPayload.sid)
+      requestHeaders.set('x-user-role', impersonationPayload.role)
+
+      // Set impersonation info headers
+      requestHeaders.set('x-impersonator-id', impersonationPayload.impersonator.userId)
+      requestHeaders.set('x-impersonator-email', impersonationPayload.impersonator.email)
+      requestHeaders.set('x-impersonator-session-id', impersonationPayload.impersonator.sessionId)
+      requestHeaders.set('x-impersonation-expires-at', impersonationSession.expiresAt.toISOString())
+      requestHeaders.set('x-is-impersonation', 'true')
+
+      // Set tenant from impersonation payload
+      requestHeaders.set('x-tenant-id', impersonationPayload.orgId)
+      requestHeaders.set('x-tenant-slug', impersonationPayload.org)
+
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders,
+        },
+      })
+    }
+
+    // Regular session validation
     const session = await validateSessionById(payload.sid)
     if (!session) {
       const loginUrl = new URL('/login', request.url)
@@ -61,6 +109,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     requestHeaders.set('x-user-role', payload.role)
 
     // Use tenant from JWT if not already resolved from domain
+    let tenantId = tenantFromDomain?.id || null
     if (!tenantFromDomain) {
       let orgSlug = payload.org
       if (payload.orgId && !orgSlug) {
@@ -74,10 +123,18 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       }
       if (payload.orgId) {
         requestHeaders.set('x-tenant-id', payload.orgId)
+        tenantId = payload.orgId
       }
       if (orgSlug) {
         requestHeaders.set('x-tenant-slug', orgSlug)
       }
+    }
+
+    // Update membership activity (fire and forget)
+    if (tenantId) {
+      updateMembershipActivity(payload.sub, tenantId).catch(() => {
+        // Ignore errors - this is non-critical
+      })
     }
 
     return NextResponse.next({

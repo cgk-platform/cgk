@@ -27,6 +27,9 @@ export default function RootLayout({
               <a href="/collections" className="text-sm hover:text-primary">
                 Collections
               </a>
+              <a href="/results" className="text-sm hover:text-primary">
+                Results
+              </a>
               <a href="/cart" className="text-sm hover:text-primary">
                 Cart
               </a>

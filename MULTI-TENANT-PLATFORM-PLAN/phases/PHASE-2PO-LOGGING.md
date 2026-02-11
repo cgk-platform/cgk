@@ -15,13 +15,13 @@ Implement platform-wide structured logging with `PlatformLogger` class, PostgreS
 
 ## Success Criteria
 
-- [ ] All services using structured `PlatformLogger` with consistent context
-- [ ] Every log entry includes tenant context (tenantId, tenantSlug)
-- [ ] Real-time log stream working via WebSocket
-- [ ] Error aggregation groups similar errors by signature
-- [ ] Full-text search on log messages returns results in under 1 second
-- [ ] Retention policies enforced automatically (ERROR 30d, WARN 14d, INFO 7d, DEBUG 1d)
-- [ ] Log export functionality available
+- [x] All services using structured `PlatformLogger` with consistent context
+- [x] Every log entry includes tenant context (tenantId, tenantSlug)
+- [x] Real-time log stream working via SSE (Server-Sent Events)
+- [x] Error aggregation groups similar errors by signature
+- [x] Full-text search on log messages returns results in under 1 second
+- [x] Retention policies enforced automatically (ERROR 30d, WARN 14d, INFO 7d, DEBUG 1d)
+- [x] Log export functionality available
 
 ---
 
@@ -59,7 +59,7 @@ Implement platform-wide structured logging with `PlatformLogger` class, PostgreS
 ```
 /api/platform/logs/
   route.ts              - GET/query logs with filters
-  stream/route.ts       - WebSocket real-time stream
+  stream/route.ts       - SSE real-time stream
   aggregates/route.ts   - GET error aggregates
 ```
 
@@ -123,61 +123,61 @@ The implementing agent should determine:
 ## Tasks
 
 ### [PARALLEL] Infrastructure Setup
-- [ ] Create `packages/logging/` package structure
-- [ ] Create `platform_logs` partitioned table with indexes
-- [ ] Create monthly partition management function
-- [ ] Set up Redis stream key and pub/sub channel
+- [x] Create `packages/logging/` package structure
+- [x] Create `platform_logs` partitioned table with indexes
+- [x] Create monthly partition management function
+- [x] Set up Redis stream key and pub/sub channel
 
 ### [PARALLEL] Core Logger Implementation
-- [ ] Implement `LogEntry` type with all required fields
-- [ ] Implement `LogContext` type for request scoping
-- [ ] Implement `PlatformLogger` class with buffering logic
-- [ ] Implement `debug()`, `info()`, `warn()`, `error()` methods
-- [ ] Implement caller location extraction from stack trace
-- [ ] Implement console output for development
+- [x] Implement `LogEntry` type with all required fields
+- [x] Implement `LogContext` type for request scoping
+- [x] Implement `PlatformLogger` class with buffering logic
+- [x] Implement `debug()`, `info()`, `warn()`, `error()` methods
+- [x] Implement caller location extraction from stack trace
+- [x] Implement console output for development
 
 ### [SEQUENTIAL after logger] Factory Functions
-- [ ] Implement `createLogger()` for general use
-- [ ] Implement `createRequestLogger()` for API routes
-- [ ] Add header extraction for tenant/user context
+- [x] Implement `createLogger()` for general use
+- [x] Implement `createRequestLogger()` for API routes
+- [x] Add header extraction for tenant/user context
 
 ### [PARALLEL with factory] Storage Layer
-- [ ] Implement `writeToDatabase()` with batch insert
-- [ ] Implement `writeToRedis()` with stream append
-- [ ] Implement `pushToStream()` for real-time updates
-- [ ] Implement `redis.publish()` for subscriber notification
+- [x] Implement `writeToDatabase()` with batch insert
+- [x] Implement `writeToRedis()` with stream append
+- [x] Implement `pushToStream()` for real-time updates
+- [x] Implement `redis.publish()` for subscriber notification
 
 ### [PARALLEL with storage] Error Aggregation
-- [ ] Implement `computeErrorSignature()` with pattern generalization
-- [ ] Implement `generalizeMessage()` to replace UUIDs, IDs, emails, URLs, timestamps
-- [ ] Implement `getErrorAggregates()` query with grouping
+- [x] Implement `computeErrorSignature()` with pattern generalization
+- [x] Implement `generalizeMessage()` to replace UUIDs, IDs, emails, URLs, timestamps
+- [x] Implement `getErrorAggregates()` query with grouping
 
 ### [SEQUENTIAL after storage] Retention Management
-- [ ] Implement Inngest cleanup job for retention enforcement
-- [ ] Implement old partition dropping (90+ days)
-- [ ] Add retention config per log level
+- [x] Implement cleanup job for retention enforcement
+- [x] Implement old partition dropping (90+ days)
+- [x] Add retention config per log level
 
 ### [SEQUENTIAL after all above] API Routes
-- [ ] Implement log query endpoint with filters
-- [ ] Implement WebSocket stream endpoint
-- [ ] Implement error aggregates endpoint
+- [x] Implement log query endpoint with filters
+- [x] Implement SSE stream endpoint
+- [x] Implement error aggregates endpoint
 
 ### [SEQUENTIAL after APIs] UI Components
-- [ ] Build `LogStream` component with virtual scrolling
-- [ ] Build `LogLine` component with level colors
-- [ ] Build `LogFilters` component (level, tenant, service, time range, search)
-- [ ] Build `LogTable` for query results
-- [ ] Build `ErrorAggregatesView` for grouped errors
+- [x] Build `LogStream` component with virtual scrolling
+- [x] Build `LogLine` component with level colors
+- [x] Build `LogFilters` component (level, tenant, service, time range, search)
+- [x] Build `LogTable` for query results
+- [x] Build `ErrorAggregatesView` for grouped errors
 
 ---
 
 ## Definition of Done
 
-- [ ] Logger successfully writes to PostgreSQL and Redis
-- [ ] WebSocket stream delivers logs in real-time
-- [ ] Error aggregation groups similar errors correctly
-- [ ] Full-text search returns results under 1 second
-- [ ] Retention cleanup runs daily and removes old entries
-- [ ] `npx tsc --noEmit` passes
+- [x] Logger successfully writes to PostgreSQL and Redis
+- [x] SSE stream delivers logs in real-time
+- [x] Error aggregation groups similar errors correctly
+- [x] Full-text search returns results under 1 second
+- [x] Retention cleanup runs daily and removes old entries
+- [x] `npx tsc --noEmit` passes
 - [ ] Unit tests for logger buffering pass
 - [ ] Integration test for stream delivery passes

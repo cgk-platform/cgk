@@ -1,5 +1,7 @@
 # PHASE-2D: Admin Finance & Creator Management
 
+**Status**: ✅ COMPLETE
+
 **Duration**: 1 week (Week 7)
 **Depends On**: Phase 2A (Admin Shell)
 **Parallel With**: Phase 2C (Content - late), Phase 2SA-ADVANCED, **PHASE-2D-PL-CONFIGURATION**
@@ -28,15 +30,15 @@ Implement the Creators and Finance sections of the admin portal including creato
 
 ## Success Criteria
 
-- [ ] Creator directory with search and filters
-- [ ] Creator detail page with earnings and projects
-- [ ] Creator pipeline kanban with drag-and-drop stages
-- [ ] Creator inbox with threads and messaging
-- [ ] Payouts dashboard with pending/completed withdrawals
-- [ ] Withdrawal approval/rejection workflow
-- [ ] Treasury view with balances
-- [ ] Expenses tracking CRUD
-- [ ] Tax/1099 status per creator
+- [x] Creator directory with search and filters
+- [x] Creator detail page with earnings and projects
+- [x] Creator pipeline kanban with drag-and-drop stages
+- [x] Creator inbox with threads and messaging
+- [x] Payouts dashboard with pending/completed withdrawals
+- [x] Withdrawal approval/rejection workflow
+- [x] Treasury view with balances
+- [x] Expenses tracking CRUD
+- [x] Tax/1099 status per creator
 
 ---
 
@@ -146,73 +148,82 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Database Layer
-- [ ] Create `apps/admin/src/lib/creators/db.ts` (getCreators, getCreator, updateStage)
-- [ ] Create `apps/admin/src/lib/creators/types.ts`
-- [ ] Create `apps/admin/src/lib/messaging/db.ts` (getThreads, sendMessage)
-- [ ] Create `apps/admin/src/lib/payouts/db.ts` (getWithdrawals, processWithdrawal)
-- [ ] Create `apps/admin/src/lib/expenses/db.ts`
-- [ ] Create `apps/admin/src/lib/treasury/db.ts`
+- [x] Create `apps/admin/src/lib/creators/db.ts` (getCreators, getCreator, updateStage)
+- [x] Create `apps/admin/src/lib/creators/types.ts`
+- [x] Create `apps/admin/src/lib/messaging/db.ts` (getThreads, sendMessage)
+- [x] Create `apps/admin/src/lib/payouts/db.ts` (getWithdrawals, processWithdrawal)
+- [x] Create `apps/admin/src/lib/expenses/db.ts`
+- [x] Create `apps/admin/src/lib/treasury/db.ts`
+- [x] Create `apps/admin/src/lib/tax/db.ts` (added)
+- [x] Create `apps/admin/src/lib/messaging/types.ts` (added)
+- [x] Create `apps/admin/src/lib/payouts/types.ts` (added)
+- [x] Create `apps/admin/src/lib/treasury/types.ts` (added)
+- [x] Create `apps/admin/src/lib/expenses/types.ts` (added)
+- [x] Create `apps/admin/src/lib/tax/types.ts` (added)
 
 ### [PARALLEL] API Routes
-- [ ] Create `apps/admin/src/app/api/admin/creators/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/creators/[id]/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/creators/[id]/stage/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/creators/inbox/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/creators/inbox/[threadId]/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/payouts/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/payouts/[id]/process/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/treasury/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/expenses/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/tax/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/creators/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/creators/[id]/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/creators/[id]/stage/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/creators/inbox/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/creators/inbox/[threadId]/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/payouts/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/payouts/[id]/process/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/treasury/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/expenses/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/tax/route.ts`
 
 ### [SEQUENTIAL after API] Creator Directory UI
-- [ ] Create `apps/admin/src/app/admin/creators/page.tsx` (directory)
-- [ ] Create `apps/admin/src/app/admin/creators/components/creator-list.tsx`
-- [ ] Create `apps/admin/src/app/admin/creators/[id]/page.tsx` (detail)
-- [ ] Create `apps/admin/src/app/admin/creators/applications/page.tsx`
+- [x] Create `apps/admin/src/app/admin/creators/page.tsx` (directory)
+- [x] Create `apps/admin/src/app/admin/creators/components/creator-list.tsx`
+- [x] Create `apps/admin/src/app/admin/creators/[id]/page.tsx` (detail)
+- [x] Create `apps/admin/src/app/admin/creators/applications/page.tsx`
 
 ### [SEQUENTIAL after API] Creator Pipeline UI
-- [ ] Create `apps/admin/src/app/admin/creator-pipeline/page.tsx`
-- [ ] Create `apps/admin/src/components/admin/creators/pipeline.tsx`
-- [ ] Create `apps/admin/src/components/admin/creators/creator-card.tsx`
-- [ ] Implement dnd-kit with DndContext and SortableContext
-- [ ] Implement stage transition API calls
+- [x] Create `apps/admin/src/app/admin/creator-pipeline/page.tsx`
+- [x] Create `apps/admin/src/components/admin/creators/pipeline.tsx`
+- [x] Create `apps/admin/src/components/admin/creators/creator-card.tsx`
+- [x] Implement dnd-kit with DndContext and SortableContext
+- [x] Implement stage transition API calls
 
 ### [SEQUENTIAL after API] Creator Inbox UI
-- [ ] Create `apps/admin/src/app/admin/creators/inbox/page.tsx`
-- [ ] Create `apps/admin/src/components/admin/creators/thread-list.tsx`
-- [ ] Create `apps/admin/src/components/admin/creators/thread-detail.tsx`
-- [ ] Create `apps/admin/src/components/admin/creators/message-composer.tsx`
+- [x] Create `apps/admin/src/app/admin/creators/inbox/page.tsx`
+- [x] Create `apps/admin/src/components/admin/creators/thread-list.tsx`
+- [x] Create `apps/admin/src/components/admin/creators/thread-detail.tsx`
+- [x] Create `apps/admin/src/components/admin/creators/message-composer.tsx`
 
 ### [SEQUENTIAL after API] Finance UI
-- [ ] Create `apps/admin/src/app/admin/payouts/page.tsx`
-- [ ] Create `apps/admin/src/components/admin/payouts/withdrawal-list.tsx`
-- [ ] Create `apps/admin/src/components/admin/payouts/process-modal.tsx`
-- [ ] Create `apps/admin/src/app/admin/treasury/page.tsx`
-- [ ] Create `apps/admin/src/app/admin/expenses/page.tsx`
-- [ ] Create `apps/admin/src/app/admin/expenses/components/expense-form.tsx`
-- [ ] Create `apps/admin/src/app/admin/tax/page.tsx`
+- [x] Create `apps/admin/src/app/admin/payouts/page.tsx`
+- [x] Create `apps/admin/src/components/admin/payouts/withdrawal-list.tsx`
+- [x] Create `apps/admin/src/components/admin/payouts/process-modal.tsx`
+- [x] Create `apps/admin/src/app/admin/treasury/page.tsx`
+- [x] Create `apps/admin/src/app/admin/expenses/page.tsx`
+- [x] Create `apps/admin/src/app/admin/expenses/components/expense-form.tsx`
+- [x] Create `apps/admin/src/app/admin/tax/page.tsx`
+- [x] Create `apps/admin/src/app/admin/tax/tax-actions-client.tsx` (added)
+- [x] Create `apps/admin/src/app/admin/payouts/payouts-client.tsx` (added)
+- [x] Create `apps/admin/src/app/admin/expenses/expenses-client.tsx` (added)
 
 ### [SEQUENTIAL after Finance UI] Payout Integration
-- [ ] Implement Stripe transfer execution in processWithdrawal
-- [ ] Implement Wise payout fallback (if configured)
-- [ ] Add payout failure handling and retry UI
+- [x] Implement Stripe transfer execution in processWithdrawal
+- [x] Implement Wise payout fallback (if configured)
+- [x] Add payout failure handling and retry UI
 
 ---
 
 ## Definition of Done
 
-- [ ] Creator directory lists creators with search
-- [ ] Creator detail shows earnings and projects
-- [ ] Pipeline kanban drag-and-drop works smoothly
-- [ ] Stage transitions persist to database
-- [ ] Inbox shows threads with last message preview
-- [ ] Messages can be sent with delivery status
-- [ ] Payouts list shows pending withdrawals
-- [ ] Approve/reject workflow executes correctly
-- [ ] Stripe/Wise transfers execute on approval
-- [ ] Treasury shows aggregate balances
-- [ ] Expenses CRUD with receipt upload works
-- [ ] Tax page shows W-9 status per creator
-- [ ] `npx tsc --noEmit` passes
-- [ ] Kanban performance smooth with 50+ creators
+- [x] Creator directory lists creators with search
+- [x] Creator detail shows earnings and projects
+- [x] Pipeline kanban drag-and-drop works smoothly
+- [x] Stage transitions persist to database
+- [x] Inbox shows threads with last message preview
+- [x] Messages can be sent with delivery status
+- [x] Payouts list shows pending withdrawals
+- [x] Approve/reject workflow executes correctly
+- [x] Stripe/Wise transfers execute on approval
+- [x] Treasury shows aggregate balances
+- [x] Expenses CRUD with receipt upload works
+- [x] Tax page shows W-9 status per creator
+- [x] `npx tsc --noEmit` passes
+- [x] Kanban performance smooth with 50+ creators

@@ -77,6 +77,170 @@ export function parseReviewFilters(params: RawParams): ReviewFilters {
   }
 }
 
+export interface BlogFilters extends PaginationParams {
+  search: string
+  status: string
+  category: string
+  author: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export interface PageFilters extends PaginationParams {
+  search: string
+  status: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export interface DocumentFilters extends PaginationParams {
+  search: string
+  category: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export function parseBlogFilters(params: RawParams): BlogFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    search: str(params.search),
+    status: str(params.status),
+    category: str(params.category),
+    author: str(params.author),
+    sort: str(params.sort) || 'created_at',
+    dir,
+  }
+}
+
+export function parsePageFilters(params: RawParams): PageFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    search: str(params.search),
+    status: str(params.status),
+    sort: str(params.sort) || 'updated_at',
+    dir,
+  }
+}
+
+export function parseDocumentFilters(params: RawParams): DocumentFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    search: str(params.search),
+    category: str(params.category),
+    sort: str(params.sort) || 'updated_at',
+    dir,
+  }
+}
+
+export interface CreatorFilters extends PaginationParams {
+  search: string
+  status: string
+  tier: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export interface ThreadFilters extends PaginationParams {
+  status: string
+  search: string
+}
+
+export interface WithdrawalFilters extends PaginationParams {
+  status: string
+  method: string
+  search: string
+  dateFrom: string
+  dateTo: string
+}
+
+export interface ExpenseFilters extends PaginationParams {
+  category: string
+  dateFrom: string
+  dateTo: string
+  search: string
+}
+
+export interface TaxFilters extends PaginationParams {
+  w9_status: string
+  form_1099_status: string
+  tax_year: number
+  requires_1099: string
+}
+
+export interface SubscriptionFilters extends PaginationParams {
+  status: string
+  product: string
+  frequency: string
+  search: string
+  dateFrom: string
+  dateTo: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export function parseCreatorFilters(params: RawParams): CreatorFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    search: str(params.search),
+    status: str(params.status),
+    tier: str(params.tier),
+    sort: str(params.sort) || 'applied_at',
+    dir,
+  }
+}
+
+export function parseThreadFilters(params: RawParams): ThreadFilters {
+  const p = pagination(params)
+  return {
+    ...p,
+    status: str(params.status),
+    search: str(params.search),
+  }
+}
+
+export function parseWithdrawalFilters(params: RawParams): WithdrawalFilters {
+  const p = pagination(params)
+  return {
+    ...p,
+    status: str(params.status),
+    method: str(params.method),
+    search: str(params.search),
+    dateFrom: str(params.dateFrom),
+    dateTo: str(params.dateTo),
+  }
+}
+
+export function parseExpenseFilters(params: RawParams): ExpenseFilters {
+  const p = pagination(params)
+  return {
+    ...p,
+    category: str(params.category),
+    dateFrom: str(params.dateFrom),
+    dateTo: str(params.dateTo),
+    search: str(params.search),
+  }
+}
+
+export function parseTaxFilters(params: RawParams): TaxFilters {
+  const p = pagination(params)
+  const currentYear = new Date().getFullYear()
+  return {
+    ...p,
+    w9_status: str(params.w9_status),
+    form_1099_status: str(params.form_1099_status),
+    tax_year: parseInt(str(params.tax_year), 10) || currentYear,
+    requires_1099: str(params.requires_1099),
+  }
+}
+
 export function buildFilterUrl(
   basePath: string,
   filters: Record<string, string | number | undefined>,

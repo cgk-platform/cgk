@@ -1,0 +1,5 @@
+export { PermissionMatrix } from './permission-matrix'
+export { RoleEditor } from './role-editor'
+export { RoleList } from './role-list'
+export { RoleSelector, RoleSelectorCompact } from './role-selector'
+export type { PermissionDefinition, PermissionsByCategory, Role, RoleWithInheritance } from './types'
