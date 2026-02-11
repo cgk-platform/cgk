@@ -1,0 +1,23 @@
+api_version = "2024-10"
+
+[[extensions]]
+name = "shipping-ab-test"
+handle = "shipping-ab-test"
+type = "function"
+description = "Filters shipping rates based on A/B test variant assignment"
+
+  [[extensions.targeting]]
+  target = "purchase.delivery-customization.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+[extensions.build]
+command = "cargo build --release --target=wasm32-wasip1"
+path = "target/wasm32-wasip1/release/shipping_ab_test.wasm"
+
+[extensions.ui]
+enable_create = true
+
+  [extensions.ui.paths]
+  create = "/admin/ab-tests/shipping/new"
+  details = "/admin/ab-tests/shipping/:id"

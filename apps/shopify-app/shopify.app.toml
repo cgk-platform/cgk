@@ -1,0 +1,85 @@
+# shopify.app.toml - CGK Platform Shopify App Configuration
+# Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
+#
+# SETUP INSTRUCTIONS:
+# 1. Create app in Shopify Partners: https://partners.shopify.com
+# 2. Copy Client ID from Partners Dashboard -> Client credentials
+# 3. Replace YOUR_CLIENT_ID_FROM_PARTNERS below with your actual client_id
+# 4. Update application_url and redirect_urls with your production domain
+# 5. Run: shopify app config link
+
+# From Shopify Partners Dashboard -> Client credentials
+# IMPORTANT: Replace with your actual client_id after app creation
+client_id = "YOUR_CLIENT_ID_FROM_PARTNERS"
+
+# App name (must match Partners Dashboard)
+name = "CGK Platform Functions"
+
+# OAuth callback URL - update for your domain
+application_url = "https://admin.cgk-platform.com/api/shopify-app/auth"
+
+# Not embedded in Shopify Admin (standalone OAuth flow)
+# Set to true if building an embedded admin app
+embedded = false
+
+# Build configuration
+[build]
+automatically_update_urls_on_dev = true
+# Set your development store URL here for local testing
+# dev_store_url = "your-dev-store.myshopify.com"
+
+# Webhook API version - use latest stable (2026-01)
+[webhooks]
+api_version = "2026-01"
+
+# Order webhooks - for order sync and attribution
+[[webhooks.subscriptions]]
+topics = ["orders/create", "orders/updated", "orders/paid", "orders/cancelled"]
+uri = "/api/webhooks/shopify/orders"
+
+# Customer webhooks - for customer sync
+[[webhooks.subscriptions]]
+topics = ["customers/create", "customers/update"]
+uri = "/api/webhooks/shopify/customers"
+
+# Fulfillment webhooks - for fulfillment tracking
+[[webhooks.subscriptions]]
+topics = ["fulfillments/create", "fulfillments/update"]
+uri = "/api/webhooks/shopify/fulfillments"
+
+# Refund webhooks - for refund processing
+[[webhooks.subscriptions]]
+topics = ["refunds/create"]
+uri = "/api/webhooks/shopify/orders"
+
+# App lifecycle webhooks - for uninstall handling
+[[webhooks.subscriptions]]
+topics = ["app/uninstalled"]
+uri = "/api/webhooks/shopify/app"
+
+# Compliance webhooks - GDPR requirements
+compliance_topics = ["customers/data_request", "customers/redact", "shop/redact"]
+
+# OAuth scopes - comprehensive for all platform features
+# These scopes support:
+# - Order management and fulfillment
+# - Customer data and segmentation
+# - Product and inventory management
+# - Delivery customization (A/B testing)
+# - Checkout customization
+# - Analytics and reporting
+# - Web pixel for session stitching
+[access_scopes]
+scopes = "write_pixels,read_customer_events,read_orders,write_orders,read_customers,write_customers,read_draft_orders,write_draft_orders,read_products,write_products,read_discounts,write_discounts,read_price_rules,write_price_rules,read_inventory,write_inventory,read_fulfillments,write_fulfillments,read_shipping,write_shipping,read_gift_cards,write_gift_cards,read_content,write_content,read_themes,read_locales,read_markets,read_reports,read_analytics,read_checkouts,write_checkouts,read_product_listings,read_publications,read_locations,read_merchant_managed_fulfillment_orders,write_merchant_managed_fulfillment_orders,read_third_party_fulfillment_orders,write_third_party_fulfillment_orders,read_assigned_fulfillment_orders,write_assigned_fulfillment_orders,read_shop,read_files,write_files,read_delivery_customizations,write_delivery_customizations,read_cart_transforms,write_cart_transforms"
+
+# OAuth redirect configuration
+[auth]
+redirect_urls = [
+  "https://admin.cgk-platform.com/api/shopify-app/auth",
+  "https://admin.cgk-platform.com/api/auth/callback",
+  "https://localhost:3000/api/shopify-app/auth"
+]
+
+# POS configuration - not used for this app
+[pos]
+embedded = false

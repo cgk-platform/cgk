@@ -1,5 +1,6 @@
 # PHASE-2U-CREATORS-ADMIN-ESIGN: E-Signature Admin System
 
+**Status**: MOSTLY COMPLETE (Template Editor deferred to PHASE-4C-ESIGN-PDF)
 **Duration**: 1.5 weeks (Week 21-22)
 **Depends On**: PHASE-4C-ESIGN-CORE, PHASE-4C-ESIGN-PDF, PHASE-4C-ESIGN-WORKFLOWS
 **Parallel With**: PHASE-2U-CREATORS-ADMIN-OPS
@@ -15,16 +16,16 @@ Implement comprehensive admin-side e-signature management including document man
 
 ## Success Criteria
 
-- [ ] Document list with search, filter, and status tracking
-- [ ] Document detail page with signer status and audit log
-- [ ] Template library with CRUD operations
-- [ ] Visual template builder/editor
-- [ ] Bulk send to multiple recipients
-- [ ] Counter-signing queue for internal signers
-- [ ] In-person signing mode for same-device signing
-- [ ] Reports dashboard with signature analytics
-- [ ] Webhook configuration UI
-- [ ] Reminder configuration and sending
+- [x] Document list with search, filter, and status tracking
+- [x] Document detail page with signer status and audit log
+- [x] Template library with CRUD operations
+- [ ] Visual template builder/editor - *Deferred: Requires PHASE-4C-ESIGN-PDF*
+- [x] Bulk send to multiple recipients
+- [x] Counter-signing queue for internal signers
+- [x] In-person signing mode for same-device signing
+- [x] Reports dashboard with signature analytics
+- [x] Webhook configuration UI
+- [x] Reminder configuration and sending
 
 ---
 
@@ -713,57 +714,57 @@ export const checkExpiredDocuments = inngest.createFunction(
 ## Tasks
 
 ### [PARALLEL] Database
-- [ ] Create `esign_bulk_sends` migration
-- [ ] Create `esign_webhooks` migration
-- [ ] Create `esign_webhook_deliveries` migration
+- [x] Create `esign_bulk_sends` migration
+- [x] Create `esign_webhooks` migration
+- [x] Create `esign_webhook_deliveries` migration
 
 ### [PARALLEL with DB] Data Layer
-- [ ] Implement document list/filter functions
-- [ ] Implement counter-sign functions
-- [ ] Implement in-person signing functions
-- [ ] Implement bulk send functions
-- [ ] Implement webhook CRUD functions
-- [ ] Implement reports/analytics functions
+- [x] Implement document list/filter functions
+- [x] Implement counter-sign functions
+- [x] Implement in-person signing functions
+- [x] Implement bulk send functions
+- [x] Implement webhook CRUD functions
+- [x] Implement reports/analytics functions
 
 ### [SEQUENTIAL after data layer] API Routes
-- [ ] Create document management routes
-- [ ] Create counter-sign routes
-- [ ] Create in-person signing routes
-- [ ] Create template routes (extends PHASE-4C)
-- [ ] Create bulk send routes
-- [ ] Create reports routes
-- [ ] Create webhook routes
+- [x] Create document management routes
+- [x] Create counter-sign routes
+- [x] Create in-person signing routes
+- [x] Create template routes (extends PHASE-4C)
+- [x] Create bulk send routes
+- [x] Create reports routes
+- [x] Create webhook routes
 
 ### [PARALLEL with API] Background Jobs
-- [ ] Implement `processEsignBulkSend`
-- [ ] Implement `sendEsignWebhook`
-- [ ] Implement `sendEsignReminders`
-- [ ] Implement `checkExpiredDocuments`
+- [x] Implement `processEsignBulkSend`
+- [x] Implement `sendEsignWebhook`
+- [x] Implement `sendEsignReminders`
+- [x] Implement `checkExpiredDocuments`
 
 ### [SEQUENTIAL after API/Jobs] UI Components
-- [ ] Build EsignDashboard
-- [ ] Build DocumentList with filters
-- [ ] Build DocumentDetail with tabs
-- [ ] Build PendingQueue
-- [ ] Build CounterSignQueue and modal
-- [ ] Build InPersonSigning UI
-- [ ] Build TemplateEditor (drag-and-drop)
-- [ ] Build BulkSendWizard
-- [ ] Build ReportsPage with charts
-- [ ] Build WebhookConfig
+- [x] Build EsignDashboard
+- [x] Build DocumentList with filters
+- [x] Build DocumentDetail with tabs
+- [x] Build PendingQueue
+- [x] Build CounterSignQueue and modal
+- [x] Build InPersonSigning UI
+- [ ] Build TemplateEditor (drag-and-drop) - *Deferred: Requires PHASE-4C-ESIGN-PDF for PDF rendering*
+- [x] Build BulkSendWizard
+- [x] Build ReportsPage with charts
+- [x] Build WebhookConfig
 
 ---
 
 ## Definition of Done
 
-- [ ] Dashboard shows accurate stats
-- [ ] Document list filters and sorts correctly
-- [ ] Document detail shows all signers and audit log
-- [ ] Counter-sign queue works for internal signers
-- [ ] In-person signing completes successfully
-- [ ] Template editor creates valid templates
-- [ ] Bulk send delivers to all recipients
-- [ ] Reports display accurate metrics
-- [ ] Webhooks fire and log deliveries
-- [ ] All pages are tenant-isolated
-- [ ] `npx tsc --noEmit` passes
+- [x] Dashboard shows accurate stats
+- [x] Document list filters and sorts correctly
+- [x] Document detail shows all signers and audit log
+- [x] Counter-sign queue works for internal signers
+- [x] In-person signing completes successfully
+- [ ] Template editor creates valid templates - *Deferred: Requires PHASE-4C-ESIGN-PDF*
+- [x] Bulk send delivers to all recipients
+- [x] Reports display accurate metrics
+- [x] Webhooks fire and log deliveries
+- [x] All pages are tenant-isolated
+- [x] `npx tsc --noEmit` passes (esign-specific files)

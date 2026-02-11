@@ -1,0 +1,44 @@
+{
+  "name": "@cgk/shopify-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "CGK Platform Shopify App with Extensions - Delivery Customization, Session Stitching, and Post-Purchase Survey",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "shopify app dev",
+    "build": "shopify app build",
+    "deploy": "shopify app deploy",
+    "deploy:force": "shopify app deploy --force",
+    "config:link": "shopify app config link",
+    "config:push": "shopify app config push",
+    "info": "shopify app info",
+    "env:show": "shopify app env show",
+    "generate:extension": "shopify app generate extension",
+    "function:run": "shopify app function run",
+    "function:typegen": "shopify app function typegen",
+    "logs": "shopify app logs",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "clean": "rm -rf dist .shopify"
+  },
+  "dependencies": {
+    "@cgk/shopify": "workspace:*",
+    "@shopify/shopify-app-remix": "^3.4.0",
+    "@shopify/shopify-api": "^12.3.0",
+    "@shopify/admin-api-client": "^1.0.0",
+    "@shopify/storefront-api-client": "^1.0.0"
+  },
+  "devDependencies": {
+    "@cgk/eslint-config": "workspace:*",
+    "@cgk/typescript-config": "workspace:*",
+    "@shopify/cli": "^3.58.0",
+    "@shopify/app": "^3.58.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.18.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

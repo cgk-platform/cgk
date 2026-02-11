@@ -40,3 +40,8 @@ coverage/
 *.pem
 .vercel
 .env*.local
+
+# Shopify App
+.shopify/
+apps/shopify-app/extensions/*/target/
+apps/shopify-app/extensions/delivery-customization/schema.graphql

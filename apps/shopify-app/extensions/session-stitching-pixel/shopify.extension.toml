@@ -1,0 +1,42 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "Session Stitching Pixel"
+handle = "session-stitching-pixel"
+type = "web_pixel_extension"
+runtime_context = "strict"
+
+[extensions.settings]
+type = "object"
+
+[extensions.settings.fields.ga4_measurement_id]
+name = "GA4 Measurement ID"
+description = "Your GA4 Measurement ID (e.g., G-XXXXXXXXXX)"
+type = "single_line_text_field"
+validations = [{ name = "min", value = "1" }]
+
+[extensions.settings.fields.ga4_api_secret]
+name = "GA4 API Secret"
+description = "Measurement Protocol API secret from GA4 Admin"
+type = "single_line_text_field"
+validations = [{ name = "min", value = "1" }]
+
+[extensions.settings.fields.meta_pixel_id]
+name = "Meta Pixel ID"
+description = "Your Meta Pixel ID from Events Manager"
+type = "single_line_text_field"
+
+[extensions.settings.fields.meta_access_token]
+name = "Meta CAPI Access Token"
+description = "Conversions API access token from Events Manager"
+type = "single_line_text_field"
+
+[extensions.settings.fields.platform_api_url]
+name = "Platform API URL"
+description = "URL to send events (e.g., https://api.yourdomain.com)"
+type = "single_line_text_field"
+
+[extensions.settings.fields.enable_debug]
+name = "Enable Debug Mode"
+description = "Log detailed event information to console"
+type = "boolean"

@@ -6,12 +6,6 @@
  */
 
 import { createTenantCache } from '@cgk/db'
-import {
-  addMinutes,
-  isBefore,
-  isAfter,
-  parseISO,
-} from 'date-fns'
 
 import { calculateAvailableSlots } from '../slots.js'
 import {
@@ -26,7 +20,6 @@ import {
   updateRoundRobinCounter,
 } from './db.js'
 import type { AvailableSlot, SchedulingUser } from '../types.js'
-import type { TeamEventType } from './types.js'
 
 const LOCK_TTL_SECONDS = 30
 

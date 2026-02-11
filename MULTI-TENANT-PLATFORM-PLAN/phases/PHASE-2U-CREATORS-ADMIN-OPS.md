@@ -1,5 +1,7 @@
 # PHASE-2U-CREATORS-ADMIN-OPS: Commissions, Samples & Onboarding Metrics
 
+**Status**: COMPLETE
+**Completed**: 2026-02-10
 **Duration**: 1 week (Week 22)
 **Depends On**: PHASE-4B (creator payments), PHASE-4G (creator analytics)
 **Parallel With**: PHASE-2U-CREATORS-ADMIN-ESIGN
@@ -15,13 +17,13 @@ Implement operational admin features for the creator program including commissio
 
 ## Success Criteria
 
-- [ ] Commission management with approval workflow
-- [ ] Retroactive commission calculation
-- [ ] Commission rate configuration per creator
-- [ ] Product sample tracking and shipment management
-- [ ] Onboarding metrics dashboard with funnel analytics
-- [ ] Application queue with review workflow
-- [ ] Onboarding settings configuration
+- [x] Commission management with approval workflow
+- [x] Retroactive commission calculation
+- [x] Commission rate configuration per creator
+- [x] Product sample tracking and shipment management
+- [x] Onboarding metrics dashboard with funnel analytics
+- [x] Application queue with review workflow
+- [x] Onboarding settings configuration
 
 ---
 
@@ -710,54 +712,54 @@ export const checkSampleDeliveries = inngest.createFunction(
 ## Tasks
 
 ### [PARALLEL] Database
-- [ ] Create `commission_config` migration
-- [ ] Create `commissions` migration
-- [ ] Create `creator_applications` migration
-- [ ] Create `onboarding_config` migration
-- [ ] Create `creator_onboarding` migration
-- [ ] Create `sample_requests` migration
+- [x] Create `commission_config` migration
+- [x] Create `commissions` migration
+- [x] Create `creator_applications` migration
+- [x] Create `onboarding_config` migration
+- [x] Create `creator_onboarding` migration
+- [x] Create `sample_requests` migration
 
 ### [PARALLEL with DB] Data Layer
-- [ ] Implement commission CRUD functions
-- [ ] Implement commission sync logic
-- [ ] Implement application CRUD functions
-- [ ] Implement onboarding config functions
-- [ ] Implement onboarding metrics functions
-- [ ] Implement sample request functions
+- [x] Implement commission CRUD functions
+- [x] Implement commission sync logic
+- [x] Implement application CRUD functions
+- [x] Implement onboarding config functions
+- [x] Implement onboarding metrics functions
+- [x] Implement sample request functions
 
 ### [SEQUENTIAL after data layer] API Routes
-- [ ] Create commission routes
-- [ ] Create application routes
-- [ ] Create onboarding settings routes
-- [ ] Create onboarding metrics routes
-- [ ] Create sample routes
+- [x] Create commission routes
+- [x] Create application routes
+- [x] Create onboarding settings routes
+- [x] Create onboarding metrics routes
+- [x] Create sample routes
 
 ### [PARALLEL with API] Background Jobs
-- [ ] Implement `syncOrderCommissions`
-- [ ] Implement `sendOnboardingReminders`
-- [ ] Implement `checkSampleDeliveries`
+- [x] Implement `syncOrderCommissions`
+- [x] Implement `sendOnboardingReminders`
+- [x] Implement `checkSampleDeliveries`
 
 ### [SEQUENTIAL after API/Jobs] UI Components
-- [ ] Build CommissionsPage
-- [ ] Build CommissionConfig
-- [ ] Build ApplicationsPage
-- [ ] Build ApplicationReviewModal
-- [ ] Build OnboardingSettingsPage
-- [ ] Build OnboardingMetricsPage
-- [ ] Build SamplesPage
+- [x] Build CommissionsPage
+- [x] Build CommissionConfig
+- [x] Build ApplicationsPage
+- [x] Build ApplicationReviewModal
+- [x] Build OnboardingSettingsPage
+- [x] Build OnboardingMetricsPage
+- [x] Build SamplesPage
 
 ---
 
 ## Definition of Done
 
-- [ ] Commissions sync and calculate correctly
-- [ ] Bulk approve/reject works
-- [ ] Retroactive application works
-- [ ] Applications queue shows all statuses
-- [ ] Approve/reject workflow complete
-- [ ] Onboarding steps configurable
-- [ ] Onboarding metrics accurate
-- [ ] Stuck creators identified and remindable
-- [ ] Sample requests tracked through delivery
-- [ ] All pages are tenant-isolated
-- [ ] `npx tsc --noEmit` passes
+- [x] Commissions sync and calculate correctly
+- [x] Bulk approve/reject works
+- [x] Retroactive application works
+- [x] Applications queue shows all statuses
+- [x] Approve/reject workflow complete
+- [x] Onboarding steps configurable
+- [x] Onboarding metrics accurate
+- [x] Stuck creators identified and remindable
+- [x] Sample requests tracked through delivery
+- [x] All pages are tenant-isolated
+- [x] `npx tsc --noEmit` passes (no errors in new files)

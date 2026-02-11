@@ -1,5 +1,6 @@
 # PHASE-2SH: Shopify App - Extensions
 
+> **Status**: COMPLETE
 > **Execution**: Week 11-13 (After PHASE-2SH-SHOPIFY-APP-CORE)
 > **Dependencies**: PHASE-2SH-SHOPIFY-APP-CORE, PHASE-2AT-ABTESTING-CORE
 > **Blocking**: PHASE-2AT-ABTESTING-SHIPPING (Delivery Customization), PHASE-2SV-SURVEYS (Post-Purchase)
@@ -20,12 +21,12 @@ This phase implements all Shopify App Extensions that run within Shopify's infra
 
 ## Success Criteria
 
-- [ ] Delivery Customization Function hides/shows shipping rates for A/B tests
-- [ ] Web Pixel captures session data (GA4, Meta) and sends to platform
-- [ ] Post-purchase survey renders on order confirmation page
-- [ ] All extensions deploy via Shopify CLI
-- [ ] Extensions respect tenant configuration
-- [ ] Extension status visible in admin UI
+- [x] Delivery Customization Function hides/shows shipping rates for A/B tests
+- [x] Web Pixel captures session data (GA4, Meta) and sends to platform
+- [x] Post-purchase survey renders on order confirmation page
+- [x] All extensions deploy via Shopify CLI
+- [x] Extensions respect tenant configuration
+- [x] Extension status visible in admin UI
 
 ---
 
@@ -809,10 +810,10 @@ export default function ShopifyExtensionsPage() {
 
 ## Definition of Done
 
-- [ ] Delivery Customization Function passes all test fixtures
-- [ ] Web Pixel sends events to GA4 and Meta successfully
-- [ ] Post-purchase survey renders and submits responses
-- [ ] Extensions deploy via Shopify CLI without errors
-- [ ] Admin UI shows extension status
-- [ ] All extensions tested in development store
-- [ ] Documentation for adding new extensions
+- [x] Delivery Customization Function passes all test fixtures
+- [x] Web Pixel sends events to GA4 and Meta successfully
+- [x] Post-purchase survey renders and submits responses
+- [x] Extensions deploy via Shopify CLI without errors
+- [x] Admin UI shows extension status
+- [x] All extensions tested in development store
+- [x] Documentation for adding new extensions

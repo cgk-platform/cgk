@@ -197,6 +197,37 @@ export function parseCreatorFilters(params: RawParams): CreatorFilters {
   }
 }
 
+export interface CreatorDirectoryFilters extends CreatorFilters {
+  tags: string[]
+  dateFrom: string
+  dateTo: string
+  dateField: 'applied_at' | 'created_at' | 'last_active_at'
+}
+
+export function parseCreatorDirectoryFilters(params: RawParams): CreatorDirectoryFilters {
+  const base = parseCreatorFilters(params)
+  const tagsParam = params.tags
+  let tags: string[] = []
+  if (typeof tagsParam === 'string') {
+    tags = tagsParam.split(',').filter(Boolean)
+  } else if (Array.isArray(tagsParam)) {
+    tags = tagsParam.filter((t): t is string => typeof t === 'string')
+  }
+
+  const dateField = str(params.dateField)
+  const validDateFields = ['applied_at', 'created_at', 'last_active_at']
+
+  return {
+    ...base,
+    tags,
+    dateFrom: str(params.dateFrom),
+    dateTo: str(params.dateTo),
+    dateField: validDateFields.includes(dateField)
+      ? (dateField as 'applied_at' | 'created_at' | 'last_active_at')
+      : 'applied_at',
+  }
+}
+
 export function parseThreadFilters(params: RawParams): ThreadFilters {
   const p = pagination(params)
   return {

@@ -8,6 +8,9 @@
 import type { ABCookie } from '../types.js'
 import { AB_COOKIE_NAME, AB_COOKIE_MAX_AGE, VISITOR_ID_LENGTH } from '../config.js'
 
+// Re-export ABCookie type for convenience
+export type { ABCookie } from '../types.js'
+
 /**
  * Generate a unique visitor ID
  * Uses ULID-style format: timestamp + random

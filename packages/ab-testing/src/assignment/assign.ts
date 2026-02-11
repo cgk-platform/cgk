@@ -14,7 +14,6 @@ import type {
   ABTargetingRule,
   VisitorContext,
   AssignmentResult,
-  TargetingResult,
 } from '../types.js'
 import { assignVariant } from './allocate.js'
 import { evaluateTargeting } from '../targeting/evaluate.js'

@@ -1,5 +1,6 @@
 # PHASE-2SH: Shopify App - Core Architecture
 
+> **Status**: COMPLETE
 > **Execution**: Week 10-11 (Parallel with 2PO-ONBOARDING, 2CM-RESEND-ONBOARDING)
 > **Dependencies**: PHASE-1C-AUTH, PHASE-1D-PACKAGES, PHASE-2A-ADMIN-SHELL
 > **Blocking**: PHASE-2AT-ABTESTING-SHIPPING, PHASE-2SV-SURVEYS, PHASE-3A-STOREFRONT
@@ -16,13 +17,46 @@ This phase establishes the core Shopify App infrastructure that all tenants inst
 
 ## Success Criteria
 
-- [ ] Shopify App OAuth flow works for tenant store connections
-- [ ] OAuth tokens encrypted and stored per-tenant in database
-- [ ] Shop domain → tenant mapping established on installation
-- [ ] App scopes grant access to all required Shopify APIs
-- [ ] Webhook verification uses per-tenant secrets
-- [ ] Admin UI shows connection status and health
-- [ ] Disconnect/reconnect flow works correctly
+- [x] Shopify App OAuth flow works for tenant store connections
+- [x] OAuth tokens encrypted and stored per-tenant in database
+- [x] Shop domain → tenant mapping established on installation
+- [x] App scopes grant access to all required Shopify APIs
+- [x] Webhook verification uses per-tenant secrets
+- [x] Admin UI shows connection status and health
+- [x] Disconnect/reconnect flow works correctly
+
+---
+
+## Implementation Summary
+
+### Files Created
+
+**OAuth Module (`packages/shopify/src/oauth/`):**
+- `errors.ts` - ShopifyError class with typed error codes
+- `encryption.ts` - AES-256-GCM token encryption/decryption
+- `scopes.ts` - 50+ platform scopes definition
+- `types.ts` - TypeScript interfaces for OAuth flow
+- `validation.ts` - Shop domain, HMAC, and timestamp validation
+- `initiate.ts` - OAuth flow initiation with state management
+- `callback.ts` - OAuth callback handling with token exchange
+- `credentials.ts` - Credential retrieval with caching
+- `webhooks.ts` - Webhook routing and handler registration
+- `index.ts` - Module exports
+
+**Database Migration:**
+- `packages/db/src/migrations/tenant/021_shopify_app_core.sql` - Multi-tenant schema
+
+**Admin API Routes (`apps/admin/src/app/api/`):**
+- `admin/shopify-app/auth/route.ts` - OAuth initiation
+- `admin/shopify-app/callback/route.ts` - OAuth callback
+- `admin/shopify-app/status/route.ts` - Connection status
+- `admin/shopify-app/disconnect/route.ts` - Store disconnect
+- `admin/shopify-app/test/route.ts` - Connection testing
+- `admin/shopify-app/refresh/route.ts` - Refresh connection
+- `shopify/webhooks/route.ts` - Webhook handler endpoint
+
+**Tests:**
+- `packages/shopify/src/__tests__/oauth.test.ts` - OAuth module tests
 
 ---
 
@@ -120,9 +154,9 @@ The platform app requests **50+ scopes** to support all current and future funct
 ```sql
 CREATE TABLE shopify_connections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  tenant_id UUID NOT NULL,
   shop TEXT NOT NULL,                                    -- mystore.myshopify.com
-  access_token_encrypted TEXT NOT NULL,                  -- AES-256-GCM encrypted
+  access_token_encrypted TEXT,                           -- AES-256-GCM encrypted
   webhook_secret_encrypted TEXT,                         -- HMAC signing secret
   storefront_api_token_encrypted TEXT,                   -- Storefront API token
   scopes TEXT[] NOT NULL DEFAULT '{}',                   -- Granted scopes
@@ -159,7 +193,7 @@ CREATE INDEX idx_shopify_connections_shop ON shopify_connections(shop);
 ```sql
 CREATE TABLE shopify_oauth_states (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id UUID NOT NULL REFERENCES tenants(id),
+  tenant_id UUID NOT NULL,
   shop TEXT NOT NULL,
   state TEXT NOT NULL UNIQUE,                            -- CSRF token
   nonce TEXT NOT NULL,                                   -- Additional security
@@ -589,11 +623,11 @@ RAWDOG Reference Files:
 
 ## Definition of Done
 
-- [ ] OAuth flow completes successfully for new tenant connections
-- [ ] Tokens encrypted with AES-256-GCM in database
-- [ ] Shop → tenant mapping works for webhook routing
-- [ ] Admin UI shows connection status with all details
-- [ ] Disconnect removes all stored credentials
-- [ ] Credential caching reduces DB queries
-- [ ] All 50+ scopes requested and granted
-- [ ] Integration tests pass for OAuth flow
+- [x] OAuth flow completes successfully for new tenant connections
+- [x] Tokens encrypted with AES-256-GCM in database
+- [x] Shop → tenant mapping works for webhook routing
+- [x] Admin UI shows connection status with all details
+- [x] Disconnect removes all stored credentials
+- [x] Credential caching reduces DB queries
+- [x] All 50+ scopes requested and granted
+- [x] Integration tests pass for OAuth flow

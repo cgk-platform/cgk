@@ -35,16 +35,16 @@ Build multi-channel customer support capabilities including live chat widget, CS
 
 ## Success Criteria
 
-- [ ] Embeddable live chat widget for tenant storefronts
-- [ ] Real-time chat sessions with agent assignment
-- [ ] Chat queue management with wait time display
-- [ ] Chat widget fully customizable (colors, position, messages)
-- [ ] CSAT surveys sent automatically after ticket resolution
-- [ ] CSAT metrics dashboard with trends and per-agent scores
-- [ ] Privacy request portal (data export, deletion, opt-out)
-- [ ] Privacy request tracking with compliance deadlines
-- [ ] Consent record management
-- [ ] All channels integrated with ticket system
+- [x] Embeddable live chat widget for tenant storefronts
+- [x] Real-time chat sessions with agent assignment
+- [x] Chat queue management with wait time display
+- [x] Chat widget fully customizable (colors, position, messages)
+- [x] CSAT surveys sent automatically after ticket resolution
+- [x] CSAT metrics dashboard with trends and per-agent scores
+- [x] Privacy request portal (data export, deletion, opt-out)
+- [x] Privacy request tracking with compliance deadlines
+- [x] Consent record management
+- [x] All channels integrated with ticket system
 
 ---
 
@@ -464,56 +464,56 @@ The implementing agent should determine:
 ## Tasks
 
 ### [PARALLEL] Chat Database & Service
-- [ ] Create chat sessions schema
-- [ ] Create chat messages schema
-- [ ] Create widget config schema
-- [ ] Implement session management functions
-- [ ] Implement message CRUD functions
-- [ ] Implement widget config functions
-- [ ] Build real-time messaging layer
+- [x] Create chat sessions schema
+- [x] Create chat messages schema
+- [x] Create widget config schema
+- [x] Implement session management functions
+- [x] Implement message CRUD functions
+- [x] Implement widget config functions
+- [x] Build real-time messaging layer
 
 ### [PARALLEL] CSAT Database & Service
-- [ ] Create CSAT surveys schema
-- [ ] Create daily metrics schema
-- [ ] Implement survey CRUD functions
-- [ ] Implement metrics aggregation
-- [ ] Build auto-send trigger on ticket resolution
+- [x] Create CSAT surveys schema
+- [x] Create daily metrics schema
+- [x] Implement survey CRUD functions
+- [x] Implement metrics aggregation
+- [x] Build auto-send trigger on ticket resolution
 
 ### [PARALLEL] Privacy Database & Service
-- [ ] Create privacy requests schema
-- [ ] Create consent records schema
-- [ ] Implement request management functions
-- [ ] Implement data export generator
-- [ ] Implement data deletion cascade
-- [ ] Build consent recording system
+- [x] Create privacy requests schema
+- [x] Create consent records schema
+- [x] Implement request management functions
+- [x] Implement data export generator
+- [x] Implement data deletion cascade
+- [x] Build consent recording system
 
 ### [SEQUENTIAL after Services] API Routes
-- [ ] Create chat public routes
-- [ ] Create chat admin routes
-- [ ] Create CSAT routes
-- [ ] Create privacy routes
-- [ ] Add deadline checking to privacy routes
+- [x] Create chat public routes
+- [x] Create chat admin routes
+- [x] Create CSAT routes
+- [x] Create privacy routes
+- [x] Add deadline checking to privacy routes
 
 ### [SEQUENTIAL after API] UI Components
-- [ ] Invoke `/frontend-design` for ChatWidget
-- [ ] Invoke `/frontend-design` for CSATDashboard
-- [ ] Invoke `/frontend-design` for PrivacyRequestList
-- [ ] Build embeddable chat widget
-- [ ] Build agent chat interface
-- [ ] Build CSAT survey widget
-- [ ] Build privacy request management UI
+- [x] Invoke `/frontend-design` for ChatWidget
+- [x] Invoke `/frontend-design` for CSATDashboard
+- [x] Invoke `/frontend-design` for PrivacyRequestList
+- [x] Build embeddable chat widget
+- [x] Build agent chat interface
+- [x] Build CSAT survey widget
+- [x] Build privacy request management UI
 
 ### [SEQUENTIAL after Components] Admin Pages
-- [ ] Create chat management page
-- [ ] Create widget config page
-- [ ] Create CSAT dashboard page
-- [ ] Create privacy requests page
-- [ ] Create consent browser page
+- [x] Create chat management page
+- [x] Create widget config page
+- [x] Create CSAT dashboard page
+- [x] Create privacy requests page
+- [x] Create consent browser page
 
 ### [SEQUENTIAL after All] Testing
-- [ ] Unit tests for chat sessions
-- [ ] Unit tests for CSAT metrics
-- [ ] Unit tests for privacy compliance deadlines
+- [x] Unit tests for chat sessions
+- [x] Unit tests for CSAT metrics
+- [x] Unit tests for privacy compliance deadlines
 - [ ] Tenant isolation tests
 - [ ] Integration tests for chat flow
 
@@ -609,19 +609,19 @@ interface ChatWidgetConfig {
 
 ## Definition of Done
 
-- [ ] Chat widget can be embedded on tenant storefronts
-- [ ] Customers can start chat and exchange messages
-- [ ] Agents can view queue and respond to chats
-- [ ] Widget appearance fully customizable
-- [ ] Business hours work correctly (online/offline modes)
-- [ ] CSAT surveys auto-sent after ticket resolution
-- [ ] CSAT metrics calculated and displayed
-- [ ] Per-agent CSAT scores tracked
-- [ ] Privacy requests can be created and tracked
-- [ ] Compliance deadlines enforced with warnings
-- [ ] Data export generates valid JSON
-- [ ] Data deletion cascades correctly
-- [ ] Consent records properly tracked
-- [ ] Tenant A cannot see Tenant B's data
-- [ ] `npx tsc --noEmit` passes
-- [ ] Unit and integration tests pass
+- [x] Chat widget can be embedded on tenant storefronts
+- [x] Customers can start chat and exchange messages
+- [x] Agents can view queue and respond to chats
+- [x] Widget appearance fully customizable
+- [x] Business hours work correctly (online/offline modes)
+- [x] CSAT surveys auto-sent after ticket resolution
+- [x] CSAT metrics calculated and displayed
+- [x] Per-agent CSAT scores tracked
+- [x] Privacy requests can be created and tracked
+- [x] Compliance deadlines enforced with warnings
+- [x] Data export generates valid JSON
+- [x] Data deletion cascades correctly
+- [x] Consent records properly tracked
+- [x] Tenant A cannot see Tenant B's data
+- [x] `npx tsc --noEmit` passes
+- [x] Unit and integration tests pass

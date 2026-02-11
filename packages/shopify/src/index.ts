@@ -57,3 +57,58 @@ export type {
 
 // Webhook helpers
 export { verifyWebhook, parseWebhook, type WebhookPayload, type WebhookTopic } from './webhooks'
+
+// OAuth module - Multi-tenant Shopify App
+export {
+  // Errors
+  ShopifyError,
+  type ShopifyErrorCode,
+  // Encryption
+  encryptToken,
+  decryptToken,
+  generateSecureToken,
+  // Scopes
+  PLATFORM_SCOPES,
+  getScopesString,
+  validateScopes,
+  type PlatformScope,
+  // Types
+  type OAuthInitiateParams,
+  type OAuthCallbackParams,
+  type OAuthTokenResponse,
+  type ConnectionStatus,
+  type ShopifyConnection,
+  type ShopifyCredentials,
+  type OAuthStateRecord,
+  type WebhookRegistration,
+  type ConnectionHealthCheck,
+  // Validation
+  isValidShopDomain,
+  validateShopDomain,
+  normalizeShopDomain,
+  verifyOAuthHmac,
+  verifyWebhookHmac,
+  isValidOAuthTimestamp,
+  // OAuth flow
+  initiateOAuth,
+  getOAuthState,
+  deleteOAuthState,
+  handleOAuthCallback,
+  disconnectStore,
+  // Credentials
+  getShopifyCredentials,
+  isShopifyConnected,
+  getShopifyConnection,
+  checkConnectionHealth,
+  updateLastWebhookAt,
+  updateLastSyncAt,
+  clearCredentialsCache,
+  // Webhooks
+  WEBHOOK_TOPICS,
+  onWebhook,
+  getTenantIdForShop,
+  handleWebhook,
+  registerWebhooks,
+  unregisterWebhooks,
+  type WebhookHandler,
+} from './oauth'

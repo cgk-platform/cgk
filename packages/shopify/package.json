@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./webhooks": {
+      "types": "./dist/webhooks/index.d.ts",
+      "import": "./dist/webhooks/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -16,8 +20,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts src/webhooks/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts src/webhooks/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
@@ -26,6 +30,8 @@
   },
   "dependencies": {
     "@cgk/core": "workspace:*",
+    "@cgk/db": "workspace:*",
+    "@cgk/jobs": "workspace:*",
     "@shopify/shopify-api": "^12.3.0"
   },
   "devDependencies": {

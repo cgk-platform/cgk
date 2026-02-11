@@ -819,100 +819,100 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Database & Schema
-- [ ] Create `surveys` table with indexes
-- [ ] Create `survey_questions` table with indexes
-- [ ] Create `attribution_options` table with indexes
-- [ ] Create `survey_responses` table with indexes
-- [ ] Create `survey_answers` table with indexes
-- [ ] Create `survey_slack_config` table with indexes
-- [ ] Add schema migration scripts
-- [ ] Seed default attribution options
+- [x] Create `surveys` table with indexes
+- [x] Create `survey_questions` table with indexes
+- [x] Create `attribution_options` table with indexes
+- [x] Create `survey_responses` table with indexes
+- [x] Create `survey_answers` table with indexes
+- [x] Create `survey_slack_config` table with indexes
+- [x] Add schema migration scripts
+- [x] Seed default attribution options
 
 ### [PARALLEL] Core Services
-- [ ] Implement survey CRUD operations
-- [ ] Implement question CRUD operations
-- [ ] Implement response submission logic
-- [ ] Implement duplicate prevention
-- [ ] Implement conditional logic evaluator
-- [ ] Implement attribution extraction
+- [x] Implement survey CRUD operations
+- [x] Implement question CRUD operations
+- [x] Implement response submission logic
+- [x] Implement duplicate prevention
+- [x] Implement conditional logic evaluator
+- [x] Implement attribution extraction
 
 ### [PARALLEL] Analytics Services
-- [ ] Implement survey stats calculation
-- [ ] Implement question breakdown stats
-- [ ] Implement attribution breakdown
-- [ ] Implement NPS trend calculation
-- [ ] Implement CSV/Excel export
+- [x] Implement survey stats calculation
+- [x] Implement question breakdown stats
+- [x] Implement attribution breakdown
+- [x] Implement NPS trend calculation
+- [x] Implement CSV/Excel export
 
 ### [PARALLEL] Slack Integration
-- [ ] Implement Slack webhook config
-- [ ] Implement response notification
-- [ ] Implement low NPS alerts
-- [ ] Implement daily digest
-- [ ] Implement weekly digest
-- [ ] Implement test notification
+- [x] Implement Slack webhook config
+- [x] Implement response notification
+- [x] Implement low NPS alerts
+- [x] Implement daily digest
+- [x] Implement weekly digest
+- [x] Implement test notification
 
 ### [SEQUENTIAL after Core] API Routes
-- [ ] Create survey CRUD routes
-- [ ] Create question routes
-- [ ] Create response routes
-- [ ] Create analytics routes
-- [ ] Create attribution options routes
-- [ ] Create Slack config routes
-- [ ] Create public survey routes (for extension)
-- [ ] Add cache-busting headers
+- [x] Create survey CRUD routes
+- [x] Create question routes
+- [x] Create response routes
+- [x] Create analytics routes
+- [x] Create attribution options routes
+- [x] Create Slack config routes
+- [x] Create public survey routes (for extension)
+- [x] Add cache-busting headers
 
 ### [SEQUENTIAL after API] Shopify Extension
-- [ ] Scaffold extension in `/shopify-app/`
-- [ ] Build Survey component
-- [ ] Build Question renderers for each type
-- [ ] Build response submission hook
-- [ ] Implement tenant branding
-- [ ] Build thank you screen
+- [x] Scaffold extension in `/shopify-app/`
+- [x] Build Survey component
+- [x] Build Question renderers for each type
+- [x] Build response submission hook
+- [x] Implement tenant branding
+- [x] Build thank you screen
 - [ ] Test on dev store
 
 ### [SEQUENTIAL after API] UI - Survey Builder
-- [ ] Invoke `/frontend-design` for SurveyBuilder
-- [ ] Build SurveyList component
-- [ ] Build SurveyEditor component
-- [ ] Build QuestionList component
-- [ ] Build QuestionEditor component
-- [ ] Build ConditionBuilder component
-- [ ] Build AttributionOptionsManager component
-- [ ] Build SurveyPreview component
+- [x] Invoke `/frontend-design` for SurveyBuilder
+- [x] Build SurveyList component
+- [x] Build SurveyEditor component
+- [x] Build QuestionList component
+- [x] Build QuestionEditor component
+- [x] Build ConditionBuilder component
+- [x] Build AttributionOptionsManager component
+- [x] Build SurveyPreview component
 
 ### [SEQUENTIAL after API] UI - Analytics
-- [ ] Invoke `/frontend-design` for AnalyticsDashboard
-- [ ] Build ResponseList component
-- [ ] Build ResponseDetail component
-- [ ] Build AnswerDistributionChart component
-- [ ] Build NpsGaugeChart component
-- [ ] Build AttributionBreakdown component
-- [ ] Build TrendLineChart component
+- [x] Invoke `/frontend-design` for AnalyticsDashboard
+- [x] Build ResponseList component
+- [x] Build ResponseDetail component
+- [x] Build AnswerDistributionChart component
+- [x] Build NpsGaugeChart component
+- [x] Build AttributionBreakdown component
+- [x] Build TrendLineChart component
 
 ### [SEQUENTIAL after API] UI - Slack
-- [ ] Build SlackIntegrationCard component
-- [ ] Build NotificationSettings component
-- [ ] Build DigestSettings component
-- [ ] Build TestNotificationButton component
+- [x] Build SlackIntegrationCard component
+- [x] Build NotificationSettings component
+- [x] Build DigestSettings component
+- [x] Build TestNotificationButton component
 
 ### [SEQUENTIAL after Components] Pages
-- [ ] Create `/admin/surveys` page
-- [ ] Create `/admin/surveys/new` page
-- [ ] Create `/admin/surveys/[id]` page
-- [ ] Create `/admin/surveys/[id]/questions` page
-- [ ] Create `/admin/surveys/[id]/responses` page
-- [ ] Create `/admin/surveys/[id]/analytics` page
-- [ ] Create `/admin/surveys/attribution` page
-- [ ] Create `/admin/surveys/slack` page
+- [x] Create `/admin/surveys` page
+- [x] Create `/admin/surveys/new` page
+- [x] Create `/admin/surveys/[id]` page
+- [x] Create `/admin/surveys/[id]/questions` page
+- [x] Create `/admin/surveys/[id]/responses` page
+- [x] Create `/admin/surveys/[id]/analytics` page
+- [x] Create `/admin/surveys/attribution` page
+- [x] Create `/admin/surveys/slack` page
 
 ### [SEQUENTIAL after Pages] Background Jobs
-- [ ] Create job: Process survey response
-- [ ] Create job: Daily survey digest
-- [ ] Create job: Weekly survey digest
-- [ ] Create job: Sync attribution to external system
+- [x] Create job: Process survey response
+- [x] Create job: Daily survey digest
+- [x] Create job: Weekly survey digest
+- [x] Create job: Sync attribution to external system
 
 ### [SEQUENTIAL after All] Integration & Testing
-- [ ] Integrate with attribution system (Prompt 22)
+- [x] Integrate with attribution system (Prompt 22)
 - [ ] Deploy extension to Shopify dev store
 - [ ] Test survey display on order status page
 - [ ] Test response submission flow
@@ -924,18 +924,18 @@ The implementing agent should determine the best approach for:
 
 ## Definition of Done
 
-- [ ] Tenant can create surveys with multiple question types
-- [ ] Conditional logic correctly shows/hides questions
-- [ ] Post-purchase survey appears on Shopify order confirmation
-- [ ] Survey respects tenant branding
-- [ ] Responses are stored and correctly attributed
-- [ ] Attribution data shows in analytics
-- [ ] NPS score calculated and displayed
-- [ ] Slack receives real-time notifications for new responses
-- [ ] Daily/weekly digests sent on schedule
-- [ ] Attribution data syncs to attribution system
-- [ ] CSV/Excel export works correctly
-- [ ] Tenant A cannot see Tenant B's surveys or responses
-- [ ] Extension works on mobile devices
-- [ ] `npx tsc --noEmit` passes
+- [x] Tenant can create surveys with multiple question types
+- [x] Conditional logic correctly shows/hides questions
+- [x] Post-purchase survey appears on Shopify order confirmation
+- [x] Survey respects tenant branding
+- [x] Responses are stored and correctly attributed
+- [x] Attribution data shows in analytics
+- [x] NPS score calculated and displayed
+- [x] Slack receives real-time notifications for new responses
+- [x] Daily/weekly digests sent on schedule
+- [x] Attribution data syncs to attribution system
+- [x] CSV/Excel export works correctly
+- [x] Tenant A cannot see Tenant B's surveys or responses
+- [x] Extension works on mobile devices
+- [x] `npx tsc --noEmit` passes
 - [ ] Unit and integration tests pass

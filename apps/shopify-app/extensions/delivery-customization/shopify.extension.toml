@@ -1,0 +1,16 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "Platform Delivery Customization"
+handle = "delivery-customization"
+type = "function"
+
+  [[extensions.targeting]]
+  target = "purchase.delivery-customization.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.build]
+  command = "cargo build --target=wasm32-wasip1 --release"
+  path = "target/wasm32-wasip1/release/delivery_customization.wasm"
+  watch = ["src/**/*.rs"]

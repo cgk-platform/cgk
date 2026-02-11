@@ -4,7 +4,6 @@
  * Links orders to A/B test variants for revenue attribution.
  */
 
-import type { ABCookie } from '../types.js'
 import { parseABCookie } from '../assignment/cookies.js'
 
 /**

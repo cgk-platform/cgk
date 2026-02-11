@@ -1,5 +1,6 @@
 # PHASE-2H: Treasury Management
 
+**Status**: COMPLETE
 **Duration**: 1 week (Week 7-8)
 **Depends On**: Phase 2A (Admin Shell), Phase 2D (Admin Finance foundation), Phase 4B (Creator Payments)
 **Parallel With**: Phase 2H-EXPENSES, Phase 2H-GIFT-CARDS
@@ -15,15 +16,15 @@ Implement treasury management for SBA loan draw requests, approval workflows, ba
 
 ## Success Criteria
 
-- [ ] Treasury draw request creation and tracking
-- [ ] Email-based approval workflow with parsing
-- [ ] PDF generation for draw requests
-- [ ] Communication log per request
-- [ ] Receipt/invoice upload and management
-- [ ] Stripe top-up management
-- [ ] Balance tracking and alerts
-- [ ] Auto-send automation configuration
-- [ ] Slack notifications for treasury events
+- [x] Treasury draw request creation and tracking
+- [x] Email-based approval workflow with parsing
+- [x] PDF generation for draw requests
+- [x] Communication log per request
+- [x] Receipt/invoice upload and management
+- [x] Stripe top-up management
+- [x] Balance tracking and alerts
+- [x] Auto-send automation configuration
+- [x] Slack notifications for treasury events
 
 ---
 
@@ -282,50 +283,50 @@ The implementing agent should determine:
 
 ### [PARALLEL] Database Layer
 
-- [ ] Create `apps/admin/src/lib/treasury/types.ts`
-- [ ] Create `apps/admin/src/lib/treasury/db/requests.ts`
-- [ ] Create `apps/admin/src/lib/treasury/db/communications.ts`
-- [ ] Create `apps/admin/src/lib/treasury/db/receipts.ts`
-- [ ] Create `apps/admin/src/lib/treasury/db/topups.ts`
-- [ ] Create `apps/admin/src/lib/treasury/db/settings.ts`
+- [x] Create `apps/admin/src/lib/treasury/types.ts`
+- [x] Create `apps/admin/src/lib/treasury/db/requests.ts`
+- [x] Create `apps/admin/src/lib/treasury/db/communications.ts`
+- [x] Create `apps/admin/src/lib/treasury/db/receipts.ts`
+- [x] Create `apps/admin/src/lib/treasury/db/topups.ts`
+- [x] Create `apps/admin/src/lib/treasury/db/settings.ts`
 
 ### [PARALLEL] Core Treasury Logic
 
-- [ ] Create `apps/admin/src/lib/treasury/pdf-generator.ts`
-- [ ] Create `apps/admin/src/lib/treasury/email.ts`
-- [ ] Create `apps/admin/src/lib/treasury/approval-parser.ts`
-- [ ] Create `apps/admin/src/lib/treasury/auto-send.ts`
-- [ ] Create `apps/admin/src/lib/treasury/slack.ts`
+- [x] Create `apps/admin/src/lib/treasury/pdf-generator.ts`
+- [x] Create `apps/admin/src/lib/treasury/email.ts`
+- [x] Create `apps/admin/src/lib/treasury/approval-parser.ts`
+- [x] Create `apps/admin/src/lib/treasury/auto-send.ts`
+- [x] Create `apps/admin/src/lib/treasury/slack.ts`
 
 ### [PARALLEL] API Routes
 
-- [ ] Create `apps/admin/src/app/api/admin/treasury/requests/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/treasury/requests/[id]/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/treasury/settings/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/treasury/receipts/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/stripe/topups/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/stripe/balance/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/stripe/funding-sources/route.ts`
-- [ ] Create `apps/admin/src/app/api/admin/stripe/pending-withdrawals/route.ts`
-- [ ] Create `apps/admin/src/app/api/webhooks/resend/treasury/route.ts` (inbound email)
+- [x] Create `apps/admin/src/app/api/admin/treasury/requests/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/treasury/requests/[id]/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/treasury/settings/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/treasury/receipts/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/stripe/topups/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/stripe/balance/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/stripe/funding-sources/route.ts`
+- [x] Create `apps/admin/src/app/api/admin/stripe/pending-withdrawals/route.ts`
+- [x] Create `apps/admin/src/app/api/webhooks/resend/treasury/route.ts` (inbound email)
 
 ### [SEQUENTIAL after API] Admin UI
 
-- [ ] Create `apps/admin/src/app/admin/treasury/page.tsx`
-- [ ] Create `apps/admin/src/app/admin/treasury/settings/page.tsx`
-- [ ] Create `apps/admin/src/app/admin/stripe-topups/page.tsx`
-- [ ] Create `apps/admin/src/components/admin/treasury/RequestDetail.tsx`
-- [ ] Create `apps/admin/src/components/admin/treasury/CommunicationLog.tsx`
-- [ ] Create `apps/admin/src/components/admin/treasury/ReceiptsSection.tsx`
-- [ ] Create `apps/admin/src/components/admin/treasury/TopupModal.tsx`
+- [x] Create `apps/admin/src/app/admin/treasury/page.tsx`
+- [x] Create `apps/admin/src/app/admin/treasury/settings/page.tsx`
+- [x] Create `apps/admin/src/app/admin/stripe-topups/page.tsx`
+- [x] Create `apps/admin/src/components/admin/treasury/RequestDetail.tsx`
+- [x] Create `apps/admin/src/components/admin/treasury/CommunicationLog.tsx`
+- [x] Create `apps/admin/src/components/admin/treasury/ReceiptsSection.tsx`
+- [x] Create `apps/admin/src/components/admin/treasury/TopupModal.tsx`
 
 ### [SEQUENTIAL after UI] Background Jobs
 
-- [ ] Create job: `treasury/send-approval-email`
-- [ ] Create job: `treasury/process-inbound-email`
-- [ ] Create job: `treasury/auto-send-approved`
-- [ ] Create job: `treasury/sync-topup-statuses`
-- [ ] Create job: `treasury/low-balance-alert`
+- [x] Create job: `treasury/send-approval-email`
+- [x] Create job: `treasury/process-inbound-email`
+- [x] Create job: `treasury/auto-send-approved`
+- [x] Create job: `treasury/sync-topup-statuses`
+- [x] Create job: `treasury/low-balance-alert`
 
 ---
 
@@ -353,16 +354,66 @@ The implementing agent should determine:
 
 ## Definition of Done
 
-- [ ] Treasury requests can be created from pending payouts
-- [ ] Approval emails sent with PDF attachment
-- [ ] Inbound emails parsed for approval/rejection
-- [ ] Communication log shows all messages
-- [ ] Manual approve/reject works from UI
-- [ ] Receipts can be uploaded and managed
-- [ ] Stripe top-ups can be created and tracked
-- [ ] Balance shown with pending indicator
-- [ ] Funding sources configurable
-- [ ] Auto-send works when enabled
-- [ ] Slack notifications fire on key events
-- [ ] All data properly tenant-isolated
-- [ ] `npx tsc --noEmit` passes
+- [x] Treasury requests can be created from pending payouts
+- [x] Approval emails sent with PDF attachment
+- [x] Inbound emails parsed for approval/rejection
+- [x] Communication log shows all messages
+- [x] Manual approve/reject works from UI
+- [x] Receipts can be uploaded and managed
+- [x] Stripe top-ups can be created and tracked
+- [x] Balance shown with pending indicator
+- [x] Funding sources configurable
+- [x] Auto-send works when enabled
+- [x] Slack notifications fire on key events
+- [x] All data properly tenant-isolated
+- [x] `npx tsc --noEmit` passes
+
+---
+
+## Implementation Notes
+
+### Files Created
+
+**Database Migration:**
+- `packages/db/src/migrations/tenant/015_treasury.sql` - All treasury tables with proper enums and indexes
+
+**Types:**
+- `apps/admin/src/lib/treasury/types.ts` - Extended with all treasury types
+
+**Database Operations:**
+- `apps/admin/src/lib/treasury/db/requests.ts` - Draw request CRUD operations
+- `apps/admin/src/lib/treasury/db/communications.ts` - Communication log operations
+- `apps/admin/src/lib/treasury/db/receipts.ts` - Receipt management
+- `apps/admin/src/lib/treasury/db/topups.ts` - Stripe top-up tracking
+- `apps/admin/src/lib/treasury/db/settings.ts` - Treasury and top-up settings
+
+**Core Logic:**
+- `apps/admin/src/lib/treasury/approval-parser.ts` - Email parsing with confidence scoring
+- `apps/admin/src/lib/treasury/email.ts` - Approval email building and sending
+- `apps/admin/src/lib/treasury/pdf-generator.ts` - PDF generation with Vercel Blob storage
+- `apps/admin/src/lib/treasury/auto-send.ts` - Automated payout processing
+- `apps/admin/src/lib/treasury/slack.ts` - Slack webhook notifications
+
+**API Routes:**
+- All treasury API routes created with proper tenant isolation
+- Webhook route for inbound email processing via Resend
+
+**UI Components:**
+- Treasury dashboard with industrial banking aesthetic
+- Settings page with comprehensive configuration
+- RequestDetail modal for viewing/managing requests
+- CommunicationLog for email thread display
+- ReceiptsSection for receipt management
+- TopupModal for creating Stripe top-ups
+
+**Background Jobs:**
+- `packages/jobs/src/handlers/treasury.ts` - All treasury background jobs
+- Jobs for email sending, auto-send, status sync, and low balance alerts
+
+### Design Aesthetic
+
+The treasury UI uses an "Industrial Banking" design aesthetic - combining Swiss private banking precision with industrial control panel elements. Features include:
+- Monospace typography for financial figures
+- Slate/emerald/amber color palette
+- Data-dense layouts with clear visual hierarchy
+- Subtle gradients and shadows for depth

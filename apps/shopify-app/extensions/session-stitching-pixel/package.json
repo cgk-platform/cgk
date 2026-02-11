@@ -1,0 +1,16 @@
+{
+  "name": "session-stitching-pixel",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@shopify/web-pixels-extension": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

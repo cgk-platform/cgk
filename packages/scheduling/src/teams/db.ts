@@ -418,7 +418,7 @@ export async function createTeamEventType(
         ${JSON.stringify(input.customQuestions || [])}::jsonb,
         ${JSON.stringify(input.reminderSettings || DEFAULT_REMINDER_SETTINGS)}::jsonb,
         ${input.schedulingType || 'round_robin'},
-        ${input.hostUserIds}::uuid[]
+        ${`{${(input.hostUserIds || []).join(',')}}`}::uuid[]
       )
       RETURNING
         id, tenant_id as "tenantId", team_id as "teamId",
@@ -463,7 +463,7 @@ export async function updateTeamEventType(
         custom_questions = COALESCE(${input.customQuestions ? JSON.stringify(input.customQuestions) : null}::jsonb, custom_questions),
         reminder_settings = COALESCE(${input.reminderSettings ? JSON.stringify(input.reminderSettings) : null}::jsonb, reminder_settings),
         scheduling_type = COALESCE(${input.schedulingType}, scheduling_type),
-        host_user_ids = COALESCE(${input.hostUserIds}::uuid[], host_user_ids),
+        host_user_ids = COALESCE(${input.hostUserIds ? `{${input.hostUserIds.join(',')}}` : null}::uuid[], host_user_ids),
         is_active = COALESCE(${input.isActive}, is_active),
         updated_at = NOW()
       WHERE id = ${eventTypeId} AND tenant_id = ${tenantId}
@@ -619,23 +619,35 @@ export async function getTeamBookings(
     }
 
     const limit = options?.limit || 50
-    const offset = options?.offset || 0
+    const offsetVal = options?.offset || 0
 
-    // Build query based on filters
-    let statusFilter = sql``
+    // Build query with sql.query for dynamic filters
+    const conditions: string[] = []
+    const params: unknown[] = [eventTypeIds]
+    let paramIndex = 2
+
     if (options?.status) {
-      statusFilter = sql`AND status = ${options.status}`
+      conditions.push(`AND status = $${paramIndex}`)
+      params.push(options.status)
+      paramIndex++
     }
 
-    let dateFilter = sql``
     if (options?.dateFrom) {
-      dateFilter = sql`${dateFilter} AND start_time >= ${options.dateFrom}::timestamptz`
-    }
-    if (options?.dateTo) {
-      dateFilter = sql`${dateFilter} AND start_time <= ${options.dateTo}::timestamptz`
+      conditions.push(`AND start_time >= $${paramIndex}::timestamptz`)
+      params.push(options.dateFrom)
+      paramIndex++
     }
 
-    const result = await sql`
+    if (options?.dateTo) {
+      conditions.push(`AND start_time <= $${paramIndex}::timestamptz`)
+      params.push(options.dateTo)
+      paramIndex++
+    }
+
+    params.push(limit, offsetVal)
+
+    const result = await sql.query(
+      `
       SELECT
         id, tenant_id as "tenantId",
         team_event_type_id as "teamEventTypeId",
@@ -648,12 +660,13 @@ export async function getTeamBookings(
         rescheduled_from as "rescheduledFrom",
         created_at as "createdAt", updated_at as "updatedAt"
       FROM scheduling_bookings
-      WHERE team_event_type_id = ANY(${eventTypeIds}::uuid[])
-        ${statusFilter}
-        ${dateFilter}
+      WHERE team_event_type_id = ANY($1::uuid[])
+        ${conditions.join(' ')}
       ORDER BY start_time DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `
+      LIMIT $${paramIndex - 1} OFFSET $${paramIndex}
+      `,
+      params
+    )
 
     return result.rows as TeamBooking[]
   })
@@ -762,7 +775,7 @@ export async function getTeamAnalytics(
         event_type_name as "eventTypeName",
         COUNT(*) as count
       FROM scheduling_bookings
-      WHERE team_event_type_id = ANY(${eventTypeIds}::uuid[])
+      WHERE team_event_type_id = ANY(${`{${eventTypeIds.join(',')}}`}::uuid[])
         AND created_at >= NOW() - INTERVAL '30 days'
       GROUP BY team_event_type_id, event_type_name
       ORDER BY count DESC

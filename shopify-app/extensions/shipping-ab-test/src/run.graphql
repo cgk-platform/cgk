@@ -1,0 +1,14 @@
+query RunInput {
+  cart {
+    attribute(key: "_ab_shipping_suffix") {
+      value
+    }
+    deliveryGroups {
+      id
+      deliveryOptions {
+        handle
+        title
+      }
+    }
+  }
+}

@@ -1,0 +1,38 @@
+query Input {
+  cart {
+    # A/B test variant assignment from cart attributes
+    shippingVariant: attribute(key: "_ab_shipping_variant") {
+      value
+    }
+    visitorId: attribute(key: "_ab_visitor_id") {
+      value
+    }
+
+    # Cart data for threshold checking
+    cost {
+      subtotalAmount {
+        amount
+      }
+    }
+
+    # Check for subscription items (always free shipping)
+    lines {
+      sellingPlanAllocation {
+        sellingPlan {
+          id
+        }
+      }
+    }
+
+    # Available delivery options
+    deliveryGroups {
+      deliveryOptions {
+        handle
+        title
+        cost {
+          amount
+        }
+      }
+    }
+  }
+}

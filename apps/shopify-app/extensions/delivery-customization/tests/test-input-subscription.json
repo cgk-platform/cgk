@@ -1,0 +1,41 @@
+{
+  "cart": {
+    "shippingVariant": { "value": "A" },
+    "visitorId": { "value": "v_sub123" },
+    "cost": {
+      "subtotalAmount": {
+        "amount": "29.99"
+      }
+    },
+    "lines": [
+      {
+        "sellingPlanAllocation": {
+          "sellingPlan": {
+            "id": "gid://shopify/SellingPlan/123456"
+          }
+        }
+      }
+    ],
+    "deliveryGroups": [
+      {
+        "deliveryOptions": [
+          {
+            "handle": "standard-a",
+            "title": "Standard Shipping (A)",
+            "cost": { "amount": "5.99" }
+          },
+          {
+            "handle": "standard-b",
+            "title": "Standard Shipping (B)",
+            "cost": { "amount": "0.00" }
+          },
+          {
+            "handle": "free-subscription",
+            "title": "Free Subscription Shipping",
+            "cost": { "amount": "0.00" }
+          }
+        ]
+      }
+    ]
+  }
+}

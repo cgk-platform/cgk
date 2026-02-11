@@ -1,0 +1,54 @@
+{
+  "cart": {
+    "shippingVariant": {
+      "value": "A"
+    },
+    "visitorId": {
+      "value": "test-visitor-123"
+    },
+    "cost": {
+      "subtotalAmount": {
+        "amount": "99.99"
+      }
+    },
+    "lines": [
+      {
+        "sellingPlanAllocation": null
+      }
+    ],
+    "deliveryGroups": [
+      {
+        "deliveryOptions": [
+          {
+            "handle": "standard",
+            "title": "Standard Shipping",
+            "cost": {
+              "amount": "5.99"
+            }
+          },
+          {
+            "handle": "standard-a",
+            "title": "Standard Shipping (A)",
+            "cost": {
+              "amount": "4.99"
+            }
+          },
+          {
+            "handle": "standard-b",
+            "title": "Standard Shipping (B)",
+            "cost": {
+              "amount": "6.99"
+            }
+          },
+          {
+            "handle": "express",
+            "title": "Express Shipping",
+            "cost": {
+              "amount": "12.99"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

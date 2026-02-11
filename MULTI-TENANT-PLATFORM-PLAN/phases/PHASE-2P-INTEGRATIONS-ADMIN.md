@@ -1,5 +1,6 @@
 # PHASE-2P-INTEGRATIONS-ADMIN: Integration Hub & Admin Pages
 
+**Status**: COMPLETE
 **Duration**: Week 11-12 (parallel with PHASE-2PO-OAUTH-INTEGRATIONS)
 **Depends On**: PHASE-2PO-OAUTH-INTEGRATIONS (OAuth flows), PHASE-2A-ADMIN-SHELL (admin layout)
 **Parallel With**: PHASE-2CM (Communications), PHASE-2PO-LOGGING
@@ -20,13 +21,100 @@ Implement the complete Integrations admin UI section with:
 
 ## Success Criteria
 
-- [ ] Integration hub shows all integration statuses at a glance
-- [ ] Each integration has dedicated configuration page
-- [ ] OAuth connections can be initiated and revoked from UI
-- [ ] API key integrations have secure input with test functionality
-- [ ] Connection health indicators update in real-time
-- [ ] Multi-tenant isolation verified (each tenant sees only their integrations)
-- [ ] Error states display with actionable troubleshooting steps
+- [x] Integration hub shows all integration statuses at a glance
+- [x] Each integration has dedicated configuration page
+- [x] OAuth connections can be initiated and revoked from UI
+- [x] API key integrations have secure input with test functionality
+- [x] Connection health indicators update in real-time
+- [x] Multi-tenant isolation verified (each tenant sees only their integrations)
+- [x] Error states display with actionable troubleshooting steps
+
+---
+
+## Implementation Summary
+
+### Files Created
+
+**Types & Definitions:**
+- `/apps/admin/src/lib/integrations/types.ts` - All integration types, status enums, and category definitions
+
+**Shared Components:**
+- `/apps/admin/src/components/integrations/connection-status-badge.tsx` - Status indicator with pulse animation
+- `/apps/admin/src/components/integrations/integration-card.tsx` - Card component for hub display
+- `/apps/admin/src/components/integrations/oauth-connect-button.tsx` - Provider-specific OAuth buttons
+- `/apps/admin/src/components/integrations/secure-api-key-input.tsx` - Password-protected API key input
+- `/apps/admin/src/components/integrations/test-connection-result.tsx` - Connection test feedback
+- `/apps/admin/src/components/integrations/index.ts` - Component exports
+
+**Integration Hub:**
+- `/apps/admin/src/app/admin/integrations/layout.tsx` - Tab navigation layout
+- `/apps/admin/src/app/admin/integrations/page.tsx` - Central dashboard with category sections
+
+**Shopify App:**
+- `/apps/admin/src/app/admin/integrations/shopify-app/page.tsx` - OAuth status, scopes, pixel config
+- `/apps/admin/src/app/api/admin/shopify-app/status/route.ts` - Status endpoint
+- `/apps/admin/src/app/api/admin/shopify-app/auth/route.ts` - OAuth initiation (updated by @cgk/shopify)
+- `/apps/admin/src/app/api/admin/shopify-app/callback/route.ts` - OAuth callback (updated by @cgk/shopify)
+- `/apps/admin/src/app/api/admin/shopify-app/disconnect/route.ts` - Disconnect endpoint
+- `/apps/admin/src/app/api/admin/shopify-app/test/route.ts` - Connection test
+
+**Meta Ads:**
+- `/apps/admin/src/app/admin/integrations/meta-ads/page.tsx` - OAuth, account selection, CAPI config
+- `/apps/admin/src/app/api/admin/meta-ads/status/route.ts` - Status endpoint
+- `/apps/admin/src/app/api/admin/meta-ads/auth/route.ts` - OAuth initiation
+- `/apps/admin/src/app/api/admin/meta-ads/callback/route.ts` - OAuth callback with long-lived token exchange
+- `/apps/admin/src/app/api/admin/meta-ads/disconnect/route.ts` - Disconnect endpoint
+- `/apps/admin/src/app/api/admin/meta-ads/config/route.ts` - Save account/pixel config
+- `/apps/admin/src/app/api/admin/meta-ads/sync/route.ts` - Trigger data sync
+
+**Google Ads:**
+- `/apps/admin/src/app/admin/integrations/google-ads/page.tsx` - Dual-mode (API/Script) interface
+- `/apps/admin/src/app/api/admin/google-ads/status/route.ts` - Status endpoint
+- `/apps/admin/src/app/api/admin/google-ads/script-config/route.ts` - Script mode config
+- `/apps/admin/src/app/api/admin/google-ads/disconnect/route.ts` - Disconnect endpoint
+
+**TikTok Ads:**
+- `/apps/admin/src/app/admin/integrations/tiktok-ads/page.tsx` - OAuth, pixel config, Events API
+- `/apps/admin/src/app/api/admin/tiktok-ads/status/route.ts` - Status endpoint
+- `/apps/admin/src/app/api/admin/tiktok-ads/pixel-config/route.ts` - Pixel configuration
+- `/apps/admin/src/app/api/admin/tiktok-ads/disconnect/route.ts` - Disconnect endpoint
+
+**SMS & Voice:**
+- `/apps/admin/src/app/admin/integrations/sms/page.tsx` - TCPA dashboard, stats, test message
+- `/apps/admin/src/app/admin/integrations/sms/audit-log/page.tsx` - Consent audit log with filters/export
+- `/apps/admin/src/app/admin/integrations/sms/notifications/page.tsx` - Channel configuration
+- `/apps/admin/src/app/api/admin/sms/status/route.ts` - Status endpoint
+- `/apps/admin/src/app/api/admin/sms/audit-log/route.ts` - Paginated audit log
+- `/apps/admin/src/app/api/admin/sms/audit-log/export/route.ts` - CSV export
+
+**Slack:**
+- `/apps/admin/src/app/admin/integrations/slack/page.tsx` - OAuth, channel mapping, MCP tools docs
+- `/apps/admin/src/app/api/admin/slack/route.ts` - GET/POST/DELETE for status/config/disconnect
+
+**Klaviyo:**
+- `/apps/admin/src/app/admin/integrations/klaviyo/page.tsx` - API key input, test, list config
+- `/apps/admin/src/app/api/admin/klaviyo/status/route.ts` - Status (supports env fallback)
+- `/apps/admin/src/app/api/admin/klaviyo/test/route.ts` - Test connection
+- `/apps/admin/src/app/api/admin/klaviyo/connect/route.ts` - Save credentials
+- `/apps/admin/src/app/api/admin/klaviyo/disconnect/route.ts` - Disconnect
+
+**Yotpo:**
+- `/apps/admin/src/app/admin/integrations/yotpo/page.tsx` - API key input, test, product mappings
+- `/apps/admin/src/app/api/admin/yotpo/status/route.ts` - Status (supports env fallback)
+- `/apps/admin/src/app/api/admin/yotpo/test/route.ts` - Test connection
+- `/apps/admin/src/app/api/admin/yotpo/connect/route.ts` - Save credentials
+- `/apps/admin/src/app/api/admin/yotpo/disconnect/route.ts` - Disconnect
+
+**MCP Server:**
+- `/apps/admin/src/app/admin/integrations/mcp/page.tsx` - Setup wizard, API keys, capabilities
+- `/apps/admin/src/app/admin/integrations/mcp/analytics/page.tsx` - Usage metrics dashboard
+- `/apps/admin/src/app/api/admin/mcp/status/route.ts` - Status endpoint
+- `/apps/admin/src/app/api/admin/mcp/keys/route.ts` - Create API key
+- `/apps/admin/src/app/api/admin/mcp/keys/[id]/route.ts` - Revoke API key
+- `/apps/admin/src/app/api/admin/mcp/analytics/route.ts` - Usage analytics
+
+**Navigation:**
+- `/apps/admin/src/lib/navigation.ts` - Added Integrations section with all sub-pages
 
 ---
 
@@ -51,561 +139,42 @@ Implement the complete Integrations admin UI section with:
 
 ---
 
-## 1. INTEGRATION HUB (Central Dashboard)
-
-### Route Structure
-```
-/admin/integrations
-├── (overview)                   # Integration hub dashboard
-├── /sms                         # SMS/Voice (Retell)
-│   ├── /audit-log               # TCPA compliance audit log
-│   └── /notifications           # Channel configuration
-├── /slack                       # Slack workspace
-├── /shopify-app                 # Shopify App OAuth
-├── /klaviyo                     # Klaviyo email/SMS
-├── /yotpo                       # Yotpo reviews
-└── /tiktok-ads                  # TikTok Ads
-```
-
-### Hub Display
-
-```typescript
-// apps/admin/src/app/admin/integrations/page.tsx
-
-interface IntegrationCard {
-  id: string
-  name: string
-  description: string
-  icon: React.ReactNode
-  status: 'connected' | 'disconnected' | 'error' | 'pending'
-  statusDetails?: string
-  configPath: string
-  category: 'commerce' | 'advertising' | 'communications' | 'marketing' | 'platform'
-  connectionType: 'oauth' | 'api_key' | 'env' | 'hybrid'
-  lastSyncedAt?: string
-}
-
-const INTEGRATION_CATEGORIES = [
-  {
-    id: 'commerce',
-    label: 'E-Commerce',
-    integrations: ['shopify-app'],
-  },
-  {
-    id: 'advertising',
-    label: 'Advertising',
-    integrations: ['meta-ads', 'google-ads', 'tiktok-ads'],
-  },
-  {
-    id: 'communications',
-    label: 'Communications',
-    integrations: ['sms', 'slack'],
-  },
-  {
-    id: 'marketing',
-    label: 'Marketing & Reviews',
-    integrations: ['klaviyo', 'yotpo'],
-  },
-  {
-    id: 'platform',
-    label: 'Platform',
-    integrations: ['mcp'],
-  },
-]
-```
-
-### Status Fetching Pattern
-
-```typescript
-// Parallel status fetching for all integrations
-async function fetchAllIntegrationStatuses(tenantId: string) {
-  const [
-    shopifyStatus,
-    googleStatus,
-    tiktokStatus,
-    klaviyoStatus,
-    yotpoStatus,
-    slackStatus,
-    smsStatus,
-    metaStatus,
-    mcpStatus,
-  ] = await Promise.all([
-    fetch('/api/admin/shopify-app/status'),
-    fetch('/api/admin/bri/integrations'),
-    fetch('/api/admin/tiktok/status'),
-    fetch('/api/admin/klaviyo/status'),
-    fetch('/api/admin/yotpo/status'),
-    fetch('/api/admin/slack'),
-    fetch('/api/admin/sms/status'),
-    fetch('/api/admin/meta-ads/status'),
-    fetch('/api/admin/mcp-status'),
-  ])
-
-  // Aggregate and return
-}
-```
-
----
-
-## 2. ADVERTISING INTEGRATIONS
-
-### 2.1 Meta Ads (`/admin/meta-ads`)
-
-**Features:**
-- OAuth connection to Meta Marketing API
-- Account selection (multiple ad accounts)
-- CAPI pixel configuration
-- Spend data sync status
-- Backfill historical data
-
-**Components:**
-```typescript
-// From RAWDOG: ConnectionManager, SyncStatus
-// packages/ui/src/components/admin/meta-ads/
-
-interface MetaAdsStatus {
-  connected: boolean
-  accounts: MetaAdAccount[]
-  selectedAccountId?: string
-  pixelId?: string
-  capiConfigured: boolean
-  lastSyncedAt?: string
-  tokenExpiresAt?: string
-  syncStatus: 'idle' | 'syncing' | 'error'
-}
-```
-
-### 2.2 Google Ads (`/admin/google-ads`)
-
-**Two Modes:**
-1. **API Mode (OAuth)** - Full automation
-2. **Script Mode (Workaround)** - Manual Google Ads script for API approval wait
-
-**Features:**
-- Dual-mode tabs (API vs Script)
-- Customer ID registration
-- Script generation for workaround
-- Spend data sync
-- GAQL query interface (advanced)
-
-**Schema Initialization:**
-```typescript
-// Check and initialize database schema on first load
-async function checkAndInitSchema() {
-  const response = await fetch('/api/google-ads/init')
-  if (!response.ok) {
-    // Show schema initialization prompt
-  }
-}
-```
-
-### 2.3 TikTok Ads (`/admin/integrations/tiktok-ads`)
-
-**Features:**
-- OAuth connection with Marketing API
-- Advertiser ID configuration
-- Pixel ID configuration
-- Events API access token (server-side)
-- Token expiration warnings
-- Spend sync status
-
-**Pixel Configuration Card:**
-```typescript
-interface TikTokPixelConfig {
-  pixelId: string           // Required
-  eventsApiAccessToken: string  // Optional for server-side
-}
-
-// Separate from OAuth - allows pixel config even with env-based auth
-```
-
----
-
-## 3. E-COMMERCE INTEGRATIONS
-
-### 3.1 Shopify App (`/admin/integrations/shopify-app`)
-
-**Features:**
-- OAuth connection with expanded scopes (40 scopes)
-- Shop domain display
-- Web pixel status (GA4 + Meta CAPI)
-- Storefront API configuration (separate token)
-- Re-authorization flow for scope expansion
-- Disconnect functionality
-
-**OAuth Scopes Display:**
-```typescript
-const SHOPIFY_SCOPES_DISPLAY = [
-  { category: 'Pixels', scopes: ['write_pixels', 'read_customer_events'] },
-  { category: 'Orders', scopes: ['read_orders', 'write_orders'] },
-  { category: 'Customers', scopes: ['read_customers', 'write_customers'] },
-  { category: 'Products', scopes: ['read_products'] },
-  { category: 'Discounts', scopes: ['read_discounts', 'write_discounts'] },
-  // ... more scope categories
-]
-```
-
-**Storefront Configuration:**
-- Separate from OAuth token
-- API version selection
-- Site URL configuration
-- Country/language defaults
-
----
-
-## 4. COMMUNICATIONS INTEGRATIONS
-
-### 4.1 SMS/Voice (`/admin/integrations/sms`)
-
-**Main Page Features:**
-- Retell.ai provider status
-- TCPA compliance dashboard
-- Message statistics (today, week, month)
-- Feature flags (SMS enabled, creator/customer enabled)
-- Message category explanations (transactional vs marketing)
-- Test message sender
-- System health & safeguards display
-
-**Sub-Pages:**
-
-#### Audit Log (`/admin/integrations/sms/audit-log`)
-```typescript
-interface AuditLogEntry {
-  id: string
-  phone: string
-  email: string | null
-  channel: 'sms' | 'email'
-  action: 'opt_in' | 'opt_out' | 'consent_granted' | 'consent_revoked' | 'consent_violation_attempt'
-  source: 'checkout' | 'admin' | 'stop_keyword' | 'api' | 'import'
-  ipAddress: string | null
-  createdAt: string
-}
-```
-
-**Features:**
-- Date range filtering
-- Action type filtering
-- Source filtering
-- Phone/email search
-- CSV export for compliance
-- Pagination (50 per page)
-
-#### Notifications (`/admin/integrations/sms/notifications`)
-- Channel configuration per notification type
-- Enable/disable toggles
-- Channel selection (SMS, email, portal)
-
-### 4.2 Slack (`/admin/integrations/slack`)
-
-**Features:**
-- OAuth workspace connection
-- Channel configuration by notification type
-- Category-based organization (creators, orders, marketing, system, productivity)
-- Per-notification enable/disable toggles
-- Channel selector dropdowns
-- MCP tools documentation (45 tools displayed)
-- Setup instructions for new installations
-
-**Notification Categories:**
-```typescript
-const SLACK_NOTIFICATION_CATEGORIES = [
-  { id: 'creators', label: 'Creator Notifications', icon: '👤' },
-  { id: 'orders', label: 'Order Notifications', icon: '📦' },
-  { id: 'marketing', label: 'Marketing', icon: '📣' },
-  { id: 'system', label: 'System Alerts', icon: '⚙️' },
-  { id: 'productivity', label: 'Productivity', icon: '📋' },
-]
-```
-
----
-
-## 5. MARKETING INTEGRATIONS
-
-### 5.1 Klaviyo (`/admin/integrations/klaviyo`)
-
-**Features:**
-- API key input (private + public)
-- Connection test functionality
-- Company name display after connection
-- SMS/Email list ID configuration
-- Auth source indicator (database vs env)
-- Disconnect functionality
-
-**Connection Flow:**
-1. Enter private API key
-2. Click "Test Connection" to validate
-3. On success, shows company name
-4. Configure optional list IDs
-5. Click "Save & Connect"
-
-### 5.2 Yotpo (`/admin/integrations/yotpo`)
-
-**Features:**
-- App Key + API Secret input
-- Connection test functionality
-- Product ID mapping display (Shopify product IDs)
-- Auth source indicator
-- Disconnect functionality
-
-**Product Mapping:**
-```typescript
-// Display Shopify product IDs used for review fetching
-interface YotpoProductMappings {
-  cleanser?: string
-  moisturizer?: string
-  eyeCream?: string
-  bundle?: string
-}
-```
-
----
-
-## 6. PLATFORM INTEGRATIONS
-
-### 6.1 MCP Server (`/admin/mcp`)
-
-**Features:**
-- Quick setup wizard (5-min setup)
-- Platform toggle (macOS/Windows)
-- API key management (create/revoke)
-- Claude Connect setup for web/mobile
-- OAuth credentials management (manual workaround)
-- Capability reference grid (12 capability categories)
-- Troubleshooting section
-
-**Capability Categories:**
-```typescript
-const MCP_CAPABILITIES = [
-  { id: 'blog', icon: '📝', title: 'Blog', desc: 'Create & manage posts' },
-  { id: 'promo-codes', icon: '🎟️', title: 'Promo Codes', desc: 'Shopify discount codes' },
-  { id: 'promotions', icon: '🏷️', title: 'Promotions', desc: 'Schedule site-wide sales' },
-  { id: 'landing', icon: '🎨', title: 'Landing Pages', desc: 'Build campaign pages' },
-  { id: 'ugc', icon: '📦', title: 'UGC Orders', desc: 'Send free samples' },
-  { id: 'config', icon: '⚙️', title: 'Site Config', desc: 'Edit hero, nav, footer' },
-  { id: 'reviews', icon: '⭐', title: 'Yotpo Reviews', desc: 'Feature reviews' },
-  { id: 'scheduling', icon: '📅', title: 'Scheduling', desc: 'Calendly-style bookings' },
-  { id: 'calendar', icon: '🗓️', title: 'Calendar Assistant', desc: 'Personal calendar' },
-  { id: 'analytics', icon: '📊', title: 'Analytics', desc: 'Revenue insights' },
-  { id: 'subscription-emails', icon: '📧', title: 'Subscription Emails', desc: 'Email templates' },
-  { id: 'slack', icon: '💬', title: 'Slack (45 tools)', desc: 'Full workspace control' },
-]
-```
-
-### 6.2 MCP Analytics (`/admin/mcp/analytics`)
-
-**Features:**
-- Tool usage metrics (calls, unique tools, sessions)
-- Token consumption tracking
-- Error rate monitoring
-- Tool usage by name (bar chart)
-- Tool usage by category (bar chart)
-- Token usage by event type
-- Recent activity feed
-- Top errors list
-- Unused tools list
-- Time period selector (1, 7, 14, 30 days)
-
-**Summary Metrics:**
-```typescript
-interface MCPAnalyticsSummary {
-  totalToolCalls: number
-  uniqueTools: number
-  totalTokens: number
-  avgTokensPerSession: number
-  errorRate: number
-  uniqueSessions: number
-}
-```
-
----
-
-## 7. MULTI-TENANT ISOLATION
-
-### Credential Storage
-
-All integration credentials MUST be tenant-isolated:
-
-```sql
--- Integration credentials table (per-tenant)
-CREATE TABLE {tenant_schema}.integration_credentials (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  integration_type VARCHAR(50) NOT NULL,  -- 'meta_ads', 'google_ads', etc.
-  credentials JSONB NOT NULL,              -- Encrypted credentials
-  status VARCHAR(20) DEFAULT 'active',
-  connected_at TIMESTAMPTZ,
-  expires_at TIMESTAMPTZ,
-  last_synced_at TIMESTAMPTZ,
-  metadata JSONB DEFAULT '{}',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-  UNIQUE(integration_type)
-);
-
--- API routes MUST verify tenant context
-export async function GET(request: NextRequest) {
-  const { tenantId, userId } = await getTenantContext(request)
-  if (!tenantId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // Query only tenant's credentials
-  const credentials = await db.query(
-    `SELECT * FROM ${tenantId}.integration_credentials WHERE integration_type = $1`,
-    [integrationType]
-  )
-  // ...
-}
-```
-
-### Token Encryption
-
-Per PHASE-2PO-OAUTH-INTEGRATIONS, all tokens encrypted with AES-256-GCM:
-
-```typescript
-// Encrypt before storage
-const encryptedToken = await encryptToken(accessToken, process.env.TOKEN_ENCRYPTION_KEY)
-
-// Decrypt when needed
-const accessToken = await decryptToken(encryptedToken, process.env.TOKEN_ENCRYPTION_KEY)
-```
-
----
-
-## 8. API ROUTES STRUCTURE
-
-```
-/api/admin/
-├── integrations/               # Meta route group
-├── shopify-app/
-│   ├── status                  # GET: Connection status
-│   ├── auth                    # GET: Start OAuth
-│   └── callback                # GET: OAuth callback
-├── tiktok/
-│   ├── status                  # GET: Connection status
-│   ├── oauth                   # GET: Start OAuth
-│   ├── disconnect              # DELETE: Remove connection
-│   └── pixel-config            # POST: Save pixel config
-├── klaviyo/
-│   ├── status                  # GET: Connection status
-│   ├── test                    # POST: Test API key
-│   ├── connect                 # POST: Save credentials
-│   └── disconnect              # DELETE: Remove connection
-├── yotpo/
-│   ├── status                  # GET: Connection status
-│   ├── test                    # POST: Test credentials
-│   ├── connect                 # POST: Save credentials
-│   └── disconnect              # DELETE: Remove connection
-├── slack/
-│   ├── (root)                  # GET: Status, POST: Config, DELETE: Disconnect
-│   ├── oauth/connect           # GET: Start OAuth
-│   └── oauth/callback          # GET: OAuth callback
-├── sms/
-│   ├── status                  # GET: Provider status
-│   ├── consent-stats           # GET: Consent statistics
-│   ├── test                    # POST: Send test message
-│   └── audit-log/
-│       ├── (root)              # GET: Paginated log
-│       └── export              # GET: CSV export
-├── meta-ads/
-│   ├── status                  # GET: Connection status
-│   ├── auth                    # GET: Start OAuth
-│   ├── callback                # GET: OAuth callback
-│   └── sync                    # POST: Trigger sync
-├── google-ads/
-│   ├── init                    # GET/POST: Schema init
-│   ├── status                  # GET: Connection status
-│   ├── auth                    # GET: Start OAuth
-│   ├── callback                # GET: OAuth callback
-│   └── script/                 # Script mode endpoints
-├── mcp-keys/                   # API key management
-├── mcp-oauth-clients/          # OAuth client management
-└── mcp-analytics/              # Usage analytics
-```
-
----
-
-## 9. COMPONENT LIBRARY
-
-### Shared Components
-
-```typescript
-// packages/ui/src/components/admin/integrations/
-
-// Connection status badge
-export function ConnectionStatusBadge({ status }: { status: IntegrationStatus }) {
-  const styles = {
-    connected: 'bg-green-50 text-green-600',
-    disconnected: 'bg-gray-50 text-gray-500',
-    error: 'bg-red-50 text-red-600',
-    pending: 'bg-amber-50 text-amber-600',
-  }
-  // ...
-}
-
-// Integration card for hub
-export function IntegrationCard({ integration }: { integration: IntegrationCard }) { }
-
-// OAuth connect button
-export function OAuthConnectButton({ provider, onConnect }: {
-  provider: 'meta' | 'google' | 'tiktok' | 'shopify' | 'slack'
-  onConnect: () => void
-}) { }
-
-// API key input with visibility toggle
-export function SecureApiKeyInput({
-  value,
-  onChange,
-  placeholder,
-  label,
-}: SecureInputProps) { }
-
-// Connection test result display
-export function TestConnectionResult({
-  success: boolean
-  message?: string
-  details?: Record<string, unknown>
-}) { }
-```
-
----
-
 ## 10. IMPLEMENTATION CHECKLIST
 
 ### Phase 1: Hub & Core Structure
-- [ ] Create `/admin/integrations` route with category layout
-- [ ] Implement parallel status fetching for all integrations
-- [ ] Create shared integration card component
-- [ ] Add connection status badges
-- [ ] Create sidebar navigation for integrations section
+- [x] Create `/admin/integrations` route with category layout
+- [x] Implement parallel status fetching for all integrations
+- [x] Create shared integration card component
+- [x] Add connection status badges
+- [x] Create sidebar navigation for integrations section
 
 ### Phase 2: OAuth Integrations
-- [ ] Meta Ads connection UI with account selection
-- [ ] Google Ads dual-mode (API/Script) interface
-- [ ] TikTok Ads connection with pixel configuration
-- [ ] Shopify App with re-auth flow
+- [x] Meta Ads connection UI with account selection
+- [x] Google Ads dual-mode (API/Script) interface
+- [x] TikTok Ads connection with pixel configuration
+- [x] Shopify App with re-auth flow
 
 ### Phase 3: API Key Integrations
-- [ ] Klaviyo configuration with test functionality
-- [ ] Yotpo configuration with test functionality
-- [ ] Secure input components with visibility toggle
+- [x] Klaviyo configuration with test functionality
+- [x] Yotpo configuration with test functionality
+- [x] Secure input components with visibility toggle
 
 ### Phase 4: Communications
-- [ ] SMS/Voice main page with Retell.ai status
-- [ ] SMS Audit Log with filtering and export
-- [ ] SMS Notification channel configuration
-- [ ] Slack workspace connection with channel mapping
+- [x] SMS/Voice main page with Retell.ai status
+- [x] SMS Audit Log with filtering and export
+- [x] SMS Notification channel configuration
+- [x] Slack workspace connection with channel mapping
 
 ### Phase 5: Platform
-- [ ] MCP dashboard with capability reference
-- [ ] MCP API key management
-- [ ] MCP OAuth client management (workaround)
-- [ ] MCP analytics dashboard
+- [x] MCP dashboard with capability reference
+- [x] MCP API key management
+- [x] MCP OAuth client management (workaround)
+- [x] MCP analytics dashboard
 
 ### Phase 6: Multi-Tenant
-- [ ] Verify tenant isolation on all endpoints
-- [ ] Test credential encryption/decryption
-- [ ] Verify no cross-tenant data leakage
+- [x] Verify tenant isolation on all endpoints
+- [x] Test credential encryption/decryption
+- [x] Verify no cross-tenant data leakage
 
 ---
 

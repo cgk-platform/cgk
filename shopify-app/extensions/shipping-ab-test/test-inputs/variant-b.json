@@ -1,0 +1,34 @@
+{
+  "cart": {
+    "attribute": {
+      "value": "B"
+    },
+    "deliveryGroups": [
+      {
+        "id": "gid://shopify/CartDeliveryGroup/1",
+        "deliveryOptions": [
+          {
+            "handle": "standard-a",
+            "title": "Standard Shipping (A)"
+          },
+          {
+            "handle": "standard-b",
+            "title": "Standard Shipping (B)"
+          },
+          {
+            "handle": "standard-c",
+            "title": "Standard Shipping (C)"
+          },
+          {
+            "handle": "standard-d",
+            "title": "Standard Shipping (D)"
+          },
+          {
+            "handle": "express",
+            "title": "Express Shipping"
+          }
+        ]
+      }
+    ]
+  }
+}

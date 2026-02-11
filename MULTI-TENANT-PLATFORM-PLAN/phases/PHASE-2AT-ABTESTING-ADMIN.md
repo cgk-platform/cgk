@@ -15,16 +15,16 @@ Build the complete admin interface for A/B testing including test list, creation
 
 ## Success Criteria
 
-- [ ] Test list shows all tests with status filters and quick stats
-- [ ] New test wizard guides through multi-step creation
-- [ ] Test detail page shows real-time results with charts
-- [ ] Statistical significance is clearly displayed
-- [ ] Winner recommendation appears when test is conclusive
-- [ ] Data quality page shows SRM, novelty, and drift alerts
-- [ ] Template A/B tests work for email template testing
-- [ ] All pages respect tenant isolation
-- [ ] Responsive design works on mobile
-- [ ] `npx tsc --noEmit` passes
+- [x] Test list shows all tests with status filters and quick stats
+- [x] New test wizard guides through multi-step creation
+- [x] Test detail page shows real-time results with charts
+- [x] Statistical significance is clearly displayed
+- [x] Winner recommendation appears when test is conclusive
+- [x] Data quality page shows SRM, novelty, and drift alerts
+- [x] Template A/B tests work for email template testing
+- [x] All pages respect tenant isolation
+- [x] Responsive design works on mobile
+- [x] `npx tsc --noEmit` passes
 
 ---
 

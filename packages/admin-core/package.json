@@ -1,0 +1,50 @@
+{
+  "name": "@cgk/admin-core",
+  "version": "0.0.0",
+  "description": "Core admin functionality: Workflow engine, Smart Inbox, and shared admin utilities",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./workflow": {
+      "types": "./dist/workflow/index.d.ts",
+      "import": "./dist/workflow/index.js"
+    },
+    "./inbox": {
+      "types": "./dist/inbox/index.d.ts",
+      "import": "./dist/inbox/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cgk/core": "workspace:*",
+    "@cgk/db": "workspace:*",
+    "@cgk/auth": "workspace:*",
+    "@cgk/communications": "workspace:*",
+    "@cgk/jobs": "workspace:*"
+  },
+  "devDependencies": {
+    "@cgk/eslint-config": "workspace:*",
+    "@cgk/typescript-config": "workspace:*",
+    "eslint": "^9.18.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -1,0 +1,165 @@
+/**
+ * Fulfillment Webhook Handlers
+ *
+ * Handles fulfillments/create and fulfillments/update webhooks
+ */
+
+import { withTenant, sql } from '@cgk/db'
+import { createJobQueue } from '@cgk/jobs'
+import type { ShopifyFulfillmentPayload } from '../types'
+
+// Create job queue for fulfillment-related background jobs
+const fulfillmentJobQueue = createJobQueue({ name: 'fulfillment-webhooks' })
+
+/**
+ * Handle fulfillments/create webhook
+ *
+ * Creates a fulfillment record and triggers review email queue
+ */
+export async function handleFulfillmentCreate(
+  tenantId: string,
+  payload: unknown,
+  _eventId: string
+): Promise<void> {
+  const fulfillment = payload as ShopifyFulfillmentPayload
+  const shopifyFulfillmentId = fulfillment.id.toString()
+  const orderId = fulfillment.order_id.toString()
+
+  await withTenant(tenantId, async () => {
+    // Upsert fulfillment record
+    await sql`
+      INSERT INTO fulfillments (
+        shopify_fulfillment_id,
+        order_shopify_id,
+        status,
+        tracking_company,
+        tracking_number,
+        tracking_url,
+        created_at,
+        updated_at
+      ) VALUES (
+        ${shopifyFulfillmentId},
+        ${orderId},
+        ${fulfillment.status},
+        ${fulfillment.tracking_company || null},
+        ${fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null},
+        ${fulfillment.tracking_url || fulfillment.tracking_urls?.[0] || null},
+        ${fulfillment.created_at},
+        ${fulfillment.updated_at}
+      )
+      ON CONFLICT (shopify_fulfillment_id) DO UPDATE SET
+        status = EXCLUDED.status,
+        tracking_company = EXCLUDED.tracking_company,
+        tracking_number = EXCLUDED.tracking_number,
+        tracking_url = EXCLUDED.tracking_url,
+        updated_at = EXCLUDED.updated_at
+    `
+
+    // Update order fulfillment status
+    await sql`
+      UPDATE orders
+      SET
+        fulfillment_status = 'fulfilled',
+        synced_at = NOW()
+      WHERE shopify_id = ${orderId}
+    `
+  })
+
+  // Trigger background jobs
+  await Promise.all([
+    // Queue review request email
+    fulfillmentJobQueue.enqueue('fulfillment/review-email-queue', {
+      tenantId,
+      orderId,
+      fulfillmentId: shopifyFulfillmentId,
+      trackingNumber: fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null,
+      trackingUrl: fulfillment.tracking_url || fulfillment.tracking_urls?.[0] || null,
+    }, { tenantId }),
+
+    // Link to creator project if applicable
+    fulfillmentJobQueue.enqueue('fulfillment/project-linking', {
+      tenantId,
+      orderId,
+      fulfillmentId: shopifyFulfillmentId,
+      lineItems: fulfillment.line_items,
+    }, { tenantId }),
+  ])
+
+  console.log(`[Webhook] Fulfillment ${shopifyFulfillmentId} created for order ${orderId}, tenant ${tenantId}`)
+}
+
+/**
+ * Handle fulfillments/update webhook
+ *
+ * Updates tracking information and triggers notifications if tracking changed
+ */
+export async function handleFulfillmentUpdate(
+  tenantId: string,
+  payload: unknown,
+  _eventId: string
+): Promise<void> {
+  const fulfillment = payload as ShopifyFulfillmentPayload
+  const shopifyFulfillmentId = fulfillment.id.toString()
+  const orderId = fulfillment.order_id.toString()
+
+  // Get existing fulfillment to check for tracking changes
+  let trackingChanged = false
+
+  await withTenant(tenantId, async () => {
+    const existing = await sql`
+      SELECT tracking_number, status
+      FROM fulfillments
+      WHERE shopify_fulfillment_id = ${shopifyFulfillmentId}
+    `
+
+    const newTrackingNumber = fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null
+
+    if (existing.rows.length > 0 && existing.rows[0]) {
+      const oldTracking = existing.rows[0].tracking_number as string | null
+      trackingChanged = oldTracking !== newTrackingNumber
+    }
+
+    // Update fulfillment record
+    await sql`
+      INSERT INTO fulfillments (
+        shopify_fulfillment_id,
+        order_shopify_id,
+        status,
+        tracking_company,
+        tracking_number,
+        tracking_url,
+        created_at,
+        updated_at
+      ) VALUES (
+        ${shopifyFulfillmentId},
+        ${orderId},
+        ${fulfillment.status},
+        ${fulfillment.tracking_company || null},
+        ${newTrackingNumber},
+        ${fulfillment.tracking_url || fulfillment.tracking_urls?.[0] || null},
+        ${fulfillment.created_at},
+        ${fulfillment.updated_at}
+      )
+      ON CONFLICT (shopify_fulfillment_id) DO UPDATE SET
+        status = EXCLUDED.status,
+        tracking_company = EXCLUDED.tracking_company,
+        tracking_number = EXCLUDED.tracking_number,
+        tracking_url = EXCLUDED.tracking_url,
+        updated_at = EXCLUDED.updated_at
+    `
+  })
+
+  // If tracking info changed, trigger notification
+  if (trackingChanged) {
+    await fulfillmentJobQueue.enqueue('fulfillment/tracking-updated', {
+      tenantId,
+      orderId,
+      fulfillmentId: shopifyFulfillmentId,
+      trackingNumber: fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null,
+      trackingUrl: fulfillment.tracking_url || fulfillment.tracking_urls?.[0] || null,
+      trackingCompany: fulfillment.tracking_company || null,
+    }, { tenantId })
+  }
+
+  console.log(`[Webhook] Fulfillment ${shopifyFulfillmentId} updated for order ${orderId}, tenant ${tenantId}`)
+}

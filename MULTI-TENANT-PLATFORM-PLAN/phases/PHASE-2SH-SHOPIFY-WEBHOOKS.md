@@ -1,5 +1,7 @@
 # PHASE-2SH: Shopify App - Webhooks
 
+> **Status**: COMPLETE
+> **Completed**: 2026-02-10
 > **Execution**: Week 11-12 (Parallel with PHASE-2SH-SHOPIFY-EXTENSIONS)
 > **Dependencies**: PHASE-2SH-SHOPIFY-APP-CORE, PHASE-5A-JOBS-SETUP
 > **Blocking**: PHASE-5B-JOBS-COMMERCE (Order sync jobs)
@@ -16,13 +18,13 @@ This phase implements the Shopify webhook infrastructure that receives real-time
 
 ## Success Criteria
 
-- [ ] All critical webhooks registered on app installation
-- [ ] HMAC signature verification using tenant-specific secrets
-- [ ] Shop domain → tenant routing works correctly
-- [ ] Webhook events trigger appropriate background jobs
-- [ ] Failed webhooks logged with retry tracking
-- [ ] Webhook health dashboard in admin UI
-- [ ] Webhook registration sync with Shopify
+- [x] All critical webhooks registered on app installation
+- [x] HMAC signature verification using tenant-specific secrets
+- [x] Shop domain → tenant routing works correctly
+- [x] Webhook events trigger appropriate background jobs
+- [x] Failed webhooks logged with retry tracking
+- [x] Webhook health dashboard in admin UI
+- [x] Webhook registration sync with Shopify
 
 ---
 
@@ -801,11 +803,67 @@ RAWDOG Reference Files:
 
 ## Definition of Done
 
-- [ ] All required webhooks registered on app installation
-- [ ] HMAC verification passes for valid webhooks
-- [ ] Shop → tenant routing works correctly
-- [ ] Webhook events logged to database
-- [ ] Failed webhooks retry automatically
-- [ ] Admin UI shows webhook health status
-- [ ] Sync command re-registers missing webhooks
-- [ ] Background jobs process webhook events
+- [x] All required webhooks registered on app installation
+- [x] HMAC verification passes for valid webhooks
+- [x] Shop → tenant routing works correctly
+- [x] Webhook events logged to database
+- [x] Failed webhooks retry automatically
+- [x] Admin UI shows webhook health status
+- [x] Sync command re-registers missing webhooks
+- [x] Background jobs process webhook events
+
+---
+
+## Implementation Summary
+
+### Files Created
+
+**Database Migration:**
+- `/packages/db/src/migrations/tenant/015_shopify_webhooks.sql` - webhook_events, webhook_registrations, shopify_connections tables
+
+**Webhook Infrastructure (`packages/shopify/src/webhooks/`):**
+- `types.ts` - TypeScript types for webhooks, payloads, handlers
+- `utils.ts` - HMAC verification, tenant routing, status mapping utilities
+- `router.ts` - Topic-to-handler routing
+- `handler.ts` - Main webhook request handler
+- `register.ts` - Webhook registration with Shopify API
+- `health.ts` - Health monitoring and event statistics
+- `index.ts` - Module exports
+
+**Webhook Handlers (`packages/shopify/src/webhooks/handlers/`):**
+- `orders.ts` - orders/create, orders/updated, orders/paid, orders/cancelled
+- `fulfillments.ts` - fulfillments/create, fulfillments/update
+- `refunds.ts` - refunds/create
+- `customers.ts` - customers/create, customers/update
+- `app.ts` - app/uninstalled
+- `index.ts` - Handler exports
+
+**Background Jobs (`packages/jobs/src/webhooks/`):**
+- `retry-failed.ts` - Retry failed webhooks every 5 minutes
+- `health-check.ts` - Webhook health check every hour, cleanup job
+- `index.ts` - Job exports
+
+**API Routes (`apps/admin/src/app/api/`):**
+- `webhooks/shopify/route.ts` - Main webhook receiver endpoint
+- `admin/integrations/shopify/webhooks/health/route.ts` - Health status
+- `admin/integrations/shopify/webhooks/sync/route.ts` - Sync registrations
+- `admin/integrations/shopify/webhooks/events/route.ts` - List events
+- `admin/integrations/shopify/webhooks/retry/[eventId]/route.ts` - Manual retry
+
+**Admin UI:**
+- `apps/admin/src/app/admin/integrations/shopify-app/webhooks/page.tsx` - Webhook health dashboard
+
+**Tests:**
+- `packages/shopify/src/webhooks/__tests__/utils.test.ts` - Utility function tests
+- `packages/shopify/src/webhooks/__tests__/router.test.ts` - Router tests
+
+### Key Features Implemented
+
+1. **HMAC Verification**: Timing-safe signature verification using crypto.timingSafeEqual
+2. **Tenant Isolation**: Shop domain -> tenant routing via organizations table
+3. **Idempotency**: Duplicate detection using topic:resource_id keys
+4. **Event Logging**: All webhooks logged with status, payload, headers
+5. **Automatic Retry**: Failed webhooks retried up to 3 times with exponential backoff
+6. **Health Monitoring**: Dashboard shows registration status, event statistics
+7. **Sync Command**: Re-registers missing webhooks with Shopify API
+8. **Background Jobs**: Scheduled retry and health check jobs

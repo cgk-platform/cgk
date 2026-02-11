@@ -49,3 +49,6 @@ export type {
   CheckoutLineItem,
   Discount,
 } from './types'
+
+// Google Feed module
+export * from './google-feed'

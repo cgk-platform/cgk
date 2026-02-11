@@ -1,0 +1,45 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "Post-Purchase Survey"
+handle = "post-purchase-survey"
+type = "checkout_ui_extension"
+
+  [[extensions.targeting]]
+  target = "purchase.thank-you.block.render"
+
+  [[extensions.targeting]]
+  target = "customer-account.order-status.block.render"
+
+[extensions.capabilities]
+api_access = true
+network_access = true
+
+[extensions.settings]
+type = "object"
+
+[extensions.settings.fields.survey_config_url]
+name = "Survey Configuration URL"
+description = "API endpoint returning survey questions for this tenant"
+type = "single_line_text_field"
+validations = [{ name = "min", value = "1" }]
+
+[extensions.settings.fields.api_key]
+name = "API Key"
+description = "API key for authenticating survey submissions"
+type = "single_line_text_field"
+
+[extensions.settings.fields.survey_title]
+name = "Survey Title"
+description = "Title displayed above the survey (default: Quick Question)"
+type = "single_line_text_field"
+
+[extensions.settings.fields.submit_button_text]
+name = "Submit Button Text"
+description = "Text for the submit button (default: Submit)"
+type = "single_line_text_field"
+
+[extensions.settings.fields.thank_you_message]
+name = "Thank You Message"
+description = "Message shown after submission (default: Thank you for your feedback!)"
+type = "single_line_text_field"

@@ -71,3 +71,18 @@ export {
   substituteVariables,
   validateTemplateContent,
 } from './render.js'
+
+// Library aggregation
+export {
+  filterTemplatesByStatus,
+  getTemplateAnalytics,
+  getTemplateEditorPath,
+  getTemplateLibrary,
+  searchTemplates,
+  type TemplateAnalyticsItem,
+  type TemplateAnalyticsResponse,
+  type TemplateLibraryCategory,
+  type TemplateLibraryItem,
+  type TemplateLibraryResponse,
+  type TrendDataPoint,
+} from './library.js'

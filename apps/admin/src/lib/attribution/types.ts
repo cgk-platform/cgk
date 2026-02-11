@@ -784,3 +784,352 @@ export interface ModelComparisonData {
   topChannel: string
   creditDistribution: CreditDistribution[]
 }
+
+// ============================================================
+// Platform Connection Types (Phase 2AT-D)
+// ============================================================
+
+export type SecondaryPlatform = 'snapchat' | 'pinterest' | 'linkedin' | 'mntn' | 'affiliate'
+export type ConnectionStatus = 'connected' | 'not_connected' | 'error'
+export type SyncStatus = 'success' | 'partial' | 'failed'
+export type SyncFrequency = 'hourly' | 'daily' | 'weekly'
+
+export interface PlatformConnection {
+  id: string
+  tenantId: string
+  platform: SecondaryPlatform
+  displayName: string
+  status: ConnectionStatus
+  connectedAt: string | null
+  lastSyncAt: string | null
+  lastSyncStatus: SyncStatus | null
+  recordsSynced: number | null
+  errorMessage: string | null
+  enabled: boolean
+  syncFrequency: SyncFrequency
+  accountId: string | null
+  accountName: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PlatformConnectionCreate {
+  platform: SecondaryPlatform
+  displayName?: string
+  accountId?: string
+  accountName?: string
+  syncFrequency?: SyncFrequency
+}
+
+export interface PlatformConnectionUpdate {
+  enabled?: boolean
+  syncFrequency?: SyncFrequency
+  displayName?: string
+}
+
+// ============================================================
+// Influencer Attribution Types (Phase 2AT-D)
+// ============================================================
+
+export type InfluencerStatus = 'active' | 'inactive'
+
+export interface InfluencerMetrics {
+  revenue: number
+  conversions: number
+  aov: number
+  newCustomerPercent: number
+  commissionEarned: number
+}
+
+export interface Influencer {
+  id: string
+  tenantId: string
+  name: string
+  profileImageUrl: string | null
+  status: InfluencerStatus
+  discountCodes: string[]
+  creatorLinks: string[]
+  utmPatterns: string[]
+  landingPage: string | null
+  commissionRate: number | null
+  creatorId: string | null
+  createdAt: string
+  updatedAt: string
+  metrics?: InfluencerMetrics
+}
+
+export interface InfluencerCreate {
+  name: string
+  profileImageUrl?: string
+  status?: InfluencerStatus
+  discountCodes?: string[]
+  creatorLinks?: string[]
+  utmPatterns?: string[]
+  landingPage?: string
+  commissionRate?: number
+  creatorId?: string
+}
+
+export interface InfluencerUpdate {
+  name?: string
+  profileImageUrl?: string
+  status?: InfluencerStatus
+  discountCodes?: string[]
+  creatorLinks?: string[]
+  utmPatterns?: string[]
+  landingPage?: string
+  commissionRate?: number
+  creatorId?: string
+}
+
+// ============================================================
+// Scheduled Report Types (Phase 2AT-D)
+// ============================================================
+
+export type ReportFrequency = 'daily' | 'weekly' | 'monthly'
+export type ReportDateRange = 'last_7d' | 'last_30d' | 'last_mtd' | 'last_month'
+export type ReportStatus = 'success' | 'failed'
+
+export interface ScheduleConfig {
+  dayOfWeek?: number
+  dayOfMonth?: number
+  hour: number
+  minute: number
+  timezone: string
+}
+
+export interface ReportConfig {
+  model: AttributionModel
+  window: AttributionWindow
+  metrics: string[]
+  channels?: string[]
+  dateRange: ReportDateRange
+}
+
+export interface ScheduledReport {
+  id: string
+  tenantId: string
+  name: string
+  frequency: ReportFrequency
+  scheduleConfig: ScheduleConfig
+  recipients: string[]
+  slackChannel: string | null
+  reportConfig: ReportConfig
+  enabled: boolean
+  lastSentAt: string | null
+  lastStatus: ReportStatus | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ScheduledReportCreate {
+  name: string
+  frequency: ReportFrequency
+  scheduleConfig: ScheduleConfig
+  recipients: string[]
+  slackChannel?: string
+  reportConfig: ReportConfig
+  enabled?: boolean
+}
+
+export interface ScheduledReportUpdate {
+  name?: string
+  frequency?: ReportFrequency
+  scheduleConfig?: ScheduleConfig
+  recipients?: string[]
+  slackChannel?: string
+  reportConfig?: ReportConfig
+  enabled?: boolean
+}
+
+// ============================================================
+// Export Configuration Types (Phase 2AT-D)
+// ============================================================
+
+export type ExportDestinationType = 's3' | 'gcs' | 'webhook' | 'sftp'
+export type ExportSchedule = 'hourly' | 'daily' | 'weekly'
+export type ExportFormat = 'csv' | 'json' | 'parquet'
+export type ExportStatus = 'success' | 'failed'
+export type ExportableTable =
+  | 'attribution_touchpoints'
+  | 'attribution_conversions'
+  | 'attribution_results'
+  | 'attribution_daily_metrics'
+  | 'customer_identities'
+
+export interface ExportDestinationConfig {
+  bucket?: string
+  path?: string
+  url?: string
+  host?: string
+  port?: number
+  username?: string
+}
+
+export interface ExportConfiguration {
+  id: string
+  tenantId: string
+  name: string
+  destinationType: ExportDestinationType
+  destinationConfig: ExportDestinationConfig
+  schedule: ExportSchedule
+  tables: ExportableTable[]
+  format: ExportFormat
+  enabled: boolean
+  lastExportAt: string | null
+  lastExportStatus: ExportStatus | null
+  lastExportRecordCount: number | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ExportConfigurationCreate {
+  name: string
+  destinationType: ExportDestinationType
+  destinationConfig: ExportDestinationConfig
+  schedule: ExportSchedule
+  tables: ExportableTable[]
+  format?: ExportFormat
+  enabled?: boolean
+}
+
+export interface ExportConfigurationUpdate {
+  name?: string
+  destinationType?: ExportDestinationType
+  destinationConfig?: ExportDestinationConfig
+  schedule?: ExportSchedule
+  tables?: ExportableTable[]
+  format?: ExportFormat
+  enabled?: boolean
+}
+
+export interface ExportHistory {
+  id: string
+  exportConfigId: string
+  status: ExportStatus
+  recordCount: number
+  fileSize: number
+  filePath: string | null
+  errorMessage: string | null
+  startedAt: string
+  completedAt: string | null
+  expiresAt: string
+}
+
+// ============================================================
+// Custom Dashboard Types (Phase 2AT-D)
+// ============================================================
+
+export type WidgetType = 'kpi' | 'line_chart' | 'bar_chart' | 'table' | 'pie' | 'text'
+export type DashboardDateRange = 'last_7d' | 'last_14d' | 'last_30d'
+
+export interface DashboardWidget {
+  widgetId: string
+  widgetType: WidgetType
+  x: number
+  y: number
+  width: number
+  height: number
+  config: Record<string, unknown>
+}
+
+export interface CustomDashboard {
+  id: string
+  tenantId: string
+  userId: string
+  name: string
+  description: string | null
+  isDefault: boolean
+  dateRangeDefault: DashboardDateRange
+  refreshIntervalMinutes: number | null
+  layout: DashboardWidget[]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CustomDashboardCreate {
+  name: string
+  description?: string
+  isDefault?: boolean
+  dateRangeDefault?: DashboardDateRange
+  refreshIntervalMinutes?: number
+  layout?: DashboardWidget[]
+}
+
+export interface CustomDashboardUpdate {
+  name?: string
+  description?: string
+  isDefault?: boolean
+  dateRangeDefault?: DashboardDateRange
+  refreshIntervalMinutes?: number
+  layout?: DashboardWidget[]
+}
+
+// ============================================================
+// Pixel Monitoring Types (Phase 2AT-D)
+// ============================================================
+
+export type PixelPlatform = 'ga4' | 'meta' | 'tiktok'
+export type PixelMatchStatus = 'matched' | 'unmatched' | 'partial'
+export type PixelEventType = 'purchase' | 'add_to_cart' | 'page_view' | 'checkout'
+
+export interface PixelHealthMetrics {
+  platform: PixelPlatform
+  accuracy24h: number
+  accuracyTrend: number
+  sessionStitchingRate: number
+  lastEvent: string | null
+  eventCount24h: number
+}
+
+export interface PixelEvent {
+  id: string
+  timestamp: string
+  eventType: PixelEventType
+  platform: PixelPlatform
+  orderId: string | null
+  matchStatus: PixelMatchStatus
+  errorMessage: string | null
+}
+
+export interface MetaEMQMetrics {
+  overallScore: number
+  parameterScores: Record<string, number>
+  trend: Array<{ date: string; score: number }>
+}
+
+export interface PixelAlertConfig {
+  id: string
+  tenantId: string
+  platform: PixelPlatform
+  enabled: boolean
+  accuracyThreshold: number
+  notificationEmail: boolean
+  notificationSlack: boolean
+  slackChannel: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PixelAlertConfigUpdate {
+  enabled?: boolean
+  accuracyThreshold?: number
+  notificationEmail?: boolean
+  notificationSlack?: boolean
+  slackChannel?: string
+}
+
+export interface PixelFailure {
+  id: string
+  tenantId: string
+  platform: PixelPlatform
+  eventType: PixelEventType
+  orderId: string | null
+  errorType: string
+  errorMessage: string
+  payload: Record<string, unknown>
+  retryCount: number
+  lastRetryAt: string | null
+  resolvedAt: string | null
+  createdAt: string
+}
