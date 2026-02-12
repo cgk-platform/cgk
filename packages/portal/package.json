@@ -1,0 +1,55 @@
+{
+  "name": "@cgk/portal",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Customer portal utilities for authentication, content, and features",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js"
+    },
+    "./api": {
+      "types": "./dist/api/index.d.ts",
+      "import": "./dist/api/index.js"
+    },
+    "./content": {
+      "types": "./dist/content/getContent.d.ts",
+      "import": "./dist/content/getContent.js"
+    },
+    "./features": {
+      "types": "./dist/features/isEnabled.d.ts",
+      "import": "./dist/features/isEnabled.js"
+    },
+    "./theme": {
+      "types": "./dist/theme/index.d.ts",
+      "import": "./dist/theme/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cgk/core": "workspace:*",
+    "@cgk/db": "workspace:*",
+    "@cgk/shopify": "workspace:*"
+  },
+  "peerDependencies": {
+    "next": ">=14.0.0"
+  },
+  "devDependencies": {
+    "@cgk/typescript-config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "next": "^16.0.0",
+    "typescript": "^5.9.0"
+  }
+}

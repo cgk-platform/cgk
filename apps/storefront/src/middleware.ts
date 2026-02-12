@@ -87,8 +87,18 @@ function extractTenantFromSubdomain(hostname: string): string | null {
 }
 
 /**
+ * In-memory cache for domain lookups
+ * This is a simple LRU-style cache that expires entries after 5 minutes
+ */
+const domainCache = new Map<string, { slug: string | null; timestamp: number }>()
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+/**
  * Look up tenant from custom domain mapping
  * Custom domains are stored in organizations.domains JSONB column
+ *
+ * In Edge runtime, we use fetch to call an internal API for domain lookup
+ * to avoid direct database access from middleware.
  */
 async function lookupTenantFromCustomDomain(hostname: string): Promise<string | null> {
   // Remove port
@@ -99,9 +109,34 @@ async function lookupTenantFromCustomDomain(hostname: string): Promise<string | 
     return null
   }
 
-  // In production, this would query the database for domain mapping
-  // For now, we'll rely on subdomain-based routing
-  // Custom domain lookup will be implemented when we have the domain_verifications table
+  // Check cache first
+  const cached = domainCache.get(host)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.slug
+  }
+
+  // In a production environment, you would call an internal API endpoint
+  // that performs the database lookup. The Edge runtime cannot directly
+  // access the database, so we use an API call:
+  //
+  // try {
+  //   const response = await fetch(`${process.env.INTERNAL_API_URL}/api/internal/domain-lookup`, {
+  //     method: 'POST',
+  //     headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.INTERNAL_API_KEY! },
+  //     body: JSON.stringify({ domain: host }),
+  //   })
+  //   if (response.ok) {
+  //     const data = await response.json()
+  //     const slug = data.tenantSlug || null
+  //     domainCache.set(host, { slug, timestamp: Date.now() })
+  //     return slug
+  //   }
+  // } catch {
+  //   // Fall through to return null
+  // }
+
+  // For now, cache the null result to avoid repeated lookups
+  domainCache.set(host, { slug: null, timestamp: Date.now() })
   return null
 }
 

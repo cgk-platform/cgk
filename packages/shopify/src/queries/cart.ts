@@ -4,16 +4,29 @@
 
 import type { StorefrontClient } from '../storefront'
 
+export interface ShopifyCartDiscountCode {
+  code: string
+  applicable: boolean
+}
+
+export interface ShopifyCartDiscountAllocation {
+  discountedAmount: { amount: string; currencyCode: string }
+}
+
 export interface ShopifyCart {
   id: string
   checkoutUrl: string
   totalQuantity: number
   createdAt: string
   updatedAt: string
+  attributes: Array<{ key: string; value: string }>
+  discountCodes: ShopifyCartDiscountCode[]
+  discountAllocations: ShopifyCartDiscountAllocation[]
   cost: {
     subtotalAmount: { amount: string; currencyCode: string }
     totalAmount: { amount: string; currencyCode: string }
     totalTaxAmount: { amount: string; currencyCode: string } | null
+    totalDutyAmount: { amount: string; currencyCode: string } | null
   }
   lines: {
     edges: Array<{
@@ -31,7 +44,9 @@ export interface ShopifyCart {
         cost: {
           amountPerQuantity: { amount: string; currencyCode: string }
           totalAmount: { amount: string; currencyCode: string }
+          compareAtAmountPerQuantity: { amount: string; currencyCode: string } | null
         }
+        discountAllocations: ShopifyCartDiscountAllocation[]
       }
     }>
   }
@@ -44,10 +59,25 @@ const CART_FRAGMENT = `
     totalQuantity
     createdAt
     updatedAt
+    attributes {
+      key
+      value
+    }
+    discountCodes {
+      code
+      applicable
+    }
+    discountAllocations {
+      discountedAmount {
+        amount
+        currencyCode
+      }
+    }
     cost {
       subtotalAmount { amount currencyCode }
       totalAmount { amount currencyCode }
       totalTaxAmount { amount currencyCode }
+      totalDutyAmount { amount currencyCode }
     }
     lines(first: 100) {
       edges {
@@ -67,6 +97,13 @@ const CART_FRAGMENT = `
           cost {
             amountPerQuantity { amount currencyCode }
             totalAmount { amount currencyCode }
+            compareAtAmountPerQuantity { amount currencyCode }
+          }
+          discountAllocations {
+            discountedAmount {
+              amount
+              currencyCode
+            }
           }
         }
       }
@@ -80,6 +117,8 @@ interface CartResponse {
   cartLinesAdd?: { cart: ShopifyCart }
   cartLinesUpdate?: { cart: ShopifyCart }
   cartLinesRemove?: { cart: ShopifyCart }
+  cartAttributesUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
+  cartDiscountCodesUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
 }
 
 export async function createCart(client: StorefrontClient): Promise<ShopifyCart> {
@@ -173,4 +212,86 @@ export async function removeCartLines(
   )
 
   return result.cartLinesRemove!.cart
+}
+
+/**
+ * Update cart attributes
+ */
+export async function updateCartAttributes(
+  client: StorefrontClient,
+  cartId: string,
+  attributes: Array<{ key: string; value: string }>
+): Promise<ShopifyCart> {
+  const result = await client.query<CartResponse>(
+    `
+    ${CART_FRAGMENT}
+    mutation CartAttributesUpdate($cartId: ID!, $attributes: [AttributeInput!]!) {
+      cartAttributesUpdate(cartId: $cartId, attributes: $attributes) {
+        cart { ...CartFields }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    `,
+    { cartId, attributes }
+  )
+
+  const userErrors = result.cartAttributesUpdate?.userErrors
+  if (userErrors && userErrors.length > 0) {
+    throw new Error(userErrors[0]?.message ?? 'Failed to update cart attributes')
+  }
+
+  if (!result.cartAttributesUpdate?.cart) {
+    throw new Error('Failed to update cart attributes')
+  }
+
+  return result.cartAttributesUpdate.cart
+}
+
+/**
+ * Apply discount codes to cart
+ */
+export async function applyCartDiscountCodes(
+  client: StorefrontClient,
+  cartId: string,
+  discountCodes: string[]
+): Promise<ShopifyCart> {
+  const result = await client.query<CartResponse>(
+    `
+    ${CART_FRAGMENT}
+    mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]) {
+      cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
+        cart { ...CartFields }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    `,
+    { cartId, discountCodes }
+  )
+
+  const discountErrors = result.cartDiscountCodesUpdate?.userErrors
+  if (discountErrors && discountErrors.length > 0) {
+    throw new Error(discountErrors[0]?.message ?? 'Failed to apply discount code')
+  }
+
+  if (!result.cartDiscountCodesUpdate?.cart) {
+    throw new Error('Failed to apply discount code')
+  }
+
+  return result.cartDiscountCodesUpdate.cart
+}
+
+/**
+ * Remove discount codes from cart (pass empty array)
+ */
+export async function removeCartDiscountCodes(
+  client: StorefrontClient,
+  cartId: string
+): Promise<ShopifyCart> {
+  return applyCartDiscountCodes(client, cartId, [])
 }

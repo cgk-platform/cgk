@@ -272,6 +272,58 @@ export function parseTaxFilters(params: RawParams): TaxFilters {
   }
 }
 
+export interface ContractorFilters extends PaginationParams {
+  search: string
+  status: string[]
+  tags: string[]
+  hasPaymentMethod: boolean | null
+  hasW9: boolean | null
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export function parseContractorFilters(params: RawParams): ContractorFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? ('asc' as const) : ('desc' as const)
+
+  // Parse status multi-select
+  const statusParam = params.status
+  let status: string[] = []
+  if (typeof statusParam === 'string' && statusParam) {
+    status = statusParam.split(',').filter(Boolean)
+  } else if (Array.isArray(statusParam)) {
+    status = statusParam.filter((s): s is string => typeof s === 'string' && s !== '')
+  }
+
+  // Parse tags
+  const tagsParam = params.tags
+  let tags: string[] = []
+  if (typeof tagsParam === 'string' && tagsParam) {
+    tags = tagsParam.split(',').filter(Boolean)
+  } else if (Array.isArray(tagsParam)) {
+    tags = tagsParam.filter((t): t is string => typeof t === 'string' && t !== '')
+  }
+
+  // Parse boolean filters
+  const hasPaymentMethodStr = str(params.hasPaymentMethod)
+  const hasPaymentMethod =
+    hasPaymentMethodStr === 'true' ? true : hasPaymentMethodStr === 'false' ? false : null
+
+  const hasW9Str = str(params.hasW9)
+  const hasW9 = hasW9Str === 'true' ? true : hasW9Str === 'false' ? false : null
+
+  return {
+    ...p,
+    search: str(params.search),
+    status,
+    tags,
+    hasPaymentMethod,
+    hasW9,
+    sort: str(params.sort) || 'createdAt',
+    dir,
+  }
+}
+
 export function buildFilterUrl(
   basePath: string,
   filters: Record<string, string | number | undefined>,

@@ -95,6 +95,9 @@ describe('CommerceProvider interface', () => {
         totalAmount: { amount: '33.00', currencyCode: 'USD' },
       },
       lines: [],
+      discountCodes: [],
+      discountAllocations: [],
+      attributes: [],
       createdAt: '2025-01-01',
       updatedAt: '2025-01-01',
     }

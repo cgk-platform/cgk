@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Editorial font imports for wizard */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -24,6 +27,16 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+
+    /* Onboarding Wizard Theme - Editorial aesthetic */
+    --wizard-bg: #faf9f7;
+    --wizard-text: #1a1a1a;
+    --wizard-muted: #6b7280;
+    --wizard-border: #e5e5e5;
+    --wizard-hover: #f3f2f0;
+    --wizard-accent: #0d9488;
+    --wizard-accent-hover: #0f766e;
+    --wizard-success: #059669;
   }
 
   .dark {
@@ -56,4 +69,34 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Wizard typography */
+  .font-serif {
+    font-family: 'DM Serif Display', Georgia, serif;
+  }
+
+  /* Wizard background class */
+  .bg-onboarding-bg {
+    background-color: var(--wizard-bg);
+  }
+}
+
+/* Wizard color utilities */
+@layer utilities {
+  .text-wizard-text { color: var(--wizard-text); }
+  .text-wizard-muted { color: var(--wizard-muted); }
+  .text-wizard-accent { color: var(--wizard-accent); }
+  .text-wizard-success { color: var(--wizard-success); }
+
+  .bg-wizard-bg { background-color: var(--wizard-bg); }
+  .bg-wizard-hover { background-color: var(--wizard-hover); }
+  .bg-wizard-accent { background-color: var(--wizard-accent); }
+  .bg-wizard-accent-hover { background-color: var(--wizard-accent-hover); }
+  .bg-wizard-success { background-color: var(--wizard-success); }
+
+  .border-wizard-border { border-color: var(--wizard-border); }
+  .border-wizard-accent { border-color: var(--wizard-accent); }
+  .border-wizard-success { border-color: var(--wizard-success); }
+
+  .ring-wizard-accent { --tw-ring-color: var(--wizard-accent); }
 }

@@ -8,11 +8,12 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
-import { ProductFilters, ProductSkeleton } from './components'
+import { ProductSkeleton } from './components'
 
-import { ProductGrid } from '@/components/products'
+import { ProductGrid, ProductFilters } from '@/components/products'
 import { getCommerceProvider } from '@/lib/commerce'
-import { getTenantConfig } from '@/lib/tenant'
+import { getProductTypes, getVendors } from '@/lib/products-db'
+import { getTenantConfig, getTenantSlug } from '@/lib/tenant'
 
 
 export const dynamic = 'force-dynamic'
@@ -52,7 +53,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         {/* Filters Sidebar */}
         <aside className="w-full lg:w-64 lg:flex-shrink-0">
           <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}>
-            <ProductFilters currentSort={params.sort} />
+            <FiltersWrapper
+              currentSort={params.sort}
+              currentType={params.type}
+              currentVendor={params.vendor}
+            />
           </Suspense>
         </aside>
 
@@ -77,6 +82,42 @@ interface ProductListProps {
   sort?: string
   productType?: string
   vendor?: string
+}
+
+/**
+ * Filters wrapper that fetches available product types and vendors
+ */
+interface FiltersWrapperProps {
+  currentSort?: string
+  currentType?: string
+  currentVendor?: string
+}
+
+async function FiltersWrapper({
+  currentSort,
+  currentType,
+  currentVendor,
+}: FiltersWrapperProps) {
+  const tenantSlug = await getTenantSlug()
+
+  if (!tenantSlug) {
+    return <ProductFilters currentSort={currentSort} />
+  }
+
+  const [productTypes, vendors] = await Promise.all([
+    getProductTypes(tenantSlug),
+    getVendors(tenantSlug),
+  ])
+
+  return (
+    <ProductFilters
+      currentSort={currentSort}
+      currentType={currentType}
+      currentVendor={currentVendor}
+      productTypes={productTypes}
+      vendors={vendors}
+    />
+  )
 }
 
 async function ProductList({ page, sort, productType, vendor }: ProductListProps) {

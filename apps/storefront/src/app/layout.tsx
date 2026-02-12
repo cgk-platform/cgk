@@ -1,18 +1,37 @@
 /**
  * Root Layout
  *
- * Provides tenant-aware layout with header, footer, and global styles.
- * Tenant context is extracted from middleware headers.
+ * Provides tenant-aware layout with theming, header, footer, and global styles.
+ * Tenant context and theme are extracted from middleware headers.
  */
 
 import type { Metadata } from 'next'
 
-import { getTenantConfig } from '@/lib/tenant'
+import { getTenantConfig, getTenantSlug } from '@/lib/tenant'
+import {
+  ThemeHead,
+  ThemeProvider,
+  DarkModeToggle,
+  ServerBrandLogo,
+  loadThemeForSSR,
+  createTheme,
+} from '@/lib/theme'
+import { StorefrontHeader } from '@/components/layout/StorefrontHeader'
 
 import './globals.css'
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenantConfig()
+  const tenantSlug = await getTenantSlug()
+  let theme = createTheme(tenantSlug ?? 'default')
+
+  if (tenantSlug) {
+    try {
+      theme = await loadThemeForSSR(tenantSlug)
+    } catch {
+      // Use default theme on error
+    }
+  }
 
   return {
     title: {
@@ -20,6 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s | ${tenant?.name ?? 'Store'}`,
     },
     description: `Shop at ${tenant?.name ?? 'our store'}`,
+    icons: theme.faviconUrl ? { icon: theme.faviconUrl } : undefined,
   }
 }
 
@@ -29,106 +49,44 @@ export default async function RootLayout({
   children: React.ReactNode
 }): Promise<React.JSX.Element> {
   const tenant = await getTenantConfig()
+  const tenantSlug = await getTenantSlug()
+
+  // Load theme config
+  let theme = createTheme(tenantSlug ?? 'default')
+  if (tenantSlug) {
+    try {
+      theme = await loadThemeForSSR(tenantSlug)
+    } catch {
+      // Use default theme on error
+    }
+  }
+
+  const storeName = tenant?.name ?? 'Store'
 
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-background font-sans antialiased">
-        <Header storeName={tenant?.name ?? 'Store'} />
-        <main className="min-h-[calc(100vh-8rem)]">{children}</main>
-        <Footer storeName={tenant?.name ?? 'Store'} />
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <ThemeHead theme={theme} />
+      </head>
+      <body className="min-h-screen bg-[hsl(var(--portal-background))] font-[var(--portal-font-family)] text-[hsl(var(--portal-foreground))] antialiased">
+        <ThemeProvider theme={theme}>
+          <StorefrontHeader
+            storeName={storeName}
+            tenantSlug={tenantSlug ?? 'default'}
+            theme={theme}
+            logoComponent={
+              <ServerBrandLogo
+                theme={{ tenantId: storeName, logoUrl: theme.logoUrl, logoHeight: theme.logoHeight }}
+                linkHref="/"
+              />
+            }
+            darkModeToggle={theme.darkModeEnabled ? <DarkModeToggle size="md" /> : null}
+          />
+          <main className="min-h-[calc(100vh-8rem)]">{children}</main>
+          <Footer storeName={storeName} />
+        </ThemeProvider>
       </body>
     </html>
-  )
-}
-
-interface HeaderProps {
-  storeName: string
-}
-
-function Header({ storeName }: HeaderProps) {
-  return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <a href="/" className="text-xl font-bold">
-          {storeName}
-        </a>
-
-        <nav className="hidden items-center gap-6 md:flex">
-          <a href="/products" className="text-sm hover:text-primary">
-            Products
-          </a>
-          <a href="/collections" className="text-sm hover:text-primary">
-            Collections
-          </a>
-        </nav>
-
-        <div className="flex items-center gap-4">
-          {/* Search */}
-          <a
-            href="/search"
-            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted"
-            aria-label="Search"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </a>
-
-          {/* Cart */}
-          <a
-            href="/cart"
-            className="relative flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted"
-            aria-label="Cart"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-              />
-            </svg>
-            {/* Cart count badge would go here */}
-          </a>
-
-          {/* Mobile Menu */}
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-muted md:hidden"
-            aria-label="Menu"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-    </header>
   )
 }
 
@@ -138,35 +96,35 @@ interface FooterProps {
 
 function Footer({ storeName }: FooterProps) {
   return (
-    <footer className="border-t bg-muted/30">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="border-t border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-muted))]/30">
+      <div className="container mx-auto px-4 py-12" style={{ maxWidth: 'var(--portal-max-width)' }}>
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div>
             <h3 className="text-lg font-bold">{storeName}</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-[hsl(var(--portal-muted-foreground))]">
               Quality products, delivered with care.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-[hsl(var(--portal-muted-foreground))]">
               Shop
             </h4>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <a href="/products" className="hover:text-primary">
+                <a href="/products" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   All Products
                 </a>
               </li>
               <li>
-                <a href="/collections" className="hover:text-primary">
+                <a href="/collections" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   Collections
                 </a>
               </li>
               <li>
-                <a href="/search?q=sale" className="hover:text-primary">
+                <a href="/search?q=sale" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   Sale
                 </a>
               </li>
@@ -175,46 +133,56 @@ function Footer({ storeName }: FooterProps) {
 
           {/* Support */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-[hsl(var(--portal-muted-foreground))]">
               Support
             </h4>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <a href="/contact" className="hover:text-primary">
+                <a href="/contact" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   Contact Us
                 </a>
               </li>
               <li>
-                <a href="/faq" className="hover:text-primary">
+                <a href="/faq" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   FAQ
                 </a>
               </li>
               <li>
-                <a href="/shipping" className="hover:text-primary">
+                <a href="/shipping" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   Shipping
                 </a>
               </li>
               <li>
-                <a href="/returns" className="hover:text-primary">
+                <a href="/returns" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   Returns
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Account */}
           <div>
-            <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-              Legal
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-[hsl(var(--portal-muted-foreground))]">
+              Account
             </h4>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <a href="/privacy" className="hover:text-primary">
+                <a href="/account" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
+                  My Account
+                </a>
+              </li>
+              <li>
+                <a href="/account/orders" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
+                  Orders
+                </a>
+              </li>
+              <li>
+                <a href="/privacy" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="/terms" className="hover:text-primary">
+                <a href="/terms" className="transition-colors hover:text-[hsl(var(--portal-primary))]">
                   Terms of Service
                 </a>
               </li>
@@ -222,7 +190,7 @@ function Footer({ storeName }: FooterProps) {
           </div>
         </div>
 
-        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
+        <div className="mt-8 border-t border-[hsl(var(--portal-border))] pt-8 text-center text-sm text-[hsl(var(--portal-muted-foreground))]">
           <p>
             &copy; {new Date().getFullYear()} {storeName}. All rights reserved.
           </p>

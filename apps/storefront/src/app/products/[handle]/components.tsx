@@ -8,22 +8,48 @@
 
 import type { Product } from '@cgk/commerce'
 import { cn } from '@cgk/ui'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 
 import { VariantSelector, PriceDisplay } from '@/components/products'
+import { AddToCartButton } from '@/components/cart'
+import { CartProvider } from '@/components/cart/CartProvider'
 
 
 interface ProductInfoProps {
   product: Product
   options: Array<{ name: string; values: string[] }>
   hasMultipleVariants: boolean
+  tenantSlug: string
 }
 
 export function ProductInfo({
   product,
   options,
   hasMultipleVariants,
+  tenantSlug,
 }: ProductInfoProps) {
+  return (
+    <CartProvider tenantSlug={tenantSlug}>
+      <ProductInfoInner
+        product={product}
+        options={options}
+        hasMultipleVariants={hasMultipleVariants}
+      />
+    </CartProvider>
+  )
+}
+
+interface ProductInfoInnerProps {
+  product: Product
+  options: Array<{ name: string; values: string[] }>
+  hasMultipleVariants: boolean
+}
+
+function ProductInfoInner({
+  product,
+  options,
+  hasMultipleVariants,
+}: ProductInfoInnerProps) {
   const [quantity, setQuantity] = useState(1)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
     // Initialize with first available options
@@ -50,16 +76,16 @@ export function ProductInfo({
     )
   }, [product.variants, selectedOptions, hasMultipleVariants])
 
-  const handleOptionChange = (name: string, value: string) => {
+  const handleOptionChange = useCallback((name: string, value: string) => {
     setSelectedOptions((prev) => ({
       ...prev,
       [name.toLowerCase()]: value,
     }))
-  }
+  }, [])
 
-  const handleQuantityChange = (delta: number) => {
+  const handleQuantityChange = useCallback((delta: number) => {
     setQuantity((prev) => Math.max(1, Math.min(99, prev + delta)))
-  }
+  }, [])
 
   const isAvailable = selectedVariant?.availableForSale ?? product.availableForSale
 
@@ -127,23 +153,31 @@ export function ProductInfo({
 
       {/* Add to Cart Button */}
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button
-          type="button"
-          disabled={!isAvailable || !selectedVariant}
-          className={cn(
-            'flex-1 rounded-lg px-6 py-4 text-lg font-semibold transition-colors',
-            isAvailable
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-              : 'cursor-not-allowed bg-gray-300 text-gray-500'
-          )}
-        >
-          {isAvailable ? 'Add to Cart' : 'Sold Out'}
-        </button>
+        {selectedVariant ? (
+          <AddToCartButton
+            variantId={selectedVariant.id}
+            productTitle={product.title}
+            quantity={quantity}
+            available={isAvailable}
+            className="flex-1"
+          />
+        ) : (
+          <button
+            type="button"
+            disabled
+            className={cn(
+              'flex-1 rounded-xl px-6 py-4 text-lg font-semibold',
+              'cursor-not-allowed bg-muted text-muted-foreground'
+            )}
+          >
+            Select Options
+          </button>
+        )}
 
         {/* Wishlist Button */}
         <button
           type="button"
-          className="flex items-center justify-center gap-2 rounded-lg border px-6 py-4 font-medium transition-colors hover:bg-muted"
+          className="flex items-center justify-center gap-2 rounded-xl border px-6 py-4 font-medium transition-colors hover:bg-muted"
           aria-label="Add to wishlist"
         >
           <svg
@@ -168,12 +202,12 @@ export function ProductInfo({
         {isAvailable ? (
           <>
             <span className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-green-700">In Stock</span>
+            <span className="text-green-700 dark:text-green-400">In Stock</span>
           </>
         ) : (
           <>
             <span className="h-2 w-2 rounded-full bg-red-500" />
-            <span className="text-red-700">Out of Stock</span>
+            <span className="text-red-700 dark:text-red-400">Out of Stock</span>
           </>
         )}
       </div>
@@ -255,19 +289,4 @@ export function ProductSkeleton() {
   )
 }
 
-interface RelatedProductsProps {
-  productType: string
-  currentProductId: string
-}
-
-export async function RelatedProducts({
-  productType,
-}: RelatedProductsProps) {
-  // This would fetch related products from the commerce provider
-  // For now, return a placeholder
-  return (
-    <div className="flex min-h-[200px] items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-      Related products would be shown here for type: {productType}
-    </div>
-  )
-}
+// Note: RelatedProducts is now implemented in ./sections.tsx

@@ -57,3 +57,126 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ==========================================================================
+   Landing Page Block Animations
+   ========================================================================== */
+
+@layer utilities {
+  /* Fade in up animation */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Fade in animation */
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Slide in from left */
+  @keyframes slide-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in-left {
+    animation: slide-in-left 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Slide in from right */
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in-right {
+    animation: slide-in-right 0.5s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Scale in animation */
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s ease-out forwards;
+    opacity: 0;
+  }
+
+  /* Hide scrollbar utility */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Stagger delay utilities for animation groups */
+  .stagger-1 { animation-delay: 100ms; }
+  .stagger-2 { animation-delay: 200ms; }
+  .stagger-3 { animation-delay: 300ms; }
+  .stagger-4 { animation-delay: 400ms; }
+  .stagger-5 { animation-delay: 500ms; }
+  .stagger-6 { animation-delay: 600ms; }
+}
+
+/* ==========================================================================
+   Prose/Typography Enhancements for Markdown Blocks
+   ========================================================================== */
+
+.prose {
+  --tw-prose-body: hsl(var(--portal-muted-foreground, var(--muted-foreground)));
+  --tw-prose-headings: hsl(var(--portal-foreground, var(--foreground)));
+  --tw-prose-links: hsl(var(--portal-primary, var(--primary)));
+  --tw-prose-bold: hsl(var(--portal-foreground, var(--foreground)));
+  --tw-prose-quotes: hsl(var(--portal-muted-foreground, var(--muted-foreground)));
+  --tw-prose-quote-borders: hsl(var(--portal-primary, var(--primary)));
+  --tw-prose-code: hsl(var(--portal-primary, var(--primary)));
+  --tw-prose-pre-bg: hsl(var(--portal-card, var(--card)));
+  --tw-prose-hr: hsl(var(--portal-border, var(--border)));
+}

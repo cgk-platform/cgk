@@ -3,16 +3,29 @@
  *
  * Displays full product information with gallery, variants, and add to cart.
  * Reads from local PostgreSQL database for fast performance.
+ * Includes reviews, related products, and recently viewed sections.
  */
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
-import { ProductInfo, RelatedProducts, ProductSkeleton } from './components'
+import { ProductInfo, ProductSkeleton } from './components'
+import {
+  ProductReviewsSection,
+  RelatedProductsSection,
+  RecentlyViewedSection,
+  ProductViewTracker,
+} from './sections'
 
-import { ProductGallery, PriceDisplay } from '@/components/products'
+import {
+  ProductGallery,
+  PriceDisplay,
+  CompactStarRating,
+  RelatedProductsSkeleton,
+} from '@/components/products'
 import { getCommerceProvider } from '@/lib/commerce'
+import { getProductRating } from '@/lib/reviews'
 import { getTenantConfig } from '@/lib/tenant'
 
 export const dynamic = 'force-dynamic'
@@ -84,7 +97,12 @@ interface ProductContentProps {
 }
 
 async function ProductContent({ handle }: ProductContentProps) {
-  const commerce = await getCommerceProvider()
+  const [commerce, tenant, ] = await Promise.all([
+    getCommerceProvider(),
+    getTenantConfig(),
+  ])
+
+  const tenantSlug = tenant?.slug ?? 'unknown'
 
   if (!commerce) {
     return (
@@ -178,6 +196,11 @@ async function ProductContent({ handle }: ProductContentProps) {
           {/* Title */}
           <h1 className="text-2xl font-bold md:text-3xl">{product.title}</h1>
 
+          {/* Rating Summary (if reviews exist) */}
+          <Suspense fallback={null}>
+            <ProductRatingSummary productId={product.id} />
+          </Suspense>
+
           {/* Price */}
           <PriceDisplay
             price={product.priceRange.minVariantPrice}
@@ -202,6 +225,7 @@ async function ProductContent({ handle }: ProductContentProps) {
             product={product}
             options={options}
             hasMultipleVariants={hasMultipleVariants}
+            tenantSlug={tenant?.slug ?? 'unknown'}
           />
 
           {/* Description */}
@@ -243,30 +267,73 @@ async function ProductContent({ handle }: ProductContentProps) {
         </div>
       </div>
 
+      {/* Track Product View */}
+      <ProductViewTracker
+        product={{
+          id: product.id,
+          handle: product.handle,
+          title: product.title,
+        }}
+      />
+
+      {/* Reviews Section */}
+      <section className="mt-16 border-t pt-8">
+        <Suspense
+          fallback={
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 w-48 rounded bg-muted" />
+              <div className="h-32 w-full rounded bg-muted" />
+            </div>
+          }
+        >
+          <ProductReviewsSection productId={product.id} />
+        </Suspense>
+      </section>
+
       {/* Related Products */}
       {product.productType && (
-        <section className="mt-16">
-          <h2 className="mb-6 text-xl font-bold">Related Products</h2>
-          <Suspense
-            fallback={
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="animate-pulse space-y-3">
-                    <div className="aspect-square rounded-lg bg-muted" />
-                    <div className="h-4 w-3/4 rounded bg-muted" />
-                    <div className="h-4 w-1/2 rounded bg-muted" />
-                  </div>
-                ))}
-              </div>
-            }
-          >
-            <RelatedProducts
+        <section className="mt-16 border-t pt-8">
+          <h2 className="mb-6 text-xl font-bold">You May Also Like</h2>
+          <Suspense fallback={<RelatedProductsSkeleton count={4} />}>
+            <RelatedProductsSection
               productType={product.productType}
               currentProductId={product.id}
+              tenantSlug={tenantSlug}
             />
           </Suspense>
         </section>
       )}
+
+      {/* Recently Viewed Products */}
+      <section className="mt-16 border-t pt-8">
+        <RecentlyViewedSection
+          currentProductId={product.id}
+          tenantSlug={tenantSlug}
+        />
+      </section>
     </>
+  )
+}
+
+/**
+ * Product Rating Summary (shown below title)
+ */
+async function ProductRatingSummary({ productId }: { productId: string }) {
+  const rating = await getProductRating(productId)
+
+  if (!rating || rating.totalReviews === 0) {
+    return null
+  }
+
+  return (
+    <a
+      href="#reviews-heading"
+      className="inline-flex items-center gap-2 text-sm hover:underline"
+    >
+      <CompactStarRating
+        rating={rating.averageRating}
+        reviewCount={rating.totalReviews}
+      />
+    </a>
   )
 }

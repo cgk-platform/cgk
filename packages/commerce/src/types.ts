@@ -50,6 +50,8 @@ export interface CartOperations {
   updateItem(cartId: string, lineId: string, quantity: number): Promise<Cart>
   removeItem(cartId: string, lineId: string): Promise<Cart>
   setAttributes(cartId: string, attributes: CartAttribute[]): Promise<Cart>
+  applyDiscountCode(cartId: string, code: string): Promise<Cart>
+  removeDiscountCodes(cartId: string): Promise<Cart>
 }
 
 export interface CheckoutOperations {
@@ -213,12 +215,24 @@ export interface Address {
   phone?: string
 }
 
+export interface CartDiscountCode {
+  code: string
+  applicable: boolean
+}
+
+export interface CartDiscountAllocation {
+  discountedAmount: Money
+}
+
 export interface Cart {
   id: string
   checkoutUrl: string
   totalQuantity: number
   cost: CartCost
   lines: CartLine[]
+  discountCodes: CartDiscountCode[]
+  discountAllocations: CartDiscountAllocation[]
+  attributes: CartAttribute[]
   createdAt: string
   updatedAt: string
 }

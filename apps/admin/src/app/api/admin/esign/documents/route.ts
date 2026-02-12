@@ -2,10 +2,11 @@
  * E-Signature Documents API
  *
  * GET /api/admin/esign/documents - List documents with filters
- * POST /api/admin/esign/documents - Create new document
+ * POST /api/admin/esign/documents - Create and send new document
  */
 
 import { getTenantContext, requireAuth } from '@cgk/auth'
+import { prepareAndSendDocument } from '@cgk/esign'
 import { NextResponse } from 'next/server'
 import { getDocuments } from '@/lib/esign'
 import type { EsignDocumentFilters } from '@/lib/esign/types'
@@ -87,27 +88,61 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { templateId, signers } = body
+    const {
+      templateId,
+      documentName,
+      signers,
+      message,
+      expiresInDays,
+      reminderEnabled,
+      reminderDays,
+      creatorId,
+    } = body
 
-    if (!templateId) {
-      return NextResponse.json({ error: 'Template ID required' }, { status: 400 })
+    if (!templateId || typeof templateId !== 'string') {
+      return NextResponse.json({ error: 'Template ID is required' }, { status: 400 })
     }
 
-    if (!signers || signers.length === 0) {
-      return NextResponse.json({ error: 'At least one signer required' }, { status: 400 })
+    if (!signers || !Array.isArray(signers) || signers.length === 0) {
+      return NextResponse.json({ error: 'At least one signer is required' }, { status: 400 })
     }
 
-    // Note: Document creation would be implemented in the esign core package
-    // This is a placeholder for the API structure
-    return NextResponse.json(
-      { error: 'Document creation not yet implemented - depends on PHASE-4C-ESIGN-CORE' },
-      { status: 501 }
-    )
+    // Validate signers
+    for (const signer of signers) {
+      if (!signer.name || typeof signer.name !== 'string') {
+        return NextResponse.json({ error: 'All signers must have a name' }, { status: 400 })
+      }
+      if (!signer.email || typeof signer.email !== 'string' || !signer.email.includes('@')) {
+        return NextResponse.json({ error: 'All signers must have a valid email' }, { status: 400 })
+      }
+    }
+
+    const result = await prepareAndSendDocument(auth.tenantId, {
+      template_id: templateId,
+      name: documentName,
+      signers: signers.map((s: { name: string; email: string; role?: string; signingOrder?: number; isInternal?: boolean }) => ({
+        name: s.name,
+        email: s.email,
+        role: s.role as 'signer' | 'cc' | 'viewer' | 'approver' | undefined,
+        signing_order: s.signingOrder,
+        is_internal: s.isInternal,
+      })),
+      message,
+      expires_in_days: expiresInDays,
+      reminder_enabled: reminderEnabled,
+      reminder_days: reminderDays,
+      creator_id: creatorId,
+      created_by: auth.userId || auth.email || 'unknown',
+    })
+
+    return NextResponse.json({
+      document: result.document,
+      signers: result.signers,
+      signersToNotify: result.signers_to_notify.map((s: { email: string }) => s.email),
+    }, { status: 201 })
   } catch (error) {
     console.error('Error creating document:', error)
-    return NextResponse.json(
-      { error: 'Failed to create document' },
-      { status: 500 }
-    )
+    const message = error instanceof Error ? error.message : 'Failed to create document'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

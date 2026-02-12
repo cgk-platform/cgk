@@ -24,6 +24,9 @@ import {
   addCartLines,
   updateCartLines,
   removeCartLines,
+  updateCartAttributes as shopifyUpdateCartAttributes,
+  applyCartDiscountCodes,
+  removeCartDiscountCodes,
 } from '@cgk/shopify'
 import type {
   ShopifyProduct,
@@ -48,6 +51,8 @@ import type {
   Customer,
   Cart,
   CartLine,
+  CartDiscountCode,
+  CartDiscountAllocation,
   Checkout,
   ListParams,
   Money,
@@ -208,6 +213,14 @@ function mapCart(c: ShopifyCart): Cart {
         totalAmount: mapMoneyRequired(e.node.cost.totalAmount),
       },
     })),
+    discountCodes: (c.discountCodes ?? []).map((dc): CartDiscountCode => ({
+      code: dc.code,
+      applicable: dc.applicable,
+    })),
+    discountAllocations: (c.discountAllocations ?? []).map((da): CartDiscountAllocation => ({
+      discountedAmount: mapMoneyRequired(da.discountedAmount),
+    })),
+    attributes: c.attributes ?? [],
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
   }
@@ -313,10 +326,19 @@ export function createShopifyProvider(config: CommerceConfig): CommerceProvider 
         return mapCart(cart)
       },
 
-      async setAttributes(_cartId: string, _attributes) {
-        // Shopify cart attributes are set via cartAttributesUpdate mutation
-        // For now, return current cart state
-        throw new Error('Cart attributes not yet implemented for Shopify provider')
+      async setAttributes(cartId: string, attributes) {
+        const cart = await shopifyUpdateCartAttributes(storefront, cartId, attributes)
+        return mapCart(cart)
+      },
+
+      async applyDiscountCode(cartId: string, code: string) {
+        const cart = await applyCartDiscountCodes(storefront, cartId, [code])
+        return mapCart(cart)
+      },
+
+      async removeDiscountCodes(cartId: string) {
+        const cart = await removeCartDiscountCodes(storefront, cartId)
+        return mapCart(cart)
       },
     },
 

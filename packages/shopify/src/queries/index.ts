@@ -30,6 +30,11 @@ export {
   addCartLines,
   updateCartLines,
   removeCartLines,
+  updateCartAttributes,
+  applyCartDiscountCodes,
+  removeCartDiscountCodes,
   type ShopifyCart,
+  type ShopifyCartDiscountCode,
+  type ShopifyCartDiscountAllocation,
   type CartLineInput,
 } from './cart'

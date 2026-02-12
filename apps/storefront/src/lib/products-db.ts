@@ -462,3 +462,88 @@ export async function getVendors(tenantSlug: string): Promise<string[]> {
 
   return result
 }
+
+/**
+ * Get related products by product type, excluding current product
+ */
+export async function getRelatedProducts(
+  tenantSlug: string,
+  productType: string,
+  currentProductId: string,
+  limit: number = 4
+): Promise<Product[]> {
+  const products = await withTenant(tenantSlug, async () => {
+    const result = await sql<LocalProductRow>`
+      SELECT *
+      FROM products
+      WHERE status = 'active'
+        AND product_type = ${productType}
+        AND id != ${currentProductId}
+        AND shopify_product_id != ${currentProductId}
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `
+    return result.rows
+  })
+
+  return products.map(mapLocalProductToCommerce)
+}
+
+/**
+ * Get products by vendor, excluding current product
+ */
+export async function getProductsByVendor(
+  tenantSlug: string,
+  vendor: string,
+  currentProductId: string,
+  limit: number = 4
+): Promise<Product[]> {
+  const products = await withTenant(tenantSlug, async () => {
+    const result = await sql<LocalProductRow>`
+      SELECT *
+      FROM products
+      WHERE status = 'active'
+        AND vendor = ${vendor}
+        AND id != ${currentProductId}
+        AND shopify_product_id != ${currentProductId}
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `
+    return result.rows
+  })
+
+  return products.map(mapLocalProductToCommerce)
+}
+
+/**
+ * Get products by handles (for recently viewed)
+ */
+export async function getProductsByHandles(
+  tenantSlug: string,
+  handles: string[]
+): Promise<Product[]> {
+  if (handles.length === 0) return []
+
+  // Fetch products one by one since we can't use array parameters directly
+  // with @vercel/postgres template literals
+  const products: LocalProductRow[] = []
+
+  for (const handle of handles) {
+    const result = await withTenant(tenantSlug, async () => {
+      const rows = await sql<LocalProductRow>`
+        SELECT *
+        FROM products
+        WHERE status = 'active'
+          AND handle = ${handle}
+        LIMIT 1
+      `
+      return rows.rows[0]
+    })
+
+    if (result) {
+      products.push(result)
+    }
+  }
+
+  return products.map(mapLocalProductToCommerce)
+}

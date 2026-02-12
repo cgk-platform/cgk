@@ -18,6 +18,7 @@
     "@cgk/communications": "workspace:*",
     "@cgk/core": "workspace:*",
     "@cgk/db": "workspace:*",
+    "@cgk/esign": "workspace:*",
     "@cgk/health": "workspace:*",
     "@cgk/integrations": "workspace:*",
     "@cgk/jobs": "workspace:*",

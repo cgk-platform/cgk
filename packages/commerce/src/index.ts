@@ -45,6 +45,8 @@ export type {
   CartLineCost,
   CartItemInput,
   CartAttribute,
+  CartDiscountCode,
+  CartDiscountAllocation,
   Checkout,
   CheckoutLineItem,
   Discount,

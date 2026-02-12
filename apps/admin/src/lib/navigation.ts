@@ -14,6 +14,7 @@ import {
   ClipboardList,
   FileSignature,
   Plug,
+  UserCircle,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -59,6 +60,11 @@ export const navigation: NavSection[] = [
       { label: 'A/B Tests', href: '/admin/commerce/ab-tests' },
       { label: 'Promotions', href: '/admin/commerce/promotions' },
     ],
+  },
+  {
+    label: 'Customer Portal',
+    icon: UserCircle,
+    href: '/admin/customer-portal',
   },
   {
     label: 'Surveys',
