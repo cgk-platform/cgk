@@ -16,7 +16,6 @@ import { getTenantSlug } from '../tenant'
 
 import {
   getAttributionFromCookie,
-  parseServerAttributionCookie,
   updateLastTouch,
 } from './storage'
 import type {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState, useTransition } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Alert, AlertDescription, Button, Card, CardContent, cn, Spinner, Textarea } from '@cgk/ui'
@@ -32,7 +32,6 @@ type FlowStep = 'reason' | 'offers' | 'confirm'
  */
 export function CancellationFlow({ subscription }: CancellationFlowProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
 
   // Flow state
   const [step, setStep] = useState<FlowStep>('reason')
@@ -109,11 +108,15 @@ export function CancellationFlow({ subscription }: CancellationFlowProps) {
         case 'frequency':
           // Assume frequency offers include the new frequency in value
           if (offer.value) {
-            const [intervalCount, interval] = offer.value.split(' ')
-            result = await updateFrequency(subscription.id, {
-              intervalCount: parseInt(intervalCount, 10),
-              interval,
-            })
+            const parts = offer.value.split(' ')
+            const intervalCount = parts[0]
+            const interval = parts[1]
+            if (intervalCount && interval) {
+              result = await updateFrequency(subscription.id, {
+                intervalCount: parseInt(intervalCount, 10),
+                interval: interval as 'day' | 'week' | 'month' | 'year',
+              })
+            }
           }
           break
         default:

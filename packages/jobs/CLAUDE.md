@@ -1,97 +1,155 @@
 # @cgk/jobs - AI Development Guide
 
 > **Package Version**: 0.0.0
-> **Last Updated**: 2025-02-10
+> **Last Updated**: 2025-02-11
+> **Provider**: Trigger.dev v4 (recommended)
 
 ---
 
 ## Purpose
 
-Background job abstraction for the CGK platform. Provides queue-based job processing with retries, scheduling, and tenant isolation.
+Vendor-agnostic background job infrastructure for the CGK platform. Supports Trigger.dev (recommended), Inngest, or local execution for development.
+
+**CRITICAL**: All events require `tenantId` for tenant isolation.
 
 ---
 
 ## Quick Reference
 
 ```typescript
-import { defineJob, createJobQueue, processJobs } from '@cgk/jobs'
-import type { Job, JobResult } from '@cgk/jobs'
+// Send a job (recommended)
+import { sendJob } from '@cgk/jobs'
+
+await sendJob('order.created', {
+  tenantId: 'rawdog',  // REQUIRED
+  orderId: 'order_123',
+  totalAmount: 9999,
+  currency: 'USD',
+})
+
+// Create a client with specific provider
+import { createJobClient } from '@cgk/jobs'
+
+const client = createJobClient({
+  provider: 'trigger.dev',
+  triggerDev: { secretKey: process.env.TRIGGER_SECRET_KEY },
+})
 ```
 
 ---
 
 ## Key Patterns
 
-### Pattern 1: Defining Jobs
+### Pattern 1: Sending Jobs (ALWAYS use sendJob)
 
 ```typescript
-import { defineJob } from '@cgk/jobs'
+import { sendJob, sendJobs } from '@cgk/jobs'
 
-export const syncInventoryJob = defineJob({
-  name: 'sync-inventory',
-  handler: async (job) => {
-    const { productId } = job.payload
+// Single job
+await sendJob('payout.requested', {
+  tenantId: 'rawdog',  // REQUIRED
+  payoutId: 'payout_123',
+  creatorId: 'creator_456',
+  amount: 50000,
+  currency: 'USD',
+  payoutType: 'domestic',
+})
 
-    // Sync inventory logic...
+// Batch jobs
+await sendJobs([
+  { event: 'email.send', payload: { tenantId, to, templateId, data } },
+  { event: 'slack.notify', payload: { tenantId, channel, message } },
+])
 
-    return { success: true, data: { synced: true } }
-  },
+// With options
+await sendJob('review.reminder', {
+  tenantId: 'rawdog',
+  orderId: 'order_123',
+  reminderNumber: 1,
+}, {
+  delay: 86400000,  // 24 hours
+  idempotencyKey: `reminder-${orderId}-1`,
+})
+```
+
+### Pattern 2: Defining Trigger.dev Tasks
+
+```typescript
+// src/trigger/order-created.ts
+import { task } from '@trigger.dev/sdk/v3'
+import { withTenant } from '@cgk/db'
+import type { OrderCreatedPayload, TenantEvent } from '@cgk/jobs'
+
+export const orderCreatedTask = task({
+  id: 'order-created',
   retry: {
-    maxAttempts: 5,
-    backoff: 'exponential',
-    initialDelay: 1000,
+    maxAttempts: 3,
+    factor: 2,
+    minTimeoutInMs: 1000,
+    maxTimeoutInMs: 60000,
+  },
+  run: async (payload: TenantEvent<OrderCreatedPayload>) => {
+    const { tenantId, orderId, totalAmount } = payload
+
+    // CRITICAL: Always use tenant context
+    await withTenant(tenantId, async () => {
+      const order = await sql`SELECT * FROM orders WHERE id = ${orderId}`
+      // Process order...
+    })
+
+    return { processed: true, orderId }
   },
 })
 ```
 
-### Pattern 2: Creating and Enqueuing Jobs
+### Pattern 3: Using Job Middleware
 
 ```typescript
-import { createJobQueue } from '@cgk/jobs'
+import { createJobHandler, withTenantContext } from '@cgk/jobs'
 
-const queue = createJobQueue({ name: 'default' })
-
-// Enqueue a job
-await queue.enqueue('sync-inventory', { productId: '123' })
-
-// Schedule for later
-await queue.enqueue('send-email',
-  { to: 'user@example.com', template: 'welcome' },
-  { delay: 60000 } // 1 minute delay
-)
-
-// With tenant context
-await queue.enqueue('process-order',
-  { orderId: 'order_123' },
-  { tenantId: 'rawdog' }
-)
-```
-
-### Pattern 3: Processing Jobs
-
-```typescript
-import { processJobs, createJobQueue } from '@cgk/jobs'
-
-const queue = createJobQueue({ name: 'default' })
-const handlers = new Map()
-
-// Register handlers
-handlers.set('sync-inventory', syncInventoryJob.handler)
-handlers.set('send-email', sendEmailJob.handler)
-
-const processor = processJobs({
-  queue,
-  handlers,
-  maxConcurrency: 5,
-  onError: (job, error) => console.error(`Job ${job.id} failed:`, error),
-  onComplete: (job, result) => console.log(`Job ${job.id} completed`),
+// Automatic tenant context + logging + error classification
+const handler = createJobHandler(async (ctx) => {
+  const { tenantId, orderId } = ctx.payload
+  // Database operations are automatically scoped to tenant
+  const order = await sql`SELECT * FROM orders WHERE id = ${orderId}`
+  return order
 })
 
-// Start processing
-processor.start()
+// Custom middleware composition
+import { composeMiddleware, withLogging, withTimeout } from '@cgk/jobs'
 
-// Stop gracefully
-process.on('SIGTERM', () => processor.stop())
+const enhancedHandler = composeMiddleware(
+  withLogging(),
+  withTimeout(30000),
+)(handler)
+```
+
+### Pattern 4: Scheduled Jobs
+
+```typescript
+import { schedules } from '@trigger.dev/sdk/v3'
+import { sendJob, SCHEDULES } from '@cgk/jobs'
+
+// Pre-defined schedules
+console.log(SCHEDULES['ab.hourlyMetrics'])  // { cron: '15 * * * *' }
+
+// Define scheduled task
+export const dailyMetrics = schedules.task({
+  id: 'daily-metrics-aggregate',
+  cron: SCHEDULES['attribution.dailyMetrics'].cron,
+  run: async () => {
+    // Get all active tenants
+    const tenants = await sql`SELECT id FROM organizations WHERE status = 'active'`
+
+    // Queue metrics for each tenant
+    for (const tenant of tenants.rows) {
+      await sendJob('ab.metricsAggregate', {
+        tenantId: tenant.id,
+        period: 'daily',
+      })
+    }
+  },
+})
 ```
 
 ---
@@ -100,31 +158,38 @@ process.on('SIGTERM', () => processor.stop())
 
 | File | Purpose | Key Exports |
 |------|---------|-------------|
-| `index.ts` | Public exports | All exports |
-| `types.ts` | Type definitions | `Job`, `JobStatus`, `JobResult` |
-| `define.ts` | Job definition | `defineJob` |
-| `queue.ts` | Queue implementation | `createJobQueue` |
-| `processor.ts` | Job processor | `processJobs` |
-| `utils.ts` | Utilities | `createJobId`, `calculateRetryDelay` |
+| `index.ts` | Public API | All exports |
+| `provider.ts` | Provider interface | `JobProvider`, `validateTenantId`, `SCHEDULES` |
+| `client.ts` | Job client | `createJobClient`, `sendJob`, `getJobClient` |
+| `events.ts` | Event types | `JobEvents`, `TenantEvent`, 80+ payload types |
+| `middleware.ts` | Job middleware | `withTenantContext`, `withLogging`, etc. |
+| `providers/local.ts` | Local provider | `createLocalProvider` |
+| `providers/trigger-dev.ts` | Trigger.dev | `createTriggerDevProvider` |
+| `providers/inngest.ts` | Inngest | `createInngestProvider` |
 
 ---
 
-## Exports Reference
-
-### Factory Functions
+## Event Categories
 
 ```typescript
-defineJob<T, R>(definition: JobDefinition<T, R>): JobDefinition<T, R>
-createJobQueue(config: JobQueueConfig): JobQueue
-processJobs(config: ProcessorConfig): JobProcessor
+import { EVENT_CATEGORIES, TOTAL_EVENT_COUNT } from '@cgk/jobs'
+
+// 80+ events across 13 categories
+EVENT_CATEGORIES.commerce      // order.*, customer.*, product.*, inventory.*
+EVENT_CATEGORIES.reviews       // review.*, survey.*
+EVENT_CATEGORIES.creators      // creator.*, project.*
+EVENT_CATEGORIES.payouts       // payout.*, payment.*, treasury.*, expense.*
+EVENT_CATEGORIES.attribution   // touchpoint.*, conversion.*, attribution.*
+EVENT_CATEGORIES.abTesting     // ab.*
+EVENT_CATEGORIES.media         // video.*, dam.*
+EVENT_CATEGORIES.subscriptions // subscription.*
+EVENT_CATEGORIES.notifications // email.*, sms.*, slack.*, push.*
+EVENT_CATEGORIES.system        // system.*
+EVENT_CATEGORIES.workflows     // workflow.*
+EVENT_CATEGORIES.brandContext  // brandContext.*
+EVENT_CATEGORIES.googleFeed    // googleFeed.*
+EVENT_CATEGORIES.webhooks      // webhook.*
 ```
-
-### Types
-
-- `Job<T>` - Job with payload
-- `JobStatus` - pending, running, completed, failed, etc.
-- `JobResult<T>` - Handler return type
-- `JobOptions` - Enqueue options (delay, priority, etc.)
 
 ---
 
@@ -133,55 +198,115 @@ processJobs(config: ProcessorConfig): JobProcessor
 | Dependency | Why |
 |------------|-----|
 | `@cgk/core` | Shared types |
-| `@cgk/db` | Job persistence |
+| `@cgk/db` | Tenant context (`withTenant`) |
+
+| Peer Dependency | When |
+|-----------------|------|
+| `@trigger.dev/sdk` | Using Trigger.dev provider |
+| `inngest` | Using Inngest provider |
 
 ---
 
 ## Common Gotchas
 
-### 1. Jobs must return JobResult
+### 1. Missing tenantId
 
 ```typescript
-// WRONG - Returns nothing
-handler: async (job) => {
-  await doWork()
+// WRONG - TypeScript will catch this
+await sendJob('order.created', {
+  orderId: 'order_123',  // Error: missing tenantId
+})
+
+// CORRECT
+await sendJob('order.created', {
+  tenantId: 'rawdog',  // REQUIRED
+  orderId: 'order_123',
+})
+```
+
+### 2. Database without tenant context
+
+```typescript
+// WRONG - Queries wrong schema
+run: async (payload) => {
+  const order = await sql`SELECT * FROM orders`  // Public schema!
 }
 
-// CORRECT - Return success/failure
-handler: async (job) => {
-  await doWork()
-  return { success: true }
+// CORRECT - Use withTenant
+run: async (payload) => {
+  await withTenant(payload.tenantId, async () => {
+    const order = await sql`SELECT * FROM orders`  // Tenant schema
+  })
 }
 ```
 
-### 2. Handle tenant context
+### 3. Not using middleware
 
 ```typescript
-handler: async (job) => {
-  if (job.tenantId) {
-    return withTenant(job.tenantId, async () => {
-      // Tenant-scoped work
-      return { success: true }
-    })
-  }
-  return { success: true }
+// WRONG - Manual logging, no error handling
+run: async (payload) => {
+  console.log('Starting...')
+  try { /* ... */ }
+  catch (e) { console.error(e) }
 }
+
+// CORRECT - Use createJobHandler
+const handler = createJobHandler(async (ctx) => {
+  // Automatic logging, timing, error classification
+  return process(ctx.payload)
+})
 ```
 
-### 3. Idempotency
+### 4. Forgetting to start Trigger.dev
 
-Jobs may be retried - ensure handlers are idempotent.
+```bash
+# Development requires the dev server
+npx trigger dev  # Run in separate terminal!
+```
 
-```typescript
-handler: async (job) => {
-  // Check if already processed
-  const existing = await checkIfProcessed(job.id)
-  if (existing) return { success: true }
+---
 
-  // Process and mark as complete
-  await processAndMark(job.id)
-  return { success: true }
-}
+## CLI Commands
+
+```bash
+# Setup jobs provider
+npx @cgk/cli setup:jobs
+
+# With specific provider
+npx @cgk/cli setup:jobs --provider trigger.dev
+
+# Verify configuration
+npx @cgk/cli setup:jobs --verify-only
+```
+
+---
+
+## Provider Comparison
+
+| Feature | Trigger.dev | Inngest | Local |
+|---------|------------|---------|-------|
+| Production Ready | ✅ | ✅ | ❌ |
+| triggerAndWait | ✅ | ❌ (use step.invoke) | ✅ |
+| Step Functions | ✅ | ✅ | ❌ |
+| Cron/Scheduled | ✅ | ✅ | ❌ |
+| Dev Server | `npx trigger dev` | `npx inngest-cli dev` | Auto |
+| Self-Hostable | ✅ | ✅ | N/A |
+
+---
+
+## Environment Variables
+
+```bash
+# Trigger.dev (recommended)
+TRIGGER_SECRET_KEY=tr_dev_xxx
+TRIGGER_PROJECT_REF=your-project
+
+# Inngest
+INNGEST_EVENT_KEY=xxx
+INNGEST_SIGNING_KEY=signkey_xxx
+
+# Local (development only)
+JOBS_PROVIDER=local
 ```
 
 ---
@@ -189,11 +314,38 @@ handler: async (job) => {
 ## Integration Points
 
 ### Used by:
-- Order processing
-- Inventory sync
-- Email sending
-- Creator payouts
+- Order processing (commerce flows)
+- Review email automation
+- Creator communications
+- Payout processing
+- Attribution tracking
+- A/B test optimization
+- Video transcription
+- DAM asset processing
 
 ### Uses:
+- `@cgk/db` - Tenant context
 - `@cgk/core` - Types
-- `@cgk/db` - Persistence
+
+---
+
+## Testing
+
+```typescript
+import { createJobClient, setJobClient } from '@cgk/jobs'
+
+// Use local provider for tests
+const testClient = createJobClient({ provider: 'local' })
+setJobClient(testClient)
+
+// Mock handler
+testClient.provider.registerHandler('order.created', async (ctx) => {
+  // Test implementation
+})
+
+// Send job
+await sendJob('order.created', {
+  tenantId: 'test_tenant',
+  orderId: 'test_order',
+})
+```

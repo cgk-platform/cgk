@@ -32,7 +32,7 @@ export function ProductSwapModal({
   item,
 }: ProductSwapModalProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [loading, setLoading] = useState(true)
   const [products, setProducts] = useState<SwappableProduct[]>([])
   const [selectedProduct, setSelectedProduct] = useState<SwappableProduct | null>(null)
@@ -94,7 +94,7 @@ export function ProductSwapModal({
       <ModalContent className="max-h-[60vh] overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Spinner size="md" />
+            <Spinner size="default" />
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-8">

@@ -5,7 +5,7 @@
  * These types are used by the customer-facing subscription management UI.
  */
 
-import type { Address, Money } from '@cgk/commerce'
+import type { Address } from '@cgk/commerce'
 
 // ---------------------------------------------------------------------------
 // Subscription Core Types

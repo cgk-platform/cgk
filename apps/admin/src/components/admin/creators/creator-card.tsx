@@ -5,15 +5,29 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical } from 'lucide-react'
 
-import type { Creator } from '@/lib/creators/types'
-import { formatDate } from '@/lib/format'
+import type { Creator } from '../../../lib/creators/types'
+import type { ShipmentStatus } from '../../../lib/creators/lifecycle-types'
+import { formatDate } from '../../../lib/format'
+
+import { ShipmentSummaryBadge } from './shipment-badge'
 
 interface CreatorCardProps {
   creator: Creator
   isDragging?: boolean
+  shipmentSummary?: {
+    totalProducts: number
+    latestStatus?: ShipmentStatus
+    latestDate?: string
+  }
+  onShipmentClick?: () => void
 }
 
-export function CreatorCard({ creator, isDragging }: CreatorCardProps) {
+export function CreatorCard({
+  creator,
+  isDragging,
+  shipmentSummary,
+  onShipmentClick,
+}: CreatorCardProps) {
   const name = creator.display_name || `${creator.first_name} ${creator.last_name}`
   const initials = name
     .split(' ')
@@ -46,6 +60,16 @@ export function CreatorCard({ creator, isDragging }: CreatorCardProps) {
         <div className="mt-1 text-xs text-muted-foreground">
           Applied {formatDate(creator.applied_at)}
         </div>
+        {shipmentSummary && shipmentSummary.totalProducts > 0 && (
+          <div className="mt-2">
+            <ShipmentSummaryBadge
+              totalProducts={shipmentSummary.totalProducts}
+              latestStatus={shipmentSummary.latestStatus}
+              latestDate={shipmentSummary.latestDate}
+              onClick={onShipmentClick}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

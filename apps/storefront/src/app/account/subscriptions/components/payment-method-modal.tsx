@@ -36,7 +36,7 @@ export function PaymentMethodModal({
   currentPaymentMethodId,
 }: PaymentMethodModalProps) {
   const router = useRouter()
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [loading, setLoading] = useState(true)
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(currentPaymentMethodId || null)
@@ -128,7 +128,7 @@ export function PaymentMethodModal({
       <ModalContent>
         {loading ? (
           <div className="flex items-center justify-center py-8">
-            <Spinner size="md" />
+            <Spinner size="default" />
           </div>
         ) : (
           <div className="space-y-4">

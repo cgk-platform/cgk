@@ -127,23 +127,31 @@ export function ReturnRequestModal({
   }
 
   const toggleItem = (itemId: string) => {
-    setSelectedItems((prev) => ({
-      ...prev,
-      [itemId]: { ...prev[itemId], selected: !prev[itemId].selected },
-    }))
+    setSelectedItems((prev) => {
+      const current = prev[itemId]
+      if (!current) return prev
+      return {
+        ...prev,
+        [itemId]: { selected: !current.selected, quantity: current.quantity },
+      }
+    })
   }
 
   const updateQuantity = (itemId: string, quantity: number) => {
     const item = order.lineItems.find((i) => i.id === itemId)
     if (!item) return
 
-    setSelectedItems((prev) => ({
-      ...prev,
-      [itemId]: {
-        ...prev[itemId],
-        quantity: Math.max(1, Math.min(quantity, item.quantity)),
-      },
-    }))
+    setSelectedItems((prev) => {
+      const current = prev[itemId]
+      if (!current) return prev
+      return {
+        ...prev,
+        [itemId]: {
+          selected: current.selected,
+          quantity: Math.max(1, Math.min(quantity, item.quantity)),
+        },
+      }
+    })
   }
 
   const getStepTitle = () => {

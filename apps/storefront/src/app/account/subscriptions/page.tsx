@@ -8,7 +8,7 @@
 import { Suspense } from 'react'
 import type { Metadata } from 'next'
 
-import { Container, Tabs, TabsContent, TabsList, TabsTrigger } from '@cgk/ui'
+import { Container, Tabs, TabsList, TabsTrigger } from '@cgk/ui'
 
 import { listSubscriptions } from '@/lib/subscriptions/api'
 import type { SubscriptionStatus } from '@/lib/subscriptions/types'

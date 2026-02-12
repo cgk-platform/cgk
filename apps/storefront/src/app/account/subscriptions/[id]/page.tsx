@@ -135,7 +135,7 @@ function OrderHistoryLoading() {
     <div className="bg-background rounded-xl border p-6">
       <h3 className="font-semibold text-lg mb-6">Order History</h3>
       <div className="flex items-center justify-center py-8">
-        <Spinner size="md" />
+        <Spinner size="default" />
       </div>
     </div>
   )

@@ -58,9 +58,12 @@ export function getVariantIndex(bucket: number, weights: number[]): number {
   let accumulated = 0
 
   for (let i = 0; i < weights.length; i++) {
-    accumulated += weights[i]
-    if (bucket < accumulated) {
-      return i
+    const weight = weights[i]
+    if (weight !== undefined) {
+      accumulated += weight
+      if (bucket < accumulated) {
+        return i
+      }
     }
   }
 

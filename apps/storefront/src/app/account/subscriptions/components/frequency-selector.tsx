@@ -85,7 +85,7 @@ export function FrequencySelector({
   if (loading) {
     return (
       <div className={cn('flex items-center justify-center py-8', className)}>
-        <Spinner size="md" />
+        <Spinner size="default" />
       </div>
     )
   }

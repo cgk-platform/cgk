@@ -1,13 +1,25 @@
 {
   "name": "@cgk/jobs",
   "version": "0.0.0",
-  "description": "Background job abstraction for CGK platform",
+  "description": "Background job abstraction for CGK platform - supports Trigger.dev, Inngest, or local execution",
   "license": "MIT",
   "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./providers": {
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js"
+    },
+    "./events": {
+      "types": "./dist/events.d.ts",
+      "import": "./dist/events.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware.d.ts",
+      "import": "./dist/middleware.js"
     }
   },
   "main": "./dist/index.js",
@@ -16,8 +28,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts src/providers/index.ts src/events.ts src/middleware.ts --format esm --dts",
+    "dev": "tsup src/index.ts src/providers/index.ts src/events.ts src/middleware.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "clean": "rm -rf dist"
@@ -25,6 +37,18 @@
   "dependencies": {
     "@cgk/core": "workspace:*",
     "@cgk/db": "workspace:*"
+  },
+  "peerDependencies": {
+    "@trigger.dev/sdk": "^3.0.0 || ^4.0.0",
+    "inngest": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@trigger.dev/sdk": {
+      "optional": true
+    },
+    "inngest": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@cgk/eslint-config": "workspace:*",

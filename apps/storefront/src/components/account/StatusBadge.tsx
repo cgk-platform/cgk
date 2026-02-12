@@ -14,44 +14,6 @@ type StatusType =
   | 'loyalty'
   | 'points'
 
-type OrderStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'processing'
-  | 'shipped'
-  | 'delivered'
-  | 'cancelled'
-  | 'refunded'
-
-type ReturnStatus =
-  | 'pending'
-  | 'approved'
-  | 'rejected'
-  | 'shipped'
-  | 'received'
-  | 'refunded'
-
-type TicketStatus =
-  | 'open'
-  | 'in_progress'
-  | 'waiting_customer'
-  | 'resolved'
-  | 'closed'
-
-type ReferralStatus = 'pending' | 'converted' | 'expired' | 'cancelled'
-
-type LoyaltyTier = 'bronze' | 'silver' | 'gold' | 'platinum'
-
-type PointsType =
-  | 'earned_purchase'
-  | 'earned_review'
-  | 'earned_referral'
-  | 'earned_birthday'
-  | 'earned_signup'
-  | 'redeemed'
-  | 'expired'
-  | 'adjusted'
-
 interface StatusBadgeProps {
   type: StatusType
   status: string

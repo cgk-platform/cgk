@@ -1,0 +1,57 @@
+{
+  "name": "@cgk/video",
+  "version": "0.0.0",
+  "description": "Video hosting, streaming, transcription, and AI content for CGK platform",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./transcription": {
+      "types": "./dist/transcription/index.d.ts",
+      "import": "./dist/transcription/index.js"
+    },
+    "./ai": {
+      "types": "./dist/ai/index.d.ts",
+      "import": "./dist/ai/index.js"
+    },
+    "./creator-tools": {
+      "types": "./dist/creator-tools/index.d.ts",
+      "import": "./dist/creator-tools/index.js"
+    },
+    "./interactions": {
+      "types": "./dist/interactions/index.d.ts",
+      "import": "./dist/interactions/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@cgk/core": "workspace:*",
+    "@cgk/db": "workspace:*",
+    "@mux/mux-node": "^9.0.0"
+  },
+  "devDependencies": {
+    "@cgk/eslint-config": "workspace:*",
+    "@cgk/typescript-config": "workspace:*",
+    "eslint": "^9.18.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.0.0"
+  }
+}

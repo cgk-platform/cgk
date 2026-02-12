@@ -1,8 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 import { Badge, Button, Card, CardContent, cn } from '@cgk/ui'
 
@@ -16,7 +15,6 @@ import {
 } from '@/lib/subscriptions/format'
 import type { Subscription, SubscriptionItem, SubscriptionOrder } from '@/lib/subscriptions/types'
 
-import { SelectionModal } from './modals'
 import { FrequencySelector } from './frequency-selector'
 import { PaymentMethodModal } from './payment-method-modal'
 import { ProductSwapModal } from './product-swap-modal'
