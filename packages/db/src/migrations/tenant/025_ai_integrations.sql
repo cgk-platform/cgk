@@ -36,8 +36,7 @@ CREATE TABLE IF NOT EXISTS tenant_slack_config (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Unique constraint - one config per tenant schema
-CREATE UNIQUE INDEX IF NOT EXISTS idx_tenant_slack_config_single ON tenant_slack_config((1));
+-- Note: Only one config row per tenant schema enforced at application level
 
 -- Trigger for updated_at
 DROP TRIGGER IF EXISTS update_tenant_slack_config_updated_at ON tenant_slack_config;
@@ -151,10 +150,17 @@ CREATE TABLE IF NOT EXISTS slack_conversations (
   context_summary TEXT,              -- AI-generated summary for context window
   metadata JSONB DEFAULT '{}',
 
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-  CONSTRAINT unique_slack_conversation UNIQUE(slack_channel_id, COALESCE(slack_thread_ts, ''))
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Unique constraints via partial indexes
+CREATE UNIQUE INDEX IF NOT EXISTS idx_slack_conv_unique_with_thread
+  ON slack_conversations(slack_channel_id, slack_thread_ts)
+  WHERE slack_thread_ts IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_slack_conv_unique_without_thread
+  ON slack_conversations(slack_channel_id)
+  WHERE slack_thread_ts IS NULL;
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_slack_conversations_agent ON slack_conversations(agent_id);
@@ -251,7 +257,7 @@ CREATE TABLE IF NOT EXISTS agent_calendar_events (
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_calendar_events_agent ON agent_calendar_events(agent_id);
 CREATE INDEX IF NOT EXISTS idx_calendar_events_time ON agent_calendar_events(agent_id, start_time);
-CREATE INDEX IF NOT EXISTS idx_calendar_events_upcoming ON agent_calendar_events(start_time) WHERE status = 'confirmed' AND start_time > NOW();
+CREATE INDEX IF NOT EXISTS idx_calendar_events_upcoming ON agent_calendar_events(start_time) WHERE status = 'confirmed';
 
 -- Trigger for updated_at
 DROP TRIGGER IF EXISTS update_agent_calendar_events_updated_at ON agent_calendar_events;
@@ -371,7 +377,7 @@ CREATE TABLE IF NOT EXISTS tenant_sms_config (
 );
 
 -- Unique constraint - one config per tenant schema
-CREATE UNIQUE INDEX IF NOT EXISTS idx_tenant_sms_config_single ON tenant_sms_config((1));
+-- One config per tenant enforced at application level
 
 -- Trigger for updated_at
 DROP TRIGGER IF EXISTS update_tenant_sms_config_updated_at ON tenant_sms_config;
@@ -486,7 +492,7 @@ CREATE TABLE IF NOT EXISTS integration_event_queue (
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_integration_events_pending ON integration_event_queue(status, next_retry_at)
-  WHERE status IN ('pending', 'failed') AND (next_retry_at IS NULL OR next_retry_at <= NOW());
+  WHERE status IN ('pending', 'failed');
 CREATE INDEX IF NOT EXISTS idx_integration_events_channel ON integration_event_queue(channel, event_type);
 CREATE INDEX IF NOT EXISTS idx_integration_events_agent ON integration_event_queue(agent_id) WHERE agent_id IS NOT NULL;
 

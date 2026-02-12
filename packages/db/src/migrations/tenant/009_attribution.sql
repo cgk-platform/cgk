@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS attribution_settings (
   -- Global settings
   enabled BOOLEAN NOT NULL DEFAULT true,
   default_model TEXT NOT NULL DEFAULT 'time_decay',
-  default_window TEXT NOT NULL DEFAULT '7d',
+  default_attribution_window TEXT NOT NULL DEFAULT '7d',
   attribution_mode TEXT NOT NULL DEFAULT 'clicks_only',
 
   -- Enabled models (array of: first_touch, last_touch, linear, time_decay, position_based, data_driven, last_non_direct)
@@ -115,7 +115,7 @@ CREATE TABLE IF NOT EXISTS attribution_results (
 
   -- Attribution model and window
   model TEXT NOT NULL,
-  window TEXT NOT NULL,
+  attribution_window TEXT NOT NULL,
 
   -- Attribution credit
   credit DECIMAL(10,6) NOT NULL DEFAULT 0,
@@ -175,7 +175,7 @@ CREATE TABLE IF NOT EXISTS attribution_channel_summary (
   -- Period
   date DATE NOT NULL,
   model TEXT NOT NULL,
-  window TEXT NOT NULL,
+  attribution_window TEXT NOT NULL,
 
   -- Channel info
   channel TEXT NOT NULL,
@@ -195,7 +195,7 @@ CREATE TABLE IF NOT EXISTS attribution_channel_summary (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-  CONSTRAINT attribution_channel_unique UNIQUE(tenant_id, date, model, window, channel, platform)
+  CONSTRAINT attribution_channel_unique UNIQUE(tenant_id, date, model, attribution_window, channel, platform)
 );
 
 -- Indexes for performance
@@ -217,14 +217,14 @@ CREATE INDEX IF NOT EXISTS idx_attribution_conversions_tenant_date ON attributio
 CREATE INDEX IF NOT EXISTS idx_attribution_results_tenant ON attribution_results(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_attribution_results_conversion ON attribution_results(conversion_id);
 CREATE INDEX IF NOT EXISTS idx_attribution_results_touchpoint ON attribution_results(touchpoint_id);
-CREATE INDEX IF NOT EXISTS idx_attribution_results_model_window ON attribution_results(model, window);
+CREATE INDEX IF NOT EXISTS idx_attribution_results_model_window ON attribution_results(model, attribution_window);
 
 CREATE INDEX IF NOT EXISTS idx_attribution_dq_tenant ON attribution_data_quality_snapshots(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_attribution_dq_date ON attribution_data_quality_snapshots(snapshot_date);
 
 CREATE INDEX IF NOT EXISTS idx_attribution_channel_tenant ON attribution_channel_summary(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_attribution_channel_date ON attribution_channel_summary(date);
-CREATE INDEX IF NOT EXISTS idx_attribution_channel_lookup ON attribution_channel_summary(tenant_id, date, model, window);
+CREATE INDEX IF NOT EXISTS idx_attribution_channel_lookup ON attribution_channel_summary(tenant_id, date, model, attribution_window);
 
 -- Triggers for updated_at
 DROP TRIGGER IF EXISTS update_attribution_settings_updated_at ON attribution_settings;

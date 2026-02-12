@@ -242,7 +242,7 @@ CREATE INDEX IF NOT EXISTS idx_privacy_requests_status ON privacy_requests(statu
 CREATE INDEX IF NOT EXISTS idx_privacy_requests_deadline ON privacy_requests(deadline_at);
 CREATE INDEX IF NOT EXISTS idx_privacy_requests_customer ON privacy_requests(customer_email);
 CREATE INDEX IF NOT EXISTS idx_privacy_requests_pending ON privacy_requests(status, deadline_at) WHERE status = 'pending' OR status = 'processing';
-CREATE INDEX IF NOT EXISTS idx_privacy_requests_overdue ON privacy_requests(deadline_at) WHERE status IN ('pending', 'processing') AND deadline_at < NOW();
+CREATE INDEX IF NOT EXISTS idx_privacy_requests_overdue ON privacy_requests(deadline_at) WHERE status IN ('pending', 'processing');
 
 -- Consent records
 CREATE TABLE IF NOT EXISTS consent_records (

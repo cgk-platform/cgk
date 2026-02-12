@@ -86,10 +86,17 @@ CREATE TABLE IF NOT EXISTS product_cogs (
   source VARCHAR(20) DEFAULT 'manual',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_by TEXT,
-
-  CONSTRAINT product_cogs_unique_variant UNIQUE(tenant_id, product_id, COALESCE(variant_id, ''::TEXT))
+  updated_by TEXT
 );
+
+-- Unique constraint via partial indexes
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_cogs_with_variant
+  ON product_cogs(tenant_id, product_id, variant_id)
+  WHERE variant_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_product_cogs_without_variant
+  ON product_cogs(tenant_id, product_id)
+  WHERE variant_id IS NULL;
 
 -- ============================================================
 -- P&L Formula Configuration

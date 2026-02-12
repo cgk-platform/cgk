@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS onboarding_config (
 );
 
 -- Singleton pattern
-CREATE UNIQUE INDEX IF NOT EXISTS idx_onboarding_config_singleton ON onboarding_config ((1));
+-- Singleton constraint enforced at application level
 
 -- Trigger for updated_at
 DROP TRIGGER IF EXISTS update_onboarding_config_updated_at ON onboarding_config;

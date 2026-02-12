@@ -74,9 +74,25 @@ CREATE INDEX IF NOT EXISTS idx_kb_articles_created_at ON kb_articles(created_at)
 -- GIN index for tags array
 CREATE INDEX IF NOT EXISTS idx_kb_articles_tags ON kb_articles USING GIN (tags);
 
--- Full-text search index combining title, content, tags
-CREATE INDEX IF NOT EXISTS idx_kb_articles_search ON kb_articles
-  USING GIN (to_tsvector('english', COALESCE(title, '') || ' ' || COALESCE(content, '') || ' ' || COALESCE(array_to_string(tags, ' '), '')));
+-- Full-text search column (maintained via trigger for mutable to_tsvector)
+ALTER TABLE kb_articles ADD COLUMN IF NOT EXISTS search_vector tsvector;
+
+CREATE INDEX IF NOT EXISTS idx_kb_articles_search ON kb_articles USING GIN (search_vector);
+
+-- Trigger to update search_vector on insert/update
+CREATE OR REPLACE FUNCTION update_kb_article_search_vector()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.search_vector := to_tsvector('english', COALESCE(NEW.title, '') || ' ' || COALESCE(NEW.content, '') || ' ' || COALESCE(array_to_string(NEW.tags, ' '), ''));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS update_kb_article_search ON kb_articles;
+CREATE TRIGGER update_kb_article_search
+  BEFORE INSERT OR UPDATE OF title, content, tags ON kb_articles
+  FOR EACH ROW
+  EXECUTE FUNCTION update_kb_article_search_vector();
 
 -- Article feedback (helpful/not helpful)
 CREATE TABLE IF NOT EXISTS kb_article_feedback (
@@ -93,10 +109,8 @@ CREATE TABLE IF NOT EXISTS kb_article_feedback (
 CREATE INDEX IF NOT EXISTS idx_kb_feedback_article ON kb_article_feedback(article_id);
 CREATE INDEX IF NOT EXISTS idx_kb_feedback_visitor ON kb_article_feedback(visitor_id);
 CREATE INDEX IF NOT EXISTS idx_kb_feedback_created_at ON kb_article_feedback(created_at);
--- Partial index for rate limiting (one feedback per visitor per article per day)
-CREATE UNIQUE INDEX IF NOT EXISTS idx_kb_feedback_unique_daily
-  ON kb_article_feedback(article_id, visitor_id, DATE(created_at))
-  WHERE visitor_id IS NOT NULL;
+-- Rate limiting handled at application level (one feedback per visitor per article per day)
+-- Note: Date-based unique index removed due to PostgreSQL immutability requirements
 
 -- Article versions for draft/history tracking
 CREATE TABLE IF NOT EXISTS kb_article_versions (

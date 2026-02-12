@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS commission_config (
 );
 
 -- Only one config per tenant (singleton pattern)
-CREATE UNIQUE INDEX IF NOT EXISTS idx_commission_config_singleton ON commission_config ((1));
+-- Singleton constraint enforced at application level
 
 -- Trigger for updated_at
 DROP TRIGGER IF EXISTS update_commission_config_updated_at ON commission_config;

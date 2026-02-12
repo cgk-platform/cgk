@@ -8,7 +8,7 @@ CREATE TABLE analytics_reports (
   type VARCHAR(50) NOT NULL DEFAULT 'custom', -- preset, custom
   config JSONB NOT NULL DEFAULT '{}', -- dimensions, metrics, filters, visualization
   schedule JSONB, -- cron expression, email recipients, enabled
-  created_by UUID REFERENCES users(id) ON DELETE SET NULL,
+  created_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
   last_run_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
