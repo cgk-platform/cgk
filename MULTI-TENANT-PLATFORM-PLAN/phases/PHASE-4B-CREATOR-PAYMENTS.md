@@ -16,25 +16,25 @@ Implement hybrid payment system supporting both Stripe Connect (US domestic) and
 
 ## Success Criteria
 
-- [ ] Stripe Connect Express integration working for US creators
-- [ ] `createAccount` and `createPayout` methods functional
-- [ ] Wise Business API integration working for international creators
-- [ ] `createQuote`, `createRecipient`, `createTransfer` methods functional
-- [ ] Payment provider selection logic (`selectProvider`) routes correctly
-- [ ] `WISE_SUPPORTED_COUNTRIES` list defined and used
-- [ ] Unified balance system aggregates across brands
-- [ ] `getCreatorBalance` function returns pending/available/withdrawn
-- [ ] `creator_balance_transactions` table tracks all movements
-- [ ] Withdrawal request flow working (`requestWithdrawal`)
-- [ ] `withdrawal_requests` table created
-- [ ] Inngest event `payout/requested` fires on withdrawal
-- [ ] **Payout methods settings UI with Stripe Connect setup flow**
-- [ ] **Payments page with detailed earnings breakdown**
-- [ ] **Transaction history with filtering and pagination**
-- [ ] **Withdrawal timeline showing request progress**
-- [ ] **Store credit integration with 10% bonus option**
-- [ ] **W-9 requirement blocking for US creators**
-- [ ] **Contract blocking for unsigned documents**
+- [x] Stripe Connect Express integration working for US creators
+- [x] `createAccount` and `createPayout` methods functional
+- [x] Wise Business API integration working for international creators
+- [x] `createQuote`, `createRecipient`, `createTransfer` methods functional
+- [x] Payment provider selection logic (`selectProvider`) routes correctly
+- [x] `WISE_SUPPORTED_COUNTRIES` list defined and used
+- [x] Unified balance system aggregates across brands
+- [x] `getCreatorBalance` function returns pending/available/withdrawn
+- [x] `creator_balance_transactions` table tracks all movements
+- [x] Withdrawal request flow working (`requestWithdrawal`)
+- [x] `withdrawal_requests` table created
+- [x] Inngest event `payout/requested` fires on withdrawal
+- [x] **Payout methods settings UI with Stripe Connect setup flow**
+- [x] **Payments page with detailed earnings breakdown**
+- [x] **Transaction history with filtering and pagination**
+- [x] **Withdrawal timeline showing request progress**
+- [x] **Store credit integration with 10% bonus option**
+- [x] **W-9 requirement blocking for US creators**
+- [x] **Contract blocking for unsigned documents**
 
 ---
 

@@ -42,59 +42,59 @@ Implement comprehensive tax compliance system including W-9 collection with encr
 ## Success Criteria
 
 ### W-9 Collection
-- [ ] W9Data interface with all tax classification types
-- [ ] AES-256-GCM encrypted TIN storage
-- [ ] Only last 4 digits visible in UI (masked: `***-**-1234`)
-- [ ] W-9 certification with timestamp and IP address
-- [ ] E-delivery consent capture and tracking
-- [ ] SSN/EIN format validation (reject known invalid patterns)
+- [x] W9Data interface with all tax classification types
+- [x] AES-256-GCM encrypted TIN storage
+- [x] Only last 4 digits visible in UI (masked: `***-**-1234`)
+- [x] W-9 certification with timestamp and IP address
+- [x] E-delivery consent capture and tracking
+- [x] SSN/EIN format validation (reject known invalid patterns)
 
 ### Multi-Payee Support
-- [ ] PayeeType abstraction (creator, contractor, merchant, vendor)
-- [ ] Form type mapping: Creator/Contractor→1099-NEC, Merchant→1099-K, Vendor→1099-MISC
-- [ ] Extensible payment sources per payee type
-- [ ] Composite unique constraints on (payee_id, payee_type)
+- [x] PayeeType abstraction (creator, contractor, merchant, vendor)
+- [x] Form type mapping: Creator/Contractor→1099-NEC, Merchant→1099-K, Vendor→1099-MISC
+- [x] Extensible payment sources per payee type
+- [x] Composite unique constraints on (payee_id, payee_type)
 
 ### Threshold Tracking
-- [ ] $600 threshold monitoring for all payee types
-- [ ] "Approaching threshold" (50-99%) identification
-- [ ] Monthly and annual payment breakdowns
-- [ ] Dashboard stats: requiring 1099, approaching, missing W-9
+- [x] $600 threshold monitoring for all payee types
+- [x] "Approaching threshold" (50-99%) identification
+- [x] Monthly and annual payment breakdowns
+- [x] Dashboard stats: requiring 1099, approaching, missing W-9
 
 ### 1099 Generation
-- [ ] Bulk generation for all qualifying payees
-- [ ] Individual form generation
-- [ ] Draft → approved → filed → delivered status workflow
-- [ ] Form approval and voiding with audit trail
+- [x] Bulk generation for all qualifying payees
+- [x] Individual form generation
+- [x] Draft → approved → filed → delivered status workflow
+- [x] Form approval and voiding with audit trail
 
 ### IRS IRIS Filing
-- [ ] Pre-filing validation (W-9 complete, amounts valid)
-- [ ] CSV generation in IRIS format
-- [ ] Manual upload workflow tracking
-- [ ] IRS confirmation number storage
-- [ ] Mark forms as filed with timestamp
+- [x] Pre-filing validation (W-9 complete, amounts valid)
+- [x] CSV generation in IRIS format
+- [x] Manual upload workflow tracking
+- [x] IRS confirmation number storage
+- [x] Mark forms as filed with timestamp
 
 ### State Filing
-- [ ] State-specific requirements configuration
-- [ ] State filing status tracking
-- [ ] State confirmation number storage
+- [x] State-specific requirements configuration
+- [x] State filing status tracking
+- [x] State confirmation number storage
 
 ### Corrections
-- [ ] Type 1 corrections (amount only)
-- [ ] Type 2 corrections (recipient info - voids original)
-- [ ] Correction approval workflow
-- [ ] Correction filing tracking
+- [x] Type 1 corrections (amount only)
+- [x] Type 2 corrections (recipient info - voids original)
+- [x] Correction approval workflow
+- [x] Correction filing tracking
 
 ### Delivery
-- [ ] Email notification to payees
-- [ ] Portal availability marking
-- [ ] Portal view tracking
-- [ ] Direct mail integration (address verification, tracking)
+- [x] Email notification to payees
+- [x] Portal availability marking
+- [x] Portal view tracking
+- [x] Direct mail integration (address verification, tracking)
 
 ### Audit Logging
-- [ ] All tax actions logged with user, timestamp
-- [ ] TIN decryption logged with IP and user agent
-- [ ] Form status changes tracked with reason
+- [x] All tax actions logged with user, timestamp
+- [x] TIN decryption logged with IP and user agent
+- [x] Form status changes tracked with reason
 
 ### Admin UI
 - [ ] Tax dashboard with stats cards

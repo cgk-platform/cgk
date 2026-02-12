@@ -18,16 +18,16 @@ Implement the core e-signature system including contract template library with v
 
 ## Success Criteria
 
-- [ ] Contract template CRUD (`createTemplate`, `getTemplate`, `listTemplates`)
-- [ ] Template field management (`createTemplateField`, `updateTemplateField`)
-- [ ] Variable system (`replaceVariables`, `extractVariables`, `validateVariables`)
-- [ ] Document creation from templates (`createDocument`)
-- [ ] Signer management (`createSigner`, `getDocumentSigners`)
-- [ ] Document field copying from templates
-- [ ] Document lifecycle states working (draft → pending → completed)
-- [ ] Signing session token generation
-- [ ] Field types: signature, initial, text, date, checkbox, dropdown, etc.
-- [ ] Tenant isolation for all e-sign entities
+- [x] Contract template CRUD (`createTemplate`, `getTemplate`, `listTemplates`)
+- [x] Template field management (`createTemplateField`, `updateTemplateField`)
+- [x] Variable system (`replaceVariables`, `extractVariables`, `validateVariables`)
+- [x] Document creation from templates (`createDocument`)
+- [x] Signer management (`createSigner`, `getDocumentSigners`)
+- [x] Document field copying from templates
+- [x] Document lifecycle states working (draft → pending → completed)
+- [x] Signing session token generation
+- [x] Field types: signature, initial, text, date, checkbox, dropdown, etc.
+- [x] Tenant isolation for all e-sign entities
 
 ---
 

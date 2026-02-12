@@ -59,13 +59,13 @@ The implementing agent MUST create:
 
 ## Success Criteria
 
-- [ ] Provider chosen with documented reasoning
-- [ ] Abstraction layer allows provider swapping
-- [ ] All event types defined (40+ categories)
-- [ ] Tenant isolation enforced (tenantId required in all events)
-- [ ] Dev environment works easily (no complex worker setup preferred)
-- [ ] **Setup guide created** with CLI-first approach
-- [ ] **New user can set up in < 15 minutes** following guide
+- [x] Provider chosen with documented reasoning
+- [x] Abstraction layer allows provider swapping
+- [x] All event types defined (40+ categories)
+- [x] Tenant isolation enforced (tenantId required in all events)
+- [x] Dev environment works easily (no complex worker setup preferred)
+- [x] **Setup guide created** with CLI-first approach
+- [x] **New user can set up in < 15 minutes** following guide
 
 ---
 
