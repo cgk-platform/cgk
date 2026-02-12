@@ -3848,6 +3848,7 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md#agent-architecture) for pre-defined agen
 | Phase | Duration | Focus |
 |-------|----------|-------|
 | [PHASE-0-PORTABILITY.md](./PHASE-0-PORTABILITY.md) | 2 weeks | **NEW: Repo setup, CLI, README, templates** |
+| [PHASE-0B-DATABASE-SETUP-UX.md](./phases/PHASE-0B-DATABASE-SETUP-UX.md) | Anytime | **NEW: Database setup UX improvements for portable installation** |
 | [PHASE-1-FOUNDATION.md](./PHASE-1-FOUNDATION.md) | 4 weeks | Monorepo, database, auth, core packages |
 | [PHASE-2-ADMIN.md](./PHASE-2-ADMIN.md) | 3 weeks | Brand Admin portal shell (white-label base) |
 | [PHASE-2A-SUPER-ADMIN.md](./PHASE-2A-SUPER-ADMIN.md) | 3 weeks | Super Admin Dashboard (Orchestrator) |

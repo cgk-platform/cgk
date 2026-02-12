@@ -341,81 +341,81 @@ GET    /api/admin/esign/stats               - E-sign statistics
 ## Tasks
 
 ### [PARALLEL] Database migrations
-- [ ] Create migration for `esign_templates`
-- [ ] Create migration for `esign_template_fields`
-- [ ] Create migration for `esign_documents`
-- [ ] Create migration for `esign_signers`
-- [ ] Create migration for `esign_fields`
-- [ ] Add tenant isolation indexes
+- [x] Create migration for `esign_templates`
+- [x] Create migration for `esign_template_fields`
+- [x] Create migration for `esign_documents`
+- [x] Create migration for `esign_signers`
+- [x] Create migration for `esign_fields`
+- [x] Add tenant isolation indexes
 
 ### [PARALLEL with DB] Type definitions
-- [ ] Create `packages/esign/src/types.ts` with all interfaces
-- [ ] Define field types enum
-- [ ] Define status enums
-- [ ] Define signer roles
+- [x] Create `packages/esign/src/types.ts` with all interfaces
+- [x] Define field types enum
+- [x] Define status enums
+- [x] Define signer roles
 
 ### [SEQUENTIAL after DB] Template operations
-- [ ] Implement `createTemplate`
-- [ ] Implement `getTemplate`, `getTemplateWithFields`
-- [ ] Implement `listTemplates` with filtering
-- [ ] Implement `updateTemplate`, `deleteTemplate`
-- [ ] Implement `duplicateTemplate`
-- [ ] Implement `archiveTemplate`, `activateTemplate`
+- [x] Implement `createTemplate`
+- [x] Implement `getTemplate`, `getTemplateWithFields`
+- [x] Implement `listTemplates` with filtering
+- [x] Implement `updateTemplate`, `deleteTemplate`
+- [x] Implement `duplicateTemplate`
+- [x] Implement `archiveTemplate`, `activateTemplate`
 
 ### [SEQUENTIAL after DB] Template field operations
-- [ ] Implement `createTemplateField`
-- [ ] Implement `updateTemplateField`, `deleteTemplateField`
-- [ ] Implement `getTemplateFields`
-- [ ] Implement `replaceTemplateFields`
+- [x] Implement `createTemplateField`
+- [x] Implement `updateTemplateField`, `deleteTemplateField`
+- [x] Implement `getTemplateFields`
+- [x] Implement `replaceTemplateFields`
 
 ### [PARALLEL with templates] Variable system
-- [ ] Create `packages/esign/src/lib/variables.ts`
-- [ ] Implement `replaceVariables`
-- [ ] Implement `hasVariables`, `extractVariables`
-- [ ] Implement `validateVariables`
-- [ ] Implement `getVariablesByCategory`
+- [x] Create `packages/esign/src/lib/variables.ts`
+- [x] Implement `replaceVariables`
+- [x] Implement `hasVariables`, `extractVariables`
+- [x] Implement `validateVariables`
+- [x] Implement `getVariablesByCategory`
 
 ### [SEQUENTIAL after templates] Document operations
-- [ ] Implement `createDocument` (copies template)
-- [ ] Implement `getDocument`, `getDocumentWithSigners`
-- [ ] Implement `listDocuments` with filtering
-- [ ] Implement document status functions
-- [ ] Implement `voidDocument`
+- [x] Implement `createDocument` (copies template)
+- [x] Implement `getDocument`, `getDocumentWithSigners`
+- [x] Implement `listDocuments` with filtering
+- [x] Implement document status functions
+- [x] Implement `voidDocument`
 
 ### [SEQUENTIAL after documents] Signer operations
-- [ ] Implement `createSigner` with token generation
-- [ ] Implement `getSignerByToken`
-- [ ] Implement signer status updates
-- [ ] Implement `regenerateAccessToken`
+- [x] Implement `createSigner` with token generation
+- [x] Implement `getSignerByToken`
+- [x] Implement signer status updates
+- [x] Implement `regenerateAccessToken`
 
 ### [SEQUENTIAL after signers] Field operations
-- [ ] Implement `createField`
-- [ ] Implement `copyFieldsFromTemplate`
-- [ ] Implement `setFieldValue`
-- [ ] Implement `areRequiredFieldsFilled`
+- [x] Implement `createField`
+- [x] Implement `copyFieldsFromTemplate`
+- [x] Implement `setFieldValue`
+- [x] Implement `areRequiredFieldsFilled`
 
 ### [SEQUENTIAL after all] Admin API routes
-- [ ] Implement template API routes
-- [ ] Implement document API routes
-- [ ] Implement stats endpoint
+- [x] Implement template API routes
+- [x] Implement document API routes
+- [x] Implement stats endpoint
 
 ### [SEQUENTIAL after API] Admin UI
-- [ ] Build e-sign dashboard page
-- [ ] Build template list page
-- [ ] Build template editor (visual field placement)
-- [ ] Build document list page
-- [ ] Build document detail page
+- [x] Build e-sign dashboard page
+- [x] Build template list page
+- [x] Build template editor (visual field placement)
+- [x] Build document list page
+- [x] Build document detail page
 
 ---
 
 ## Definition of Done
 
-- [ ] Templates can be created, edited, and archived
-- [ ] Template fields can be placed visually
-- [ ] Documents can be created from templates
-- [ ] Signers can be added with access tokens
-- [ ] Document fields copied from template
-- [ ] Variable replacement working
-- [ ] Tenant isolation verified
-- [ ] `npx tsc --noEmit` passes
-- [ ] Manual testing: template → document → signer workflow works
+- [x] Templates can be created, edited, and archived
+- [x] Template fields can be placed visually
+- [x] Documents can be created from templates
+- [x] Signers can be added with access tokens
+- [x] Document fields copied from template
+- [x] Variable replacement working
+- [x] Tenant isolation verified
+- [x] `npx tsc --noEmit` passes
+- [x] Manual testing: template → document → signer workflow works

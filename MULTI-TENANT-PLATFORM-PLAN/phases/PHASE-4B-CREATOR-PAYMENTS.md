@@ -399,106 +399,106 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Provider implementations
-- [ ] Create `packages/payments/src/providers/stripe.ts`
-- [ ] Implement StripeConnect class with createAccount, createPayout
-- [ ] Create `packages/payments/src/providers/wise.ts`
-- [ ] Implement WiseBusiness class with createQuote, createRecipient, createTransfer, fundTransfer
+- [x] Create `packages/payments/src/providers/stripe.ts`
+- [x] Implement StripeConnect class with createAccount, createPayout
+- [x] Create `packages/payments/src/providers/wise.ts`
+- [x] Implement WiseBusiness class with createQuote, createRecipient, createTransfer, fundTransfer
 
 ### [PARALLEL with providers] Database tables
-- [ ] Create migration for `public.creator_balance_transactions`
-- [ ] Create migration for `public.withdrawal_requests`
-- [ ] Create migration for `public.creator_payment_methods`
-- [ ] Add indexes for creatorId, brandId, type, created_at
+- [x] Create migration for `public.creator_balance_transactions`
+- [x] Create migration for `public.withdrawal_requests`
+- [x] Create migration for `public.creator_payment_methods`
+- [x] Add indexes for creatorId, brandId, type, created_at
 
 ### [SEQUENTIAL after providers] Provider selection
-- [ ] Create `packages/payments/src/payout.ts`
-- [ ] Define `WISE_SUPPORTED_COUNTRIES` array
-- [ ] Implement `selectProvider(request)` function
-- [ ] Implement `executePayout(request)` orchestrator
+- [x] Create `packages/payments/src/payout.ts`
+- [x] Define `WISE_SUPPORTED_COUNTRIES` array
+- [x] Implement `selectProvider(request)` function
+- [x] Implement `executePayout(request)` orchestrator
 
 ### [SEQUENTIAL after database] Balance system
-- [ ] Implement `getCreatorBalance(creatorId, brandId?)` in creator-portal
-- [ ] Handle aggregation across brands
-- [ ] Handle byBrand breakdown
-- [ ] Calculate upcoming maturations (pending → available dates)
-- [ ] Calculate earnings breakdown by type
+- [x] Implement `getCreatorBalance(creatorId, brandId?)` in creator-portal
+- [x] Handle aggregation across brands
+- [x] Handle byBrand breakdown
+- [x] Calculate upcoming maturations (pending → available dates)
+- [x] Calculate earnings breakdown by type
 
 ### [SEQUENTIAL after balance] Withdrawal flow
-- [ ] Implement `requestWithdrawal(creatorId, amountCents, paymentMethodId, payoutType)`
-- [ ] Add balance validation
-- [ ] Add pending withdrawal check
-- [ ] Add W-9 requirement validation for US creators
-- [ ] Add unsigned contract blocking
-- [ ] Implement Inngest event sending for `payout/requested`
-- [ ] Create withdrawal request API route
+- [x] Implement `requestWithdrawal(creatorId, amountCents, paymentMethodId, payoutType)`
+- [x] Add balance validation
+- [x] Add pending withdrawal check
+- [x] Add W-9 requirement validation for US creators
+- [x] Add unsigned contract blocking
+- [x] Implement Inngest event sending for `payout/requested`
+- [x] Create withdrawal request API route
 
 ### [PARALLEL] Payout methods settings UI
-- [ ] Create `GET /api/creator/payments/methods` route
-- [ ] Create `PATCH /api/creator/payments/methods` route
-- [ ] Create `DELETE /api/creator/payments/methods` route
-- [ ] Create Stripe Connect onboarding routes
-- [ ] Create OAuth flow for Standard accounts (Brazil)
-- [ ] Build payout methods page at `/creator/settings/payout-methods`
-- [ ] Build Stripe setup form at `/creator/settings/payout-methods/stripe-setup`
-- [ ] Implement country detection for account type selection
-- [ ] Handle OAuth callback and token exchange
+- [x] Create `GET /api/creator/payments/methods` route
+- [x] Create `PATCH /api/creator/payments/methods` route
+- [x] Create `DELETE /api/creator/payments/methods` route
+- [x] Create Stripe Connect onboarding routes
+- [x] Create OAuth flow for Standard accounts (Brazil)
+- [x] Build payout methods page at `/creator/settings/payout-methods`
+- [x] Build Stripe setup form at `/creator/settings/payout-methods/stripe-setup`
+- [x] Implement country detection for account type selection
+- [x] Handle OAuth callback and token exchange
 
 ### [PARALLEL] Payments page UI
-- [ ] Create `GET /api/creator/payments/balance` route
-- [ ] Create `GET /api/creator/payments/transactions` route
-- [ ] Create `GET /api/creator/payments/withdraw` route (list)
-- [ ] Create `POST /api/creator/payments/withdraw` route (create)
-- [ ] Create `GET /api/creator/payments/store-credit` route
-- [ ] Build payments page at `/creator/payments`
-- [ ] Build balance cards grid (Available, Pending, Paid)
-- [ ] Build payout method setup alert
-- [ ] Build W-9 requirement alert
-- [ ] Build contract blocking alert
-- [ ] Build earnings summary breakdown
-- [ ] Build upcoming funds release section
-- [ ] Build 30-day hold explainer
-- [ ] Build transaction history with filtering and pagination
-- [ ] Build store credit balance card
+- [x] Create `GET /api/creator/payments/balance` route
+- [x] Create `GET /api/creator/payments/transactions` route
+- [x] Create `GET /api/creator/payments/withdraw` route (list)
+- [x] Create `POST /api/creator/payments/withdraw` route (create)
+- [x] Create `GET /api/creator/payments/store-credit` route
+- [x] Build payments page at `/creator/payments`
+- [x] Build balance cards grid (Available, Pending, Paid)
+- [x] Build payout method setup alert
+- [x] Build W-9 requirement alert
+- [x] Build contract blocking alert
+- [x] Build earnings summary breakdown
+- [x] Build upcoming funds release section
+- [x] Build 30-day hold explainer
+- [x] Build transaction history with filtering and pagination
+- [x] Build store credit balance card
 
 ### [PARALLEL] Withdrawal UI
-- [ ] Build withdrawal request modal
-- [ ] Build amount input with minimum validation
-- [ ] Build payout type toggle (Cash vs Store Credit)
-- [ ] Build payment method selector
-- [ ] Build store credit bonus preview
-- [ ] Build `WithdrawalTimeline` component
-- [ ] Build completed withdrawals history list
-- [ ] Implement withdrawal success/error feedback
+- [x] Build withdrawal request modal
+- [x] Build amount input with minimum validation
+- [x] Build payout type toggle (Cash vs Store Credit)
+- [x] Build payment method selector
+- [x] Build store credit bonus preview
+- [x] Build `WithdrawalTimeline` component
+- [x] Build completed withdrawals history list
+- [x] Implement withdrawal success/error feedback
 
 ### [PARALLEL] Contract status integration
-- [ ] Create `GET /api/creator/contract-status` route
-- [ ] Implement blocking check for unsigned contracts
-- [ ] Build contract blocking UI in payments page
+- [x] Create `GET /api/creator/contract-status` route
+- [x] Implement blocking check for unsigned contracts
+- [x] Build contract blocking UI in payments page
 
 ### [PARALLEL] Store credit integration
-- [ ] Implement Shopify customer linking on store credit withdrawal
-- [ ] Implement 10% bonus calculation
-- [ ] Build store credit history display
-- [ ] Create store credit API integration
+- [x] Implement Shopify customer linking on store credit withdrawal
+- [x] Implement 10% bonus calculation
+- [x] Build store credit history display
+- [x] Create store credit API integration
 
 ---
 
 ## Definition of Done
 
-- [ ] Stripe test payout succeeds to test account
-- [ ] Wise test transfer succeeds (sandbox)
-- [ ] Balance correctly calculated from transactions
-- [ ] Withdrawal request creates pending record
-- [ ] Inngest event fires on withdrawal request
-- [ ] Provider selection routes US to Stripe, international to Wise
-- [ ] **Payout methods settings page fully functional**
-- [ ] **Stripe Connect setup flow works end-to-end**
-- [ ] **Payments page shows all balance cards**
-- [ ] **Transaction history filters and paginates correctly**
-- [ ] **Withdrawal modal submits successfully**
-- [ ] **Withdrawal timeline shows correct progress**
-- [ ] **Store credit withdrawal applies 10% bonus**
-- [ ] **W-9 blocking works for US creators**
-- [ ] **Contract blocking prevents unauthorized withdrawals**
-- [ ] `npx tsc --noEmit` passes
-- [ ] Unit tests pass for payout flows
+- [x] Stripe test payout succeeds to test account
+- [x] Wise test transfer succeeds (sandbox)
+- [x] Balance correctly calculated from transactions
+- [x] Withdrawal request creates pending record
+- [x] Inngest event fires on withdrawal request
+- [x] Provider selection routes US to Stripe, international to Wise
+- [x] **Payout methods settings page fully functional**
+- [x] **Stripe Connect setup flow works end-to-end**
+- [x] **Payments page shows all balance cards**
+- [x] **Transaction history filters and paginates correctly**
+- [x] **Withdrawal modal submits successfully**
+- [x] **Withdrawal timeline shows correct progress**
+- [x] **Store credit withdrawal applies 10% bonus**
+- [x] **W-9 blocking works for US creators**
+- [x] **Contract blocking prevents unauthorized withdrawals**
+- [x] `npx tsc --noEmit` passes
+- [x] Unit tests pass for payout flows

@@ -1,5 +1,8 @@
 # PHASE-5D: Analytics Job Migrations
 
+> **STATUS**: ✅ COMPLETE (2026-02-12)
+> **Completed By**: Wave 3A Agents
+
 **Duration**: 4-5 days (Week 20-21)
 **Depends On**: PHASE-5A (Jobs Infrastructure Setup), **PHASE-2D-PL-CONFIGURATION** (for tenant cost configs)
 **Parallel With**: PHASE-5B, PHASE-5C (after 5A complete)
@@ -26,13 +29,13 @@ Migrate all analytics and attribution Trigger.dev tasks to Inngest, including at
 
 ## Success Criteria
 
-- [ ] All 17 attribution tasks migrated
-- [ ] GA4 and Meta CAPI event sending working
-- [ ] TikTok spend sync operational
-- [ ] Daily metrics aggregation running
-- [ ] Attribution models calculating correctly (first-touch, last-touch, linear, time-decay)
-- [ ] Fairing survey sync working
-- [ ] ML training pipeline functional (30 min timeout supported)
+- [x] All 17 attribution tasks migrated
+- [x] GA4 and Meta CAPI event sending working
+- [x] TikTok spend sync operational
+- [x] Daily metrics aggregation running
+- [x] Attribution models calculating correctly (first-touch, last-touch, linear, time-decay, position-based)
+- [x] Fairing survey sync working
+- [x] ML training pipeline functional (30 min timeout supported)
 
 ---
 

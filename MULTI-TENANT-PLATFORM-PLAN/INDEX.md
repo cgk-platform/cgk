@@ -74,6 +74,7 @@ Read file_path="/Users/holdenthemic/Documents/rawdog-web/src/trigger/payment-aut
 ```
 phases/
 ├── PHASE-0-PORTABILITY.md           # Week -2 to 0: Repo setup, CLI, templates
+├── PHASE-0B-DATABASE-SETUP-UX.md    # Anytime: Database setup experience improvements
 │
 ├── PHASE-1A-MONOREPO.md             # Week 1: Turborepo + pnpm workspace
 ├── PHASE-1B-DATABASE.md             # Week 2: Schema-per-tenant design
@@ -191,6 +192,10 @@ phases/
 ### What Can Run Together
 
 ```
+ANYTIME: Infrastructure Improvements (Independent - No Dependencies)
+├── 0B (Database Setup UX) - Can run in parallel with ANY phase
+└── Priority: HIGH - Affects all new user onboarding
+
 Week 1-4: Foundation (Sequential)
 ├── 1A -> 1B -> 1C -> 1D
 
@@ -311,9 +316,10 @@ Phase 1 (Foundation)
 | 1 | `PLAN.md` | Understand goals |
 | 2 | `PROMPT.md` | Understand patterns |
 | 3 | `phases/PHASE-0-PORTABILITY.md` | Monorepo, CLI, templates |
-| 4 | `PORTABILITY-ARCHITECTURE.md` | CLI architecture design |
-| 5 | **`PLATFORM-SETUP-SPEC-*.md`** | **First-run wizard, Vercel integrations** |
-| 6 | `CLAUDE-MD-TEMPLATE.md` | AI documentation patterns |
+| 4 | `phases/PHASE-0B-DATABASE-SETUP-UX.md` | **Database setup experience improvements** |
+| 5 | `PORTABILITY-ARCHITECTURE.md` | CLI architecture design |
+| 6 | **`PLATFORM-SETUP-SPEC-*.md`** | **First-run wizard, Vercel integrations** |
+| 7 | `CLAUDE-MD-TEMPLATE.md` | AI documentation patterns |
 
 ### Phase 1 Agents (Foundation)
 | Priority | Document | Why |
@@ -690,7 +696,8 @@ MULTI-TENANT-PLATFORM-PLAN/
 │   ├── CLAUDE-MD-PACKAGE-TEMPLATE.md <- Per-package AI docs
 │   └── LOGGING-AI-ADDENDUM.md     <- AI-friendly logging
 │
-├── phases/                        <- ALL 52 PHASE DOCS
+├── phases/                        <- ALL 53 PHASE DOCS
+│   ├── Setup & Portability (0, 0B) 2 docs  <- Includes Database Setup UX
 │   ├── Foundation (1A-1D)         4 docs
 │   ├── Admin (2A-2D)              4 docs
 │   ├── Super Admin (2SA-*)        3 docs
@@ -741,6 +748,7 @@ MULTI-TENANT-PLATFORM-PLAN/
 | Phase | Weeks | Focus | Agents |
 |-------|-------|-------|--------|
 | 0 | -2 to 0 | Portability Setup | 1 |
+| **0B** | Anytime | **Database Setup UX (parallel)** | 1 |
 | 1 | 1-4 | Foundation | 2-3 |
 | 2 | 5-7 | Brand Admin | 2-4 |
 | 2SA | 5-7 | Super Admin | 2 (parallel) |

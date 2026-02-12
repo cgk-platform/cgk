@@ -537,114 +537,114 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Data model and types
-- [ ] Define Creator interface in `apps/creator-portal/src/lib/types.ts`
-- [ ] Define BrandMembership interface
-- [ ] Define Conversation and Message interfaces
-- [ ] Define NotificationSetting interface
-- [ ] Create SQL migration for `public.creators` table (include profile fields)
-- [ ] Create SQL migration for `public.creator_brand_memberships` table
-- [ ] Create SQL migration for `public.creator_conversations` table
-- [ ] Create SQL migration for `public.creator_messages` table
-- [ ] Create SQL migration for `public.creator_sessions` table
-- [ ] Create SQL migration for `public.creator_notification_settings` table
-- [ ] Create SQL migration for `public.creator_password_reset_tokens` table
+- [x] Define Creator interface in `apps/creator-portal/src/lib/types.ts`
+- [x] Define BrandMembership interface
+- [x] Define Conversation and Message interfaces
+- [x] Define NotificationSetting interface
+- [x] Create SQL migration for `public.creators` table (include profile fields)
+- [x] Create SQL migration for `public.creator_brand_memberships` table
+- [x] Create SQL migration for `public.creator_conversations` table
+- [x] Create SQL migration for `public.creator_messages` table
+- [x] Create SQL migration for `public.creator_sessions` table
+- [x] Create SQL migration for `public.creator_notification_settings` table
+- [x] Create SQL migration for `public.creator_password_reset_tokens` table
 
 ### [PARALLEL with above] Auth scaffolding
-- [ ] Create `apps/creator-portal/src/lib/auth/index.ts`
-- [ ] Implement password hash comparison (bcrypt or Argon2)
-- [ ] Set up JWT signing configuration
-- [ ] Implement rate limiting utility for auth endpoints
+- [x] Create `apps/creator-portal/src/lib/auth/index.ts`
+- [x] Implement password hash comparison (bcrypt or Argon2)
+- [x] Set up JWT signing configuration
+- [x] Implement rate limiting utility for auth endpoints
 
 ### [SEQUENTIAL after data model] Authentication implementation
-- [ ] Implement `authenticateCreator(email, password)` function
-- [ ] Load brand memberships on successful auth
-- [ ] Implement `signCreatorJWT(creatorId, memberships)`
-- [ ] Create login API route
-- [ ] Create auth middleware for protected routes
-- [ ] Implement magic link authentication
-- [ ] Create session tracking on login
+- [x] Implement `authenticateCreator(email, password)` function
+- [x] Load brand memberships on successful auth
+- [x] Implement `signCreatorJWT(creatorId, memberships)`
+- [x] Create login API route
+- [x] Create auth middleware for protected routes
+- [x] Implement magic link authentication
+- [x] Create session tracking on login
 
 ### [SEQUENTIAL after auth] Dashboard
-- [ ] Create dashboard page at `apps/creator-portal/src/app/dashboard/page.tsx`
-- [ ] Implement `getCurrentCreator()` helper
-- [ ] Implement parallel stats fetching per brand
-- [ ] Build `BrandEarningsCard` component
-- [ ] Build `ProjectsList` component (stub for Phase 4C)
-- [ ] Build `WithdrawalStatus` component (stub for Phase 4B)
-- [ ] Build quick actions grid
-- [ ] Integrate `TaxInfoAlert` component
-- [ ] Integrate `PendingContractsAlert` component
-- [ ] Implement guided tour for new users
+- [x] Create dashboard page at `apps/creator-portal/src/app/dashboard/page.tsx`
+- [x] Implement `getCurrentCreator()` helper
+- [x] Implement parallel stats fetching per brand
+- [x] Build `BrandEarningsCard` component
+- [x] Build `ProjectsList` component (stub for Phase 4C)
+- [x] Build `WithdrawalStatus` component (stub for Phase 4B)
+- [x] Build quick actions grid
+- [x] Integrate `TaxInfoAlert` component
+- [x] Integrate `PendingContractsAlert` component
+- [x] Implement guided tour for new users
 
 ### [PARALLEL with dashboard] Messaging system
-- [ ] Create `GET /api/creator/messages` - List conversations
-- [ ] Create `GET /api/creator/messages/[id]` - Get messages
-- [ ] Create `POST /api/creator/messages/[id]` - Send message
-- [ ] Create `GET /api/creator/messages/[id]/poll` - Poll for new messages
-- [ ] Build `MessagesPage` component with split view
-- [ ] Build `MessageBubble` component
-- [ ] Build `TypingIndicator` component
-- [ ] Build mobile thread view at `/creator/messages/[id]`
-- [ ] Implement 5-second polling for new messages
+- [x] Create `GET /api/creator/messages` - List conversations
+- [x] Create `GET /api/creator/messages/[id]` - Get messages
+- [x] Create `POST /api/creator/messages/[id]` - Send message
+- [x] Create `GET /api/creator/messages/[id]/poll` - Poll for new messages
+- [x] Build `MessagesPage` component with split view
+- [x] Build `MessageBubble` component
+- [x] Build `TypingIndicator` component
+- [x] Build mobile thread view at `/creator/messages/[id]`
+- [x] Implement 5-second polling for new messages
 
 ### [PARALLEL with dashboard] Profile settings
-- [ ] Create `GET /api/creator/settings` - Fetch profile
-- [ ] Create `PATCH /api/creator/settings` - Update profile
-- [ ] Build profile settings page at `/creator/settings/profile`
-- [ ] Implement form with name, bio, phone, shipping address
-- [ ] Add character counter for bio field
-- [ ] Implement save with loading/success/error states
+- [x] Create `GET /api/creator/settings` - Fetch profile
+- [x] Create `PATCH /api/creator/settings` - Update profile
+- [x] Build profile settings page at `/creator/settings/profile`
+- [x] Implement form with name, bio, phone, shipping address
+- [x] Add character counter for bio field
+- [x] Implement save with loading/success/error states
 
 ### [PARALLEL with dashboard] Security settings
-- [ ] Create `POST /api/creator/settings/password` - Change password
-- [ ] Create `GET /api/creator/sessions` - List sessions
-- [ ] Create `DELETE /api/creator/sessions` - Revoke all other sessions
-- [ ] Build security settings page at `/creator/settings/security`
-- [ ] Implement password change form with validation
-- [ ] Build active sessions list with revocation
+- [x] Create `POST /api/creator/settings/password` - Change password
+- [x] Create `GET /api/creator/sessions` - List sessions
+- [x] Create `DELETE /api/creator/sessions` - Revoke all other sessions
+- [x] Build security settings page at `/creator/settings/security`
+- [x] Implement password change form with validation
+- [x] Build active sessions list with revocation
 
 ### [PARALLEL with dashboard] Notification settings
-- [ ] Create `GET /api/creator/settings/notifications` - Fetch preferences
-- [ ] Create `PATCH /api/creator/settings/notifications` - Update preferences
-- [ ] Build notification settings page at `/creator/settings/notifications`
-- [ ] Implement toggle grid for email/SMS per notification type
-- [ ] Add save preferences button with feedback
+- [x] Create `GET /api/creator/settings/notifications` - Fetch preferences
+- [x] Create `PATCH /api/creator/settings/notifications` - Update preferences
+- [x] Build notification settings page at `/creator/settings/notifications`
+- [x] Implement toggle grid for email/SMS per notification type
+- [x] Add save preferences button with feedback
 
 ### [PARALLEL with dashboard] Forgot/reset password
-- [ ] Create `POST /api/creator/auth/forgot-password` - Request reset
-- [ ] Create `POST /api/creator/auth/reset-password` - Complete reset
-- [ ] Build forgot password page at `/creator/forgot-password`
-- [ ] Build reset password page at `/creator/reset-password`
-- [ ] Implement rate limiting (3 requests per hour per email)
-- [ ] Create password reset email template
-- [ ] Implement secure token generation with 1-hour expiry
+- [x] Create `POST /api/creator/auth/forgot-password` - Request reset
+- [x] Create `POST /api/creator/auth/reset-password` - Complete reset
+- [x] Build forgot password page at `/creator/forgot-password`
+- [x] Build reset password page at `/creator/reset-password`
+- [x] Implement rate limiting (3 requests per hour per email)
+- [x] Create password reset email template
+- [x] Implement secure token generation with 1-hour expiry
 
 ### [SEQUENTIAL after all settings] Settings layout
-- [ ] Create settings layout with tab navigation
-- [ ] Implement settings index redirect to /profile
-- [ ] Add settings tabs: Profile, Security, Notifications, Payout Methods, Tax
+- [x] Create settings layout with tab navigation
+- [x] Implement settings index redirect to /profile
+- [x] Add settings tabs: Profile, Security, Notifications, Payout Methods, Tax
 
 ### [PARALLEL] Help/FAQ system
-- [ ] Create FAQ content (JSON or markdown)
-- [ ] Build FAQ accordion component
-- [ ] Add getting started guide to dashboard
-- [ ] Add help link in navigation
-- [ ] Create support contact information display
+- [x] Create FAQ content (JSON or markdown)
+- [x] Build FAQ accordion component
+- [x] Add getting started guide to dashboard
+- [x] Add help link in navigation
+- [x] Create support contact information display
 
 ---
 
 ## Definition of Done
 
-- [ ] Creator can log in with email/password
-- [ ] Creator can reset forgotten password
-- [ ] Dashboard shows earnings for all associated brands
-- [ ] JWT contains brand membership claims
-- [ ] Database tables created with proper indexes
-- [ ] Auth middleware protects dashboard routes
-- [ ] **Messaging inbox displays conversations with polling**
-- [ ] **Profile settings update correctly**
-- [ ] **Password change works with proper validation**
-- [ ] **Session list shows with revocation working**
-- [ ] **Notification preferences save and persist**
-- [ ] `npx tsc --noEmit` passes
-- [ ] Manual testing: full portal flow works end-to-end
+- [x] Creator can log in with email/password
+- [x] Creator can reset forgotten password
+- [x] Dashboard shows earnings for all associated brands
+- [x] JWT contains brand membership claims
+- [x] Database tables created with proper indexes
+- [x] Auth middleware protects dashboard routes
+- [x] **Messaging inbox displays conversations with polling**
+- [x] **Profile settings update correctly**
+- [x] **Password change works with proper validation**
+- [x] **Session list shows with revocation working**
+- [x] **Notification preferences save and persist**
+- [x] `npx tsc --noEmit` passes
+- [x] Manual testing: full portal flow works end-to-end

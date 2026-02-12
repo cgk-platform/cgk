@@ -11,6 +11,11 @@ WEEK 1-2: PHASE 0 (Portability)
           └─ Single Agent
           └─ CHECKPOINT: CLI works
 
+ANYTIME:  PHASE 0B (Database Setup UX) - PARALLEL TRACK
+          └─ Single Agent (can run anytime, no dependencies)
+          └─ CLI improvements, migration fixes, documentation
+          └─ Priority: HIGH (affects all new users)
+
 WEEK 3-6: PHASE 1 (Foundation) - SEQUENTIAL
           1A ─→ 1B ─→ 1C ─→ 1D
           └─ Single Agent
@@ -116,6 +121,7 @@ WEEK 30: PHASE 8 (Final Audit) - 15 PARALLEL AGENTS
 | Weeks | Agents | Assignment |
 |-------|--------|------------|
 | 1-6 | 1 | Foundation (0, 1A-1D) |
+| Anytime | 1 | Database Setup UX (0B) - can run in parallel |
 | 7-10 | 2 | Brand Admin + Super Admin |
 | 11-16 | 4 | Communications + Scheduling + AI + Support |
 | 14-20 | 2 | Storefront + Attribution |

@@ -97,17 +97,17 @@ Implement comprehensive tax compliance system including W-9 collection with encr
 - [x] Form status changes tracked with reason
 
 ### Admin UI
-- [ ] Tax dashboard with stats cards
-- [ ] 1099 forms management page
-- [ ] IRS filing workflow page
-- [ ] W-9 status tracking page
-- [ ] Annual payments page with CSV export
-- [ ] Tax settings page
+- [x] Tax dashboard with stats cards
+- [x] 1099 forms management page
+- [x] IRS filing workflow page
+- [x] W-9 status tracking page
+- [x] Annual payments page with CSV export
+- [x] Tax settings page
 
 ### W-9 Reminders
-- [ ] Automated reminder cadence (initial, 7-day, 14-day, 21-day)
-- [ ] Background task for daily reminder checks
-- [ ] Reminder tracking table
+- [x] Automated reminder cadence (initial, 7-day, 14-day, 21-day)
+- [x] Background task for daily reminder checks (via Phase 5E jobs)
+- [x] Reminder tracking table (w9_compliance_tracking)
 
 ---
 
@@ -1054,102 +1054,102 @@ export const w9ComplianceReminders = schedules.task({
 ### Week 1: Foundation
 
 #### [PARALLEL] Types and Database
-- [ ] Define all types in `packages/tax/src/types.ts`
-- [ ] Create migration for `tax_payees` table
-- [ ] Create migration for `tax_forms` table
-- [ ] Create migration for `tax_form_audit_log` table
-- [ ] Create migration for `w9_compliance_tracking` table
-- [ ] Add all indexes
+- [x] Define all types in `packages/tax/src/types.ts`
+- [x] Create migration for `tax_payees` table
+- [x] Create migration for `tax_forms` table
+- [x] Create migration for `tax_form_audit_log` table
+- [x] Create migration for `w9_compliance_tracking` table
+- [x] Add all indexes
 
 #### [PARALLEL with above] Encryption
-- [ ] Create `packages/tax/src/encryption.ts`
-- [ ] Implement `encryptTIN()` with AES-256-GCM
-- [ ] Implement `decryptTIN()` with auth tag verification
-- [ ] Implement `isValidSSN()` and `isValidEIN()`
-- [ ] Implement `maskTIN()` and `getLastFour()`
+- [x] Create `packages/tax/src/encryption.ts`
+- [x] Implement `encryptTIN()` with AES-256-GCM
+- [x] Implement `decryptTIN()` with auth tag verification
+- [x] Implement `isValidSSN()` and `isValidEIN()`
+- [x] Implement `maskTIN()` and `getLastFour()`
 
 #### [SEQUENTIAL after encryption] W-9 Storage
-- [ ] Create `packages/tax/src/w9.ts`
-- [ ] Implement `saveW9()` with encrypted storage
-- [ ] Implement `getTaxPayee()` with decryption
-- [ ] Implement `hasCompleteTaxInfo()` check
-- [ ] Implement `getEncryptedTIN()` with audit logging
+- [x] Create `packages/tax/src/w9.ts`
+- [x] Implement `saveW9()` with encrypted storage
+- [x] Implement `getTaxPayee()` with decryption
+- [x] Implement `hasCompleteTaxInfo()` check
+- [x] Implement `getEncryptedTIN()` with audit logging
 
 #### [SEQUENTIAL after W-9] Payment Aggregation
-- [ ] Create `packages/tax/src/payments.ts`
-- [ ] Define `PAYMENT_SOURCES` config per payee type
-- [ ] Implement `getAnnualPayments()`
-- [ ] Implement `getPayeesRequiring1099()`
-- [ ] Implement `getPayeesApproachingThreshold()`
-- [ ] Implement `getPayeesMissingW9()`
-- [ ] Implement `getTaxYearStats()` for dashboard
+- [x] Create `packages/tax/src/payments.ts`
+- [x] Define `PAYMENT_SOURCES` config per payee type
+- [x] Implement `getAnnualPayments()`
+- [x] Implement `getPayeesRequiring1099()`
+- [x] Implement `getPayeesApproachingThreshold()`
+- [x] Implement `getPayeesMissingW9()`
+- [x] Implement `getTaxYearStats()` for dashboard
 
 ### Week 2: Forms and Admin
 
 #### [SEQUENTIAL after payments] Form Generation
-- [ ] Create `packages/tax/src/form-generation.ts`
-- [ ] Implement `getPayerInfo()` from env
-- [ ] Implement `generate1099()` for single payee
-- [ ] Implement `bulkGenerate1099s()` for all qualifying
-- [ ] Implement `approve1099()` with status change
-- [ ] Implement `void1099()` for draft forms
-- [ ] Implement `bulkApprove1099s()`
+- [x] Create `packages/tax/src/form-generation.ts`
+- [x] Implement `getPayerInfo()` from env
+- [x] Implement `generate1099()` for single payee
+- [x] Implement `bulkGenerate1099s()` for all qualifying
+- [x] Implement `approve1099()` with status change
+- [x] Implement `void1099()` for draft forms
+- [x] Implement `bulkApprove1099s()`
 
 #### [PARALLEL with generation] PDF Generation
-- [ ] Create `packages/tax/src/pdf-generation.ts`
-- [ ] Implement `generate1099NECPDF()` layout
-- [ ] Store PDF in secure storage
-- [ ] Implement PDF caching
+- [x] Create `packages/tax/src/pdf-generation.ts`
+- [x] Implement `generate1099NECPDF()` layout
+- [x] Store PDF in secure storage
+- [x] Implement PDF caching
 
 #### [SEQUENTIAL after generation] IRIS Filing
-- [ ] Create `packages/tax/src/iris-filing.ts`
-- [ ] Implement `validateForFiling()` pre-checks
-- [ ] Implement `generateIRISCSV()` export
-- [ ] Implement `markFormsAsFiled()` status update
-- [ ] Implement `getFilingStats()` for dashboard
+- [x] Create `packages/tax/src/iris-filing.ts`
+- [x] Implement `validateForFiling()` pre-checks
+- [x] Implement `generateIRISCSV()` export
+- [x] Implement `markFormsAsFiled()` status update
+- [x] Implement `getFilingStats()` for dashboard
 
 #### [PARALLEL with IRIS] Corrections
-- [ ] Create `packages/tax/src/corrections.ts`
-- [ ] Implement `createAmountCorrection()` (Type 1)
-- [ ] Implement `createInfoCorrection()` (Type 2)
-- [ ] Implement correction approval flow
+- [x] Create `packages/tax/src/corrections.ts`
+- [x] Implement `createAmountCorrection()` (Type 1)
+- [x] Implement `createInfoCorrection()` (Type 2)
+- [x] Implement correction approval flow
 
 #### [SEQUENTIAL after all lib] Admin Pages
-- [ ] Build `/admin/tax` dashboard with stats
-- [ ] Build `/admin/tax/1099s` list page
-- [ ] Build `/admin/tax/1099s/[id]` detail page
-- [ ] Build `/admin/tax/filing` IRS workflow
-- [ ] Build `/admin/tax/w9-status` tracking page
-- [ ] Build `/admin/tax/annual-payments` with CSV export
-- [ ] Build `/admin/tax/settings` payer config
+- [x] Build `/admin/tax` dashboard with stats
+- [x] Build `/admin/tax/1099s` list page
+- [x] Build `/admin/tax/1099s/[id]` detail page
+- [x] Build `/admin/tax/filing` IRS workflow
+- [x] Build `/admin/tax/w9-status` tracking page
+- [x] Build `/admin/tax/annual-payments` with CSV export
+- [x] Build `/admin/tax/settings` payer config
 
 #### [SEQUENTIAL after admin] Automation
-- [ ] Create W-9 reminder scheduled task
-- [ ] Implement 4-level escalation cadence
-- [ ] Create confirmation email on W-9 completion
+- [x] Create W-9 reminder scheduled task (via Phase 5E jobs)
+- [x] Implement 4-level escalation cadence
+- [x] Create confirmation email on W-9 completion
 
 #### [SEQUENTIAL after all] Creator Portal
-- [ ] Build W-9 collection form in creator portal
-- [ ] Build 1099 viewing/download in creator portal
-- [ ] E-delivery consent capture
+- [x] Build W-9 collection form in creator portal
+- [x] Build 1099 viewing/download in creator portal
+- [x] E-delivery consent capture
 
 ---
 
 ## Definition of Done
 
-- [ ] All type definitions complete
-- [ ] Database schema migrated
-- [ ] TIN encryption/decryption working with audit
-- [ ] W-9 collection captures all fields
-- [ ] Payment aggregation correctly calculates thresholds
-- [ ] 1099 generation for all payee types
-- [ ] Form approval/voiding workflow complete
-- [ ] IRIS CSV generation working
-- [ ] Corrections (Type 1 & Type 2) working
-- [ ] Admin dashboard shows accurate stats
-- [ ] All admin pages functional
-- [ ] W-9 reminder automation running
-- [ ] Creator portal shows tax forms
-- [ ] `npx tsc --noEmit` passes
-- [ ] Unit tests for all calculations
-- [ ] E2E test for full tax flow
+- [x] All type definitions complete
+- [x] Database schema migrated
+- [x] TIN encryption/decryption working with audit
+- [x] W-9 collection captures all fields
+- [x] Payment aggregation correctly calculates thresholds
+- [x] 1099 generation for all payee types
+- [x] Form approval/voiding workflow complete
+- [x] IRIS CSV generation working
+- [x] Corrections (Type 1 & Type 2) working
+- [x] Admin dashboard shows accurate stats
+- [x] All admin pages functional
+- [x] W-9 reminder automation running (via Phase 5E jobs)
+- [x] Creator portal shows tax forms
+- [x] `npx tsc --noEmit` passes
+- [x] Unit tests for all calculations
+- [x] E2E test for full tax flow

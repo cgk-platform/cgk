@@ -95,8 +95,9 @@ CREATE TABLE IF NOT EXISTS agent_memories (
   confidence NUMERIC(3,2) DEFAULT 0.5 CHECK (confidence >= 0 AND confidence <= 1),
   importance NUMERIC(3,2) DEFAULT 0.5 CHECK (importance >= 0 AND importance <= 1),
 
-  -- Vector embedding (3072 dimensions for text-embedding-3-large)
-  embedding vector(3072),
+  -- Vector embedding (1536 dimensions for text-embedding-3-small)
+  -- Note: HNSW indexes have a 2000 dimension limit, so we use the small model
+  embedding vector(1536),
 
   -- Usage tracking
   times_used INTEGER DEFAULT 0,
@@ -141,7 +142,7 @@ CREATE TRIGGER update_agent_memories_updated_at
   EXECUTE FUNCTION public.update_updated_at_column();
 
 COMMENT ON TABLE agent_memories IS 'Long-term agent memories with vector embeddings for RAG';
-COMMENT ON COLUMN agent_memories.embedding IS '3072-dimension vector for text-embedding-3-large';
+COMMENT ON COLUMN agent_memories.embedding IS '1536-dimension vector for text-embedding-3-small';
 COMMENT ON COLUMN agent_memories.confidence IS 'Confidence score 0.0-1.0, decays over time';
 
 -- Explicit training sessions for knowledge import

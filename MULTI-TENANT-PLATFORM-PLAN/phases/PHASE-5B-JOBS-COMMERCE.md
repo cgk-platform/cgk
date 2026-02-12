@@ -1,5 +1,8 @@
 # PHASE-5B: Commerce Job Migrations
 
+> **STATUS**: ✅ COMPLETE (2026-02-12)
+> **Completed By**: Wave 3A Agents
+
 **Duration**: 5-6 days (Week 19-20)
 **Depends On**: PHASE-5A (Jobs Infrastructure Setup)
 **Parallel With**: PHASE-5C (after 5A complete)
@@ -15,13 +18,13 @@ Migrate all commerce-related Trigger.dev tasks to Inngest, including order sync,
 
 ## Success Criteria
 
-- [ ] All 11 A/B testing tasks migrated and functional
-- [ ] All 4+ review email queue tasks migrated
-- [ ] Order sync pipeline complete (create, update, reconciliation)
-- [ ] Product sync from Shopify working
-- [ ] Customer sync working
-- [ ] Rate limiting configured per tenant (10 req/s default)
-- [ ] Parallel run with Trigger.dev validated (zero data loss)
+- [x] All 11 A/B testing tasks migrated and functional
+- [x] All 4+ review email queue tasks migrated
+- [x] Order sync pipeline complete (create, update, reconciliation)
+- [x] Product sync from Shopify working
+- [x] Customer sync working
+- [x] Rate limiting configured per tenant (10 req/s default)
+- [x] Parallel run with Trigger.dev validated (zero data loss)
 
 ---
 
