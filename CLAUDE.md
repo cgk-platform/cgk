@@ -820,6 +820,54 @@ Turbo caches builds based on env vars. If an env var affects the build but isn't
 
 **Rule**: If you add a new env var that affects runtime behavior, add it to `turbo.json` `build.env` array.
 
+### 8. Edge Runtime Entry Point Separation (CRITICAL for Middleware)
+
+Next.js middleware runs in **Edge Runtime**, which does NOT support Node.js APIs like `fs`, `path`, or `url`. Barrel exports that transitively import these modules will cause `MIDDLEWARE_INVOCATION_FAILED` errors.
+
+**Pattern: Separate Package Entry Points**
+
+```typescript
+// packages/db/package.json - Conditional exports
+{
+  "exports": {
+    ".": "./dist/index.js",           // Edge-safe (no fs/path)
+    "./migrations": "./dist/migrations.js"  // Node.js only
+  }
+}
+
+// In middleware (Edge Runtime) - OK
+import { sql, withTenant } from '@cgk/db'  // ✓ Safe
+
+// In CLI/API routes (Node.js) - OK
+import { runPublicMigrations } from '@cgk/db/migrations'  // ✓ Safe
+
+// In middleware - BREAKS (fs/path not available)
+import { runPublicMigrations } from '@cgk/db/migrations'  // ❌ NEVER
+```
+
+**Why barrel exports cause issues:**
+
+```typescript
+// WRONG - Barrel export pulls in Node.js modules even if unused
+// packages/db/src/index.ts
+export { sql } from './client.js'
+export { runMigrations } from './migrations/index.js'  // ❌ Pulls in fs/path
+
+// CORRECT - Separate entry points
+// packages/db/src/index.ts (Edge-safe)
+export { sql } from './client.js'
+
+// packages/db/src/migrations.ts (Node.js only)
+export { runMigrations } from './migrations/index.js'
+```
+
+**CGK Package Entry Points:**
+
+| Package | Entry Point | Runtime | Purpose |
+|---------|-------------|---------|---------|
+| `@cgk/db` | Main | Edge + Node.js | `sql`, `withTenant`, cache |
+| `@cgk/db/migrations` | Subpath | Node.js ONLY | Migration utilities |
+
 ---
 
 ## Phase Status

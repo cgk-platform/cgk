@@ -155,8 +155,8 @@ export const setupDatabaseCommand = new Command('setup:database')
     }
 
     try {
-      const db = await import('@cgk/db')
-      const results = await db.runPublicMigrations({
+      const migrations = await import('@cgk/db/migrations')
+      const results = await migrations.runPublicMigrations({
         dryRun: options.dryRun,
         onProgress: (migration, status) => {
           if (status === 'running') {
@@ -351,8 +351,8 @@ async function runMigrations(): Promise<boolean> {
   spinner.start('Running database migrations...')
 
   try {
-    const db = await import('@cgk/db')
-    const results = await db.runPublicMigrations()
+    const migrations = await import('@cgk/db/migrations')
+    const results = await migrations.runPublicMigrations()
 
     if (results.length === 0) {
       spinner.succeed('No pending migrations')

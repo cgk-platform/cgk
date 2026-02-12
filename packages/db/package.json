@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./migrations": {
+      "types": "./dist/migrations.d.ts",
+      "import": "./dist/migrations.js"
     }
   },
   "main": "./dist/index.js",
@@ -16,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts && cp -r src/migrations/public src/migrations/tenant dist/",
+    "build": "tsup src/index.ts src/migrations.ts --format esm --dts && cp -r src/migrations/public src/migrations/tenant dist/",
     "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",

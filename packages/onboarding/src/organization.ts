@@ -4,7 +4,8 @@
  * Creates and manages organizations during onboarding.
  */
 
-import { createTenantSchema, sql } from '@cgk/db'
+import { sql } from '@cgk/db'
+import { createTenantSchema } from '@cgk/db/migrations'
 import { createLogger } from '@cgk/logging'
 
 import type { BasicInfoData, OrganizationSummary } from './types.js'

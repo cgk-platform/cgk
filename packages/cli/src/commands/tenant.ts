@@ -56,10 +56,11 @@ const createTenantCommand = new Command('tenant:create')
     try {
       // Dynamic import to handle missing dependency gracefully
       const db = await import('@cgk/db')
+      const migrations = await import('@cgk/db/migrations')
 
       // Check if tenant already exists
       spinner.start('Checking if tenant exists...')
-      const exists = await db.tenantSchemaExists(slug)
+      const exists = await migrations.tenantSchemaExists(slug)
 
       if (exists) {
         spinner.fail(`Tenant "${slug}" already exists`)
@@ -70,7 +71,7 @@ const createTenantCommand = new Command('tenant:create')
 
       // Create tenant schema
       spinner.start('Creating tenant schema...')
-      const results = await db.createTenantSchema(slug, {
+      const results = await migrations.createTenantSchema(slug, {
         onProgress: (migration, status) => {
           if (status === 'running') {
             spinner.text = `Running migration: ${migration.name}...`

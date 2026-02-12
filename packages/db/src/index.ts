@@ -36,22 +36,10 @@ export {
   type TenantCache,
 } from './cache.js'
 
-// Migration utilities
-export {
-  createTenantSchema,
-  getMigrationStatus,
-  loadMigrations,
-  loadPublicMigrations,
-  loadTenantMigrations,
-  runPublicMigrations,
-  runTenantMigrations,
-  tenantSchemaExists,
-  type Migration,
-  type MigrationOptions,
-  type MigrationRecord,
-  type MigrationResult,
-  type SchemaType,
-} from './migrations/index.js'
+// Migration utilities are intentionally NOT exported here.
+// They use Node.js fs/path modules which break in Edge Runtime (middleware).
+// Import from '@cgk/db/migrations' instead for migration functions.
+// See: packages/db/src/migrations.ts
 
 // Types
 export type { QueryConfig, QueryResult } from './types.js'

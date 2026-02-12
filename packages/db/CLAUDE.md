@@ -28,6 +28,28 @@ await cache.set('key', value, { ttl: 3600 })
 
 ---
 
+## Entry Points
+
+| Import Path | Runtime | Purpose |
+|-------------|---------|---------|
+| `@cgk/db` | Edge + Node.js | Core utilities: `sql`, `withTenant`, cache |
+| `@cgk/db/migrations` | Node.js ONLY | Migration utilities (uses fs/path) |
+
+**CRITICAL: Never import from `@cgk/db/migrations` in middleware or Edge Runtime code.**
+
+```typescript
+// Middleware (Edge Runtime) - OK
+import { sql, withTenant } from '@cgk/db'
+
+// CLI/Scripts (Node.js) - OK
+import { runPublicMigrations, createTenantSchema } from '@cgk/db/migrations'
+
+// Middleware - BREAKS (fs/path not available)
+import { runPublicMigrations } from '@cgk/db/migrations'  // ❌ NEVER
+```
+
+---
+
 ## Key Patterns
 
 ### Pattern 1: Tenant-Scoped Queries (MANDATORY)
@@ -94,10 +116,11 @@ const users = await sql`SELECT * FROM users WHERE email = '${email}'`
 
 ### Pattern 5: Running Migrations
 
-**When to use**: Setup and tenant creation
+**When to use**: Setup and tenant creation (Node.js only, NOT in middleware)
 
 ```typescript
-import { runPublicMigrations, createTenantSchema } from '@cgk/db'
+// Import from @cgk/db/migrations (NOT @cgk/db)
+import { runPublicMigrations, createTenantSchema } from '@cgk/db/migrations'
 
 // Run public schema migrations
 await runPublicMigrations()
@@ -112,7 +135,8 @@ await createTenantSchema('new_brand')
 
 | File | Purpose | Key Exports |
 |------|---------|-------------|
-| `index.ts` | Public exports | All exports |
+| `index.ts` | Edge-safe exports | `sql`, `withTenant`, cache utilities |
+| `migrations.ts` | Node.js-only entry | Migration utilities (uses fs/path) |
 | `client.ts` | Database connection | `sql` |
 | `tenant.ts` | Tenant context | `withTenant`, `setTenantSchema`, `validateTenantSlug` |
 | `request.ts` | Request helpers | `getTenantFromRequest`, `requireTenant` |
@@ -272,6 +296,17 @@ if (!isValidTenantSlug(slug)) {
 }
 // or
 validateTenantSlug(slug) // throws if invalid
+```
+
+### 6. Edge Runtime Compatibility
+
+```typescript
+// WRONG - Importing migrations in middleware breaks Edge Runtime
+import { sql, runPublicMigrations } from '@cgk/db'  // ❌ Even partial import fails
+
+// CORRECT - Use separate entry points
+import { sql } from '@cgk/db'  // Edge-safe
+import { runPublicMigrations } from '@cgk/db/migrations'  // Node.js only (in API routes)
 ```
 
 ---
