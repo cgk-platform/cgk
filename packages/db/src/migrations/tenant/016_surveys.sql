@@ -2,7 +2,7 @@
 -- Post-purchase surveys, attribution collection, and response analytics
 
 -- Survey definitions
-CREATE TABLE surveys (
+CREATE TABLE IF NOT EXISTS surveys (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Metadata
@@ -46,13 +46,13 @@ CREATE TABLE surveys (
   CONSTRAINT surveys_slug_unique UNIQUE (slug)
 );
 
-CREATE INDEX idx_surveys_status ON surveys(status);
-CREATE INDEX idx_surveys_type ON surveys(survey_type);
-CREATE INDEX idx_surveys_created ON surveys(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_surveys_status ON surveys(status);
+CREATE INDEX IF NOT EXISTS idx_surveys_type ON surveys(survey_type);
+CREATE INDEX IF NOT EXISTS idx_surveys_created ON surveys(created_at DESC);
 
 
 -- Survey questions
-CREATE TABLE survey_questions (
+CREATE TABLE IF NOT EXISTS survey_questions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
 
@@ -86,13 +86,13 @@ CREATE TABLE survey_questions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_survey_questions_survey ON survey_questions(survey_id, display_order);
-CREATE INDEX idx_survey_questions_attribution ON survey_questions(is_attribution_question)
+CREATE INDEX IF NOT EXISTS idx_survey_questions_survey ON survey_questions(survey_id, display_order);
+CREATE INDEX IF NOT EXISTS idx_survey_questions_attribution ON survey_questions(is_attribution_question)
   WHERE is_attribution_question = TRUE;
 
 
 -- Attribution options (predefined + custom)
-CREATE TABLE attribution_options (
+CREATE TABLE IF NOT EXISTS attribution_options (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Display
@@ -116,11 +116,11 @@ CREATE TABLE attribution_options (
   CONSTRAINT attribution_options_value_unique UNIQUE (value)
 );
 
-CREATE INDEX idx_attribution_options_active ON attribution_options(is_active, display_order);
+CREATE INDEX IF NOT EXISTS idx_attribution_options_active ON attribution_options(is_active, display_order);
 
 
 -- Survey responses
-CREATE TABLE survey_responses (
+CREATE TABLE IF NOT EXISTS survey_responses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
 
@@ -149,16 +149,16 @@ CREATE TABLE survey_responses (
   CONSTRAINT survey_responses_order_unique UNIQUE (survey_id, order_id)
 );
 
-CREATE INDEX idx_survey_responses_survey ON survey_responses(survey_id, created_at DESC);
-CREATE INDEX idx_survey_responses_order ON survey_responses(order_id);
-CREATE INDEX idx_survey_responses_customer ON survey_responses(customer_id);
-CREATE INDEX idx_survey_responses_complete ON survey_responses(is_complete);
-CREATE INDEX idx_survey_responses_attribution ON survey_responses(attribution_source);
-CREATE INDEX idx_survey_responses_nps ON survey_responses(nps_score) WHERE nps_score IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_survey_responses_survey ON survey_responses(survey_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_survey_responses_order ON survey_responses(order_id);
+CREATE INDEX IF NOT EXISTS idx_survey_responses_customer ON survey_responses(customer_id);
+CREATE INDEX IF NOT EXISTS idx_survey_responses_complete ON survey_responses(is_complete);
+CREATE INDEX IF NOT EXISTS idx_survey_responses_attribution ON survey_responses(attribution_source);
+CREATE INDEX IF NOT EXISTS idx_survey_responses_nps ON survey_responses(nps_score) WHERE nps_score IS NOT NULL;
 
 
 -- Individual question answers
-CREATE TABLE survey_answers (
+CREATE TABLE IF NOT EXISTS survey_answers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   response_id UUID NOT NULL REFERENCES survey_responses(id) ON DELETE CASCADE,
   question_id UUID NOT NULL REFERENCES survey_questions(id) ON DELETE CASCADE,
@@ -174,12 +174,12 @@ CREATE TABLE survey_answers (
   CONSTRAINT survey_answers_unique UNIQUE (response_id, question_id)
 );
 
-CREATE INDEX idx_survey_answers_response ON survey_answers(response_id);
-CREATE INDEX idx_survey_answers_question ON survey_answers(question_id);
+CREATE INDEX IF NOT EXISTS idx_survey_answers_response ON survey_answers(response_id);
+CREATE INDEX IF NOT EXISTS idx_survey_answers_question ON survey_answers(question_id);
 
 
 -- Slack notification config
-CREATE TABLE survey_slack_config (
+CREATE TABLE IF NOT EXISTS survey_slack_config (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID REFERENCES surveys(id) ON DELETE CASCADE,
 
@@ -207,8 +207,8 @@ CREATE TABLE survey_slack_config (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX idx_survey_slack_survey ON survey_slack_config(survey_id);
-CREATE INDEX idx_survey_slack_active ON survey_slack_config(is_active) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_survey_slack_survey ON survey_slack_config(survey_id);
+CREATE INDEX IF NOT EXISTS idx_survey_slack_active ON survey_slack_config(is_active) WHERE is_active = TRUE;
 
 
 -- Seed default attribution options

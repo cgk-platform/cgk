@@ -90,13 +90,10 @@ WEEK 22-25: PHASE 5 (Jobs) - PARALLEL AFTER 5A
           5A (BLOCKING - must complete first)
 
           THEN 4 PARALLEL AGENTS:
-          ┌─ 5B (Commerce Jobs)
-          ├─ 5C (Creator Jobs)
-          ├─ 5D (Analytics Jobs)
-          └─ 5E (Scheduled Jobs)
-
-          THEN SEQUENTIAL:
-          5F (Trigger.dev Task Integration - wire handlers to actual tasks)
+          ┌─ 5B (Commerce Jobs - handlers)
+          ├─ 5C (Creator Jobs - handlers)
+          ├─ 5D (Analytics Jobs - handlers)
+          └─ 5E (Scheduled Jobs - handlers)
 
           SAVES: 10 days vs sequential
           └─ CHECKPOINT: Jobs Audit (fresh session)
@@ -104,6 +101,11 @@ WEEK 22-25: PHASE 5 (Jobs) - PARALLEL AFTER 5A
 WEEK 25-27: PHASE 6 (MCP) - SEQUENTIAL
           6A ─→ 6B
           └─ Single Agent
+
+WEEK 27: PHASE 5F (Trigger.dev Integration) - SEQUENTIAL
+          5F (Wire 240 handlers to actual Trigger.dev tasks)
+          └─ Single Agent
+          └─ CHECKPOINT: Jobs fully operational
 
 WEEK 27-30: PHASE 7 (Migration) - SEQUENTIAL
           7A ─→ 7B ─→ 7C

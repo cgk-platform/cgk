@@ -3,7 +3,7 @@
 -- Adds team-based scheduling: round-robin, collective, and individual host selection
 
 -- Scheduling teams
-CREATE TABLE scheduling_teams (
+CREATE TABLE IF NOT EXISTS scheduling_teams (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
 
@@ -21,7 +21,7 @@ CREATE TABLE scheduling_teams (
 );
 
 -- Team members (many-to-many relationship)
-CREATE TABLE scheduling_team_members (
+CREATE TABLE IF NOT EXISTS scheduling_team_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   team_id UUID NOT NULL REFERENCES scheduling_teams(id) ON DELETE CASCADE,
@@ -34,7 +34,7 @@ CREATE TABLE scheduling_team_members (
 );
 
 -- Team event types (shared event types for teams)
-CREATE TABLE scheduling_team_event_types (
+CREATE TABLE IF NOT EXISTS scheduling_team_event_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   team_id UUID NOT NULL REFERENCES scheduling_teams(id) ON DELETE CASCADE,
@@ -63,7 +63,7 @@ CREATE TABLE scheduling_team_event_types (
 );
 
 -- Round-robin counter (tracks next host index)
-CREATE TABLE scheduling_round_robin_counters (
+CREATE TABLE IF NOT EXISTS scheduling_round_robin_counters (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   team_event_type_id UUID NOT NULL REFERENCES scheduling_team_event_types(id) ON DELETE CASCADE,
@@ -90,22 +90,22 @@ ADD CONSTRAINT chk_booking_event_type
 CHECK (event_type_id IS NOT NULL OR team_event_type_id IS NOT NULL);
 
 -- Indexes for scheduling_teams
-CREATE INDEX idx_scheduling_teams_tenant ON scheduling_teams(tenant_id);
-CREATE INDEX idx_scheduling_teams_slug ON scheduling_teams(slug);
+CREATE INDEX IF NOT EXISTS idx_scheduling_teams_tenant ON scheduling_teams(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_teams_slug ON scheduling_teams(slug);
 
 -- Indexes for scheduling_team_members
-CREATE INDEX idx_scheduling_team_members_team ON scheduling_team_members(team_id);
-CREATE INDEX idx_scheduling_team_members_user ON scheduling_team_members(user_id);
-CREATE INDEX idx_scheduling_team_members_tenant ON scheduling_team_members(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_team_members_team ON scheduling_team_members(team_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_team_members_user ON scheduling_team_members(user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_team_members_tenant ON scheduling_team_members(tenant_id);
 
 -- Indexes for scheduling_team_event_types
-CREATE INDEX idx_scheduling_team_event_types_team ON scheduling_team_event_types(team_id);
-CREATE INDEX idx_scheduling_team_event_types_tenant ON scheduling_team_event_types(tenant_id);
-CREATE INDEX idx_scheduling_team_event_types_slug ON scheduling_team_event_types(slug);
-CREATE INDEX idx_scheduling_team_event_types_active ON scheduling_team_event_types(is_active) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_scheduling_team_event_types_team ON scheduling_team_event_types(team_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_team_event_types_tenant ON scheduling_team_event_types(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_team_event_types_slug ON scheduling_team_event_types(slug);
+CREATE INDEX IF NOT EXISTS idx_scheduling_team_event_types_active ON scheduling_team_event_types(is_active) WHERE is_active = true;
 
 -- Indexes for scheduling_round_robin_counters
-CREATE INDEX idx_scheduling_round_robin_event ON scheduling_round_robin_counters(team_event_type_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_round_robin_event ON scheduling_round_robin_counters(team_event_type_id);
 
 -- Index for team bookings
-CREATE INDEX idx_scheduling_bookings_team_event ON scheduling_bookings(team_event_type_id) WHERE team_event_type_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_scheduling_bookings_team_event ON scheduling_bookings(team_event_type_id) WHERE team_event_type_id IS NOT NULL;

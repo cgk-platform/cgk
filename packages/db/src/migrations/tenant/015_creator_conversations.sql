@@ -19,7 +19,7 @@ END $$;
 CREATE TABLE IF NOT EXISTS creator_conversations (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   creator_id TEXT NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
-  project_id TEXT REFERENCES projects(id) ON DELETE SET NULL,
+  project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
 
   -- Conversation metadata
   subject TEXT,

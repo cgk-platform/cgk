@@ -77,10 +77,15 @@ ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS quality_score INTEGER;
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS quality_breakdown JSONB;
 ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS quality_calculated_at TIMESTAMPTZ;
 
--- Author credential fields for E-E-A-T
-ALTER TABLE blog_authors ADD COLUMN IF NOT EXISTS credentials TEXT[];
-ALTER TABLE blog_authors ADD COLUMN IF NOT EXISTS expertise_areas TEXT[];
-ALTER TABLE blog_authors ADD COLUMN IF NOT EXISTS is_team_account BOOLEAN NOT NULL DEFAULT FALSE;
+-- Author credential fields for E-E-A-T (only if blog_authors exists)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'blog_authors') THEN
+    EXECUTE 'ALTER TABLE blog_authors ADD COLUMN IF NOT EXISTS credentials TEXT[]';
+    EXECUTE 'ALTER TABLE blog_authors ADD COLUMN IF NOT EXISTS expertise_areas TEXT[]';
+    EXECUTE 'ALTER TABLE blog_authors ADD COLUMN IF NOT EXISTS is_team_account BOOLEAN NOT NULL DEFAULT FALSE';
+  END IF;
+END $$;
 
 -- Indexes for efficient queries
 CREATE INDEX IF NOT EXISTS idx_blog_clusters_slug ON blog_clusters(slug);

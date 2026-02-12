@@ -2,7 +2,7 @@
 -- Migration: 009_scheduling.sql
 
 -- Scheduling users (per-tenant scheduling profiles)
-CREATE TABLE scheduling_users (
+CREATE TABLE IF NOT EXISTS scheduling_users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   user_id UUID NOT NULL,
@@ -33,7 +33,7 @@ CREATE TABLE scheduling_users (
 );
 
 -- Event types (meeting templates)
-CREATE TABLE scheduling_event_types (
+CREATE TABLE IF NOT EXISTS scheduling_event_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   user_id UUID NOT NULL REFERENCES scheduling_users(id) ON DELETE CASCADE,
@@ -66,7 +66,7 @@ CREATE TABLE scheduling_event_types (
 );
 
 -- Availability schedules (weekly)
-CREATE TABLE scheduling_availability (
+CREATE TABLE IF NOT EXISTS scheduling_availability (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   user_id UUID NOT NULL REFERENCES scheduling_users(id) ON DELETE CASCADE,
@@ -90,7 +90,7 @@ CREATE TABLE scheduling_availability (
 );
 
 -- Blocked dates (PTO, holidays, conferences)
-CREATE TABLE scheduling_blocked_dates (
+CREATE TABLE IF NOT EXISTS scheduling_blocked_dates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   user_id UUID NOT NULL REFERENCES scheduling_users(id) ON DELETE CASCADE,
@@ -106,7 +106,7 @@ CREATE TABLE scheduling_blocked_dates (
 );
 
 -- Bookings (confirmed meetings)
-CREATE TABLE scheduling_bookings (
+CREATE TABLE IF NOT EXISTS scheduling_bookings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   event_type_id UUID NOT NULL REFERENCES scheduling_event_types(id) ON DELETE CASCADE,
@@ -148,7 +148,7 @@ CREATE TABLE scheduling_bookings (
 );
 
 -- Changelog for audit/analytics
-CREATE TABLE scheduling_changelog (
+CREATE TABLE IF NOT EXISTS scheduling_changelog (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   entity_type TEXT NOT NULL,
@@ -160,31 +160,31 @@ CREATE TABLE scheduling_changelog (
 );
 
 -- Indexes for scheduling_users
-CREATE INDEX idx_scheduling_users_tenant ON scheduling_users(tenant_id);
-CREATE INDEX idx_scheduling_users_user_id ON scheduling_users(user_id);
-CREATE INDEX idx_scheduling_users_username ON scheduling_users(username);
+CREATE INDEX IF NOT EXISTS idx_scheduling_users_tenant ON scheduling_users(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_users_user_id ON scheduling_users(user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_users_username ON scheduling_users(username);
 
 -- Indexes for scheduling_event_types
-CREATE INDEX idx_scheduling_event_types_tenant ON scheduling_event_types(tenant_id);
-CREATE INDEX idx_scheduling_event_types_user ON scheduling_event_types(user_id);
-CREATE INDEX idx_scheduling_event_types_slug ON scheduling_event_types(slug);
-CREATE INDEX idx_scheduling_event_types_active ON scheduling_event_types(is_active) WHERE is_active = true;
+CREATE INDEX IF NOT EXISTS idx_scheduling_event_types_tenant ON scheduling_event_types(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_event_types_user ON scheduling_event_types(user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_event_types_slug ON scheduling_event_types(slug);
+CREATE INDEX IF NOT EXISTS idx_scheduling_event_types_active ON scheduling_event_types(is_active) WHERE is_active = true;
 
 -- Indexes for scheduling_availability
-CREATE INDEX idx_scheduling_availability_user ON scheduling_availability(user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_availability_user ON scheduling_availability(user_id);
 
 -- Indexes for scheduling_blocked_dates
-CREATE INDEX idx_scheduling_blocked_dates_user ON scheduling_blocked_dates(user_id);
-CREATE INDEX idx_scheduling_blocked_dates_dates ON scheduling_blocked_dates(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_scheduling_blocked_dates_user ON scheduling_blocked_dates(user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_blocked_dates_dates ON scheduling_blocked_dates(start_date, end_date);
 
 -- Indexes for scheduling_bookings
-CREATE INDEX idx_scheduling_bookings_tenant ON scheduling_bookings(tenant_id);
-CREATE INDEX idx_scheduling_bookings_host ON scheduling_bookings(host_user_id);
-CREATE INDEX idx_scheduling_bookings_event_type ON scheduling_bookings(event_type_id);
-CREATE INDEX idx_scheduling_bookings_start ON scheduling_bookings(start_time);
-CREATE INDEX idx_scheduling_bookings_status ON scheduling_bookings(status);
-CREATE INDEX idx_scheduling_bookings_invitee_email ON scheduling_bookings((invitee->>'email'));
+CREATE INDEX IF NOT EXISTS idx_scheduling_bookings_tenant ON scheduling_bookings(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_bookings_host ON scheduling_bookings(host_user_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_bookings_event_type ON scheduling_bookings(event_type_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_bookings_start ON scheduling_bookings(start_time);
+CREATE INDEX IF NOT EXISTS idx_scheduling_bookings_status ON scheduling_bookings(status);
+CREATE INDEX IF NOT EXISTS idx_scheduling_bookings_invitee_email ON scheduling_bookings((invitee->>'email'));
 
 -- Indexes for scheduling_changelog
-CREATE INDEX idx_scheduling_changelog_entity ON scheduling_changelog(entity_type, entity_id);
-CREATE INDEX idx_scheduling_changelog_created ON scheduling_changelog(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_scheduling_changelog_entity ON scheduling_changelog(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_scheduling_changelog_created ON scheduling_changelog(created_at DESC);

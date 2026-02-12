@@ -2,7 +2,7 @@
 -- Tenant-scoped analytics tables for reports, targets, P&L data, and Slack alerts
 
 -- Custom reports table
-CREATE TABLE analytics_reports (
+CREATE TABLE IF NOT EXISTS analytics_reports (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(255) NOT NULL,
   type VARCHAR(50) NOT NULL DEFAULT 'custom', -- preset, custom
@@ -15,7 +15,7 @@ CREATE TABLE analytics_reports (
 );
 
 -- Report runs / execution history
-CREATE TABLE analytics_report_runs (
+CREATE TABLE IF NOT EXISTS analytics_report_runs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id UUID NOT NULL REFERENCES analytics_reports(id) ON DELETE CASCADE,
   status VARCHAR(50) DEFAULT 'pending', -- pending, running, completed, failed
@@ -27,7 +27,7 @@ CREATE TABLE analytics_report_runs (
 );
 
 -- Analytics targets/goals
-CREATE TABLE analytics_targets (
+CREATE TABLE IF NOT EXISTS analytics_targets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   metric VARCHAR(100) NOT NULL, -- revenue, cac, ltv, roas, aov, conversion_rate
   target_value DECIMAL(15,2) NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE analytics_targets (
 );
 
 -- Slack notification configuration
-CREATE TABLE analytics_slack_alerts (
+CREATE TABLE IF NOT EXISTS analytics_slack_alerts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   alert_type VARCHAR(100) NOT NULL, -- revenue_daily, revenue_milestone, revenue_threshold, high_value_order, order_spike, first_time_customer, churn_spike, mrr_milestone, failed_payments, low_stock, out_of_stock, reorder_needed
   channel_id VARCHAR(100) NOT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE analytics_slack_alerts (
 );
 
 -- P&L data cache (pre-computed P&L breakdowns)
-CREATE TABLE pl_data (
+CREATE TABLE IF NOT EXISTS pl_data (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   period_type VARCHAR(50) NOT NULL, -- daily, monthly, quarterly, yearly
   period_start DATE NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE pl_data (
 );
 
 -- Analytics settings
-CREATE TABLE analytics_settings (
+CREATE TABLE IF NOT EXISTS analytics_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   -- Data source connections
   shopify_connected BOOLEAN DEFAULT false,
@@ -104,7 +104,7 @@ CREATE TABLE analytics_settings (
 );
 
 -- Aggregated daily metrics cache for quick dashboard loading
-CREATE TABLE analytics_daily_metrics (
+CREATE TABLE IF NOT EXISTS analytics_daily_metrics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   date DATE NOT NULL,
   -- Revenue metrics
@@ -143,7 +143,7 @@ CREATE TABLE analytics_daily_metrics (
 );
 
 -- Geographic metrics cache
-CREATE TABLE analytics_geo_metrics (
+CREATE TABLE IF NOT EXISTS analytics_geo_metrics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   date DATE NOT NULL,
   country VARCHAR(2) NOT NULL, -- ISO country code
@@ -163,7 +163,7 @@ CREATE TABLE analytics_geo_metrics (
 );
 
 -- BRI (Brand Relationship Intelligence) conversation analytics
-CREATE TABLE analytics_bri_metrics (
+CREATE TABLE IF NOT EXISTS analytics_bri_metrics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   date DATE NOT NULL,
   channel VARCHAR(50) NOT NULL, -- chat, voice, email
@@ -189,7 +189,7 @@ CREATE TABLE analytics_bri_metrics (
 );
 
 -- Pipeline/funnel metrics
-CREATE TABLE analytics_pipeline_metrics (
+CREATE TABLE IF NOT EXISTS analytics_pipeline_metrics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   date DATE NOT NULL,
   source VARCHAR(100), -- channel source (optional for aggregate)
@@ -223,7 +223,7 @@ CREATE TABLE analytics_pipeline_metrics (
 );
 
 -- Burn rate / cash flow tracking
-CREATE TABLE analytics_burn_rate (
+CREATE TABLE IF NOT EXISTS analytics_burn_rate (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   period_type VARCHAR(20) NOT NULL, -- daily, weekly, monthly
   period_start DATE NOT NULL,
@@ -255,22 +255,22 @@ CREATE TABLE analytics_burn_rate (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_analytics_reports_type ON analytics_reports(type);
-CREATE INDEX idx_analytics_reports_created_by ON analytics_reports(created_by);
-CREATE INDEX idx_analytics_report_runs_report_id ON analytics_report_runs(report_id);
-CREATE INDEX idx_analytics_report_runs_status ON analytics_report_runs(status);
-CREATE INDEX idx_analytics_targets_metric ON analytics_targets(metric);
-CREATE INDEX idx_analytics_targets_period ON analytics_targets(period, period_start);
-CREATE INDEX idx_analytics_slack_alerts_type ON analytics_slack_alerts(alert_type);
-CREATE INDEX idx_analytics_slack_alerts_enabled ON analytics_slack_alerts(is_enabled);
-CREATE INDEX idx_pl_data_period ON pl_data(period_type, period_start);
-CREATE INDEX idx_analytics_daily_metrics_date ON analytics_daily_metrics(date);
-CREATE INDEX idx_analytics_geo_metrics_date ON analytics_geo_metrics(date);
-CREATE INDEX idx_analytics_geo_metrics_country ON analytics_geo_metrics(country);
-CREATE INDEX idx_analytics_bri_metrics_date ON analytics_bri_metrics(date);
-CREATE INDEX idx_analytics_bri_metrics_channel ON analytics_bri_metrics(channel);
-CREATE INDEX idx_analytics_pipeline_metrics_date ON analytics_pipeline_metrics(date);
-CREATE INDEX idx_analytics_burn_rate_period ON analytics_burn_rate(period_type, period_start);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_type ON analytics_reports(type);
+CREATE INDEX IF NOT EXISTS idx_analytics_reports_created_by ON analytics_reports(created_by);
+CREATE INDEX IF NOT EXISTS idx_analytics_report_runs_report_id ON analytics_report_runs(report_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_report_runs_status ON analytics_report_runs(status);
+CREATE INDEX IF NOT EXISTS idx_analytics_targets_metric ON analytics_targets(metric);
+CREATE INDEX IF NOT EXISTS idx_analytics_targets_period ON analytics_targets(period, period_start);
+CREATE INDEX IF NOT EXISTS idx_analytics_slack_alerts_type ON analytics_slack_alerts(alert_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_slack_alerts_enabled ON analytics_slack_alerts(is_enabled);
+CREATE INDEX IF NOT EXISTS idx_pl_data_period ON pl_data(period_type, period_start);
+CREATE INDEX IF NOT EXISTS idx_analytics_daily_metrics_date ON analytics_daily_metrics(date);
+CREATE INDEX IF NOT EXISTS idx_analytics_geo_metrics_date ON analytics_geo_metrics(date);
+CREATE INDEX IF NOT EXISTS idx_analytics_geo_metrics_country ON analytics_geo_metrics(country);
+CREATE INDEX IF NOT EXISTS idx_analytics_bri_metrics_date ON analytics_bri_metrics(date);
+CREATE INDEX IF NOT EXISTS idx_analytics_bri_metrics_channel ON analytics_bri_metrics(channel);
+CREATE INDEX IF NOT EXISTS idx_analytics_pipeline_metrics_date ON analytics_pipeline_metrics(date);
+CREATE INDEX IF NOT EXISTS idx_analytics_burn_rate_period ON analytics_burn_rate(period_type, period_start);
 
 -- Insert default analytics settings row
 INSERT INTO analytics_settings (id) VALUES (gen_random_uuid());

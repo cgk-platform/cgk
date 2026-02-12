@@ -29,11 +29,12 @@ function validateTenantSlug(slug: string): void {
 async function ensureMigrationTable(schema: string): Promise<void> {
   // Create the tracking table if it doesn't exist
   // IMPORTANT: With Neon's connection pooler, search_path must be in the same query
+  // NOTE: We track by name (UNIQUE) because multiple migrations can share version numbers
   await sql.query(`
     SET search_path TO ${schema};
     CREATE TABLE IF NOT EXISTS schema_migrations (
-      version INTEGER PRIMARY KEY,
-      name TEXT NOT NULL,
+      version INTEGER NOT NULL,
+      name TEXT PRIMARY KEY,
       applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `)
@@ -78,11 +79,12 @@ async function applyMigration(
     await sql.query(sqlWithSchema)
 
     // Record the migration (include SET search_path for pooler compatibility)
+    // Use name as primary key since multiple migrations can share version numbers
     await sql.query(`
       SET search_path TO ${schema};
       INSERT INTO schema_migrations (version, name, applied_at)
       VALUES (${migration.version}, '${migration.name}', NOW())
-      ON CONFLICT (version) DO NOTHING
+      ON CONFLICT (name) DO NOTHING
     `)
 
     return {
@@ -116,10 +118,10 @@ async function runMigrationsForSchema(
 
   // Get already applied migrations
   const applied = await getAppliedMigrations(schema)
-  const appliedVersions = new Set(applied.map((m) => m.version))
+  const appliedNames = new Set(applied.map((m) => m.name))
 
-  // Filter to pending migrations
-  let pending = migrations.filter((m) => !appliedVersions.has(m.version))
+  // Filter to pending migrations (by name, since multiple migrations can share version numbers)
+  let pending = migrations.filter((m) => !appliedNames.has(m.name))
 
   // Filter to target version if specified
   if (targetVersion !== undefined) {
@@ -238,8 +240,8 @@ export async function getMigrationStatus(
   try {
     await ensureMigrationTable(schema)
     const applied = await getAppliedMigrations(schema)
-    const appliedVersions = new Set(applied.map((m) => m.version))
-    const pending = migrations.filter((m) => !appliedVersions.has(m.version))
+    const appliedNames = new Set(applied.map((m) => m.name))
+    const pending = migrations.filter((m) => !appliedNames.has(m.name))
 
     return { applied, pending }
   } catch {

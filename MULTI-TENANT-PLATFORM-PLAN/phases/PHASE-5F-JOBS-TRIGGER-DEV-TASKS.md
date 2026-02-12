@@ -1,9 +1,9 @@
 # PHASE-5F: Trigger.dev Task Integration
 
-**Duration**: 3-4 days (Week 22)
-**Depends On**: PHASE-5A through PHASE-5E (all handlers complete)
+**Duration**: 3-4 days (Week 26-27)
+**Depends On**: PHASE-5A through PHASE-5E (all handlers complete), PHASE-6B (MCP complete)
 **Parallel With**: None
-**Blocks**: Production job execution
+**Blocks**: PHASE-7A (Migration Testing - needs working jobs)
 
 ---
 

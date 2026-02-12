@@ -2,7 +2,7 @@
 -- Phase 3F: DAM system for managing images, videos, documents
 
 -- Core asset library
-CREATE TABLE dam_assets (
+CREATE TABLE IF NOT EXISTS dam_assets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE dam_assets (
 );
 
 -- Collections (folders/albums)
-CREATE TABLE dam_collections (
+CREATE TABLE IF NOT EXISTS dam_collections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE dam_collections (
 );
 
 -- Collection-Asset junction
-CREATE TABLE dam_collection_assets (
+CREATE TABLE IF NOT EXISTS dam_collection_assets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   collection_id UUID NOT NULL REFERENCES dam_collections(id) ON DELETE CASCADE,
@@ -111,7 +111,7 @@ CREATE TABLE dam_collection_assets (
 );
 
 -- Google Drive connections
-CREATE TABLE dam_gdrive_connections (
+CREATE TABLE IF NOT EXISTS dam_gdrive_connections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
@@ -146,7 +146,7 @@ CREATE TABLE dam_gdrive_connections (
 );
 
 -- File mappings (Drive -> DAM)
-CREATE TABLE dam_gdrive_file_mappings (
+CREATE TABLE IF NOT EXISTS dam_gdrive_file_mappings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   connection_id UUID NOT NULL REFERENCES dam_gdrive_connections(id) ON DELETE CASCADE,
@@ -163,7 +163,7 @@ CREATE TABLE dam_gdrive_file_mappings (
 );
 
 -- Import queue
-CREATE TABLE dam_import_queue_items (
+CREATE TABLE IF NOT EXISTS dam_import_queue_items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   source_type TEXT NOT NULL CHECK (source_type IN ('gdrive', 'upload', 'api')),
@@ -193,7 +193,7 @@ CREATE TABLE dam_import_queue_items (
 );
 
 -- Trash (soft delete recovery)
-CREATE TABLE dam_trash (
+CREATE TABLE IF NOT EXISTS dam_trash (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   asset_id UUID NOT NULL,
@@ -204,7 +204,7 @@ CREATE TABLE dam_trash (
 );
 
 -- Usage/analytics logs
-CREATE TABLE dam_usage_logs (
+CREATE TABLE IF NOT EXISTS dam_usage_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   asset_id UUID NOT NULL REFERENCES dam_assets(id) ON DELETE CASCADE,
@@ -215,7 +215,7 @@ CREATE TABLE dam_usage_logs (
 );
 
 -- Audit logs
-CREATE TABLE dam_audit_logs (
+CREATE TABLE IF NOT EXISTS dam_audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id TEXT NOT NULL,
   user_id TEXT NOT NULL,
@@ -231,42 +231,42 @@ CREATE TABLE dam_audit_logs (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_dam_assets_tenant ON dam_assets(tenant_id, created_at DESC);
-CREATE INDEX idx_dam_assets_type ON dam_assets(tenant_id, asset_type);
-CREATE INDEX idx_dam_assets_group ON dam_assets(asset_group_id);
-CREATE INDEX idx_dam_assets_search ON dam_assets USING GIN(search_vector);
-CREATE INDEX idx_dam_assets_tags ON dam_assets USING GIN(manual_tags);
-CREATE INDEX idx_dam_assets_ai_tags ON dam_assets USING GIN(ai_tags);
-CREATE INDEX idx_dam_assets_content_tags ON dam_assets USING GIN(content_tags);
-CREATE INDEX idx_dam_assets_product_tags ON dam_assets USING GIN(product_tags);
-CREATE INDEX idx_dam_assets_hash ON dam_assets(file_hash);
-CREATE INDEX idx_dam_assets_source ON dam_assets(tenant_id, source_type, source_file_id);
-CREATE INDEX idx_dam_assets_rights ON dam_assets(tenant_id, rights_status);
-CREATE INDEX idx_dam_assets_archived ON dam_assets(tenant_id, is_archived) WHERE is_archived = false;
-CREATE INDEX idx_dam_assets_favorite ON dam_assets(tenant_id, is_favorite) WHERE is_favorite = true;
+CREATE INDEX IF NOT EXISTS idx_dam_assets_tenant ON dam_assets(tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_type ON dam_assets(tenant_id, asset_type);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_group ON dam_assets(asset_group_id);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_search ON dam_assets USING GIN(search_vector);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_tags ON dam_assets USING GIN(manual_tags);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_ai_tags ON dam_assets USING GIN(ai_tags);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_content_tags ON dam_assets USING GIN(content_tags);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_product_tags ON dam_assets USING GIN(product_tags);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_hash ON dam_assets(file_hash);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_source ON dam_assets(tenant_id, source_type, source_file_id);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_rights ON dam_assets(tenant_id, rights_status);
+CREATE INDEX IF NOT EXISTS idx_dam_assets_archived ON dam_assets(tenant_id, is_archived) WHERE is_archived = false;
+CREATE INDEX IF NOT EXISTS idx_dam_assets_favorite ON dam_assets(tenant_id, is_favorite) WHERE is_favorite = true;
 
-CREATE INDEX idx_dam_collections_tenant ON dam_collections(tenant_id);
-CREATE INDEX idx_dam_collections_type ON dam_collections(tenant_id, collection_type);
+CREATE INDEX IF NOT EXISTS idx_dam_collections_tenant ON dam_collections(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_dam_collections_type ON dam_collections(tenant_id, collection_type);
 
-CREATE INDEX idx_dam_collection_assets_collection ON dam_collection_assets(collection_id);
-CREATE INDEX idx_dam_collection_assets_asset ON dam_collection_assets(asset_id);
+CREATE INDEX IF NOT EXISTS idx_dam_collection_assets_collection ON dam_collection_assets(collection_id);
+CREATE INDEX IF NOT EXISTS idx_dam_collection_assets_asset ON dam_collection_assets(asset_id);
 
-CREATE INDEX idx_dam_gdrive_connections_tenant ON dam_gdrive_connections(tenant_id);
-CREATE INDEX idx_dam_gdrive_connections_channel ON dam_gdrive_connections(watch_channel_id);
+CREATE INDEX IF NOT EXISTS idx_dam_gdrive_connections_tenant ON dam_gdrive_connections(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_dam_gdrive_connections_channel ON dam_gdrive_connections(watch_channel_id);
 
-CREATE INDEX idx_dam_gdrive_mappings_connection ON dam_gdrive_file_mappings(connection_id);
-CREATE INDEX idx_dam_gdrive_mappings_status ON dam_gdrive_file_mappings(connection_id, sync_status);
+CREATE INDEX IF NOT EXISTS idx_dam_gdrive_mappings_connection ON dam_gdrive_file_mappings(connection_id);
+CREATE INDEX IF NOT EXISTS idx_dam_gdrive_mappings_status ON dam_gdrive_file_mappings(connection_id, sync_status);
 
-CREATE INDEX idx_dam_queue_status ON dam_import_queue_items(tenant_id, status);
-CREATE INDEX idx_dam_queue_source ON dam_import_queue_items(tenant_id, source_type, source_file_id);
+CREATE INDEX IF NOT EXISTS idx_dam_queue_status ON dam_import_queue_items(tenant_id, status);
+CREATE INDEX IF NOT EXISTS idx_dam_queue_source ON dam_import_queue_items(tenant_id, source_type, source_file_id);
 
-CREATE INDEX idx_dam_trash_tenant ON dam_trash(tenant_id, permanent_delete_at);
+CREATE INDEX IF NOT EXISTS idx_dam_trash_tenant ON dam_trash(tenant_id, permanent_delete_at);
 
-CREATE INDEX idx_dam_usage_asset ON dam_usage_logs(asset_id, created_at);
-CREATE INDEX idx_dam_usage_tenant ON dam_usage_logs(tenant_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_dam_usage_asset ON dam_usage_logs(asset_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_dam_usage_tenant ON dam_usage_logs(tenant_id, created_at);
 
-CREATE INDEX idx_dam_audit_entity ON dam_audit_logs(entity_type, entity_id);
-CREATE INDEX idx_dam_audit_tenant ON dam_audit_logs(tenant_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_dam_audit_entity ON dam_audit_logs(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_dam_audit_tenant ON dam_audit_logs(tenant_id, created_at);
 
 -- Trigger to update updated_at
 CREATE OR REPLACE FUNCTION dam_update_updated_at()

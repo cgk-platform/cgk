@@ -9,7 +9,7 @@ DROP TABLE IF EXISTS shopify_connections CASCADE;
 
 -- Shopify connections table (Multi-Tenant)
 -- Stores encrypted OAuth tokens and connection metadata per tenant
-CREATE TABLE shopify_connections (
+CREATE TABLE IF NOT EXISTS shopify_connections (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   shop TEXT NOT NULL,                                    -- mystore.myshopify.com
@@ -56,14 +56,14 @@ CREATE TABLE shopify_connections (
 );
 
 -- Indexes for shopify_connections
-CREATE INDEX idx_shopify_connections_tenant ON shopify_connections(tenant_id);
-CREATE INDEX idx_shopify_connections_shop ON shopify_connections(shop);
-CREATE INDEX idx_shopify_connections_status ON shopify_connections(status);
-CREATE INDEX idx_shopify_connections_tenant_status ON shopify_connections(tenant_id, status);
+CREATE INDEX IF NOT EXISTS idx_shopify_connections_tenant ON shopify_connections(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_shopify_connections_shop ON shopify_connections(shop);
+CREATE INDEX IF NOT EXISTS idx_shopify_connections_status ON shopify_connections(status);
+CREATE INDEX IF NOT EXISTS idx_shopify_connections_tenant_status ON shopify_connections(tenant_id, status);
 
 -- Shopify OAuth states table (Temporary - for OAuth flow)
 -- Stores temporary state for CSRF protection during OAuth
-CREATE TABLE shopify_oauth_states (
+CREATE TABLE IF NOT EXISTS shopify_oauth_states (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   shop TEXT NOT NULL,
@@ -75,12 +75,12 @@ CREATE TABLE shopify_oauth_states (
 );
 
 -- Indexes for OAuth states
-CREATE INDEX idx_oauth_states_state ON shopify_oauth_states(state);
-CREATE INDEX idx_oauth_states_expires ON shopify_oauth_states(expires_at);
-CREATE INDEX idx_oauth_states_tenant ON shopify_oauth_states(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_oauth_states_state ON shopify_oauth_states(state);
+CREATE INDEX IF NOT EXISTS idx_oauth_states_expires ON shopify_oauth_states(expires_at);
+CREATE INDEX IF NOT EXISTS idx_oauth_states_tenant ON shopify_oauth_states(tenant_id);
 
 -- Shopify API rate limits tracking
-CREATE TABLE shopify_rate_limits (
+CREATE TABLE IF NOT EXISTS shopify_rate_limits (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   shop TEXT NOT NULL,
@@ -104,8 +104,8 @@ CREATE TABLE shopify_rate_limits (
   CONSTRAINT unique_tenant_shop_endpoint UNIQUE(tenant_id, shop, endpoint)
 );
 
-CREATE INDEX idx_rate_limits_tenant_shop ON shopify_rate_limits(tenant_id, shop);
-CREATE INDEX idx_rate_limits_throttled ON shopify_rate_limits(is_throttled) WHERE is_throttled = TRUE;
+CREATE INDEX IF NOT EXISTS idx_rate_limits_tenant_shop ON shopify_rate_limits(tenant_id, shop);
+CREATE INDEX IF NOT EXISTS idx_rate_limits_throttled ON shopify_rate_limits(is_throttled) WHERE is_throttled = TRUE;
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_shopify_connection_updated_at()

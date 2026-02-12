@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS google_feed_settings (
 
   -- Feed configuration
   feed_name TEXT NOT NULL DEFAULT 'Product Feed',
-  feed_token TEXT UNIQUE DEFAULT encode(gen_random_bytes(32), 'hex'),
+  feed_token TEXT UNIQUE DEFAULT replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''),
   target_country TEXT NOT NULL DEFAULT 'US',
   language TEXT NOT NULL DEFAULT 'en',
   currency TEXT NOT NULL DEFAULT 'USD',

@@ -3,7 +3,7 @@
 -- Created: 2026-02-10
 
 -- Webhook events table - stores all received webhooks
-CREATE TABLE webhook_events (
+CREATE TABLE IF NOT EXISTS webhook_events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   shop TEXT NOT NULL,
   topic TEXT NOT NULL,
@@ -28,14 +28,14 @@ CREATE TABLE webhook_events (
 );
 
 -- Indexes for webhook events
-CREATE INDEX idx_webhook_events_status ON webhook_events(status);
-CREATE INDEX idx_webhook_events_topic ON webhook_events(topic);
-CREATE INDEX idx_webhook_events_received ON webhook_events(received_at);
-CREATE INDEX idx_webhook_events_shop ON webhook_events(shop);
-CREATE INDEX idx_webhook_events_status_retry ON webhook_events(status, retry_count) WHERE status = 'failed';
+CREATE INDEX IF NOT EXISTS idx_webhook_events_status ON webhook_events(status);
+CREATE INDEX IF NOT EXISTS idx_webhook_events_topic ON webhook_events(topic);
+CREATE INDEX IF NOT EXISTS idx_webhook_events_received ON webhook_events(received_at);
+CREATE INDEX IF NOT EXISTS idx_webhook_events_shop ON webhook_events(shop);
+CREATE INDEX IF NOT EXISTS idx_webhook_events_status_retry ON webhook_events(status, retry_count) WHERE status = 'failed';
 
 -- Webhook registrations table - tracks registered webhooks with Shopify
-CREATE TABLE webhook_registrations (
+CREATE TABLE IF NOT EXISTS webhook_registrations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   shop TEXT NOT NULL,
   topic TEXT NOT NULL,
@@ -57,8 +57,8 @@ CREATE TABLE webhook_registrations (
 );
 
 -- Indexes for webhook registrations
-CREATE INDEX idx_webhook_registrations_shop ON webhook_registrations(shop);
-CREATE INDEX idx_webhook_registrations_status ON webhook_registrations(status);
+CREATE INDEX IF NOT EXISTS idx_webhook_registrations_shop ON webhook_registrations(shop);
+CREATE INDEX IF NOT EXISTS idx_webhook_registrations_status ON webhook_registrations(status);
 
 -- Shopify connections table - stores shop credentials and tenant mapping
 CREATE TABLE IF NOT EXISTS shopify_connections (
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS shopify_connections (
 );
 
 -- Indexes for shopify connections
-CREATE INDEX idx_shopify_connections_status ON shopify_connections(status);
+CREATE INDEX IF NOT EXISTS idx_shopify_connections_status ON shopify_connections(status);
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_webhook_registration_updated_at()
