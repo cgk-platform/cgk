@@ -311,6 +311,99 @@ import { runPublicMigrations } from '@cgk/db/migrations'  // Node.js only (in AP
 
 ---
 
+## Migration Writing Guidelines
+
+### Critical Rules for New Migrations
+
+1. **Always use IF NOT EXISTS / IF EXISTS**
+   ```sql
+   CREATE TABLE IF NOT EXISTS my_table (...)
+   CREATE INDEX IF NOT EXISTS idx_name ON my_table(column);
+   DROP TRIGGER IF EXISTS my_trigger ON my_table;
+   ```
+
+2. **Wrap enum creation in DO blocks**
+   ```sql
+   DO $$ BEGIN
+     CREATE TYPE my_enum AS ENUM ('a', 'b', 'c');
+   EXCEPTION
+     WHEN duplicate_object THEN NULL;
+   END $$;
+   ```
+
+3. **Use fully qualified function names in tenant schemas**
+   ```sql
+   -- WRONG - function not found in tenant schema
+   EXECUTE FUNCTION update_updated_at_column();
+
+   -- CORRECT - reference public schema
+   EXECUTE FUNCTION public.update_updated_at_column();
+   ```
+
+4. **Use public.vector for pgvector types in tenant schemas**
+   ```sql
+   -- WRONG - vector type not in tenant search_path
+   embedding vector(1536)
+
+   -- CORRECT - use public schema qualifier
+   embedding public.vector(1536)
+   CREATE INDEX ... USING hnsw (embedding public.vector_cosine_ops)
+   ```
+
+5. **Match foreign key types exactly**
+   ```sql
+   -- Check actual table types before referencing
+   -- public.users.id is UUID
+   -- tenant creators.id is TEXT
+   -- tenant ai_agents.id is TEXT
+   -- tenant videos.id is TEXT
+   -- tenant projects.id is UUID
+
+   -- WRONG - type mismatch
+   user_id TEXT REFERENCES public.users(id)  -- users.id is UUID!
+
+   -- CORRECT - match types
+   user_id UUID REFERENCES public.users(id)
+   ```
+
+6. **Verify enum values exist before using in WHERE clauses**
+   ```sql
+   -- Check existing enum values first:
+   -- SELECT enumlabel FROM pg_enum WHERE enumtypid = 'my_enum'::regtype;
+
+   -- WRONG - 'onboarding' doesn't exist in creator_status
+   WHERE status IN ('approved', 'onboarding')
+
+   -- CORRECT - use actual enum values
+   WHERE status IN ('approved', 'pending')
+   ```
+
+7. **Match column names with existing schema**
+   ```sql
+   -- Check actual columns first:
+   -- \d table_name
+
+   -- WRONG - column doesn't exist
+   SELECT o.email, o.total_price_cents FROM orders o
+
+   -- CORRECT - use actual column names
+   SELECT o.customer_email, o.total_cents FROM orders o
+   ```
+
+### Common Type Mismatches (Tenant Schema)
+
+| Table | ID Type | Notes |
+|-------|---------|-------|
+| `public.users` | UUID | All user_id FKs must be UUID |
+| `public.organizations` | UUID | All org FKs must be UUID |
+| `creators` | TEXT | Tenant-scoped, text IDs |
+| `ai_agents` | TEXT | Tenant-scoped, text IDs |
+| `videos` | TEXT | Tenant-scoped, text IDs |
+| `projects` | UUID | Tenant-scoped, UUID IDs |
+| `orders` | TEXT | Tenant-scoped, text IDs |
+
+---
+
 ## Dependencies
 
 | Dependency | Why |
