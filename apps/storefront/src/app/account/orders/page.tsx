@@ -5,16 +5,15 @@
  * Server-rendered with client components for interactivity.
  */
 
+import { Tabs, TabsList, TabsTrigger } from '@cgk/ui'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
-import { Tabs, TabsList, TabsTrigger } from '@cgk/ui'
+import { OrdersListClient, OrdersListSkeleton, OrdersSearch } from './components'
 
 import { getOrders } from '@/lib/account/api'
 import { defaultContent } from '@/lib/account/content'
 import type { OrderStatus } from '@/lib/account/types'
-
-import { OrdersListClient, OrdersListSkeleton, OrdersSearch } from './components'
 
 export const metadata: Metadata = {
   title: 'Order History',

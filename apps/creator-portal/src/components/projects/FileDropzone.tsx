@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react'
 
-import { ALL_ALLOWED_TYPES, MAX_FILE_SIZE, formatFileSize, getFileCategory } from '@/lib/files/upload'
+import { ALL_ALLOWED_TYPES, MAX_FILE_SIZE, formatFileSize, getFileCategory } from '@/lib/files/helpers'
 
 interface FileDropzoneProps {
   onUpload: (file: File) => Promise<void>
@@ -31,39 +31,7 @@ export function FileDropzone({
     setIsDragging(false)
   }, [])
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setIsDragging(false)
-    setError(null)
-
-    if (disabled) return
-
-    const files = Array.from(e.dataTransfer.files)
-    if (files.length === 0) return
-
-    // Process first file (or could handle multiple)
-    const firstFile = files[0]
-    if (firstFile) {
-      await processFile(firstFile)
-    }
-  }, [disabled])
-
-  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    setError(null)
-    const files = e.target.files
-    if (!files || files.length === 0) return
-
-    const firstFile = files[0]
-    if (firstFile) {
-      await processFile(firstFile)
-    }
-
-    // Reset input
-    e.target.value = ''
-  }, [])
-
-  const processFile = async (file: File) => {
+  const processFile = useCallback(async (file: File) => {
     // Validate size
     if (file.size > MAX_FILE_SIZE) {
       setError(`File size exceeds maximum of ${formatFileSize(MAX_FILE_SIZE)}`)
@@ -85,7 +53,39 @@ export function FileDropzone({
     } finally {
       setIsUploading(false)
     }
-  }
+  }, [onUpload])
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+    setError(null)
+
+    if (disabled) return
+
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length === 0) return
+
+    // Process first file (or could handle multiple)
+    const firstFile = files[0]
+    if (firstFile) {
+      await processFile(firstFile)
+    }
+  }, [disabled, processFile])
+
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null)
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    const firstFile = files[0]
+    if (firstFile) {
+      await processFile(firstFile)
+    }
+
+    // Reset input
+    e.target.value = ''
+  }, [processFile])
 
   return (
     <div className="space-y-4">

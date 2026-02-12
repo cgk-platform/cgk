@@ -5,19 +5,18 @@
  * Server-rendered with client-side interactivity for actions.
  */
 
-import { Suspense } from 'react'
-import type { Metadata } from 'next'
-
 import { Container, Tabs, TabsList, TabsTrigger } from '@cgk/ui'
-
-import { listSubscriptions } from '@/lib/subscriptions/api'
-import type { SubscriptionStatus } from '@/lib/subscriptions/types'
+import type { Metadata } from 'next'
+import { Suspense } from 'react'
 
 import {
   EmptySubscriptionsState,
   SubscriptionCard,
   SubscriptionCardSkeleton,
 } from './components'
+
+import { listSubscriptionsServer } from '@/lib/subscriptions/api.server'
+import type { SubscriptionStatus } from '@/lib/subscriptions/types'
 
 export const metadata: Metadata = {
   title: 'My Subscriptions',
@@ -93,7 +92,7 @@ interface SubscriptionListProps {
 }
 
 async function SubscriptionList({ status }: SubscriptionListProps) {
-  const { subscriptions } = await listSubscriptions({
+  const { subscriptions } = await listSubscriptionsServer({
     status: status === 'all' ? undefined : status,
   })
 

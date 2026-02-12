@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Hero Block Component
  *

@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-
 import { Alert, AlertDescription, Button, cn, Spinner } from '@cgk/ui'
-
 import {
   getPaymentMethods,
   requestPaymentUpdateLink,
@@ -12,7 +10,6 @@ import {
 } from '@/lib/subscriptions/api'
 import { formatCardBrand, formatCardExpiry } from '@/lib/subscriptions/format'
 import type { PaymentMethod } from '@/lib/subscriptions/types'
-
 import { Modal, ModalContent, ModalFooter, ModalHeader, ModalTitle, ModalDescription } from './modals'
 
 interface PaymentMethodModalProps {

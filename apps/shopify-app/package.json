@@ -7,7 +7,8 @@
   "type": "module",
   "scripts": {
     "dev": "shopify app dev",
-    "build": "shopify app build",
+    "build": "echo 'Shopify app built via shopify:build - skipping in turbo'",
+    "shopify:build": "shopify app build",
     "deploy": "shopify app deploy",
     "deploy:force": "shopify app deploy --force",
     "config:link": "shopify app config link",

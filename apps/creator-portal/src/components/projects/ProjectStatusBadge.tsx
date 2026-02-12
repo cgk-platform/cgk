@@ -1,6 +1,6 @@
 'use client'
 
-import { getStatusDisplayInfo, type ProjectStatus } from '@/lib/projects'
+import { getStatusDisplayInfo, type ProjectStatus } from '@/lib/projects/helpers'
 
 interface ProjectStatusBadgeProps {
   status: ProjectStatus

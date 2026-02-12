@@ -11,13 +11,10 @@
  * - Order history
  */
 
-import { Suspense } from 'react'
-import { notFound } from 'next/navigation'
-import type { Metadata } from 'next'
-
 import { Container, Spinner } from '@cgk/ui'
-
-import { getSubscription, getSubscriptionOrders } from '@/lib/subscriptions/api'
+import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { Suspense } from 'react'
 
 import {
   FrequencyChanger,
@@ -29,6 +26,11 @@ import {
   SubscriptionActions,
   SubscriptionHeader,
 } from '../components'
+
+import {
+  getSubscriptionOrdersServer,
+  getSubscriptionServer,
+} from '@/lib/subscriptions/api.server'
 
 interface SubscriptionDetailPageProps {
   params: Promise<{
@@ -49,7 +51,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function SubscriptionDetailPage({ params }: SubscriptionDetailPageProps) {
   const { id } = await params
-  const subscription = await getSubscription(id)
+  const subscription = await getSubscriptionServer(id)
 
   if (!subscription) {
     notFound()
@@ -125,7 +127,7 @@ async function SubscriptionOrderHistory({
   subscriptionId,
   currencyCode,
 }: SubscriptionOrderHistoryProps) {
-  const orders = await getSubscriptionOrders(subscriptionId)
+  const orders = await getSubscriptionOrdersServer(subscriptionId)
 
   return <OrderHistory orders={orders} currencyCode={currencyCode} />
 }

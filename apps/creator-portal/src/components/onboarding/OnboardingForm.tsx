@@ -1,20 +1,21 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { Button, Card, CardContent } from '@cgk/ui'
-import { StepProgress } from './StepProgress'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+
 import { AutoSaveIndicator, type SaveStatus } from './AutoSaveIndicator'
-import { ResumeBanner } from './ResumeBanner'
 import {
   Step1BasicInfo,
   Step2SocialMedia,
   Step3ShippingAddress,
   Step4ContentInterests,
 } from './FormSteps'
+import { ResumeBanner } from './ResumeBanner'
+import { StepProgress } from './StepProgress'
 import {
-  getInitialFormData,
   FORM_STEPS,
+  getInitialFormData,
   type CreatorApplicationForm,
   type OnboardingSettings,
 } from '../../lib/onboarding/types'

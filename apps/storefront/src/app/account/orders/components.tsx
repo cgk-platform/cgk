@@ -11,9 +11,9 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
+import { CancelOrderModal } from '@/components/account/CancelOrderModal'
 import { EmptyState, EmptyStateIcons } from '@/components/account/EmptyState'
 import { OrderCard } from '@/components/account/OrderCard'
-import { CancelOrderModal } from '@/components/account/CancelOrderModal'
 import { ReturnRequestModal } from '@/components/account/ReturnRequestModal'
 import { cancelOrder, requestReturn } from '@/lib/account/api'
 import type {

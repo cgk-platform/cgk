@@ -1,9 +1,21 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import { OnboardingForm } from '../../../../components/onboarding/OnboardingForm'
 
 export const metadata: Metadata = {
   title: 'Join Our Creator Program',
   description: 'Apply to become a creator and start earning with our brand',
+}
+
+function OnboardingFormLoading(): React.JSX.Element {
+  return (
+    <div className="flex min-h-[400px] items-center justify-center">
+      <div className="text-center">
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        <p className="mt-4 text-muted-foreground">Loading application...</p>
+      </div>
+    </div>
+  )
 }
 
 /**
@@ -85,7 +97,9 @@ export default function JoinPage(): React.JSX.Element {
           </div>
 
           {/* The actual form component - tenantSlug would come from subdomain/context */}
-          <OnboardingForm tenantSlug="default" />
+          <Suspense fallback={<OnboardingFormLoading />}>
+            <OnboardingForm tenantSlug="default" />
+          </Suspense>
         </div>
       </div>
     </div>

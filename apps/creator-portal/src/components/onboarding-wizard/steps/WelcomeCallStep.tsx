@@ -1,7 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
 import { cn } from '@cgk/ui'
+import { useCallback, useEffect, useState } from 'react'
+
 import type { WelcomeCallData } from '../../../lib/onboarding-wizard/types'
 
 /** Time slot from scheduling API */

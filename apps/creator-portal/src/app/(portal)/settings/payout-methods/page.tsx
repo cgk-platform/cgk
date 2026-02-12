@@ -6,9 +6,30 @@
  * Allows creators to manage their payout methods including Stripe Connect.
  */
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+
+function PayoutMethodsLoading(): React.JSX.Element {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Payout Methods</h1>
+      </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    </div>
+  )
+}
+
+export default function PayoutMethodsPage(): React.JSX.Element {
+  return (
+    <Suspense fallback={<PayoutMethodsLoading />}>
+      <PayoutMethodsContent />
+    </Suspense>
+  )
+}
 
 interface PaymentMethod {
   id: string
@@ -49,7 +70,7 @@ interface OnboardingResponse {
   onboardingUrl?: string
 }
 
-export default function PayoutMethodsPage(): React.JSX.Element {
+function PayoutMethodsContent(): React.JSX.Element {
   const searchParams = useSearchParams()
   const setupComplete = searchParams.get('setup') === 'complete'
   const error = searchParams.get('error')

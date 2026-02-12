@@ -120,8 +120,9 @@ export default async function IRSFilingPage({
 }
 
 async function FilingStatsLoader({ taxYear }: { taxYear: number }) {
-  const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
+  // Headers available for future tenant context
+  void (await headers())
+  void taxYear
 
   // Mock data - would use @cgk/tax
   const stats = {
@@ -162,6 +163,7 @@ async function FilingStatsLoader({ taxYear }: { taxYear: number }) {
 }
 
 async function ValidationSection({ taxYear }: { taxYear: number }) {
+  void taxYear
   // Mock validation result
   const validation = {
     valid: false,

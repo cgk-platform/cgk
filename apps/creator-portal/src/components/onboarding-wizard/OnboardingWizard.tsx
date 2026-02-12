@@ -1,24 +1,25 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
 import { cn } from '@cgk/ui'
-import { StepNavigation } from './StepNavigation'
-import { WizardProgress } from './WizardProgress'
+import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
+import { AgreementStep } from './steps/AgreementStep'
+import { CompleteStep } from './steps/CompleteStep'
+import { PaymentStep } from './steps/PaymentStep'
 import { ProfileStep } from './steps/ProfileStep'
 import { SocialStep } from './steps/SocialStep'
-import { PaymentStep } from './steps/PaymentStep'
 import { TaxStep } from './steps/TaxStep'
-import { AgreementStep } from './steps/AgreementStep'
 import { WelcomeCallStep } from './steps/WelcomeCallStep'
-import { CompleteStep } from './steps/CompleteStep'
 import { AutoSaveStatus } from './AutoSaveStatus'
+import { StepNavigation } from './StepNavigation'
+import { WizardProgress } from './WizardProgress'
 import {
+  calculateProgress,
   getInitialWizardData,
   getNextStepId,
   getPreviousStepId,
   getStep,
-  calculateProgress,
   WIZARD_STEPS,
   type OnboardingWizardData,
   type WizardStepId,

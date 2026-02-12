@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-
 import { Alert, AlertDescription, Button, Card, CardContent, cn, Spinner, Textarea } from '@cgk/ui'
-
 import {
   applySaveOffer,
   cancelSubscription,

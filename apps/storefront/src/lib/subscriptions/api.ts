@@ -1,11 +1,13 @@
 /**
  * Subscription API client for customer portal
  *
- * Server-side functions that call the subscription provider abstraction.
+ * Client-safe functions that call the subscription API endpoints.
  * These work with any configured provider (Loop, ReCharge, Shopify native).
+ *
+ * Note: This file is imported by client components, so it must not use
+ * server-only APIs like `next/headers`. Tenant context is automatically
+ * resolved by the API routes via cookies/headers.
  */
-
-import { getTenantConfig } from '@/lib/tenant'
 
 import type {
   CancellationReason,
@@ -25,20 +27,17 @@ import type {
 // Configuration
 // ---------------------------------------------------------------------------
 
-async function getApiBaseUrl(): Promise<string> {
-  const config = await getTenantConfig()
-  if (!config) {
-    throw new Error('Tenant configuration not found')
-  }
-  return `/api/subscriptions`
-}
+/**
+ * Base URL for subscription API endpoints.
+ * Tenant context is resolved server-side via cookies/headers.
+ */
+const API_BASE_URL = '/api/subscriptions'
 
 async function fetchWithTenant<T>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
-  const baseUrl = await getApiBaseUrl()
-  const response = await fetch(`${baseUrl}${path}`, {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',

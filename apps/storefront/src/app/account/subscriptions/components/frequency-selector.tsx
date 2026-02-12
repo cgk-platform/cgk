@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-
 import { Badge, Button, cn, Spinner } from '@cgk/ui'
-
 import { getFrequencyOptions, updateFrequency } from '@/lib/subscriptions/api'
 import { formatFrequency } from '@/lib/subscriptions/format'
 import type { FrequencyOption, SubscriptionFrequency } from '@/lib/subscriptions/types'
@@ -40,7 +38,7 @@ export function FrequencySelector({
       try {
         const data = await getFrequencyOptions(subscriptionId)
         setOptions(data)
-      } catch (err) {
+      } catch {
         setError('Failed to load frequency options')
       } finally {
         setLoading(false)

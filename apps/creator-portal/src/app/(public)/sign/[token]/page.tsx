@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { SignatureCapture } from '@/components/esign/SignatureCanvas'
 
@@ -58,11 +58,7 @@ export default function SigningPage(): React.JSX.Element {
   const [declineReason, setDeclineReason] = useState('')
   const [showDeclineModal, setShowDeclineModal] = useState(false)
 
-  useEffect(() => {
-    fetchSigningSession()
-  }, [token])
-
-  const fetchSigningSession = async () => {
+  const fetchSigningSession = useCallback(async () => {
     try {
       setState('loading')
       const url = tenant
@@ -93,7 +89,11 @@ export default function SigningPage(): React.JSX.Element {
       setError(err instanceof Error ? err.message : 'Failed to load document')
       setState('error')
     }
-  }
+  }, [token, tenant])
+
+  useEffect(() => {
+    fetchSigningSession()
+  }, [fetchSigningSession])
 
   const handleSignatureAdopted = (sig: typeof signature) => {
     setSignature(sig)

@@ -5,18 +5,17 @@
  * shipping address, tracking, and action buttons.
  */
 
+import { cn, formatCurrency } from '@cgk/ui'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { cn, formatCurrency } from '@cgk/ui'
+import { OrderDetailActions, OrderTrackingSection } from './components'
 
 import { StatusBadge } from '@/components/account/StatusBadge'
 import { getOrder } from '@/lib/account/api'
 import { defaultContent, getContent } from '@/lib/account/content'
 import type { Address } from '@/lib/account/types'
-
-import { OrderDetailActions, OrderTrackingSection } from './components'
 
 export const metadata: Metadata = {
   title: 'Order Details',

@@ -19,10 +19,19 @@ import type {
 } from './types'
 import { getCountrySpec, isCountrySupported, SUPPORTED_COUNTRIES } from './types'
 
-// Initialize Stripe client
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-02-24.acacia',
-})
+// Lazy-loaded Stripe client to avoid build-time initialization
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY environment variable is required')
+    }
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-02-24.acacia',
+    })
+  }
+  return _stripe
+}
 
 /**
  * Get Stripe Connect OAuth URL
@@ -78,7 +87,7 @@ export async function handleStripeOAuthCallback(
   }
 
   // Exchange code for access token
-  const response = await stripe.oauth.token({
+  const response = await getStripe().oauth.token({
     grant_type: 'authorization_code',
     code,
   })
@@ -91,7 +100,7 @@ export async function handleStripeOAuthCallback(
   }
 
   // Get account details
-  const account = await stripe.accounts.retrieve(response.stripe_user_id)
+  const account = await getStripe().accounts.retrieve(response.stripe_user_id)
 
   // Get tenant ID
   const tenantResult = await sql`
@@ -175,7 +184,7 @@ export async function createStripeAccount(
   }
 
   // Create Stripe account
-  const account = await stripe.accounts.create({
+  const account = await getStripe().accounts.create({
     type: 'custom',
     country: step1Data.country,
     business_type: step1Data.businessType,
@@ -229,7 +238,7 @@ export async function updateStripeAccountStep2(
 
   if (isIndividual) {
     const data = step2Data as { firstName: string; lastName: string; phone: string; dateOfBirth: { day: number; month: number; year: number } }
-    await stripe.accounts.update(progress.stripeAccountId, {
+    await getStripe().accounts.update(progress.stripeAccountId, {
       individual: {
         first_name: data.firstName,
         last_name: data.lastName,
@@ -243,7 +252,7 @@ export async function updateStripeAccountStep2(
     })
   } else {
     const data = step2Data as { companyName: string; companyPhone: string; taxId: string }
-    await stripe.accounts.update(progress.stripeAccountId, {
+    await getStripe().accounts.update(progress.stripeAccountId, {
       company: {
         name: data.companyName,
         phone: data.companyPhone,
@@ -289,11 +298,11 @@ export async function updateStripeAccountStep3(
   const isIndividual = progress.step1Data?.businessType === 'individual'
 
   if (isIndividual) {
-    await stripe.accounts.update(progress.stripeAccountId, {
+    await getStripe().accounts.update(progress.stripeAccountId, {
       individual: { address },
     })
   } else {
-    await stripe.accounts.update(progress.stripeAccountId, {
+    await getStripe().accounts.update(progress.stripeAccountId, {
       company: { address },
     })
   }
@@ -354,13 +363,13 @@ export async function updateStripeAccountStep4(
       updateData.ssn_last_4 = idNumberLast4
     }
 
-    await stripe.accounts.update(progress.stripeAccountId, {
+    await getStripe().accounts.update(progress.stripeAccountId, {
       individual: updateData,
     })
   }
 
   // Get updated account status
-  const account = await stripe.accounts.retrieve(progress.stripeAccountId)
+  const account = await getStripe().accounts.retrieve(progress.stripeAccountId)
 
   // Get tenant ID
   const tenantResult = await sql`
@@ -414,7 +423,7 @@ export async function syncStripeAccountStatus(
     throw new StripeConnectError('No Stripe account found', 'NO_ACCOUNT')
   }
 
-  const account = await stripe.accounts.retrieve(progress.stripeAccountId)
+  const account = await getStripe().accounts.retrieve(progress.stripeAccountId)
 
   // Get tenant ID
   const tenantResult = await sql`

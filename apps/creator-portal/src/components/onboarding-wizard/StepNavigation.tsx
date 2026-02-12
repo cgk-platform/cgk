@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@cgk/ui'
+
 import type { WizardStep, WizardStepId } from '../../lib/onboarding-wizard/types'
 
 interface StepNavigationProps {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 
@@ -99,6 +99,22 @@ function getStatusBadgeVariant(status: string): 'default' | 'success' | 'warning
 }
 
 export default function PayoutMethodsPage() {
+  return (
+    <Suspense fallback={<PayoutMethodsLoading />}>
+      <PayoutMethodsContent />
+    </Suspense>
+  )
+}
+
+function PayoutMethodsLoading() {
+  return (
+    <div className="flex items-center justify-center min-h-[400px]">
+      <Spinner className="h-8 w-8" />
+    </div>
+  )
+}
+
+function PayoutMethodsContent() {
   const searchParams = useSearchParams()
   const successMessage = searchParams.get('success')
   const errorMessage = searchParams.get('error')

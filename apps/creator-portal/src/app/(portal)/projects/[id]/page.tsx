@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { FileDropzone, FileListItem } from '@/components/projects/FileDropzone'
 import { ProjectStatusBadge } from '@/components/projects/ProjectStatusBadge'
@@ -23,11 +23,7 @@ export default function ProjectDetailPage(): React.JSX.Element {
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchProject()
-  }, [projectId])
-
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -45,7 +41,11 @@ export default function ProjectDetailPage(): React.JSX.Element {
     } finally {
       setLoading(false)
     }
-  }
+  }, [projectId])
+
+  useEffect(() => {
+    fetchProject()
+  }, [fetchProject])
 
   const handleFileUpload = async (file: File) => {
     const formData = new FormData()

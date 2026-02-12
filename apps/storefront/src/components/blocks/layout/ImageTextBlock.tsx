@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Image + Text Block Component
  *

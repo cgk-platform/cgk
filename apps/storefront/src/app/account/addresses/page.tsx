@@ -8,11 +8,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+import { AddressesClient, AddressesListSkeleton } from './components'
 
 import { getAddresses } from '@/lib/account/api'
 import { defaultContent, getContent } from '@/lib/account/content'
-
-import { AddressesClient, AddressesListSkeleton } from './components'
 
 export const metadata: Metadata = {
   title: 'Address Book',

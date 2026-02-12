@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 
-import type { Project } from '@/lib/projects'
 import { ProjectStatusBadge } from './ProjectStatusBadge'
+
+import type { Project } from '@/lib/projects'
 
 interface ProjectCardProps {
   project: Project

@@ -538,23 +538,140 @@ Constraints:
 
 ---
 
-## Environment Variables
+## Environment Variables Strategy
 
-### Required (All Apps)
+### How It Works
+
+Next.js loads env files in this priority order (later = higher priority):
+1. `.env` (lowest)
+2. `.env.local` ← **Vercel syncs here** (production vars)
+3. `.env.development`
+4. `.env.development.local` ← **Local-only vars go here** (highest in dev, never overwritten)
+
+```
+cgk/
+├── apps/
+│   ├── admin/
+│   │   ├── .env.example           ← Documentation with comments (committed)
+│   │   ├── .env.local             ← Synced from Vercel (production vars)
+│   │   └── .env.development.local ← Local-only vars (LOCAL_*, DEBUG_*, TEST_*)
+│   ├── storefront/
+│   │   ├── .env.example
+│   │   ├── .env.local
+│   │   └── .env.development.local
+│   └── ... (same pattern for all apps)
+```
+
+**IMPORTANT: All env files live in `apps/<app>/`, NEVER at the monorepo root.**
+Next.js only loads env files from the directory where `next dev` runs (each app folder).
+
+**Key insight**: `vercel env pull` overwrites `.env.local` but NEVER touches `.env.development.local` or `.env.example`.
+
+### Workflow (PRIORITY ORDER)
+
+**PRIORITY 1: Work with the user to set env vars properly**
+- Ask the user for the actual values
+- Help them add to Vercel using the CLI commands below
+- Pull to local with `pnpm env:pull`
+
+**PRIORITY 2: Document in `.env.example` as backup**
+- Add commented placeholders to `apps/<app>/.env.example` for any new vars
+- Include a comment explaining what the var is for
+- Keep all per-app `.env.example` files in sync
+
+**Production vars** (no prefix):
+1. Work with user to get the actual value
+2. Add to Vercel (source of truth) using CLI commands
+3. Run `pnpm env:pull` to sync to all apps
+4. Document in `apps/<app>/.env.example` with comment
+
+**Local-only vars** (`LOCAL_*`, `DEBUG_*`, `TEST_*`):
+1. Add directly to `apps/<app>/.env.development.local`
+2. NEVER push to Vercel
+3. These survive `vercel env pull` because they're in a different file
+
+### Required Variables (All Apps)
+
+See `apps/<app>/.env.example` for per-app documentation. Core vars include:
 
 ```bash
 # Database
 DATABASE_URL=postgresql://...
-REDIS_URL=redis://...
+POSTGRES_URL=postgresql://...
 
 # Auth
-JWT_SECRET=your-jwt-secret
-SESSION_SECRET=your-session-secret
+JWT_SECRET=
+SESSION_SECRET=
 
-# Background Jobs
-INNGEST_EVENT_KEY=...
-INNGEST_SIGNING_KEY=...
+# Shopify
+SHOPIFY_API_KEY=
+SHOPIFY_API_SECRET=
+SHOPIFY_STORE_DOMAIN=
+
+# Stripe
+STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
 ```
+
+### Naming Convention
+
+| Prefix | Where to add | Sync to Vercel? |
+|--------|--------------|-----------------|
+| (none) | `.env.local` via Vercel | ✅ Yes - add to Vercel first |
+| `LOCAL_` | `.env.development.local` | ❌ Never |
+| `DEBUG_` | `.env.development.local` | ❌ Never |
+| `TEST_` | `.env.development.local` | ❌ Never |
+
+### Syncing Commands
+
+**Pull from Vercel to all apps:**
+```bash
+pnpm env:pull
+```
+
+**Add new production env var to Vercel (all 5 projects):**
+```bash
+VALUE="your-secret-value"
+for app in admin storefront orchestrator creator-portal contractor-portal; do
+  echo "Adding to $app..."
+  (cd apps/$app && \
+    printf "$VALUE" | vercel env add VAR_NAME production && \
+    printf "$VALUE" | vercel env add VAR_NAME preview && \
+    printf "$VALUE" | vercel env add VAR_NAME development)
+done
+# Then pull to sync locally:
+pnpm env:pull
+```
+
+### Agent Responsibilities
+
+**When implementing a feature that needs a new env var:**
+
+1. **FIRST: Work with the user** - Ask them for the value or help them obtain it
+2. **SECOND: Set it properly**
+   - Production var → Help user add to Vercel → run `pnpm env:pull`
+   - Local-only var → Add to `apps/<app>/.env.development.local`
+3. **THIRD: Document it** - Add commented placeholder to ALL `apps/<app>/.env.example` files:
+   ```bash
+   # Description of what this var does and where to get it
+   NEW_VAR_NAME=
+   ```
+
+**When noticing a missing env var:**
+1. Inform the user immediately - don't just document it
+2. Help them set the value in Vercel (production) or `.env.development.local` (local-only)
+3. Add to all `apps/<app>/.env.example` files with explanatory comment
+
+**When updating any env var:**
+- Keep ALL `apps/<app>/.env.example` files in sync
+- Add clear comments explaining what each var is for
+
+**CRITICAL Rules:**
+- PRIORITIZE actually setting env vars with the user over just documenting them
+- NEVER push `LOCAL_*`, `DEBUG_*`, or `TEST_*` vars to Vercel
+- ALWAYS add to Vercel FIRST for production vars, then pull (Vercel is source of truth)
+- ALWAYS keep all per-app `.env.example` files updated with comments
 
 ---
 
@@ -568,6 +685,84 @@ INNGEST_SIGNING_KEY=...
 | Background Jobs | Trigger.dev v4 or Inngest | Vendor-agnostic abstraction |
 | MCP Transport | Streamable HTTP | Not SSE (deprecated) |
 | Payments | Stripe Connect + Wise | Domestic + international |
+
+---
+
+## Common Build Error Patterns
+
+### 1. Top-level SDK Initialization
+
+Don't initialize SDKs (Stripe, etc.) at module level. Use lazy getters instead.
+
+```typescript
+// BAD - fails at build time
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {...})
+
+// GOOD - lazy initialization
+let _stripe: Stripe | null = null
+function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {...})
+  }
+  return _stripe
+}
+```
+
+### 2. next/headers in Client Components
+
+Can only be used in Server Components.
+
+```typescript
+// BAD - importing in file used by client components
+import { headers } from 'next/headers'
+
+// GOOD - split into server-only file or use dynamic import
+// server-only.ts
+import 'server-only'
+import { headers } from 'next/headers'
+```
+
+### 3. styled-jsx Requires 'use client'
+
+```typescript
+// BAD - styled-jsx in Server Component
+export function MyComponent() {
+  return <div><style jsx>{`...`}</style></div>
+}
+
+// GOOD - add directive
+'use client'
+export function MyComponent() {...}
+```
+
+### 4. useSearchParams Needs Suspense Boundary (Next.js 15+)
+
+```typescript
+// BAD - direct usage
+export default function Page() {
+  const searchParams = useSearchParams()
+  ...
+}
+
+// GOOD - wrap in Suspense
+export default function Page() {
+  return <Suspense fallback={<Loading />}><Content /></Suspense>
+}
+function Content() {
+  const searchParams = useSearchParams()
+  ...
+}
+```
+
+### 5. workspace:* Protocol in Non-pnpm Contexts
+
+Shopify CLI uses npm internally, so `workspace:*` references cause issues.
+
+```json
+// In apps deployed via external tools (Shopify), avoid workspace: references
+// or use a no-op build script for turbo
+"build": "echo 'Built via external tool'"
+```
 
 ---
 

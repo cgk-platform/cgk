@@ -110,8 +110,8 @@ function W9StatusFilter({ status, payeeType }: { status: string; payeeType: stri
 }
 
 async function W9StatsLoader() {
-  const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
+  // Headers available for future tenant context
+  void (await headers())
 
   // Mock stats
   const stats = {
@@ -167,8 +167,8 @@ async function W9ListLoader({
   status: string
   payeeType: string
 }) {
-  const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
+  // Headers available for future tenant context
+  void (await headers())
 
   // Mock data
   const payees = [

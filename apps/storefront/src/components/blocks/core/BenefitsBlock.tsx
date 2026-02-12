@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Benefits Block Component
  *

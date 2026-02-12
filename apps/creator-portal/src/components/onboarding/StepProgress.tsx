@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@cgk/ui'
+
 import { FORM_STEPS } from '../../lib/onboarding/types'
 
 interface StepProgressProps {

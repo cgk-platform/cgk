@@ -76,8 +76,8 @@ export default async function TaxSettingsPage() {
 }
 
 async function PayerInfoForm() {
-  const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
+  // Headers available for future tenant context
+  void (await headers())
 
   // Mock payer info - would come from tenant settings or env
   const payerInfo = {

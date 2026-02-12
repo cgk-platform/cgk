@@ -8,10 +8,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+import { ProfileForm, ProfileFormSkeleton } from './components'
+
 import { getProfile } from '@/lib/account/api'
 import { defaultContent, getContent } from '@/lib/account/content'
-
-import { ProfileForm, ProfileFormSkeleton } from './components'
 
 export const metadata: Metadata = {
   title: 'Profile Settings',

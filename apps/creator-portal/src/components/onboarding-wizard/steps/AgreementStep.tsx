@@ -1,7 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '@cgk/ui'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
 import type { AgreementData, AgreementDocument } from '../../../lib/onboarding-wizard/types'
 
 interface AgreementStepProps {
@@ -59,20 +60,34 @@ export function AgreementStep({
   const [isDrawing, setIsDrawing] = useState(false)
   const [currentSignature, setCurrentSignature] = useState<string | null>(null)
 
-  // Load documents
+  // Track whether initialization has been performed
+  const hasInitializedRef = useRef(false)
+
+  // Store latest values in refs to access in effect without triggering re-runs
+  const dataRef = useRef(data)
+  const onChangeRef = useRef(onChange)
+
+  // Keep refs up to date
+  useEffect(() => {
+    dataRef.current = data
+    onChangeRef.current = onChange
+  }, [data, onChange])
+
+  // Load documents and initialize agreements (runs once on mount)
   useEffect(() => {
     // In production, fetch from API
     setDocuments(MOCK_DOCUMENTS)
 
-    // Initialize agreements array if empty
-    if (data.agreements.length === 0) {
+    // Initialize agreements array if empty and not already initialized
+    if (!hasInitializedRef.current && dataRef.current.agreements.length === 0) {
+      hasInitializedRef.current = true
       const initialAgreements = MOCK_DOCUMENTS.map((doc) => ({
         documentId: doc.id,
         signed: false,
         signedAt: null,
         signatureData: null,
       }))
-      onChange({ ...data, agreements: initialAgreements })
+      onChangeRef.current({ ...dataRef.current, agreements: initialAgreements })
     }
   }, [])
 

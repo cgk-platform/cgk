@@ -116,10 +116,10 @@ interface OrderTrackingSectionProps {
 }
 
 export function OrderTrackingSection({ order, content }: OrderTrackingSectionProps) {
+  const [isExpanded, setIsExpanded] = useState(true)
+
   const tracking = order.tracking
   if (!tracking) return null
-
-  const [isExpanded, setIsExpanded] = useState(true)
 
   return (
     <section

@@ -2,9 +2,7 @@
 
 import { useCallback, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-
 import { Alert, AlertDescription, Button, cn } from '@cgk/ui'
-
 import {
   orderNow,
   pauseSubscription,
@@ -14,7 +12,6 @@ import {
 } from '@/lib/subscriptions/api'
 import { formatDate, formatRelativeDate } from '@/lib/subscriptions/format'
 import type { Subscription } from '@/lib/subscriptions/types'
-
 import { ActionModal, ConfirmModal } from './modals'
 
 interface SubscriptionActionsProps {

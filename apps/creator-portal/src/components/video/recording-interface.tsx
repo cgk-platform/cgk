@@ -54,6 +54,13 @@ export function RecordingInterface({
   const cameraStreamRef = useRef<MediaStream | null>(null)
   const durationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  const stopAllStreams = useCallback(() => {
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+    cameraStreamRef.current?.getTracks().forEach((track) => track.stop())
+    streamRef.current = null
+    cameraStreamRef.current = null
+  }, [])
+
   // Clean up streams on unmount
   useEffect(() => {
     return () => {
@@ -62,14 +69,7 @@ export function RecordingInterface({
         clearInterval(durationIntervalRef.current)
       }
     }
-  }, [])
-
-  const stopAllStreams = useCallback(() => {
-    streamRef.current?.getTracks().forEach((track) => track.stop())
-    cameraStreamRef.current?.getTracks().forEach((track) => track.stop())
-    streamRef.current = null
-    cameraStreamRef.current = null
-  }, [])
+  }, [stopAllStreams])
 
   const startPreview = async () => {
     setError(null)

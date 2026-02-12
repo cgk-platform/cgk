@@ -4,11 +4,10 @@
  * Displays store credit balance and transaction history.
  */
 
+import { cn, formatCurrency } from '@cgk/ui'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'
-
-import { cn, formatCurrency } from '@cgk/ui'
 
 import { getStoreCredit } from '@/lib/account/api'
 import { defaultContent, getContent, storeCreditTransactionLabels } from '@/lib/account/content'

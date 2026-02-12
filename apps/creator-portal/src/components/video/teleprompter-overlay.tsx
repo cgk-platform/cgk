@@ -1,14 +1,13 @@
 'use client'
 
 import { cn } from '@cgk/ui'
-import { Maximize2, Minimize2, Settings2 } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-
 import {
   calculateScrollRate,
   DEFAULT_TELEPROMPTER_SETTINGS,
   type TeleprompterSettings,
 } from '@cgk/video/creator-tools'
+import { Maximize2, Minimize2, Settings2 } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface TeleprompterOverlayProps {
   content: string

@@ -155,13 +155,12 @@ function ThresholdFilter({
 
 async function PaymentStatsLoader({
   taxYear,
-  payeeType,
 }: {
   taxYear: number
   payeeType: string
 }) {
-  const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
+  // Headers available for future tenant context
+  void (await headers())
 
   // Mock stats
   const stats = {
@@ -221,8 +220,8 @@ async function PaymentsListLoader({
   payeeType: string
   threshold?: string
 }) {
-  const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
+  // Headers available for future tenant context
+  void (await headers())
 
   // Mock data
   const payees = [

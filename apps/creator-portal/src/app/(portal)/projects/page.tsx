@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { ProjectCard } from '@/components/projects/ProjectCard'
 import type { Project, ProjectStatus } from '@/lib/projects'
@@ -42,11 +42,7 @@ export default function ProjectsPage(): React.JSX.Element {
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    fetchProjects()
-  }, [statusFilter, searchQuery])
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -72,7 +68,11 @@ export default function ProjectsPage(): React.JSX.Element {
     } finally {
       setLoading(false)
     }
-  }
+  }, [statusFilter, searchQuery])
+
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
 
   const formatCurrency = (cents: number): string => {
     return new Intl.NumberFormat('en-US', {

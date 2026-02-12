@@ -1,8 +1,8 @@
 'use client'
 
+import { cn, Input, Label } from '@cgk/ui'
 import { useCallback, useState } from 'react'
-import { Input, Label } from '@cgk/ui'
-import { cn } from '@cgk/ui'
+
 import type { SocialData, SocialConnection } from '../../../lib/onboarding-wizard/types'
 
 interface SocialStepProps {

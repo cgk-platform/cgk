@@ -1,10 +1,8 @@
 'use client'
 
-import Image from 'next/image'
 import { useState } from 'react'
-
+import Image from 'next/image'
 import { Badge, Button, Card, CardContent, cn } from '@cgk/ui'
-
 import {
   formatCardBrand,
   formatCardExpiry,
@@ -14,7 +12,6 @@ import {
   getStatusDisplay,
 } from '@/lib/subscriptions/format'
 import type { Subscription, SubscriptionItem, SubscriptionOrder } from '@/lib/subscriptions/types'
-
 import { FrequencySelector } from './frequency-selector'
 import { PaymentMethodModal } from './payment-method-modal'
 import { ProductSwapModal } from './product-swap-modal'

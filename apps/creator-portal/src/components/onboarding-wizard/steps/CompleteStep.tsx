@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import type { OnboardingWizardData } from '../../../lib/onboarding-wizard/types'
 
 interface CompleteStepProps {

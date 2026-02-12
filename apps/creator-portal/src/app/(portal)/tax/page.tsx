@@ -127,7 +127,7 @@ function W9Form({ onCancel }: { onCancel?: () => void }) {
       await new Promise((resolve) => setTimeout(resolve, 1000))
       alert('W-9 submitted successfully!')
       onCancel?.()
-    } catch (error) {
+    } catch {
       alert('Failed to submit W-9')
     } finally {
       setSubmitting(false)
