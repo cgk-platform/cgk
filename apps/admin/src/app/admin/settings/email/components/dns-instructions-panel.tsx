@@ -51,10 +51,10 @@ export function DNSInstructionsPanel({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchInstructions = async (provider?: string) => {
+  const fetchInstructions = async (domainId: string, provider?: string) => {
     try {
       setLoading(true)
-      const url = new URL(`/api/admin/settings/email/domains/${domain.id}/dns`, window.location.origin)
+      const url = new URL(`/api/admin/settings/email/domains/${domainId}/dns`, window.location.origin)
       if (provider) {
         url.searchParams.set('provider', provider)
       }
@@ -75,13 +75,13 @@ export function DNSInstructionsPanel({
   }
 
   useEffect(() => {
-    fetchInstructions()
+    fetchInstructions(domain.id)
   }, [domain.id])
 
   const handleRegistrarChange = (registrarId: string) => {
     setSelectedRegistrar(registrarId)
     if (registrarId) {
-      fetchInstructions(registrarId)
+      fetchInstructions(domain.id, registrarId)
     }
   }
 

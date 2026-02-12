@@ -43,14 +43,14 @@ export function SenderAddressList({ domainId, domainName }: SenderAddressListPro
   const [showAddModal, setShowAddModal] = useState(false)
   const [testingAddress, setTestingAddress] = useState<SenderAddressWithDomain | null>(null)
 
-  const fetchAddresses = async () => {
+  const fetchAddresses = async (targetDomainId: string) => {
     try {
       const res = await fetch('/api/admin/settings/email/addresses')
       if (!res.ok) throw new Error('Failed to fetch addresses')
       const data = await res.json()
       // Filter to only addresses for this domain
       const filtered = data.addresses.filter(
-        (a: SenderAddressWithDomain) => a.domainId === domainId
+        (a: SenderAddressWithDomain) => a.domainId === targetDomainId
       )
       setState({ addresses: filtered, loading: false, error: null })
     } catch (err) {
@@ -63,7 +63,7 @@ export function SenderAddressList({ domainId, domainName }: SenderAddressListPro
   }
 
   useEffect(() => {
-    fetchAddresses()
+    fetchAddresses(domainId)
   }, [domainId])
 
   const handleSetDefault = async (address: SenderAddressWithDomain) => {
@@ -79,7 +79,7 @@ export function SenderAddressList({ domainId, domainName }: SenderAddressListPro
         throw new Error(data.error || 'Failed to set default')
       }
 
-      await fetchAddresses()
+      await fetchAddresses(domainId)
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to set default')
     }
@@ -100,7 +100,7 @@ export function SenderAddressList({ domainId, domainName }: SenderAddressListPro
         throw new Error(data.error || 'Failed to delete address')
       }
 
-      await fetchAddresses()
+      await fetchAddresses(domainId)
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to delete address')
     }
@@ -187,7 +187,7 @@ export function SenderAddressList({ domainId, domainName }: SenderAddressListPro
         domainId={domainId}
         domainName={domainName}
         onClose={() => setShowAddModal(false)}
-        onSuccess={fetchAddresses}
+        onSuccess={() => fetchAddresses(domainId)}
       />
 
       {/* Test Email Modal */}

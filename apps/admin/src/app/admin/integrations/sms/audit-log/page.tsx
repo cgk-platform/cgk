@@ -48,14 +48,14 @@ export default function SmsAuditLogPage() {
   const [dateTo, setDateTo] = useState('')
   const [exporting, setExporting] = useState(false)
 
-  const fetchAuditLog = async () => {
+  const fetchAuditLog = async (searchTerm: string) => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: PAGE_SIZE.toString(),
       })
-      if (search) params.set('search', search)
+      if (searchTerm) params.set('search', searchTerm)
       if (actionFilter !== 'all') params.set('action', actionFilter)
       if (sourceFilter !== 'all') params.set('source', sourceFilter)
       if (dateFrom) params.set('dateFrom', dateFrom)
@@ -75,12 +75,11 @@ export default function SmsAuditLogPage() {
   }
 
   useEffect(() => {
-    fetchAuditLog()
-  }, [page, actionFilter, sourceFilter, dateFrom, dateTo])
+    fetchAuditLog(search)
+  }, [page, actionFilter, sourceFilter, dateFrom, dateTo, search])
 
   const handleSearch = () => {
     setPage(1)
-    fetchAuditLog()
   }
 
   const handleExport = async () => {

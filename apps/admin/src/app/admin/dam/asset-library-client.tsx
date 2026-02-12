@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useCallback } from 'react'
 
-import type { AssetRow, Collection, AssetFilters, BulkOperation } from '@cgk/dam'
+import type { AssetRow, AssetType, Collection, AssetFilters, BulkOperation } from '@cgk/dam'
 import {
   AssetCard,
   AssetDetailModal,
@@ -49,7 +49,7 @@ export function AssetLibraryClient({
   // Search filters state
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     query: filters.search || '',
-    assetTypes: filters.asset_type ? [filters.asset_type as any] : [],
+    assetTypes: filters.asset_type ? [filters.asset_type as AssetType] : [],
     tags: filters.tags || [],
     dateFrom: filters.date_from,
     dateTo: filters.date_to,

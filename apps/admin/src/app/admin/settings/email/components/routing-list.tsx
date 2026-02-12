@@ -46,7 +46,50 @@ export function RoutingList() {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [updating, setUpdating] = useState<string | null>(null)
 
-  const fetchData = async () => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [routingRes, addressesRes] = await Promise.all([
+          fetch('/api/admin/settings/email/routing?view=status'),
+          fetch('/api/admin/settings/email/addresses'),
+        ])
+
+        if (!routingRes.ok) throw new Error('Failed to fetch routing')
+        if (!addressesRes.ok) throw new Error('Failed to fetch addresses')
+
+        const routingData = await routingRes.json()
+        const addressesData = await addressesRes.json()
+
+        // Filter to only verified addresses
+        const verifiedAddresses = addressesData.addresses.filter(
+          (a: SenderAddressWithDomain) => a.verificationStatus === 'verified'
+        )
+
+        setState({
+          routing: routingData.routing,
+          addresses: verifiedAddresses,
+          loading: false,
+          error: null,
+        })
+
+        // Auto-expand first category
+        const categories = Object.keys(routingData.routing)
+        if (categories.length > 0) {
+          setExpandedCategory((current) => current ?? categories[0] ?? null)
+        }
+      } catch (err) {
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: err instanceof Error ? err.message : 'Failed to load data',
+        }))
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const refetchData = async () => {
     try {
       const [routingRes, addressesRes] = await Promise.all([
         fetch('/api/admin/settings/email/routing?view=status'),
@@ -59,7 +102,6 @@ export function RoutingList() {
       const routingData = await routingRes.json()
       const addressesData = await addressesRes.json()
 
-      // Filter to only verified addresses
       const verifiedAddresses = addressesData.addresses.filter(
         (a: SenderAddressWithDomain) => a.verificationStatus === 'verified'
       )
@@ -70,12 +112,6 @@ export function RoutingList() {
         loading: false,
         error: null,
       })
-
-      // Auto-expand first category
-      const categories = Object.keys(routingData.routing)
-      if (categories.length > 0 && !expandedCategory) {
-        setExpandedCategory(categories[0] ?? null)
-      }
     } catch (err) {
       setState((prev) => ({
         ...prev,
@@ -84,10 +120,6 @@ export function RoutingList() {
       }))
     }
   }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   const handleUpdate = async (
     notificationType: string,
@@ -106,7 +138,7 @@ export function RoutingList() {
         throw new Error(data.error || 'Failed to update routing')
       }
 
-      await fetchData()
+      await refetchData()
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Failed to update routing')
     } finally {

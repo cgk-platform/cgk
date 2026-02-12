@@ -1,5 +1,6 @@
 import { Card, CardContent, Button, Input } from '@cgk/ui'
 import { getAgents } from '@cgk/support'
+import type { SupportAgent } from '@cgk/support'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Plus, Search } from 'lucide-react'
@@ -142,6 +143,6 @@ export default async function AgentsPage({ searchParams }: PageProps) {
 // Client wrapper for agent list actions
 import { AgentListClientWrapper } from './agent-list-client'
 
-function AgentListClient({ agents }: { agents: import('@cgk/support').SupportAgent[] }) {
+function AgentListClient({ agents }: { agents: SupportAgent[] }) {
   return <AgentListClientWrapper agents={agents} />
 }

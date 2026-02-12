@@ -98,52 +98,51 @@ export default function CallHistoryPage() {
   const [dateRange, setDateRange] = useState('7days')
 
   useEffect(() => {
+    async function fetchCalls() {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (agentId) params.set('agentId', agentId)
+        if (direction) params.set('direction', direction)
+        if (status) params.set('status', status)
+        params.set('includeStats', 'true')
+
+        // Calculate date range
+        const endDate = new Date()
+        let startDate = new Date()
+        switch (dateRange) {
+          case '24hours':
+            startDate.setHours(startDate.getHours() - 24)
+            break
+          case '7days':
+            startDate.setDate(startDate.getDate() - 7)
+            break
+          case '30days':
+            startDate.setDate(startDate.getDate() - 30)
+            break
+          case '90days':
+            startDate.setDate(startDate.getDate() - 90)
+            break
+        }
+        params.set('startDate', startDate.toISOString())
+        params.set('endDate', endDate.toISOString())
+
+        const response = await fetch(`/api/admin/ai-agents/calls?${params}`)
+        if (response.ok) {
+          const data = await response.json()
+          setCalls(data.calls || [])
+          setStats(data.stats)
+        } else {
+          setError('Failed to fetch calls')
+        }
+      } catch {
+        setError('Failed to fetch calls')
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchCalls()
   }, [agentId, direction, status, dateRange])
-
-  async function fetchCalls() {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (agentId) params.set('agentId', agentId)
-      if (direction) params.set('direction', direction)
-      if (status) params.set('status', status)
-      params.set('includeStats', 'true')
-
-      // Calculate date range
-      const endDate = new Date()
-      let startDate = new Date()
-      switch (dateRange) {
-        case '24hours':
-          startDate.setHours(startDate.getHours() - 24)
-          break
-        case '7days':
-          startDate.setDate(startDate.getDate() - 7)
-          break
-        case '30days':
-          startDate.setDate(startDate.getDate() - 30)
-          break
-        case '90days':
-          startDate.setDate(startDate.getDate() - 90)
-          break
-      }
-      params.set('startDate', startDate.toISOString())
-      params.set('endDate', endDate.toISOString())
-
-      const response = await fetch(`/api/admin/ai-agents/calls?${params}`)
-      if (response.ok) {
-        const data = await response.json()
-        setCalls(data.calls || [])
-        setStats(data.stats)
-      } else {
-        setError('Failed to fetch calls')
-      }
-    } catch {
-      setError('Failed to fetch calls')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   function formatDuration(seconds: number | null): string {
     if (!seconds) return '--'

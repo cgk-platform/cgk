@@ -77,42 +77,9 @@ export default function TemplateEditorPage() {
   const [testEmail, setTestEmail] = useState('')
   const [sendingTest, setSendingTest] = useState(false)
 
-  useEffect(() => {
-    fetchTemplate()
-    fetchVariables()
-    fetchVersions()
-  }, [templateId])
-
-  useEffect(() => {
-    if (template) {
-      setSubject(template.subject)
-      setBodyHtml(template.bodyHtml)
-      setIsActive(template.isActive)
-      fetchPreview()
-    }
-  }, [template])
-
-  const fetchTemplate = async () => {
-    setLoading(true)
+  const fetchVariables = async (notificationType: string) => {
     try {
-      const response = await fetch(`/api/admin/settings/email/templates/${templateId}`)
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch template')
-      }
-
-      setTemplate(data.template)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch template')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchVariables = async () => {
-    try {
-      const response = await fetch(`/api/admin/settings/email/templates/variables?notificationType=${template?.notificationType || ''}`)
+      const response = await fetch(`/api/admin/settings/email/templates/variables?notificationType=${notificationType}`)
       const data = await response.json()
 
       if (response.ok) {
@@ -123,9 +90,9 @@ export default function TemplateEditorPage() {
     }
   }
 
-  const fetchVersions = async () => {
+  const fetchVersions = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/settings/email/templates/${templateId}/versions`)
+      const response = await fetch(`/api/admin/settings/email/templates/${id}/versions`)
       const data = await response.json()
 
       if (response.ok) {
@@ -136,9 +103,9 @@ export default function TemplateEditorPage() {
     }
   }
 
-  const fetchPreview = async () => {
+  const fetchPreview = async (id: string) => {
     try {
-      const response = await fetch(`/api/admin/settings/email/templates/${templateId}/preview`, {
+      const response = await fetch(`/api/admin/settings/email/templates/${id}/preview`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ useSampleData: true }),
@@ -152,6 +119,39 @@ export default function TemplateEditorPage() {
       console.error('Failed to fetch preview:', err)
     }
   }
+
+  useEffect(() => {
+    const fetchTemplate = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(`/api/admin/settings/email/templates/${templateId}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch template')
+        }
+
+        setTemplate(data.template)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch template')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTemplate()
+    fetchVariables('')
+    fetchVersions(templateId)
+  }, [templateId])
+
+  useEffect(() => {
+    if (template) {
+      setSubject(template.subject)
+      setBodyHtml(template.bodyHtml)
+      setIsActive(template.isActive)
+      fetchPreview(templateId)
+    }
+  }, [template, templateId])
 
   const handleSave = async () => {
     setSaving(true)
@@ -178,8 +178,8 @@ export default function TemplateEditorPage() {
       setTemplate(data.template)
       setChangeNote('')
       setSuccessMessage('Template saved successfully')
-      fetchVersions()
-      fetchPreview()
+      fetchVersions(templateId)
+      fetchPreview(templateId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save template')
     } finally {
@@ -207,8 +207,8 @@ export default function TemplateEditorPage() {
 
       setTemplate(data.template)
       setSuccessMessage('Template reset to default')
-      fetchVersions()
-      fetchPreview()
+      fetchVersions(templateId)
+      fetchPreview(templateId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset template')
     } finally {
@@ -238,8 +238,8 @@ export default function TemplateEditorPage() {
 
       setTemplate(data.template)
       setSuccessMessage(`Restored to version ${version}`)
-      fetchVersions()
-      fetchPreview()
+      fetchVersions(templateId)
+      fetchPreview(templateId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to restore version')
     } finally {

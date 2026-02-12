@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 
 import { Button, Input, Label, cn } from '@cgk/ui'
@@ -55,10 +55,10 @@ const targetingActions: { value: TargetingAction; label: string; description: st
 ]
 
 export function Step3Targeting({ data, updateData }: Step3Props) {
-  const step3: WizardStep3Data = data.step3 || {
+  const step3: WizardStep3Data = useMemo(() => data.step3 || {
     targetingRules: [],
     exclusionGroups: [],
-  }
+  }, [data.step3])
 
   const update = useCallback(
     (changes: Partial<WizardStep3Data>) => {

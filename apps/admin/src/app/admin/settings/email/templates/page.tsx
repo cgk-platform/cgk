@@ -58,10 +58,31 @@ export default function EmailTemplatesPage() {
   const [seeding, setSeeding] = useState(false)
 
   useEffect(() => {
+    const fetchTemplates = async () => {
+      setLoading(true)
+      try {
+        const params = new URLSearchParams()
+        if (categoryFilter) params.set('category', categoryFilter)
+
+        const response = await fetch(`/api/admin/settings/email/templates?${params}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch templates')
+        }
+
+        setTemplates(data.templates)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch templates')
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchTemplates()
   }, [categoryFilter])
 
-  const fetchTemplates = async () => {
+  const fetchTemplatesForRefresh = async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -97,7 +118,7 @@ export default function EmailTemplatesPage() {
         throw new Error(data.error || 'Failed to seed templates')
       }
 
-      await fetchTemplates()
+      await fetchTemplatesForRefresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to seed templates')
     } finally {

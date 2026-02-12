@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Plus, Trash2, GripVertical } from 'lucide-react'
 
 import { Button, Input, Label, cn } from '@cgk/ui'
@@ -28,13 +28,13 @@ const allocationModes: { value: AllocationMode; label: string; description: stri
 ]
 
 export function Step2Variants({ data, updateData }: Step2Props) {
-  const step2: WizardStep2Data = data.step2 || {
+  const step2: WizardStep2Data = useMemo(() => data.step2 || {
     variants: [
       { name: 'Control', url: '', trafficAllocation: 50, isControl: true },
       { name: 'Variant B', url: '', trafficAllocation: 50, isControl: false },
     ],
     mode: 'manual',
-  }
+  }, [data.step2])
 
   const update = useCallback(
     (changes: Partial<WizardStep2Data>) => {

@@ -13,7 +13,7 @@ interface ChannelRowProps {
   isSelected: boolean
   onToggleExpand: (id: string) => void
   onToggleSelect: (id: string) => void
-  children?: ChannelHierarchy[]
+  childChannels?: ChannelHierarchy[]
 }
 
 function ChannelRow({
@@ -23,7 +23,7 @@ function ChannelRow({
   isSelected,
   onToggleExpand,
   onToggleSelect,
-  children,
+  childChannels,
 }: ChannelRowProps) {
   const hasChildren = channel.level !== 'ad'
   const indent = level * 24
@@ -83,7 +83,7 @@ function ChannelRow({
           </div>
         </td>
       </tr>
-      {isExpanded && children && children.map((child) => (
+      {isExpanded && childChannels && childChannels.map((child) => (
         <ChannelRow
           key={child.id}
           channel={child}
@@ -361,7 +361,7 @@ export default function ChannelsPage() {
                         isSelected={selectedIds.has(channel.id)}
                         onToggleExpand={handleToggleExpand}
                         onToggleSelect={handleToggleSelect}
-                        children={channel.children}
+                        childChannels={channel.children}
                       />
                     ))
                   )}

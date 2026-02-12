@@ -106,27 +106,26 @@ export default function CallDetailPage() {
   const [activeTab, setActiveTab] = useState(initialTab)
 
   useEffect(() => {
+    async function fetchCallDetails() {
+      try {
+        const response = await fetch(
+          `/api/admin/ai-agents/calls/${callId}?includeTranscript=true&includeResponses=true`
+        )
+        if (response.ok) {
+          const data = await response.json()
+          setCall(data.call)
+          setTranscripts(data.transcripts || [])
+        } else {
+          setError('Failed to fetch call details')
+        }
+      } catch {
+        setError('Failed to fetch call details')
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchCallDetails()
   }, [callId])
-
-  async function fetchCallDetails() {
-    try {
-      const response = await fetch(
-        `/api/admin/ai-agents/calls/${callId}?includeTranscript=true&includeResponses=true`
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setCall(data.call)
-        setTranscripts(data.transcripts || [])
-      } else {
-        setError('Failed to fetch call details')
-      }
-    } catch {
-      setError('Failed to fetch call details')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   function formatCallDuration(seconds: number | null): string {
     if (!seconds) return '--'

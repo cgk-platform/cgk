@@ -21,30 +21,30 @@ export default function SchemaPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [view, setView] = useState<'all' | 'issues'>('all')
 
-  const fetchResults = async () => {
-    setIsLoading(true)
-    try {
-      // Fetch summary
-      const summaryRes = await fetch('/api/admin/seo/schema-validation?view=summary')
-      const summaryData = await summaryRes.json()
-      if (summaryRes.ok) {
-        setSummary(summaryData.summary)
-      }
-
-      // Fetch results based on view
-      const resultsRes = await fetch(`/api/admin/seo/schema-validation?view=${view}`)
-      const resultsData = await resultsRes.json()
-      if (resultsRes.ok) {
-        setResults(resultsData.results)
-      }
-    } catch (err) {
-      console.error('Failed to fetch schema validation:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const fetchResults = async () => {
+      setIsLoading(true)
+      try {
+        // Fetch summary
+        const summaryRes = await fetch('/api/admin/seo/schema-validation?view=summary')
+        const summaryData = await summaryRes.json()
+        if (summaryRes.ok) {
+          setSummary(summaryData.summary)
+        }
+
+        // Fetch results based on view
+        const resultsRes = await fetch(`/api/admin/seo/schema-validation?view=${view}`)
+        const resultsData = await resultsRes.json()
+        if (resultsRes.ok) {
+          setResults(resultsData.results)
+        }
+      } catch (err) {
+        console.error('Failed to fetch schema validation:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     fetchResults()
   }, [view])
 

@@ -93,57 +93,55 @@ export default function VoiceSettingsPage() {
   const [formData, setFormData] = useState<Partial<VoiceConfig>>({})
 
   useEffect(() => {
+    async function fetchVoiceConfig() {
+      try {
+        const response = await fetch(`/api/admin/ai-agents/${agentId}/voice`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.config) {
+            setConfig(data.config)
+            setFormData(data.config)
+          } else {
+            // Set defaults if no config exists
+            setFormData({
+              ttsProvider: 'elevenlabs',
+              sttProvider: 'assemblyai',
+              sttLanguage: 'en',
+              speakingRate: 1.0,
+              pitch: 0,
+              volumeGainDb: 0,
+              voicemailEnabled: true,
+              maxCallDurationMinutes: 30,
+            })
+          }
+        }
+      } catch {
+        setError('Failed to fetch voice configuration')
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchVoiceConfig()
   }, [agentId])
 
   useEffect(() => {
+    async function fetchVoices(provider: string) {
+      try {
+        const response = await fetch(
+          `/api/admin/ai-agents/${agentId}/voice/voices?provider=${provider}`
+        )
+        if (response.ok) {
+          const data = await response.json()
+          setVoices(data.voices || [])
+        }
+      } catch {
+        console.error('Failed to fetch voices')
+      }
+    }
     if (formData.ttsProvider) {
       fetchVoices(formData.ttsProvider)
     }
-  }, [formData.ttsProvider])
-
-  async function fetchVoiceConfig() {
-    try {
-      const response = await fetch(`/api/admin/ai-agents/${agentId}/voice`)
-      if (response.ok) {
-        const data = await response.json()
-        if (data.config) {
-          setConfig(data.config)
-          setFormData(data.config)
-        } else {
-          // Set defaults if no config exists
-          setFormData({
-            ttsProvider: 'elevenlabs',
-            sttProvider: 'assemblyai',
-            sttLanguage: 'en',
-            speakingRate: 1.0,
-            pitch: 0,
-            volumeGainDb: 0,
-            voicemailEnabled: true,
-            maxCallDurationMinutes: 30,
-          })
-        }
-      }
-    } catch {
-      setError('Failed to fetch voice configuration')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function fetchVoices(provider: string) {
-    try {
-      const response = await fetch(
-        `/api/admin/ai-agents/${agentId}/voice/voices?provider=${provider}`
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setVoices(data.voices || [])
-      }
-    } catch {
-      console.error('Failed to fetch voices')
-    }
-  }
+  }, [agentId, formData.ttsProvider])
 
   async function handleSave() {
     setSaving(true)

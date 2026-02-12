@@ -79,6 +79,7 @@ export default function WebhookHealthPage() {
   const [syncing, setSyncing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<WebhookEventStatus | 'all'>('all')
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const fetchHealth = async () => {
     try {
@@ -88,25 +89,6 @@ export default function WebhookHealthPage() {
       }
       const data = await response.json()
       setHealthData(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
-    }
-  }
-
-  const fetchEvents = async () => {
-    try {
-      const url = new URL('/api/admin/integrations/shopify/webhooks/events', window.location.origin)
-      url.searchParams.set('limit', '20')
-      if (statusFilter !== 'all') {
-        url.searchParams.set('status', statusFilter)
-      }
-
-      const response = await fetch(url.toString())
-      if (!response.ok) {
-        throw new Error('Failed to fetch webhook events')
-      }
-      const data = await response.json()
-      setEventsData(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
@@ -130,6 +112,34 @@ export default function WebhookHealthPage() {
     }
   }
 
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const url = new URL('/api/admin/integrations/shopify/webhooks/events', window.location.origin)
+        url.searchParams.set('limit', '20')
+        if (statusFilter !== 'all') {
+          url.searchParams.set('status', statusFilter)
+        }
+
+        const response = await fetch(url.toString())
+        if (!response.ok) {
+          throw new Error('Failed to fetch webhook events')
+        }
+        const data = await response.json()
+        setEventsData(data)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Unknown error')
+      }
+    }
+
+    const loadData = async () => {
+      setLoading(true)
+      await Promise.all([fetchHealth(), fetchEvents()])
+      setLoading(false)
+    }
+    loadData()
+  }, [statusFilter, refreshKey])
+
   const retryEvent = async (eventId: string) => {
     try {
       const response = await fetch(`/api/admin/integrations/shopify/webhooks/retry/${eventId}`, {
@@ -139,24 +149,11 @@ export default function WebhookHealthPage() {
         throw new Error('Failed to retry webhook')
       }
       // Refresh events after retry
-      await fetchEvents()
+      setRefreshKey(prev => prev + 1)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     }
   }
-
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true)
-      await Promise.all([fetchHealth(), fetchEvents()])
-      setLoading(false)
-    }
-    loadData()
-  }, [])
-
-  useEffect(() => {
-    fetchEvents()
-  }, [statusFilter])
 
   if (loading) {
     return (

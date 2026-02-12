@@ -3,7 +3,7 @@
 import { Button, Checkbox, Label, RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
 import { Filter, X } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useState, useTransition } from 'react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
 
 import { CONTRACTOR_STATUS_LABELS, type ContractorStatus } from '@/lib/contractors/types'
 
@@ -21,7 +21,7 @@ export function ContractorFilters({ availableTags }: ContractorFiltersProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   // Parse current filter values
-  const currentStatus = searchParams.get('status')?.split(',').filter(Boolean) || []
+  const currentStatus = useMemo(() => searchParams.get('status')?.split(',').filter(Boolean) || [], [searchParams])
   const currentTags = searchParams.get('tags')?.split(',').filter(Boolean) || []
   const hasPaymentMethod = searchParams.get('hasPaymentMethod')
   const hasW9 = searchParams.get('hasW9')

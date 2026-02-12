@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Plus, Trash2, AlertTriangle } from 'lucide-react'
 
 import { Button, Input, Label, cn } from '@cgk/ui'
@@ -32,12 +32,12 @@ const guardrailMetrics = [
 ]
 
 export function Step4Schedule({ data, updateData }: Step4Props) {
-  const step4: WizardStep4Data = data.step4 || {
+  const step4: WizardStep4Data = useMemo(() => data.step4 || {
     startOption: 'now',
     endOption: 'auto_significance',
     timezone: 'America/New_York',
     guardrails: [],
-  }
+  }, [data.step4])
 
   const update = useCallback(
     (changes: Partial<WizardStep4Data>) => {

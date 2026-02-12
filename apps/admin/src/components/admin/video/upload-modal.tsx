@@ -43,33 +43,7 @@ export function UploadModal({
     setIsDragging(false)
   }, [])
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-
-    const files = Array.from(e.dataTransfer.files).filter((file) =>
-      file.type.startsWith('video/'),
-    )
-
-    if (files.length === 0) {
-      setError('Please drop video files only')
-      return
-    }
-
-    handleFiles(files)
-  }, [])
-
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = Array.from(e.target.files || [])
-      if (files.length > 0) {
-        handleFiles(files)
-      }
-    },
-    [],
-  )
-
-  const handleFiles = async (files: File[]) => {
+  const handleFiles = useCallback(async (files: File[]) => {
     setError(null)
 
     // Create initial upload states
@@ -146,7 +120,33 @@ export function UploadModal({
         )
       }
     }
-  }
+  }, [folderId, onUploadComplete, uploads.length])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+
+    const files = Array.from(e.dataTransfer.files).filter((file) =>
+      file.type.startsWith('video/'),
+    )
+
+    if (files.length === 0) {
+      setError('Please drop video files only')
+      return
+    }
+
+    handleFiles(files)
+  }, [handleFiles])
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = Array.from(e.target.files || [])
+      if (files.length > 0) {
+        handleFiles(files)
+      }
+    },
+    [handleFiles],
+  )
 
   const uploadToMux = async (
     uploadUrl: string,

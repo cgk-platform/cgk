@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Package, RefreshCw } from 'lucide-react'
 
 import { Button, Card, CardContent } from '@cgk/ui'
@@ -20,11 +20,7 @@ export function ShipmentHistory({ creatorId, onSendProduct }: ShipmentHistoryPro
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadShipments()
-  }, [creatorId])
-
-  async function loadShipments() {
+  const loadShipments = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -38,7 +34,11 @@ export function ShipmentHistory({ creatorId, onSendProduct }: ShipmentHistoryPro
     } finally {
       setLoading(false)
     }
-  }
+  }, [creatorId])
+
+  useEffect(() => {
+    loadShipments()
+  }, [loadShipments])
 
   async function syncShipment(shipmentId: string) {
     try {

@@ -51,22 +51,21 @@ export default function McpAnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState(7)
 
-  const fetchAnalytics = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch(`/api/admin/mcp/analytics?days=${timeRange}`)
-      if (response.ok) {
-        const result = await response.json()
-        setData(result)
-      }
-    } catch (error) {
-      console.error('Failed to fetch MCP analytics:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const fetchAnalytics = async () => {
+      setLoading(true)
+      try {
+        const response = await fetch(`/api/admin/mcp/analytics?days=${timeRange}`)
+        if (response.ok) {
+          const result = await response.json()
+          setData(result)
+        }
+      } catch (error) {
+        console.error('Failed to fetch MCP analytics:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchAnalytics()
   }, [timeRange])
 

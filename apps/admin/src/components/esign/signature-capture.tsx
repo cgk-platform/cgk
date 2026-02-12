@@ -67,28 +67,6 @@ export function SignatureCapture({
     loadFonts()
   }, [])
 
-  // Initialize canvas
-  useEffect(() => {
-    if (!canvasRef.current) return
-
-    const canvas = canvasRef.current
-    canvas.width = canvasWidth * 2
-    canvas.height = canvasHeight * 2
-    canvas.style.width = `${canvasWidth}px`
-    canvas.style.height = `${canvasHeight}px`
-
-    const context = canvas.getContext('2d')
-    if (context) {
-      context.scale(2, 2)
-      context.lineCap = 'round'
-      context.lineJoin = 'round'
-      context.strokeStyle = '#1a1a1a'
-      context.lineWidth = 2
-      contextRef.current = context
-      clearCanvas()
-    }
-  }, [canvasWidth, canvasHeight])
-
   const clearCanvas = useCallback(() => {
     const canvas = canvasRef.current
     const context = contextRef.current
@@ -111,6 +89,28 @@ export function SignatureCapture({
     context.lineWidth = 2
     setHasDrawn(false)
   }, [canvasWidth, canvasHeight])
+
+  // Initialize canvas
+  useEffect(() => {
+    if (!canvasRef.current) return
+
+    const canvas = canvasRef.current
+    canvas.width = canvasWidth * 2
+    canvas.height = canvasHeight * 2
+    canvas.style.width = `${canvasWidth}px`
+    canvas.style.height = `${canvasHeight}px`
+
+    const context = canvas.getContext('2d')
+    if (context) {
+      context.scale(2, 2)
+      context.lineCap = 'round'
+      context.lineJoin = 'round'
+      context.strokeStyle = '#1a1a1a'
+      context.lineWidth = 2
+      contextRef.current = context
+      clearCanvas()
+    }
+  }, [canvasWidth, canvasHeight, clearCanvas])
 
   const getCoordinates = (e: React.MouseEvent | React.TouchEvent): { x: number; y: number } | null => {
     const canvas = canvasRef.current
