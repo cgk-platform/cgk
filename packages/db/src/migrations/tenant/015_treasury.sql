@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS treasury_draw_request_items (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
 
   -- Parent request
-  request_id TEXT NOT NULL REFERENCES treasury_draw_requests(id) ON DELETE CASCADE,
+  treasury_request_id TEXT NOT NULL REFERENCES treasury_draw_requests(id) ON DELETE CASCADE,
 
   -- Withdrawal reference
   withdrawal_id TEXT NOT NULL,
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS treasury_communications (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
 
   -- Parent request
-  request_id TEXT NOT NULL REFERENCES treasury_draw_requests(id) ON DELETE CASCADE,
+  treasury_request_id TEXT NOT NULL REFERENCES treasury_draw_requests(id) ON DELETE CASCADE,
 
   -- Direction and channel
   direction communication_direction NOT NULL,
@@ -295,18 +295,19 @@ CREATE INDEX IF NOT EXISTS idx_treasury_draw_requests_created_at ON treasury_dra
 CREATE INDEX IF NOT EXISTS idx_treasury_draw_requests_treasurer_email ON treasury_draw_requests(treasurer_email);
 
 -- Indexes for treasury_draw_request_items
-CREATE INDEX IF NOT EXISTS idx_treasury_draw_request_items_request_id ON treasury_draw_request_items(request_id);
+CREATE INDEX IF NOT EXISTS idx_treasury_draw_request_items_treasury_request_id ON treasury_draw_request_items(treasury_request_id);
 CREATE INDEX IF NOT EXISTS idx_treasury_draw_request_items_withdrawal_id ON treasury_draw_request_items(withdrawal_id);
 
 -- Indexes for treasury_communications
-CREATE INDEX IF NOT EXISTS idx_treasury_communications_request_id ON treasury_communications(request_id);
+CREATE INDEX IF NOT EXISTS idx_treasury_communications_treasury_request_id ON treasury_communications(treasury_request_id);
 CREATE INDEX IF NOT EXISTS idx_treasury_communications_direction ON treasury_communications(direction);
 CREATE INDEX IF NOT EXISTS idx_treasury_communications_created_at ON treasury_communications(created_at);
 
 -- Indexes for treasury_receipts
 CREATE INDEX IF NOT EXISTS idx_treasury_receipts_status ON treasury_receipts(status);
 CREATE INDEX IF NOT EXISTS idx_treasury_receipts_vendor_name ON treasury_receipts(vendor_name);
-CREATE INDEX IF NOT EXISTS idx_treasury_receipts_expense_id ON treasury_receipts(expense_id);
+-- Note: Using linked_expense_id which matches existing schema
+CREATE INDEX IF NOT EXISTS idx_treasury_receipts_expense_id ON treasury_receipts(linked_expense_id);
 CREATE INDEX IF NOT EXISTS idx_treasury_receipts_created_at ON treasury_receipts(created_at);
 
 -- Indexes for stripe_topups

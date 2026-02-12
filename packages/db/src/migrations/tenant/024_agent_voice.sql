@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS agent_voice_config (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
-  agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
 
   -- TTS Settings
   tts_provider TEXT DEFAULT 'elevenlabs',     -- elevenlabs, openai, google
@@ -46,7 +46,7 @@ CREATE INDEX IF NOT EXISTS idx_voice_config_agent ON agent_voice_config(agent_id
 CREATE TABLE IF NOT EXISTS agent_voice_calls (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
-  agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
 
   -- Call identifiers
   call_sid TEXT NOT NULL,                     -- Provider's call ID

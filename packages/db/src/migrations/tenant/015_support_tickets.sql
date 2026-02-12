@@ -39,7 +39,7 @@ END $$;
 -- Support agents (tenant team members with support role)
 CREATE TABLE IF NOT EXISTS support_agents (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
-  user_id TEXT NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
 
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS ticket_comments (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
 
-  author_id TEXT REFERENCES public.users(id) ON DELETE SET NULL,
+  author_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   author_name VARCHAR(255) NOT NULL,
   author_type ticket_comment_author_type NOT NULL,
 
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS sentiment_alerts (
   trigger_reason TEXT,
 
   acknowledged BOOLEAN NOT NULL DEFAULT FALSE,
-  acknowledged_by TEXT REFERENCES public.users(id) ON DELETE SET NULL,
+  acknowledged_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
   acknowledged_at TIMESTAMPTZ,
 
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -183,7 +183,7 @@ CREATE TABLE IF NOT EXISTS ticket_audit_log (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
   ticket_id TEXT NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
 
-  actor_id TEXT REFERENCES public.users(id) ON DELETE SET NULL,
+  actor_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   actor_name VARCHAR(255),
   action VARCHAR(100) NOT NULL,
 

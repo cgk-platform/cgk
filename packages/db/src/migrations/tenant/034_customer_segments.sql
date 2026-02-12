@@ -135,20 +135,19 @@ BEGIN
       SELECT
         o.id AS order_id,
         o.order_number,
-        o.email AS customer_email,
-        o.customer_name,
-        o.total_price_cents,
+        o.customer_email,
+        o.total_cents AS total_price_cents,
         o.currency,
         o.fulfillment_status,
         o.tags,
-        o.source_name AS channel,
+        o.utm_source AS channel,
         o.order_placed_at,
         o.created_at,
         CASE
           WHEN EXISTS (
             SELECT 1 FROM samples_config sc
             WHERE sc.tiktok_tags && o.tags::text[]
-               OR (o.source_name ILIKE ANY(sc.channel_patterns))
+               OR (o.utm_source ILIKE ANY(sc.channel_patterns))
           ) THEN ''tiktok''
           WHEN EXISTS (
             SELECT 1 FROM samples_config sc
@@ -159,8 +158,8 @@ BEGIN
       FROM orders o
       WHERE EXISTS (
         SELECT 1 FROM samples_config sc
-        WHERE (sc.ugc_tags && o.tags::text[] OR sc.tiktok_tags && o.tags::text[] OR o.source_name ILIKE ANY(sc.channel_patterns))
-          AND (NOT sc.zero_price_only OR o.total_price_cents = 0)
+        WHERE (sc.ugc_tags && o.tags::text[] OR sc.tiktok_tags && o.tags::text[] OR o.utm_source ILIKE ANY(sc.channel_patterns))
+          AND (NOT sc.zero_price_only OR o.total_cents = 0)
           AND sc.enabled = true
       )
     ';

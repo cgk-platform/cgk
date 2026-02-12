@@ -2,10 +2,9 @@
 -- Phase: PHASE-2AI-MEMORY
 -- Enables persistent memory, vector embeddings, semantic search, and learning
 
--- Enable pgvector extension (must be done in public schema, but works across all schemas)
--- Note: This needs superuser privileges and should be run once at DB setup
+-- pgvector extension should be installed in public schema during DB setup
 -- For Neon/Vercel Postgres, pgvector is pre-installed
-CREATE EXTENSION IF NOT EXISTS vector;
+-- We reference public.vector explicitly since tenant schemas have isolated search_path
 
 -- Memory type enum
 DO $$ BEGIN
@@ -97,7 +96,8 @@ CREATE TABLE IF NOT EXISTS agent_memories (
 
   -- Vector embedding (1536 dimensions for text-embedding-3-small)
   -- Note: HNSW indexes have a 2000 dimension limit, so we use the small model
-  embedding vector(1536),
+  -- Use public.vector since extension is in public schema
+  embedding public.vector(1536),
 
   -- Usage tracking
   times_used INTEGER DEFAULT 0,
@@ -130,8 +130,9 @@ CREATE INDEX IF NOT EXISTS idx_memories_created ON agent_memories(created_at DES
 
 -- HNSW index for vector similarity search (fast approximate nearest neighbor)
 -- Using cosine distance for semantic similarity
+-- Note: vector_cosine_ops is in public schema with the extension
 CREATE INDEX IF NOT EXISTS idx_memories_embedding ON agent_memories
-  USING hnsw (embedding vector_cosine_ops)
+  USING hnsw (embedding public.vector_cosine_ops)
   WITH (m = 16, ef_construction = 64);
 
 -- Trigger for updated_at

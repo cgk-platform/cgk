@@ -77,7 +77,7 @@ DROP TRIGGER IF EXISTS update_portal_theme_config_updated_at ON portal_theme_con
 CREATE TRIGGER update_portal_theme_config_updated_at
   BEFORE UPDATE ON portal_theme_config
   FOR EACH ROW
-  EXECUTE FUNCTION update_updated_at_column();
+  EXECUTE FUNCTION public.update_updated_at_column();
 
 COMMENT ON TABLE portal_theme_config IS 'Per-tenant theme configuration for customer portal';
 COMMENT ON COLUMN portal_theme_config.spacing IS 'Spacing density: compact, normal, or relaxed';

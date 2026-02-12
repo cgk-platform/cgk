@@ -52,10 +52,11 @@ ALTER TABLE creators ADD COLUMN IF NOT EXISTS welcome_call_dismissed BOOLEAN DEF
 ALTER TABLE creators ADD COLUMN IF NOT EXISTS first_login_at TIMESTAMPTZ;
 
 -- Index for finding creators needing reminders
+-- Using 'pending' instead of 'onboarding' to match existing enum values
 CREATE INDEX IF NOT EXISTS idx_creators_reminder_status ON creators(status, reminder_count, last_reminder_at)
-  WHERE status IN ('approved', 'onboarding');
+  WHERE status IN ('approved', 'pending');
 CREATE INDEX IF NOT EXISTS idx_creators_welcome_call ON creators(status, first_login_at, welcome_call_scheduled_at)
-  WHERE status IN ('approved', 'onboarding', 'active');
+  WHERE status IN ('approved', 'pending', 'active');
 
 COMMENT ON COLUMN creators.reminder_count IS 'Number of approval reminders sent';
 COMMENT ON COLUMN creators.last_reminder_at IS 'Timestamp of last approval reminder';

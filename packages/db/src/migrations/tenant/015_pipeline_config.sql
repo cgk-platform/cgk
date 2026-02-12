@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS pipeline_triggers (
 -- Saved filters for quick access
 CREATE TABLE IF NOT EXISTS pipeline_saved_filters (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
-  user_id TEXT REFERENCES public.users(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   name VARCHAR(100) NOT NULL,
   filters JSONB NOT NULL,
   is_default BOOLEAN DEFAULT false,
@@ -101,10 +101,10 @@ END $$;
 -- Stage transition history for analytics
 CREATE TABLE IF NOT EXISTS pipeline_stage_history (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
-  project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   from_stage VARCHAR(50),
   to_stage VARCHAR(50) NOT NULL,
-  changed_by TEXT REFERENCES public.users(id),
+  changed_by UUID REFERENCES public.users(id),
   notes TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -113,7 +113,8 @@ CREATE TABLE IF NOT EXISTS pipeline_stage_history (
 CREATE INDEX IF NOT EXISTS idx_pipeline_triggers_enabled ON pipeline_triggers(enabled) WHERE enabled = true;
 CREATE INDEX IF NOT EXISTS idx_pipeline_saved_filters_user ON pipeline_saved_filters(user_id);
 CREATE INDEX IF NOT EXISTS idx_projects_status ON projects(status);
-CREATE INDEX IF NOT EXISTS idx_projects_creator ON projects(creator_id);
+-- Note: creator_id index skipped as projects table may have different schema (owner_id instead)
+-- CREATE INDEX IF NOT EXISTS idx_projects_creator ON projects(creator_id);
 CREATE INDEX IF NOT EXISTS idx_projects_due_date ON projects(due_date);
 CREATE INDEX IF NOT EXISTS idx_projects_created_at ON projects(created_at);
 CREATE INDEX IF NOT EXISTS idx_pipeline_stage_history_project ON pipeline_stage_history(project_id);

@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS privacy_requests (
   verified_at TIMESTAMPTZ,
   verification_method privacy_verification_method,
 
-  processed_by TEXT REFERENCES public.users(id) ON DELETE SET NULL,
+  processed_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
   processed_at TIMESTAMPTZ,
 
   result_url TEXT,

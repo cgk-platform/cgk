@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS creator_conversations (
   unread_creator INTEGER NOT NULL DEFAULT 0,
   unread_admin INTEGER NOT NULL DEFAULT 0,
 
-  -- Assignment
-  assigned_to TEXT REFERENCES public.users(id) ON DELETE SET NULL,
+  -- Assignment (UUID to match public.users.id type)
+  assigned_to UUID REFERENCES public.users(id) ON DELETE SET NULL,
 
   -- Timestamps
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

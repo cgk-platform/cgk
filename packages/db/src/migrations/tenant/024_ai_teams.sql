@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS ai_team_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
   team_id UUID NOT NULL REFERENCES ai_teams(id) ON DELETE CASCADE,
-  agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
 
   -- Role in team
   role TEXT NOT NULL DEFAULT 'member',   -- lead, member, specialist
@@ -107,7 +107,7 @@ CREATE INDEX IF NOT EXISTS idx_org_chart_level ON org_chart(tenant_id, level);
 CREATE TABLE IF NOT EXISTS agent_relationships (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id UUID NOT NULL,
-  agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
 
   -- Who the relationship is with
   person_type TEXT NOT NULL,             -- 'team_member', 'creator', 'contact'
@@ -155,8 +155,8 @@ CREATE TABLE IF NOT EXISTS agent_slack_messages (
   slack_channel_id TEXT NOT NULL,
 
   -- Sender/Receiver
-  from_agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
-  to_agent_id UUID REFERENCES ai_agents(id) ON DELETE SET NULL,  -- NULL = broadcast
+  from_agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  to_agent_id TEXT REFERENCES ai_agents(id) ON DELETE SET NULL,  -- NULL = broadcast
 
   -- Message details
   message_type TEXT NOT NULL,            -- status, question, handoff, task, response
@@ -186,8 +186,8 @@ CREATE TABLE IF NOT EXISTS agent_handoffs (
   tenant_id UUID NOT NULL,
 
   -- Participants
-  from_agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
-  to_agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  from_agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  to_agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
 
   -- Conversation context
   conversation_id TEXT NOT NULL,
@@ -224,7 +224,7 @@ CREATE TABLE IF NOT EXISTS agent_conversation_log (
 
   -- Conversation reference
   conversation_id TEXT NOT NULL,
-  agent_id UUID NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
+  agent_id TEXT NOT NULL REFERENCES ai_agents(id) ON DELETE CASCADE,
 
   -- Message details
   role TEXT NOT NULL,                    -- 'user' or 'agent'

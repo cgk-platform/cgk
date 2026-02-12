@@ -3,21 +3,29 @@
 -- Created: 2026-02-10
 
 -- Feature flag type enum
-CREATE TYPE feature_flag_type AS ENUM (
-  'boolean',
-  'percentage',
-  'tenant_list',
-  'user_list',
-  'schedule',
-  'variant'
-);
+DO $$ BEGIN
+  CREATE TYPE feature_flag_type AS ENUM (
+    'boolean',
+    'percentage',
+    'tenant_list',
+    'user_list',
+    'schedule',
+    'variant'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Feature flag status enum
-CREATE TYPE feature_flag_status AS ENUM (
-  'active',
-  'archived',
-  'disabled'
-);
+DO $$ BEGIN
+  CREATE TYPE feature_flag_status AS ENUM (
+    'active',
+    'archived',
+    'disabled'
+  );
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Main feature flags table
 CREATE TABLE IF NOT EXISTS feature_flags (
@@ -38,9 +46,13 @@ CREATE TABLE IF NOT EXISTS feature_flags (
 );
 
 -- Flag key format constraint
-ALTER TABLE feature_flags
-ADD CONSTRAINT feature_flags_key_format
-CHECK (key ~ '^[a-z][a-z0-9._]+$');
+DO $$ BEGIN
+  ALTER TABLE feature_flags
+  ADD CONSTRAINT feature_flags_key_format
+  CHECK (key ~ '^[a-z][a-z0-9._]+$');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
 
 -- Flag overrides table
 CREATE TABLE IF NOT EXISTS feature_flag_overrides (
@@ -61,17 +73,17 @@ CREATE TABLE IF NOT EXISTS feature_flag_overrides (
 );
 
 -- Unique constraint for tenant overrides
-CREATE UNIQUE INDEX feature_flag_overrides_tenant_unique
+CREATE UNIQUE INDEX IF NOT EXISTS feature_flag_overrides_tenant_unique
 ON feature_flag_overrides (flag_id, tenant_id)
 WHERE tenant_id IS NOT NULL AND user_id IS NULL;
 
 -- Unique constraint for user overrides (without tenant)
-CREATE UNIQUE INDEX feature_flag_overrides_user_unique
+CREATE UNIQUE INDEX IF NOT EXISTS feature_flag_overrides_user_unique
 ON feature_flag_overrides (flag_id, user_id)
 WHERE user_id IS NOT NULL AND tenant_id IS NULL;
 
 -- Unique constraint for tenant+user overrides
-CREATE UNIQUE INDEX feature_flag_overrides_tenant_user_unique
+CREATE UNIQUE INDEX IF NOT EXISTS feature_flag_overrides_tenant_user_unique
 ON feature_flag_overrides (flag_id, tenant_id, user_id)
 WHERE tenant_id IS NOT NULL AND user_id IS NOT NULL;
 
@@ -91,26 +103,26 @@ CREATE TABLE IF NOT EXISTS feature_flag_audit (
 );
 
 -- Indexes for feature_flags
-CREATE INDEX idx_feature_flags_key ON feature_flags(key);
-CREATE INDEX idx_feature_flags_status ON feature_flags(status);
-CREATE INDEX idx_feature_flags_type ON feature_flags(type);
-CREATE INDEX idx_feature_flags_category ON feature_flags(category);
-CREATE INDEX idx_feature_flags_created_at ON feature_flags(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feature_flags_key ON feature_flags(key);
+CREATE INDEX IF NOT EXISTS idx_feature_flags_status ON feature_flags(status);
+CREATE INDEX IF NOT EXISTS idx_feature_flags_type ON feature_flags(type);
+CREATE INDEX IF NOT EXISTS idx_feature_flags_category ON feature_flags(category);
+CREATE INDEX IF NOT EXISTS idx_feature_flags_created_at ON feature_flags(created_at DESC);
 
 -- Indexes for feature_flag_overrides
-CREATE INDEX idx_feature_flag_overrides_flag_id ON feature_flag_overrides(flag_id);
-CREATE INDEX idx_feature_flag_overrides_flag_key ON feature_flag_overrides(flag_key);
-CREATE INDEX idx_feature_flag_overrides_tenant_id ON feature_flag_overrides(tenant_id);
-CREATE INDEX idx_feature_flag_overrides_user_id ON feature_flag_overrides(user_id);
-CREATE INDEX idx_feature_flag_overrides_expires_at ON feature_flag_overrides(expires_at)
+CREATE INDEX IF NOT EXISTS idx_feature_flag_overrides_flag_id ON feature_flag_overrides(flag_id);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_overrides_flag_key ON feature_flag_overrides(flag_key);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_overrides_tenant_id ON feature_flag_overrides(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_overrides_user_id ON feature_flag_overrides(user_id);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_overrides_expires_at ON feature_flag_overrides(expires_at)
 WHERE expires_at IS NOT NULL;
 
 -- Indexes for feature_flag_audit
-CREATE INDEX idx_feature_flag_audit_flag_id ON feature_flag_audit(flag_id);
-CREATE INDEX idx_feature_flag_audit_flag_key ON feature_flag_audit(flag_key);
-CREATE INDEX idx_feature_flag_audit_action ON feature_flag_audit(action);
-CREATE INDEX idx_feature_flag_audit_user_id ON feature_flag_audit(user_id);
-CREATE INDEX idx_feature_flag_audit_created_at ON feature_flag_audit(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_audit_flag_id ON feature_flag_audit(flag_id);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_audit_flag_key ON feature_flag_audit(flag_key);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_audit_action ON feature_flag_audit(action);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_audit_user_id ON feature_flag_audit(user_id);
+CREATE INDEX IF NOT EXISTS idx_feature_flag_audit_created_at ON feature_flag_audit(created_at DESC);
 
 -- Trigger to update updated_at
 CREATE OR REPLACE FUNCTION update_feature_flag_updated_at()
@@ -121,6 +133,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS feature_flags_updated_at ON feature_flags;
 CREATE TRIGGER feature_flags_updated_at
   BEFORE UPDATE ON feature_flags
   FOR EACH ROW

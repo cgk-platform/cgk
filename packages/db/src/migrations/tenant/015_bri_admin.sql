@@ -217,8 +217,8 @@ CREATE TABLE IF NOT EXISTS user_memories (
   content TEXT NOT NULL,
   content_type TEXT NOT NULL DEFAULT 'general', -- general, preference, context
 
-  -- Search
-  embedding VECTOR(1536),               -- OpenAI embedding for semantic search
+  -- Search (use public.vector since extension is in public schema)
+  embedding public.vector(1536),        -- OpenAI embedding for semantic search
   importance_score NUMERIC(5,2) DEFAULT 50.0,
 
   -- State
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS user_memories (
 -- Only create vector index if extension exists
 DO $$ BEGIN
   CREATE INDEX IF NOT EXISTS idx_user_memories_embedding ON user_memories
-    USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+    USING ivfflat (embedding public.vector_cosine_ops) WITH (lists = 100);
 EXCEPTION
   WHEN undefined_object THEN NULL;
 END $$;
