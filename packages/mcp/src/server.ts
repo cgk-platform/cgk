@@ -1,18 +1,36 @@
 /**
- * MCP Server factory
+ * MCP Server factory (Legacy API)
+ *
+ * This module provides the legacy server factory API for backward compatibility.
+ * For new code, prefer using MCPHandler directly for better control over
+ * authentication and streaming.
  */
 
-import type { PromptDefinition } from './prompts'
+import type { PromptDefinition, PromptHandlerMessage } from './prompts'
 import type { ResourceDefinition } from './resources'
 import type { ToolDefinition } from './tools'
-import type { Tool, Resource, Prompt, ToolResult, ResourceContent, PromptMessage } from './types'
+import type {
+  Tool,
+  Resource,
+  Prompt,
+  ToolResult,
+  ResourceContents,
+  TextContent,
+} from './types'
+import type { StreamingChunk } from './streaming'
 
+/**
+ * MCP server configuration
+ */
 export interface MCPServerConfig {
   name: string
   version: string
   description?: string
 }
 
+/**
+ * MCP server interface
+ */
 export interface MCPServer {
   readonly name: string
   readonly version: string
@@ -28,8 +46,8 @@ export interface MCPServer {
   listPrompts(): Prompt[]
 
   callTool(name: string, args: Record<string, unknown>): Promise<ToolResult>
-  readResource(uri: string): Promise<ResourceContent>
-  getPrompt(name: string, args?: Record<string, unknown>): Promise<PromptMessage[]>
+  readResource(uri: string): Promise<ResourceContents>
+  getPrompt(name: string, args?: Record<string, unknown>): Promise<PromptHandlerMessage[]>
 
   // Lifecycle
   start(): Promise<void>
@@ -37,7 +55,28 @@ export interface MCPServer {
 }
 
 /**
+ * Type guard to check if a value is an async generator
+ */
+function isAsyncGenerator(
+  value: unknown
+): value is AsyncGenerator<StreamingChunk, void, unknown> {
+  if (value === null || typeof value !== 'object') {
+    return false
+  }
+  // Check for async iterator symbol
+  if (!(Symbol.asyncIterator in value)) {
+    return false
+  }
+  // Check for next method
+  const asIterable = value as Record<string, unknown>
+  return typeof asIterable.next === 'function'
+}
+
+/**
  * Create an MCP server
+ *
+ * @param config - Server configuration
+ * @returns MCP server instance
  */
 export function createMCPServer(config: MCPServerConfig): MCPServer {
   const tools = new Map<string, ToolDefinition>()
@@ -89,16 +128,35 @@ export function createMCPServer(config: MCPServerConfig): MCPServer {
       const tool = tools.get(name)
       if (!tool) {
         return {
-          content: [{ type: 'text', text: `Tool not found: ${name}` }],
+          content: [{ type: 'text' as const, text: `Tool not found: ${name}` }],
           isError: true,
         }
       }
 
       try {
-        return await tool.handler(args)
+        const result = tool.handler(args)
+
+        // Handle streaming tools by collecting all chunks
+        if (isAsyncGenerator(result)) {
+          const contents: TextContent[] = []
+          for await (const chunk of result) {
+            if (chunk.type === 'partial' || chunk.type === 'complete') {
+              const textContents = (chunk.type === 'partial' ? chunk.content : chunk.result.content)
+                .filter((c): c is TextContent => c.type === 'text')
+              contents.push(...textContents)
+            }
+          }
+          return {
+            content: contents.length > 0 ? contents : [{ type: 'text' as const, text: 'No results' }],
+            isError: false,
+          }
+        }
+
+        // Handle regular promise-based tools
+        return await result
       } catch (error) {
         return {
-          content: [{ type: 'text', text: `Tool error: ${error instanceof Error ? error.message : String(error)}` }],
+          content: [{ type: 'text' as const, text: `Tool error: ${error instanceof Error ? error.message : String(error)}` }],
           isError: true,
         }
       }
@@ -123,7 +181,6 @@ export function createMCPServer(config: MCPServerConfig): MCPServer {
     },
 
     async start() {
-      // TODO: Start stdio transport or HTTP server
       console.log(`MCP Server ${config.name} v${config.version} starting...`)
     },
 

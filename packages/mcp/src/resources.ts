@@ -2,10 +2,16 @@
  * MCP Resource definition utilities
  */
 
-import type { ResourceContent } from './types'
+import type { ResourceContents } from './types'
 
-export type ResourceHandler = () => Promise<ResourceContent>
+/**
+ * Resource handler function type
+ */
+export type ResourceHandler = () => Promise<ResourceContents>
 
+/**
+ * Resource definition
+ */
 export interface ResourceDefinition {
   uri: string
   name: string

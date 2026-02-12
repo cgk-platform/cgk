@@ -1,31 +1,199 @@
 /**
  * @cgk/mcp - MCP (Model Context Protocol) server utilities
  *
+ * Provides Streamable HTTP transport for MCP servers with:
+ * - Per-request authentication
+ * - Tenant isolation
+ * - Streaming responses for long-running tools
+ * - Token usage logging
+ *
  * @ai-pattern mcp-server
  * @ai-note Tools for building MCP servers for AI assistants
  */
 
-// Server factory
+// =============================================================================
+// Handler - Main MCP request handler
+// =============================================================================
+
+export {
+  MCPHandler,
+  MCPProtocolError,
+  createMCPHandlerFactory,
+  type MCPServerInfo,
+  type MCPHandlerConfig,
+} from './handler'
+
+// =============================================================================
+// Session Management
+// =============================================================================
+
+export {
+  createMCPSession,
+  getSession,
+  touchSession,
+  incrementUsage,
+  deleteSession,
+  getTenantSessions,
+  getTenantSessionCount,
+  cleanupExpiredSessions,
+  logTokenUsage,
+  startUsageTracking,
+  getTokenUsageLogs,
+  getUsageStats,
+  clearTokenUsageLogs,
+  isValidProtocolVersion,
+  negotiateProtocolVersion,
+  startSessionCleanup,
+  stopSessionCleanup,
+  getSessionStoreSize,
+} from './session'
+
+// =============================================================================
+// Streaming Utilities
+// =============================================================================
+
+export {
+  STREAMING_TOOLS,
+  requiresStreaming,
+  createStreamingResponse,
+  createStreamingToolHandler,
+  progressChunk,
+  partialChunk,
+  textPartialChunk,
+  completeChunk,
+  textCompleteChunk,
+  errorChunk,
+  aggregateStreamingResult,
+  batchProcess,
+  type StreamingToolName,
+  type StreamingChunkType,
+  type ProgressChunk,
+  type PartialChunk,
+  type CompleteChunk,
+  type ErrorChunk,
+  type StreamingChunk,
+  type StreamingResponseOptions,
+  type StreamingContext,
+  type BatchStreamingOptions,
+} from './streaming'
+
+// =============================================================================
+// Server Factory (Legacy API)
+// =============================================================================
+
 export { createMCPServer, type MCPServer, type MCPServerConfig } from './server'
 
-// Tool definition
-export { defineTool, type ToolDefinition, type ToolHandler } from './tools'
+// =============================================================================
+// Tool Definition
+// =============================================================================
 
-// Resource definition
-export { defineResource, type ResourceDefinition, type ResourceHandler } from './resources'
+export {
+  defineTool,
+  textResult,
+  errorResult,
+  jsonResult,
+  type ToolDefinition,
+  type ToolHandler,
+} from './tools'
 
-// Prompt definition
-export { definePrompt, type PromptDefinition, type PromptHandler } from './prompts'
+// =============================================================================
+// Resource Definition
+// =============================================================================
 
-// Context helpers
-export { createContext, type MCPContext } from './context'
+export {
+  defineResource,
+  type ResourceDefinition,
+  type ResourceHandler,
+} from './resources'
 
-// Types
+// =============================================================================
+// Prompt Definition
+// =============================================================================
+
+export {
+  definePrompt,
+  type PromptDefinition,
+  type PromptHandler,
+  type PromptHandlerMessage,
+} from './prompts'
+
+// =============================================================================
+// Context Helpers
+// =============================================================================
+
+export {
+  createContext,
+  getContext,
+  requireContext,
+  updateContext,
+  clearContext,
+  withContext,
+  withContextSync,
+  type MCPContext,
+} from './context'
+
+// =============================================================================
+// Protocol Types
+// =============================================================================
+
 export type {
+  // Protocol versions
+  MCPProtocolVersion,
+  // JSON-RPC 2.0 types
+  JSONRPCID,
+  JSONRPCRequest,
+  JSONRPCNotification,
+  JSONRPCResponse,
+  JSONRPCError,
+  // MCP message types
+  MCPRequest,
+  MCPNotification,
+  MCPResponse,
+  MCPMethod,
+  // Initialize types
+  MCPClientCapabilities,
+  MCPServerCapabilities,
+  InitializeParams,
+  InitializeResult,
+  // Tool types
   Tool,
-  Resource,
-  Prompt,
+  JSONSchema,
+  ListToolsResult,
+  CallToolParams,
+  CallToolResult,
   ToolResult,
+  ContentBlock,
+  TextContent,
+  ImageContent,
   ResourceContent,
+  // Resource types
+  Resource,
+  EmbeddedResource,
+  ListResourcesResult,
+  ReadResourceParams,
+  ReadResourceResult,
+  ResourceContents,
+  // Prompt types
+  Prompt,
+  PromptArgument,
+  PromptRole,
   PromptMessage,
+  ListPromptsResult,
+  GetPromptParams,
+  GetPromptResult,
+  // Session types
+  MCPSession,
+  CreateSessionOptions,
+  TokenUsageEntry,
+} from './types'
+
+// =============================================================================
+// Protocol Constants
+// =============================================================================
+
+export {
+  MIN_PROTOCOL_VERSION,
+  CURRENT_PROTOCOL_VERSION,
+  SUPPORTED_PROTOCOL_VERSIONS,
+  JSONRPCErrorCodes,
 } from './types'

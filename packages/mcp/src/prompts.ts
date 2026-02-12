@@ -2,10 +2,25 @@
  * MCP Prompt definition utilities
  */
 
-import type { PromptMessage, PromptArgument } from './types'
+import type { PromptArgument, TextContent, ImageContent, EmbeddedResource, PromptRole } from './types'
 
-export type PromptHandler = (args: Record<string, unknown>) => Promise<PromptMessage[]>
+/**
+ * Prompt message for handler return type
+ * Uses specific content types for type safety
+ */
+export interface PromptHandlerMessage {
+  role: PromptRole
+  content: TextContent | ImageContent | EmbeddedResource
+}
 
+/**
+ * Prompt handler function type
+ */
+export type PromptHandler = (args: Record<string, unknown>) => Promise<PromptHandlerMessage[]>
+
+/**
+ * Prompt definition
+ */
 export interface PromptDefinition {
   name: string
   description?: string

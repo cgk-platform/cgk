@@ -3,14 +3,26 @@
  */
 
 import type { JSONSchema, ToolResult } from './types'
+import type { StreamingChunk } from './streaming'
 
-export type ToolHandler = (args: Record<string, unknown>) => Promise<ToolResult>
+/**
+ * Tool handler function type
+ * Can return a Promise<ToolResult> or an AsyncGenerator for streaming
+ */
+export type ToolHandler = (
+  args: Record<string, unknown>
+) => Promise<ToolResult> | AsyncGenerator<StreamingChunk, void, unknown>
 
+/**
+ * Tool definition
+ */
 export interface ToolDefinition {
   name: string
   description: string
   inputSchema: JSONSchema
   handler: ToolHandler
+  /** Whether this tool supports streaming output */
+  streaming?: boolean
 }
 
 /**
