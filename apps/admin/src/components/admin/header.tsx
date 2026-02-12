@@ -4,7 +4,7 @@ import { Menu, Search, Bell } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { TenantSwitcher, useHasMultipleTenants } from '@cgk/ui'
+import { TenantSwitcher, useTenantOptional } from '@cgk/ui'
 
 interface HeaderProps {
   tenantName: string
@@ -12,16 +12,10 @@ interface HeaderProps {
 }
 
 export function Header({ tenantName, onMenuToggle }: HeaderProps) {
+  const tenantContext = useTenantOptional()
+  const hasMultipleTenants = tenantContext?.hasMultipleTenants ?? false
   const pathname = usePathname()
   const breadcrumbs = buildBreadcrumbs(pathname)
-
-  // Check if user has multiple tenants (will be false if TenantProvider not present)
-  let hasMultiple = false
-  try {
-    hasMultiple = useHasMultipleTenants()
-  } catch {
-    // TenantProvider not present, show static tenant name
-  }
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
@@ -56,7 +50,7 @@ export function Header({ tenantName, onMenuToggle }: HeaderProps) {
       <div className="flex-1" />
 
       {/* Tenant switcher or static tenant name */}
-      {hasMultiple ? (
+      {hasMultipleTenants ? (
         <TenantSwitcher variant="compact" />
       ) : (
         <span className="hidden text-sm text-muted-foreground lg:block">{tenantName}</span>

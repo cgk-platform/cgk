@@ -7,7 +7,7 @@
  * @ai-note Public endpoint for survey access
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk/auth'
 import { getCSATConfig, getSurvey } from '@cgk/support'

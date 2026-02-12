@@ -177,7 +177,7 @@ export default function DashboardsPage() {
       }
 
       await fetchDashboards()
-    } catch (err) {
+    } catch {
       setError('Failed to delete dashboard')
     }
   }

@@ -7,7 +7,7 @@
  * @ai-note Public endpoint for visitor chat
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk/auth'
 import { endChatSession, getChatSession } from '@cgk/support'

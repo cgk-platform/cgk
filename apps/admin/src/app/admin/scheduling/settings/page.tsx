@@ -82,7 +82,7 @@ export default function SchedulingSettingsPage() {
             setDefaultDuration(profile.defaultDuration.toString())
           }
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load profile')
       } finally {
         setLoading(false)

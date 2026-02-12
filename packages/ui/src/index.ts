@@ -64,9 +64,10 @@ export {
   useCurrentTenant,
   useHasMultipleTenants,
   useTenant,
+  useTenantOptional,
 } from './context/tenant-context'
 
-export type { TenantInfo } from './context/tenant-context'
+export type { TenantContextValue, TenantInfo } from './context/tenant-context'
 
 // Tenant switching components
 export {

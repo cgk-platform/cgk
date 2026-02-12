@@ -59,7 +59,7 @@ export function AITasksList({
 
       try {
         await onToggleTask(taskIndex, completed)
-      } catch (error) {
+      } catch {
         // Revert on error
         setOptimisticTasks((prev) => {
           const next = { ...prev }

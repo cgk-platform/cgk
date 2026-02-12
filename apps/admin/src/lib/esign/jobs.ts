@@ -219,7 +219,7 @@ export const sendEsignWebhook = defineJob({
         })
 
         results.push({ webhookId: webhook.id, success: response.ok })
-      } catch (error) {
+      } catch {
         const durationMs = Date.now() - startTime
 
         await logWebhookDelivery(tenantSlug, {

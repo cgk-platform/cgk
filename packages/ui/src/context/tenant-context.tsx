@@ -19,7 +19,7 @@ export interface TenantInfo {
   lastActiveAt: Date | null
 }
 
-interface TenantContextValue {
+export interface TenantContextValue {
   /** Currently active tenant */
   currentTenant: TenantInfo | null
   /** All tenants the user has access to */
@@ -230,6 +230,25 @@ export function useTenant(): TenantContextValue {
     throw new Error('useTenant must be used within a TenantProvider')
   }
   return context
+}
+
+/**
+ * Hook to safely access tenant context without throwing
+ *
+ * Returns null if TenantProvider is not present in the component tree.
+ * Useful for components that may be used both inside and outside a TenantProvider.
+ *
+ * @example
+ * function Header() {
+ *   const tenant = useTenantOptional()
+ *   if (!tenant) {
+ *     return <DefaultHeader />
+ *   }
+ *   return <TenantHeader tenant={tenant.currentTenant} />
+ * }
+ */
+export function useTenantOptional(): TenantContextValue | null {
+  return React.useContext(TenantContext)
 }
 
 /**

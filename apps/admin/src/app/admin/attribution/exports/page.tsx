@@ -168,7 +168,7 @@ export default function ExportsPage() {
       }
 
       await fetchExports()
-    } catch (err) {
+    } catch {
       setError('Failed to delete export')
     }
   }
@@ -185,7 +185,7 @@ export default function ExportsPage() {
       }
 
       await fetchExports()
-    } catch (err) {
+    } catch {
       setError('Failed to run export')
     } finally {
       setRunningExportId(null)

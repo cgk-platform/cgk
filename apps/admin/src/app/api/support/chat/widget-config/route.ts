@@ -7,7 +7,7 @@
  * @ai-note Public endpoint for widget embedding
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk/auth'
 import { getWidgetConfig, isWithinBusinessHours } from '@cgk/support'

@@ -97,7 +97,7 @@ export default function AvailabilityPage() {
           const data = await blockedRes.json()
           setBlockedDates(data.blockedDates || [])
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load availability')
       } finally {
         setLoading(false)

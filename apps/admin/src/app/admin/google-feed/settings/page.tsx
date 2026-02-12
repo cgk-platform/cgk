@@ -151,7 +151,7 @@ export default function GoogleFeedSettingsPage() {
       })
       const result = await res.json()
       setTestResult(result)
-    } catch (error) {
+    } catch {
       setTestResult({ success: false, error: 'Connection test failed' })
     } finally {
       setTesting(false)

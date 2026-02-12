@@ -60,7 +60,7 @@ export function DomainList() {
           alert('Verification check complete. Status: ' + data.status)
         }
       }
-    } catch (err) {
+    } catch {
       alert('Failed to verify domain')
     } finally {
       setVerifyingId(null)

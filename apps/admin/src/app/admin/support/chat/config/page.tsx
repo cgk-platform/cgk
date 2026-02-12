@@ -34,7 +34,7 @@ export default function ChatConfigPage() {
           setConfig(data.config)
           setIsOnline(data.isOnline)
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load configuration')
       } finally {
         setLoading(false)

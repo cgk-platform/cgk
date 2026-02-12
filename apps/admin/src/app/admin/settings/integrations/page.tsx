@@ -316,7 +316,7 @@ export default function IntegrationsSettingsPage() {
       } else {
         setError(data.error || 'Failed to start OAuth')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to start OAuth flow')
     } finally {
       setActionLoading(null)
@@ -336,7 +336,7 @@ export default function IntegrationsSettingsPage() {
       })
       await fetchStatuses()
       setSuccess(`${PROVIDER_INFO[provider].name} disconnected`)
-    } catch (err) {
+    } catch {
       setError('Failed to disconnect')
     } finally {
       setActionLoading(null)
@@ -359,7 +359,7 @@ export default function IntegrationsSettingsPage() {
       } else {
         setError(data.error || 'Failed to connect Klaviyo')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to connect Klaviyo')
     } finally {
       setActionLoading(null)

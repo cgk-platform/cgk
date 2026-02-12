@@ -7,7 +7,7 @@
  * @ai-required Uses getTenantContext for tenant isolation
  */
 
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk/auth'
 import { getSurvey } from '@cgk/support'

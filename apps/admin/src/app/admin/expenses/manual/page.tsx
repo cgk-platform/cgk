@@ -42,7 +42,7 @@ export default function ManualExpensesPage() {
         const expData = await expRes.json()
         setExpenses(expData.expenses || [])
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load data')
     } finally {
       setIsLoading(false)

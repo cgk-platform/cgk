@@ -163,7 +163,7 @@ export default function InfluencersPage() {
       }
 
       await fetchInfluencers()
-    } catch (err) {
+    } catch {
       setError('Failed to delete influencer')
     }
   }

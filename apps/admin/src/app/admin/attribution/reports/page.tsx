@@ -196,7 +196,7 @@ export default function ReportsPage() {
       }
 
       await fetchReports()
-    } catch (err) {
+    } catch {
       setError('Failed to delete report')
     }
   }
@@ -213,7 +213,7 @@ export default function ReportsPage() {
       }
 
       await fetchReports()
-    } catch (err) {
+    } catch {
       setError('Failed to send report')
     } finally {
       setSendingReportId(null)

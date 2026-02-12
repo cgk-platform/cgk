@@ -197,7 +197,7 @@ export function AssetUploader({
       setFiles(prev => prev.map(f =>
         f.status === 'uploading' ? { ...f, status: 'complete' as const, progress: 100 } : f
       ))
-    } catch (error) {
+    } catch {
       setFiles(prev => prev.map(f =>
         f.status === 'uploading'
           ? { ...f, status: 'error' as const, error: 'Upload failed' }

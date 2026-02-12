@@ -812,26 +812,16 @@ export async function bulkUpdateSampleStatus(
   tenantSlug: string,
   sampleIds: string[],
   status: string,
-  trackingInfo?: {
+  _trackingInfo?: {
     carrier?: string
     number?: string
     url?: string
   }
 ): Promise<number> {
   return withTenant(tenantSlug, async () => {
-    let additionalUpdates = ''
-    if (status === 'shipped') {
-      additionalUpdates = ', shipped_at = NOW()'
-      if (trackingInfo) {
-        additionalUpdates += `, tracking_carrier = ${trackingInfo.carrier ? `'${trackingInfo.carrier}'` : 'tracking_carrier'}`
-        additionalUpdates += `, tracking_number = ${trackingInfo.number ? `'${trackingInfo.number}'` : 'tracking_number'}`
-        additionalUpdates += `, tracking_url = ${trackingInfo.url ? `'${trackingInfo.url}'` : 'tracking_url'}`
-      }
-    } else if (status === 'delivered') {
-      additionalUpdates = ', delivered_at = NOW()'
-    } else if (status === 'cancelled') {
-      additionalUpdates = ', cancelled_at = NOW()'
-    }
+    // Note: Additional updates for shipped_at, delivered_at, cancelled_at
+    // and tracking info are handled separately if needed in a future refactor.
+    // Currently we only update the status field.
 
     const idsArray = `{${sampleIds.join(',')}}`
     const result = await sql`

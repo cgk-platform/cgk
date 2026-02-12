@@ -1,5 +1,5 @@
 import { headers } from 'next/headers'
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 import { createContractorInvitation, createProject } from '@/lib/contractors/db'
 import type { ContractorInvitation } from '@/lib/contractors/types'
