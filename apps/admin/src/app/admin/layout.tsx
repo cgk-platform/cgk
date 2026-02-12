@@ -20,6 +20,7 @@ const DEFAULT_TENANT: TenantConfig = {
   },
   features: {
     creators: true,
+    contractors: true,
     subscriptions: true,
     abTesting: false,
     attribution: false,

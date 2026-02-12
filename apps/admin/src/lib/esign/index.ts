@@ -87,3 +87,28 @@ export {
   getReportData,
   exportReportCsv,
 } from './reports'
+
+// Webhook triggers
+export {
+  triggerWebhooks,
+  triggerDocumentSent,
+  triggerDocumentViewed,
+  triggerDocumentSigned,
+  triggerDocumentCompleted,
+  triggerDocumentDeclined,
+  triggerDocumentExpired,
+  triggerDocumentVoided,
+} from './webhook-triggers'
+
+// Creator queue integration
+export {
+  logToCreatorQueue,
+  logSigningRequestToCreatorQueue,
+  logReminderToCreatorQueue,
+  logCompletionToCreatorQueue,
+  logVoidedToCreatorQueue,
+  logExpiredToCreatorQueue,
+  logDeclinedToCreatorQueue,
+  type EsignEmailType,
+  type LogToCreatorQueueInput,
+} from './creator-queue'

@@ -4,6 +4,7 @@ import {
   ShoppingCart,
   BarChart3,
   Users,
+  HardHat,
   Wallet,
   Activity,
   Settings,
@@ -15,6 +16,7 @@ import {
   FileSignature,
   Plug,
   UserCircle,
+  Gift,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -62,6 +64,18 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    label: 'Gift Cards',
+    icon: Gift,
+    href: '/admin/gift-cards',
+    children: [
+      { label: 'Dashboard', href: '/admin/gift-cards' },
+      { label: 'Products', href: '/admin/gift-cards/products' },
+      { label: 'Transactions', href: '/admin/gift-cards/transactions' },
+      { label: 'Emails', href: '/admin/gift-cards/emails' },
+      { label: 'Settings', href: '/admin/gift-cards/settings' },
+    ],
+  },
+  {
     label: 'Customer Portal',
     icon: UserCircle,
     href: '/admin/customer-portal',
@@ -97,7 +111,18 @@ export const navigation: NavSection[] = [
       { label: 'Directory', href: '/admin/creators' },
       { label: 'Applications', href: '/admin/creators/applications' },
       { label: 'Pipeline', href: '/admin/creators/pipeline' },
+      { label: 'Analytics', href: '/admin/creators/analytics' },
       { label: 'Inbox', href: '/admin/creators/inbox' },
+    ],
+  },
+  {
+    label: 'Contractors',
+    icon: HardHat,
+    href: '/admin/contractors',
+    featureFlag: 'contractors',
+    children: [
+      { label: 'Directory', href: '/admin/contractors' },
+      { label: 'Invite', href: '/admin/contractors/invite' },
     ],
   },
   {

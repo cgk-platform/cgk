@@ -173,6 +173,13 @@ export type {
   WebhookRetryPayload,
   WebhookHealthCheckPayload,
   WebhookCleanupPayload,
+  // Recovery
+  RecoveryEmailScheduledPayload,
+  RecoveryEmailSentPayload,
+  RecoveryCheckAbandonedPayload,
+  RecoveryProcessQueuePayload,
+  RecoveryExpireOldPayload,
+  RecoveryCheckoutUpdatedPayload,
 } from './events'
 
 export { EVENT_CATEGORIES, TOTAL_EVENT_COUNT } from './events'
@@ -338,3 +345,13 @@ export {
   creatorLifecycleJobs,
   CREATOR_LIFECYCLE_SCHEDULES,
 } from './handlers/creator-lifecycle'
+
+// Recovery Jobs
+export {
+  processRecoveryEmailJob,
+  checkAbandonedCheckoutsJob,
+  processRecoveryQueueJob,
+  expireOldCheckoutsJob,
+  recoveryJobs,
+  RECOVERY_SCHEDULES,
+} from './handlers/recovery'

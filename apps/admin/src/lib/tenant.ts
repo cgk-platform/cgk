@@ -2,6 +2,7 @@ import { createTenantCache, sql } from '@cgk/db'
 
 export interface TenantFeatures {
   creators: boolean
+  contractors: boolean
   subscriptions: boolean
   abTesting: boolean
   attribution: boolean
@@ -34,6 +35,7 @@ const DEFAULT_COLORS: TenantColors = {
 
 const DEFAULT_FEATURES: TenantFeatures = {
   creators: true,
+  contractors: true,
   subscriptions: true,
   abTesting: false,
   attribution: false,

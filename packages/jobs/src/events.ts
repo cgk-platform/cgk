@@ -574,6 +574,39 @@ export interface GoogleFeedImageOptimizePayload {
 }
 
 // ============================================================
+// RECOVERY EVENTS
+// ============================================================
+
+export interface RecoveryEmailScheduledPayload {
+  emailId: string
+  checkoutId: string
+  sequenceNumber: number
+}
+
+export interface RecoveryEmailSentPayload {
+  emailId: string
+  checkoutId: string
+}
+
+export interface RecoveryCheckAbandonedPayload {
+  // Empty - scheduled job
+}
+
+export interface RecoveryProcessQueuePayload {
+  limit?: number
+}
+
+export interface RecoveryExpireOldPayload {
+  daysOld?: number
+}
+
+export interface RecoveryCheckoutUpdatedPayload {
+  shopifyCheckoutId: string
+  completed: boolean
+  orderId?: string
+}
+
+// ============================================================
 // WEBHOOK EVENTS
 // ============================================================
 
@@ -711,6 +744,14 @@ export interface JobEvents {
   'webhook.retry': TenantEvent<WebhookRetryPayload>
   'webhook.healthCheck': TenantEvent<WebhookHealthCheckPayload>
   'webhook.cleanup': TenantEvent<WebhookCleanupPayload>
+
+  // Recovery
+  'recovery.emailScheduled': TenantEvent<RecoveryEmailScheduledPayload>
+  'recovery.emailSent': TenantEvent<RecoveryEmailSentPayload>
+  'recovery.checkAbandoned': TenantEvent<RecoveryCheckAbandonedPayload>
+  'recovery.processQueue': TenantEvent<RecoveryProcessQueuePayload>
+  'recovery.expireOld': TenantEvent<RecoveryExpireOldPayload>
+  'recovery.checkoutUpdated': TenantEvent<RecoveryCheckoutUpdatedPayload>
 }
 
 /**
@@ -821,6 +862,14 @@ export const EVENT_CATEGORIES = {
     'googleFeed.imageOptimize',
   ],
   webhooks: ['webhook.retry', 'webhook.healthCheck', 'webhook.cleanup'],
+  recovery: [
+    'recovery.emailScheduled',
+    'recovery.emailSent',
+    'recovery.checkAbandoned',
+    'recovery.processQueue',
+    'recovery.expireOld',
+    'recovery.checkoutUpdated',
+  ],
 } as const
 
 /**

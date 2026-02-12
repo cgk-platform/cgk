@@ -27,11 +27,14 @@
   "dependencies": {
     "@cgk/core": "workspace:*",
     "@cgk/db": "workspace:*",
-    "nanoid": "^5.0.9"
+    "@vercel/blob": "^0.27.0",
+    "nanoid": "^5.0.9",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "@cgk/eslint-config": "workspace:*",
     "@cgk/typescript-config": "workspace:*",
+    "@types/react": "^19.0.0",
     "eslint": "^9.18.0",
     "tsup": "^8.3.0",
     "typescript": "^5.9.0",

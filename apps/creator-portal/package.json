@@ -10,31 +10,35 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cgk/auth": "workspace:*",
     "@cgk/core": "workspace:*",
     "@cgk/db": "workspace:*",
-    "@cgk/auth": "workspace:*",
-    "@cgk/ui": "workspace:*",
+    "@cgk/jobs": "workspace:*",
     "@cgk/payments": "workspace:*",
+    "@cgk/ui": "workspace:*",
     "@cgk/video": "workspace:*",
-    "lucide-react": "^0.469.0",
+    "@vercel/blob": "^0.27.1",
     "bcryptjs": "^3.0.3",
     "jose": "^5.2.0",
+    "lucide-react": "^0.469.0",
+    "nanoid": "^5.1.5",
     "next": "^15.2.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "recharts": "^2.15.4"
   },
   "devDependencies": {
     "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
     "@cgk/tailwind-config": "workspace:*",
+    "@cgk/typescript-config": "workspace:*",
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.17",
+    "eslint": "^9.18.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.9.0",
-    "eslint": "^9.18.0"
+    "typescript": "^5.9.0"
   }
 }

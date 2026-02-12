@@ -128,3 +128,82 @@ export function W9StatusBadge({ status }: { status: string }) {
 export function Form1099StatusBadge({ status }: { status: string }) {
   return <StatusBadge status={status} map={form1099StatusMap} />
 }
+
+const abandonedCheckoutStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
+  abandoned: { label: 'Abandoned', variant: 'warning' },
+  processing: { label: 'Processing', variant: 'info' },
+  recovered: { label: 'Recovered', variant: 'success' },
+  expired: { label: 'Expired', variant: 'outline' },
+}
+
+export function AbandonedCheckoutStatusBadge({ status }: { status: string }) {
+  return <StatusBadge status={status} map={abandonedCheckoutStatusMap} />
+}
+
+const draftOrderStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
+  open: { label: 'Open', variant: 'info' },
+  invoice_sent: { label: 'Invoice Sent', variant: 'warning' },
+  completed: { label: 'Completed', variant: 'success' },
+  cancelled: { label: 'Cancelled', variant: 'outline' },
+}
+
+export function DraftOrderStatusBadge({ status }: { status: string }) {
+  return <StatusBadge status={status} map={draftOrderStatusMap} />
+}
+
+// Promo code status badges
+const promoCodeStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
+  active: { label: 'Active', variant: 'success' },
+  scheduled: { label: 'Scheduled', variant: 'warning' },
+  expired: { label: 'Expired', variant: 'outline' },
+  disabled: { label: 'Disabled', variant: 'secondary' },
+}
+
+export function PromoCodeStatusBadge({ status }: { status: string }) {
+  return <StatusBadge status={status} map={promoCodeStatusMap} />
+}
+
+// Promo code type badges
+const promoCodeTypeMap: Record<string, { label: string; variant: BadgeVariant }> = {
+  percentage: { label: 'Percentage', variant: 'info' },
+  fixed_amount: { label: 'Fixed Amount', variant: 'success' },
+  free_shipping: { label: 'Free Shipping', variant: 'default' },
+  buy_x_get_y: { label: 'BXGY', variant: 'warning' },
+}
+
+export function PromoCodeTypeBadge({ type }: { type: string }) {
+  return <StatusBadge status={type} map={promoCodeTypeMap} />
+}
+
+// Selling plan status badges
+const sellingPlanStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
+  active: { label: 'Active', variant: 'success' },
+  inactive: { label: 'Inactive', variant: 'outline' },
+}
+
+export function SellingPlanStatusBadge({ isActive }: { isActive: boolean }) {
+  return <StatusBadge status={isActive ? 'active' : 'inactive'} map={sellingPlanStatusMap} />
+}
+
+// Selling plan discount type badges
+const discountTypeMap: Record<string, { label: string; variant: BadgeVariant }> = {
+  percentage: { label: 'Percentage', variant: 'info' },
+  fixed_amount: { label: 'Fixed Amount', variant: 'success' },
+  explicit_price: { label: 'Fixed Price', variant: 'warning' },
+}
+
+export function DiscountTypeBadge({ type }: { type: string }) {
+  return <StatusBadge status={type} map={discountTypeMap} />
+}
+
+// Promotion status badges
+const promotionStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
+  scheduled: { label: 'Scheduled', variant: 'warning' },
+  active: { label: 'Active', variant: 'success' },
+  ended: { label: 'Ended', variant: 'outline' },
+  disabled: { label: 'Disabled', variant: 'secondary' },
+}
+
+export function PromotionStatusBadge({ status }: { status: string }) {
+  return <StatusBadge status={status} map={promotionStatusMap} />
+}

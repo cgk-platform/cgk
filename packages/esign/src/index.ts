@@ -20,6 +20,10 @@ export {
   SIGNER_ROLES,
   FIELD_TYPES,
   SIGNATURE_TYPES,
+  WORKFLOW_STATUSES,
+  WORKFLOW_STEP_TYPES,
+  WORKFLOW_TRIGGER_TYPES,
+  WORKFLOW_CONDITION_TYPES,
   // Template types
   type TemplateStatus,
   type EsignTemplate,
@@ -55,6 +59,21 @@ export {
   type CreateSignatureInput,
   // Session types
   type SigningSession,
+  // Workflow types
+  type WorkflowStatus,
+  type WorkflowStepType,
+  type WorkflowTriggerType,
+  type WorkflowConditionType,
+  type WorkflowCondition,
+  type WorkflowStep,
+  type EsignWorkflow,
+  type CreateWorkflowInput,
+  type UpdateWorkflowInput,
+  type WorkflowExecution,
+  type CreateWorkflowExecutionInput,
+  type CounterSignPending,
+  type SignatureData,
+  type CompleteSigningResult,
 } from './types.js'
 
 // ============================================================================
@@ -290,3 +309,226 @@ export {
   generateDocumentName,
   validateDocumentForSending,
 } from './lib/send.js'
+
+// ============================================================================
+// Workflow Management
+// ============================================================================
+
+export {
+  // Workflow CRUD
+  createWorkflow,
+  getWorkflow,
+  listWorkflows,
+  updateWorkflow,
+  deleteWorkflow,
+  activateWorkflow,
+  archiveWorkflow,
+  // Workflow Execution
+  createWorkflowExecution,
+  getWorkflowExecution,
+  updateWorkflowExecution,
+  listWorkflowExecutions,
+  getPendingExecutions,
+  // Step Management
+  getCurrentStep,
+  advanceToNextStep,
+  checkStepCondition,
+  // Validation
+  validateWorkflow,
+  getWorkflowsByTrigger,
+} from './lib/workflows.js'
+
+// ============================================================================
+// Signing Session Flow
+// ============================================================================
+
+export {
+  // Session management
+  getSigningSession,
+  canSignerSign,
+  getNextSigners,
+  markDocumentViewed,
+  // Signature submission
+  processSignature,
+  completeSignerSigning,
+  sendToNextSigners,
+  // Validation
+  validateSigningToken,
+  getSigningProgress,
+} from './lib/signing-session.js'
+
+// ============================================================================
+// Email Functions
+// ============================================================================
+
+export {
+  // Types
+  type EmailConfig,
+  type SigningRequestParams,
+  type SigningCompleteParams,
+  type DocumentCompleteParams,
+  type ReminderParams,
+  type VoidNotificationParams,
+  type DeclineNotificationParams,
+  type ExpirationWarningParams,
+  type EmailResult,
+  // Email builders
+  buildSigningRequestEmail,
+  buildSigningCompleteEmail,
+  buildDocumentCompleteEmail,
+  buildReminderEmail,
+  buildVoidNotificationEmail,
+  buildDeclineNotificationEmail,
+  buildExpirationWarningEmail,
+  // Job payload builders
+  buildSigningRequestJobPayload,
+  buildReminderJobPayload,
+  buildCompletionJobPayload,
+  // Recipient helpers
+  getCompletionRecipients,
+  getCCRecipients as getEmailCCRecipients,
+  getSignersPendingReminder,
+} from './lib/email.js'
+
+// ============================================================================
+// Decline Flow
+// ============================================================================
+
+export {
+  // Types
+  type DeclineDocumentInput,
+  type DeclineDocumentResult,
+  type VoidDocumentInput,
+  type VoidDocumentResult,
+  // Decline operations
+  declineDocument,
+  voidDocument as voidDocumentWithNotification,
+  canDecline,
+  getDeclineStats,
+} from './lib/decline.js'
+
+// ============================================================================
+// Background Jobs
+// ============================================================================
+
+export {
+  // Job types
+  type EsignJobPayload,
+  type SendRemindersPayload,
+  type ExpireDocumentsPayload,
+  type ProcessWorkflowStepPayload,
+  type SendSigningRequestPayload,
+  type SendCompletionNotificationPayload,
+  // Job result types
+  type ReminderJobResult,
+  type ExpirationJobResult,
+  type WorkflowStepResult,
+  type CleanupResult,
+  // Job processors
+  processReminders,
+  processExpirations,
+  processWorkflowStep,
+  cleanupOldData,
+  // Schedules
+  ESIGN_JOB_SCHEDULES,
+} from './lib/jobs.js'
+
+// ============================================================================
+// Coordinate System
+// ============================================================================
+
+export {
+  // Types
+  type FieldPosition,
+  type PdfCoordinates,
+  type PageSize,
+  type PageSizeName,
+  // Constants
+  PAGE_SIZES,
+  // Coordinate conversions
+  toPreviewCSS,
+  toPreviewCSSWithPx,
+  toPdfCoordinates,
+  fromPdfCoordinates,
+  fromPixelCoordinates,
+  toPixelCoordinates,
+  // Validation helpers
+  clampPosition,
+  isValidPosition,
+  fieldsOverlap,
+  getDefaultFieldSize,
+  snapToGrid,
+  // Utility functions
+  getBoundingBox,
+  centerField,
+  distributeFields,
+  alignFields,
+  getFieldCenter,
+  getFieldDistance,
+} from './lib/coordinates.js'
+
+// ============================================================================
+// PDF Operations
+// ============================================================================
+
+export {
+  // Types
+  type EmbedOptions,
+  type EmbedContext,
+  type VerificationResult,
+  type PdfPageInfo,
+  // Main embedding
+  embedFieldsInPDF,
+  // PDF information
+  getPdfPageInfo,
+  getPdfPageCount,
+  // Flattening
+  forceFlattenPdf,
+  verifyPdfFlattened,
+  // PDF utilities
+  createPdfDocument,
+  loadPdf,
+  mergePdfs,
+  extractPages,
+  addWatermark,
+  // Alternative checkbox style
+  embedXMark,
+} from './lib/pdf.js'
+
+// ============================================================================
+// Storage Operations
+// ============================================================================
+
+export {
+  // Types
+  type FinalizeDocumentOptions,
+  type PreviewOptions,
+  type SignatureImageOptions,
+  type UploadResult,
+  // Path generators
+  getSignedDocumentPath,
+  getPreviewPath,
+  getSignatureImagePath,
+  getTemplatePath,
+  getThumbnailPath,
+  getDocumentPath,
+  // Document finalization
+  finalizeSignedDocument,
+  generatePreviewPdf,
+  // Signature storage
+  saveSignatureImage,
+  deleteSignatureImage,
+  // Template storage
+  uploadTemplatePdf,
+  uploadTemplateThumbnail,
+  deleteTemplateFiles,
+  // Document storage
+  uploadDocumentPdf,
+  deleteDocumentFiles,
+  // Cleanup
+  cleanupPreviews,
+  // Utilities
+  getDownloadUrl as getStorageDownloadUrl,
+  isVercelBlobUrl,
+  extractBlobPathname,
+} from './lib/storage.js'

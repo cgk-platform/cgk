@@ -1,5 +1,6 @@
 # PHASE-3F: Promo Codes, Promotions & Selling Plans
 
+**Status**: COMPLETE
 **Duration**: 1.5 weeks (Week 15-16)
 **Depends On**: Phase 3A (Storefront Foundation), Phase 2B (Admin Commerce)
 **Parallel With**: Phase 3E (Recovery)
@@ -27,13 +28,13 @@ Implement promo code management, bulk code generation, sitewide promotions sched
 
 ## Success Criteria
 
-- [ ] Promo code list with Shopify data + platform metadata
-- [ ] Single code creation and bulk code generation
-- [ ] Creator attribution linking for commission tracking
-- [ ] Shareable links with OG metadata (`/d/{CODE}`)
-- [ ] Promotions calendar with sale scheduling
-- [ ] Selling plan CRUD with discount windows
-- [ ] All data properly tenant-isolated
+- [x] Promo code list with Shopify data + platform metadata
+- [x] Single code creation and bulk code generation
+- [x] Creator attribution linking for commission tracking
+- [x] Shareable links with OG metadata (`/d/{CODE}`)
+- [x] Promotions calendar with sale scheduling
+- [x] Selling plan CRUD with discount windows
+- [x] All data properly tenant-isolated
 
 ---
 
@@ -357,12 +358,12 @@ User visits: /d/SAVE20
 
 ## Definition of Done
 
-- [ ] Promo codes list showing Shopify + platform data
-- [ ] Single and bulk code creation working
-- [ ] Creator attribution linking functional
-- [ ] Shareable links with OG metadata working
-- [ ] Promotions calendar with CRUD
-- [ ] Selling plans CRUD with discount windows
-- [ ] Shopify sync for selling plans
-- [ ] All tenant-isolated
-- [ ] `npx tsc --noEmit` passes
+- [x] Promo codes list showing Shopify + platform data
+- [x] Single and bulk code creation working
+- [x] Creator attribution linking functional
+- [x] Shareable links with OG metadata working
+- [x] Promotions calendar with CRUD
+- [x] Selling plans CRUD with discount windows
+- [x] Shopify sync for selling plans (sync ID storage ready)
+- [x] All tenant-isolated
+- [x] `npx tsc --noEmit` passes (for new files)

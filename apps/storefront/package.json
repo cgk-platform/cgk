@@ -12,6 +12,7 @@
   "dependencies": {
     "@cgk/core": "workspace:*",
     "@cgk/db": "workspace:*",
+    "@cgk/jobs": "workspace:*",
     "@cgk/portal": "workspace:*",
     "@cgk/ui": "workspace:*",
     "@cgk/commerce": "workspace:*",

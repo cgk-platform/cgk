@@ -381,3 +381,186 @@ export interface ListDocumentsOptions {
   offset?: number
   search?: string
 }
+
+// ============================================================================
+// WORKFLOW TYPES
+// ============================================================================
+
+export const WORKFLOW_STATUSES = ['draft', 'active', 'archived'] as const
+export type WorkflowStatus = (typeof WORKFLOW_STATUSES)[number]
+
+export const WORKFLOW_STEP_TYPES = ['sequential', 'parallel'] as const
+export type WorkflowStepType = (typeof WORKFLOW_STEP_TYPES)[number]
+
+export const WORKFLOW_TRIGGER_TYPES = [
+  'creator_onboarding',
+  'manual',
+  'api',
+  'scheduled',
+] as const
+export type WorkflowTriggerType = (typeof WORKFLOW_TRIGGER_TYPES)[number]
+
+export const WORKFLOW_CONDITION_TYPES = [
+  'all_signed',
+  'any_signed',
+  'field_value',
+  'custom',
+] as const
+export type WorkflowConditionType = (typeof WORKFLOW_CONDITION_TYPES)[number]
+
+/**
+ * Workflow step condition for conditional routing
+ */
+export interface WorkflowCondition {
+  type: WorkflowConditionType
+  /** For field_value: field ID to check */
+  field_id?: string
+  /** For field_value: expected value */
+  expected_value?: string
+  /** For custom: custom expression */
+  expression?: string
+}
+
+/**
+ * Workflow step configuration
+ */
+export interface WorkflowStep {
+  id: string
+  /** Step order (1-based) */
+  order: number
+  /** Sequential or parallel execution */
+  type: WorkflowStepType
+  /** Step name for display */
+  name: string
+  /** Template to use for this step */
+  template_id: string
+  /** Signers configuration for this step */
+  signers: Array<{
+    /** Role identifier (e.g., 'creator', 'admin', 'witness') */
+    role: string
+    /** Is this an internal (counter) signer? */
+    is_internal: boolean
+    /** Signing order within this step */
+    signing_order: number
+    /** Email template to use */
+    email_template_id?: string
+  }>
+  /** Condition to proceed to next step (optional) */
+  proceed_condition?: WorkflowCondition
+  /** Auto-proceed after this many days if condition not met */
+  timeout_days?: number
+  /** What to do on timeout: skip, remind, or fail */
+  timeout_action?: 'skip' | 'remind' | 'fail'
+}
+
+/**
+ * Workflow template for reusable signing workflows
+ */
+export interface EsignWorkflow {
+  id: string
+  name: string
+  description: string | null
+  trigger_type: WorkflowTriggerType
+  status: WorkflowStatus
+  /** Ordered steps in the workflow */
+  steps: WorkflowStep[]
+  /** Default message for all documents */
+  default_message: string | null
+  /** Default expiration in days */
+  default_expires_days: number | null
+  /** Reminder settings */
+  reminder_enabled: boolean
+  reminder_days: number
+  created_by: string
+  created_at: Date
+  updated_at: Date
+}
+
+export interface CreateWorkflowInput {
+  name: string
+  description?: string
+  trigger_type: WorkflowTriggerType
+  steps: WorkflowStep[]
+  default_message?: string
+  default_expires_days?: number
+  reminder_enabled?: boolean
+  reminder_days?: number
+  created_by: string
+}
+
+export interface UpdateWorkflowInput {
+  name?: string
+  description?: string
+  status?: WorkflowStatus
+  steps?: WorkflowStep[]
+  default_message?: string
+  default_expires_days?: number
+  reminder_enabled?: boolean
+  reminder_days?: number
+}
+
+/**
+ * Workflow execution instance
+ */
+export interface WorkflowExecution {
+  id: string
+  workflow_id: string
+  /** Current step being executed */
+  current_step: number
+  /** Overall execution status */
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'cancelled'
+  /** Context data for variable replacement */
+  context: Record<string, unknown>
+  /** Documents created during execution */
+  document_ids: string[]
+  /** Error message if failed */
+  error_message: string | null
+  /** User or system that triggered the workflow */
+  triggered_by: string
+  started_at: Date
+  completed_at: Date | null
+  created_at: Date
+}
+
+export interface CreateWorkflowExecutionInput {
+  workflow_id: string
+  context: Record<string, unknown>
+  triggered_by: string
+}
+
+/**
+ * Counter-signature pending item for admin queue
+ */
+export interface CounterSignPending {
+  signer_id: string
+  signer_name: string
+  signer_email: string
+  document_id: string
+  document_name: string
+  signing_order: number
+  external_signers_completed: number
+  external_signers_total: number
+  ready_to_sign: boolean
+  created_at: Date
+}
+
+/**
+ * Signature data from capture
+ */
+export interface SignatureData {
+  type: SignatureType
+  /** Base64 image data or typed text */
+  data: string
+  /** Font name for typed signatures */
+  font_name?: string
+}
+
+/**
+ * Result of completing a signing
+ */
+export interface CompleteSigningResult {
+  success: boolean
+  documentCompleted: boolean
+  signedAt: Date
+  nextSigners: EsignSigner[]
+}

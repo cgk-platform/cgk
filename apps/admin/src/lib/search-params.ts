@@ -324,6 +324,103 @@ export function parseContractorFilters(params: RawParams): ContractorFilters {
   }
 }
 
+export interface AbandonedCheckoutFilters extends PaginationParams {
+  status: string
+  dateFrom: string
+  dateTo: string
+  minValue: string
+  maxValue: string
+  search: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export function parseAbandonedCheckoutFilters(params: RawParams): AbandonedCheckoutFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    status: str(params.status),
+    dateFrom: str(params.dateFrom),
+    dateTo: str(params.dateTo),
+    minValue: str(params.minValue),
+    maxValue: str(params.maxValue),
+    search: str(params.search),
+    sort: str(params.sort) || 'abandoned_at',
+    dir,
+  }
+}
+
+// ============================================================================
+// Segments & Samples Filters
+// ============================================================================
+
+export interface SegmentFilters extends PaginationParams {
+  search: string
+  type: 'shopify' | 'rfm' | 'all'
+}
+
+export interface RfmCustomerFilters extends PaginationParams {
+  search: string
+  segment: string
+  minRfmScore: number | null
+  maxRfmScore: number | null
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export interface SamplesFilters extends PaginationParams {
+  search: string
+  type: string
+  fulfillmentStatus: string
+  dateFrom: string
+  dateTo: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export function parseSegmentFilters(params: RawParams): SegmentFilters {
+  const p = pagination(params)
+  const typeVal = str(params.type)
+  const type = typeVal === 'shopify' || typeVal === 'rfm' ? typeVal : 'all'
+  return {
+    ...p,
+    search: str(params.search),
+    type,
+  }
+}
+
+export function parseRfmCustomerFilters(params: RawParams): RfmCustomerFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  const minScore = str(params.minRfmScore)
+  const maxScore = str(params.maxRfmScore)
+  return {
+    ...p,
+    search: str(params.search),
+    segment: str(params.segment),
+    minRfmScore: minScore ? parseInt(minScore, 10) : null,
+    maxRfmScore: maxScore ? parseInt(maxScore, 10) : null,
+    sort: str(params.sort) || 'rfm_score',
+    dir,
+  }
+}
+
+export function parseSamplesFilters(params: RawParams): SamplesFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    search: str(params.search),
+    type: str(params.type),
+    fulfillmentStatus: str(params.fulfillmentStatus),
+    dateFrom: str(params.dateFrom),
+    dateTo: str(params.dateTo),
+    sort: str(params.sort) || 'order_placed_at',
+    dir,
+  }
+}
+
 export function buildFilterUrl(
   basePath: string,
   filters: Record<string, string | number | undefined>,
@@ -336,4 +433,77 @@ export function buildFilterUrl(
   }
   const qs = params.toString()
   return qs ? `${basePath}?${qs}` : basePath
+}
+
+// ============================================================================
+// Promo Codes, Selling Plans, and Promotions Filters
+// ============================================================================
+
+export interface PromoCodeFilters extends PaginationParams {
+  search: string
+  status: string
+  type: string
+  creatorId: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export function parsePromoCodeFilters(params: RawParams): PromoCodeFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    search: str(params.search),
+    status: str(params.status),
+    type: str(params.type),
+    creatorId: str(params.creatorId),
+    sort: str(params.sort) || 'created_at',
+    dir,
+  }
+}
+
+export interface SellingPlanFilters extends PaginationParams {
+  activeOnly: boolean
+}
+
+export function parseSellingPlanFilters(params: RawParams): SellingPlanFilters {
+  const p = pagination(params, 50)
+  return {
+    ...p,
+    activeOnly: str(params.activeOnly) === 'true',
+  }
+}
+
+export interface PromotionFilters extends PaginationParams {
+  status: string
+  includeEnded: boolean
+  startDate: string
+  endDate: string
+}
+
+export function parsePromotionFilters(params: RawParams): PromotionFilters {
+  const p = pagination(params, 50)
+  return {
+    ...p,
+    status: str(params.status),
+    includeEnded: str(params.includeEnded) !== 'false',
+    startDate: str(params.startDate),
+    endDate: str(params.endDate),
+  }
+}
+
+export function parseSubscriptionFilters(params: RawParams): SubscriptionFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    status: str(params.status),
+    product: str(params.product),
+    frequency: str(params.frequency),
+    search: str(params.search),
+    dateFrom: str(params.dateFrom),
+    dateTo: str(params.dateTo),
+    sort: str(params.sort) || 'created_at',
+    dir,
+  }
 }

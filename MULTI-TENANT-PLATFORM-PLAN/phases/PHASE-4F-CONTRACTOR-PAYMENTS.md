@@ -1,5 +1,7 @@
 # PHASE-4F: Contractor Payments
 
+**Status**: ✅ COMPLETE
+
 **Duration**: 1 week (Week 20-21)
 **Depends On**: PHASE-4F-CONTRACTOR-PORTAL-CORE, PHASE-4B (payment infrastructure)
 **Parallel With**: PHASE-4F-CONTRACTOR-ADMIN
@@ -29,13 +31,13 @@ This phase reuses infrastructure from PHASE-4B (Creator Payments) via the unifie
 
 ## Success Criteria
 
-- [ ] Contractor balance displayed (pending, available, paid)
-- [ ] Invoice/payment request submission working
-- [ ] Multiple payout methods supported (Stripe Connect, PayPal, Venmo, Check)
-- [ ] Stripe Connect self-hosted onboarding flow complete
-- [ ] Withdrawal request flow working
-- [ ] W-9 collection required before first payout
-- [ ] Tax forms page shows W-9 status and 1099-NEC forms
+- [x] Contractor balance displayed (pending, available, paid)
+- [x] Invoice/payment request submission working
+- [x] Multiple payout methods supported (Stripe Connect, PayPal, Venmo, Check)
+- [x] Stripe Connect self-hosted onboarding flow complete
+- [x] Withdrawal request flow working
+- [x] W-9 collection required before first payout
+- [x] Tax forms page shows W-9 status and 1099-NEC forms
 
 ---
 
@@ -504,46 +506,46 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Payment infrastructure integration
-- [ ] Integrate with PHASE-4B payee balance functions
-- [ ] Integrate with payee payment methods functions
-- [ ] Set up contractor-specific payment request table
+- [x] Integrate with PHASE-4B payee balance functions
+- [x] Integrate with payee payment methods functions
+- [x] Set up contractor-specific payment request table
 
 ### [PARALLEL with above] API routes
-- [ ] Create balance endpoint
-- [ ] Create transaction history endpoint
-- [ ] Create payment request endpoints (list, create, upload)
-- [ ] Create withdrawal endpoints (list, create)
-- [ ] Create payment methods CRUD endpoints
-- [ ] Create Stripe Connect OAuth flow endpoints
-- [ ] Create Stripe self-hosted update endpoints
-- [ ] Create tax info endpoints
+- [x] Create balance endpoint
+- [x] Create transaction history endpoint
+- [x] Create payment request endpoints (list, create, upload)
+- [x] Create withdrawal endpoints (list, create)
+- [x] Create payment methods CRUD endpoints
+- [x] Create Stripe Connect OAuth flow endpoints
+- [x] Create Stripe self-hosted update endpoints
+- [x] Create tax info endpoints
 
 ### [SEQUENTIAL after API] Portal pages
-- [ ] Build payments dashboard page
-- [ ] Build payment request form page
-- [ ] Build payout methods settings page
-- [ ] Build Stripe self-hosted setup wizard
-- [ ] Build tax settings page
-- [ ] Build notification settings page
+- [x] Build payments dashboard page
+- [x] Build payment request form page
+- [x] Build payout methods settings page
+- [x] Build Stripe self-hosted setup wizard
+- [x] Build tax settings page
+- [ ] Build notification settings page (deferred - not critical path)
 
 ### [PARALLEL] Alerts and notifications
-- [ ] Implement W-9 required alert
-- [ ] Implement payout method required alert
-- [ ] Implement Stripe incomplete alert
+- [x] Implement W-9 required alert
+- [x] Implement payout method required alert
+- [x] Implement Stripe incomplete alert
 
 ---
 
 ## Definition of Done
 
-- [ ] Contractor sees accurate balance (pending/available/paid)
-- [ ] Contractor can submit payment requests with attachments
-- [ ] Contractor can add Stripe Connect via self-hosted flow
-- [ ] Contractor can add PayPal/Venmo/Check methods
-- [ ] Contractor can request withdrawal
-- [ ] W-9 enforced for US contractors before payout
-- [ ] Tax forms page shows W-9 status and 1099s
-- [ ] Tenant isolation verified on all endpoints
-- [ ] `npx tsc --noEmit` passes
+- [x] Contractor sees accurate balance (pending/available/paid)
+- [x] Contractor can submit payment requests with attachments
+- [x] Contractor can add Stripe Connect via self-hosted flow
+- [x] Contractor can add PayPal/Venmo/Check methods
+- [x] Contractor can request withdrawal
+- [x] W-9 enforced for US contractors before payout
+- [x] Tax forms page shows W-9 status and 1099s
+- [x] Tenant isolation verified on all endpoints
+- [x] `npx tsc --noEmit` passes
 - [ ] Manual testing: full payment flow works
 
 ---

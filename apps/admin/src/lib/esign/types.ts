@@ -91,6 +91,8 @@ export type EsignAuditAction =
   | 'in_person_started'
   | 'in_person_completed'
   | 'expired'
+  | 'downloaded'
+  | 'forwarded'
 
 // Base document type
 export interface EsignDocument {
