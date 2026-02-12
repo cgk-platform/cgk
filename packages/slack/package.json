@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/client-types.d.ts",
+      "import": "./dist/client-types.js"
     }
   },
   "main": "./dist/index.js",
@@ -16,8 +20,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts src/client-types.ts --format esm --dts",
+    "dev": "tsup src/index.ts src/client-types.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "clean": "rm -rf dist"

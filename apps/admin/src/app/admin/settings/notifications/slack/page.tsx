@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, Button, Badge, Switch, RadixSelect as Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@cgk/ui'
-import { NOTIFICATION_TYPES } from '@cgk/slack'
+import { NOTIFICATION_TYPES } from '@cgk/slack/types'
 
 interface SlackChannel {
   id: string
