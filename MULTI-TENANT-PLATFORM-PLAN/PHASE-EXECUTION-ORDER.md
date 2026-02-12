@@ -95,6 +95,9 @@ WEEK 22-25: PHASE 5 (Jobs) - PARALLEL AFTER 5A
           ├─ 5D (Analytics Jobs)
           └─ 5E (Scheduled Jobs)
 
+          THEN SEQUENTIAL:
+          5F (Trigger.dev Task Integration - wire handlers to actual tasks)
+
           SAVES: 10 days vs sequential
           └─ CHECKPOINT: Jobs Audit (fresh session)
 

@@ -174,8 +174,9 @@ phases/
 ├── PHASE-5C-JOBS-CREATORS.md         # Week 20: Payouts, applications
 ├── PHASE-5D-JOBS-ANALYTICS.md        # Week 20-21: Attribution, metrics
 ├── PHASE-5E-JOBS-SCHEDULED.md        # Week 21: All 40+ cron jobs
+├── PHASE-5F-JOBS-TRIGGER-DEV-TASKS.md # Week 22: Wire handlers to Trigger.dev tasks
 │
-├── PHASE-6A-MCP-TRANSPORT.md         # Week 22: Streamable HTTP handler
+├── PHASE-6A-MCP-TRANSPORT.md         # Week 22-23: Streamable HTTP handler
 ├── PHASE-6B-MCP-TOOLS.md             # Week 23: 70+ tools, rate limiting
 │
 ├── PHASE-7A-MIGRATION-DATA.md        # Week 24: RAWDOG data migration
