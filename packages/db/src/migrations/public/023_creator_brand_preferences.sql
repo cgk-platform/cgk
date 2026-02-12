@@ -67,11 +67,18 @@ CREATE TABLE IF NOT EXISTS creator_brand_exclusions (
   reason TEXT,
 
   -- Timestamps
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-  -- Unique constraint: one exclusion per creator-brand pair
-  UNIQUE(creator_id, COALESCE(organization_id, gen_random_uuid()::UUID), brand_name)
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Unique constraint: one exclusion per creator-brand pair
+-- Using partial unique indexes to handle nullable organization_id
+CREATE UNIQUE INDEX IF NOT EXISTS idx_creator_exclusions_unique_with_org
+  ON creator_brand_exclusions(creator_id, organization_id, brand_name)
+  WHERE organization_id IS NOT NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_creator_exclusions_unique_without_org
+  ON creator_brand_exclusions(creator_id, brand_name)
+  WHERE organization_id IS NULL;
 
 -- Trigger for updated_at on creator_preferences
 DROP TRIGGER IF EXISTS update_creator_preferences_updated_at ON creator_preferences;

@@ -79,11 +79,11 @@ CREATE INDEX IF NOT EXISTS idx_voice_usage_period ON voice_usage_logs(tenant_id,
 CREATE INDEX IF NOT EXISTS idx_voice_usage_type ON voice_usage_logs(usage_type);
 
 -- Voice feature flags
-INSERT INTO feature_flags (name, description, default_enabled, category)
+INSERT INTO feature_flags (key, name, description, default_value, category, salt)
 VALUES
-  ('voice_calls_enabled', 'Enable AI voice call capabilities', false, 'ai'),
-  ('voice_tts_enabled', 'Enable text-to-speech for agents', true, 'ai'),
-  ('voice_stt_enabled', 'Enable speech-to-text transcription', true, 'ai'),
-  ('voice_recording_enabled', 'Enable call recording', true, 'ai'),
-  ('voice_realtime_enabled', 'Enable real-time voice transcription', false, 'ai')
-ON CONFLICT (name) DO NOTHING;
+  ('voice.calls_enabled', 'Voice Calls', 'Enable AI voice call capabilities', 'false', 'ai', substr(md5(random()::text), 1, 16)),
+  ('voice.tts_enabled', 'Text to Speech', 'Enable text-to-speech for agents', 'true', 'ai', substr(md5(random()::text), 1, 16)),
+  ('voice.stt_enabled', 'Speech to Text', 'Enable speech-to-text transcription', 'true', 'ai', substr(md5(random()::text), 1, 16)),
+  ('voice.recording_enabled', 'Call Recording', 'Enable call recording', 'true', 'ai', substr(md5(random()::text), 1, 16)),
+  ('voice.realtime_enabled', 'Realtime Voice', 'Enable real-time voice transcription', 'false', 'ai', substr(md5(random()::text), 1, 16))
+ON CONFLICT (key) DO NOTHING;

@@ -66,10 +66,10 @@ END $$;
 -- Creator Balance Transactions (cross-brand unified ledger)
 -- This table lives in public schema because it aggregates across all tenants/brands
 CREATE TABLE IF NOT EXISTS creator_balance_transactions (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Creator reference (public.creators)
-  creator_id TEXT NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
+  creator_id UUID NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
 
   -- Brand context (tenant identifier, nullable for platform-level transactions)
   brand_id TEXT,
@@ -105,10 +105,10 @@ CREATE TABLE IF NOT EXISTS creator_balance_transactions (
 
 -- Withdrawal Requests
 CREATE TABLE IF NOT EXISTS withdrawal_requests (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Creator reference
-  creator_id TEXT NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
+  creator_id UUID NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
 
   -- Amount
   amount_cents INTEGER NOT NULL CHECK (amount_cents >= 2500), -- $25 minimum
@@ -153,10 +153,10 @@ CREATE TABLE IF NOT EXISTS withdrawal_requests (
 
 -- Creator Payment Methods
 CREATE TABLE IF NOT EXISTS creator_payment_methods (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
   -- Creator reference
-  creator_id TEXT NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
+  creator_id UUID NOT NULL REFERENCES creators(id) ON DELETE CASCADE,
 
   -- Method type and status
   type payment_method_type NOT NULL,

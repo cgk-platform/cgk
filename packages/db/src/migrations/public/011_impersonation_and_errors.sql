@@ -28,8 +28,8 @@ CREATE INDEX IF NOT EXISTS idx_impersonation_active
 -- Platform Errors Table
 -- Cross-tenant error tracking for super admin error explorer
 CREATE TABLE IF NOT EXISTS platform_errors (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  tenant_id TEXT REFERENCES organizations(id),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID REFERENCES organizations(id),
   tenant_name TEXT,
   severity TEXT NOT NULL CHECK (severity IN ('p1', 'p2', 'p3')),
   status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'acknowledged', 'resolved')),
@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS platform_errors (
   pattern_hash TEXT,
   occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   acknowledged_at TIMESTAMPTZ,
-  acknowledged_by TEXT REFERENCES users(id),
+  acknowledged_by UUID REFERENCES users(id),
   resolved_at TIMESTAMPTZ,
-  resolved_by TEXT REFERENCES users(id),
+  resolved_by UUID REFERENCES users(id),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -64,8 +64,8 @@ CREATE INDEX IF NOT EXISTS idx_platform_errors_active
 -- Platform Jobs Table
 -- Cross-tenant job monitoring for super admin dashboard
 CREATE TABLE IF NOT EXISTS platform_jobs (
-  id TEXT PRIMARY KEY,
-  tenant_id TEXT REFERENCES organizations(id),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID REFERENCES organizations(id),
   job_type TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled')),
   payload JSONB DEFAULT '{}',
@@ -95,8 +95,8 @@ CREATE INDEX IF NOT EXISTS idx_platform_jobs_type
 -- Platform Webhooks Table
 -- Cross-tenant webhook delivery monitoring
 CREATE TABLE IF NOT EXISTS platform_webhooks (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  tenant_id TEXT REFERENCES organizations(id),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID REFERENCES organizations(id),
   event_type TEXT NOT NULL,
   target_url TEXT NOT NULL,
   payload JSONB DEFAULT '{}',
@@ -123,8 +123,8 @@ CREATE INDEX IF NOT EXISTS idx_platform_webhooks_failed
 -- Health Check Matrix Table
 -- Stores per-tenant per-service health status
 CREATE TABLE IF NOT EXISTS platform_health_matrix (
-  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  tenant_id TEXT NOT NULL REFERENCES organizations(id),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL REFERENCES organizations(id),
   service_name TEXT NOT NULL,
   status TEXT NOT NULL CHECK (status IN ('healthy', 'degraded', 'unhealthy', 'unknown')),
   response_time_ms INTEGER,
