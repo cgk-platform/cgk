@@ -359,6 +359,164 @@ Before marking complete:
 
 ---
 
+## Lessons Learned from Migration Debugging (February 2026)
+
+This section documents actual errors encountered when running all migrations and their fixes. **USE THIS AS A CHECKLIST when writing new migrations.**
+
+### Error Categories Encountered
+
+#### 1. Type Mismatches Between Tables (MOST COMMON)
+
+**Symptom**: `foreign key constraint cannot be implemented`
+
+**Root Cause**: Foreign key column type doesn't match referenced primary key type.
+
+| Table | ID Column Type | WRONG Reference | CORRECT Reference |
+|-------|---------------|-----------------|-------------------|
+| `public.users` | UUID | `user_id TEXT REFERENCES public.users(id)` | `user_id UUID REFERENCES public.users(id)` |
+| `public.organizations` | UUID | `org_id TEXT REFERENCES public.organizations(id)` | `org_id UUID REFERENCES public.organizations(id)` |
+| `tenant.creators` | TEXT | `creator_id UUID REFERENCES creators(id)` | `creator_id TEXT REFERENCES creators(id)` |
+| `tenant.ai_agents` | TEXT | `agent_id UUID REFERENCES ai_agents(id)` | `agent_id TEXT REFERENCES ai_agents(id)` |
+| `tenant.videos` | TEXT | `video_id UUID REFERENCES videos(id)` | `video_id TEXT REFERENCES videos(id)` |
+| `tenant.projects` | UUID | `project_id TEXT REFERENCES projects(id)` | `project_id UUID REFERENCES projects(id)` |
+| `tenant.orders` | TEXT | `order_id UUID REFERENCES orders(id)` | `order_id TEXT REFERENCES orders(id)` |
+
+**Fix Pattern**:
+```sql
+-- Before referencing a table, check its ID type:
+-- \d table_name  (in psql)
+
+-- WRONG - Assume TEXT
+user_id TEXT REFERENCES public.users(id)
+
+-- CORRECT - Match actual type (UUID)
+user_id UUID REFERENCES public.users(id)
+```
+
+#### 2. Duplicate Object Errors
+
+**Symptom**: `relation "idx_name" already exists`, `trigger already exists`, `type already exists`
+
+**Root Cause**: Missing `IF NOT EXISTS` or `DROP ... IF EXISTS`
+
+**Fix Patterns**:
+```sql
+-- WRONG
+CREATE INDEX idx_foo ON table(column);
+CREATE TYPE my_enum AS ENUM ('a', 'b');
+CREATE TRIGGER my_trigger ...;
+
+-- CORRECT
+CREATE INDEX IF NOT EXISTS idx_foo ON table(column);
+
+DO $$ BEGIN
+  CREATE TYPE my_enum AS ENUM ('a', 'b');
+EXCEPTION
+  WHEN duplicate_object THEN NULL;
+END $$;
+
+DROP TRIGGER IF EXISTS my_trigger ON table;
+CREATE TRIGGER my_trigger ...;
+```
+
+#### 3. Missing Functions in Tenant Schema
+
+**Symptom**: `function update_updated_at_column() does not exist`
+
+**Root Cause**: Functions defined in public schema aren't in tenant search_path
+
+**Fix Pattern**:
+```sql
+-- WRONG - function not found
+EXECUTE FUNCTION update_updated_at_column();
+
+-- CORRECT - fully qualify with schema
+EXECUTE FUNCTION public.update_updated_at_column();
+```
+
+#### 4. pgvector Extension Not in Search Path
+
+**Symptom**: `type "vector" does not exist`
+
+**Root Cause**: pgvector extension installed in public schema, but tenant schema search_path doesn't include it
+
+**Fix Pattern**:
+```sql
+-- WRONG
+embedding vector(1536),
+USING hnsw (embedding vector_cosine_ops)
+
+-- CORRECT - use public schema qualifier
+embedding public.vector(1536),
+USING hnsw (embedding public.vector_cosine_ops)
+```
+
+#### 5. Column Name Mismatches
+
+**Symptom**: `column "X" does not exist`
+
+**Root Cause**: Migration references column names that don't match actual schema
+
+**Actual vs Expected (examples)**:
+| Expected | Actual |
+|----------|--------|
+| `orders.email` | `orders.customer_email` |
+| `orders.total_price_cents` | `orders.total_cents` |
+| `orders.source_name` | `orders.utm_source` |
+| `treasury.request_id` | `treasury.treasury_request_id` |
+| `receipts.expense_id` | `receipts.linked_expense_id` |
+
+**Fix Pattern**:
+```sql
+-- Before writing queries, check actual columns:
+-- SELECT column_name FROM information_schema.columns
+-- WHERE table_schema = 'tenant_rawdog' AND table_name = 'orders';
+```
+
+#### 6. Invalid Enum Values
+
+**Symptom**: `invalid input value for enum X: "Y"`
+
+**Root Cause**: Using enum value that doesn't exist in the enum type
+
+**Example**:
+```sql
+-- Check existing values first:
+-- SELECT enumlabel FROM pg_enum WHERE enumtypid = 'creator_status'::regtype;
+-- Returns: pending, approved, active, paused, terminated
+
+-- WRONG - 'onboarding' doesn't exist
+WHERE status IN ('approved', 'onboarding')
+
+-- CORRECT - use actual enum values
+WHERE status IN ('approved', 'pending')
+```
+
+### Pre-Flight Checklist for New Migrations
+
+Before committing a new migration, verify:
+
+- [ ] All `CREATE INDEX` statements have `IF NOT EXISTS`
+- [ ] All `CREATE TYPE` statements wrapped in `DO $$ ... EXCEPTION` block
+- [ ] All `CREATE TRIGGER` preceded by `DROP TRIGGER IF EXISTS`
+- [ ] All foreign keys match the referenced column's type exactly
+- [ ] All function calls in tenant schema use `public.` prefix
+- [ ] All pgvector types use `public.vector()` not `vector()`
+- [ ] All enum values exist (check with `pg_enum` query)
+- [ ] All column references match actual schema (check with `\d table_name`)
+
+### Recommended: Run Migrations in Test Tenant First
+
+```bash
+# Before deploying, test migrations against a fresh tenant
+export DATABASE_URL="..."
+psql -c "CREATE SCHEMA IF NOT EXISTS tenant_test_migration"
+# Run your migration file
+psql -c "DROP SCHEMA tenant_test_migration CASCADE"
+```
+
+---
+
 ## Pattern References
 
 **Skills to invoke:**

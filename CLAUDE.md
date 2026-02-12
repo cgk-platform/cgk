@@ -162,6 +162,56 @@ tenant_{slug} schema (per-tenant):
 └── ... all tenant-specific data
 ```
 
+### Schema Layout & ID Types (CRITICAL for Migrations)
+
+**PUBLIC SCHEMA - ID types are UUID:**
+| Table | ID Type | Notes |
+|-------|---------|-------|
+| `organizations` | UUID | Tenant registry |
+| `users` | UUID | All user FKs must be UUID |
+| `sessions` | UUID | Auth sessions |
+| `api_keys` | UUID | API authentication |
+| `team_invitations` | UUID | Team management |
+| `feature_flags` | UUID | Feature flag system |
+| `creators` (public) | UUID | Global creator registry |
+
+**TENANT SCHEMA - ID types vary (mostly TEXT):**
+| Table | ID Type | Notes |
+|-------|---------|-------|
+| `orders` | TEXT | Shopify order IDs are strings |
+| `customers` | TEXT | Shopify customer IDs |
+| `products` | TEXT | Shopify product IDs |
+| `creators` | TEXT | Tenant-scoped creators |
+| `ai_agents` | TEXT | AI agent definitions |
+| `videos` | TEXT | Video records |
+| `projects` | **UUID** | Exception - uses UUID |
+| `blog_posts` | TEXT | Blog content |
+| `subscriptions` | TEXT | Subscription records |
+| `reviews` | TEXT | Product reviews |
+
+**CRITICAL: When writing migrations, ALWAYS verify ID types before adding foreign keys:**
+```sql
+-- Check actual column type before referencing
+-- \d public.users     -- Shows: id UUID
+-- \d tenant_rawdog.creators  -- Shows: id TEXT
+
+-- WRONG - TEXT doesn't match UUID
+user_id TEXT REFERENCES public.users(id)
+
+-- CORRECT - Types must match
+user_id UUID REFERENCES public.users(id)
+```
+
+### Common Migration Pitfalls
+
+1. **Type Mismatch**: Public tables use UUID, most tenant tables use TEXT
+2. **Missing IF NOT EXISTS**: All CREATE INDEX/TABLE need idempotency
+3. **Function Scope**: Use `public.update_updated_at_column()` in tenant schemas
+4. **pgvector Types**: Use `public.vector(1536)` not `vector(1536)`
+5. **Enum Values**: Check existing values before using in WHERE clauses
+
+See `/MULTI-TENANT-PLATFORM-PLAN/phases/PHASE-0B-DATABASE-SETUP-UX.md` for detailed error patterns and fixes.
+
 ### Tenant Context Wrapper
 
 **CRITICAL**: Always use `withTenant()` for tenant-scoped queries:
