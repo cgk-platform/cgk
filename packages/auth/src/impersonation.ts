@@ -12,11 +12,11 @@
  * - Cannot impersonate another super admin
  */
 
-import { randomBytes } from 'crypto'
 import * as jose from 'jose'
 
 import { sql } from '@cgk/db'
 
+import { generateSecureToken } from './crypto'
 import { logAuditAction, getSuperAdminUser, isSuperAdmin } from './super-admin'
 import type { OrgContext, UserRole } from './types'
 
@@ -99,10 +99,10 @@ export class ImpersonationError extends Error {
 }
 
 /**
- * Generate a secure random token
+ * Generate a secure random token (Edge-compatible)
  */
 function generateToken(length: number = IMPERSONATION_TOKEN_LENGTH): string {
-  return randomBytes(length).toString('base64url')
+  return generateSecureToken(length)
 }
 
 /**

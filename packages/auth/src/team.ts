@@ -1,9 +1,7 @@
-import { createHash } from 'crypto'
-
 import { sql } from '@cgk/db'
 import { nanoid } from 'nanoid'
 
-
+import { sha256 } from './crypto'
 import type { UserRole } from './types'
 
 const INVITATION_TOKEN_LENGTH = 48
@@ -62,13 +60,6 @@ export interface TeamAuditEntry {
   oldValue: Record<string, unknown> | null
   newValue: Record<string, unknown> | null
   createdAt: Date
-}
-
-/**
- * Hash a token using SHA-256
- */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex')
 }
 
 /**
@@ -306,7 +297,7 @@ export async function createInvitation(
 
   // Generate token
   const token = nanoid(INVITATION_TOKEN_LENGTH)
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
 
   // Calculate expiration
   const expiresAt = new Date()
@@ -492,7 +483,7 @@ export async function acceptInvitation(
   token: string,
   userId: string
 ): Promise<{ tenantId: string; role: UserRole }> {
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
   const normalizedEmail = email.toLowerCase().trim()
 
   // Find the invitation
@@ -625,7 +616,7 @@ export async function resendInvitation(
 
   // Generate new token
   const token = nanoid(INVITATION_TOKEN_LENGTH)
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
 
   // Calculate new expiration
   const expiresAt = new Date()

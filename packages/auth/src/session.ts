@@ -1,19 +1,12 @@
-import { createHash } from 'crypto'
 import { nanoid } from 'nanoid'
 
 import { sql } from '@cgk/db'
 
+import { sha256 } from './crypto'
 import type { Session, SessionCreateResult } from './types'
 
 const SESSION_TOKEN_LENGTH = 32
 const SESSION_EXPIRATION_DAYS = 30
-
-/**
- * Hash a token using SHA-256
- */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex')
-}
 
 /**
  * Map database row to Session object
@@ -46,7 +39,7 @@ export async function createSession(
   req?: Request
 ): Promise<SessionCreateResult> {
   const token = nanoid(SESSION_TOKEN_LENGTH)
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
 
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + SESSION_EXPIRATION_DAYS)
@@ -78,7 +71,7 @@ export async function createSession(
  * @returns Session if valid and not revoked, null otherwise
  */
 export async function validateSession(token: string): Promise<Session | null> {
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
 
   const result = await sql`
     SELECT * FROM sessions

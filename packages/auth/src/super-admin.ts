@@ -5,9 +5,9 @@
  * Super admins have platform-level access separate from regular user roles.
  */
 
-import { createHash, randomBytes } from 'crypto'
-
 import { sql } from '@cgk/db'
+
+import { sha256, generateSecureToken } from './crypto'
 
 /**
  * Super admin role definition with permissions
@@ -128,17 +128,10 @@ const SESSION_EXPIRATION_HOURS = 4
 const INACTIVITY_TIMEOUT_MINUTES = 30
 
 /**
- * Hash a token using SHA-256
- */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex')
-}
-
-/**
- * Generate a secure random token
+ * Generate a secure random token (Edge-compatible)
  */
 function generateToken(length: number = SESSION_TOKEN_LENGTH): string {
-  return randomBytes(length).toString('base64url')
+  return generateSecureToken(length)
 }
 
 /**
@@ -281,7 +274,7 @@ export async function createSuperAdminSession(
 
   // Generate session token
   const token = generateToken()
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
 
   // Calculate expiration (4 hours)
   const expiresAt = new Date()
@@ -325,7 +318,7 @@ export async function createSuperAdminSession(
  * @returns Session if valid, null otherwise
  */
 export async function validateSuperAdminSession(token: string): Promise<SuperAdminSession | null> {
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
 
   const result = await sql`
     SELECT * FROM super_admin_sessions

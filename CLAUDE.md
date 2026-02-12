@@ -764,6 +764,62 @@ Shopify CLI uses npm internally, so `workspace:*` references cause issues.
 "build": "echo 'Built via external tool'"
 ```
 
+### 6. Edge Runtime Compatibility (MIDDLEWARE_INVOCATION_FAILED)
+
+Next.js middleware runs on Edge Runtime by default. Node.js `crypto` module is NOT available.
+
+**Symptoms**: `MIDDLEWARE_INVOCATION_FAILED` error on Vercel
+
+```typescript
+// BAD - Node.js crypto doesn't work in Edge Runtime
+import { createHash, randomBytes } from 'crypto'
+
+function hashToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex')
+}
+
+// GOOD - Use Web Crypto API (Edge-compatible)
+async function sha256(input: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(input)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+// GOOD - Use crypto.getRandomValues for random bytes
+function generateToken(length: number): string {
+  const bytes = new Uint8Array(length)
+  crypto.getRandomValues(bytes)
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
+}
+```
+
+**Note**: `@cgk/auth` uses Edge-compatible crypto utilities in `packages/auth/src/crypto.ts`.
+
+### 7. turbo.json Env Var Declaration
+
+Turbo caches builds based on env vars. If an env var affects the build but isn't declared in turbo.json, you'll get warnings and incorrect cache hits.
+
+**Symptoms**: Warning like "JWT_SECRET is set on Vercel but missing from turbo.json"
+
+```json
+// turbo.json - add env vars that affect build output
+{
+  "tasks": {
+    "build": {
+      "env": [
+        "DATABASE_URL",
+        "JWT_SECRET",      // Add any env var that affects runtime
+        "SESSION_SECRET"
+      ]
+    }
+  }
+}
+```
+
+**Rule**: If you add a new env var that affects runtime behavior, add it to `turbo.json` `build.env` array.
+
 ---
 
 ## Phase Status

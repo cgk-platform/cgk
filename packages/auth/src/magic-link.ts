@@ -1,19 +1,12 @@
-import { createHash } from 'crypto'
 import { nanoid } from 'nanoid'
 
 import { sql } from '@cgk/db'
 
+import { sha256 } from './crypto'
 import type { MagicLinkPurpose, MagicLinkVerifyResult, UserRole } from './types'
 
 const MAGIC_LINK_TOKEN_LENGTH = 48
 const MAGIC_LINK_EXPIRATION_HOURS = 24
-
-/**
- * Hash a token using SHA-256
- */
-function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex')
-}
 
 /**
  * Create a magic link for email authentication
@@ -31,7 +24,7 @@ export async function createMagicLink(
   inviteRole?: UserRole
 ): Promise<string> {
   const token = nanoid(MAGIC_LINK_TOKEN_LENGTH)
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
 
   const expiresAt = new Date()
   expiresAt.setHours(expiresAt.getHours() + MAGIC_LINK_EXPIRATION_HOURS)
@@ -63,7 +56,7 @@ export async function verifyMagicLink(
   email: string,
   token: string
 ): Promise<MagicLinkVerifyResult> {
-  const tokenHash = hashToken(token)
+  const tokenHash = await sha256(token)
   const normalizedEmail = email.toLowerCase()
 
   // Find and validate the magic link
