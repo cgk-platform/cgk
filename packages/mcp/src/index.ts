@@ -197,3 +197,30 @@ export {
   SUPPORTED_PROTOCOL_VERSIONS,
   JSONRPCErrorCodes,
 } from './types'
+
+// =============================================================================
+// Commerce Tools
+// =============================================================================
+
+export {
+  commerceTools,
+  // Order tools
+  listOrdersTool,
+  getOrderTool,
+  searchOrdersTool,
+  updateOrderStatusTool,
+  cancelOrderTool,
+  // Customer tools
+  listCustomersTool,
+  getCustomerTool,
+  searchCustomersTool,
+  getCustomerOrdersTool,
+  // Product tools
+  listProductsTool,
+  getProductTool,
+  updateProductTool,
+  syncProductTool,
+  // Inventory tools
+  getInventoryTool,
+  updateInventoryTool,
+} from './tools/commerce'
