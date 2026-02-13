@@ -53,7 +53,9 @@
   "devDependencies": {
     "@cgk/eslint-config": "workspace:*",
     "@cgk/typescript-config": "workspace:*",
+    "@trigger.dev/build": "4.3.3",
     "eslint": "^9.18.0",
+    "trigger.dev": "^4.3.3",
     "tsup": "^8.3.0",
     "typescript": "^5.9.0"
   }
