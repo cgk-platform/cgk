@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/monorepo",
+  "name": "@cgk-platform-platform/monorepo",
   "version": "0.0.0",
   "private": true,
   "description": "CGK - Commerce Growth Kit: Multi-tenant e-commerce platform",
@@ -11,7 +11,7 @@
   "author": "CGK Platform",
   "type": "module",
   "config": {
-    "packageNamespace": "@cgk"
+    "packageNamespace": "@cgk-platform"
   },
   "scripts": {
     "build": "turbo run build",

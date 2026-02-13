@@ -10,17 +10,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*",
-    "@cgk/auth": "workspace:*",
-    "@cgk/ui": "workspace:*",
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/auth": "workspace:*",
+    "@cgk-platform/ui": "workspace:*",
     "next": "^14.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
