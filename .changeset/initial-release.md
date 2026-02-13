@@ -22,10 +22,8 @@
 "@cgk-platform/scheduling": minor
 "@cgk-platform/ab-testing": minor
 "@cgk-platform/tax": minor
-"@cgk-platform/support": minor
 "@cgk-platform/integrations": minor
 "@cgk-platform/onboarding": minor
-"@cgk-platform/portal": minor
 "@cgk-platform/slack": minor
 ---
 
