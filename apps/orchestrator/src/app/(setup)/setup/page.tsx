@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useState, useEffect, useCallback } from 'react'
 
-import { StepIndicator } from './components/step-indicator'
-import { DatabaseStep } from './components/database-step'
-import { CacheStep } from './components/cache-step'
-import { StorageStep } from './components/storage-step'
-import { MigrationsStep } from './components/migrations-step'
 import { AdminStep } from './components/admin-step'
-import { ConfigStep } from './components/config-step'
+import { CacheStep } from './components/cache-step'
 import { CompleteStep } from './components/complete-step'
+import { ConfigStep } from './components/config-step'
+import { DatabaseStep } from './components/database-step'
+import { MigrationsStep } from './components/migrations-step'
+import { StepIndicator } from './components/step-indicator'
+import { StorageStep } from './components/storage-step'
 
 /**
  * Step definitions for the setup wizard
@@ -38,12 +38,7 @@ export default function SetupPage() {
   const [currentStep, setCurrentStep] = useState(0)
   const [stepStatus, setStepStatus] = useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    // Check current setup status on mount
-    checkSetupStatus()
-  }, [])
-
-  const checkSetupStatus = async () => {
+  const checkSetupStatus = useCallback(async () => {
     try {
       const response = await fetch('/api/setup/status')
       const data = await response.json()
@@ -70,7 +65,12 @@ export default function SetupPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [router])
+
+  useEffect(() => {
+    // Check current setup status on mount
+    checkSetupStatus()
+  }, [checkSetupStatus])
 
   const handleStepComplete = () => {
     // Mark current step as complete

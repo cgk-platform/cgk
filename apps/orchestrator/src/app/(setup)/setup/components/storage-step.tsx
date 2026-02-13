@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { Button, Label } from '@cgk-platform/ui'
 import { Cloud, CheckCircle2, AlertCircle, Loader2, SkipForward } from 'lucide-react'
+import { useState } from 'react'
 
 interface StepProps {
   onComplete: () => void

@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server'
-import { sql } from '@cgk-platform/db'
 import { hashPassword } from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@cgk-platform/ui'
 import { CheckCircle2, Rocket, ExternalLink } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 interface StepProps {
   onComplete: () => void

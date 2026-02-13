@@ -1,5 +1,5 @@
-import { NextResponse, type NextRequest } from 'next/server'
 import { sql } from '@cgk-platform/db'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 

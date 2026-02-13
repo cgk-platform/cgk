@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+
 import { getSetupStatus } from '@/lib/setup-detection'
 
 export const dynamic = 'force-dynamic'

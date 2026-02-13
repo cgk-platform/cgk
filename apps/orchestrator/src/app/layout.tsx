@@ -1,8 +1,8 @@
+import { Toaster } from '@cgk-platform/ui'
+import { TooltipProvider } from '@cgk-platform/ui'
 import type { Metadata, Viewport } from 'next'
 import { Instrument_Serif, Geist, Geist_Mono } from 'next/font/google'
 
-import { Toaster } from '@cgk-platform/ui'
-import { TooltipProvider } from '@cgk-platform/ui'
 
 import './globals.css'
 
