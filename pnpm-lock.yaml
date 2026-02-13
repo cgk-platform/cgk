@@ -32,64 +32,64 @@ importers:
 
   apps/admin:
     dependencies:
-      '@cgk/ab-testing':
+      '@cgk-platform/ab-testing':
         specifier: workspace:*
         version: link:../../packages/ab-testing
-      '@cgk/admin-core':
+      '@cgk-platform/admin-core':
         specifier: workspace:*
         version: link:../../packages/admin-core
-      '@cgk/ai-agents':
+      '@cgk-platform/ai-agents':
         specifier: workspace:*
         version: link:../../packages/ai-agents
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@cgk/commerce':
+      '@cgk-platform/commerce':
         specifier: workspace:*
         version: link:../../packages/commerce
-      '@cgk/communications':
+      '@cgk-platform/communications':
         specifier: workspace:*
         version: link:../../packages/communications
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/dam':
+      '@cgk-platform/dam':
         specifier: workspace:*
         version: link:../../packages/dam
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cgk/esign':
+      '@cgk-platform/esign':
         specifier: workspace:*
         version: link:../../packages/esign
-      '@cgk/health':
+      '@cgk-platform/health':
         specifier: workspace:*
         version: link:../../packages/health
-      '@cgk/integrations':
+      '@cgk-platform/integrations':
         specifier: workspace:*
         version: link:../../packages/integrations
-      '@cgk/jobs':
+      '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
-      '@cgk/logging':
+      '@cgk-platform/logging':
         specifier: workspace:*
         version: link:../../packages/logging
-      '@cgk/scheduling':
+      '@cgk-platform/scheduling':
         specifier: workspace:*
         version: link:../../packages/scheduling
-      '@cgk/shopify':
+      '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../../packages/shopify
-      '@cgk/slack':
+      '@cgk-platform/slack':
         specifier: workspace:*
         version: link:../../packages/slack
-      '@cgk/support':
+      '@cgk-platform/support':
         specifier: workspace:*
         version: link:../../packages/support
-      '@cgk/ui':
+      '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@cgk/video':
+      '@cgk-platform/video':
         specifier: workspace:*
         version: link:../../packages/video
       '@dnd-kit/core':
@@ -132,88 +132,15 @@ importers:
         specifier: ^2.3.0
         version: 2.4.0
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/tailwind-config':
+      '@cgk-platform/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/config/tailwind
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
-      '@types/node':
-        specifier: ^22.0.0
-        version: 22.19.11
-      '@types/react':
-        specifier: ^19.0.0
-        version: 19.2.13
-      '@types/react-dom':
-        specifier: ^19.0.0
-        version: 19.2.3(@types/react@19.2.13)
-      autoprefixer:
-        specifier: ^10.4.17
-        version: 10.4.24(postcss@8.5.6)
-      eslint:
-        specifier: ^9.18.0
-        version: 9.39.2(jiti@2.6.1)
-      postcss:
-        specifier: ^8.4.33
-        version: 8.5.6
-      tailwindcss:
-        specifier: ^3.4.1
-        version: 3.4.19(tsx@4.21.0)(yaml@2.8.2)
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-
-  apps/contractor-portal:
-    dependencies:
-      '@cgk/auth':
-        specifier: workspace:*
-        version: link:../../packages/auth
-      '@cgk/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@cgk/db':
-        specifier: workspace:*
-        version: link:../../packages/db
-      '@cgk/payments':
-        specifier: workspace:*
-        version: link:../../packages/payments
-      '@cgk/ui':
-        specifier: workspace:*
-        version: link:../../packages/ui
-      '@hello-pangea/dnd':
-        specifier: ^17.0.0
-        version: 17.0.0(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      bcryptjs:
-        specifier: ^3.0.3
-        version: 3.0.3
-      jose:
-        specifier: ^5.2.0
-        version: 5.10.0
-      next:
-        specifier: ^15.2.0
-        version: 15.5.12(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      react:
-        specifier: ^19.0.0
-        version: 19.2.4
-      react-dom:
-        specifier: ^19.0.0
-        version: 19.2.4(react@19.2.4)
-    devDependencies:
-      '@cgk/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/config/eslint
-      '@cgk/tailwind-config':
-        specifier: workspace:*
-        version: link:../../packages/config/tailwind
-      '@cgk/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/config/typescript
-      '@types/bcryptjs':
-        specifier: ^3.0.0
-        version: 3.0.0
       '@types/node':
         specifier: ^22.0.0
         version: 22.19.11
@@ -239,27 +166,100 @@ importers:
         specifier: ^5.9.0
         version: 5.9.3
 
-  apps/creator-portal:
+  apps/contractor-portal:
     dependencies:
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cgk/jobs':
-        specifier: workspace:*
-        version: link:../../packages/jobs
-      '@cgk/payments':
+      '@cgk-platform/payments':
         specifier: workspace:*
         version: link:../../packages/payments
-      '@cgk/ui':
+      '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@cgk/video':
+      '@hello-pangea/dnd':
+        specifier: ^17.0.0
+        version: 17.0.0(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      bcryptjs:
+        specifier: ^3.0.3
+        version: 3.0.3
+      jose:
+        specifier: ^5.2.0
+        version: 5.10.0
+      next:
+        specifier: ^15.2.0
+        version: 15.5.12(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.4(react@19.2.4)
+    devDependencies:
+      '@cgk-platform/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/config/eslint
+      '@cgk-platform/tailwind-config':
+        specifier: workspace:*
+        version: link:../../packages/config/tailwind
+      '@cgk-platform/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/config/typescript
+      '@types/bcryptjs':
+        specifier: ^3.0.0
+        version: 3.0.0
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.19.11
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.13
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.13)
+      autoprefixer:
+        specifier: ^10.4.17
+        version: 10.4.24(postcss@8.5.6)
+      eslint:
+        specifier: ^9.18.0
+        version: 9.39.2(jiti@2.6.1)
+      postcss:
+        specifier: ^8.4.33
+        version: 8.5.6
+      tailwindcss:
+        specifier: ^3.4.1
+        version: 3.4.19(tsx@4.21.0)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.9.0
+        version: 5.9.3
+
+  apps/creator-portal:
+    dependencies:
+      '@cgk-platform/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@cgk-platform/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@cgk-platform/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@cgk-platform/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
+      '@cgk-platform/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
+      '@cgk-platform/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      '@cgk-platform/video':
         specifier: workspace:*
         version: link:../../packages/video
       '@vercel/blob':
@@ -290,13 +290,13 @@ importers:
         specifier: ^2.15.4
         version: 2.15.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/tailwind-config':
+      '@cgk-platform/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/config/tailwind
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@types/bcryptjs':
@@ -329,16 +329,16 @@ importers:
 
   apps/mcp-server:
     dependencies:
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cgk/mcp':
+      '@cgk-platform/mcp':
         specifier: workspace:*
         version: link:../../packages/mcp
       next:
@@ -351,10 +351,10 @@ importers:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@types/node':
@@ -375,31 +375,31 @@ importers:
 
   apps/orchestrator:
     dependencies:
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cgk/feature-flags':
+      '@cgk-platform/feature-flags':
         specifier: workspace:*
         version: link:../../packages/feature-flags
-      '@cgk/health':
+      '@cgk-platform/health':
         specifier: workspace:*
         version: link:../../packages/health
-      '@cgk/logging':
+      '@cgk-platform/logging':
         specifier: workspace:*
         version: link:../../packages/logging
-      '@cgk/onboarding':
+      '@cgk-platform/onboarding':
         specifier: workspace:*
         version: link:../../packages/onboarding
-      '@cgk/slack':
+      '@cgk-platform/slack':
         specifier: workspace:*
         version: link:../../packages/slack
-      '@cgk/ui':
+      '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       lucide-react:
@@ -415,13 +415,13 @@ importers:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/tailwind-config':
+      '@cgk-platform/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/config/tailwind
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@types/node':
@@ -451,7 +451,7 @@ importers:
 
   apps/shopify-app:
     dependencies:
-      '@cgk/shopify':
+      '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../../packages/shopify
       '@shopify/admin-api-client':
@@ -467,10 +467,10 @@ importers:
         specifier: ^1.0.0
         version: 1.0.9
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@shopify/app':
@@ -491,28 +491,28 @@ importers:
 
   apps/storefront:
     dependencies:
-      '@cgk/analytics':
+      '@cgk-platform/analytics':
         specifier: workspace:*
         version: link:../../packages/analytics
-      '@cgk/commerce':
+      '@cgk-platform/commerce':
         specifier: workspace:*
         version: link:../../packages/commerce
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cgk/jobs':
+      '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
-      '@cgk/portal':
+      '@cgk-platform/portal':
         specifier: workspace:*
         version: link:../../packages/portal
-      '@cgk/shopify':
+      '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../../packages/shopify
-      '@cgk/ui':
+      '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       lucide-react:
@@ -528,13 +528,13 @@ importers:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/tailwind-config':
+      '@cgk-platform/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/config/tailwind
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@types/node':
@@ -564,23 +564,23 @@ importers:
 
   packages/ab-testing:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/feature-flags':
+      '@cgk-platform/feature-flags':
         specifier: workspace:*
         version: link:../feature-flags
-      '@cgk/logging':
+      '@cgk-platform/logging':
         specifier: workspace:*
         version: link:../logging
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -598,26 +598,26 @@ importers:
 
   packages/admin-core:
     dependencies:
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../auth
-      '@cgk/communications':
+      '@cgk-platform/communications':
         specifier: workspace:*
         version: link:../communications
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/jobs':
+      '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../jobs
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -635,20 +635,20 @@ importers:
 
   packages/ai-agents:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       openai:
         specifier: ^4.77.0
         version: 4.104.0(ws@8.19.0(bufferutil@4.1.0))(zod@3.25.76)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@types/node':
@@ -669,14 +669,14 @@ importers:
 
   packages/analytics:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -691,10 +691,10 @@ importers:
 
   packages/auth:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       bcryptjs:
@@ -707,10 +707,10 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@types/bcryptjs':
@@ -731,13 +731,13 @@ importers:
 
   packages/cli:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/jobs':
+      '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../jobs
       chalk:
@@ -756,10 +756,10 @@ importers:
         specifier: ^8.0.1
         version: 8.2.0
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@types/fs-extra':
@@ -780,20 +780,20 @@ importers:
 
   packages/commerce:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/shopify':
+      '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../shopify
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -811,17 +811,17 @@ importers:
 
   packages/communications:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -874,10 +874,10 @@ importers:
 
   packages/core:
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -892,10 +892,10 @@ importers:
 
   packages/dam:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       '@vercel/blob':
@@ -908,10 +908,10 @@ importers:
         specifier: ^0.33.0
         version: 0.33.5
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@types/node':
@@ -932,17 +932,17 @@ importers:
 
   packages/db:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
       '@vercel/postgres':
         specifier: ^0.10.0
         version: 0.10.0
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -960,10 +960,10 @@ importers:
 
   packages/esign:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       '@vercel/blob':
@@ -976,10 +976,10 @@ importers:
         specifier: ^1.17.1
         version: 1.17.1
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@types/react':
@@ -1000,20 +1000,20 @@ importers:
 
   packages/feature-flags:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/logging':
+      '@cgk-platform/logging':
         specifier: workspace:*
         version: link:../logging
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@testing-library/react':
@@ -1049,17 +1049,17 @@ importers:
 
   packages/health:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1077,20 +1077,20 @@ importers:
 
   packages/integrations:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/jobs':
+      '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../jobs
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@mux/mux-node':
@@ -1117,10 +1117,10 @@ importers:
 
   packages/jobs:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       '@trigger.dev/sdk':
@@ -1130,10 +1130,10 @@ importers:
         specifier: ^3.0.0
         version: 3.52.0(@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0))(express@5.2.1)(hono@4.11.9)(next@16.1.6(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@trigger.dev/build':
@@ -1154,17 +1154,17 @@ importers:
 
   packages/logging:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1179,23 +1179,23 @@ importers:
 
   packages/mcp:
     dependencies:
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../auth
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.0
         version: 1.26.0(supports-color@10.2.2)(zod@3.25.76)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1210,17 +1210,17 @@ importers:
 
   packages/onboarding:
     dependencies:
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../auth
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/logging':
+      '@cgk-platform/logging':
         specifier: workspace:*
         version: link:../logging
     devDependencies:
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       tsup:
@@ -1235,20 +1235,20 @@ importers:
 
   packages/payments:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       stripe:
         specifier: ^17.0.0
         version: 17.7.0
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1263,17 +1263,17 @@ importers:
 
   packages/portal:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/shopify':
+      '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../shopify
     devDependencies:
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@types/node':
@@ -1288,10 +1288,10 @@ importers:
 
   packages/scheduling:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       date-fns:
@@ -1301,10 +1301,10 @@ importers:
         specifier: ^3.0.0
         version: 3.2.0(date-fns@4.1.0)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1322,23 +1322,23 @@ importers:
 
   packages/shopify:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk/jobs':
+      '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../jobs
       '@shopify/shopify-api':
         specifier: ^12.3.0
         version: 12.3.0
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1356,20 +1356,20 @@ importers:
 
   packages/slack:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       '@slack/web-api':
         specifier: ^7.8.0
         version: 7.14.0
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1384,14 +1384,14 @@ importers:
 
   packages/support:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
     devDependencies:
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       typescript:
@@ -1403,17 +1403,17 @@ importers:
 
   packages/tax:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@types/node':
@@ -1434,7 +1434,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
       '@radix-ui/react-checkbox':
@@ -1480,10 +1480,10 @@ importers:
         specifier: ^2.6.0
         version: 2.6.1
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       '@testing-library/jest-dom':
@@ -1525,20 +1525,20 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.39.0
         version: 0.39.0
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
       '@mux/mux-node':
         specifier: ^9.0.0
         version: 9.0.1
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../config/typescript
       eslint:
@@ -1556,16 +1556,16 @@ importers:
 
   starters/basic:
     dependencies:
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cgk/ui':
+      '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -1578,10 +1578,10 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@types/node':
@@ -1611,28 +1611,28 @@ importers:
 
   starters/full:
     dependencies:
-      '@cgk/analytics':
+      '@cgk-platform/analytics':
         specifier: workspace:*
         version: link:../../packages/analytics
-      '@cgk/auth':
+      '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@cgk/commerce':
+      '@cgk-platform/commerce':
         specifier: workspace:*
         version: link:../../packages/commerce
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/db':
+      '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@cgk/payments':
+      '@cgk-platform/payments':
         specifier: workspace:*
         version: link:../../packages/payments
-      '@cgk/shopify':
+      '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../../packages/shopify
-      '@cgk/ui':
+      '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -1645,10 +1645,10 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@types/node':
@@ -1678,19 +1678,19 @@ importers:
 
   starters/storefront-only:
     dependencies:
-      '@cgk/analytics':
+      '@cgk-platform/analytics':
         specifier: workspace:*
         version: link:../../packages/analytics
-      '@cgk/commerce':
+      '@cgk-platform/commerce':
         specifier: workspace:*
         version: link:../../packages/commerce
-      '@cgk/core':
+      '@cgk-platform/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@cgk/shopify':
+      '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../../packages/shopify
-      '@cgk/ui':
+      '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       next:
@@ -1703,10 +1703,10 @@ importers:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
     devDependencies:
-      '@cgk/eslint-config':
+      '@cgk-platform/eslint-config':
         specifier: workspace:*
         version: link:../../packages/config/eslint
-      '@cgk/typescript-config':
+      '@cgk-platform/typescript-config':
         specifier: workspace:*
         version: link:../../packages/config/typescript
       '@types/node':
