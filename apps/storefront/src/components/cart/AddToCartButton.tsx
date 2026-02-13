@@ -11,7 +11,7 @@
 
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useState, useCallback, useEffect } from 'react'
 
 import { useCart } from './CartProvider'

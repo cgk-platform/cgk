@@ -4,7 +4,7 @@
  * GET /api/admin/esign/pending - Get pending documents by category
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getPendingDocuments } from '@/lib/esign'
 

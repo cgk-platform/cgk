@@ -1,12 +1,12 @@
 /**
- * @cgk/video - Permission database operations
+ * @cgk-platform/video - Permission database operations
  *
  * CRUD operations for video permissions with tenant isolation.
  */
 
 import { createHash } from 'crypto'
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   CreatePermissionInput,

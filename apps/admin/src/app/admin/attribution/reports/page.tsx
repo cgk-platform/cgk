@@ -15,8 +15,8 @@ import {
   Input,
   Label,
   Switch,
-} from '@cgk/ui'
-import { cn } from '@cgk/ui'
+} from '@cgk-platform/ui'
+import { cn } from '@cgk-platform/ui'
 import {
   Plus,
   Edit2,

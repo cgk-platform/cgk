@@ -4,7 +4,7 @@
  * POST /api/admin/esign/documents/[id]/void - Void a document
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { voidDocument } from '@/lib/esign'
 

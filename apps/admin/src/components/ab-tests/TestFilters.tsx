@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import { Search, X } from 'lucide-react'
 
-import { Button, Input, cn } from '@cgk/ui'
+import { Button, Input, cn } from '@cgk-platform/ui'
 
 interface TestFiltersProps {
   status?: string

@@ -1,4 +1,4 @@
-import { createGlobalCache, sql, withTenant } from '@cgk/db'
+import { createGlobalCache, sql, withTenant } from '@cgk-platform/db'
 
 import type { BrandSummary, PaginatedBrands } from '../../../../../types/platform'
 

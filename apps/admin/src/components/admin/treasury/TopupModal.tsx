@@ -1,8 +1,8 @@
 'use client'
 
-import { Button } from '@cgk/ui'
-import { Input } from '@cgk/ui'
-import { Label } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
+import { Input } from '@cgk-platform/ui'
+import { Label } from '@cgk-platform/ui'
 import {
   DollarSign,
   CreditCard,

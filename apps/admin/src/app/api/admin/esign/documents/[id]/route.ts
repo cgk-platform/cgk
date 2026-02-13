@@ -4,7 +4,7 @@
  * GET /api/admin/esign/documents/[id] - Get document with signers and audit log
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getDocumentWithSigners, getDocumentAuditLog } from '@/lib/esign'
 

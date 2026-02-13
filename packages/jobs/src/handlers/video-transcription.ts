@@ -7,7 +7,7 @@
  * - AI content generation
  * - Sync schedule for stuck jobs
  *
- * NOTE: These jobs require the @cgk/video package to be implemented.
+ * NOTE: These jobs require the @cgk-platform/video package to be implemented.
  * Currently stubbed to allow build to pass.
  *
  * @ai-pattern tenant-isolation
@@ -53,8 +53,8 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       return { success: false, error: { message: 'videoId and playbackId required', retryable: false } }
     }
 
-    // @cgk/video package not yet implemented
-    console.log('[video/transcription] Stub - @cgk/video not yet available', {
+    // @cgk-platform/video package not yet implemented
+    console.log('[video/transcription] Stub - @cgk-platform/video not yet available', {
       tenantId,
       videoId,
       playbackId,
@@ -63,7 +63,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
     return {
       success: false,
       error: {
-        message: '@cgk/video package not yet implemented. Create this package to enable video transcription.',
+        message: '@cgk-platform/video package not yet implemented. Create this package to enable video transcription.',
         retryable: false,
       },
     }
@@ -90,8 +90,8 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
       return { success: false, error: { message: 'videoId and transcript required', retryable: false } }
     }
 
-    // @cgk/video package not yet implemented
-    console.log('[video/ai-content-generation] Stub - @cgk/video not yet available', {
+    // @cgk-platform/video package not yet implemented
+    console.log('[video/ai-content-generation] Stub - @cgk-platform/video not yet available', {
       tenantId,
       videoId,
       transcriptLength: transcript.length,
@@ -100,7 +100,7 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
     return {
       success: false,
       error: {
-        message: '@cgk/video package not yet implemented. Create this package to enable AI content generation.',
+        message: '@cgk-platform/video package not yet implemented. Create this package to enable AI content generation.',
         retryable: false,
       },
     }
@@ -124,15 +124,15 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
       return { success: true, data: { message: 'No tenantId provided - needs orchestration' } }
     }
 
-    // @cgk/video package not yet implemented
-    console.log('[video/transcription-sync] Stub - @cgk/video not yet available', {
+    // @cgk-platform/video package not yet implemented
+    console.log('[video/transcription-sync] Stub - @cgk-platform/video not yet available', {
       tenantId,
     })
 
     return {
       success: false,
       error: {
-        message: '@cgk/video package not yet implemented. Create this package to enable transcription sync.',
+        message: '@cgk-platform/video package not yet implemented. Create this package to enable transcription sync.',
         retryable: false,
       },
     }

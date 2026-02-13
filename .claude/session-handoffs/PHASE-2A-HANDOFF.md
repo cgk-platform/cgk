@@ -14,7 +14,7 @@ Built the white-labeled admin portal framework at `apps/admin/`. This provides t
 - `src/lib/theme.ts` - `generateThemeCSS()` produces CSS variable overrides from tenant colors
 
 ### Middleware
-- `src/middleware.ts` - Auth + domain-to-tenant routing (custom domain lookup, subdomain matching, JWT verification via `@cgk/auth`, header injection for x-user-id/x-session-id/x-user-role/x-tenant-id/x-tenant-slug)
+- `src/middleware.ts` - Auth + domain-to-tenant routing (custom domain lookup, subdomain matching, JWT verification via `@cgk-platform/auth`, header injection for x-user-id/x-session-id/x-user-role/x-tenant-id/x-tenant-slug)
 
 ### Components (6 files)
 - `src/components/admin/sidebar.tsx` - Collapsible sidebar: tenant branding, feature-flag-filtered nav, expandable sub-sections, active route highlighting, user menu with logout
@@ -51,7 +51,7 @@ Built the white-labeled admin portal framework at `apps/admin/`. This provides t
 - Tenant isolation: `withTenant()` for all tenant-scoped queries
 - Tenant cache: `createTenantCache()` for config caching
 - Auth: `verifyJWT()` + `validateSessionById()` in middleware
-- User lookup: `getUserById()` from `@cgk/auth` for sidebar user menu
+- User lookup: `getUserById()` from `@cgk-platform/auth` for sidebar user menu
 - Server/client boundary: `'use client'` only on interactive components (sidebar, header, mobile-nav, admin-shell, settings layout)
 - Feature flags: Navigation sections filtered by tenant features config
 

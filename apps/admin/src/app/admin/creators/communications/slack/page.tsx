@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, Check, Hash, RefreshCw, Send } from 'lucide-react'
 
-import { Alert, AlertDescription, Badge, Button, Card, CardContent, Switch } from '@cgk/ui'
+import { Alert, AlertDescription, Badge, Button, Card, CardContent, Switch } from '@cgk-platform/ui'
 
 import type {
   CreatorNotificationType,

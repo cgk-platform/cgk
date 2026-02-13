@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 
-import { Button, Card, CardContent, Badge, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Badge, cn } from '@cgk-platform/ui'
 
 import { getTemplateABTests } from '@/lib/ab-tests/db'
 import type { TemplateABTest } from '@/lib/ab-tests/types'

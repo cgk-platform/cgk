@@ -6,7 +6,7 @@
 
 'use client'
 
-import { formatCurrency } from '@cgk/ui'
+import { formatCurrency } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 import type { Order } from '@/lib/account/types'

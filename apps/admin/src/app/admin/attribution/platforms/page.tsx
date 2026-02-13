@@ -12,8 +12,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@cgk/ui'
-import { cn } from '@cgk/ui'
+} from '@cgk-platform/ui'
+import { cn } from '@cgk-platform/ui'
 import {
   Link2,
   RefreshCw,

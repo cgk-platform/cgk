@@ -4,8 +4,8 @@
  * POST /api/admin/inbox/threads/[id]/messages - Send message
  */
 
-import { requireAuth } from '@cgk/auth'
-import { getMessages, sendMessage, type SendMessageInput } from '@cgk/admin-core'
+import { requireAuth } from '@cgk-platform/auth'
+import { getMessages, sendMessage, type SendMessageInput } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

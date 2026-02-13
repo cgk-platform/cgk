@@ -6,7 +6,7 @@
 
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import {
   FileStack,
   Files,

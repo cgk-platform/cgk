@@ -1,5 +1,5 @@
 /**
- * @cgk/communications - Email Communications Package
+ * @cgk-platform/communications - Email Communications Package
  *
  * Provides email sender management, DNS configuration, domain verification,
  * notification routing, and email queue management.

@@ -5,7 +5,7 @@
  * Provides user queries, status management, and activity logging.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { logAuditAction, revokeAllSuperAdminSessions } from './super-admin'
 import { revokeAllSessions } from './session'

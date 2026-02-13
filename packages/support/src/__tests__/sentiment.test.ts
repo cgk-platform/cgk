@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 
 // We need to mock the database before importing sentiment
-vi.mock('@cgk/db', () => ({
+vi.mock('@cgk-platform/db', () => ({
   sql: vi.fn(),
   withTenant: vi.fn((_, fn) => fn()),
 }))

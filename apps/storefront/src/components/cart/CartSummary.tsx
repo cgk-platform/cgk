@@ -12,8 +12,8 @@
 
 'use client'
 
-import type { Cart } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Cart } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 import { useState, useCallback, useRef, useEffect } from 'react'
 
 import { formatMoney } from '@/lib/cart/types'

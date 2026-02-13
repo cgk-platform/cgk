@@ -4,7 +4,7 @@
  * Handles automatic processing of approved draw requests
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import { getAutoSendConfig } from './db/settings'
 import type { DrawRequestWithItems } from './types'

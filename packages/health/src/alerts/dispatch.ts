@@ -4,7 +4,7 @@
  * Sends alerts to configured channels (Slack, email, PagerDuty, webhooks).
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type { Alert, AlertSeverity, CreateAlertPayload } from '../types.js'
 import { getEnabledChannels, type SlackConfig } from './channels.js'

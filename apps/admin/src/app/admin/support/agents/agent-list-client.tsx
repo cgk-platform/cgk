@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import type { SupportAgent } from '@cgk/support'
+import type { SupportAgent } from '@cgk-platform/support'
 
 import { AgentList } from '@/components/support/agent-list'
 

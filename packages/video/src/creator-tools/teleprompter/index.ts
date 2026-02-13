@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Teleprompter Module
+ * @cgk-platform/video - Teleprompter Module
  *
  * Re-exports for teleprompter types and database operations.
  */

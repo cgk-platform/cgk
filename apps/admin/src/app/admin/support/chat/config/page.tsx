@@ -14,9 +14,9 @@ import {
   Label,
   Switch,
   Textarea,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 
-import type { ChatWidgetConfig } from '@cgk/support'
+import type { ChatWidgetConfig } from '@cgk-platform/support'
 
 export default function ChatConfigPage() {
   const [config, setConfig] = useState<ChatWidgetConfig | null>(null)

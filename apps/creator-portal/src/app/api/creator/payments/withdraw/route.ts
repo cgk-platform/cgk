@@ -13,7 +13,7 @@ import {
   MINIMUM_WITHDRAWAL_CENTS,
   STORE_CREDIT_BONUS_PERCENT,
   calculateStoreCreditBonus,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

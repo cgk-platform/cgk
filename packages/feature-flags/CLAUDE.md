@@ -1,4 +1,4 @@
-# @cgk/feature-flags - AI Development Guide
+# @cgk-platform/feature-flags - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2026-02-10
@@ -15,7 +15,7 @@ Complete feature flag system with 6 flag types, consistent hashing for stable ro
 
 ```typescript
 // Server-side (API routes, RSC)
-import { isEnabled, getVariant, evaluate } from '@cgk/feature-flags/server'
+import { isEnabled, getVariant, evaluate } from '@cgk-platform/feature-flags/server'
 
 const showNewCheckout = await isEnabled('checkout.new_flow', {
   tenantId: 'rawdog',
@@ -23,7 +23,7 @@ const showNewCheckout = await isEnabled('checkout.new_flow', {
 })
 
 // Client-side (React components)
-import { useFlag, useVariant, FlagProvider } from '@cgk/feature-flags/react'
+import { useFlag, useVariant, FlagProvider } from '@cgk-platform/feature-flags/react'
 
 const isNewCheckout = useFlag('checkout.new_flow')
 ```
@@ -37,7 +37,7 @@ const isNewCheckout = useFlag('checkout.new_flow')
 **When to use**: In API routes and server components
 
 ```typescript
-import { isEnabled, getVariant } from '@cgk/feature-flags/server'
+import { isEnabled, getVariant } from '@cgk-platform/feature-flags/server'
 
 // Boolean check
 if (await isEnabled('payments.wise_enabled', { tenantId })) {
@@ -60,7 +60,7 @@ switch (variant) {
 
 ```tsx
 'use client'
-import { useFlag, useVariant, FeatureFlag } from '@cgk/feature-flags/react'
+import { useFlag, useVariant, FeatureFlag } from '@cgk-platform/feature-flags/react'
 
 // Hook usage
 function MyComponent() {
@@ -87,8 +87,8 @@ function App() {
 
 ```tsx
 // app/layout.tsx
-import { evaluateAllFlags } from '@cgk/feature-flags/server'
-import { FlagProvider } from '@cgk/feature-flags/react'
+import { evaluateAllFlags } from '@cgk-platform/feature-flags/server'
+import { FlagProvider } from '@cgk-platform/feature-flags/react'
 
 export default async function Layout({ children }) {
   const { results } = await evaluateAllFlags({ tenantId: 'rawdog' })
@@ -106,7 +106,7 @@ export default async function Layout({ children }) {
 **When to use**: When you have a fixed context (middleware, handlers)
 
 ```typescript
-import { createFlagEvaluator } from '@cgk/feature-flags/server'
+import { createFlagEvaluator } from '@cgk-platform/feature-flags/server'
 
 // Create once with context
 const flags = createFlagEvaluator({ tenantId: 'rawdog', userId })
@@ -169,7 +169,7 @@ if (await flags.isEnabled('payments.wise_enabled')) { /* ... */ }
 - **Invalidation**: Via Redis pub/sub to all instances
 
 ```typescript
-import { invalidateFlag, invalidateAllFlags } from '@cgk/feature-flags/server'
+import { invalidateFlag, invalidateAllFlags } from '@cgk-platform/feature-flags/server'
 
 // After updating a flag
 await invalidateFlag('checkout.new_flow')
@@ -229,9 +229,9 @@ await killFlag('checkout.new_flow', userId, 'Production incident')
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/db` | Database access |
-| `@cgk/logging` | Structured logging |
-| `@cgk/core` | Shared types |
+| `@cgk-platform/db` | Database access |
+| `@cgk-platform/logging` | Structured logging |
+| `@cgk-platform/core` | Shared types |
 
 ---
 
@@ -239,8 +239,8 @@ await killFlag('checkout.new_flow', userId, 'Production incident')
 
 ```bash
 # Run tests
-pnpm --filter @cgk/feature-flags test
+pnpm --filter @cgk-platform/feature-flags test
 
 # Watch mode
-pnpm --filter @cgk/feature-flags test:watch
+pnpm --filter @cgk-platform/feature-flags test:watch
 ```

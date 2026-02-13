@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Input, Label, Spinner } from '@cgk/ui'
+import { Button, Card, CardContent, Input, Label, Spinner } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 interface AddDomainModalProps {

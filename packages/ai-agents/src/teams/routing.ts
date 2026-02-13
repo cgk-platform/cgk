@@ -2,7 +2,7 @@
  * Task Routing - Route messages/tasks to appropriate agents
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { listAgents } from '../agents/registry.js'
 import { getAgentTeamMemberships } from '../db/teams-queries.js'
 import type {

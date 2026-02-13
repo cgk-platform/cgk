@@ -5,7 +5,7 @@
  * Changes the creator's password with current password verification.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { hashPassword, requireCreatorAuth, verifyPassword, type CreatorAuthContext } from '@/lib/auth'
 import { validatePassword } from '@/lib/auth/password'

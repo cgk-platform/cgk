@@ -307,7 +307,7 @@ export function getCCRecipientsForNotification(
 
 /**
  * Queue entry data for esign notifications
- * Compatible with @cgk/communications queue
+ * Compatible with @cgk-platform/communications queue
  */
 export interface EsignQueueEntryData {
   type: EsignNotificationType

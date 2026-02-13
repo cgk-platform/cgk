@@ -5,7 +5,7 @@
  * @ai-note Handles follow-up emails and duplicate prevention
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { QueueEntry, QueueType, ReviewQueueEntry } from './types.js'
 

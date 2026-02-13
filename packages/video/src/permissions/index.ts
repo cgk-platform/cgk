@@ -1,5 +1,5 @@
 /**
- * @cgk/video/permissions - Permission exports
+ * @cgk-platform/video/permissions - Permission exports
  */
 
 export type {

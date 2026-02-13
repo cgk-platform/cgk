@@ -4,7 +4,7 @@
  * Checks Google Ads API connectivity and OAuth token validity.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { evaluateLatencyHealth } from '../evaluator.js'
 import type { HealthCheckResult, HealthMonitor } from '../types.js'

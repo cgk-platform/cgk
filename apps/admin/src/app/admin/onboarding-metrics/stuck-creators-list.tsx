@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 
 import type { StuckCreator } from '@/lib/creators-admin-ops'
 

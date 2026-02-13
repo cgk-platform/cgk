@@ -1,10 +1,10 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { getCollections, createCollection, type CreateCollectionInput } from '@cgk/dam'
+import { getCollections, createCollection, type CreateCollectionInput } from '@cgk-platform/dam'
 
 export async function GET() {
   const headerList = await headers()

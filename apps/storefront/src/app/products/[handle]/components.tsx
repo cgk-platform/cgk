@@ -6,8 +6,8 @@
 
 'use client'
 
-import type { Product } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Product } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 import { useState, useMemo, useCallback } from 'react'
 
 import { VariantSelector, PriceDisplay } from '@/components/products'

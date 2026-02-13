@@ -4,7 +4,7 @@
  * POST /api/contractor/payments/connect/sync - Sync account status from Stripe
  */
 
-import { StripeConnectError, syncStripeAccountStatus } from '@cgk/payments'
+import { StripeConnectError, syncStripeAccountStatus } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

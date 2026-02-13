@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, Check, RefreshCw } from 'lucide-react'
 
-import { Alert, AlertDescription, Button, Card, CardContent, Switch } from '@cgk/ui'
+import { Alert, AlertDescription, Button, Card, CardContent, Switch } from '@cgk-platform/ui'
 
 import type { CreatorReminderConfig, ReminderStep } from '../../../../../lib/creators/lifecycle-types'
 

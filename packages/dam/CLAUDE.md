@@ -1,4 +1,4 @@
-# @cgk/dam - AI Development Guide
+# @cgk-platform/dam - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-11
@@ -21,8 +21,8 @@ import {
   createCollection,
   searchAssets,
   generateThumbnail,
-} from '@cgk/dam'
-import { withTenant } from '@cgk/db'
+} from '@cgk-platform/dam'
+import { withTenant } from '@cgk-platform/db'
 
 // Always use within tenant context
 const assets = await withTenant('rawdog', async () => {
@@ -39,8 +39,8 @@ const assets = await withTenant('rawdog', async () => {
 **When to use**: All asset operations
 
 ```typescript
-import { withTenant } from '@cgk/db'
-import { getAssets, createAsset, updateAsset, deleteAsset } from '@cgk/dam'
+import { withTenant } from '@cgk-platform/db'
+import { getAssets, createAsset, updateAsset, deleteAsset } from '@cgk-platform/dam'
 
 // List assets with filtering
 const result = await withTenant(tenantSlug, () =>
@@ -93,7 +93,7 @@ import {
   createCollection,
   addAssetsToCollection,
   getCollectionAssets,
-} from '@cgk/dam'
+} from '@cgk-platform/dam'
 
 // List collections
 const collections = await withTenant(tenantSlug, () =>
@@ -125,7 +125,7 @@ const { assets, totalCount } = await withTenant(tenantSlug, () =>
 **When to use**: Searching assets by content
 
 ```typescript
-import { searchAssets, getSearchSuggestions } from '@cgk/dam'
+import { searchAssets, getSearchSuggestions } from '@cgk-platform/dam'
 
 // Search with filters
 const result = await withTenant(tenantSlug, () =>
@@ -156,7 +156,7 @@ import {
   generateThumbnail,
   getAssetTypeFromMime,
   createVercelBlobStorage,
-} from '@cgk/dam'
+} from '@cgk-platform/dam'
 
 // 1. Determine asset type
 const assetType = getAssetTypeFromMime(file.type)
@@ -215,7 +215,7 @@ import {
   createConnection,
   initialSync,
   getOAuthConfigFromEnv,
-} from '@cgk/dam'
+} from '@cgk-platform/dam'
 
 // 1. Generate OAuth URL
 const config = getOAuthConfigFromEnv()
@@ -335,7 +335,7 @@ const assets = await withTenant(tenantSlug, () =>
 // Tokens are automatically encrypted when using createConnection
 // Never store raw tokens in the database
 
-import { encryptToken, decryptToken } from '@cgk/dam'
+import { encryptToken, decryptToken } from '@cgk-platform/dam'
 
 const encrypted = encryptToken(accessToken)
 const decrypted = decryptToken(encrypted)
@@ -364,8 +364,8 @@ The `dam_assets` table has a generated `search_vector` column. Searches use Post
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/db` | Database operations and tenant context |
-| `@cgk/core` | Shared types |
+| `@cgk-platform/db` | Database operations and tenant context |
+| `@cgk-platform/core` | Shared types |
 | `@vercel/blob` | File storage |
 | `googleapis` | Google Drive API |
 | `sharp` | Image processing (optional) |
@@ -376,9 +376,9 @@ The `dam_assets` table has a generated `search_vector` column. Searches use Post
 
 ### Used by:
 - `apps/admin` - DAM admin pages
-- `@cgk/commerce` - Product images
+- `@cgk-platform/commerce` - Product images
 - Creator portal - Creator content uploads
 
 ### Uses:
-- `@cgk/db` - Database and tenant isolation
-- `@cgk/jobs` - Background sync jobs (when available)
+- `@cgk-platform/db` - Database and tenant isolation
+- `@cgk-platform/jobs` - Background sync jobs (when available)

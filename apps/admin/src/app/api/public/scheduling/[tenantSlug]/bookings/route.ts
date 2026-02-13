@@ -1,4 +1,4 @@
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import {
   acquireBookingLock,
   calculateAvailableSlots,
@@ -12,7 +12,7 @@ import {
   releaseBookingLock,
   type CreateBookingInput,
   type Invitee,
-} from '@cgk/scheduling'
+} from '@cgk-platform/scheduling'
 import { addDays, format, parseISO } from 'date-fns'
 
 export const dynamic = 'force-dynamic'

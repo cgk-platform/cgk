@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { headers } from 'next/headers'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cgk/ui'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@cgk-platform/ui'
 
 import {
   getApplicationFunnel,

@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Permission types
+ * @cgk-platform/video - Permission types
  */
 
 import type { PermissionLevel } from '../types.js'

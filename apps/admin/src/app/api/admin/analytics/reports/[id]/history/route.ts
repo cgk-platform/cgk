@@ -4,7 +4,7 @@
  * GET /api/admin/analytics/reports/[id]/history - Get run history for a report
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { getReportRunHistory } from '@/lib/analytics'
 

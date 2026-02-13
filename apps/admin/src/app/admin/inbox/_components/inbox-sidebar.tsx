@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Clock, Inbox, Users, X } from 'lucide-react'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 interface InboxSidebarProps {
   stats: {

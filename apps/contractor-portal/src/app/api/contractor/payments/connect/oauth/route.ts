@@ -4,7 +4,7 @@
  * POST /api/contractor/payments/connect/oauth - Get OAuth URL
  */
 
-import { getStripeOAuthUrl } from '@cgk/payments'
+import { getStripeOAuthUrl } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

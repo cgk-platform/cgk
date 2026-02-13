@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Card, CardContent, CardHeader, Input, Switch } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Switch } from '@cgk-platform/ui'
 import {
   Brain,
   Shield,

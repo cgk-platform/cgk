@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { createTenantCache } from '@cgk/db'
-import { getTenantWorkspace, SlackClient, type SlackChannel } from '@cgk/slack'
+import { createTenantCache } from '@cgk-platform/db'
+import { getTenantWorkspace, SlackClient, type SlackChannel } from '@cgk-platform/slack'
 
 const CHANNEL_CACHE_TTL = 300 // 5 minutes
 

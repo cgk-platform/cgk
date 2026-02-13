@@ -4,9 +4,9 @@
  * GET /api/platform/onboarding/[id] - Get session with progress
  */
 
-import { requireAuth } from '@cgk/auth'
-import { createLogger } from '@cgk/logging'
-import { getSessionWithProgress } from '@cgk/onboarding'
+import { requireAuth } from '@cgk-platform/auth'
+import { createLogger } from '@cgk-platform/logging'
+import { getSessionWithProgress } from '@cgk-platform/onboarding'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

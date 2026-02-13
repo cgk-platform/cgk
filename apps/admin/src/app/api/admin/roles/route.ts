@@ -3,7 +3,7 @@ import {
   createCustomRole,
   getRolesForTenant,
   isValidPermissionFormat,
-} from '@cgk/auth'
+} from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

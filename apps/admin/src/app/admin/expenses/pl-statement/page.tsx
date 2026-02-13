@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import { ArrowLeft, Download, TrendingUp, TrendingDown, ChevronRight, HelpCircle } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'

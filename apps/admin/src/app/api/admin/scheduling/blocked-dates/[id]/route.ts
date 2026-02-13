@@ -1,5 +1,5 @@
-import { requireAuth } from '@cgk/auth'
-import { deleteBlockedDate } from '@cgk/scheduling'
+import { requireAuth } from '@cgk-platform/auth'
+import { deleteBlockedDate } from '@cgk-platform/scheduling'
 
 export const dynamic = 'force-dynamic'
 

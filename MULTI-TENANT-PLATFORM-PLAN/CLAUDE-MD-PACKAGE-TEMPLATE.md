@@ -7,7 +7,7 @@
 ---
 
 ```markdown
-# @cgk/{package-name} - AI Development Guide
+# @cgk-platform/{package-name} - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: YYYY-MM-DD
@@ -26,7 +26,7 @@ Example: "Database client and tenant utilities for the multi-tenant platform. Pr
 
 ```typescript
 // Most common import pattern
-import { withTenant, sql, getTenantFromRequest } from '@cgk/db'
+import { withTenant, sql, getTenantFromRequest } from '@cgk-platform/db'
 
 // Common usage
 const orders = await withTenant('rawdog', async () => {
@@ -121,7 +121,7 @@ interface MigrationStatus {
 | Dependency | Why |
 |------------|-----|
 | `@vercel/postgres` | PostgreSQL client for Vercel/Neon |
-| `@cgk/core` | Shared types and utilities |
+| `@cgk-platform/core` | Shared types and utilities |
 
 ---
 
@@ -135,7 +135,7 @@ import { db } from '@vercel/postgres'
 const client = await db.connect()
 
 // ✅ CORRECT - Use sql template tag
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 const result = await sql`SELECT * FROM users`
 ```
 
@@ -172,14 +172,14 @@ const orders = await withTenant('rawdog', async () => {
 ## Integration Points
 
 ### Used by:
-- `@cgk/auth` - Session storage
-- `@cgk/jobs` - Job state persistence
+- `@cgk-platform/auth` - Session storage
+- `@cgk-platform/jobs` - Job state persistence
 - `apps/admin` - Admin portal data access
 
 ### Uses:
 - `@vercel/postgres` - Database driver
-- `@cgk/core` - Type definitions
-- `@cgk/logging` - Query logging
+- `@cgk-platform/core` - Type definitions
+- `@cgk-platform/logging` - Query logging
 
 ---
 
@@ -210,7 +210,7 @@ Example prompt:
 \`\`\`
 /frontend-design
 
-Building [Component] for @cgk/{package-name}.
+Building [Component] for @cgk-platform/{package-name}.
 
 Requirements:
 - [List requirements]
@@ -256,7 +256,7 @@ When generating CLAUDE.md files:
 
 When creating CLAUDE.md for packages, include the relevant skill section:
 
-### For UI Packages (@cgk/ui, @cgk/admin-ui, @cgk/storefront-ui)
+### For UI Packages (@cgk-platform/ui, @cgk-platform/admin-ui, @cgk-platform/storefront-ui)
 
 Add this section to the CLAUDE.md:
 
@@ -278,7 +278,7 @@ Add this section to the CLAUDE.md:
 \`\`\`
 /frontend-design
 
-Building [ComponentName] for @cgk/ui package.
+Building [ComponentName] for @cgk-platform/ui package.
 
 Requirements:
 - [Specific requirements]
@@ -314,7 +314,7 @@ See `/docs/MULTI-TENANT-PLATFORM-PLAN/FRONTEND-DESIGN-SKILL-GUIDE.md` for ready-
 - [List relevant components for this app]
 ```
 
-### For Non-UI Packages (@cgk/db, @cgk/auth, @cgk/jobs)
+### For Non-UI Packages (@cgk-platform/db, @cgk-platform/auth, @cgk-platform/jobs)
 
 Add this section if the package has ANY exported React hooks or components:
 

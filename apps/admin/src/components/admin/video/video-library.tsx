@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import {
   Grid,
   List,
@@ -18,7 +18,7 @@ import { VideoStatusBadge } from './video-status-badge'
 import { deleteVideoAction } from '@/lib/video/actions'
 import { formatDuration, type ViewMode } from '@/lib/video/types'
 
-import type { Video, VideoStatus } from '@cgk/video'
+import type { Video, VideoStatus } from '@cgk-platform/video'
 
 interface VideoLibraryProps {
   videos: Video[]

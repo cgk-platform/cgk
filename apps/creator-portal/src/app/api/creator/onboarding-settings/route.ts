@@ -4,7 +4,7 @@
  * GET /api/creator/onboarding-settings - Get tenant onboarding settings
  */
 
-import { sql, withTenant, getTenantFromRequest } from '@cgk/db'
+import { sql, withTenant, getTenantFromRequest } from '@cgk-platform/db'
 import type { OnboardingSettings, SurveyQuestion } from '../../../../lib/onboarding/types'
 
 export const dynamic = 'force-dynamic'

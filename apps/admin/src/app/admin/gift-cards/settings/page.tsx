@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label, Switch, Textarea } from '@cgk/ui'
+import { Card, CardContent, CardHeader, CardTitle, Button, Input, Label, Switch, Textarea } from '@cgk-platform/ui'
 import { Save, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 

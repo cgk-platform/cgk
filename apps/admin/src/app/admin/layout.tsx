@@ -1,4 +1,4 @@
-import { getUserById, getUserTenants, type TenantContext } from '@cgk/auth'
+import { getUserById, getUserTenants, type TenantContext } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 
 import { AdminShell } from './admin-shell'

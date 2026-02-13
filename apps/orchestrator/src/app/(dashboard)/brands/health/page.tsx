@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 
 /**
  * Brands Health Overview page

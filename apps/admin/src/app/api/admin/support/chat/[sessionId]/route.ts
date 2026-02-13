@@ -11,7 +11,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   endChatSession,
   getChatSession,
@@ -19,7 +19,7 @@ import {
   markMessagesRead,
   sendMessage,
   type SendMessageInput,
-} from '@cgk/support'
+} from '@cgk-platform/support'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

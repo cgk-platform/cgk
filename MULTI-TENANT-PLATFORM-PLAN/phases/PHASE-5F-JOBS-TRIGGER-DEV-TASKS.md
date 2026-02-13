@@ -1,5 +1,7 @@
 # PHASE-5F: Trigger.dev Task Integration
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Duration**: 3-4 days (Week 26-27)
 **Depends On**: PHASE-5A through PHASE-5E (all handlers complete), PHASE-6B (MCP complete)
 **Parallel With**: None
@@ -7,9 +9,65 @@
 
 ---
 
+## Prerequisites (Run Before Starting Phase 5F)
+
+### 1. Generate Encryption Keys
+
+The jobs package needs access to tenant credentials via `@cgk-platform/integrations`. These credentials are encrypted using `INTEGRATION_ENCRYPTION_KEY`.
+
+Run from repo root:
+
+```bash
+./scripts/generate-encryption-keys.sh > .env.generated
+```
+
+### 2. Add Keys to Vercel
+
+```bash
+./scripts/add-encryption-keys-to-vercel.sh
+```
+
+### 3. Pull Keys Locally
+
+```bash
+pnpm env:pull
+```
+
+### 4. Configure Trigger.dev Env Sync
+
+The trigger.config.ts already includes `syncVercelEnvVars()` extension. For this to work during `npx trigger deploy`, you need Vercel API access.
+
+Create `packages/jobs/.env.development.local`:
+
+```bash
+# Get from: https://vercel.com/account/tokens
+VERCEL_ACCESS_TOKEN=your-token-from-vercel-dashboard
+
+# Get from: vercel project ls (or Vercel dashboard)
+VERCEL_PROJECT_ID=prj_xxxx
+```
+
+### 5. Verify Configuration
+
+```bash
+# Check encryption key is present
+grep INTEGRATION_ENCRYPTION_KEY apps/admin/.env.local
+
+# Dry-run deploy to verify config
+cd packages/jobs && npx trigger deploy --dry-run
+```
+
+### 6. Install Trigger.dev CLI (if not installed)
+
+```bash
+pnpm add -D trigger.dev @trigger.dev/sdk
+```
+
+---
+
 ## Goal
 
-Wire the 240 job handlers from `@cgk/jobs` to actual Trigger.dev task definitions. Without this phase, the background jobs infrastructure is an abstraction layer only - jobs cannot actually execute.
+Wire the 240 job handlers from `@cgk-platform/jobs` to actual Trigger.dev task definitions. Without this phase, the background jobs infrastructure is an abstraction layer only - jobs cannot actually execute.
 
 ---
 
@@ -94,13 +152,13 @@ apps/admin/src/trigger/
 
 ### 3. Task Pattern
 
-Each task wraps a handler from `@cgk/jobs`:
+Each task wraps a handler from `@cgk-platform/jobs`:
 
 ```typescript
 // apps/admin/src/trigger/commerce/order-sync.ts
 import { task } from '@trigger.dev/sdk/v3'
-import { withTenant } from '@cgk/db'
-import type { TenantEvent, SyncOrderPayload } from '@cgk/jobs'
+import { withTenant } from '@cgk-platform/db'
+import type { TenantEvent, SyncOrderPayload } from '@cgk-platform/jobs'
 
 export const syncOrderTask = task({
   id: 'commerce-sync-order',
@@ -116,7 +174,7 @@ export const syncOrderTask = task({
     // CRITICAL: Tenant isolation
     return withTenant(tenantId, async () => {
       // Import and call the handler logic
-      const { syncOrder } = await import('@cgk/jobs/handlers/commerce')
+      const { syncOrder } = await import('@cgk-platform/jobs/handlers/commerce')
       return syncOrder({ tenantId, orderId, shopifyOrderId, source })
     })
   },
@@ -128,7 +186,7 @@ export const syncOrderTask = task({
 ```typescript
 // apps/admin/src/trigger/scheduled/health-checks.ts
 import { schedules } from '@trigger.dev/sdk/v3'
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 export const criticalHealthCheck = schedules.task({
   id: 'ops-health-check-critical',

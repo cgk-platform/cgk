@@ -5,7 +5,7 @@
  * POST /api/creator/messages/[id] - Send a message
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

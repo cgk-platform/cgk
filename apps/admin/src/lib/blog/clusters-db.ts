@@ -2,7 +2,7 @@
  * Blog cluster database operations
  * All operations must be called within withTenant() context
  */
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type {
   BlogCluster,

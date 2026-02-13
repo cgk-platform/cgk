@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Direct upload handling
+ * @cgk-platform/video - Direct upload handling
  *
  * Creates Mux direct upload URLs for browser-to-Mux uploads.
  */

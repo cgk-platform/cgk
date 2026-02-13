@@ -4,7 +4,7 @@
  * Functions to check webhook health and retrieve event statistics
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import type {
   WebhookHealthStatus,
   WebhookRegistration,

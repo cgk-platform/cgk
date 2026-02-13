@@ -1,4 +1,4 @@
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ import {
   Settings,
 } from 'lucide-react'
 
-import { Card, CardContent, CardHeader, Button } from '@cgk/ui'
+import { Card, CardContent, CardHeader, Button } from '@cgk-platform/ui'
 import { SEONav } from '@/components/admin/seo/SEONav'
 import { getGSCConnection } from '@/lib/seo/google-search-console'
 import { getKeywordStats } from '@/lib/seo/keyword-tracker'

@@ -8,7 +8,7 @@ import {
   markSmsSkipped,
   maskPhoneNumber,
   scheduleSmsRetry,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 interface RouteParams {
   params: Promise<{ id: string }>

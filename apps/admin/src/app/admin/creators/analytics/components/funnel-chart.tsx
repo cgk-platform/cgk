@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, cn } from '@cgk/ui'
+import { Card, CardContent, CardHeader, CardTitle, cn } from '@cgk-platform/ui'
 
 import type { ApplicationFunnel, FunnelStage } from '@/lib/creators/analytics-types'
 

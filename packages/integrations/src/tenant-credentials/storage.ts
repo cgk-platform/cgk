@@ -4,7 +4,7 @@
  * Handles encrypted storage and retrieval of tenant-owned API credentials
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { encryptToken, decryptToken } from '../encryption.js'
 import {
   SERVICE_DISPLAY_NAMES,

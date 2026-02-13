@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, CardHeader } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader } from '@cgk-platform/ui'
 
 interface BrandEarningsCardProps {
   brandId: string

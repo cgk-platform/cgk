@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@cgk/ui'
+import { Input } from '@cgk-platform/ui'
 import { Search } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'

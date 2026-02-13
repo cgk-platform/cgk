@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Progress, cn } from '@cgk/ui'
+import { Button, Progress, cn } from '@cgk-platform/ui'
 import {
   AlertCircle,
   CheckCircle,

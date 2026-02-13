@@ -2,13 +2,13 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import {
   getTenantWorkspace,
   invalidateSlackCache,
   decryptToken,
   revokeToken,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 
 /**
  * DELETE /api/admin/integrations/slack/disconnect

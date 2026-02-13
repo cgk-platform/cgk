@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 
 import type { DateRange, UnitEconomicsData } from '@/lib/analytics'
 import { formatCurrency, formatPercent } from '@/lib/format'

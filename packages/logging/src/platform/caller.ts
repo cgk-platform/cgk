@@ -28,7 +28,7 @@ export function getCallerLocation(): CallerLocation | null {
     // Skip frames from this logging package
     if (
       line.includes('/packages/logging/') ||
-      line.includes('@cgk/logging') ||
+      line.includes('@cgk-platform/logging') ||
       line.includes('PlatformLogger') ||
       line.includes('getCallerLocation')
     ) {

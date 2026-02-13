@@ -1,10 +1,10 @@
 /**
- * @cgk/video - CTA Button Database Operations
+ * @cgk-platform/video - CTA Button Database Operations
  *
  * CRUD operations for video CTA buttons with tenant isolation.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { CTA_VALIDATION, type CTAButton, type CTAButtonInput } from './types.js'
 

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Input } from '@cgk/ui'
+import { Button, Input } from '@cgk-platform/ui'
 import { Loader2, Save } from 'lucide-react'
-import type { SLAConfig, TicketPriority } from '@cgk/support'
+import type { SLAConfig, TicketPriority } from '@cgk-platform/support'
 
 interface SLASettingsClientProps {
   initialConfigs: SLAConfig[]

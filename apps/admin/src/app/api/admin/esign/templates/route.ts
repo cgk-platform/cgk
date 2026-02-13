@@ -5,8 +5,8 @@
  * POST /api/admin/esign/templates - Create template
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
-import { createTemplate } from '@cgk/esign'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
+import { createTemplate } from '@cgk-platform/esign'
 import { NextResponse } from 'next/server'
 import { listTemplates, getTemplateStats, getTemplateFieldCount } from '@/lib/esign'
 import type { EsignTemplateStatus } from '@/lib/esign/types'

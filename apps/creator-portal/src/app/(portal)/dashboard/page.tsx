@@ -1,6 +1,6 @@
 'use client'
 
-import { Spinner } from '@cgk/ui'
+import { Spinner } from '@cgk-platform/ui'
 import { useEffect, useState } from 'react'
 
 

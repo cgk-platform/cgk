@@ -2,7 +2,7 @@
  * Handoff Context - Build context for conversation handoffs
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { getAgentById } from '../db/queries.js'
 import { getHandoffById } from '../db/handoffs-queries.js'
 import type { AgentHandoff, HandoffContext } from '../types/teams.js'

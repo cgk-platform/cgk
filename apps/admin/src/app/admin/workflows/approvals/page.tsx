@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Check, Clock, X } from 'lucide-react'
 
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 
 interface PendingApproval {
   id: string

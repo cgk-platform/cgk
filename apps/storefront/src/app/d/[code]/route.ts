@@ -13,7 +13,7 @@
  *    - Track visit for attribution
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { cookies, headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'

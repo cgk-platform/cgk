@@ -1,5 +1,7 @@
 # PHASE-2U-CREATORS-ADMIN-COMMUNICATIONS: Communications Hub
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Duration**: 1 week (Week 21)
 **Depends On**: PHASE-2CM (unified communications), PHASE-4A (creator portal)
@@ -666,8 +668,8 @@ export const processBulkSend = inngest.createFunction(
 - [x] Create bulk send API routes
 
 ### [PARALLEL with API] Background Jobs
-- [ ] Implement `processScheduledCreatorEmails` (uses existing @cgk/communications processors)
-- [ ] Implement `processBulkSend` (uses existing @cgk/communications processors)
+- [ ] Implement `processScheduledCreatorEmails` (uses existing @cgk-platform/communications processors)
+- [ ] Implement `processBulkSend` (uses existing @cgk-platform/communications processors)
 - [x] Add retry logic for failed emails (uses existing retry patterns)
 - [ ] Add webhook handling for email events (handled by existing inbound module)
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { AlertTriangle, BarChart3, ChevronDown, Clock, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 

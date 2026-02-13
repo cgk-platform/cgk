@@ -9,7 +9,7 @@ import {
   sendTestSms,
   updateSmsHealthStatus,
   verifyTwilioCredentials,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * POST /api/admin/sms/setup/verify

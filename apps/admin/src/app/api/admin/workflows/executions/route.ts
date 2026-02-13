@@ -3,8 +3,8 @@
  * GET /api/admin/workflows/executions - List all executions
  */
 
-import { getTenantContext } from '@cgk/auth'
-import { getWorkflowExecutions } from '@cgk/admin-core'
+import { getTenantContext } from '@cgk-platform/auth'
+import { getWorkflowExecutions } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

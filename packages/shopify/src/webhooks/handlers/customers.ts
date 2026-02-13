@@ -4,8 +4,8 @@
  * Handles customers/create and customers/update webhooks
  */
 
-import { withTenant, sql } from '@cgk/db'
-import { createJobQueue } from '@cgk/jobs'
+import { withTenant, sql } from '@cgk-platform/db'
+import { createJobQueue } from '@cgk-platform/jobs'
 import type { ShopifyCustomerPayload } from '../types'
 
 // Create job queue for customer-related background jobs

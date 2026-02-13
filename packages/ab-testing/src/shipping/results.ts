@@ -5,7 +5,7 @@
  * for shipping threshold A/B tests.
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import {
   getShippingMetrics,
   getMismatchCount,

@@ -1,4 +1,4 @@
-import { CURRENT_PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS } from '@cgk/mcp'
+import { CURRENT_PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS } from '@cgk-platform/mcp'
 
 export const dynamic = 'force-dynamic'
 

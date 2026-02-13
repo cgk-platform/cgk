@@ -11,7 +11,7 @@ import {
   updateStripeAccountStep4,
   type StripeOnboardingStep2,
   type StripeOnboardingStep3,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

@@ -8,7 +8,7 @@
  * @ai-critical Uses FOR UPDATE SKIP LOCKED to prevent race conditions
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { calculateSegmentCount } from './compliance.js'
 import type {

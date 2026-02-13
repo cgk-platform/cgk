@@ -5,7 +5,7 @@
  * PATCH: Update a sync configuration
  * DELETE: Remove a sync configuration
  */
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

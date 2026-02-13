@@ -1,4 +1,4 @@
-# @cgk/communications - AI Development Guide
+# @cgk-platform/communications - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2026-02-10
@@ -26,20 +26,20 @@ import {
   markAsFailed,
   createReviewQueueEntry,
   getQueueStats,
-} from '@cgk/communications/queue'
+} from '@cgk-platform/communications/queue'
 
 // Processors
 import {
   createReviewProcessor,
   createRetryProcessor,
-} from '@cgk/communications/processors'
+} from '@cgk-platform/communications/processors'
 
 // Sender Management
 import {
   getSenderForNotification,
   createDomain,
   verifyDomainWithResend,
-} from '@cgk/communications/sender'
+} from '@cgk-platform/communications/sender'
 ```
 
 ---
@@ -51,7 +51,7 @@ import {
 **When to use**: Processing email queue entries
 
 ```typescript
-import { claimScheduledEntries, markAsSent, markAsFailed } from '@cgk/communications'
+import { claimScheduledEntries, markAsSent, markAsFailed } from '@cgk-platform/communications'
 
 // Claim entries - uses FOR UPDATE SKIP LOCKED
 const runId = crypto.randomUUID()
@@ -72,7 +72,7 @@ for (const entry of entries) {
 **When to use**: Background job for review email queue
 
 ```typescript
-import { createReviewProcessor } from '@cgk/communications/processors'
+import { createReviewProcessor } from '@cgk-platform/communications/processors'
 
 const runProcessor = createReviewProcessor({
   tenantId: 'rawdog',
@@ -93,7 +93,7 @@ const result = await runProcessor()
 **When to use**: Review request -> reminder sequences
 
 ```typescript
-import { createReviewQueueEntry, createReviewFollowUp } from '@cgk/communications'
+import { createReviewQueueEntry, createReviewFollowUp } from '@cgk-platform/communications'
 
 // Initial entry
 const entry = await createReviewQueueEntry({
@@ -119,7 +119,7 @@ const followUp = await createReviewFollowUp(
 **When to use**: Retrying failed entries
 
 ```typescript
-import { getRetryableEntries, scheduleRetry, calculateRetryDelay } from '@cgk/communications'
+import { getRetryableEntries, scheduleRetry, calculateRetryDelay } from '@cgk-platform/communications'
 
 // Get entries ready for retry (respects backoff)
 const retryable = await getRetryableEntries(tenantId, 'review', 20)
@@ -136,7 +136,7 @@ for (const entry of retryable) {
 **When to use**: Admin bulk operations
 
 ```typescript
-import { performBulkAction } from '@cgk/communications'
+import { performBulkAction } from '@cgk-platform/communications'
 
 const result = await performBulkAction(
   tenantId,
@@ -248,8 +248,8 @@ if (!followUp) {
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/db` | Database access with tenant isolation |
-| `@cgk/core` | Shared types |
+| `@cgk-platform/db` | Database access with tenant isolation |
+| `@cgk-platform/core` | Shared types |
 
 ---
 
@@ -269,8 +269,8 @@ if (!followUp) {
 ## Testing
 
 ```bash
-pnpm --filter @cgk/communications test
-pnpm --filter @cgk/communications test:watch
+pnpm --filter @cgk-platform/communications test
+pnpm --filter @cgk-platform/communications test:watch
 ```
 
 ---
@@ -282,5 +282,5 @@ pnpm --filter @cgk/communications test:watch
 - Background jobs - Email processing
 
 ### Uses:
-- `@cgk/db` - Database access
-- `@cgk/core` - Types
+- `@cgk-platform/db` - Database access
+- `@cgk-platform/core` - Types

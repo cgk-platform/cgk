@@ -1,16 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: [
-    '@cgk/ui',
-    '@cgk/core',
-    '@cgk/db',
-    '@cgk/auth',
-    '@cgk/commerce',
-    '@cgk/shopify',
-    '@cgk/dam',
-    '@cgk/video',
-    '@cgk/jobs',
-    '@cgk/slack',
+    '@cgk-platform/ui',
+    '@cgk-platform/core',
+    '@cgk-platform/db',
+    '@cgk-platform/auth',
+    '@cgk-platform/commerce',
+    '@cgk-platform/shopify',
+    '@cgk-platform/dam',
+    '@cgk-platform/video',
+    '@cgk-platform/jobs',
+    '@cgk-platform/slack',
   ],
 
   // Mark packages that should only run on the server

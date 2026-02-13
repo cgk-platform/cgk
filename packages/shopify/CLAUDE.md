@@ -1,4 +1,4 @@
-# @cgk/shopify - AI Development Guide
+# @cgk-platform/shopify - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -14,8 +14,8 @@ Shopify Admin and Storefront API clients for the CGK platform. Provides typed Gr
 ## Quick Reference
 
 ```typescript
-import { createStorefrontClient, createAdminClient } from '@cgk/shopify'
-import { verifyWebhook, type WebhookPayload } from '@cgk/shopify'
+import { createStorefrontClient, createAdminClient } from '@cgk-platform/shopify'
+import { verifyWebhook, type WebhookPayload } from '@cgk-platform/shopify'
 ```
 
 ---
@@ -25,7 +25,7 @@ import { verifyWebhook, type WebhookPayload } from '@cgk/shopify'
 ### Pattern 1: Storefront API Client
 
 ```typescript
-import { createStorefrontClient } from '@cgk/shopify'
+import { createStorefrontClient } from '@cgk-platform/shopify'
 
 const storefront = createStorefrontClient({
   storeDomain: 'my-store.myshopify.com',
@@ -50,7 +50,7 @@ const products = await storefront.query(`
 ### Pattern 2: Admin API Client
 
 ```typescript
-import { createAdminClient } from '@cgk/shopify'
+import { createAdminClient } from '@cgk-platform/shopify'
 
 const admin = createAdminClient({
   storeDomain: 'my-store.myshopify.com',
@@ -71,7 +71,7 @@ const order = await admin.query(`
 ### Pattern 3: Webhook Verification
 
 ```typescript
-import { verifyWebhook, parseWebhook } from '@cgk/shopify'
+import { verifyWebhook, parseWebhook } from '@cgk-platform/shopify'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -135,7 +135,7 @@ type WebhookTopic = 'orders/create' | 'orders/updated' | 'products/create' | ...
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/core` | Shared types |
+| `@cgk-platform/core` | Shared types |
 | `@shopify/shopify-api` | Official Shopify SDK (optional) |
 
 ---
@@ -177,9 +177,9 @@ try {
 ## Integration Points
 
 ### Used by:
-- `@cgk/commerce` - Shopify provider implementation
+- `@cgk-platform/commerce` - Shopify provider implementation
 - `apps/storefront` - Direct Shopify access
 - Webhook handlers
 
 ### Uses:
-- `@cgk/core` - Types
+- `@cgk-platform/core` - Types

@@ -7,8 +7,8 @@
 
 'use client'
 
-import type { ProductImage } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { ProductImage } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 import Image from 'next/image'
 import { useState, useCallback } from 'react'
 

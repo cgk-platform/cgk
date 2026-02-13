@@ -1,5 +1,5 @@
-import { withTenant } from '@cgk/db'
-import { Card, CardContent, CardHeader, CardTitle, Button } from '@cgk/ui'
+import { withTenant } from '@cgk-platform/db'
+import { Card, CardContent, CardHeader, CardTitle, Button } from '@cgk-platform/ui'
 import {
   Gift,
   CreditCard,

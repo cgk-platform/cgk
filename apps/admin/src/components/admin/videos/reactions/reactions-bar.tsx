@@ -1,13 +1,13 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 import {
   REACTION_EMOJIS,
   type AddReactionInput,
   type ReactionSummary,
-} from '@cgk/video/interactions'
+} from '@cgk-platform/video/interactions'
 
 interface ReactionsBarProps {
   reactions: ReactionSummary[]

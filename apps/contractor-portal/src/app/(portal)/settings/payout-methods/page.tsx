@@ -18,7 +18,7 @@ import {
   Input,
   Label,
   Spinner,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 
 interface PayoutMethod {
   id: string

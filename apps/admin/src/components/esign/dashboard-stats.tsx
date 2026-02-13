@@ -7,7 +7,7 @@
 
 'use client'
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 import {
   Clock,
   FileCheck,

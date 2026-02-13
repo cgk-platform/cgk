@@ -4,7 +4,7 @@
  * Provides server-side tenant context extraction and validation.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { cache } from 'react'
 

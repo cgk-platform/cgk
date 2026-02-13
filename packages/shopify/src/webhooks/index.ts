@@ -1,12 +1,12 @@
 /**
- * @cgk/shopify Webhooks Module
+ * @cgk-platform/shopify Webhooks Module
  *
  * Shopify webhook handling infrastructure for the CGK platform
  *
  * @example
  * ```ts
  * // In your API route
- * import { handleShopifyWebhook, createWebhookRoute } from '@cgk/shopify/webhooks'
+ * import { handleShopifyWebhook, createWebhookRoute } from '@cgk-platform/shopify/webhooks'
  *
  * // Option 1: Use the request handler directly
  * export async function POST(request: Request) {

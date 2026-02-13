@@ -22,7 +22,7 @@ import {
   SelectValue,
   Switch,
   Textarea,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import {
   ArrowDown,
   ArrowUp,

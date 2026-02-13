@@ -5,7 +5,7 @@
  * Interactive sync operations with preview/execute pattern
  */
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import {
   AlertCircle,
   Check,

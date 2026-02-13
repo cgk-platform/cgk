@@ -9,12 +9,12 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import {
   getCSATConfig,
   getCSATMetrics,
   type CSATMetricsOptions,
-} from '@cgk/support'
+} from '@cgk-platform/support'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -116,7 +116,7 @@ export async function PATCH(req: NextRequest) {
       )
     }
 
-    const { updateCSATConfig } = await import('@cgk/support')
+    const { updateCSATConfig } = await import('@cgk-platform/support')
     const config = await updateCSATConfig(tenantId, body)
 
     return NextResponse.json({ config })

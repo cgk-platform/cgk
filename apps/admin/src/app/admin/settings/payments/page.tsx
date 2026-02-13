@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@cgk/ui'
+import { Card, CardContent } from '@cgk-platform/ui'
 
 export default function PaymentsSettingsPage() {
   return (

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, cn } from '@cgk/ui'
+import { Badge, Button, cn } from '@cgk-platform/ui'
 import { Clock, Loader2, Mail, MailCheck, RotateCcw, Trash2, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'

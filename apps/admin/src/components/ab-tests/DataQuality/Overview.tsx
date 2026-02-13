@@ -2,7 +2,7 @@
 
 import { AlertTriangle, CheckCircle, Activity, Eye } from 'lucide-react'
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 
 import type { DataQualityOverview as OverviewType } from '@/lib/ab-tests/types'
 

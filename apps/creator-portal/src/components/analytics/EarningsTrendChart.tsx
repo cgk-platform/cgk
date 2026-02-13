@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 import {
   Area,
   AreaChart,

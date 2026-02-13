@@ -1,5 +1,7 @@
 # PHASE-4C-ESIGN-WORKFLOWS: Multi-Signer Workflows
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Duration**: 1 week (Week 18)
 **Depends On**: PHASE-4C-ESIGN-CORE, PHASE-4C-ESIGN-PDF
@@ -403,6 +405,8 @@ export const esignExpirationJob = jobProvider.createJob({
 
 ```
 # Signing (public)
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
 GET    /api/esign/sign/[token]        - Get signing session
 POST   /api/esign/sign/[token]/submit - Submit signature
 POST   /api/esign/sign/[token]/decline - Decline document

@@ -2,7 +2,7 @@
  * Shopify OAuth callback handling
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { encryptToken } from './encryption.js'
 import { ShopifyError } from './errors.js'
 import { getOAuthState, deleteOAuthState } from './initiate.js'

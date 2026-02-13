@@ -27,7 +27,7 @@ export interface ThemeContextValue {
 
 /**
  * Base portal theme properties
- * These are defined in @cgk/portal/theme but we include them here
+ * These are defined in @cgk-platform/portal/theme but we include them here
  * to ensure type safety even if module resolution has issues
  */
 interface BasePortalThemeConfig {

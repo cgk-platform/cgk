@@ -5,7 +5,7 @@
  * @ai-required Always use tenant context for all operations
  */
 
-import { createTenantCache } from '@cgk/db'
+import { createTenantCache } from '@cgk-platform/db'
 
 import { calculateAvailableSlots } from '../slots.js'
 import {

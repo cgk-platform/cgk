@@ -1,5 +1,5 @@
 /**
- * @cgk/slack/types - Client-safe exports
+ * @cgk-platform/slack/types - Client-safe exports
  *
  * This module exports only types and constants that are safe for use
  * in client-side code. It does NOT import @slack/web-api or any
@@ -8,7 +8,7 @@
  * @example
  * ```typescript
  * // In a 'use client' component
- * import { NOTIFICATION_TYPES, REPORT_METRICS } from '@cgk/slack/types'
+ * import { NOTIFICATION_TYPES, REPORT_METRICS } from '@cgk-platform/slack/types'
  * ```
  */
 

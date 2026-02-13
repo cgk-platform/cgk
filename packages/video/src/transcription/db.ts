@@ -7,7 +7,7 @@
  * @ai-required Always use withTenant() for queries
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type {
   TranscriptionStatus,
   TranscriptionWord,

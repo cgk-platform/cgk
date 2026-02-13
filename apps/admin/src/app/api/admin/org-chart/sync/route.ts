@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { syncOrgChart, validateOrgChart } = await import('@cgk/ai-agents')
+    const { syncOrgChart, validateOrgChart } = await import('@cgk-platform/ai-agents')
 
     const result = await withTenant(tenantId, async () => {
       // Sync the org chart

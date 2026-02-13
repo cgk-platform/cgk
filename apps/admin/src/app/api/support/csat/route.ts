@@ -10,12 +10,12 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import {
   getSurvey,
   submitSurveyResponse,
   type CSATRating,
-} from '@cgk/support'
+} from '@cgk-platform/support'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Get config for survey display
-    const { getCSATConfig } = await import('@cgk/support')
+    const { getCSATConfig } = await import('@cgk-platform/support')
     const config = await getCSATConfig(tenantId)
 
     return NextResponse.json({

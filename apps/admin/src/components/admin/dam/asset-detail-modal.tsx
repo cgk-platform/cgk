@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn, Input, Textarea } from '@cgk/ui'
+import { Button, cn, Input, Textarea } from '@cgk-platform/ui'
 import {
   X,
   Download,
@@ -21,7 +21,7 @@ import {
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 
-import type { Asset, AssetType, Collection } from '@cgk/dam'
+import type { Asset, AssetType, Collection } from '@cgk-platform/dam'
 
 export interface AssetDetailModalProps {
   asset: Asset | null

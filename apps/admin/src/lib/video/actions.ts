@@ -15,7 +15,7 @@ import {
   type CreateVideoInput,
   type UpdateVideoInput,
   type CreateFolderInput,
-} from '@cgk/video'
+} from '@cgk-platform/video'
 import { headers } from 'next/headers'
 
 /**

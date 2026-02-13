@@ -1,6 +1,6 @@
 'use client'
 
-import { Alert, AlertDescription, Button, cn, Label, Textarea } from '@cgk/ui'
+import { Alert, AlertDescription, Button, cn, Label, Textarea } from '@cgk-platform/ui'
 import { AlertTriangle, Eye, Loader2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 

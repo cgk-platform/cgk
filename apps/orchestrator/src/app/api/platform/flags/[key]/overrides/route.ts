@@ -6,16 +6,16 @@
  * DELETE /api/platform/flags/[key]/overrides/[id] - Delete override
  */
 
-import { requireAuth } from '@cgk/auth'
-import type { CreateOverrideInput } from '@cgk/feature-flags'
+import { requireAuth } from '@cgk-platform/auth'
+import type { CreateOverrideInput } from '@cgk-platform/feature-flags'
 import {
   createOverride,
   deleteOverride,
   getFlagByKey,
   getOverridesForFlag,
   invalidateFlag,
-} from '@cgk/feature-flags/server'
-import { createLogger } from '@cgk/logging'
+} from '@cgk-platform/feature-flags/server'
+import { createLogger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

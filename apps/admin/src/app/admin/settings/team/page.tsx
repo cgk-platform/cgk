@@ -1,5 +1,5 @@
-import { getInvitations, getTeamMembers, requireAuth } from '@cgk/auth'
-import { Card, CardContent } from '@cgk/ui'
+import { getInvitations, getTeamMembers, requireAuth } from '@cgk-platform/auth'
+import { Card, CardContent } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
@@ -23,7 +23,7 @@ async function TeamDataLoader() {
   ])
 
   // Get rate limit from database (we'll calculate it)
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
   const rateLimitResult = await sql`
     SELECT COUNT(*) as count
     FROM team_invitations

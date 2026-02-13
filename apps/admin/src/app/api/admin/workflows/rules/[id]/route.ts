@@ -5,13 +5,13 @@
  * DELETE /api/admin/workflows/rules/[id] - Delete rule
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   deleteWorkflowRule,
   getWorkflowRule,
   updateWorkflowRule,
   type UpdateWorkflowRuleInput,
-} from '@cgk/admin-core'
+} from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

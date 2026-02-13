@@ -4,8 +4,8 @@
  * POST /api/platform/brands/launch - Launch a brand (complete onboarding)
  */
 
-import { requireAuth } from '@cgk/auth'
-import { createLogger } from '@cgk/logging'
+import { requireAuth } from '@cgk-platform/auth'
+import { createLogger } from '@cgk-platform/logging'
 import {
   completeSession,
   getSession,
@@ -13,7 +13,7 @@ import {
   launchOrganization,
   updateOrganization,
   verifyLaunchReadiness,
-} from '@cgk/onboarding'
+} from '@cgk-platform/onboarding'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

@@ -15,7 +15,7 @@ import type {
   ConditionOperator,
   TargetingAction,
   TargetingCondition,
-} from '@cgk/ab-testing'
+} from '@cgk-platform/ab-testing'
 
 // Re-export types for convenience
 export type {

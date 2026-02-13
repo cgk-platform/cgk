@@ -5,7 +5,7 @@
  * PATCH /api/creator/onboarding/resume - Update application progress
  */
 
-import { sql, withTenant, getTenantFromRequest } from '@cgk/db'
+import { sql, withTenant, getTenantFromRequest } from '@cgk-platform/db'
 import type { CreatorApplicationForm } from '../../../../../lib/onboarding/types'
 
 export const dynamic = 'force-dynamic'

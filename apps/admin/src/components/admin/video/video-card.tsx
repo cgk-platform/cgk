@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@cgk/ui'
-import { getThumbnailUrl } from '@cgk/video'
+import { cn } from '@cgk-platform/ui'
+import { getThumbnailUrl } from '@cgk-platform/video'
 import { Clock, Eye, Play, MoreVertical, Folder, Pencil, Trash2, Share2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { VideoStatusBadge } from './video-status-badge'
 import { formatDuration } from '@/lib/video/types'
 
-import type { Video } from '@cgk/video'
+import type { Video } from '@cgk-platform/video'
 
 interface VideoCardProps {
   video: Video

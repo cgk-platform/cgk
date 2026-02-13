@@ -4,7 +4,7 @@
  * Handles email/password authentication and loading brand memberships.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type { BrandMembership, Creator, MembershipStatus, ShippingAddress, TaxFormStatus } from '../types'
 import { verifyPassword } from './password'

@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 
-import type { PrivacyRequest, PrivacyRequestStatus, PrivacyRequestType } from '@cgk/support'
+import type { PrivacyRequest, PrivacyRequestStatus, PrivacyRequestType } from '@cgk-platform/support'
 
 interface PrivacyStats {
   pending: number

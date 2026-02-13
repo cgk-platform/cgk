@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, cn } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, cn } from '@cgk-platform/ui'
 import { Edit2, Eye } from 'lucide-react'
 import Link from 'next/link'
 

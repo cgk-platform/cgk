@@ -4,7 +4,7 @@
  * GET /api/contractor/tax/forms/[id] - Download tax form
  */
 
-import { getTaxFormById } from '@cgk/payments'
+import { getTaxFormById } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

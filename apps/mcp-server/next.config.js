@@ -1,10 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: [
-    '@cgk/mcp',
-    '@cgk/core',
-    '@cgk/db',
-    '@cgk/auth',
+    '@cgk-platform/mcp',
+    '@cgk-platform/core',
+    '@cgk-platform/db',
+    '@cgk-platform/auth',
   ],
 
   // No external packages needed - everything is Edge compatible

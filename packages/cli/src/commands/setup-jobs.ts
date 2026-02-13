@@ -352,7 +352,7 @@ async function verifyProvider(
 
   try {
     // Dynamically import to test configuration
-    const jobs = await import('@cgk/jobs')
+    const jobs = await import('@cgk-platform/jobs')
     const client = jobs.getJobClient()
 
     const health = await client.healthCheck()

@@ -110,8 +110,8 @@ packages/communications/package.json (added sender export path)
 
 ### Sender Resolution (Critical Pattern)
 ```typescript
-import { getSenderForNotification, NOTIFICATION_TYPES } from '@cgk/communications'
-import { withTenant } from '@cgk/db'
+import { getSenderForNotification, NOTIFICATION_TYPES } from '@cgk-platform/communications'
+import { withTenant } from '@cgk-platform/db'
 
 const result = await withTenant(tenantSlug, () =>
   getSenderForNotification(NOTIFICATION_TYPES.REVIEW_REQUEST)
@@ -130,8 +130,8 @@ if (result.success) {
 
 ### Domain Management
 ```typescript
-import { createDomain, verifyDomainWithResend, getResendConfig } from '@cgk/communications'
-import { withTenant } from '@cgk/db'
+import { createDomain, verifyDomainWithResend, getResendConfig } from '@cgk-platform/communications'
+import { withTenant } from '@cgk-platform/db'
 
 // Create domain
 const domain = await withTenant(tenantSlug, () =>
@@ -181,4 +181,4 @@ This phase enables:
 - [x] Notification types are routable to different senders
 - [x] Test emails can be sent from any verified sender
 - [x] No hardcoded sender addresses in codebase
-- [x] Type check passes for sender module (`pnpm --filter @cgk/communications typecheck` - no sender-related errors)
+- [x] Type check passes for sender module (`pnpm --filter @cgk-platform/communications typecheck` - no sender-related errors)

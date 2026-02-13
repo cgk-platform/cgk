@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import {
   Check,
   Download,
@@ -17,7 +17,7 @@ import {
 import Image from 'next/image'
 import { useState } from 'react'
 
-import type { AssetRow } from '@cgk/dam'
+import type { AssetRow } from '@cgk-platform/dam'
 
 export interface AssetCardProps {
   asset: AssetRow

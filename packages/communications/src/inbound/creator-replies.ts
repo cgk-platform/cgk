@@ -8,7 +8,7 @@
  * @ai-note Uses tenant-isolated database operations
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type {
   InboundEmail,

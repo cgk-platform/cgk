@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardContent } from '@cgk/ui'
+import { Badge, Button, Card, CardContent } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -99,7 +99,7 @@ async function FormsListLoader({
     return <p className="text-muted-foreground">No tenant configured.</p>
   }
 
-  // Mock data for now - would use @cgk/tax package
+  // Mock data for now - would use @cgk-platform/tax package
   const forms = [
     {
       id: '1099_abc123',

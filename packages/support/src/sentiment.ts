@@ -5,7 +5,7 @@
  * Uses Claude API for AI-powered sentiment analysis with keyword-based fallback
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { SentimentAlert, SentimentAnalysisResult, TicketPriority } from './types'
 

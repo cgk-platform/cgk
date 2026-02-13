@@ -235,7 +235,7 @@ interface DomainStatus {
 
 ```typescript
 // apps/orchestrator/src/app/api/platform/domains/add/route.ts
-import { createVercelDomainClient } from '@cgk/domains'
+import { createVercelDomainClient } from '@cgk-platform/domains'
 
 export async function POST(req: Request) {
   const userId = await getAuthUserId()
@@ -1232,8 +1232,8 @@ function mapShopifyProductToLocal(node: any) {
 
 ```typescript
 // apps/admin/src/app/api/webhooks/shopify/products/route.ts
-import { verifyShopifyWebhook } from '@cgk/shopify'
-import { importShopifyProducts } from '@cgk/jobs'
+import { verifyShopifyWebhook } from '@cgk-platform/shopify'
+import { importShopifyProducts } from '@cgk-platform/jobs'
 
 export async function POST(req: Request) {
   const tenantId = req.nextUrl.searchParams.get('tenant')

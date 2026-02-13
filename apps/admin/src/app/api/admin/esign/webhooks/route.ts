@@ -5,7 +5,7 @@
  * POST /api/admin/esign/webhooks - Create webhook
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { listWebhooks, createWebhook } from '@/lib/esign'
 import type { EsignWebhookEvent } from '@/lib/esign/types'

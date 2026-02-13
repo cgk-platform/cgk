@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
   try {
     const url = new URL(request.url)
-    const aiAgents = await import('@cgk/ai-agents')
+    const aiAgents = await import('@cgk-platform/ai-agents')
     const listActions = aiAgents.listActions
     type ActionLogFiltersType = NonNullable<Parameters<typeof listActions>[0]>
 

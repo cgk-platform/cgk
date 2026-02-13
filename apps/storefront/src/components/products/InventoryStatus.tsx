@@ -5,7 +5,7 @@
  * Supports various display modes for different contexts.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 interface InventoryStatusProps {
   /** Number of items in stock (undefined means unknown) */

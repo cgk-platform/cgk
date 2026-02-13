@@ -5,7 +5,7 @@
  * Interactive grid with moderation actions and detail modal
  */
 
-import { Badge, Button, Card, cn } from '@cgk/ui'
+import { Badge, Button, Card, cn } from '@cgk-platform/ui'
 import {
   CheckCircle,
   Clock,

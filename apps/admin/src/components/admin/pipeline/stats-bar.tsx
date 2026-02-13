@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { AlertTriangle, Clock, DollarSign, TrendingUp } from 'lucide-react'
 
 import type { PipelineStats } from '@/lib/pipeline/types'

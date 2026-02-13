@@ -1,5 +1,5 @@
 /**
- * @cgk/logging - Structured logging
+ * @cgk-platform/logging - Structured logging
  *
  * @ai-pattern structured-logging
  * @ai-note JSON-formatted logs with context

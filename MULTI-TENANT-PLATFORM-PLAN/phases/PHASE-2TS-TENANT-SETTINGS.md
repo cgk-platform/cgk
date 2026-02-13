@@ -1,5 +1,7 @@
 # PHASE-2TS: Tenant Admin Settings
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Completed**: 2026-02-10
 
@@ -440,9 +442,9 @@ All settings routes follow this pattern:
 
 ```typescript
 // apps/admin/src/app/api/admin/settings/ai/route.ts
-import { getTenantContext } from '@cgk/auth'
-import { requirePermission } from '@cgk/auth/permissions'
-import { withTenant } from '@cgk/db'
+import { getTenantContext } from '@cgk-platform/auth'
+import { requirePermission } from '@cgk-platform/auth/permissions'
+import { withTenant } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -545,5 +547,5 @@ The implementing agent should determine:
 - [x] Cache invalidation triggers on config changes
 - [x] UI shows unsaved changes indicator
 - [x] Settings have sensible defaults for new tenants
-- [ ] `npx tsc --noEmit` passes (pre-existing errors in @cgk/logging not related to this phase)
+- [ ] `npx tsc --noEmit` passes (pre-existing errors in @cgk-platform/logging not related to this phase)
 - [ ] Unit and integration tests pass (deferred - requires test setup)

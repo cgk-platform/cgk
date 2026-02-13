@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getVoiceCall, getCallTranscripts, getCallResponses } = await import('@cgk/ai-agents')
+    const { getVoiceCall, getCallTranscripts, getCallResponses } = await import('@cgk-platform/ai-agents')
 
     const result = await withTenant(tenantId, async () => {
       const call = await getVoiceCall(callId)

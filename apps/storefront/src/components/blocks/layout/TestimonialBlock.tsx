@@ -6,7 +6,7 @@
  */
 
 import Image from 'next/image'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { BlockProps, TestimonialConfig } from '../types'
 import { LucideIcon } from '../icons'
 

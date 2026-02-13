@@ -5,7 +5,7 @@
  * DELETE /api/admin/analytics/slack-alerts/[id] - Delete a slack alert
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { deleteSlackAlert, updateSlackAlert } from '@/lib/analytics'
 import type { SlackAlertUpdate } from '@/lib/analytics'

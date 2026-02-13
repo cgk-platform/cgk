@@ -3,7 +3,7 @@
  * Handles document decline with reason capture and notifications
  */
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import type { EsignDocument, EsignSigner } from '../types.js'
 import { getDocument, markDocumentDeclined, updateDocument } from './documents.js'
 import { getSigner, markSignerDeclined, getDocumentSigners } from './signers.js'

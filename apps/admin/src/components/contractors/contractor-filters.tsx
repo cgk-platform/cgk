@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Checkbox, Label, RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
+import { Button, Checkbox, Label, RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk-platform/ui'
 import { Filter, X } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useMemo, useState, useTransition } from 'react'

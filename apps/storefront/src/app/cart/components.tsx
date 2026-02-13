@@ -4,8 +4,8 @@
 
 'use client'
 
-import type { Cart } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Cart } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 import { CartProvider, useCart } from '@/components/cart/CartProvider'

@@ -1,4 +1,4 @@
-# @cgk/db - AI Development Guide
+# @cgk-platform/db - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -14,7 +14,7 @@ Database client and tenant utilities for the multi-tenant platform. Provides sch
 ## Quick Reference
 
 ```typescript
-import { withTenant, sql, createTenantCache } from '@cgk/db'
+import { withTenant, sql, createTenantCache } from '@cgk-platform/db'
 
 // ALWAYS use withTenant for tenant data
 const orders = await withTenant('rawdog', async () => {
@@ -32,20 +32,20 @@ await cache.set('key', value, { ttl: 3600 })
 
 | Import Path | Runtime | Purpose |
 |-------------|---------|---------|
-| `@cgk/db` | Edge + Node.js | Core utilities: `sql`, `withTenant`, cache |
-| `@cgk/db/migrations` | Node.js ONLY | Migration utilities (uses fs/path) |
+| `@cgk-platform/db` | Edge + Node.js | Core utilities: `sql`, `withTenant`, cache |
+| `@cgk-platform/db/migrations` | Node.js ONLY | Migration utilities (uses fs/path) |
 
-**CRITICAL: Never import from `@cgk/db/migrations` in middleware or Edge Runtime code.**
+**CRITICAL: Never import from `@cgk-platform/db/migrations` in middleware or Edge Runtime code.**
 
 ```typescript
 // Middleware (Edge Runtime) - OK
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 // CLI/Scripts (Node.js) - OK
-import { runPublicMigrations, createTenantSchema } from '@cgk/db/migrations'
+import { runPublicMigrations, createTenantSchema } from '@cgk-platform/db/migrations'
 
 // Middleware - BREAKS (fs/path not available)
-import { runPublicMigrations } from '@cgk/db/migrations'  // ❌ NEVER
+import { runPublicMigrations } from '@cgk-platform/db/migrations'  // ❌ NEVER
 ```
 
 ---
@@ -57,7 +57,7 @@ import { runPublicMigrations } from '@cgk/db/migrations'  // ❌ NEVER
 **When to use**: ALWAYS when querying tenant data
 
 ```typescript
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 // DO this - queries run against tenant_rawdog schema
 const orders = await withTenant('rawdog', async () => {
@@ -73,7 +73,7 @@ const orders = await sql`SELECT * FROM orders`
 **When to use**: In API routes to get tenant context
 
 ```typescript
-import { getTenantFromRequest, requireTenant, withTenant } from '@cgk/db'
+import { getTenantFromRequest, requireTenant, withTenant } from '@cgk-platform/db'
 
 // Option 1: Returns null if no tenant
 const tenant = await getTenantFromRequest(request)
@@ -91,7 +91,7 @@ await withTenant(tenant.slug, async () => { ... })
 **When to use**: ALWAYS for tenant-specific caching
 
 ```typescript
-import { createTenantCache } from '@cgk/db'
+import { createTenantCache } from '@cgk-platform/db'
 
 const cache = createTenantCache('rawdog')
 
@@ -119,8 +119,8 @@ const users = await sql`SELECT * FROM users WHERE email = '${email}'`
 **When to use**: Setup and tenant creation (Node.js only, NOT in middleware)
 
 ```typescript
-// Import from @cgk/db/migrations (NOT @cgk/db)
-import { runPublicMigrations, createTenantSchema } from '@cgk/db/migrations'
+// Import from @cgk-platform/db/migrations (NOT @cgk-platform/db)
+import { runPublicMigrations, createTenantSchema } from '@cgk-platform/db/migrations'
 
 // Run public schema migrations
 await runPublicMigrations()
@@ -239,7 +239,7 @@ import { db } from '@vercel/postgres'
 const client = await db.connect()
 
 // CORRECT - Use sql template tag
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 const result = await sql`SELECT * FROM users`
 ```
 
@@ -289,7 +289,7 @@ await cache.set('pricing-config', config)
 // Valid: rawdog, my_brand, brand_2024
 // Invalid: My-Brand, Brand Name, RAWDOG
 
-import { isValidTenantSlug, validateTenantSlug } from '@cgk/db'
+import { isValidTenantSlug, validateTenantSlug } from '@cgk-platform/db'
 
 if (!isValidTenantSlug(slug)) {
   throw new Error('Invalid slug')
@@ -302,11 +302,11 @@ validateTenantSlug(slug) // throws if invalid
 
 ```typescript
 // WRONG - Importing migrations in middleware breaks Edge Runtime
-import { sql, runPublicMigrations } from '@cgk/db'  // ❌ Even partial import fails
+import { sql, runPublicMigrations } from '@cgk-platform/db'  // ❌ Even partial import fails
 
 // CORRECT - Use separate entry points
-import { sql } from '@cgk/db'  // Edge-safe
-import { runPublicMigrations } from '@cgk/db/migrations'  // Node.js only (in API routes)
+import { sql } from '@cgk-platform/db'  // Edge-safe
+import { runPublicMigrations } from '@cgk-platform/db/migrations'  // Node.js only (in API routes)
 ```
 
 ---
@@ -409,19 +409,19 @@ import { runPublicMigrations } from '@cgk/db/migrations'  // Node.js only (in AP
 | Dependency | Why |
 |------------|-----|
 | `@vercel/postgres` | PostgreSQL client for Vercel/Neon |
-| `@cgk/core` | Shared types and utilities |
+| `@cgk-platform/core` | Shared types and utilities |
 
 ---
 
 ## Integration Points
 
 ### Used by:
-- `@cgk/auth` - Session storage
-- `@cgk/jobs` - Job state persistence
-- `@cgk/cli` - Database setup and tenant management
+- `@cgk-platform/auth` - Session storage
+- `@cgk-platform/jobs` - Job state persistence
+- `@cgk-platform/cli` - Database setup and tenant management
 - All `apps/*` for data access
 
 ### Uses:
 - `@vercel/postgres` - Database driver
-- `@cgk/core` - Type definitions
+- `@cgk-platform/core` - Type definitions
 - Upstash Redis (optional) - For cache (falls back to in-memory)

@@ -1,5 +1,5 @@
-import { Button, Card, CardContent, Input } from '@cgk/ui'
-import { getTickets } from '@cgk/support'
+import { Button, Card, CardContent, Input } from '@cgk-platform/ui'
+import { getTickets } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Plus, Filter, Search } from 'lucide-react'

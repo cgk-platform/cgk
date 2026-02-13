@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import {
   getPlatformWorkspace,
   updatePlatformChannels,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
 
 /**

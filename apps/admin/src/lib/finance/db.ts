@@ -4,7 +4,7 @@
  * All operations use tenant context via withTenant() for proper isolation.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   COGSConfig,

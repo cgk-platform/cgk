@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Mux webhook handling
+ * @cgk-platform/video - Mux webhook handling
  *
  * Verifies webhook signatures and processes Mux events.
  */

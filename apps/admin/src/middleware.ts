@@ -6,8 +6,8 @@ import {
   validateSessionById,
   verifyImpersonationJWT,
   verifyJWT,
-} from '@cgk/auth'
-import { sql } from '@cgk/db'
+} from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

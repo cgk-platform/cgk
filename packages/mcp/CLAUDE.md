@@ -1,4 +1,4 @@
-# @cgk/mcp - AI Development Guide
+# @cgk-platform/mcp - AI Development Guide
 
 > **Package Version**: 0.1.0
 > **Last Updated**: 2026-02-12
@@ -22,21 +22,21 @@ MCP (Model Context Protocol) server utilities for the CGK platform. Provides eve
 
 ```typescript
 // Handler (primary API)
-import { MCPHandler, createMCPHandlerFactory } from '@cgk/mcp'
+import { MCPHandler, createMCPHandlerFactory } from '@cgk-platform/mcp'
 
 // Tools, Resources, Prompts
-import { defineTool, defineResource, definePrompt } from '@cgk/mcp'
-import { textResult, jsonResult, errorResult } from '@cgk/mcp'
+import { defineTool, defineResource, definePrompt } from '@cgk-platform/mcp'
+import { textResult, jsonResult, errorResult } from '@cgk-platform/mcp'
 
 // Streaming
-import { progressChunk, partialChunk, completeChunk, errorChunk } from '@cgk/mcp'
-import { requiresStreaming, createStreamingResponse } from '@cgk/mcp'
+import { progressChunk, partialChunk, completeChunk, errorChunk } from '@cgk-platform/mcp'
+import { requiresStreaming, createStreamingResponse } from '@cgk-platform/mcp'
 
 // Session Management
-import { createMCPSession, getSession, getTokenUsageLogs } from '@cgk/mcp'
+import { createMCPSession, getSession, getTokenUsageLogs } from '@cgk-platform/mcp'
 
 // Types
-import type { MCPHandler, ToolResult, StreamingChunk } from '@cgk/mcp'
+import type { MCPHandler, ToolResult, StreamingChunk } from '@cgk-platform/mcp'
 ```
 
 ---
@@ -46,7 +46,7 @@ import type { MCPHandler, ToolResult, StreamingChunk } from '@cgk/mcp'
 ### Pattern 1: Creating an MCP Handler (NEW - Primary API)
 
 ```typescript
-import { MCPHandler, defineTool, textResult } from '@cgk/mcp'
+import { MCPHandler, defineTool, textResult } from '@cgk-platform/mcp'
 
 // Create handler with tenant/user context
 const handler = new MCPHandler(tenantId, userId, {
@@ -88,7 +88,7 @@ const result = await handler.callTool({ name: 'get_orders', arguments: { limit: 
 ### Pattern 2: Defining Tools
 
 ```typescript
-import { defineTool, textResult, jsonResult, errorResult } from '@cgk/mcp'
+import { defineTool, textResult, jsonResult, errorResult } from '@cgk-platform/mcp'
 
 // Simple tool
 const simpleTool = defineTool({
@@ -129,7 +129,7 @@ const searchTool = defineTool({
 For long-running operations (search, export, bulk operations):
 
 ```typescript
-import { defineTool, progressChunk, partialChunk, completeChunk } from '@cgk/mcp'
+import { defineTool, progressChunk, partialChunk, completeChunk } from '@cgk-platform/mcp'
 
 const exportTool = defineTool({
   name: 'export_analytics',
@@ -163,7 +163,7 @@ const exportTool = defineTool({
 ### Pattern 4: Resources
 
 ```typescript
-import { defineResource } from '@cgk/mcp'
+import { defineResource } from '@cgk-platform/mcp'
 
 const configResource = defineResource({
   uri: 'cgk://config/tenant',
@@ -186,7 +186,7 @@ handler.registerResource(configResource)
 ### Pattern 5: Prompts
 
 ```typescript
-import { definePrompt } from '@cgk/mcp'
+import { definePrompt } from '@cgk-platform/mcp'
 
 const analysisPrompt = definePrompt({
   name: 'analyze_sales',
@@ -214,7 +214,7 @@ handler.registerPrompt(analysisPrompt)
 ### Pattern 6: Session Management
 
 ```typescript
-import { createMCPSession, getSession, getTokenUsageLogs, getUsageStats } from '@cgk/mcp'
+import { createMCPSession, getSession, getTokenUsageLogs, getUsageStats } from '@cgk-platform/mcp'
 
 // Sessions are created automatically by MCPHandler.initialize()
 // But you can also manage them manually:
@@ -307,9 +307,9 @@ These tools use streaming by default:
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/auth` | Authentication context |
-| `@cgk/core` | Shared types |
-| `@cgk/db` | Data access |
+| `@cgk-platform/auth` | Authentication context |
+| `@cgk-platform/core` | Shared types |
+| `@cgk-platform/db` | Data access |
 | `@modelcontextprotocol/sdk` | Protocol reference |
 
 ---
@@ -370,13 +370,13 @@ const handler = new MCPHandler(tenantId, userId, config)
 
 ```bash
 # Run tests
-pnpm --filter @cgk/mcp test
+pnpm --filter @cgk-platform/mcp test
 
 # Type check
-pnpm --filter @cgk/mcp typecheck
+pnpm --filter @cgk-platform/mcp typecheck
 
 # Build
-pnpm --filter @cgk/mcp build
+pnpm --filter @cgk-platform/mcp build
 ```
 
 ---
@@ -389,6 +389,6 @@ pnpm --filter @cgk/mcp build
 - Developer tools
 
 ### Uses:
-- `@cgk/core` - Types
-- `@cgk/db` - Data access
-- `@cgk/auth` - User context
+- `@cgk-platform/core` - Types
+- `@cgk-platform/db` - Data access
+- `@cgk-platform/auth` - User context

@@ -14,7 +14,7 @@
 
 import * as jose from 'jose'
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { generateSecureToken } from './crypto'
 import { logAuditAction, getSuperAdminUser, isSuperAdmin } from './super-admin'

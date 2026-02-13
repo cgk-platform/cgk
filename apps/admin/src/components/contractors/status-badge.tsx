@@ -1,49 +1,34 @@
-import { Badge } from '@cgk/ui'
+/**
+ * Contractor Status Badges
+ *
+ * Thin wrappers around @cgk-platform/ui StatusBadge for contractor domain.
+ */
 
-import {
-  CONTRACTOR_STATUS_LABELS,
-  CONTRACTOR_STATUS_VARIANTS,
-  type ContractorStatus,
-  PAYMENT_REQUEST_STATUS_LABELS,
-  PAYMENT_REQUEST_STATUS_VARIANTS,
-  type PaymentRequestStatus,
-  PROJECT_STATUS_LABELS,
-  PROJECT_STATUS_VARIANTS,
-  type ProjectStatus,
+import { StatusBadge, type StatusBadgeProps } from '@cgk-platform/ui'
+
+import type {
+  ContractorStatus,
+  PaymentRequestStatus,
+  ProjectStatus,
 } from '@/lib/contractors/types'
 
-interface ContractorStatusBadgeProps {
-  status: ContractorStatus
+export function ContractorStatusBadge({
+  status,
+  ...props
+}: { status: ContractorStatus } & Omit<StatusBadgeProps, 'status'>) {
+  return <StatusBadge status={status} showDot {...props} />
 }
 
-export function ContractorStatusBadge({ status }: ContractorStatusBadgeProps) {
-  return (
-    <Badge variant={CONTRACTOR_STATUS_VARIANTS[status]}>
-      {CONTRACTOR_STATUS_LABELS[status]}
-    </Badge>
-  )
+export function ProjectStatusBadge({
+  status,
+  ...props
+}: { status: ProjectStatus } & Omit<StatusBadgeProps, 'status'>) {
+  return <StatusBadge status={status} {...props} />
 }
 
-interface ProjectStatusBadgeProps {
-  status: ProjectStatus
-}
-
-export function ProjectStatusBadge({ status }: ProjectStatusBadgeProps) {
-  return (
-    <Badge variant={PROJECT_STATUS_VARIANTS[status]}>
-      {PROJECT_STATUS_LABELS[status]}
-    </Badge>
-  )
-}
-
-interface PaymentRequestStatusBadgeProps {
-  status: PaymentRequestStatus
-}
-
-export function PaymentRequestStatusBadge({ status }: PaymentRequestStatusBadgeProps) {
-  return (
-    <Badge variant={PAYMENT_REQUEST_STATUS_VARIANTS[status]}>
-      {PAYMENT_REQUEST_STATUS_LABELS[status]}
-    </Badge>
-  )
+export function PaymentRequestStatusBadge({
+  status,
+  ...props
+}: { status: PaymentRequestStatus } & Omit<StatusBadgeProps, 'status'>) {
+  return <StatusBadge status={status} {...props} />
 }

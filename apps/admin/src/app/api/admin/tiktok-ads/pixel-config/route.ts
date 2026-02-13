@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

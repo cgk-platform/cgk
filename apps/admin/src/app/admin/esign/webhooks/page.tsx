@@ -6,7 +6,7 @@
 
 'use client'
 
-import { Button, Card, CardContent, Input, Switch, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Input, Switch, cn } from '@cgk-platform/ui'
 import {
   Check,
   Copy,

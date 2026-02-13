@@ -4,9 +4,9 @@
  * GET /api/platform/flags/audit - Get all audit entries
  */
 
-import { requireAuth } from '@cgk/auth'
-import { getAllAuditEntries } from '@cgk/feature-flags/server'
-import { createLogger } from '@cgk/logging'
+import { requireAuth } from '@cgk-platform/auth'
+import { getAllAuditEntries } from '@cgk-platform/feature-flags/server'
+import { createLogger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { Alert, AlertDescription, Button, cn, Spinner } from '@cgk/ui'
+import { Alert, AlertDescription, Button, cn, Spinner } from '@cgk-platform/ui'
 import { getSwappableProducts, swapItem } from '@/lib/subscriptions/api'
 import { formatPrice } from '@/lib/subscriptions/format'
 import type { SubscriptionItem, SwappableProduct } from '@/lib/subscriptions/types'

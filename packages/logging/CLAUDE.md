@@ -1,4 +1,4 @@
-# @cgk/logging - AI Development Guide
+# @cgk-platform/logging - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -14,7 +14,7 @@ Structured logging for the CGK platform. Provides JSON-formatted logs with conte
 ## Quick Reference
 
 ```typescript
-import { createLogger, withLogContext, type Logger } from '@cgk/logging'
+import { createLogger, withLogContext, type Logger } from '@cgk-platform/logging'
 ```
 
 ---
@@ -24,7 +24,7 @@ import { createLogger, withLogContext, type Logger } from '@cgk/logging'
 ### Pattern 1: Basic Logging
 
 ```typescript
-import { createLogger } from '@cgk/logging'
+import { createLogger } from '@cgk-platform/logging'
 
 const logger = createLogger({
   level: 'info',
@@ -52,7 +52,7 @@ requestLogger.info('Processing request') // Includes all meta
 ### Pattern 3: Log Context Propagation
 
 ```typescript
-import { withLogContext, getLogContext } from '@cgk/logging'
+import { withLogContext, getLogContext } from '@cgk-platform/logging'
 
 // In middleware
 app.use((req, res, next) => {
@@ -73,7 +73,7 @@ function handleOrder() {
 ### Pattern 4: Custom Formatters
 
 ```typescript
-import { createLogger, jsonFormatter, prettyFormatter } from '@cgk/logging'
+import { createLogger, jsonFormatter, prettyFormatter } from '@cgk-platform/logging'
 
 // JSON for production
 const prodLogger = createLogger({
@@ -89,7 +89,7 @@ const devLogger = createLogger({
 ### Pattern 5: Custom Transports
 
 ```typescript
-import { createLogger, createMultiTransport, consoleTransport } from '@cgk/logging'
+import { createLogger, createMultiTransport, consoleTransport } from '@cgk-platform/logging'
 
 // Send to multiple destinations
 const transport = createMultiTransport(
@@ -157,7 +157,7 @@ type LogLevelName = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/core` | Shared types |
+| `@cgk-platform/core` | Shared types |
 
 ---
 
@@ -208,4 +208,4 @@ orderLogger.info('Step 2')
 - Background jobs
 
 ### Uses:
-- `@cgk/core` - Types
+- `@cgk-platform/core` - Types

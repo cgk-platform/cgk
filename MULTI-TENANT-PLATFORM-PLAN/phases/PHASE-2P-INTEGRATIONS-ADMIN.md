@@ -1,5 +1,7 @@
 # PHASE-2P-INTEGRATIONS-ADMIN: Integration Hub & Admin Pages
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Duration**: Week 11-12 (parallel with PHASE-2PO-OAUTH-INTEGRATIONS)
 **Depends On**: PHASE-2PO-OAUTH-INTEGRATIONS (OAuth flows), PHASE-2A-ADMIN-SHELL (admin layout)
@@ -53,8 +55,8 @@ Implement the complete Integrations admin UI section with:
 **Shopify App:**
 - `/apps/admin/src/app/admin/integrations/shopify-app/page.tsx` - OAuth status, scopes, pixel config
 - `/apps/admin/src/app/api/admin/shopify-app/status/route.ts` - Status endpoint
-- `/apps/admin/src/app/api/admin/shopify-app/auth/route.ts` - OAuth initiation (updated by @cgk/shopify)
-- `/apps/admin/src/app/api/admin/shopify-app/callback/route.ts` - OAuth callback (updated by @cgk/shopify)
+- `/apps/admin/src/app/api/admin/shopify-app/auth/route.ts` - OAuth initiation (updated by @cgk-platform/shopify)
+- `/apps/admin/src/app/api/admin/shopify-app/callback/route.ts` - OAuth callback (updated by @cgk-platform/shopify)
 - `/apps/admin/src/app/api/admin/shopify-app/disconnect/route.ts` - Disconnect endpoint
 - `/apps/admin/src/app/api/admin/shopify-app/test/route.ts` - Connection test
 

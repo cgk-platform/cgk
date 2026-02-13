@@ -1,10 +1,10 @@
 /**
- * @cgk/video - Teleprompter Database Operations
+ * @cgk-platform/video - Teleprompter Database Operations
  *
  * CRUD operations for teleprompter scripts with tenant isolation.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   CreateScriptInput,

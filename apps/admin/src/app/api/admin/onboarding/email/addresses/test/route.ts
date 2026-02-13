@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -8,7 +8,7 @@ import {
   getSenderAddressById,
   getResendConfig,
   sendTestEmail,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * POST /api/admin/onboarding/email/addresses/test

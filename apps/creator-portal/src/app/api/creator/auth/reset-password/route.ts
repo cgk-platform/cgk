@@ -5,7 +5,7 @@
  * Completes the password reset flow with a valid token.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import {
   hashPassword,

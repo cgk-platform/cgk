@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, Button, Badge, Switch, RadixSelect as Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@cgk/ui'
-import { NOTIFICATION_TYPES } from '@cgk/slack/types'
+import { Card, CardContent, Button, Badge, Switch, RadixSelect as Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@cgk-platform/ui'
+import { NOTIFICATION_TYPES } from '@cgk-platform/slack/types'
 
 interface SlackChannel {
   id: string

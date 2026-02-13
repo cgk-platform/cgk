@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useCallback } from 'react'
 
 import { BRAND_CATEGORIES } from '@/lib/brand-preferences/constants'

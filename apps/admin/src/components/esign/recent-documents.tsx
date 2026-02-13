@@ -6,7 +6,7 @@
 
 'use client'
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 import { ChevronRight, User } from 'lucide-react'
 import Link from 'next/link'
 import { DocumentStatusBadge } from './document-status-badge'

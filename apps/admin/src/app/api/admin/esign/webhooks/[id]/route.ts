@@ -6,7 +6,7 @@
  * DELETE /api/admin/esign/webhooks/[id] - Delete webhook
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import {
   getWebhook,

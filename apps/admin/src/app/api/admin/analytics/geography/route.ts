@@ -5,7 +5,7 @@
  * Returns geographic distribution of revenue and customers
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getGeographyData } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

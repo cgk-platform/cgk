@@ -7,7 +7,7 @@
  * Combines sidebar, header, and content area with responsive behavior.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useState, useCallback, type ReactNode } from 'react'
 
 import { PortalSidebar } from './PortalSidebar'

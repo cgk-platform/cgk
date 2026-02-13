@@ -1,11 +1,11 @@
 /**
- * @cgk/slack - Notification sending and routing
+ * @cgk-platform/slack - Notification sending and routing
  *
  * @ai-pattern notifications
  * @ai-note Handles sending notifications to configured channels with tenant isolation
  */
 
-import { withTenant, sql, createTenantCache } from '@cgk/db'
+import { withTenant, sql, createTenantCache } from '@cgk-platform/db'
 import { SlackClient } from './client'
 import { buildMessage, getSampleData, type TemplateVariables } from './templates'
 import type {

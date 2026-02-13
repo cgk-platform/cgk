@@ -6,8 +6,8 @@ import {
   generateOAuthState,
   serializeOAuthState,
   buildAuthorizationUrl,
-} from '@cgk/slack'
-import { createTenantCache } from '@cgk/db'
+} from '@cgk-platform/slack'
+import { createTenantCache } from '@cgk-platform/db'
 
 const OAUTH_STATE_TTL = 600 // 10 minutes
 

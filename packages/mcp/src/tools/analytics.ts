@@ -8,7 +8,7 @@
  * @ai-required All tools MUST use withTenant() for database access
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import {
   defineTool,
   jsonResult,

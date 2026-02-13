@@ -6,7 +6,7 @@
  * DELETE /api/creator/payments/methods - Remove a method
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

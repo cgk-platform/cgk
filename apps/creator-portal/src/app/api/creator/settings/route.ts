@@ -5,7 +5,7 @@
  * PATCH /api/creator/settings - Update profile fields
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { UpdateProfileInput } from '@/lib/types'

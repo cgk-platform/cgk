@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { getTenantWorkspace, SlackClient } from '@cgk/slack'
+import { getTenantWorkspace, SlackClient } from '@cgk-platform/slack'
 
 /**
  * POST /api/admin/integrations/slack/test

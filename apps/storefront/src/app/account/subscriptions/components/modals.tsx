@@ -2,7 +2,7 @@
 
 import type { ReactNode } from 'react'
 import { useCallback, useEffect, useState } from 'react'
-import { Button, cn, Spinner } from '@cgk/ui'
+import { Button, cn, Spinner } from '@cgk-platform/ui'
 
 // ---------------------------------------------------------------------------
 // Base Modal Component

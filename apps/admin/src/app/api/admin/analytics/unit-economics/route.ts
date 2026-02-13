@@ -5,7 +5,7 @@
  * Returns CAC, LTV, margins, and cohort analysis
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getUnitEconomics } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

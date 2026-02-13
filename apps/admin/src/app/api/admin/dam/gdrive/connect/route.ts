@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { generateAuthorizationUrl, getOAuthConfigFromEnv, type OAuthState } from '@cgk/dam'
+import { generateAuthorizationUrl, getOAuthConfigFromEnv, type OAuthState } from '@cgk-platform/dam'
 
 export async function POST(request: Request) {
   const headerList = await headers()

@@ -1,9 +1,9 @@
 export const dynamic = 'force-dynamic'
 
-import { setTenantSchema, sql } from '@cgk/db'
+import { setTenantSchema, sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 
-import { generateGoogleFeed, type ShopifyProductData } from '@cgk/commerce'
+import { generateGoogleFeed, type ShopifyProductData } from '@cgk-platform/commerce'
 
 /**
  * GET /api/feeds/google/[token]/products.xml

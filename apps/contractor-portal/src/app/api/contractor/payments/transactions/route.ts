@@ -4,7 +4,7 @@
  * GET /api/contractor/payments/transactions - List balance transactions
  */
 
-import { getBalanceTransactions, type ContractorTransactionType } from '@cgk/payments'
+import { getBalanceTransactions, type ContractorTransactionType } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

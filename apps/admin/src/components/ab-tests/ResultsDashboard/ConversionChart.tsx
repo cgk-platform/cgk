@@ -1,7 +1,7 @@
 'use client'
 
 import { useTimeSeriesData } from '@/lib/ab-tests/hooks'
-import { Card, CardHeader, CardContent } from '@cgk/ui'
+import { Card, CardHeader, CardContent } from '@cgk-platform/ui'
 
 interface ConversionChartProps {
   testId: string

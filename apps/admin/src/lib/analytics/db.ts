@@ -5,7 +5,7 @@
  * NEVER query analytics data without tenant context.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   AnalyticsReport,

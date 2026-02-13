@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardContent, cn } from '@cgk-platform/ui'
 import { CheckCircle, AlertCircle, XCircle, Activity, Globe, Server, Link2 } from 'lucide-react'
 
 import type { DataQualityMetrics, HealthStatus } from '@/lib/attribution'

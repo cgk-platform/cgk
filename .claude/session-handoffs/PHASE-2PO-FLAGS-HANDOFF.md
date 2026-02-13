@@ -122,7 +122,7 @@ All 32 tests passing.
 ## Dependencies Added
 
 - `packages/feature-flags` - New package
-- `apps/orchestrator/package.json` - Added `@cgk/feature-flags` and `@cgk/logging`
+- `apps/orchestrator/package.json` - Added `@cgk-platform/feature-flags` and `@cgk-platform/logging`
 
 ---
 
@@ -160,7 +160,7 @@ All 32 tests passing.
 
 ### Server-side (API routes, RSC)
 ```typescript
-import { isEnabled, getVariant } from '@cgk/feature-flags/server'
+import { isEnabled, getVariant } from '@cgk-platform/feature-flags/server'
 
 if (await isEnabled('checkout.new_flow', { tenantId, userId })) {
   return <NewCheckout />
@@ -169,7 +169,7 @@ if (await isEnabled('checkout.new_flow', { tenantId, userId })) {
 
 ### Client-side (React)
 ```tsx
-import { useFlag, FlagProvider } from '@cgk/feature-flags/react'
+import { useFlag, FlagProvider } from '@cgk-platform/feature-flags/react'
 
 function Component() {
   const isNewCheckout = useFlag('checkout.new_flow')

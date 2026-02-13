@@ -1,5 +1,5 @@
 /**
- * @cgk/ai-agents - AI Agent system (BRII) for CGK platform
+ * @cgk-platform/ai-agents - AI Agent system (BRII) for CGK platform
  *
  * Provides:
  * - Agent configuration and management

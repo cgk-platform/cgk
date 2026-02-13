@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { sendReport } from '@cgk/slack'
+import { sendReport } from '@cgk-platform/slack'
 
 /**
  * POST /api/admin/notifications/slack/reports/[id]/send

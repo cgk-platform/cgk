@@ -4,7 +4,7 @@
  * All operations use tenant isolation via withTenant wrapper.
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import {
   DEFAULT_PORTAL_BRANDING,

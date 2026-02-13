@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -10,7 +10,7 @@ import {
   deleteAsset,
   incrementViewCount,
   type UpdateAssetInput,
-} from '@cgk/dam'
+} from '@cgk-platform/dam'
 
 export async function GET(
   _request: Request,

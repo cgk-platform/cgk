@@ -4,7 +4,7 @@
  * All database operations use withTenant() for tenant isolation
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import type {
   ABTest,

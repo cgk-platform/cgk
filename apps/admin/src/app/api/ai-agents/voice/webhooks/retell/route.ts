@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     const signature = request.headers.get('x-retell-signature')
 
     // Verify webhook signature
-    const { verifyRetellSignature } = await import('@cgk/ai-agents')
+    const { verifyRetellSignature } = await import('@cgk-platform/ai-agents')
     if (!verifyRetellSignature(bodyText, signature)) {
       console.error('Invalid Retell webhook signature')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
@@ -41,8 +41,8 @@ export async function POST(request: Request) {
     }
 
     // Process the webhook within tenant context
-    const { withTenant } = await import('@cgk/db')
-    const { createRetellClient, getVoiceCredentials } = await import('@cgk/ai-agents')
+    const { withTenant } = await import('@cgk-platform/db')
+    const { createRetellClient, getVoiceCredentials } = await import('@cgk-platform/ai-agents')
 
     await withTenant(tenantId, async () => {
       // Get tenant's Retell credentials

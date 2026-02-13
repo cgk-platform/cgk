@@ -103,7 +103,7 @@ Built a comprehensive RBAC system for the CGK platform with permission definitio
 
 ### Permission Checking
 ```typescript
-import { checkPermissionOrRespond, getUserPermissions, hasPermission } from '@cgk/auth'
+import { checkPermissionOrRespond, getUserPermissions, hasPermission } from '@cgk-platform/auth'
 
 // In API routes
 const denied = await checkPermissionOrRespond(userId, tenantId, 'orders.view')
@@ -116,7 +116,7 @@ if (hasPermission(permissions, 'orders.manage')) { ... }
 
 ### React Permission Guards
 ```tsx
-import { PermissionGate, useHasPermission } from '@cgk/ui'
+import { PermissionGate, useHasPermission } from '@cgk-platform/ui'
 
 // Hook usage
 const canEditOrders = useHasPermission('orders.manage')
@@ -140,8 +140,8 @@ const canEditOrders = useHasPermission('orders.manage')
 
 ## Verification
 
-- `pnpm turbo typecheck --filter=@cgk/auth` - PASSES
-- `pnpm turbo typecheck --filter=@cgk/ui` - PASSES
+- `pnpm turbo typecheck --filter=@cgk-platform/auth` - PASSES
+- `pnpm turbo typecheck --filter=@cgk-platform/ui` - PASSES
 - `npx tsc --noEmit` in apps/admin - PASSES for RBAC files
 - Unit tests - 38 tests PASS
 - No TODO, PLACEHOLDER, or FIXME comments

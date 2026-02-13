@@ -11,9 +11,9 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { withTenant } from '@cgk/db'
-import { listInboundEmails } from '@cgk/communications'
-import type { InboundEmailType, InboundProcessingStatus } from '@cgk/communications'
+import { withTenant } from '@cgk-platform/db'
+import { listInboundEmails } from '@cgk-platform/communications'
+import type { InboundEmailType, InboundProcessingStatus } from '@cgk-platform/communications'
 
 export async function GET(request: Request) {
   const headerList = await headers()

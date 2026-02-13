@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Comments Module
+ * @cgk-platform/video - Comments Module
  *
  * Re-exports for video comment types and database operations.
  */

@@ -4,7 +4,7 @@
  * Analytics and reporting for e-signatures.
  */
 
-import { Button, Card, CardContent, cn } from '@cgk/ui'
+import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 import {
   BarChart3,
   CheckCircle,

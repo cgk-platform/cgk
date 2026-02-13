@@ -3,7 +3,7 @@
  * UGC photo moderation with approval workflow
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 

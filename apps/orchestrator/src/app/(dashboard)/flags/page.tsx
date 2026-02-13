@@ -1,7 +1,7 @@
 'use client'
 
-import type { FeatureFlag } from '@cgk/feature-flags'
-import { Button } from '@cgk/ui'
+import type { FeatureFlag } from '@cgk-platform/feature-flags'
+import { Button } from '@cgk-platform/ui'
 import { useState, useCallback } from 'react'
 
 import { CreateFlagModal, FlagEditor, FlagList } from '../../../components/flags'

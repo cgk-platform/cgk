@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { Bold, Italic, Link as LinkIcon, List, ListOrdered, Code, Image, Eye, Edit } from 'lucide-react'
 import { useState, useCallback } from 'react'
 

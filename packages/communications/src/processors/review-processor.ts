@@ -114,7 +114,7 @@ export function createReviewProcessor(
  * Review processor job handler for background jobs
  *
  * @ai-pattern job-handler
- * @ai-note Use with @cgk/jobs
+ * @ai-note Use with @cgk-platform/jobs
  */
 export function createReviewProcessorJob(
   getSendEmail: () => (entry: ReviewQueueEntry) => Promise<SendResult>

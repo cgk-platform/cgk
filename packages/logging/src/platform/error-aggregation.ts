@@ -109,7 +109,7 @@ export function computeErrorSignature(
 export async function getErrorAggregates(
   filters: ErrorAggregateFilters
 ): Promise<ErrorAggregate[]> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const { tenantId, service, startTime, endTime, minCount = 1 } = filters
 
@@ -220,7 +220,7 @@ export async function getErrorsBySignature(
     message: string
   }>
 }> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const result = await sql`
     SELECT

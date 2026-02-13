@@ -1,5 +1,5 @@
 /**
- * @cgk/admin-core - Core admin functionality
+ * @cgk-platform/admin-core - Core admin functionality
  * PHASE-2H-WORKFLOWS
  *
  * Provides:

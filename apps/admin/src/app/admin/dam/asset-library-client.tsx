@@ -1,12 +1,12 @@
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import { Grid, List, Plus, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useCallback } from 'react'
 
-import type { AssetRow, AssetType, Collection, AssetFilters, BulkOperation } from '@cgk/dam'
+import type { AssetRow, AssetType, Collection, AssetFilters, BulkOperation } from '@cgk-platform/dam'
 import {
   AssetCard,
   AssetDetailModal,

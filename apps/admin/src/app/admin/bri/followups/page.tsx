@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Card, CardContent, CardHeader, Input, Switch, Textarea } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Switch, Textarea } from '@cgk-platform/ui'
 import { CalendarClock, Save, Bell, AlertTriangle, Clock } from 'lucide-react'
 
 interface FollowupSettings {

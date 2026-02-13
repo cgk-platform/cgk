@@ -48,7 +48,7 @@ tenant_{slug} schema (per-tenant):
 
 ```typescript
 // ✅ CORRECT - Always use withTenant
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 
 const orders = await withTenant(tenantId, async () => {
   return sql`SELECT * FROM orders WHERE status = 'pending'`
@@ -76,7 +76,7 @@ export async function withTenant<T>(
 
 ```typescript
 // Only for platform-level operations (super admin dashboard)
-import { withPlatformContext } from '@cgk/db'
+import { withPlatformContext } from '@cgk-platform/db'
 
 // Explicitly marked as cross-tenant - requires super admin auth
 const allOrders = await withPlatformContext(async () => {
@@ -100,8 +100,8 @@ const allOrders = await withPlatformContext(async () => {
 
 ```typescript
 // apps/admin/src/app/api/orders/route.ts
-import { getTenantContext } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { getTenantContext } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 
 export async function GET(req: Request) {
   // STEP 1: Get and validate tenant context
@@ -153,14 +153,14 @@ export async function getTenantContext(req: Request) {
 
 ```typescript
 // ✅ CORRECT - Use the helper
-import { createTenantCache } from '@cgk/cache'
+import { createTenantCache } from '@cgk-platform/cache'
 
 const cache = createTenantCache(tenantId)
 await cache.set('pricing-config', config)  // Stored as: tenant:rawdog:pricing-config
 const config = await cache.get('pricing-config')
 
 // ❌ WRONG - Never use raw Redis
-import { redis } from '@cgk/cache'
+import { redis } from '@cgk-platform/cache'
 await redis.set('pricing-config', config)  // No tenant prefix = data leak!
 ```
 
@@ -267,7 +267,7 @@ export type Events = {
 
 ```typescript
 // ✅ CORRECT - Files under tenant path
-import { uploadFile } from '@cgk/storage'
+import { uploadFile } from '@cgk-platform/storage'
 
 const url = await uploadFile({
   tenantId: 'rawdog',

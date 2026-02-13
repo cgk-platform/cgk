@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Progress } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Progress } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 interface TaxSummaryData {

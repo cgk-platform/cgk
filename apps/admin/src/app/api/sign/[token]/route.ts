@@ -6,7 +6,7 @@
  */
 
 import { NextResponse } from 'next/server'
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import {
   getSignerByToken,
   markSignerViewed,
@@ -23,7 +23,7 @@ import {
   logDocumentSigned,
   logDocumentDeclined,
   type EsignField,
-} from '@cgk/esign'
+} from '@cgk-platform/esign'
 
 export const dynamic = 'force-dynamic'
 

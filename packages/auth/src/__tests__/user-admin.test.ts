@@ -10,8 +10,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 const mockSqlTemplate = vi.fn()
 const mockSqlQuery = vi.fn()
 
-// Mock @cgk/db
-vi.mock('@cgk/db', () => ({
+// Mock @cgk-platform/db
+vi.mock('@cgk-platform/db', () => ({
   sql: Object.assign((...args: unknown[]) => mockSqlTemplate(...args), {
     query: (...args: unknown[]) => mockSqlQuery(...args),
   }),

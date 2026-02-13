@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Card, CardContent, CardHeader, Badge } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Badge } from '@cgk-platform/ui'
 import { Users, Save, Star, DollarSign, Eye } from 'lucide-react'
 
 interface TeamMember {

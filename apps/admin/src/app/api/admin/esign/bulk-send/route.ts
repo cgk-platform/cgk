@@ -5,7 +5,7 @@
  * POST /api/admin/esign/bulk-send - Create new bulk send
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import {
   listBulkSends,

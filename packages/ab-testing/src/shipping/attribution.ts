@@ -5,7 +5,7 @@
  * Calculates net revenue and detects mismatches.
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { extractSuffix, parseShippingPrice } from './config.js'
 import { extractABDataFromAttributes } from './cart-bridge.js'
 import type {

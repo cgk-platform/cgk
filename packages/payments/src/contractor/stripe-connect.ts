@@ -7,7 +7,7 @@
 
 import Stripe from 'stripe'
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { upsertStripeConnectMethod } from './payout-methods'
 import type {

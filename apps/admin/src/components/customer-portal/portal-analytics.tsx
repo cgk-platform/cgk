@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 import { LogIn, Eye, MousePointer, TrendingUp, BarChart3 } from 'lucide-react'
 import { useState } from 'react'
 

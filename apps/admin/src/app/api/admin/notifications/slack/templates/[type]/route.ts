@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { withTenant, sql } from '@cgk/db'
-import type { SlackBlock } from '@cgk/slack'
+import { withTenant, sql } from '@cgk-platform/db'
+import type { SlackBlock } from '@cgk-platform/slack'
 
 interface TemplateRecord {
   id: string

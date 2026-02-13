@@ -4,8 +4,8 @@
  * Implements OAuth 2.0 PKCE flow for Shopify Customer Account API.
  */
 
-import { sql } from '@cgk/db'
-import { decryptToken } from '@cgk/shopify'
+import { sql } from '@cgk-platform/db'
+import { decryptToken } from '@cgk-platform/shopify'
 import { generatePKCEChallenge, generateNonce, generateState } from './pkce'
 import type {
   CustomerOAuthConfig,

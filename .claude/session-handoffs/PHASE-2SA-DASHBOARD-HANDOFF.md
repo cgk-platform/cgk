@@ -115,7 +115,7 @@ Created `/apps/orchestrator/src/types/platform.ts` with interfaces for:
 
 1. **SSE over WebSocket**: Next.js Edge runtime doesn't support native WebSocket. Used Server-Sent Events with polling as fallback for real-time alerts.
 
-2. **Cache Strategy**: Used `createGlobalCache()` from `@cgk/db` with:
+2. **Cache Strategy**: Used `createGlobalCache()` from `@cgk-platform/db` with:
    - 30-second TTL for KPIs and brands
    - 10-second TTL for health checks
    - Cache keys include query params for filtered lists

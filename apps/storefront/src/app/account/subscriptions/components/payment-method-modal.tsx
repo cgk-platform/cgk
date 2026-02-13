@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Alert, AlertDescription, Button, cn, Spinner } from '@cgk/ui'
+import { Alert, AlertDescription, Button, cn, Spinner } from '@cgk-platform/ui'
 import {
   getPaymentMethods,
   requestPaymentUpdateLink,

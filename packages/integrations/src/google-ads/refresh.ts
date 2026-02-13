@@ -5,7 +5,7 @@
  * @ai-required Handle invalid_grant errors for revoked tokens
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { decryptToken, encryptToken } from '../encryption.js'
 import type { TokenRefreshResult } from '../types.js'

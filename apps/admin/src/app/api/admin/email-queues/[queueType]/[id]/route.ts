@@ -13,13 +13,13 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import {
   getEntryById,
   rescheduleEntry,
   type QueueType,
-} from '@cgk/communications'
-import { sql, withTenant } from '@cgk/db'
+} from '@cgk-platform/communications'
+import { sql, withTenant } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

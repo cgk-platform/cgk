@@ -7,7 +7,7 @@
  * @ai-note Handles treasury, receipt, support, and creator email routing
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type {
   ApprovalParseResult,

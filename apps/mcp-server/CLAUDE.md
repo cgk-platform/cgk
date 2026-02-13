@@ -85,7 +85,7 @@ All methods require authentication. The handler receives `tenantId` and `userId`
 
 ```typescript
 // In route.ts, add to exampleTools array:
-import { defineTool, textResult, jsonResult } from '@cgk/mcp'
+import { defineTool, textResult, jsonResult } from '@cgk-platform/mcp'
 
 const newTool = defineTool({
   name: 'get_orders',
@@ -352,10 +352,10 @@ Streaming responses use NDJSON (newline-delimited JSON):
 
 | Package | Why |
 |---------|-----|
-| `@cgk/mcp` | MCP protocol handling |
-| `@cgk/auth` | JWT verification |
-| `@cgk/core` | Shared types |
-| `@cgk/db` | Database access (future) |
+| `@cgk-platform/mcp` | MCP protocol handling |
+| `@cgk-platform/auth` | JWT verification |
+| `@cgk-platform/core` | Shared types |
+| `@cgk-platform/db` | Database access (future) |
 | `next` | Framework |
 | `react` | Required by Next.js |
 

@@ -1,5 +1,5 @@
-import { getTenantContext } from '@cgk/auth'
-import { startMetaOAuth } from '@cgk/integrations'
+import { getTenantContext } from '@cgk-platform/auth'
+import { startMetaOAuth } from '@cgk-platform/integrations'
 
 export const dynamic = 'force-dynamic'
 

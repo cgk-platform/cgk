@@ -3,7 +3,7 @@
  * Get and cache user permissions for a tenant
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { resolvePermissions } from './checker'
 import { PREDEFINED_ROLE_IDS } from './roles'

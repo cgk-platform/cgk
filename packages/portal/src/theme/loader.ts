@@ -5,7 +5,7 @@
  * Uses tenant-isolated cache for performance.
  */
 
-import { sql, withTenant, createTenantCache } from '@cgk/db'
+import { sql, withTenant, createTenantCache } from '@cgk-platform/db'
 import type { PortalThemeConfig, PortalThemeConfigRow, SpacingDensity } from './types.js'
 import { mergeWithDefaults } from './defaults.js'
 

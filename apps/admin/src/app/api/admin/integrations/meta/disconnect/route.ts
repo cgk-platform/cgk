@@ -1,5 +1,5 @@
-import { getTenantContext } from '@cgk/auth'
-import { disconnectMeta } from '@cgk/integrations'
+import { getTenantContext } from '@cgk-platform/auth'
+import { disconnectMeta } from '@cgk-platform/integrations'
 
 export const dynamic = 'force-dynamic'
 

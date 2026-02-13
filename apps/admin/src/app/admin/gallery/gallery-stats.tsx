@@ -5,7 +5,7 @@
  * Clickable stat cards for filtering submissions
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 import type { UGCGalleryStats } from '@/lib/admin-utilities/types'
 

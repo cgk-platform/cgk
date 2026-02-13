@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Card, CardContent, CardHeader, Input, Badge } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Badge } from '@cgk-platform/ui'
 import { Mic, Volume2, AudioLines, Save, Play, Plus, X } from 'lucide-react'
 
 import type { VoiceConfig } from '@/lib/bri/types'

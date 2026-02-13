@@ -5,8 +5,8 @@
  * for creator deliverables. All operations use tenant isolation.
  */
 
-import { sql, withTenant } from '@cgk/db'
-import { sendJob } from '@cgk/jobs'
+import { sql, withTenant } from '@cgk-platform/db'
+import { sendJob } from '@cgk-platform/jobs'
 import { nanoid } from 'nanoid'
 
 import type {

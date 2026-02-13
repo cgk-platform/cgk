@@ -5,7 +5,7 @@
  * Returns JSON data suitable for PDF rendering on the client
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

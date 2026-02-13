@@ -18,7 +18,7 @@ import {
   type CheckAddress,
   type PayoutMethodType,
   type UpdatePayoutMethodInput,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

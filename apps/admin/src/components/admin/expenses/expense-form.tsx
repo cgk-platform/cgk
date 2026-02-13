@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Label } from '@cgk/ui'
+import { Button, Input, Label } from '@cgk-platform/ui'
 import { useState } from 'react'
 import type { ExpenseCategory, CreateOperatingExpenseInput } from '@/lib/expenses/types'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, cn } from '@cgk/ui'
+import { Badge, Card, cn } from '@cgk-platform/ui'
 import { Bell, ChevronUp, Clock } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 

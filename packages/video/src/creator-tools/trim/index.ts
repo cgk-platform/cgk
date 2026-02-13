@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Trim Module
+ * @cgk-platform/video - Trim Module
  *
  * Re-exports for video trimming types and operations.
  */

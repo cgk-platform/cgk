@@ -8,7 +8,7 @@
  * @ai-critical All queries must use withTenant wrapper
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   SmsHealthStatus,

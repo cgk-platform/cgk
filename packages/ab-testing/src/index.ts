@@ -1,8 +1,8 @@
 /**
- * @cgk/ab-testing - Client Exports
+ * @cgk-platform/ab-testing - Client Exports
  *
  * This module exports client-safe utilities for A/B testing.
- * For server-only functionality, import from '@cgk/ab-testing/server'.
+ * For server-only functionality, import from '@cgk-platform/ab-testing/server'.
  */
 
 // Types

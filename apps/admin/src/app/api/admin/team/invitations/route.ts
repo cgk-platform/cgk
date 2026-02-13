@@ -7,8 +7,8 @@ import {
   requireAuth,
   type AuthContext,
   type UserRole,
-} from '@cgk/auth'
-import { sql } from '@cgk/db'
+} from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

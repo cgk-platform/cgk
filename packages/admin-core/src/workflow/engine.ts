@@ -10,7 +10,7 @@
  * - Tracks execution state and cooldowns
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { executeActions } from './actions'
 import { computeFields, evaluateConditions } from './evaluator'

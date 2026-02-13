@@ -1,11 +1,11 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import {
   calculateScrollRate,
   DEFAULT_TELEPROMPTER_SETTINGS,
   type TeleprompterSettings,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 import { Maximize2, Minimize2, Settings2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 

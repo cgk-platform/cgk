@@ -5,7 +5,7 @@ import {
   TenantAccessError,
   validateSessionById,
   verifyJWT,
-} from '@cgk/auth'
+} from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Alert, AlertDescription, AlertTitle } from '@cgk/ui'
+import { Alert, AlertDescription, AlertTitle } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 

@@ -1,5 +1,5 @@
 /**
- * @cgk/slack - Block Kit message templates
+ * @cgk-platform/slack - Block Kit message templates
  *
  * @ai-pattern templates
  * @ai-note Pre-built Slack message templates using Block Kit

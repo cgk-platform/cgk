@@ -4,7 +4,7 @@
  * GET /api/admin/esign/stats - Get dashboard statistics
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getDashboardStats } from '@/lib/esign'
 

@@ -330,7 +330,7 @@ Each restructured phase MUST preserve these from originals:
 - [ ] Daily metrics aggregation
 - [ ] Webhook queue processing
 - [ ] All cron/scheduled jobs rebuilt
-- [ ] CLI setup command (`npx @cgk/cli setup:jobs`)
+- [ ] CLI setup command (`npx @cgk-platform/cli setup:jobs`)
 - [ ] Setup documentation (`docs/setup/BACKGROUND-JOBS.md`)
 
 ### Phase 6 (MCP)

@@ -7,13 +7,13 @@ export const dynamic = 'force-dynamic'
  * POST - Create a new video and get upload URL
  */
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import {
   getVideos,
   createVideo,
   createDirectUpload,
-} from '@cgk/video'
-import type { VideoStatus, CreateVideoInput } from '@cgk/video'
+} from '@cgk-platform/video'
+import type { VideoStatus, CreateVideoInput } from '@cgk-platform/video'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

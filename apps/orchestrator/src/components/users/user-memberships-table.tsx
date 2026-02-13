@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, cn } from '@cgk/ui'
+import { Badge, cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 interface UserMembership {

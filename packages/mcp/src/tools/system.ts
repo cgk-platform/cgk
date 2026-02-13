@@ -17,7 +17,7 @@
 
 import { defineTool, jsonResult, errorResult } from '../tools'
 import type { ToolDefinition } from '../tools'
-import { withTenant, sql, createTenantCache, createGlobalCache } from '@cgk/db'
+import { withTenant, sql, createTenantCache, createGlobalCache } from '@cgk-platform/db'
 
 // =============================================================================
 // Types

@@ -1,5 +1,7 @@
 # PHASE-2PO-FLAGS: Feature Flags System
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Completed**: 2026-02-10
 **Duration**: Week 9 (5 days)
@@ -244,14 +246,14 @@ apps/orchestrator/src/app/(dashboard)/flags/
 
 ```typescript
 // Server-side
-import { isEnabled, getVariant } from '@cgk/feature-flags/server'
+import { isEnabled, getVariant } from '@cgk-platform/feature-flags/server'
 
 if (await isEnabled('checkout.new_flow', { tenantId, userId })) {
   // New checkout
 }
 
 // Client-side
-import { useFlag } from '@cgk/feature-flags/react'
+import { useFlag } from '@cgk-platform/feature-flags/react'
 
 const showNewUI = useFlag('checkout.new_flow')
 ```

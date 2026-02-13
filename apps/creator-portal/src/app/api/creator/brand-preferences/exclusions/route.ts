@@ -5,7 +5,7 @@
  * POST /api/creator/brand-preferences/exclusions - Add brand to exclusion list
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { AddBrandExclusionInput, BrandExclusion } from '@/lib/types'

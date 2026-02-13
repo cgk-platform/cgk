@@ -16,7 +16,7 @@ Get a brand site running in under 5 minutes:
 
 ```bash
 # Create a new brand site
-npx @cgk/cli create my-brand
+npx @cgk-platform/cli create my-brand
 
 # Navigate to the project
 cd my-brand
@@ -38,7 +38,7 @@ pnpm dev
 ### Check Your System
 
 ```bash
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 ```
 
 ## Installation
@@ -47,18 +47,18 @@ npx @cgk/cli doctor
 
 ```bash
 # Create with default template (full features)
-npx @cgk/cli create my-brand
+npx @cgk-platform/cli create my-brand
 
 # Create with specific template
-npx @cgk/cli create my-brand --template storefront-only
-npx @cgk/cli create my-brand --template basic
+npx @cgk-platform/cli create my-brand --template storefront-only
+npx @cgk-platform/cli create my-brand --template basic
 ```
 
 ### Existing Project
 
 ```bash
 # Initialize CGK in an existing Next.js project
-npx @cgk/cli init
+npx @cgk-platform/cli init
 ```
 
 ## Templates
@@ -74,7 +74,7 @@ npx @cgk/cli init
 Create a `platform.config.ts` in your project root:
 
 ```typescript
-import { defineConfig } from '@cgk/core'
+import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({
   platform: {
@@ -127,25 +127,25 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 | Package | Description |
 |---------|-------------|
-| `@cgk/core` | Core configuration and types |
-| `@cgk/db` | Database utilities with tenant isolation |
-| `@cgk/auth` | JWT + session authentication |
-| `@cgk/ui` | React components (shadcn/ui based) |
-| `@cgk/commerce` | Commerce provider abstraction |
-| `@cgk/shopify` | Shopify Admin & Storefront clients |
-| `@cgk/payments` | Stripe + Wise payment handling |
-| `@cgk/jobs` | Background job abstraction |
-| `@cgk/analytics` | GA4 and attribution tracking |
-| `@cgk/logging` | Structured logging |
-| `@cgk/mcp` | MCP server utilities |
-| `@cgk/cli` | Command-line tools |
+| `@cgk-platform/core` | Core configuration and types |
+| `@cgk-platform/db` | Database utilities with tenant isolation |
+| `@cgk-platform/auth` | JWT + session authentication |
+| `@cgk-platform/ui` | React components (shadcn/ui based) |
+| `@cgk-platform/commerce` | Commerce provider abstraction |
+| `@cgk-platform/shopify` | Shopify Admin & Storefront clients |
+| `@cgk-platform/payments` | Stripe + Wise payment handling |
+| `@cgk-platform/jobs` | Background job abstraction |
+| `@cgk-platform/analytics` | GA4 and attribution tracking |
+| `@cgk-platform/logging` | Structured logging |
+| `@cgk-platform/mcp` | MCP server utilities |
+| `@cgk-platform/cli` | Command-line tools |
 
 ## Tenant Isolation
 
 CGK uses schema-per-tenant PostgreSQL isolation. **Always** use the tenant context:
 
 ```typescript
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 
 // Correct - uses tenant context
 const orders = await withTenant(tenantId, () =>
@@ -182,7 +182,7 @@ docker run -p 3000:3000 my-brand
 After deployment, run the setup wizard:
 
 ```bash
-npx @cgk/cli setup
+npx @cgk-platform/cli setup
 ```
 
 This will:
@@ -198,7 +198,7 @@ This will:
 ```
 cgk/
 ├── apps/              # Applications (docs, admin)
-├── packages/          # Shared packages (@cgk/*)
+├── packages/          # Shared packages (@cgk-platform/*)
 ├── starters/          # Project templates
 └── docs/              # Documentation
 ```

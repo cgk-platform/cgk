@@ -8,7 +8,7 @@ import {
   type ReportFrequency,
   type DateRangeType,
   type ReportMetricConfig,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 
 /**
  * GET /api/admin/notifications/slack/reports

@@ -1,3 +1,3 @@
-import { config } from "@cgk/eslint-config/library";
+import { config } from "@cgk-platform/eslint-config/library";
 
 export default config;

@@ -1,4 +1,4 @@
-import { Button, Card, CardContent } from '@cgk/ui'
+import { Button, Card, CardContent } from '@cgk-platform/ui'
 import { Archive, MessageSquare, Plus, Star } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Badge, Button, Card, CardContent, CardHeader, Textarea } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, Textarea } from '@cgk-platform/ui'
 import { Users, Brain, Plus, Trash2, User } from 'lucide-react'
 
 import type { TeamMember, MemoryType, MemorySource } from '@/lib/bri/types'

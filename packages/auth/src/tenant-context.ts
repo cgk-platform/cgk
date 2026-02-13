@@ -5,7 +5,7 @@
  * accessible tenants/organizations.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { signJWT } from './jwt'
 import { updateSessionOrganization } from './session'

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Badge, cn } from '@cgk/ui'
+import { Button, Badge, cn } from '@cgk-platform/ui'
 import { MoreVertical, Pencil, Trash2, Power, PowerOff } from 'lucide-react'
-import type { SupportAgent } from '@cgk/support'
+import type { SupportAgent } from '@cgk-platform/support'
 
 interface AgentListProps {
   agents: SupportAgent[]

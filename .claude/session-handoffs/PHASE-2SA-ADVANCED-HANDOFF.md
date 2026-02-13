@@ -85,7 +85,7 @@ Successfully implemented all advanced super admin capabilities including:
 
 3. **Job Monitoring**: Created abstraction layer that works with both Inngest and Trigger.dev via platform_jobs table.
 
-4. **SQL Array Handling**: Due to @cgk/db template limitations with arrays, queries fetch all records and filter in JS when array filtering is needed.
+4. **SQL Array Handling**: Due to @cgk-platform/db template limitations with arrays, queries fetch all records and filter in JS when array filtering is needed.
 
 5. **Impersonation Token**: Uses separate JWT with `type: 'impersonation'` claim to distinguish from regular auth tokens.
 
@@ -94,7 +94,7 @@ Successfully implemented all advanced super admin capabilities including:
 ## TypeScript Status
 
 - **apps/orchestrator**: Passes `npx tsc --noEmit` with no errors
-- **apps/admin**: Has pre-existing errors from @cgk/communications and @cgk/feature-flags modules (unrelated to this phase)
+- **apps/admin**: Has pre-existing errors from @cgk-platform/communications and @cgk-platform/feature-flags modules (unrelated to this phase)
 
 ---
 

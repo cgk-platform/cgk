@@ -204,7 +204,7 @@ export function createRetryProcessor(
  * Retry processor job handler for background jobs
  *
  * @ai-pattern job-handler
- * @ai-note Use with @cgk/jobs for scheduled retry processing
+ * @ai-note Use with @cgk-platform/jobs for scheduled retry processing
  */
 export function createRetryProcessorJob() {
   return async (payload: {

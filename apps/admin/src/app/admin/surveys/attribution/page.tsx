@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 import { Plus, Trash2, GripVertical, Eye, EyeOff } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 

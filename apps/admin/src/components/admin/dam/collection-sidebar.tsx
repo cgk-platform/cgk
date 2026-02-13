@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import {
   Folder,
   FolderPlus,
@@ -16,7 +16,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
-import type { Collection } from '@cgk/dam'
+import type { Collection } from '@cgk-platform/dam'
 
 export interface CollectionSidebarProps {
   collections: Collection[]

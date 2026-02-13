@@ -1,4 +1,4 @@
-# @cgk/slack - AI Development Guide
+# @cgk-platform/slack - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -19,7 +19,7 @@ import {
   sendTestNotification,
   sendCriticalAlert,
   SlackClient,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 
 // Send tenant notification
 await sendNotification('rawdog', 'commerce.order.new', {
@@ -39,7 +39,7 @@ await sendCriticalAlert('api', 'High Error Rate', 'Error rate exceeded 5%')
 ### Pattern 1: Sending Tenant Notifications
 
 ```typescript
-import { sendNotification } from '@cgk/slack'
+import { sendNotification } from '@cgk-platform/slack'
 
 // Send a notification to the mapped channel
 const result = await sendNotification('rawdog', 'creator.project.submitted', {
@@ -62,7 +62,7 @@ import {
   buildAuthorizationUrl,
   exchangeCodeForTokens,
   processOAuthResponse,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 
 // Step 1: Generate state and redirect
 const state = generateOAuthState(tenantId, userId)
@@ -79,7 +79,7 @@ const processed = processOAuthResponse(tokens)
 ### Pattern 3: Creating a Client
 
 ```typescript
-import { SlackClient } from '@cgk/slack'
+import { SlackClient } from '@cgk-platform/slack'
 
 // From encrypted tokens
 const client = SlackClient.fromEncryptedTokens(
@@ -106,7 +106,7 @@ import {
   sendErrorAlert,
   sendWarningAlert,
   sendDeploymentAlert,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 
 // Critical alerts include @here mention
 await sendCriticalAlert('database', 'Connection Pool Exhausted')
@@ -124,7 +124,7 @@ await sendDeploymentAlert('v2.1.0 Released', 'Deployed to production')
 ### Pattern 5: Scheduled Reports
 
 ```typescript
-import { createReport, sendReport, getReports } from '@cgk/slack'
+import { createReport, sendReport, getReports } from '@cgk-platform/slack'
 
 // Create a report
 const report = await createReport('rawdog', {
@@ -214,7 +214,7 @@ SLACK_TOKEN_ENCRYPTION_KEY= # Min 32 chars for AES-256
 await sql`INSERT INTO ... VALUES (${token})`
 
 // CORRECT - Encrypt before storing
-import { encryptToken } from '@cgk/slack'
+import { encryptToken } from '@cgk-platform/slack'
 const encrypted = encryptToken(token)
 await sql`INSERT INTO ... VALUES (${encrypted})`
 ```
@@ -226,7 +226,7 @@ await sql`INSERT INTO ... VALUES (${encrypted})`
 const workspace = await sql`SELECT * FROM tenant_slack_workspaces`
 
 // CORRECT - Always use tenant context
-import { getTenantWorkspace } from '@cgk/slack'
+import { getTenantWorkspace } from '@cgk-platform/slack'
 const workspace = await getTenantWorkspace(tenantId)
 ```
 
@@ -261,7 +261,7 @@ if (result.error?.includes('channel_not_found')) {
 ## Integration Points
 
 ### Uses:
-- `@cgk/db` - Database operations with tenant isolation
+- `@cgk-platform/db` - Database operations with tenant isolation
 - `@slack/web-api` - Official Slack API client
 
 ### Used by:
@@ -282,7 +282,7 @@ pnpm test        # Run tests
 
 ### Test Connection
 ```typescript
-import { SlackClient } from '@cgk/slack'
+import { SlackClient } from '@cgk-platform/slack'
 
 const client = SlackClient.fromEncryptedTokens(botToken)
 const result = await client.testConnection(testChannelId)

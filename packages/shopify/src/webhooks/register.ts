@@ -4,7 +4,7 @@
  * Functions for registering and managing webhook subscriptions with Shopify
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { createAdminClient } from '../admin'
 import type { WebhookTopic, WebhookSyncResult, ShopifyCredentials } from './types'
 

@@ -3,7 +3,7 @@
  * Phase 2SP-TICKETS
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   AgentFilters,

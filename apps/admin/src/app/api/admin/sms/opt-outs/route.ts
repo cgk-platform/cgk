@@ -9,7 +9,7 @@ import {
   listOptOuts,
   maskPhoneNumber,
   normalizeToE164,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * GET /api/admin/sms/opt-outs

@@ -1,10 +1,10 @@
 /**
- * @cgk/video - Video Comments Database Operations
+ * @cgk-platform/video - Video Comments Database Operations
  *
  * CRUD operations for timestamped video comments with tenant isolation.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import {
   buildCommentTree,

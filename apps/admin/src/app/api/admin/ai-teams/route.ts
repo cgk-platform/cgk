@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { listTeams } = await import('@cgk/ai-agents')
+    const { listTeams } = await import('@cgk-platform/ai-agents')
 
     const teams = await withTenant(tenantId, async () => {
       return listTeams()
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json()
-    const { createTeam } = await import('@cgk/ai-agents')
+    const { createTeam } = await import('@cgk-platform/ai-agents')
 
     // Validate required fields
     if (!body.name) {

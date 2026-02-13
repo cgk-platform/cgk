@@ -3,7 +3,7 @@
  *
  * Periodically checks webhook registrations and re-registers missing webhooks.
  *
- * NOTE: This job requires the @cgk/shopify/webhooks module to be built and available.
+ * NOTE: This job requires the @cgk-platform/shopify/webhooks module to be built and available.
  * Currently stubbed to allow build to pass.
  */
 
@@ -32,13 +32,13 @@ export const webhookHealthCheckJob = defineJob<{ tenantIds?: string[] }>({
   handler: async (job): Promise<JobResult<HealthCheckResult>> => {
     const { tenantIds } = job.payload
 
-    // @cgk/shopify/webhooks module needs to be built first
+    // @cgk-platform/shopify/webhooks module needs to be built first
     console.log(`[webhooks/health-check] tenantIds=${tenantIds?.join(',') || 'all'}`)
 
     return {
       success: false,
       error: {
-        message: '@cgk/shopify/webhooks module must be built before this job can run',
+        message: '@cgk-platform/shopify/webhooks module must be built before this job can run',
         retryable: false,
       },
       data: {
@@ -66,13 +66,13 @@ export const cleanupOldWebhookEventsJob = defineJob<{
   handler: async (job): Promise<JobResult<{ deleted: number }>> => {
     const { tenantIds, retentionDays = 30 } = job.payload
 
-    // @cgk/shopify/webhooks module needs to be built first
+    // @cgk-platform/shopify/webhooks module needs to be built first
     console.log(`[webhooks/cleanup-old-events] tenantIds=${tenantIds?.join(',') || 'all'} retentionDays=${retentionDays}`)
 
     return {
       success: false,
       error: {
-        message: '@cgk/shopify/webhooks module must be built before this job can run',
+        message: '@cgk-platform/shopify/webhooks module must be built before this job can run',
         retryable: false,
       },
       data: { deleted: 0 },

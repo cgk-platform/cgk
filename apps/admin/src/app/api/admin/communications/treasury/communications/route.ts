@@ -11,12 +11,12 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type {
   TreasuryCommunication,
   ApprovalStatus,
   ApprovalConfidence,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * Map database row to TreasuryCommunication

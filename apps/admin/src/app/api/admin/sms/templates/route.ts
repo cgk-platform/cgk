@@ -7,7 +7,7 @@ import {
   createSmsTemplate,
   listSmsTemplates,
   SMS_NOTIFICATION_TYPES,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * GET /api/admin/sms/templates

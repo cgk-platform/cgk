@@ -15,7 +15,7 @@ import {
   listScripts,
   validateScriptInput,
   type CreateScriptInput,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 
 export async function GET(request: Request) {
   const headerList = await headers()

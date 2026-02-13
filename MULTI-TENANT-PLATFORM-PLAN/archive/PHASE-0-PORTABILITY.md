@@ -104,7 +104,7 @@ packages/
 **CLAUDE.md Template for Packages:**
 
 ```markdown
-# @cgk/{package-name} - AI Development Guide
+# @cgk-platform/{package-name} - AI Development Guide
 
 ## Purpose
 [1-2 sentences on what this package does]
@@ -112,7 +112,7 @@ packages/
 ## Quick Reference
 \`\`\`typescript
 // Most common import pattern
-import { ... } from '@cgk/{package-name}'
+import { ... } from '@cgk-platform/{package-name}'
 \`\`\`
 
 ## Key Patterns
@@ -214,7 +214,7 @@ program.parse()
 
 #### [SEQUENTIAL] Test End-to-End Flow
 
-- [ ] Test `npx @cgk/cli create test-brand`
+- [ ] Test `npx @cgk-platform/cli create test-brand`
 - [ ] Verify template copies correctly
 - [ ] Test `pnpm install` works
 - [ ] Test `pnpm dev` starts correctly
@@ -296,7 +296,7 @@ cgk/
 
 ## Success Criteria
 
-- [ ] `npx @cgk/cli create my-brand --template=basic` works
+- [ ] `npx @cgk-platform/cli create my-brand --template=basic` works
 - [ ] `pnpm install && pnpm dev` starts without errors
 - [ ] Packages can be published to npm
 - [ ] README provides complete installation guide

@@ -5,7 +5,7 @@
  * All operations are tenant-scoped using withTenant().
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import type {
   Subscription,

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, Check, ExternalLink, RefreshCw, X } from 'lucide-react'
 
-import { Alert, AlertDescription, Badge, Button, Card, CardContent, Input, Label, Spinner } from '@cgk/ui'
+import { Alert, AlertDescription, Badge, Button, Card, CardContent, Input, Label, Spinner } from '@cgk-platform/ui'
 
 interface IntegrationStatus {
   provider: 'meta' | 'google_ads' | 'tiktok' | 'klaviyo'

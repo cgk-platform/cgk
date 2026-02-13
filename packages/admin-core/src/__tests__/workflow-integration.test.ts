@@ -15,7 +15,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 const mockSql = vi.fn()
 const mockWithTenant = vi.fn()
 
-vi.mock('@cgk/db', () => ({
+vi.mock('@cgk-platform/db', () => ({
   sql: mockSql,
   withTenant: mockWithTenant,
 }))

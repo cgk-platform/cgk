@@ -1,7 +1,7 @@
 'use client'
 
-import type { FlagAuditEntry } from '@cgk/feature-flags'
-import { Badge, Card, CardContent, Select, SelectOption, Spinner } from '@cgk/ui'
+import type { FlagAuditEntry } from '@cgk-platform/feature-flags'
+import { Badge, Card, CardContent, Select, SelectOption, Spinner } from '@cgk-platform/ui'
 import { useCallback, useEffect, useState } from 'react'
 
 interface AuditResponse {

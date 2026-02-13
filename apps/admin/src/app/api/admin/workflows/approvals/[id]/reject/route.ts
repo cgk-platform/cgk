@@ -3,8 +3,8 @@
  * POST /api/admin/workflows/approvals/[id]/reject - Reject pending execution
  */
 
-import { requireAuth } from '@cgk/auth'
-import { WorkflowEngine } from '@cgk/admin-core'
+import { requireAuth } from '@cgk-platform/auth'
+import { WorkflowEngine } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

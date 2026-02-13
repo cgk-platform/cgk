@@ -7,8 +7,8 @@
 
 'use client'
 
-import type { ProductVariant } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { ProductVariant } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 
 interface ProductOption {
   name: string

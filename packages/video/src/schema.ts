@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Database schema definitions
+ * @cgk-platform/video - Database schema definitions
  *
  * SQL schema for video tables (videos, video_folders, video_permissions, video_views)
  * These tables are created per-tenant in tenant schemas.

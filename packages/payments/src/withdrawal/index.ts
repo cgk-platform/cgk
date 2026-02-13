@@ -4,7 +4,7 @@
  * Creator withdrawal requests, validation, and processing.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import {
   getCreatorBalance,
@@ -414,7 +414,7 @@ export async function requestWithdrawal(
   })
 
   // Note: Job event should be sent by the caller if needed
-  // This avoids the dependency on @cgk/jobs
+  // This avoids the dependency on @cgk-platform/jobs
 
   return { success: true, withdrawal }
 }

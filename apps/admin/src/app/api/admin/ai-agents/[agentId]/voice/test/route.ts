@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const { testType, provider, voiceId, audioUrl, sampleText } = body
 
     if (testType === 'tts') {
-      const { testTTSConfig } = await import('@cgk/ai-agents')
+      const { testTTSConfig } = await import('@cgk-platform/ai-agents')
 
       if (!provider || !voiceId) {
         return NextResponse.json(
@@ -58,7 +58,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     }
 
     if (testType === 'stt') {
-      const { testSTTConfig } = await import('@cgk/ai-agents')
+      const { testSTTConfig } = await import('@cgk-platform/ai-agents')
 
       if (!provider || !audioUrl) {
         return NextResponse.json(

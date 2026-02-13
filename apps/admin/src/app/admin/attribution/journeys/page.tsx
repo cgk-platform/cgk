@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 import { ChevronRight, Mail, Search, ShoppingCart, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 

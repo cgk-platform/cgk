@@ -9,7 +9,7 @@
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 // Job Payload Types
 export interface SurveySlackNotificationPayload {

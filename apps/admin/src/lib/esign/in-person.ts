@@ -4,7 +4,7 @@
  * Functions for managing in-person signing sessions.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type { EsignInPersonSession, EsignInPersonSessionStatus } from './types'
 
 /**

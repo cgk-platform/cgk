@@ -1,5 +1,5 @@
 /**
- * @cgk/core - Core utilities, types, and configuration schemas
+ * @cgk-platform/core - Core utilities, types, and configuration schemas
  *
  * @ai-pattern core-package
  * @ai-required This package is required by all other @cgk packages

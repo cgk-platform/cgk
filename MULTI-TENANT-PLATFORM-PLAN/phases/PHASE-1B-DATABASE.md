@@ -1,5 +1,7 @@
 # PHASE-1B: Database Foundation
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Duration**: 1 week (Week 2)
 **Depends On**: PHASE-1A (monorepo must exist)
 **Parallel With**: None
@@ -22,14 +24,16 @@ This package will be used by every installing user. Setup must be simple:
 
 ### CLI Setup
 ```bash
-npx @cgk/cli setup:database
+npx @cgk-platform/cli setup:database
 # Should:
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
 # 1. Check DATABASE_URL env var
 # 2. Test connection
 # 3. Run public schema migrations
 # 4. Verify setup
 
-npx @cgk/cli tenant:create <slug>
+npx @cgk-platform/cli tenant:create <slug>
 # Should:
 # 1. Create tenant schema
 # 2. Run tenant migrations
@@ -92,9 +96,9 @@ POSTGRES_URL=postgresql://...  # Required (auto-provisioned by Vercel/Neon)
 - Tenant schema migrations (`migrations/tenant/`) - 7 files
 
 ### CLI Commands ✅ (instead of tooling scripts)
-- `npx @cgk/cli setup:database` - Test connection, run migrations, verify
-- `npx @cgk/cli tenant:create <slug>` - Provision new tenant schema
-- `npx @cgk/cli tenant:list` - List all tenants
+- `npx @cgk-platform/cli setup:database` - Test connection, run migrations, verify
+- `npx @cgk-platform/cli tenant:create <slug>` - Provision new tenant schema
+- `npx @cgk-platform/cli tenant:list` - List all tenants
 
 ---
 
@@ -197,9 +201,9 @@ The implementing agent should determine the best approach for:
 - [x] Support both public and tenant schema migrations
 
 ### [SEQUENTIAL after Runner] CLI Commands ✅
-- [x] Implement `npx @cgk/cli setup:database` command
-- [x] Implement `npx @cgk/cli tenant:create <slug>` command
-- [x] Implement `npx @cgk/cli tenant:list` command
+- [x] Implement `npx @cgk-platform/cli setup:database` command
+- [x] Implement `npx @cgk-platform/cli tenant:create <slug>` command
+- [x] Implement `npx @cgk-platform/cli tenant:list` command
 - [x] Update doctor command to check database status
 
 ### [SEQUENTIAL after All] Testing & Docs ✅
@@ -367,17 +371,17 @@ docs/setup/
 
 ```bash
 # Test database setup (requires DATABASE_URL env var)
-npx @cgk/cli setup:database
+npx @cgk-platform/cli setup:database
 
 # Create a test tenant
-npx @cgk/cli tenant:create test_brand --name "Test Brand"
+npx @cgk-platform/cli tenant:create test_brand --name "Test Brand"
 
 # List tenants
-npx @cgk/cli tenant:list
+npx @cgk-platform/cli tenant:list
 
 # Check overall status
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 
 # Type check
-pnpm turbo typecheck --filter=@cgk/db --filter=@cgk/cli
+pnpm turbo typecheck --filter=@cgk-platform/db --filter=@cgk-platform/cli
 ```

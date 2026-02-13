@@ -5,8 +5,8 @@ import {
   getUserPermissions,
   hasPermission,
   requireAuth,
-} from '@cgk/auth'
-import { Card, CardContent } from '@cgk/ui'
+} from '@cgk-platform/auth'
+import { Card, CardContent } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { Suspense } from 'react'

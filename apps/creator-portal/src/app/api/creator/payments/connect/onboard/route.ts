@@ -5,12 +5,12 @@
  * POST /api/creator/payments/connect/onboard - Start Stripe onboarding
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import {
   createStripeConnectProvider,
   createStripeAccountLink,
   requiresStripeStandardAccount,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

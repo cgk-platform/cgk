@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react'
 import { Plus, Trash2, AlertTriangle } from 'lucide-react'
 
-import { Button, Input, Label, cn } from '@cgk/ui'
+import { Button, Input, Label, cn } from '@cgk-platform/ui'
 
 import type { WizardData, WizardStep4Data, Guardrail } from '@/lib/ab-tests/types'
 

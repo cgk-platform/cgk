@@ -15,7 +15,7 @@ Built the complete tenant team management system for the admin portal. This enab
   - Added `invited_by` and `invitation_id` columns to `user_organizations`
   - Created indexes for performance: tenant, email, token, status, timestamps
 
-### Service Layer (1 file in @cgk/auth)
+### Service Layer (1 file in @cgk-platform/auth)
 - `packages/auth/src/team.ts` - Full team management service with:
   - `getTeamMembers()` - Paginated list of team members
   - `getTeamMember()` - Get single member details
@@ -67,7 +67,7 @@ Built the complete tenant team management system for the admin portal. This enab
 
 ## Verification
 
-- `pnpm turbo typecheck --filter=@cgk/auth` - PASSES
+- `pnpm turbo typecheck --filter=@cgk-platform/auth` - PASSES
 - `eslint` on new files - PASSES
 - No TODO, PLACEHOLDER, or FIXME comments
 

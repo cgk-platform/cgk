@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Label, Textarea, Checkbox } from '@cgk/ui'
+import { Button, Input, Label, Textarea, Checkbox } from '@cgk-platform/ui'
 import { X, Mail, CheckCircle, Loader2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 

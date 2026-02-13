@@ -1,7 +1,7 @@
 /**
  * Shopify Commerce Provider
  *
- * Implements the CommerceProvider interface using @cgk/shopify clients.
+ * Implements the CommerceProvider interface using @cgk-platform/shopify clients.
  */
 
 import {
@@ -9,7 +9,7 @@ import {
   createStorefrontClient,
   type AdminClient,
   type StorefrontClient,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 import {
   listProducts as shopifyListProducts,
   getProductById,
@@ -27,7 +27,7 @@ import {
   updateCartAttributes as shopifyUpdateCartAttributes,
   applyCartDiscountCodes,
   removeCartDiscountCodes,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 import type {
   ShopifyProduct,
   ShopifyOrder,
@@ -37,7 +37,7 @@ import type {
   ShopifyLineItem,
   ShopifyCart,
   ShopifyAddress,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 import type {
   CommerceProvider,

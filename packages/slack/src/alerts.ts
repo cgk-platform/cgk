@@ -1,11 +1,11 @@
 /**
- * @cgk/slack - Platform-level ops alerting
+ * @cgk-platform/slack - Platform-level ops alerting
  *
  * @ai-pattern alerts
  * @ai-note Super admin Slack integration for cross-tenant alerts
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { SlackClient } from './client'
 import type {
   PlatformSlackWorkspace,

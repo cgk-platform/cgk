@@ -1,5 +1,7 @@
 # PHASE-2SH: Shopify App - Webhooks
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 > **Status**: COMPLETE
 > **Completed**: 2026-02-10
 > **Execution**: Week 11-12 (Parallel with PHASE-2SH-SHOPIFY-EXTENSIONS)
@@ -281,8 +283,8 @@ export async function routeToHandler(
 
 ```typescript
 // packages/shopify/src/webhooks/handlers/orders.ts
-import { withTenant, sql } from '@cgk/db'
-import { triggerJob } from '@cgk/jobs'
+import { withTenant, sql } from '@cgk-platform/db'
+import { triggerJob } from '@cgk-platform/jobs'
 
 export async function handleOrderCreate(
   tenantId: string,

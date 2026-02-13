@@ -5,7 +5,7 @@
  * @ai-note TikTok issues new refresh tokens on each refresh
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { decryptToken, encryptToken } from '../encryption.js'
 import type { TokenRefreshResult } from '../types.js'

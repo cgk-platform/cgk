@@ -4,7 +4,7 @@
  * Detects when users correct the agent and creates failure learnings.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { createMemory } from '../memory/storage.js'
 import type { CreateFailureLearningInput, FailureLearning, FailureType } from '../memory/types.js'
 

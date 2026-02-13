@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, Minus, Package, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 
-import { Alert, AlertDescription, Badge, Button, Input } from '@cgk/ui'
+import { Alert, AlertDescription, Badge, Button, Input } from '@cgk-platform/ui'
 
 import type { ShippingAddress, ShipmentProduct } from '../../../lib/creators/lifecycle-types'
 

@@ -3,8 +3,8 @@
  * GET /api/admin/workflows/approvals - List pending approvals
  */
 
-import { getTenantContext } from '@cgk/auth'
-import { WorkflowEngine } from '@cgk/admin-core'
+import { getTenantContext } from '@cgk-platform/auth'
+import { WorkflowEngine } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

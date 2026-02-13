@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
   Badge,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import {
   Loader2,
   Phone,

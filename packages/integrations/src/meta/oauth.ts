@@ -5,7 +5,7 @@
  * @ai-required Use HMAC-signed state for CSRF protection
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { encryptToken } from '../encryption.js'
 import { createOAuthState, validateOAuthState } from '../oauth-state.js'

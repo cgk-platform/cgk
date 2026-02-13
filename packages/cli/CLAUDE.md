@@ -1,4 +1,4 @@
-# @cgk/cli - AI Development Guide
+# @cgk-platform/cli - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -15,22 +15,22 @@ CLI tool for the CGK platform. Provides commands to create brand sites, initiali
 
 ```bash
 # Create new brand site
-npx @cgk/cli create my-brand
-npx @cgk/cli create my-brand --template=basic
+npx @cgk-platform/cli create my-brand
+npx @cgk-platform/cli create my-brand --template=basic
 
 # Initialize in existing project
-npx @cgk/cli init
+npx @cgk-platform/cli init
 
 # Check system requirements
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 
 # Run setup wizard
-npx @cgk/cli setup
+npx @cgk-platform/cli setup
 
 # Database migrations
-npx @cgk/cli migrate
-npx @cgk/cli migrate --status
-npx @cgk/cli migrate --rollback
+npx @cgk-platform/cli migrate
+npx @cgk-platform/cli migrate --status
+npx @cgk-platform/cli migrate --rollback
 ```
 
 ---
@@ -48,7 +48,7 @@ Create a new CGK brand site.
 
 **Example:**
 ```bash
-npx @cgk/cli create my-brand --template=full
+npx @cgk-platform/cli create my-brand --template=full
 ```
 
 ### `init`
@@ -58,7 +58,7 @@ Initialize CGK in an existing Next.js project.
 **Example:**
 ```bash
 cd existing-project
-npx @cgk/cli init
+npx @cgk-platform/cli init
 ```
 
 ### `doctor`

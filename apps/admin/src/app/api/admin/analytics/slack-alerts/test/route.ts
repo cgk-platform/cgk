@@ -4,7 +4,7 @@
  * POST /api/admin/analytics/slack-alerts/test - Send a test slack alert
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

@@ -3,8 +3,8 @@
  * POST /api/admin/workflows/scheduled/[id]/cancel - Cancel a scheduled action
  */
 
-import { requireAuth } from '@cgk/auth'
-import { WorkflowEngine } from '@cgk/admin-core'
+import { requireAuth } from '@cgk-platform/auth'
+import { WorkflowEngine } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

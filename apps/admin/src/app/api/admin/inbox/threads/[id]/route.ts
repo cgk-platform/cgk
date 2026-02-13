@@ -4,13 +4,13 @@
  * PATCH /api/admin/inbox/threads/[id] - Update thread
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import {
   getThread,
   markThreadAsRead,
   updateThread,
   type UpdateThreadInput,
-} from '@cgk/admin-core'
+} from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

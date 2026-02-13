@@ -39,7 +39,7 @@ Set these in your Vercel project settings:
 4. Run migrations:
 
 ```bash
-npx @cgk/cli migrate
+npx @cgk-platform/cli migrate
 ```
 
 ## Cache Setup
@@ -54,11 +54,11 @@ npx @cgk/cli migrate
 
 ```bash
 # Verify deployment
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 
 # Run migrations
-npx @cgk/cli migrate
+npx @cgk-platform/cli migrate
 
 # Create admin user
-npx @cgk/cli setup --admin
+npx @cgk-platform/cli setup --admin
 ```

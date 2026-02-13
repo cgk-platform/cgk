@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 export type PeriodOption = 'week' | 'month' | 'last_month' | 'year' | 'last_year' | 'all' | 'custom'

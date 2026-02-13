@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, CardHeader, Input, Label } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Label } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 

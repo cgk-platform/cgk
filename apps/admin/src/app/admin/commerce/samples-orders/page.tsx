@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, Input, Label, Switch, Tabs, TabsList, TabsTrigger } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, Input, Label, Switch, Tabs, TabsList, TabsTrigger } from '@cgk-platform/ui'
 import { ChevronLeft, ChevronRight, ExternalLink, Package, Settings, X } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'

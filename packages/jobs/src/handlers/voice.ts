@@ -6,7 +6,7 @@
  * - Recording cleanup
  * - Retell agent sync
  *
- * NOTE: These jobs require the @cgk/ai-agents package to be implemented.
+ * NOTE: These jobs require the @cgk-platform/ai-agents package to be implemented.
  * Currently stubbed to allow build to pass.
  */
 
@@ -33,7 +33,7 @@ export const generateCallSummariesJob = defineJob({
     return {
       success: false,
       error: {
-        message: '@cgk/ai-agents package not yet implemented',
+        message: '@cgk-platform/ai-agents package not yet implemented',
         retryable: false,
       },
     }
@@ -64,7 +64,7 @@ export const cleanupOldRecordingsJob = defineJob({
     return {
       success: false,
       error: {
-        message: '@cgk/ai-agents package not yet implemented',
+        message: '@cgk-platform/ai-agents package not yet implemented',
         retryable: false,
       },
     }
@@ -92,7 +92,7 @@ export const syncRetellAgentsJob = defineJob({
     return {
       success: false,
       error: {
-        message: '@cgk/ai-agents package not yet implemented',
+        message: '@cgk-platform/ai-agents package not yet implemented',
         retryable: false,
       },
     }
@@ -130,7 +130,7 @@ export const processVoiceUsageJob = defineJob({
     return {
       success: false,
       error: {
-        message: '@cgk/ai-agents package not yet implemented',
+        message: '@cgk-platform/ai-agents package not yet implemented',
         retryable: false,
       },
     }

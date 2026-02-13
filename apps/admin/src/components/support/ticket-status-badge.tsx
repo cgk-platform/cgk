@@ -1,26 +1,18 @@
+/**
+ * Ticket Status Badge
+ *
+ * Thin wrapper around @cgk-platform/ui StatusBadge for support ticket status.
+ */
+
 'use client'
 
-import { Badge } from '@cgk/ui'
-import type { TicketStatus } from '@cgk/support'
+import { StatusBadge, type StatusBadgeProps } from '@cgk-platform/ui'
+import type { TicketStatus } from '@cgk-platform/support'
 
-interface TicketStatusBadgeProps {
+interface TicketStatusBadgeProps extends Omit<StatusBadgeProps, 'status'> {
   status: TicketStatus
-  className?: string
 }
 
-const STATUS_CONFIG: Record<TicketStatus, { label: string; variant: 'info' | 'warning' | 'success' | 'secondary' }> = {
-  open: { label: 'Open', variant: 'info' },
-  pending: { label: 'Pending', variant: 'warning' },
-  resolved: { label: 'Resolved', variant: 'success' },
-  closed: { label: 'Closed', variant: 'secondary' },
-}
-
-export function TicketStatusBadge({ status, className }: TicketStatusBadgeProps) {
-  const config = STATUS_CONFIG[status]
-
-  return (
-    <Badge variant={config.variant} className={className}>
-      {config.label}
-    </Badge>
-  )
+export function TicketStatusBadge({ status, ...props }: TicketStatusBadgeProps) {
+  return <StatusBadge status={status} {...props} />
 }

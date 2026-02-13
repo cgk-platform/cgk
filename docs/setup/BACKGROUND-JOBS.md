@@ -14,7 +14,7 @@ This guide walks you through setting up background job processing for your CGK p
 
 ```bash
 # Run the setup wizard
-npx @cgk/cli setup:jobs
+npx @cgk-platform/cli setup:jobs
 ```
 
 This interactive wizard will guide you through provider selection and configuration.
@@ -77,7 +77,7 @@ TRIGGER_PROJECT_REF=your-project-ref  # Optional but recommended
 Or run the setup wizard:
 
 ```bash
-npx @cgk/cli setup:jobs --provider trigger.dev
+npx @cgk-platform/cli setup:jobs --provider trigger.dev
 ```
 
 ### Step 4: Start Dev Server
@@ -93,7 +93,7 @@ This starts the Trigger.dev dev server which processes jobs locally.
 ### Step 5: Verify Setup
 
 ```bash
-npx @cgk/cli setup:jobs --verify-only
+npx @cgk-platform/cli setup:jobs --verify-only
 ```
 
 ### Creating Tasks with Trigger.dev
@@ -103,7 +103,7 @@ Tasks are defined in `src/trigger/` directory:
 ```typescript
 // src/trigger/order-created.ts
 import { task } from '@trigger.dev/sdk/v3'
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 
 export const orderCreatedTask = task({
   id: 'order-created',
@@ -133,7 +133,7 @@ export const orderCreatedTask = task({
 ### Sending Jobs
 
 ```typescript
-import { sendJob } from '@cgk/jobs'
+import { sendJob } from '@cgk-platform/jobs'
 
 await sendJob('order.created', {
   tenantId: 'rawdog',  // REQUIRED - tenant isolation
@@ -180,7 +180,7 @@ npx inngest-cli dev
 ```typescript
 // src/inngest/order-created.ts
 import { inngest } from './client'
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 
 export const orderCreatedFn = inngest.createFunction(
   { id: 'order-created' },
@@ -205,7 +205,7 @@ export const orderCreatedFn = inngest.createFunction(
 For development without external services:
 
 ```bash
-npx @cgk/cli setup:jobs --provider local
+npx @cgk-platform/cli setup:jobs --provider local
 ```
 
 Or set manually:
@@ -253,18 +253,18 @@ Configure background job provider:
 
 ```bash
 # Interactive setup
-npx @cgk/cli setup:jobs
+npx @cgk-platform/cli setup:jobs
 
 # Specify provider
-npx @cgk/cli setup:jobs --provider trigger.dev
-npx @cgk/cli setup:jobs --provider inngest
-npx @cgk/cli setup:jobs --provider local
+npx @cgk-platform/cli setup:jobs --provider trigger.dev
+npx @cgk-platform/cli setup:jobs --provider inngest
+npx @cgk-platform/cli setup:jobs --provider local
 
 # Verify existing setup
-npx @cgk/cli setup:jobs --verify-only
+npx @cgk-platform/cli setup:jobs --verify-only
 
 # Skip environment setup (just verify)
-npx @cgk/cli setup:jobs --skip-env
+npx @cgk-platform/cli setup:jobs --skip-env
 ```
 
 ---
@@ -304,7 +304,7 @@ run: async (payload) => {
 
 ## Event Types
 
-The `@cgk/jobs` package exports all event types:
+The `@cgk-platform/jobs` package exports all event types:
 
 ```typescript
 import type {
@@ -312,7 +312,7 @@ import type {
   OrderCreatedPayload,
   PayoutRequestedPayload,
   // ... 80+ event types
-} from '@cgk/jobs'
+} from '@cgk-platform/jobs'
 ```
 
 Categories:
@@ -354,7 +354,7 @@ export const dailyMetrics = schedules.task({
 Pre-defined schedules are exported:
 
 ```typescript
-import { SCHEDULES } from '@cgk/jobs'
+import { SCHEDULES } from '@cgk-platform/jobs'
 
 console.log(SCHEDULES['ab.hourlyMetrics'])  // { cron: '15 * * * *' }
 console.log(SCHEDULES['attribution.dailyMetrics'])  // { cron: '10 2 * * *' }

@@ -7,7 +7,7 @@
 
 'use server'
 
-import type { Cart, CartAttribute } from '@cgk/commerce'
+import type { Cart, CartAttribute } from '@cgk-platform/commerce'
 import { cookies } from 'next/headers'
 
 import { requireCommerceProvider } from '../commerce'

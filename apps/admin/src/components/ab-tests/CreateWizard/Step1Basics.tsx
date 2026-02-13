@@ -1,6 +1,6 @@
 'use client'
 
-import { Input, Label, Textarea, cn } from '@cgk/ui'
+import { Input, Label, Textarea, cn } from '@cgk-platform/ui'
 
 import type { WizardData, WizardStep1Data, TestType, GoalEvent, OptimizationMetric } from '@/lib/ab-tests/types'
 

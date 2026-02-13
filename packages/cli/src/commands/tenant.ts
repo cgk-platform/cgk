@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import ora from 'ora'
 
-// Note: We dynamically import @cgk/db to handle cases where DB isn't available
+// Note: We dynamically import @cgk-platform/db to handle cases where DB isn't available
 
 /**
  * Validate tenant slug format
@@ -49,14 +49,14 @@ const createTenantCommand = new Command('tenant:create')
     // Check POSTGRES_URL (Vercel/Neon) or DATABASE_URL
     if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
       console.log(chalk.red('\n❌ POSTGRES_URL not set'))
-      console.log(chalk.dim('   Run: npx @cgk/cli setup:database'))
+      console.log(chalk.dim('   Run: npx @cgk-platform/cli setup:database'))
       process.exit(1)
     }
 
     try {
       // Dynamic import to handle missing dependency gracefully
-      const db = await import('@cgk/db')
-      const migrations = await import('@cgk/db/migrations')
+      const db = await import('@cgk-platform/db')
+      const migrations = await import('@cgk-platform/db/migrations')
 
       // Check if tenant already exists
       spinner.start('Checking if tenant exists...')
@@ -129,12 +129,12 @@ const listTenantsCommand = new Command('tenant:list')
     // Check POSTGRES_URL (Vercel/Neon) or DATABASE_URL
     if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
       console.log(chalk.red('\n❌ POSTGRES_URL not set'))
-      console.log(chalk.dim('   Run: npx @cgk/cli setup:database'))
+      console.log(chalk.dim('   Run: npx @cgk-platform/cli setup:database'))
       process.exit(1)
     }
 
     try {
-      const db = await import('@cgk/db')
+      const db = await import('@cgk-platform/db')
 
       interface Organization {
         id: string
@@ -169,7 +169,7 @@ const listTenantsCommand = new Command('tenant:list')
       if (result.rows.length === 0) {
         console.log(chalk.yellow('\nNo tenants found.\n'))
         console.log('Create one with:')
-        console.log(chalk.cyan('  npx @cgk/cli tenant:create <slug> --name "Brand Name"'))
+        console.log(chalk.cyan('  npx @cgk-platform/cli tenant:create <slug> --name "Brand Name"'))
         console.log('')
         return
       }
@@ -200,7 +200,7 @@ const listTenantsCommand = new Command('tenant:list')
       if (error instanceof Error && error.message.includes('does not exist')) {
         console.log(chalk.yellow('\nNo tenants found (organizations table not created yet).\n'))
         console.log('Run setup first:')
-        console.log(chalk.cyan('  npx @cgk/cli setup:database'))
+        console.log(chalk.cyan('  npx @cgk-platform/cli setup:database'))
         console.log('')
         return
       }

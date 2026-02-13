@@ -3,7 +3,7 @@
  * Multi-signer workflow automation with sequential/parallel execution
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { nanoid } from 'nanoid'
 import type {
   EsignWorkflow,

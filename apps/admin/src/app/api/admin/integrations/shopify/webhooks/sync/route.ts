@@ -6,9 +6,9 @@
  * Syncs webhook registrations with Shopify, re-registering any missing webhooks
  */
 
-import { getTenantContext } from '@cgk/auth'
-import { withTenant, sql } from '@cgk/db'
-import { syncWebhookRegistrations } from '@cgk/shopify/webhooks'
+import { getTenantContext } from '@cgk-platform/auth'
+import { withTenant, sql } from '@cgk-platform/db'
+import { syncWebhookRegistrations } from '@cgk-platform/shopify/webhooks'
 
 export const dynamic = 'force-dynamic'
 

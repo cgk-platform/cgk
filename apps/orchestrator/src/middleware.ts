@@ -6,8 +6,8 @@ import {
   logAuditAction,
   validateSuperAdminSessionById,
   verifyJWT,
-} from '@cgk/auth'
-import { sql } from '@cgk/db'
+} from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -29,9 +29,11 @@ import type { NextRequest } from 'next/server'
 const PUBLIC_PATHS = [
   '/api/platform/auth/login',
   '/api/platform/auth/mfa',
+  '/api/setup',
   '/login',
   '/mfa-challenge',
   '/unauthorized',
+  '/setup',
 ]
 
 /**

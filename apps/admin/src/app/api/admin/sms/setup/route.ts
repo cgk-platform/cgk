@@ -8,7 +8,7 @@ import {
   hasValidTwilioConfig,
   markSmsSetupCompleted,
   updateSmsSettings,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * GET /api/admin/sms/setup

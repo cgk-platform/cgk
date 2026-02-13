@@ -1,4 +1,4 @@
-# @cgk/analytics - AI Development Guide
+# @cgk-platform/analytics - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -15,14 +15,14 @@ GA4 and attribution tracking for the CGK platform. Provides client-side analytic
 
 ```typescript
 // Client-side
-import { initGA4, trackEvent, trackPageView } from '@cgk/analytics'
-import { trackAttribution, getAttributionFromCookie } from '@cgk/analytics'
+import { initGA4, trackEvent, trackPageView } from '@cgk-platform/analytics'
+import { trackAttribution, getAttributionFromCookie } from '@cgk-platform/analytics'
 
 // E-commerce
-import { trackAddToCart, trackPurchase } from '@cgk/analytics'
+import { trackAddToCart, trackPurchase } from '@cgk-platform/analytics'
 
 // Server-side
-import { trackServerEvent, configureServerAnalytics } from '@cgk/analytics'
+import { trackServerEvent, configureServerAnalytics } from '@cgk-platform/analytics'
 ```
 
 ---
@@ -33,7 +33,7 @@ import { trackServerEvent, configureServerAnalytics } from '@cgk/analytics'
 
 ```tsx
 // In your app root
-import { initGA4 } from '@cgk/analytics'
+import { initGA4 } from '@cgk-platform/analytics'
 
 useEffect(() => {
   initGA4({
@@ -46,7 +46,7 @@ useEffect(() => {
 ### Pattern 2: Track Events
 
 ```typescript
-import { trackEvent, trackPageView } from '@cgk/analytics'
+import { trackEvent, trackPageView } from '@cgk-platform/analytics'
 
 // Custom events
 trackEvent('button_click', { button_id: 'signup', location: 'header' })
@@ -58,7 +58,7 @@ trackPageView('/products/widget', 'Widget Product Page')
 ### Pattern 3: E-commerce Tracking
 
 ```typescript
-import { trackViewItem, trackAddToCart, trackPurchase } from '@cgk/analytics'
+import { trackViewItem, trackAddToCart, trackPurchase } from '@cgk-platform/analytics'
 
 // View product
 trackViewItem({
@@ -88,7 +88,7 @@ trackPurchase({
 ### Pattern 4: Attribution Tracking
 
 ```typescript
-import { parseAttributionParams, trackAttribution, getAttributionFromCookie } from '@cgk/analytics'
+import { parseAttributionParams, trackAttribution, getAttributionFromCookie } from '@cgk-platform/analytics'
 
 // On page load, capture attribution
 const attribution = parseAttributionParams(window.location.href)
@@ -106,7 +106,7 @@ if (orderAttribution?.creatorCode) {
 ### Pattern 5: Server-Side Tracking
 
 ```typescript
-import { configureServerAnalytics, trackServerEvent } from '@cgk/analytics'
+import { configureServerAnalytics, trackServerEvent } from '@cgk-platform/analytics'
 
 // Configure once at startup
 configureServerAnalytics({
@@ -170,7 +170,7 @@ trackPurchase(purchase: PurchaseEvent): void
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/core` | Shared types |
+| `@cgk-platform/core` | Shared types |
 
 ---
 
@@ -209,4 +209,4 @@ Attribution data expires after 30 days. For longer attribution windows, store in
 - Creator attribution system
 
 ### Uses:
-- `@cgk/core` - Types
+- `@cgk-platform/core` - Types

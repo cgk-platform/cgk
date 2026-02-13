@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, cn } from '@cgk/ui'
+import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 import { AlertCircle, CheckCircle, Loader2, Play, TrendingUp } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 

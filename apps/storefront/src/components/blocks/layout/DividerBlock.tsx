@@ -4,7 +4,7 @@
  * Horizontal divider line with configurable style, color, and width.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { BlockProps, DividerConfig } from '../types'
 
 /**

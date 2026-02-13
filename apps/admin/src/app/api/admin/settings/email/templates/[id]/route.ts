@@ -5,7 +5,7 @@ import {
   getTemplateById,
   updateTemplate,
   type UpdateTemplateInput,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

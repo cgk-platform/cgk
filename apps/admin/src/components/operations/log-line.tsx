@@ -1,7 +1,7 @@
 'use client'
 
-import { Badge } from '@cgk/ui'
-import type { PlatformLogEntry, LogLevelName } from '@cgk/logging'
+import { Badge } from '@cgk-platform/ui'
+import type { PlatformLogEntry, LogLevelName } from '@cgk-platform/logging'
 import { ChevronDown, ChevronRight, AlertTriangle, Info, Bug, AlertCircle, XCircle } from 'lucide-react'
 import { useState } from 'react'
 

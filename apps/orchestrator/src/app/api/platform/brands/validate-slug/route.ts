@@ -4,8 +4,8 @@
  * GET /api/platform/brands/validate-slug?slug=xxx - Check if slug is available
  */
 
-import { requireAuth } from '@cgk/auth'
-import { generateSlug, isSlugAvailable, isValidSlug } from '@cgk/onboarding'
+import { requireAuth } from '@cgk-platform/auth'
+import { generateSlug, isSlugAvailable, isValidSlug } from '@cgk-platform/onboarding'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

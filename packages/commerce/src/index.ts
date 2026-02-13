@@ -1,5 +1,5 @@
 /**
- * @cgk/commerce - Commerce provider abstraction
+ * @cgk-platform/commerce - Commerce provider abstraction
  *
  * @ai-pattern commerce-abstraction
  * @ai-note Provider-agnostic commerce operations

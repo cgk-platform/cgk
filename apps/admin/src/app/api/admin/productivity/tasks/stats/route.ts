@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

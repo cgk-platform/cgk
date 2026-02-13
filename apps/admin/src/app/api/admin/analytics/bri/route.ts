@@ -5,7 +5,7 @@
  * Returns Brand Relationship Intelligence AI metrics
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getBRIAnalytics } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

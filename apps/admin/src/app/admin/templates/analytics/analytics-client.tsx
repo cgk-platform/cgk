@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import { ArrowLeft, RefreshCw, TrendingUp, Mail, MousePointerClick, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, useTransition } from 'react'

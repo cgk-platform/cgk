@@ -1,5 +1,5 @@
 /**
- * @cgk/db - Database client and tenant utilities
+ * @cgk-platform/db - Database client and tenant utilities
  *
  * @ai-pattern tenant-isolation
  * @ai-required Always use withTenant() for tenant-scoped queries
@@ -38,7 +38,7 @@ export {
 
 // Migration utilities are intentionally NOT exported here.
 // They use Node.js fs/path modules which break in Edge Runtime (middleware).
-// Import from '@cgk/db/migrations' instead for migration functions.
+// Import from '@cgk-platform/db/migrations' instead for migration functions.
 // See: packages/db/src/migrations.ts
 
 // Types

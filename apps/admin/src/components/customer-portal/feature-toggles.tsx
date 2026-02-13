@@ -1,6 +1,6 @@
 'use client'
 
-import { Switch, cn } from '@cgk/ui'
+import { Switch, cn } from '@cgk-platform/ui'
 import { AlertTriangle } from 'lucide-react'
 import { useState, useTransition } from 'react'
 

@@ -4,7 +4,7 @@ import {
   getTemplateById,
   previewTemplate,
   getSampleDataForType,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

@@ -3,8 +3,8 @@
  * POST /api/admin/inbox/threads/[id]/snooze - Snooze thread
  */
 
-import { requireAuth } from '@cgk/auth'
-import { snoozeThread } from '@cgk/admin-core'
+import { requireAuth } from '@cgk-platform/auth'
+import { snoozeThread } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

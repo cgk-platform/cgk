@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Badge, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Badge, cn } from '@cgk-platform/ui'
 import {
   Cpu,
   Key,
@@ -114,7 +114,7 @@ export default function McpPage() {
   "mcpServers": {
     "cgk": {
       "command": "npx",
-      "args": ["-y", "@cgk/mcp-server"],
+      "args": ["-y", "@cgk-platform/mcp-server"],
       "env": {
         "CGK_API_KEY": "${apiKey}",
         "CGK_SERVER_URL": "${serverUrl}"
@@ -127,7 +127,7 @@ export default function McpPage() {
   "mcpServers": {
     "cgk": {
       "command": "npx.cmd",
-      "args": ["-y", "@cgk/mcp-server"],
+      "args": ["-y", "@cgk-platform/mcp-server"],
       "env": {
         "CGK_API_KEY": "${apiKey}",
         "CGK_SERVER_URL": "${serverUrl}"

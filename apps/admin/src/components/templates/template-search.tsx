@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@cgk/ui'
+import { Input } from '@cgk-platform/ui'
 import { Search, X } from 'lucide-react'
 import { useCallback, useState, useTransition } from 'react'
 

@@ -14,7 +14,7 @@ Implemented a multi-tenant scheduling and booking system (Calendly-style) with e
 
 ## What Was Done
 
-### 1. New Package: `@cgk/scheduling`
+### 1. New Package: `@cgk-platform/scheduling`
 Location: `/packages/scheduling/`
 
 **Created Files:**
@@ -90,7 +90,7 @@ Location: `/apps/admin/src/app/admin/scheduling/`
 - Default: `true`
 
 **Dependencies:**
-- Added `@cgk/scheduling` to admin app
+- Added `@cgk-platform/scheduling` to admin app
 - Added `date-fns` to admin app for slot API routes
 
 ---
@@ -196,7 +196,7 @@ Considers all constraints:
 ## Type Check Status
 
 ```bash
-pnpm turbo typecheck --filter=@cgk/scheduling
+pnpm turbo typecheck --filter=@cgk-platform/scheduling
 # Result: Success (3 tasks, 0 errors)
 ```
 

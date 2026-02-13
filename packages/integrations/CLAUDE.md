@@ -1,4 +1,4 @@
-# @cgk/integrations - AI Development Guide
+# @cgk-platform/integrations - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2026-02-10
@@ -21,7 +21,7 @@ import {
   refreshMetaToken,
   encryptToken,
   decryptToken,
-} from '@cgk/integrations'
+} from '@cgk-platform/integrations'
 ```
 
 ---
@@ -31,7 +31,7 @@ import {
 ### Pattern 1: Starting OAuth Flow
 
 ```typescript
-import { startMetaOAuth } from '@cgk/integrations'
+import { startMetaOAuth } from '@cgk-platform/integrations'
 
 const { authUrl, state } = await startMetaOAuth({
   tenantId: 'rawdog',
@@ -44,7 +44,7 @@ const { authUrl, state } = await startMetaOAuth({
 ### Pattern 2: Completing OAuth Flow
 
 ```typescript
-import { completeMetaOAuth } from '@cgk/integrations'
+import { completeMetaOAuth } from '@cgk-platform/integrations'
 
 // In OAuth callback handler
 const result = await completeMetaOAuth({
@@ -58,7 +58,7 @@ const result = await completeMetaOAuth({
 ### Pattern 3: Token Encryption
 
 ```typescript
-import { encryptToken, decryptToken } from '@cgk/integrations'
+import { encryptToken, decryptToken } from '@cgk-platform/integrations'
 
 // Encrypt before storage
 const encrypted = await encryptToken(token, process.env.ENCRYPTION_KEY!)
@@ -70,7 +70,7 @@ const plaintext = await decryptToken(encrypted, process.env.ENCRYPTION_KEY!)
 ### Pattern 4: Getting Access Tokens
 
 ```typescript
-import { getMetaAccessToken } from '@cgk/integrations'
+import { getMetaAccessToken } from '@cgk-platform/integrations'
 
 // Automatically refreshes if needed
 const accessToken = await getMetaAccessToken(tenantId)
@@ -79,7 +79,7 @@ const accessToken = await getMetaAccessToken(tenantId)
 ### Pattern 5: Checking Integration Status
 
 ```typescript
-import { getAllIntegrationStatuses, getIntegrationStatus } from '@cgk/integrations'
+import { getAllIntegrationStatuses, getIntegrationStatus } from '@cgk-platform/integrations'
 
 // Get all statuses
 const statuses = await getAllIntegrationStatuses(tenantId)
@@ -208,9 +208,9 @@ if (result.code !== 0) {
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/core` | Shared types |
-| `@cgk/db` | Database access, tenant isolation, cache |
-| `@cgk/jobs` | Background job definitions |
+| `@cgk-platform/core` | Shared types |
+| `@cgk-platform/db` | Database access, tenant isolation, cache |
+| `@cgk-platform/jobs` | Background job definitions |
 | `crypto` | Node.js crypto for encryption |
 
 ---
@@ -219,11 +219,11 @@ if (result.code !== 0) {
 
 ```bash
 # Run tests
-pnpm --filter @cgk/integrations test
+pnpm --filter @cgk-platform/integrations test
 
 # Watch mode
-pnpm --filter @cgk/integrations test:watch
+pnpm --filter @cgk-platform/integrations test:watch
 
 # Type check
-pnpm --filter @cgk/integrations typecheck
+pnpm --filter @cgk-platform/integrations typecheck
 ```

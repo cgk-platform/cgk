@@ -18,7 +18,7 @@ import {
   SelectValue,
   Textarea,
   cn,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import {
   AlertCircle,
   ArrowLeft,

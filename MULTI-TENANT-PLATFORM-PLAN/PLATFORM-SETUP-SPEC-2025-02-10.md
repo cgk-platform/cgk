@@ -52,7 +52,7 @@ cd my-platform
 pnpm install
 
 # Run setup wizard (CLI-based)
-npx @cgk/cli setup
+npx @cgk-platform/cli setup
 
 # OR start dev server and use web-based wizard
 pnpm dev
@@ -566,12 +566,12 @@ interface PlatformConfig {
 
 ---
 
-## CLI Alternative: `npx @cgk/cli setup`
+## CLI Alternative: `npx @cgk-platform/cli setup`
 
 For developers who prefer command-line:
 
 ```bash
-$ npx @cgk/cli setup
+$ npx @cgk-platform/cli setup
 
   ╭─────────────────────────────────────────────────╮
   │                                                 │
@@ -598,15 +598,15 @@ $ npx @cgk/cli setup
 
 ```bash
 # Full interactive setup
-npx @cgk/cli setup
+npx @cgk-platform/cli setup
 
 # Provision specific services
-npx @cgk/cli setup --database
-npx @cgk/cli setup --cache
-npx @cgk/cli setup --storage
+npx @cgk-platform/cli setup --database
+npx @cgk-platform/cli setup --cache
+npx @cgk-platform/cli setup --storage
 
 # Check configuration status
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 
 # Output:
 #   ✓ Database: Connected (Neon PostgreSQL)
@@ -617,7 +617,7 @@ npx @cgk/cli doctor
 #   ✓ Platform: Configured
 
 # Reset setup (destructive!)
-npx @cgk/cli setup --reset
+npx @cgk-platform/cli setup --reset
 ```
 
 ---
@@ -745,7 +745,7 @@ For one-click deployment, create `vercel.json`:
 
 | Phase | Relationship |
 |-------|--------------|
-| **Phase 0** | CLI commands wrap this wizard (`npx @cgk/cli setup`) |
+| **Phase 0** | CLI commands wrap this wizard (`npx @cgk-platform/cli setup`) |
 | **Phase 1B** | Database schema from this spec is foundation |
 | **Phase 2SA** | Super admin created here accesses orchestrator |
 | **Phase 2PO** | Brand onboarding assumes platform setup complete |
@@ -761,8 +761,8 @@ For one-click deployment, create `vercel.json`:
 - [ ] First super admin can be created
 - [ ] Platform config saves correctly
 - [ ] After setup, normal app routes work
-- [ ] CLI `npx @cgk/cli setup` mirrors web wizard
-- [ ] `npx @cgk/cli doctor` shows configuration status
+- [ ] CLI `npx @cgk-platform/cli setup` mirrors web wizard
+- [ ] `npx @cgk-platform/cli doctor` shows configuration status
 - [ ] Setup cannot be re-run after completion (security)
 
 ---

@@ -5,7 +5,7 @@
  * Works with the public.creator_balance_transactions table.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type {
   CreatorBalance,

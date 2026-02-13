@@ -176,8 +176,8 @@ export function generateThemeCss(theme: PortalThemeConfig): string {
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { generateThemeCss } from '@cgk/portal/theme'
-import type { PortalThemeConfig } from '@cgk/portal/types'
+import { generateThemeCss } from '@cgk-platform/portal/theme'
+import type { PortalThemeConfig } from '@cgk-platform/portal/types'
 
 interface ThemeContextValue {
   theme: PortalThemeConfig | null

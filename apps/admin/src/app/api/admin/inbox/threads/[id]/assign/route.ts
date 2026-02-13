@@ -3,8 +3,8 @@
  * POST /api/admin/inbox/threads/[id]/assign - Assign thread to user
  */
 
-import { requireAuth } from '@cgk/auth'
-import { assignThread, getThread } from '@cgk/admin-core'
+import { requireAuth } from '@cgk-platform/auth'
+import { assignThread, getThread } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

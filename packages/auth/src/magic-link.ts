@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid'
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { sha256 } from './crypto'
 import type { MagicLinkPurpose, MagicLinkVerifyResult, UserRole } from './types'

@@ -1,5 +1,5 @@
 /**
- * @cgk/slack - OAuth flow implementation
+ * @cgk-platform/slack - OAuth flow implementation
  *
  * @ai-pattern oauth
  * @ai-note Handles Slack OAuth authorization with bot and user scopes

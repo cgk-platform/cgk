@@ -1,11 +1,11 @@
 /**
- * @cgk/slack - Scheduled reports
+ * @cgk-platform/slack - Scheduled reports
  *
  * @ai-pattern reports
  * @ai-note Handles scheduled performance reports to Slack channels
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { SlackClient } from './client'
 import { getTenantWorkspace } from './notifications'
 import type {
@@ -347,7 +347,7 @@ async function fetchReportData(
   _tenantId: string,
   report: SlackReport,
 ): Promise<ReportData> {
-  // This would integrate with @cgk/analytics to fetch actual metrics
+  // This would integrate with @cgk-platform/analytics to fetch actual metrics
   // For now, return placeholder data
 
   const periodMap: Record<DateRangeType, string> = {

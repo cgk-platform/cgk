@@ -6,7 +6,7 @@
 
 'use client'
 
-import { Button, Card, CardContent, Input, Select } from '@cgk/ui'
+import { Button, Card, CardContent, Input, Select } from '@cgk-platform/ui'
 import {
   ChevronLeft,
   ChevronRight,

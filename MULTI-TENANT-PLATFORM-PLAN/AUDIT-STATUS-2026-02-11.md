@@ -18,7 +18,7 @@ Significant progress on Phase 3 (Storefront/Ecommerce) and Phase 4 (Creators/Con
 | Task | Status | Notes |
 |------|--------|-------|
 | Monorepo structure | ✅ Complete | Turborepo + pnpm workspaces |
-| CLI tooling | ✅ Complete | @cgk/cli package |
+| CLI tooling | ✅ Complete | @cgk-platform/cli package |
 | Starter templates | ✅ Complete | Full and minimal starters |
 
 ### Phase 1: Foundation
@@ -211,7 +211,7 @@ All patterns documented in CLAUDE.md:
 2. No `sql.unsafe()` - use separate query functions
 3. Array access needs null checks before spreading
 4. Unused vars: remove or prefix with `_`
-5. `RadixSelect` vs `Select` distinction in @cgk/ui
+5. `RadixSelect` vs `Select` distinction in @cgk-platform/ui
 
 ---
 

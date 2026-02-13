@@ -9,7 +9,7 @@ import {
   maskPhoneNumber,
   type SmsQueueFilters,
   type SmsQueueStatus,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * GET /api/admin/sms/queue

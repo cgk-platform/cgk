@@ -1,4 +1,4 @@
-import { createTenantCache, sql } from '@cgk/db'
+import { createTenantCache, sql } from '@cgk-platform/db'
 
 export interface TenantFeatures {
   creators: boolean

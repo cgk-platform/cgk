@@ -1,5 +1,5 @@
 /**
- * @cgk/esign - E-Signature System Core
+ * @cgk-platform/esign - E-Signature System Core
  *
  * Complete e-signature solution with document templates, field management,
  * signature capture, and compliance tracking.

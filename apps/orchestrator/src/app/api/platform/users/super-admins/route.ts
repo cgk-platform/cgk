@@ -2,8 +2,8 @@ import {
   getSuperAdminUser,
   getUserByEmail,
   logAuditAction,
-} from '@cgk/auth'
-import { sql } from '@cgk/db'
+} from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 

@@ -3,7 +3,7 @@
  * GET: Get sample detection configuration
  * PATCH: Update sample detection configuration
  */
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

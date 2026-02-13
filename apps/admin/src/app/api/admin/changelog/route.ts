@@ -3,7 +3,7 @@
  * GET: Fetch changelog entries with filtering and stats
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 
 import { getChangelog, getChangelogStats } from '@/lib/admin-utilities/db'

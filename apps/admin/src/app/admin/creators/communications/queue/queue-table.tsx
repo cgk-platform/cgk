@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Checkbox, cn } from '@cgk/ui'
+import { Button, Checkbox, cn } from '@cgk-platform/ui'
 import { AlertCircle, Check, Clock, Eye, MoreHorizontal, RefreshCcw, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'

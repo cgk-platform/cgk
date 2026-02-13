@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, Textarea } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Textarea } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 interface DisableUserModalProps {

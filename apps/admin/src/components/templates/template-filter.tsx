@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 export type TemplateStatusFilter = 'all' | 'custom' | 'default'
 

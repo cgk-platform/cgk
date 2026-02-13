@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { handleWebhook, onWebhook } from '@cgk/shopify'
+import { handleWebhook, onWebhook } from '@cgk-platform/shopify'
 
 // Register default webhook handlers
 // These can be extended in separate files for specific business logic

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth } from '@cgk/auth'
-import { getTicketMetrics, getUnacknowledgedAlerts, getAllSLAConfigs } from '@cgk/support'
+import { requireAuth } from '@cgk-platform/auth'
+import { getTicketMetrics, getUnacknowledgedAlerts, getAllSLAConfigs } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

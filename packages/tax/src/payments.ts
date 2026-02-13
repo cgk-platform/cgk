@@ -7,7 +7,7 @@
  * @ai-required Payments must be aggregated per payee type
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   PayeePaymentSummary,

@@ -5,7 +5,7 @@
  * Server-rendered with client components for interactivity.
  */
 
-import { Tabs, TabsList, TabsTrigger } from '@cgk/ui'
+import { Tabs, TabsList, TabsTrigger } from '@cgk-platform/ui'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 

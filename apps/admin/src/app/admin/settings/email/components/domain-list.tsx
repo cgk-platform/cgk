@@ -1,9 +1,9 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, Spinner } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, Spinner } from '@cgk-platform/ui'
 import { useEffect, useState } from 'react'
 
-import type { EmailDomain } from '@cgk/communications'
+import type { EmailDomain } from '@cgk-platform/communications'
 import { AddDomainModal } from './add-domain-modal'
 import { DNSInstructionsPanel } from './dns-instructions-panel'
 import { SenderAddressList } from './sender-address-list'

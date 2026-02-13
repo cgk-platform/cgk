@@ -7,7 +7,7 @@
 
 import crypto from 'crypto'
 
-import { createTenantCache } from '@cgk/db'
+import { createTenantCache } from '@cgk-platform/db'
 
 import type { OAuthStatePayload, SignedOAuthState } from './types.js'
 

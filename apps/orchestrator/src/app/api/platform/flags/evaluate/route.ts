@@ -4,10 +4,10 @@
  * POST /api/platform/flags/evaluate - Evaluate flags for a context
  */
 
-import { getTenantContext } from '@cgk/auth'
-import type { EvaluationContext } from '@cgk/feature-flags'
-import { evaluateAllFlags, evaluateFlags } from '@cgk/feature-flags/server'
-import { createLogger } from '@cgk/logging'
+import { getTenantContext } from '@cgk-platform/auth'
+import type { EvaluationContext } from '@cgk-platform/feature-flags'
+import { evaluateAllFlags, evaluateFlags } from '@cgk-platform/feature-flags/server'
+import { createLogger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

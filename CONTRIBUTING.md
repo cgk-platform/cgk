@@ -95,7 +95,7 @@ pnpm changeset
 # 3. Write a summary of changes
 ```
 
-All `@cgk/*` packages use lockstep versioning - they share the same version number.
+All `@cgk-platform/*` packages use lockstep versioning - they share the same version number.
 
 ## Coding Standards
 
@@ -144,7 +144,7 @@ const data = await sql`SELECT * FROM orders`
 pnpm test
 
 # Run tests for a specific package
-pnpm --filter @cgk/core test
+pnpm --filter @cgk-platform/core test
 
 # Run tests in watch mode
 pnpm test -- --watch
@@ -183,7 +183,7 @@ Releases are automated via GitHub Actions:
 
 Every push to `main` publishes a canary release:
 ```bash
-npm install @cgk/core@canary
+npm install @cgk-platform/core@canary
 ```
 
 ## Getting Help

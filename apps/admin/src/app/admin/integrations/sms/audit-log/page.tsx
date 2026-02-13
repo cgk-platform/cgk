@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Badge } from '@cgk/ui'
+import { Button, Card, CardContent, Badge } from '@cgk-platform/ui'
 import {
   Download,
   Filter,

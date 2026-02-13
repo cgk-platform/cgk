@@ -5,8 +5,8 @@
  * POST /api/admin/esign/templates/[id]/fields - Save template fields (bulk replace)
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
-import { getTemplateFields, replaceTemplateFields, getTemplate, type FieldType } from '@cgk/esign'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
+import { getTemplateFields, replaceTemplateFields, getTemplate, type FieldType } from '@cgk-platform/esign'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'

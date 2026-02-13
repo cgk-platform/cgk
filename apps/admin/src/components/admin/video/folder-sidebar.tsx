@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import {
   ChevronDown,
   ChevronRight,
@@ -23,7 +23,7 @@ import {
 } from '@/lib/video/actions'
 import { buildFolderTree, type FolderNode } from '@/lib/video/types'
 
-import type { VideoFolder } from '@cgk/video'
+import type { VideoFolder } from '@cgk-platform/video'
 
 interface FolderSidebarProps {
   folders: VideoFolder[]

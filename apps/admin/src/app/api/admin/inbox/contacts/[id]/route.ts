@@ -5,13 +5,13 @@
  * DELETE /api/admin/inbox/contacts/[id] - Delete contact
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   deleteContact,
   getContact,
   updateContact,
   type UpdateContactInput,
-} from '@cgk/admin-core'
+} from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

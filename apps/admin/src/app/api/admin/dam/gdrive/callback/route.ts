@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { redirect } from 'next/navigation'
 
 import {
@@ -9,7 +9,7 @@ import {
   getOAuthConfigFromEnv,
   createConnection,
   type GDriveConnection,
-} from '@cgk/dam'
+} from '@cgk-platform/dam'
 
 export async function GET(request: Request) {
   const url = new URL(request.url)

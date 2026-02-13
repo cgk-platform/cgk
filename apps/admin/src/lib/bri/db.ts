@@ -5,7 +5,7 @@
  * @ai-required All queries must use withTenant()
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 /**
  * Convert a JavaScript array to PostgreSQL array literal format

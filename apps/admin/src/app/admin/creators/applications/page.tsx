@@ -1,4 +1,4 @@
-import { Card, CardContent, Badge } from '@cgk/ui'
+import { Card, CardContent, Badge } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'

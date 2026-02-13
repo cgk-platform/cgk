@@ -15,7 +15,7 @@ export async function GET() {
   // Would get creator from session
   // const creatorId = 'creator_123' // TODO: Get from session
 
-  // Mock response - would use @cgk/tax package
+  // Mock response - would use @cgk-platform/tax package
   const taxStatus = {
     w9: {
       hasW9: true,
@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     )
   }
 
-  // Would validate and save using @cgk/tax package
+  // Would validate and save using @cgk-platform/tax package
   // await saveW9(tenantSlug, {
   //   payeeId: creatorId,
   //   payeeType: 'creator',

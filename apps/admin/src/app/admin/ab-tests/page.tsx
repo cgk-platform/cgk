@@ -3,7 +3,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 
 import { getABTests, getQuickStats } from '@/lib/ab-tests/db'
 import { ABTestQuickStats, QuickStatsSkeleton } from '@/components/ab-tests/QuickStats'

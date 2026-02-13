@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@cgk/ui'
-import type { PlatformLogEntry } from '@cgk/logging'
+import { Button } from '@cgk-platform/ui'
+import type { PlatformLogEntry } from '@cgk-platform/logging'
 import { Pause, Play, RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 

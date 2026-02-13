@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { AlertCircle, Check, Clock, Filter, X } from 'lucide-react'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 interface WorkflowExecution {
   id: string

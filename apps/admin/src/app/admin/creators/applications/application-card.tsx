@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, Badge, Button } from '@cgk/ui'
+import { Card, CardContent, Badge, Button } from '@cgk-platform/ui'
 
 import type { CreatorApplication, ApplicationStatus } from '@/lib/creators-admin-ops'
 import { formatDateTime } from '@/lib/format'

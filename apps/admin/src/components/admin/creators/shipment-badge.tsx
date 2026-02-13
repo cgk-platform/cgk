@@ -1,38 +1,40 @@
+/**
+ * Shipment Status Badge
+ *
+ * Specialized badge with tracking link support.
+ */
+
 'use client'
 
 import { Package } from 'lucide-react'
 
-import { Badge, cn } from '@cgk/ui'
+import { StatusBadge, type StatusBadgeProps } from '@cgk-platform/ui'
 
 import type { ShipmentStatus } from '../../../lib/creators/lifecycle-types'
 import { getTrackingUrl, SHIPMENT_STATUS_CONFIG } from '../../../lib/creators/lifecycle-types'
 
-interface ShipmentBadgeProps {
+interface ShipmentBadgeProps extends Omit<StatusBadgeProps, 'status'> {
   status: ShipmentStatus
   trackingNumber?: string
   carrier?: string
-  className?: string
 }
 
-export function ShipmentBadge({ status, trackingNumber, carrier, className }: ShipmentBadgeProps) {
+export function ShipmentBadge({
+  status,
+  trackingNumber,
+  carrier,
+  className,
+  ...props
+}: ShipmentBadgeProps) {
   const config = SHIPMENT_STATUS_CONFIG[status]
 
-  const colorClasses: Record<string, string> = {
-    gray: 'bg-gray-100 text-gray-700 border-gray-200',
-    blue: 'bg-blue-100 text-blue-700 border-blue-200',
-    amber: 'bg-amber-100 text-amber-700 border-amber-200',
-    green: 'bg-green-100 text-green-700 border-green-200',
-    red: 'bg-red-100 text-red-700 border-red-200',
-  }
-
   const badge = (
-    <Badge
-      variant="outline"
-      className={cn(colorClasses[config.color], 'gap-1 border', className)}
-    >
-      <span>{config.icon}</span>
-      <span>{config.label}</span>
-    </Badge>
+    <StatusBadge
+      status={status}
+      label={config.label}
+      className={className}
+      {...props}
+    />
   )
 
   if (trackingNumber && carrier && status === 'shipped') {
@@ -74,7 +76,7 @@ export function ShipmentSummaryBadge({
   return (
     <button
       onClick={onClick}
-      className="flex items-center gap-2 rounded-md bg-muted/50 px-2 py-1 text-xs hover:bg-muted"
+      className="flex items-center gap-2 rounded-md bg-muted/50 px-2 py-1 text-xs transition-colors duration-fast hover:bg-muted"
     >
       <Package className="h-3 w-3 text-muted-foreground" />
       <span>

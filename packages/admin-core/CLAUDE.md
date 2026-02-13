@@ -1,4 +1,4 @@
-# @cgk/admin-core - AI Development Guide
+# @cgk-platform/admin-core - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2026-02-10
@@ -20,14 +20,14 @@ import {
   executeActions,
   getWorkflowRules,
   createWorkflowRule,
-} from '@cgk/admin-core/workflow'
+} from '@cgk-platform/admin-core/workflow'
 
 import {
   getThreads,
   sendMessage,
   getContacts,
   createContact,
-} from '@cgk/admin-core/inbox'
+} from '@cgk-platform/admin-core/inbox'
 ```
 
 ---
@@ -37,7 +37,7 @@ import {
 ### Pattern 1: Workflow Engine (Singleton per Tenant)
 
 ```typescript
-import { WorkflowEngine } from '@cgk/admin-core/workflow'
+import { WorkflowEngine } from '@cgk-platform/admin-core/workflow'
 
 // Get or create engine for tenant
 const engine = WorkflowEngine.getInstance(tenantId)
@@ -70,7 +70,7 @@ await engine.triggerManually({
 ### Pattern 2: Condition Evaluation
 
 ```typescript
-import { evaluateConditions, computeFields } from '@cgk/admin-core/workflow'
+import { evaluateConditions, computeFields } from '@cgk-platform/admin-core/workflow'
 
 const computed = computeFields(entity)
 const { passed, results } = evaluateConditions(conditions, {
@@ -94,7 +94,7 @@ import {
   markThreadAsRead,
   snoozeThread,
   generateDraft,
-} from '@cgk/admin-core/inbox'
+} from '@cgk-platform/admin-core/inbox'
 
 // Get open threads
 const { threads, total } = await getThreads(tenantId, {
@@ -240,10 +240,10 @@ await engine.reloadRules() // After creating/updating rules
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/db` | Database queries with tenant isolation |
-| `@cgk/auth` | User context for actions |
-| `@cgk/communications` | Email queueing |
-| `@cgk/jobs` | Background job integration |
+| `@cgk-platform/db` | Database queries with tenant isolation |
+| `@cgk-platform/auth` | User context for actions |
+| `@cgk-platform/communications` | Email queueing |
+| `@cgk-platform/jobs` | Background job integration |
 
 ---
 
@@ -251,8 +251,8 @@ await engine.reloadRules() // After creating/updating rules
 
 ```bash
 # Run tests
-pnpm --filter @cgk/admin-core test
+pnpm --filter @cgk-platform/admin-core test
 
 # Watch mode
-pnpm --filter @cgk/admin-core test:watch
+pnpm --filter @cgk-platform/admin-core test:watch
 ```

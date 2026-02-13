@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Video Trimming Types
+ * @cgk-platform/video - Video Trimming Types
  *
  * Type definitions for video clipping and trimming operations.
  */

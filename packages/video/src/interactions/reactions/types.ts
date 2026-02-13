@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Video Reactions Types
+ * @cgk-platform/video - Video Reactions Types
  *
  * Type definitions for emoji reactions at video timestamps.
  */

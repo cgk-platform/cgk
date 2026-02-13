@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 
-import type { EmailSetupStatus } from '@cgk/communications'
+import type { EmailSetupStatus } from '@cgk-platform/communications'
 import type { EmailSetupBannerProps } from './types'
 
 /**

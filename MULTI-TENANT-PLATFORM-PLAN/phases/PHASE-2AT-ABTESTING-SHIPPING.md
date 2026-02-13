@@ -1,5 +1,7 @@
 # PHASE-2AT: A/B Testing - Shopify Functions Integration
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE (Backend/API complete, UI components in separate phase, production deployment pending)
 **Duration**: 1 week (Week 13-14)
 **Depends On**: PHASE-2AT-ABTESTING-CORE
@@ -140,6 +142,8 @@ fn extract_suffix(title: &str) -> &str {
 
 ```graphql
 # src/run.graphql
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
 
 query RunInput {
   cart {

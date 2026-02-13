@@ -4,7 +4,7 @@
  * Handles user feedback and converts it to learnings.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { createFailureLearning } from './correction-detector.js'
 import type { AgentFeedback, CreateFeedbackInput, FeedbackType } from '../memory/types.js'
 

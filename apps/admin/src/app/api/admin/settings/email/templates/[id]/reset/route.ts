@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import {
   getTemplateById,
   resetToDefault,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

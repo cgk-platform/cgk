@@ -5,7 +5,7 @@
  * Supports various widths and text alignments.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { BlockProps, MarkdownConfig } from '../types'
 
 /**

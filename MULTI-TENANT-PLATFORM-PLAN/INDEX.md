@@ -9,7 +9,7 @@
 ## Key Principle: Portable by Design
 
 This platform is designed to be:
-- **Clone and Deploy**: `npx @cgk/cli create my-brand` -> working site in < 1 hour
+- **Clone and Deploy**: `npx @cgk-platform/cli create my-brand` -> working site in < 1 hour
 - **Updateable**: Platform updates don't break customizations
 - **AI-First**: Documentation optimized for Claude, Cursor, and AI coding tools
 - **Scalable**: Same codebase for 1 or 1000+ tenants
@@ -184,7 +184,13 @@ phases/
 ├── PHASE-7B-MIGRATION-TESTING.md     # Week 25: E2E, performance, security
 ├── PHASE-7C-MIGRATION-CUTOVER.md     # Week 26: Zero-downtime cutover
 │
-└── PHASE-8-AUDIT.md                  # Week 27: 15-agent final verification
+├── PHASE-8-AUDIT.md                  # Week 27: 15-agent final verification
+│
+├── PHASE-9A-PRODUCTION-CREDENTIALS.md # Production: Env vars, encryption keys
+├── PHASE-9B-DNS-DOMAINS.md            # Production: Domain configuration
+├── PHASE-9C-DATABASE-MIGRATIONS.md    # Production: Run migrations
+├── PHASE-9D-SETUP-WIZARD.md           # Production: Web-based setup wizard (REQUIRED)
+└── PHASE-9E-NPM-DEPLOYMENT.md         # Publishing: npm packages, @cgk-platform/cli
 ```
 
 ---
@@ -288,6 +294,11 @@ Week 24-26: Migration (Sequential)
 
 Week 27: Audit (All Parallel Agents)
 └── PHASE-8-AUDIT (15 agents simultaneously)
+
+Production Deployment (After Audit)
+├── 9A (Credentials) -> 9B (DNS) -> 9C (Migrations) -> 9D (Setup Wizard)
+├── 9E (npm Publishing) - Can run in PARALLEL with 9A-9D
+└── All steps REQUIRED for production/open-source release
 ```
 
 ### Dependency Graph

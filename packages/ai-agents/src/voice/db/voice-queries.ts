@@ -5,7 +5,7 @@
  * @ai-required All queries expect to be run within withTenant() context
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type {
   AgentVoiceConfig,
   CreateTranscriptInput,

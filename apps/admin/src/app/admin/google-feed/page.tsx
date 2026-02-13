@@ -1,5 +1,5 @@
-import { withTenant } from '@cgk/db'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui'
+import { withTenant } from '@cgk-platform/db'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'

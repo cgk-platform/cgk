@@ -5,7 +5,7 @@
  * Interactive top-up management with create modal and settings
  */
 
-import { Badge, Button, Card, cn } from '@cgk/ui'
+import { Badge, Button, Card, cn } from '@cgk-platform/ui'
 import {
   AlertCircle,
   ArrowUpRight,

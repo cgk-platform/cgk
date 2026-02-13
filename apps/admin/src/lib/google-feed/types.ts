@@ -29,7 +29,7 @@ export type {
   CustomLabelRules,
   MerchantIssue,
   SyncError,
-} from '@cgk/commerce'
+} from '@cgk-platform/commerce'
 
 // ---------------------------------------------------------------------------
 // Admin-Specific Types

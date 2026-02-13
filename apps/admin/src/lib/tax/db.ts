@@ -2,7 +2,7 @@
  * Tax database operations with tenant isolation
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { CreatorTaxInfo, TaxFilters, TaxYearSummary } from './types'
 

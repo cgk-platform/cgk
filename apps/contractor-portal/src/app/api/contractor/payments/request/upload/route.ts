@@ -7,7 +7,7 @@
  * with a blob storage service like Vercel Blob, S3, or Cloudflare R2.
  */
 
-import { createPaymentAttachment } from '@cgk/payments'
+import { createPaymentAttachment } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

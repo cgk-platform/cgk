@@ -5,10 +5,10 @@
  * POST /api/platform/flags - Create a new flag
  */
 
-import { requireAuth } from '@cgk/auth'
-import { isValidFlagKey, type CreateFlagInput, type FlagListFilters } from '@cgk/feature-flags'
-import { createFlag, getCategories, getFlags, invalidateAllFlags } from '@cgk/feature-flags/server'
-import { createLogger } from '@cgk/logging'
+import { requireAuth } from '@cgk-platform/auth'
+import { isValidFlagKey, type CreateFlagInput, type FlagListFilters } from '@cgk-platform/feature-flags'
+import { createFlag, getCategories, getFlags, invalidateAllFlags } from '@cgk-platform/feature-flags/server'
+import { createLogger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

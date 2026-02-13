@@ -704,7 +704,7 @@ function ProductPage({ handle }: { handle: string }) {
 ### Migration Path
 
 Tenants can migrate from Shopify to Custom:
-1. Export products/customers via CLI: `npx @cgk/cli migrate-commerce`
+1. Export products/customers via CLI: `npx @cgk-platform/cli migrate-commerce`
 2. Configure Stripe in admin UI
 3. Update feature flag override
 4. Test checkout flow

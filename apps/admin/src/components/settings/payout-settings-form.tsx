@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, cn, Spinner } from '@cgk/ui'
+import { Card, CardContent, cn, Spinner } from '@cgk-platform/ui'
 import {
   Banknote,
   Building2,

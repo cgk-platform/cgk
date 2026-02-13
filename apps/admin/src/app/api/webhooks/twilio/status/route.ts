@@ -6,7 +6,7 @@ import {
   findTenantByTwilioNumber,
   handleStatusWebhook,
   parseFormData,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * POST /api/webhooks/twilio/status

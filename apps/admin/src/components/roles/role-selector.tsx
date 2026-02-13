@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Label } from '@cgk/ui'
+import { Badge, Label } from '@cgk-platform/ui'
 import * as React from 'react'
 
 import type { Role } from './types'

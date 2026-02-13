@@ -12,7 +12,7 @@
  */
 
 import { useState, useCallback } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, Checkbox } from '@cgk/ui'
+import { Card, CardContent, CardHeader, CardTitle, Checkbox } from '@cgk-platform/ui'
 
 export interface AITask {
   text: string

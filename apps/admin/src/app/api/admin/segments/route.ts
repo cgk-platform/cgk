@@ -2,7 +2,7 @@
  * Combined Segments API
  * GET: List all segments (Shopify + RFM)
  */
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Switch, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Switch, cn } from '@cgk-platform/ui'
 import { Mail, MessageSquare, Bell, Save } from 'lucide-react'
 import { useState, useTransition } from 'react'
 

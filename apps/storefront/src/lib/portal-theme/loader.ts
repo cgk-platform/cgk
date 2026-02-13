@@ -5,7 +5,7 @@
  * Supports caching and SSR-compatible loading.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { cache } from 'react'
 
 import type { CustomerPortalThemeConfig } from './types'

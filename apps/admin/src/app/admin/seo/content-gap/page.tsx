@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 import { RefreshCw, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 

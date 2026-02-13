@@ -3,7 +3,7 @@
  * GET: List RFM segment distribution and customers
  * POST: Trigger RFM calculation
  */
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

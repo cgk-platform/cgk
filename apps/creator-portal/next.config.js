@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@cgk/ui', '@cgk/core', '@cgk/db', '@cgk/auth', '@cgk/payments'],
+  transpilePackages: ['@cgk-platform/ui', '@cgk-platform/core', '@cgk-platform/db', '@cgk-platform/auth', '@cgk-platform/payments'],
 }
 
 module.exports = nextConfig

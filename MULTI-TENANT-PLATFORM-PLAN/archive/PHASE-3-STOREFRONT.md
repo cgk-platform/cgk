@@ -72,7 +72,7 @@ Build: `cargo build --target=wasm32-wasip1 --release`
 
 ### Commerce Provider Strategy
 
-All storefront components use the `CommerceProvider` interface from `@cgk/commerce`. This enables:
+All storefront components use the `CommerceProvider` interface from `@cgk-platform/commerce`. This enables:
 
 - **Default**: Shopify Headless checkout (implemented in Phase 3)
 - **Future**: Custom+Stripe checkout (interface ready, implementation deferred)
@@ -95,7 +95,7 @@ See [COMMERCE-PROVIDER-SPEC-2025-02-10.md](./COMMERCE-PROVIDER-SPEC-2025-02-10.m
 #### [PARALLEL] Commerce Provider Integration
 ```typescript
 // apps/storefront/src/lib/commerce.ts
-import { createCommerceProvider } from '@cgk/commerce'
+import { createCommerceProvider } from '@cgk-platform/commerce'
 import { getTenantConfig } from './tenant'
 
 // Cached provider instance per request
@@ -138,7 +138,7 @@ export async function getProduct(handle: string) {
 ```typescript
 // apps/storefront/src/components/product-page.tsx
 import { getCommerceProvider } from '@/lib/commerce'
-import type { Product } from '@cgk/commerce'
+import type { Product } from '@cgk-platform/commerce'
 
 export async function ProductPage({ handle }: { handle: string }) {
   const commerce = await getCommerceProvider()

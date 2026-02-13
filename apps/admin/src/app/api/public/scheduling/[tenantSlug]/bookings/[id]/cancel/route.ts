@@ -1,5 +1,5 @@
-import { sql } from '@cgk/db'
-import { getBooking, updateBookingStatus } from '@cgk/scheduling'
+import { sql } from '@cgk-platform/db'
+import { getBooking, updateBookingStatus } from '@cgk-platform/scheduling'
 
 export const dynamic = 'force-dynamic'
 

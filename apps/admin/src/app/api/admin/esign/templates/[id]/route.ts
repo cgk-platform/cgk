@@ -6,7 +6,7 @@
  * DELETE /api/admin/esign/templates/[id] - Archive template
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import {
   getTemplateWithFields,

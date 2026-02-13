@@ -1,5 +1,5 @@
 /**
- * @cgk/video/creator-tools - Video Creator Tools
+ * @cgk-platform/video/creator-tools - Video Creator Tools
  *
  * Teleprompter, trimming, CTA buttons, and real-time status updates.
  */

@@ -84,19 +84,19 @@ export function withTenantContext<T extends TenantEvent<unknown>, R = void>(
       )
     }
 
-    // Dynamically import @cgk/db to avoid circular dependencies
+    // Dynamically import @cgk-platform/db to avoid circular dependencies
     // and to handle cases where the package may not be available
     try {
-      const { withTenant } = await import('@cgk/db')
+      const { withTenant } = await import('@cgk-platform/db')
 
       return withTenant(tenantId, async () => {
         return handler(ctx)
       })
     } catch (importError) {
-      // If @cgk/db is not available, proceed without tenant context
+      // If @cgk-platform/db is not available, proceed without tenant context
       // This allows the jobs package to be used standalone for testing
       console.warn(
-        `[Job:${ctx.name}] @cgk/db not available, proceeding without tenant context`
+        `[Job:${ctx.name}] @cgk-platform/db not available, proceeding without tenant context`
       )
       return handler(ctx)
     }

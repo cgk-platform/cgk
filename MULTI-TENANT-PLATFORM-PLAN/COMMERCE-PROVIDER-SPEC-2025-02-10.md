@@ -607,7 +607,7 @@ export function createStripeClient(config: StripeConfig) {
 import type { CommerceProvider } from './types'
 import { createShopifyProvider, ShopifyProviderConfig } from './providers/shopify'
 import { createCustomProvider, CustomProviderConfig } from './providers/custom'
-import { evaluateFlag } from '@cgk/feature-flags'
+import { evaluateFlag } from '@cgk-platform/feature-flags'
 
 export type CommerceProviderConfig =
   | { type: 'shopify'; config: ShopifyProviderConfig }
@@ -656,8 +656,8 @@ Components use the provider abstraction, unaware of which backend is active:
 
 ```typescript
 // apps/storefront/src/components/product-page.tsx
-import { useCommerceProvider } from '@cgk/commerce'
-import { useCart } from '@cgk/commerce-hooks'
+import { useCommerceProvider } from '@cgk-platform/commerce'
+import { useCart } from '@cgk-platform/commerce-hooks'
 
 export function ProductPage({ handle }: { handle: string }) {
   const commerce = useCommerceProvider()
@@ -691,9 +691,9 @@ export function ProductPage({ handle }: { handle: string }) {
 
 ```typescript
 // apps/storefront/src/components/checkout.tsx
-import { useCommerceProvider } from '@cgk/commerce'
-import { useCart } from '@cgk/commerce-hooks'
-import { useFlag } from '@cgk/feature-flags/react'
+import { useCommerceProvider } from '@cgk-platform/commerce'
+import { useCart } from '@cgk-platform/commerce-hooks'
+import { useFlag } from '@cgk-platform/feature-flags/react'
 
 export function Checkout() {
   const provider = useCommerceProvider()
@@ -837,7 +837,7 @@ Both providers receive webhooks through a unified handler:
 
 ```typescript
 // apps/storefront/src/app/api/webhooks/commerce/route.ts
-import { getCommerceProvider } from '@cgk/commerce'
+import { getCommerceProvider } from '@cgk-platform/commerce'
 
 export async function POST(req: Request) {
   const tenantId = req.headers.get('x-tenant-id')

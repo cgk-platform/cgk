@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button, Card, CardContent, CardHeader, Input, Switch, Badge } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Switch, Badge } from '@cgk-platform/ui'
 import { Bell, Save, Slack, Mail, Phone, CheckCircle2, XCircle } from 'lucide-react'
 
 const NOTIFICATION_EVENTS = [

@@ -1,5 +1,5 @@
 /**
- * @cgk/video/ai - AI Content Generation Module
+ * @cgk-platform/video/ai - AI Content Generation Module
  *
  * Provides:
  * - Title generation from transcripts

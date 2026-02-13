@@ -2,7 +2,7 @@
 
 import { CheckCircle, AlertCircle } from 'lucide-react'
 
-import { Badge, Card, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardContent, cn } from '@cgk-platform/ui'
 
 import type { WizardData } from '@/lib/ab-tests/types'
 

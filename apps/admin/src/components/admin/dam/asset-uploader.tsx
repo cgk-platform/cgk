@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn, Progress } from '@cgk/ui'
+import { Button, cn, Progress } from '@cgk-platform/ui'
 import {
   Upload,
   X,
@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
-import type { AssetType } from '@cgk/dam'
+import type { AssetType } from '@cgk-platform/dam'
 
 export interface UploadFile {
   id: string

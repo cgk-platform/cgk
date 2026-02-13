@@ -3,7 +3,7 @@
  * Tracks all actions on documents for compliance
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { nanoid } from 'nanoid'
 
 // ============================================================================

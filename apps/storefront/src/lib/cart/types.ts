@@ -4,7 +4,7 @@
  * Defines cart-related types including cart attributes for tenant tracking.
  */
 
-import type { Cart, CartLine, Money } from '@cgk/commerce'
+import type { Cart, CartLine, Money } from '@cgk-platform/commerce'
 
 /**
  * Platform-specific cart attributes for tracking and routing

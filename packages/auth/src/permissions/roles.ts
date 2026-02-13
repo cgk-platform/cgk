@@ -3,7 +3,7 @@
  * CRUD operations for RBAC roles
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { resolvePermissions } from './checker'
 

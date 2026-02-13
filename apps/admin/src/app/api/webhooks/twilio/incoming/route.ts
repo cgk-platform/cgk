@@ -4,7 +4,7 @@ import {
   createTwimlResponse,
   handleIncomingSmsWebhook,
   parseFormData,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * POST /api/webhooks/twilio/incoming

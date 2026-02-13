@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Label } from '@cgk/ui'
+import { Button, Input, Label } from '@cgk-platform/ui'
 import { X, Loader2, AlertTriangle } from 'lucide-react'
 import { useState, useCallback, useEffect } from 'react'
 

@@ -16,7 +16,7 @@ import {
   ArrowUpDown,
 } from 'lucide-react'
 
-import { Badge, Button, Card, CardContent, cn } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, cn } from '@cgk-platform/ui'
 
 import type { ABTest, TestStatus, TestType } from '@/lib/ab-tests/types'
 import { Pagination } from '@/components/commerce/pagination'

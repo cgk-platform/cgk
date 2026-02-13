@@ -6,7 +6,7 @@
  * Displays a service x tenant grid showing health status for each combination.
  */
 
-import type { HealthMatrixResponse, HealthStatus } from '@cgk/health'
+import type { HealthMatrixResponse, HealthStatus } from '@cgk-platform/health'
 import { useEffect, useState } from 'react'
 
 

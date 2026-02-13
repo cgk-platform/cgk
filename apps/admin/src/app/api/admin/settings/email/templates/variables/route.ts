@@ -4,7 +4,7 @@ import {
   COMMON_VARIABLES,
   NOTIFICATION_VARIABLES,
   getVariablesForType,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

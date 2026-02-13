@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 import type { DateRange } from '@/lib/analytics'
 

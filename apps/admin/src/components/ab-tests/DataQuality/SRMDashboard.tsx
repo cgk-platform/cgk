@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react'
 
-import { Badge, Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardHeader, CardContent, cn } from '@cgk-platform/ui'
 
 import type { SRMAnalysis } from '@/lib/ab-tests/types'
 

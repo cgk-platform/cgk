@@ -18,7 +18,7 @@ export async function GET(
   // Would get creator from session and verify ownership
   // const creatorId = 'creator_123' // TODO: Get from session
 
-  // Would fetch document using @cgk/tax
+  // Would fetch document using @cgk-platform/tax
   // const document = await getTaxFormById(tenantSlug, id)
   // if (!document || document.payeeId !== creatorId) {
   //   return NextResponse.json({ error: 'Document not found' }, { status: 404 })

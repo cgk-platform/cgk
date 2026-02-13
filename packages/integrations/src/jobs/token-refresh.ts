@@ -8,8 +8,8 @@
  * @ai-required Tokens must be refreshed proactively
  */
 
-import { sql } from '@cgk/db'
-import { defineJob } from '@cgk/jobs'
+import { sql } from '@cgk-platform/db'
+import { defineJob } from '@cgk-platform/jobs'
 
 import { refreshGoogleAdsToken } from '../google-ads/refresh.js'
 import { refreshMetaToken } from '../meta/refresh.js'

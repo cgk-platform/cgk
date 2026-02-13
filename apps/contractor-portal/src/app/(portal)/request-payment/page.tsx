@@ -16,7 +16,7 @@ import {
   Label,
   Spinner,
   Textarea,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 
 const WORK_TYPES = [
   { value: 'contract_work', label: 'Contract Work' },

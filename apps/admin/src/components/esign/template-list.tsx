@@ -20,7 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import {
   Archive,
   Check,

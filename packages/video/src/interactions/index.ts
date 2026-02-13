@@ -1,5 +1,5 @@
 /**
- * @cgk/video/interactions - Video Interactions
+ * @cgk-platform/video/interactions - Video Interactions
  *
  * Comments and reactions for videos.
  */

@@ -5,7 +5,7 @@
  * Returns ad spend analysis, ROAS curves, and channel efficiency
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getSpendSensitivity } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

@@ -7,7 +7,7 @@
  * Shows a miniature portal interface with all theme changes applied.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { usePortalTheme } from './PortalThemeProvider'
 import { PortalIcon } from './PortalIcon'
 

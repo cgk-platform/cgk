@@ -1,8 +1,8 @@
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 
-import { getAssets, getCollections, getAssetStats, type AssetFilters } from '@cgk/dam'
+import { getAssets, getCollections, getAssetStats, type AssetFilters } from '@cgk-platform/dam'
 import { AssetLibraryClient } from './asset-library-client'
 
 export default async function DAMPage({

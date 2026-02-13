@@ -4,8 +4,8 @@
  * Handles refunds/create webhook
  */
 
-import { withTenant, sql } from '@cgk/db'
-import { createJobQueue } from '@cgk/jobs'
+import { withTenant, sql } from '@cgk-platform/db'
+import { createJobQueue } from '@cgk-platform/jobs'
 import type { ShopifyRefundPayload } from '../types'
 import { parseCents } from '../utils'
 

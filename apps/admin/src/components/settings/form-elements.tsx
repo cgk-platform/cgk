@@ -1,6 +1,6 @@
 'use client'
 
-import { Alert, AlertDescription, Button, cn, Input, Label, Select, Switch } from '@cgk/ui'
+import { Alert, AlertDescription, Button, cn, Input, Label, Select, Switch } from '@cgk-platform/ui'
 import { AlertCircle, Check, Loader2 } from 'lucide-react'
 
 // ============================================================

@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { Circle, CircleDot, ExternalLink, Mail } from 'lucide-react'
 import Link from 'next/link'
 

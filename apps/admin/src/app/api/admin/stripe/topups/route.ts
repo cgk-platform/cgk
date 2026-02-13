@@ -3,7 +3,7 @@
  * GET: Fetch top-ups list with stats
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 
 import { getStripeTopups, getTopupStats } from '@/lib/admin-utilities/db'

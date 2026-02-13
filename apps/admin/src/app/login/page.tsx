@@ -1,4 +1,4 @@
-import { Card, CardContent, Button, Input, Label } from '@cgk/ui'
+import { Card, CardContent, Button, Input, Label } from '@cgk-platform/ui'
 
 export default function LoginPage() {
   return (

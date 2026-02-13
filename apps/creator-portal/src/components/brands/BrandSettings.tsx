@@ -15,7 +15,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import { useCallback, useEffect, useState } from 'react'
 
 import type {

@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button } from '@cgk/ui'
-import { Card, CardContent, CardHeader } from '@cgk/ui'
-import { Switch } from '@cgk/ui'
-import { RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
+import { Switch } from '@cgk-platform/ui'
+import { RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk-platform/ui'
 
 import type { NotificationRoutingStepProps } from '../types'
 

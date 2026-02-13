@@ -1,5 +1,7 @@
 # PHASE-2AI-ADMIN: AI Agent Admin UI
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 > **Status**: COMPLETE
 > **Completed**: 2026-02-10
 > **Goal**: Implement all BRI (AI Agent) admin pages for configuring, monitoring, and managing AI agents
@@ -633,8 +635,8 @@ All pages MUST use tenant-scoped queries:
 
 ```typescript
 // API Route Pattern
-import { getTenantContext } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { getTenantContext } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 
 export async function GET(req: Request) {
   const { tenantId } = await getTenantContext(req)

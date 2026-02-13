@@ -1,4 +1,4 @@
-import { completeGoogleAdsOAuth } from '@cgk/integrations'
+import { completeGoogleAdsOAuth } from '@cgk-platform/integrations'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'

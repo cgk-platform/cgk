@@ -4,8 +4,8 @@
  * GET /api/creator/payments/connect/oauth/callback - Handle OAuth callback
  */
 
-import { sql } from '@cgk/db'
-import { completeStripeOAuth, createStripeConnectProvider } from '@cgk/payments'
+import { sql } from '@cgk-platform/db'
+import { completeStripeOAuth, createStripeConnectProvider } from '@cgk-platform/payments'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'

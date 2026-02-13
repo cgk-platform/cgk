@@ -7,7 +7,7 @@
  * Supports multiple styles with theme-aware rendering.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 

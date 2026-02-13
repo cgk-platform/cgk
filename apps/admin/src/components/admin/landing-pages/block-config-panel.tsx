@@ -1,6 +1,6 @@
 'use client'
 
-import { Input, Label, Textarea } from '@cgk/ui'
+import { Input, Label, Textarea } from '@cgk-platform/ui'
 
 import type { Block, BlockConfig, BlockType } from '@/lib/landing-pages/types'
 

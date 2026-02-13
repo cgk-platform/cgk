@@ -4,7 +4,7 @@
  * Check if portal features are enabled for a tenant.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type { PortalFeatureFlags } from '../types'
 
 /**

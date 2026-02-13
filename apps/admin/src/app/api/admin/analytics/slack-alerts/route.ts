@@ -5,7 +5,7 @@
  * POST /api/admin/analytics/slack-alerts - Create a new slack alert
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { createSlackAlert, getSlackAlerts } from '@/lib/analytics'
 import type { SlackAlertCreate } from '@/lib/analytics'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Label } from '@cgk/ui'
+import { Button, Input, Label } from '@cgk-platform/ui'
 import Link from 'next/link'
 import { useState } from 'react'
 

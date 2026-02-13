@@ -2,7 +2,7 @@
  * Full-Text Search
  * PostgreSQL FTS implementation for asset search
  */
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type { Asset, AssetRow, AssetType } from '../types.js'
 

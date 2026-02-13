@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk-platform/ui'
 import { ArrowRight, Inbox, Mail, MessageSquare, Send, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { headers } from 'next/headers'

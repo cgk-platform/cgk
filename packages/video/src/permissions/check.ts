@@ -1,12 +1,12 @@
 /**
- * @cgk/video - Permission checking
+ * @cgk-platform/video - Permission checking
  *
  * Validates user access to videos based on permissions.
  */
 
 import { createHash } from 'crypto'
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import type { PermissionLevel } from '../types.js'
 import type { PermissionCheckResult, PermissionUserContext } from './types.js'

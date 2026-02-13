@@ -1,7 +1,7 @@
 /**
  * A/B Testing Admin Types
  *
- * Extended types for the admin UI, building on @cgk/ab-testing types
+ * Extended types for the admin UI, building on @cgk-platform/ab-testing types
  */
 
 import type {
@@ -17,7 +17,7 @@ import type {
   TargetingAction,
   ConditionField,
   ConditionOperator,
-} from '@cgk/ab-testing'
+} from '@cgk-platform/ab-testing'
 
 export type {
   ABTest,

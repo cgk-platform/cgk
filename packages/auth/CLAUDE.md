@@ -1,4 +1,4 @@
-# @cgk/auth - AI Development Guide
+# @cgk-platform/auth - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2026-02-10
@@ -14,7 +14,7 @@ Authentication utilities for the CGK platform. Provides JWT handling, session ma
 ## Quick Reference
 
 ```typescript
-import { getTenantContext, requireAuth, signJWT, verifyJWT } from '@cgk/auth'
+import { getTenantContext, requireAuth, signJWT, verifyJWT } from '@cgk-platform/auth'
 
 // In API routes
 export async function GET(req: Request) {
@@ -38,8 +38,8 @@ export async function POST(req: Request) {
 **When to use**: At the start of EVERY API route
 
 ```typescript
-import { getTenantContext } from '@cgk/auth'
-import { withTenant, sql } from '@cgk/db'
+import { getTenantContext } from '@cgk-platform/auth'
+import { withTenant, sql } from '@cgk-platform/db'
 
 export async function GET(req: Request) {
   const { tenantId, userId } = await getTenantContext(req)
@@ -60,7 +60,7 @@ export async function GET(req: Request) {
 **When to use**: When route requires authenticated user
 
 ```typescript
-import { requireAuth, AuthenticationError } from '@cgk/auth'
+import { requireAuth, AuthenticationError } from '@cgk-platform/auth'
 
 export async function POST(req: Request) {
   try {
@@ -80,7 +80,7 @@ export async function POST(req: Request) {
 **When to use**: Passwordless login flow
 
 ```typescript
-import { createMagicLink, sendMagicLinkEmail, verifyMagicLink } from '@cgk/auth'
+import { createMagicLink, sendMagicLinkEmail, verifyMagicLink } from '@cgk-platform/auth'
 
 // Request magic link
 const token = await createMagicLink(email, 'login')
@@ -95,7 +95,7 @@ const { userId, purpose, orgId } = await verifyMagicLink(email, token)
 **When to use**: Creating and managing user sessions
 
 ```typescript
-import { createSession, validateSession, revokeSession, signJWT } from '@cgk/auth'
+import { createSession, validateSession, revokeSession, signJWT } from '@cgk-platform/auth'
 
 // Create session after login
 const { session, token } = await createSession(userId, orgId, request)
@@ -123,7 +123,7 @@ await revokeSession(sessionId)
 **When to use**: Password-based authentication
 
 ```typescript
-import { hashPassword, verifyPassword } from '@cgk/auth'
+import { hashPassword, verifyPassword } from '@cgk-platform/auth'
 
 // Hash password on registration
 const hash = await hashPassword(password)
@@ -227,8 +227,8 @@ await verifyMagicLink(email, token) // Throws error!
 | `jose` | Edge-compatible JWT signing and verification |
 | `bcryptjs` | Password hashing |
 | `nanoid` | Secure token generation |
-| `@cgk/core` | Shared types |
-| `@cgk/db` | Session and user storage |
+| `@cgk-platform/core` | Shared types |
+| `@cgk-platform/db` | Session and user storage |
 
 ---
 
@@ -236,8 +236,8 @@ await verifyMagicLink(email, token) // Throws error!
 
 ```bash
 # Run tests
-pnpm --filter @cgk/auth test
+pnpm --filter @cgk-platform/auth test
 
 # Watch mode
-pnpm --filter @cgk/auth test:watch
+pnpm --filter @cgk-platform/auth test:watch
 ```

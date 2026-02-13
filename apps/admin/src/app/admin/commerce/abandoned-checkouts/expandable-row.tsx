@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge } from '@cgk/ui'
+import { Badge } from '@cgk-platform/ui'
 import { ChevronDown, ChevronRight, ExternalLink, Package } from 'lucide-react'
 import { useState } from 'react'
 

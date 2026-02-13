@@ -6,7 +6,7 @@
 
 'use client'
 
-import { cn, formatCurrency } from '@cgk/ui'
+import { cn, formatCurrency } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 import type { PortalContentStrings, WishlistItem } from '@/lib/account/types'

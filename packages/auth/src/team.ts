@@ -1,4 +1,4 @@
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { nanoid } from 'nanoid'
 
 import { sha256 } from './crypto'

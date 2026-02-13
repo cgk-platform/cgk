@@ -5,7 +5,7 @@
  * @ai-note Handle multiple entries at once for admin actions
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { BulkAction, BulkActionResult, QueueType } from './types.js'
 import { markAsSkipped } from './claim.js'

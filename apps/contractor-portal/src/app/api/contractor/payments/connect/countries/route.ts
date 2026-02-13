@@ -4,7 +4,7 @@
  * GET /api/contractor/payments/connect/countries - Get available countries
  */
 
-import { getAvailableCountries } from '@cgk/payments'
+import { getAvailableCountries } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

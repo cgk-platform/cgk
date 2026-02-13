@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Card, CardHeader, CardContent, cn } from '@cgk-platform/ui'
 
 import { useSegmentData } from '@/lib/ab-tests/hooks'
 import type { SegmentData } from '@/lib/ab-tests/types'

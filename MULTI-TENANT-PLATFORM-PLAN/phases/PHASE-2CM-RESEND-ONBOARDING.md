@@ -1,5 +1,7 @@
 # PHASE-2CM-RESEND-ONBOARDING: Resend Tenant Onboarding
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Duration**: Week 11 (3 days)
 **Depends On**: PHASE-2CM-SENDER-DNS, PHASE-2PO-ONBOARDING (tenant wizard)
@@ -433,7 +435,7 @@ The implementing agent should determine:
 
 ### Files Created
 
-**Package: `@cgk/communications` (onboarding module)**
+**Package: `@cgk-platform/communications` (onboarding module)**
 - `/packages/communications/src/onboarding/types.ts` - Type definitions
 - `/packages/communications/src/onboarding/verify-api-key.ts` - API key verification
 - `/packages/communications/src/onboarding/domain-setup.ts` - Domain helpers

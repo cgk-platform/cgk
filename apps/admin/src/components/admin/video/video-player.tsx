@@ -1,7 +1,7 @@
 'use client'
 
-import { cn } from '@cgk/ui'
-import { getStreamUrl, getThumbnailUrl } from '@cgk/video'
+import { cn } from '@cgk-platform/ui'
+import { getStreamUrl, getThumbnailUrl } from '@cgk-platform/video'
 import type Hls from 'hls.js'
 import {
   Maximize,

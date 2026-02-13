@@ -16,7 +16,7 @@ import {
   Label,
   Progress,
   Spinner,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 
 interface Country {
   code: string

@@ -1,5 +1,5 @@
-import { getAllUsers, logAuditAction } from '@cgk/auth'
-import type { UserQueryOptions, PlatformUserStatus } from '@cgk/auth'
+import { getAllUsers, logAuditAction } from '@cgk-platform/auth'
+import type { UserQueryOptions, PlatformUserStatus } from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 

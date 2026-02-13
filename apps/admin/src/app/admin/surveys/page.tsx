@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent } from '@cgk/ui'
+import { Badge, Button, Card, CardContent } from '@cgk-platform/ui'
 import { Plus, Search, BarChart3, MessageSquare, Eye, MoreHorizontal, Copy, Archive, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'

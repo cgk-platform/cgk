@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Teleprompter Types
+ * @cgk-platform/video - Teleprompter Types
  *
  * Type definitions for teleprompter scripts and settings.
  */

@@ -4,7 +4,7 @@
  * GET /api/creator/analytics/breakdown - Fetch earnings breakdown by type, brand, and time
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

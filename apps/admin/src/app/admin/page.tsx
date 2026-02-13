@@ -1,4 +1,4 @@
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 
@@ -8,18 +8,23 @@ import { KpiCards, KpiCardsSkeleton, type KpiData } from '@/components/admin/das
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
+    <div className="space-y-8">
+      {/* Page header */}
+      <div className="animate-fade-up">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-muted-foreground">
           Overview of your store performance
         </p>
       </div>
 
+      {/* KPI Cards */}
       <Suspense fallback={<KpiCardsSkeleton />}>
         <KpiCardsLoader />
       </Suspense>
 
+      {/* Two-column layout */}
       <div className="grid gap-6 lg:grid-cols-2">
         <Suspense fallback={<EscalationsSkeleton />}>
           <EscalationsLoader />

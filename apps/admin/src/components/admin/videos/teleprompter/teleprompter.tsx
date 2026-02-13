@@ -1,11 +1,11 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { Pause, Play, RotateCcw, Settings2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { TeleprompterSettings, TeleprompterScript } from '@cgk/video/creator-tools'
-import { calculateScrollRate, DEFAULT_TELEPROMPTER_SETTINGS } from '@cgk/video/creator-tools'
+import type { TeleprompterSettings, TeleprompterScript } from '@cgk-platform/video/creator-tools'
+import { calculateScrollRate, DEFAULT_TELEPROMPTER_SETTINGS } from '@cgk-platform/video/creator-tools'
 
 interface TeleprompterProps {
   script: TeleprompterScript

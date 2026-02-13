@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import crypto from 'crypto'
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { logInboundEmail } from '@/lib/treasury/db/communications'
 import {
   approveDrawRequest,

@@ -8,7 +8,7 @@
 
 ## Context
 
-We fixed ~100 TypeScript errors in `@cgk/ai-agents` by (among other things) prefixing unused variables with underscores. Per our updated CLAUDE.md guidance, we should either:
+We fixed ~100 TypeScript errors in `@cgk-platform/ai-agents` by (among other things) prefixing unused variables with underscores. Per our updated CLAUDE.md guidance, we should either:
 1. **Remove** the variable entirely if it's dead code
 2. **Keep underscore + add comment** explaining why it's intentionally unused
 
@@ -31,7 +31,7 @@ Run parallel agents to handle this efficiently.
 
 ## Files to Review
 
-### @cgk/ai-agents - Underscore Parameters (check if actually needed)
+### @cgk-platform/ai-agents - Underscore Parameters (check if actually needed)
 
 | File | Line | Variable | Action Needed |
 |------|------|----------|---------------|
@@ -46,7 +46,7 @@ Run parallel agents to handle this efficiently.
 | `src/integrations/slack/interactions.ts` | 410 | `_tenantId` | Check if needed for Slack approval |
 | `src/integrations/email/sender.ts` | 164 | `_tenantId` | Check if needed for inbound email handling |
 
-### @cgk/ai-agents - Underscore Imports (likely removable)
+### @cgk-platform/ai-agents - Underscore Imports (likely removable)
 
 | File | Line | Import | Recommendation |
 |------|------|--------|----------------|
@@ -79,7 +79,7 @@ Key patterns to document:
 
 After cleanup, run:
 ```bash
-pnpm turbo typecheck --filter=@cgk/ai-agents
+pnpm turbo typecheck --filter=@cgk-platform/ai-agents
 ```
 
 Should still pass with 0 errors.

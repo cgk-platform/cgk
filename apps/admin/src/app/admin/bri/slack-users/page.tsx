@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Button, Card, CardContent, CardHeader, Input, Badge, Alert, AlertDescription } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Badge, Alert, AlertDescription } from '@cgk-platform/ui'
 import { Search, AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 interface TeamMember {

@@ -5,7 +5,7 @@
  * @ai-required Must use offline access for refresh tokens
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { encryptToken } from '../encryption.js'
 import { storeSimpleOAuthState, validateSimpleOAuthState } from '../oauth-state.js'

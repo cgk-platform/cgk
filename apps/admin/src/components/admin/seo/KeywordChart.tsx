@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react'
 
 import type { KeywordHistory, TrendStatus } from '@/lib/seo/types'

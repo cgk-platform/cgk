@@ -4,7 +4,7 @@
  * Implements tiered scheduling with configurable intervals.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { createAndDispatchAlert } from './alerts/dispatch.js'
 import {

@@ -5,7 +5,7 @@
  * POST /api/admin/esign/counter-sign - Counter-sign a document
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import {
   getCounterSignQueue,

@@ -1,4 +1,4 @@
-import { Badge, Card, CardContent, CardHeader } from '@cgk/ui'
+import { Badge, Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import {
   ArrowLeft,
   Mail,

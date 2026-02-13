@@ -7,7 +7,7 @@
  * - Recently viewed products section
  */
 
-import type { Product } from '@cgk/commerce'
+import type { Product } from '@cgk-platform/commerce'
 
 import {
   ProductReviews,

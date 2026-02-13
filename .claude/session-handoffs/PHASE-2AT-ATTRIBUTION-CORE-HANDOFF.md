@@ -116,9 +116,9 @@ Wizard state is managed client-side with React state. Platform connections simul
 ## Dependencies
 
 This phase depends on:
-- `@cgk/db` - Database client and tenant utilities
-- `@cgk/auth` - Tenant context extraction
-- `@cgk/ui` - Shared UI components
+- `@cgk-platform/db` - Database client and tenant utilities
+- `@cgk-platform/auth` - Tenant context extraction
+- `@cgk-platform/ui` - Shared UI components
 
 ---
 

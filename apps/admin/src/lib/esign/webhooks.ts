@@ -4,7 +4,7 @@
  * Functions for managing webhook configurations and delivery logs.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { createHmac } from 'crypto'
 import type {
   EsignWebhook,

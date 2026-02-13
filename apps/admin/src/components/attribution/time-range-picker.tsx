@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, cn } from '@cgk/ui'
+import { Button, Input, cn } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 import type { TimeRangePreset } from '@/lib/attribution'

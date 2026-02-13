@@ -12,8 +12,8 @@ import {
   Zap,
 } from 'lucide-react'
 
-import { Button } from '@cgk/ui'
-import { cn } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
+import { cn } from '@cgk-platform/ui'
 
 interface WorkflowRule {
   id: string

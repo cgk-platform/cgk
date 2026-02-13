@@ -1,4 +1,4 @@
-# @cgk/video - AI Development Guide
+# @cgk-platform/video - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-11
@@ -23,7 +23,7 @@ import {
   checkVideoPermission,
   trackView,
   getVideoAnalytics,
-} from '@cgk/video'
+} from '@cgk-platform/video'
 
 // Create video and get upload URL
 const { uploadUrl, uploadId } = await createDirectUpload({
@@ -77,7 +77,7 @@ await fetch(uploadUrl, {
 **When to use**: ALL video database operations
 
 ```typescript
-import { getVideos, getVideo, withTenant } from '@cgk/video'
+import { getVideos, getVideo, withTenant } from '@cgk-platform/video'
 
 // CORRECT - Functions handle tenant isolation internally
 const videos = await getVideos(tenantId, userId, { limit: 20 })
@@ -92,7 +92,7 @@ const videos = await sql`SELECT * FROM videos` // NO!
 **When to use**: Before granting access to a video
 
 ```typescript
-import { checkVideoPermission } from '@cgk/video'
+import { checkVideoPermission } from '@cgk-platform/video'
 
 const result = await checkVideoPermission(
   tenantId,
@@ -122,7 +122,7 @@ import {
   verifyWebhookSignature,
   parseWebhookPayload,
   processWebhookEvent,
-} from '@cgk/video'
+} from '@cgk-platform/video'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -294,8 +294,8 @@ if (video.status !== 'ready') {
 | Dependency | Why |
 |------------|-----|
 | `@mux/mux-node` | Mux API SDK |
-| `@cgk/db` | Database and tenant isolation |
-| `@cgk/core` | Shared types |
+| `@cgk-platform/db` | Database and tenant isolation |
+| `@cgk-platform/core` | Shared types |
 
 ---
 
@@ -307,8 +307,8 @@ if (video.status !== 'ready') {
 - Background jobs - Webhook processing
 
 ### Uses:
-- `@cgk/db` - Database operations
-- `@cgk/jobs` - Background processing
+- `@cgk-platform/db` - Database operations
+- `@cgk-platform/jobs` - Background processing
 - Mux API - Video hosting
 - AssemblyAI API - Transcription
 - Anthropic Claude API - AI content
@@ -324,13 +324,13 @@ import {
   getTranscriptionProvider,
   saveTranscriptionResult,
   generateCaptions,
-} from '@cgk/video/transcription'
+} from '@cgk-platform/video/transcription'
 
 import {
   generateAITitle,
   generateAISummary,
   extractTasks,
-} from '@cgk/video/ai'
+} from '@cgk-platform/video/ai'
 ```
 
 ### Transcription Pattern
@@ -362,7 +362,7 @@ await saveAIContent(tenantId, videoId, { title, summary, tasks })
 ### Export Captions
 
 ```typescript
-import { generateCaptions, getCaptionContentType } from '@cgk/video/transcription'
+import { generateCaptions, getCaptionContentType } from '@cgk-platform/video/transcription'
 
 const vtt = generateCaptions(words, { format: 'vtt' })
 const srt = generateCaptions(words, { format: 'srt' })
@@ -371,7 +371,7 @@ const srt = generateCaptions(words, { format: 'srt' })
 ### Search Transcripts
 
 ```typescript
-import { searchVideosByTranscript } from '@cgk/video/transcription'
+import { searchVideosByTranscript } from '@cgk-platform/video/transcription'
 
 const results = await searchVideosByTranscript(tenantId, 'search term', 20, 0)
 ```

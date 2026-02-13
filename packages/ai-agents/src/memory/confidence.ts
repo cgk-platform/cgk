@@ -8,7 +8,7 @@
  * - Decays over time when not used
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type { AgentMemory, ConfidenceFactors, MemorySource } from './types.js'
 import { SOURCE_WEIGHTS } from './types.js'
 

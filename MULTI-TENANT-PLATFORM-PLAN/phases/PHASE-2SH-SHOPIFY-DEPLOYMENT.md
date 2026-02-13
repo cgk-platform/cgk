@@ -1,5 +1,7 @@
 # PHASE-2SH: Shopify App - Deployment & Setup Guide
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 > **Status**: COMPLETE
 > **Execution**: Before Week 10 (Pre-requisite setup)
 > **Dependencies**: None
@@ -59,6 +61,8 @@ In the app settings:
 
 ```toml
 # shopify.app.toml - Reference from RAWDOG
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
 # Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
 
 # From Shopify Partners Dashboard → Client credentials
@@ -619,7 +623,7 @@ RAWDOG Working Files:
 - `/.github/workflows/shopify-app-deploy.yml` - GitHub Actions workflow for automated deployment
 
 **Package Updates:**
-- `/packages/shopify/package.json` - Added @cgk/db and @cgk/jobs dependencies
+- `/packages/shopify/package.json` - Added @cgk-platform/db and @cgk-platform/jobs dependencies
 - `/.gitignore` - Added .shopify/ and Rust build artifacts
 
 ### Remaining Manual Steps

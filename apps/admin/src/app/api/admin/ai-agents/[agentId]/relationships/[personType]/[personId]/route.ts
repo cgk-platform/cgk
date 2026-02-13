@@ -1,10 +1,10 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import type { PersonType } from '@cgk/ai-agents'
+import type { PersonType } from '@cgk-platform/ai-agents'
 
 interface RouteParams {
   params: Promise<{ agentId: string; personType: string; personId: string }>
@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
   try {
     const { getAgentRelationship, getPreferences, getRelationshipContext } =
-      await import('@cgk/ai-agents')
+      await import('@cgk-platform/ai-agents')
 
     const [relationship, preferences, context] = await withTenant(tenantId, async () => {
       const r = await getAgentRelationship(agentId, personType as PersonType, personId)
@@ -107,7 +107,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { updateRelationship } = await import('@cgk/ai-agents')
+    const { updateRelationship } = await import('@cgk-platform/ai-agents')
 
     const relationship = await withTenant(tenantId, async () => {
       return updateRelationship(agentId, personType as PersonType, personId, {

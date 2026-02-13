@@ -4,7 +4,7 @@
  * POST /api/admin/esign/documents/[id]/resend - Resend to pending signers
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { resendDocument, addAuditLogEntry } from '@/lib/esign'
 

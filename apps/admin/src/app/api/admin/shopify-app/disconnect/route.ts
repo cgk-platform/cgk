@@ -9,7 +9,7 @@ import {
   unregisterWebhooks,
   isShopifyConnected,
   ShopifyError,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 /**
  * DELETE /api/admin/shopify-app/disconnect

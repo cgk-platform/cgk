@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { Card, CardContent, Button, Badge, Alert } from '@cgk/ui'
+import { Card, CardContent, Button, Badge, Alert } from '@cgk-platform/ui'
 
 interface SlackWorkspace {
   workspaceName: string | null

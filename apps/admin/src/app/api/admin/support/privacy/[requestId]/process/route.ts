@@ -9,13 +9,13 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import {
   getPrivacyRequest,
   processDataDeletion,
   processDataExport,
   updateRequestStatus,
-} from '@cgk/support'
+} from '@cgk-platform/support'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -87,7 +87,7 @@ export async function POST(
 
         case 'do_not_sell':
           // Mark in consent records
-          const { recordConsent } = await import('@cgk/support')
+          const { recordConsent } = await import('@cgk-platform/support')
           await recordConsent(tenantId, {
             customerEmail: existingRequest.customerEmail,
             customerId: existingRequest.customerId ?? undefined,

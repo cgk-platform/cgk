@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -36,7 +36,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { listVoiceCalls } = await import('@cgk/ai-agents')
+    const { listVoiceCalls } = await import('@cgk-platform/ai-agents')
 
     // Parse filters from query params
     const direction = url.searchParams.get('direction') as 'inbound' | 'outbound' | undefined
@@ -106,7 +106,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       createRetellClient,
       getAgentVoiceConfig,
       getVoiceCredentials,
-    } = await import('@cgk/ai-agents')
+    } = await import('@cgk-platform/ai-agents')
 
     // Get voice config and credentials
     const [voiceConfig, credentials] = await withTenant(tenantId, async () => {

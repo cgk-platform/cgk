@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, Input, Label } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Label } from '@cgk-platform/ui'
 import { Plus, RefreshCw, Download, Search, X } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'

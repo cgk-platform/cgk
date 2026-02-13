@@ -1,10 +1,10 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { addAssetsToCollection, removeAssetsFromCollection } from '@cgk/dam'
+import { addAssetsToCollection, removeAssetsFromCollection } from '@cgk-platform/dam'
 
 export async function POST(
   request: Request,

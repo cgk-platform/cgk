@@ -202,7 +202,7 @@ export async function suggestHandoffAgents(
  * Cancel a pending handoff
  */
 export async function cancelHandoff(handoffId: string): Promise<void> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   await sql`
     UPDATE agent_handoffs

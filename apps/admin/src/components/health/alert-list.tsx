@@ -7,7 +7,7 @@
  */
 
 
-import type { Alert, AlertSeverity, AlertStatus } from '@cgk/health'
+import type { Alert, AlertSeverity, AlertStatus } from '@cgk-platform/health'
 import {
   AlertCircle,
   AlertTriangle,

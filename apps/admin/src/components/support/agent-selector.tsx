@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { ChevronDown, User, UserCheck, Users } from 'lucide-react'
-import type { SupportAgent } from '@cgk/support'
+import type { SupportAgent } from '@cgk-platform/support'
 
 interface AgentSelectorProps {
   currentAgentId?: string | null

@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check } from 'lucide-react'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 
 import type { WizardData } from '@/lib/ab-tests/types'
 import { useCreateABTest } from '@/lib/ab-tests/hooks'

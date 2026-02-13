@@ -4,7 +4,7 @@
  * GET /api/creator/payments/transactions - List balance transactions
  */
 
-import { listBalanceTransactions, type BalanceTransactionType } from '@cgk/payments'
+import { listBalanceTransactions, type BalanceTransactionType } from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

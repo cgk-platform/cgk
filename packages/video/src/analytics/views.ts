@@ -1,10 +1,10 @@
 /**
- * @cgk/video - View tracking
+ * @cgk-platform/video - View tracking
  *
  * Track video views and watch time for analytics.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { TrackViewInput, VideoView } from '../types.js'
 

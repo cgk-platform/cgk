@@ -6,7 +6,7 @@
  * POST /api/webhooks/shopify
  */
 
-import { handleShopifyWebhook } from '@cgk/shopify/webhooks'
+import { handleShopifyWebhook } from '@cgk-platform/shopify/webhooks'
 
 // Disable body parsing - we need the raw body for HMAC verification
 export const dynamic = 'force-dynamic'

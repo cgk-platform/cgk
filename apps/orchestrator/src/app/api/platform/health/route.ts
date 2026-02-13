@@ -8,7 +8,7 @@
  * (detailed per-tenant, per-service matrix).
  */
 
-import { createGlobalCache, sql } from '@cgk/db'
+import { createGlobalCache, sql } from '@cgk-platform/db'
 import {
   aggregateHealthStatus,
   ALL_MONITORS,
@@ -21,7 +21,7 @@ import {
   type PlatformHealthResponse,
   type ServiceHealthSummary,
   type TenantHealthSummary,
-} from '@cgk/health'
+} from '@cgk-platform/health'
 
 import type { SystemHealth } from '../../../../types/platform'
 

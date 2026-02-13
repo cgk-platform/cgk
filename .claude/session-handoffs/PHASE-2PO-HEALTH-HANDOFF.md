@@ -69,7 +69,7 @@ Built the comprehensive health monitoring system for the CGK platform. This incl
 
 ## Verification
 
-- `pnpm turbo typecheck --filter=@cgk/health` - PASSES
+- `pnpm turbo typecheck --filter=@cgk-platform/health` - PASSES
 - `pnpm turbo typecheck --filter=cgk-orchestrator` - PASSES
 - `pnpm turbo typecheck --filter=cgk-admin` - PASSES
 - `npx eslint .` on all new files - PASSES
@@ -118,7 +118,7 @@ const cached = await getCachedHealth(service, tenantId)
 
 ## Dependencies Added
 
-- `@cgk/health` workspace package added to:
+- `@cgk-platform/health` workspace package added to:
   - `apps/orchestrator/package.json`
   - `apps/admin/package.json`
 - `clsx` and `tailwind-merge` added to `apps/admin/package.json`

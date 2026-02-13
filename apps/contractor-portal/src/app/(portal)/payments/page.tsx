@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
   Spinner,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 
 interface Balance {
   pendingCents: number

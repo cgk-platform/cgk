@@ -8,7 +8,7 @@
  * - Server and client-side compatibility
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import { getTenantSlug } from '../tenant'
 

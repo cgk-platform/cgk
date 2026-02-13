@@ -1,5 +1,5 @@
 /**
- * @cgk/analytics - GA4 and attribution tracking
+ * @cgk-platform/analytics - GA4 and attribution tracking
  *
  * @ai-pattern analytics-tracking
  * @ai-note Client and server-side analytics helpers

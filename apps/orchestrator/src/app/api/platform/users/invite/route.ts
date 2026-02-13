@@ -5,15 +5,15 @@
  * GET /api/platform/users/invite?organizationId=xxx - Get pending invitations
  */
 
-import { requireAuth } from '@cgk/auth'
-import { createLogger } from '@cgk/logging'
+import { requireAuth } from '@cgk-platform/auth'
+import { createLogger } from '@cgk-platform/logging'
 import {
   createInvitation,
   getOrganizationInvitations,
   markInvitationSent,
   revokeInvitation,
   toUserInvitations,
-} from '@cgk/onboarding'
+} from '@cgk-platform/onboarding'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

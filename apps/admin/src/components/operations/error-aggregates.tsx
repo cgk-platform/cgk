@@ -1,7 +1,7 @@
 'use client'
 
-import { Badge, Card, CardContent, CardHeader, Spinner } from '@cgk/ui'
-import type { ErrorAggregate } from '@cgk/logging'
+import { Badge, Card, CardContent, CardHeader, Spinner } from '@cgk-platform/ui'
+import type { ErrorAggregate } from '@cgk-platform/logging'
 import { AlertTriangle, ChevronDown, ChevronRight, Clock, Users } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 

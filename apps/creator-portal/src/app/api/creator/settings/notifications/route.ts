@@ -5,7 +5,7 @@
  * PATCH /api/creator/settings/notifications - Update preferences
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { NotificationSettings } from '@/lib/types'

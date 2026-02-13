@@ -5,7 +5,7 @@
  * Used in product reviews and rating summaries.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 interface StarRatingProps {
   /** Rating value (0-5) */

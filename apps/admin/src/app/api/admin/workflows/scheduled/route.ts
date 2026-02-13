@@ -3,8 +3,8 @@
  * GET /api/admin/workflows/scheduled - List scheduled actions
  */
 
-import { getTenantContext } from '@cgk/auth'
-import { getScheduledActions } from '@cgk/admin-core'
+import { getTenantContext } from '@cgk-platform/auth'
+import { getScheduledActions } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

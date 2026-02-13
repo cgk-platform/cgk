@@ -7,7 +7,7 @@
 'use client'
 
 import Link from 'next/link'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 import { CartIcon } from '@/components/cart'
 import { CartProvider } from '@/components/cart/CartProvider'

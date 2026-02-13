@@ -1,9 +1,9 @@
 'use client'
 
-import { Button, Card, CardContent, Input, Label, Select, SelectOption, Spinner, Switch } from '@cgk/ui'
+import { Button, Card, CardContent, Input, Label, Select, SelectOption, Spinner, Switch } from '@cgk-platform/ui'
 import { useState } from 'react'
 
-import type { SenderPurpose } from '@cgk/communications'
+import type { SenderPurpose } from '@cgk-platform/communications'
 
 interface AddSenderAddressModalProps {
   open: boolean

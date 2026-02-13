@@ -9,7 +9,7 @@
  * Supports both first-touch and last-touch attribution models.
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import { generateVisitorId, generateSessionId } from '../cart/attributes'
 import { getTenantSlug } from '../tenant'

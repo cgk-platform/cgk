@@ -124,7 +124,7 @@ export const setupDatabaseCommand = new Command('setup:database')
     spinner.start('Connecting to database...')
 
     try {
-      const db = await import('@cgk/db')
+      const db = await import('@cgk-platform/db')
       await db.sql`SELECT 1`
       spinner.succeed('Database connection successful')
     } catch (error) {
@@ -155,7 +155,7 @@ export const setupDatabaseCommand = new Command('setup:database')
     }
 
     try {
-      const migrations = await import('@cgk/db/migrations')
+      const migrations = await import('@cgk-platform/db/migrations')
       const results = await migrations.runPublicMigrations({
         dryRun: options.dryRun,
         onProgress: (migration, status) => {
@@ -197,7 +197,7 @@ export const setupDatabaseCommand = new Command('setup:database')
     spinner.start('Checking tables...')
 
     try {
-      const db = await import('@cgk/db')
+      const db = await import('@cgk-platform/db')
       const result = await db.sql<{ table_name: string }>`
         SELECT table_name
         FROM information_schema.tables
@@ -229,7 +229,7 @@ export const setupDatabaseCommand = new Command('setup:database')
 
     console.log(chalk.green('\n✅ Database setup complete!\n'))
     console.log('Next steps:')
-    console.log(chalk.cyan('  npx @cgk/cli tenant:create <slug> --name "Brand Name"'))
+    console.log(chalk.cyan('  npx @cgk-platform/cli tenant:create <slug> --name "Brand Name"'))
     console.log('')
   })
 
@@ -252,7 +252,7 @@ async function setupDatabase(): Promise<boolean> {
     // Test connection
     spinner.start('Testing database connection...')
     try {
-      const db = await import('@cgk/db')
+      const db = await import('@cgk-platform/db')
       await db.sql`SELECT 1`
       spinner.succeed('Database connection successful')
       return true
@@ -351,7 +351,7 @@ async function runMigrations(): Promise<boolean> {
   spinner.start('Running database migrations...')
 
   try {
-    const migrations = await import('@cgk/db/migrations')
+    const migrations = await import('@cgk-platform/db/migrations')
     const results = await migrations.runPublicMigrations()
 
     if (results.length === 0) {
@@ -418,10 +418,10 @@ async function createAdminUser(): Promise<boolean> {
   spinner.start('Creating admin user...')
 
   try {
-    const db = await import('@cgk/db')
+    const db = await import('@cgk-platform/db')
 
     // Simple password hashing (in production, use proper library like argon2)
-    // This is a placeholder - actual implementation should use @cgk/auth
+    // This is a placeholder - actual implementation should use @cgk-platform/auth
     const crypto = await import('crypto')
     const passwordHash = crypto
       .createHash('sha256')
@@ -462,7 +462,7 @@ async function configurePlatform(): Promise<boolean> {
   spinner.start('Saving platform configuration...')
 
   try {
-    const db = await import('@cgk/db')
+    const db = await import('@cgk-platform/db')
 
     await db.sql`
       INSERT INTO public.platform_config (key, value)

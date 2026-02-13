@@ -5,7 +5,7 @@
  * GET /api/admin/esign/reports?export=csv - Export report as CSV
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getReportData, exportReportCsv } from '@/lib/esign'
 

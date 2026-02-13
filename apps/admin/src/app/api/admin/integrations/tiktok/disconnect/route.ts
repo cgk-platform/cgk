@@ -1,5 +1,5 @@
-import { getTenantContext } from '@cgk/auth'
-import { disconnectTikTok } from '@cgk/integrations'
+import { getTenantContext } from '@cgk-platform/auth'
+import { disconnectTikTok } from '@cgk-platform/integrations'
 
 export const dynamic = 'force-dynamic'
 

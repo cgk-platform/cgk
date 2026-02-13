@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, Input, Label, Textarea } from '@cgk/ui'
+import { Card, CardContent, Input, Label, Textarea } from '@cgk-platform/ui'
 
 import type { LandingPage } from '@/lib/landing-pages/types'
 

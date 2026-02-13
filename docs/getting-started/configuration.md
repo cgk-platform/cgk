@@ -33,7 +33,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 Create a `platform.config.ts` in your project root:
 
 ```typescript
-import { defineConfig } from '@cgk/core'
+import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({
   brand: {

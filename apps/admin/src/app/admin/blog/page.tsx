@@ -1,5 +1,5 @@
-import { withTenant } from '@cgk/db'
-import { Button, Card, CardContent } from '@cgk/ui'
+import { withTenant } from '@cgk-platform/db'
+import { Button, Card, CardContent } from '@cgk-platform/ui'
 import { FileText, Plus } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'

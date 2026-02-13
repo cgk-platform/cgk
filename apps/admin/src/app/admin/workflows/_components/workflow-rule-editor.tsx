@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Save, Settings, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-import { Button } from '@cgk/ui'
-import { cn } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
+import { cn } from '@cgk-platform/ui'
 
 import { ActionList } from './action-list'
 import { ConditionBuilder } from './condition-builder'

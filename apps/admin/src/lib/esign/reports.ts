@@ -4,7 +4,7 @@
  * Functions for generating e-signature reports and statistics.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type {
   EsignDashboardStats,
   EsignReportData,

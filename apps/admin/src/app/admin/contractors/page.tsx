@@ -1,4 +1,4 @@
-import { Badge, Card, CardContent } from '@cgk/ui'
+import { Badge, Card, CardContent } from '@cgk-platform/ui'
 import { BanknoteIcon, CheckCircle, AlertTriangle, Users } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getActionAutonomy } = await import('@cgk/ai-agents')
+    const { getActionAutonomy } = await import('@cgk-platform/ai-agents')
 
     const actionAutonomy = await withTenant(tenantId, async () => {
       return getActionAutonomy(agentId, decodeURIComponent(actionType))
@@ -81,7 +81,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { setActionAutonomy } = await import('@cgk/ai-agents')
+    const { setActionAutonomy } = await import('@cgk-platform/ai-agents')
 
     // Validate autonomy level
     const validLevels = ['autonomous', 'suggest_and_confirm', 'human_required']

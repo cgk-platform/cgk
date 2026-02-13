@@ -19,7 +19,7 @@ import {
   CardTitle,
   Button,
   Badge,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 
 export interface TranscriptionChapter {
   headline: string

@@ -1,5 +1,5 @@
 /**
- * @cgk/video/transcription - Video Transcription Module
+ * @cgk-platform/video/transcription - Video Transcription Module
  *
  * Provides:
  * - AssemblyAI integration for transcription

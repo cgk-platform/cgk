@@ -4,7 +4,7 @@
  * Functions for managing bulk document sending operations.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type {
   EsignBulkSend,
   EsignBulkSendRecipient,

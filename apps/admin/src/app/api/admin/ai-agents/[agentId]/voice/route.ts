@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getAgentVoiceConfig } = await import('@cgk/ai-agents')
+    const { getAgentVoiceConfig } = await import('@cgk-platform/ai-agents')
 
     const config = await withTenant(tenantId, async () => {
       return getAgentVoiceConfig(agentId)
@@ -77,7 +77,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { createAgentVoiceConfig, validateVoiceConfig } = await import('@cgk/ai-agents')
+    const { createAgentVoiceConfig, validateVoiceConfig } = await import('@cgk-platform/ai-agents')
 
     // Validate configuration
     const errors = validateVoiceConfig(body)
@@ -128,7 +128,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { updateAgentVoiceConfig, validateVoiceConfig } = await import('@cgk/ai-agents')
+    const { updateAgentVoiceConfig, validateVoiceConfig } = await import('@cgk-platform/ai-agents')
 
     // Validate configuration
     const errors = validateVoiceConfig(body)

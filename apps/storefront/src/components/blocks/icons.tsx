@@ -7,7 +7,7 @@
 
 import * as LucideIcons from 'lucide-react'
 import type { LucideProps } from 'lucide-react'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 /**
  * Map of icon names to Lucide components

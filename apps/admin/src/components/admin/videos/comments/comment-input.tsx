@@ -1,10 +1,10 @@
 'use client'
 
-import { Button, cn, Textarea } from '@cgk/ui'
+import { Button, cn, Textarea } from '@cgk-platform/ui'
 import { Clock, Loader2, Send, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-import { formatCommentTimestamp } from '@cgk/video/interactions'
+import { formatCommentTimestamp } from '@cgk-platform/video/interactions'
 
 interface CommentInputProps {
   currentTime?: number

@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Mux asset management
+ * @cgk-platform/video - Mux asset management
  *
  * Operations for managing video assets in Mux.
  */

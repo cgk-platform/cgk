@@ -4,7 +4,7 @@
  * Uses pgvector to perform fast similarity search over embeddings.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { generateEmbedding } from '../memory/embeddings.js'
 import { recordMemoryAccess as _recordMemoryAccess } from '../memory/storage.js'
 import type { MemorySearchFilters, MemorySearchResult, MemoryType } from '../memory/types.js'

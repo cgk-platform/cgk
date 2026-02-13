@@ -1,5 +1,5 @@
 /**
- * @cgk/video - SSE Module
+ * @cgk-platform/video - SSE Module
  *
  * Re-exports for Server-Sent Events functionality.
  */

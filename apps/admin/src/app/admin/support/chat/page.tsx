@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 
 import { ChatQueue } from './components/chat-queue'
 
-import type { ChatSession } from '@cgk/support'
+import type { ChatSession } from '@cgk-platform/support'
 
 interface ActiveSession extends ChatSession {
   unreadCount?: number

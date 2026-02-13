@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock dependencies before importing
-vi.mock('@cgk/db', () => ({
+vi.mock('@cgk-platform/db', () => ({
   sql: vi.fn(),
 }))
 
@@ -17,7 +17,7 @@ vi.mock('../user-admin', () => ({
   logUserActivity: vi.fn().mockResolvedValue(undefined),
 }))
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import {
   getDefaultTenant,

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Mail, MessageSquare, User } from 'lucide-react'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 interface Thread {
   id: string

@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, CardContent, cn } from '@cgk/ui'
+import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 
 import { useAttribution, ModelSelector, TimeRangePicker } from '@/components/attribution'
 import type { CreativePerformance, CreativePlatform, CreativeSavedView } from '@/lib/attribution'

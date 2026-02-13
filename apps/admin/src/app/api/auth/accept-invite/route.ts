@@ -9,8 +9,8 @@ import {
   getUserByEmail,
   getUserOrganizations,
   signJWT,
-} from '@cgk/auth'
-import { sql } from '@cgk/db'
+} from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {

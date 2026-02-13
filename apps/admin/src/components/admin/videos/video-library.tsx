@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn, Input } from '@cgk/ui'
+import { Button, cn, Input } from '@cgk-platform/ui'
 import {
   Clock,
   Filter,
@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 
-import type { Video, VideoStatus } from '@cgk/video'
+import type { Video, VideoStatus } from '@cgk-platform/video'
 
 import { StatusBadge } from './status-indicator'
 

@@ -1,11 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-// Mock @cgk/db
-vi.mock('@cgk/db', () => ({
+// Mock @cgk-platform/db
+vi.mock('@cgk-platform/db', () => ({
   sql: vi.fn(),
 }))
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import {
   createSession,
   validateSession,

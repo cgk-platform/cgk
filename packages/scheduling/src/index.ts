@@ -1,5 +1,5 @@
 /**
- * @cgk/scheduling - Scheduling and booking system
+ * @cgk-platform/scheduling - Scheduling and booking system
  *
  * @ai-pattern tenant-isolation
  * @ai-required Always use tenant context for all operations
@@ -11,7 +11,7 @@
  *   calculateAvailableSlots,
  *   createBooking,
  *   acquireBookingLock
- * } from '@cgk/scheduling'
+ * } from '@cgk-platform/scheduling'
  *
  * // Get available slots
  * const slots = calculateAvailableSlots('2026-02-15', {

@@ -1,6 +1,6 @@
 'use client'
 
-import { Select, SelectOption, cn } from '@cgk/ui'
+import { Select, SelectOption, cn } from '@cgk-platform/ui'
 
 import { ATTRIBUTION_MODELS, type AttributionModel } from '@/lib/attribution'
 

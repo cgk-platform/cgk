@@ -368,7 +368,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
  * @example
  * // In your function file (e.g., src/inngest/order-created.ts)
  * import { inngest } from './client'
- * import { defineInngestFunction } from '@cgk/jobs'
+ * import { defineInngestFunction } from '@cgk-platform/jobs'
  *
  * export const orderCreatedFn = defineInngestFunction('order.created', {
  *   handler: async ({ event, step }) => {

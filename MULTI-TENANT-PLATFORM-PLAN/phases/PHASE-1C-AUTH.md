@@ -1,5 +1,7 @@
 # PHASE-1C: Authentication System
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Duration**: 1 week (Week 3)
 **Depends On**: PHASE-1B (needs sessions/magic_links tables)
 **Parallel With**: None
@@ -384,7 +386,7 @@ const cookieOptions = {
 - [x] Login/logout flow works end-to-end
 - [x] All auth tests pass (42 tests)
 - [x] `npx tsc --noEmit` passes for packages/auth
-- [x] `pnpm turbo typecheck --filter=@cgk/auth` passes
+- [x] `pnpm turbo typecheck --filter=@cgk-platform/auth` passes
 
 ---
 
@@ -429,11 +431,13 @@ const cookieOptions = {
 
 ```bash
 # Type check
-pnpm turbo typecheck --filter=@cgk/auth
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+pnpm turbo typecheck --filter=@cgk-platform/auth
 
 # Run tests
-pnpm --filter @cgk/auth test
+pnpm --filter @cgk-platform/auth test
 
 # Build
-pnpm turbo build --filter=@cgk/auth
+pnpm turbo build --filter=@cgk-platform/auth
 ```

@@ -22,7 +22,7 @@ import {
   type CallToolParams,
   type ReadResourceParams,
   type GetPromptParams,
-} from '@cgk/mcp'
+} from '@cgk-platform/mcp'
 import {
   authenticateRequest,
   createAuthErrorResponse,

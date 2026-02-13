@@ -1,5 +1,5 @@
 {
-  "extends": "@cgk/typescript-config/nextjs.json",
+  "extends": "@cgk-platform/typescript-config/nextjs.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

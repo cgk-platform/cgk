@@ -6,7 +6,7 @@
  * DELETE /api/admin/analytics/reports/[id] - Delete report
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { deleteAnalyticsReport, getAnalyticsReportById, updateAnalyticsReport } from '@/lib/analytics'
 import type { ReportUpdate } from '@/lib/analytics'

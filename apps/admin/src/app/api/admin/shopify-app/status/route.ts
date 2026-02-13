@@ -6,7 +6,7 @@ import { NextResponse } from 'next/server'
 import {
   getShopifyConnection,
   isShopifyConnected,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 /**
  * GET /api/admin/shopify-app/status

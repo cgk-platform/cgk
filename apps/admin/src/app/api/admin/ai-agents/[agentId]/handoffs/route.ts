@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getPendingHandoffs } = await import('@cgk/ai-agents')
+    const { getPendingHandoffs } = await import('@cgk-platform/ai-agents')
 
     const handoffs = await withTenant(tenantId, async () => {
       return getPendingHandoffs(agentId)
@@ -81,7 +81,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { initiateHandoff, canHandoffTo } = await import('@cgk/ai-agents')
+    const { initiateHandoff, canHandoffTo } = await import('@cgk-platform/ai-agents')
 
     // Validate required fields
     if (!body.toAgentId || !body.conversationId || !body.channel || !body.reason) {

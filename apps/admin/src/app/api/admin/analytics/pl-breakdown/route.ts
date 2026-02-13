@@ -5,7 +5,7 @@
  * Returns profit and loss breakdown with category drill-down
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getPLBreakdown } from '@/lib/analytics'
 import type { PLBreakdown, PLLineItem, PLSection } from '@/lib/analytics'

@@ -5,7 +5,7 @@
  * @ai-critical Uses FOR UPDATE SKIP LOCKED to prevent race conditions
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { QueueEntry, QueueStatus, QueueType } from './types.js'
 

@@ -7,7 +7,7 @@
  * @ai-required All operations use tenant context
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { getDefaultTemplate, getAllDefaultTemplates } from './defaults.js'
 import type {

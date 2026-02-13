@@ -14,7 +14,7 @@
 
 import { use, useState, useCallback, useEffect } from 'react'
 import Link from 'next/link'
-import { Button, Card, CardContent, Spinner } from '@cgk/ui'
+import { Button, Card, CardContent, Spinner } from '@cgk-platform/ui'
 import {
   TranscriptionStatus,
   TranscriptViewer,

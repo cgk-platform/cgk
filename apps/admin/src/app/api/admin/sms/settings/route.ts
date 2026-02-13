@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { getSmsSettings, updateSmsSettings } from '@cgk/communications'
+import { getSmsSettings, updateSmsSettings } from '@cgk-platform/communications'
 
 /**
  * GET /api/admin/sms/settings

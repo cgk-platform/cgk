@@ -36,7 +36,7 @@ This platform will be installed by other users. The background jobs system must 
 ### CLI-First Setup
 ```bash
 # User should be able to set up with something like:
-npx @cgk/cli setup:jobs
+npx @cgk-platform/cli setup:jobs
 
 # NOT require:
 # - Signing up for a service through web UI first
@@ -131,8 +131,8 @@ Define all events from existing background tasks:
 
 ### Setup CLI Command
 ```bash
-# Add to @cgk/cli
-npx @cgk/cli setup:jobs
+# Add to @cgk-platform/cli
+npx @cgk-platform/cli setup:jobs
 
 # Should:
 # 1. Check if provider is configured (env vars)
@@ -240,7 +240,7 @@ The implementing agent should determine:
 - [ ] Test basic send/receive
 
 ### [SEQUENTIAL after Implementation] CLI Setup Command
-- [ ] Add `setup:jobs` command to @cgk/cli
+- [ ] Add `setup:jobs` command to @cgk-platform/cli
 - [ ] Implement provider detection
 - [ ] Implement guided setup flow
 - [ ] Implement verification step
@@ -260,7 +260,7 @@ The implementing agent should determine:
 - [ ] `packages/jobs/` exports working JobProvider
 - [ ] All event types defined with TypeScript interfaces
 - [ ] Tenant isolation enforced (tenantId required)
-- [ ] `npx @cgk/cli setup:jobs` works
+- [ ] `npx @cgk-platform/cli setup:jobs` works
 - [ ] `docs/setup/BACKGROUND-JOBS.md` is complete
 - [ ] New user can complete setup in < 15 minutes
 - [ ] `npx tsc --noEmit` passes

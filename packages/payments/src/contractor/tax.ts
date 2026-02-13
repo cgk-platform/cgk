@@ -6,7 +6,7 @@
 
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { getPayoutMethods } from './payout-methods'
 import type { CheckAddress, SubmitW9Input, TaxForm, W9Info } from './types'

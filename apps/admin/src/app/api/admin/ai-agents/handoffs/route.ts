@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     const status = url.searchParams.get('status') || undefined
     const limit = parseInt(url.searchParams.get('limit') || '50', 10)
 
-    const { listHandoffs, getHandoffStats } = await import('@cgk/ai-agents')
+    const { listHandoffs, getHandoffStats } = await import('@cgk-platform/ai-agents')
 
     const [handoffs, stats] = await withTenant(tenantId, async () => {
       const h = await listHandoffs({

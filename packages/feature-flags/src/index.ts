@@ -1,19 +1,19 @@
 /**
- * @cgk/feature-flags - Feature Flag System
+ * @cgk-platform/feature-flags - Feature Flag System
  *
  * Client-safe exports only. For server-side operations (database, caching),
- * import from '@cgk/feature-flags/server'.
+ * import from '@cgk-platform/feature-flags/server'.
  *
  * @example
  * ```ts
  * // Client-safe (works in browser and server)
- * import { type FeatureFlag, isValidFlagKey, evaluateFlag } from '@cgk/feature-flags'
+ * import { type FeatureFlag, isValidFlagKey, evaluateFlag } from '@cgk-platform/feature-flags'
  *
  * // Server-only (API routes, server components)
- * import { isEnabled, getVariant, createFlag } from '@cgk/feature-flags/server'
+ * import { isEnabled, getVariant, createFlag } from '@cgk-platform/feature-flags/server'
  *
  * // React components
- * import { useFlag, FlagProvider } from '@cgk/feature-flags/react'
+ * import { useFlag, FlagProvider } from '@cgk-platform/feature-flags/react'
  * ```
  */
 
@@ -80,7 +80,7 @@ export {
 } from './platform-flags.js'
 
 // =============================================================================
-// NOTE: For server-side operations, import from '@cgk/feature-flags/server'
+// NOTE: For server-side operations, import from '@cgk-platform/feature-flags/server'
 //
 // Server-only exports (NOT available from main entry):
 // - createFlag, updateFlag, deleteFlag, killFlag (repository)

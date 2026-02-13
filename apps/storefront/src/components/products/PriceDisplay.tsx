@@ -8,8 +8,8 @@
  * - Subscription pricing
  */
 
-import type { Money } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Money } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 
 interface PriceDisplayProps {
   /** Current price */

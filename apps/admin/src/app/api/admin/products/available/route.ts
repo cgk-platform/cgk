@@ -34,7 +34,7 @@ interface ShopifyProduct {
  *
  * In a full implementation, this would:
  * 1. Get tenant's Shopify credentials from tenant_settings
- * 2. Use @cgk/shopify package to fetch products
+ * 2. Use @cgk-platform/shopify package to fetch products
  * 3. Filter to only active products with available inventory
  * 4. Implement pagination for large catalogs
  */

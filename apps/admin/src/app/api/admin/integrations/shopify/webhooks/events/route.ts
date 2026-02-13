@@ -6,10 +6,10 @@
  * Lists recent webhook events with filtering and pagination
  */
 
-import { getTenantContext } from '@cgk/auth'
-import { withTenant, sql } from '@cgk/db'
-import { getRecentWebhookEvents } from '@cgk/shopify/webhooks'
-import type { WebhookEventStatus } from '@cgk/shopify/webhooks'
+import { getTenantContext } from '@cgk-platform/auth'
+import { withTenant, sql } from '@cgk-platform/db'
+import { getRecentWebhookEvents } from '@cgk-platform/shopify/webhooks'
+import type { WebhookEventStatus } from '@cgk-platform/shopify/webhooks'
 
 export const dynamic = 'force-dynamic'
 

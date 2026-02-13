@@ -4,8 +4,8 @@
  * GET /api/creator/payments/connect/oauth - Generate OAuth URL for Standard accounts
  */
 
-import { sql } from '@cgk/db'
-import { requiresStripeStandardAccount } from '@cgk/payments'
+import { sql } from '@cgk-platform/db'
+import { requiresStripeStandardAccount } from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

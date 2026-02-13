@@ -4,7 +4,7 @@
  * POST /api/admin/esign/webhooks/[id]/test - Test a webhook
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { testWebhook } from '@/lib/esign'
 

@@ -5,7 +5,7 @@
  * PATCH /api/creator/brand-preferences/exclusions/[id] - Update exclusion reason
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

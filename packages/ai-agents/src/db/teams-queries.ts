@@ -3,7 +3,7 @@
  * All queries expect to be run within a tenant context via withTenant()
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type {
   AddTeamMemberInput,
   AITeam,

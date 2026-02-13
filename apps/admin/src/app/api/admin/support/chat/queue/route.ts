@@ -9,8 +9,8 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getTenantContext } from '@cgk/auth'
-import { getChatQueueStats, getQueuedSessions } from '@cgk/support'
+import { getTenantContext } from '@cgk-platform/auth'
+import { getChatQueueStats, getQueuedSessions } from '@cgk-platform/support'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

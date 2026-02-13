@@ -1,5 +1,5 @@
 /**
- * @cgk/video/analytics - Analytics exports
+ * @cgk-platform/video/analytics - Analytics exports
  */
 
 export {

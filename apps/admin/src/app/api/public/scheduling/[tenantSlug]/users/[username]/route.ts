@@ -1,5 +1,5 @@
-import { sql } from '@cgk/db'
-import { getEventTypesByUser, getSchedulingUserByUsername } from '@cgk/scheduling'
+import { sql } from '@cgk-platform/db'
+import { getEventTypesByUser, getSchedulingUserByUsername } from '@cgk-platform/scheduling'
 
 export const dynamic = 'force-dynamic'
 

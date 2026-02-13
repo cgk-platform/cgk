@@ -5,7 +5,7 @@
  * All queries must be called within a withTenant() context.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type {
   GoogleFeedSettings,
   GoogleFeedProduct,

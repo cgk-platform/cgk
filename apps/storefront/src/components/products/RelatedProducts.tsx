@@ -5,8 +5,8 @@
  * Server component that fetches from commerce provider.
  */
 
-import type { Product } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Product } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 
 import { ProductCard } from './ProductCard'
 import { ProductGrid } from './ProductGrid'

@@ -5,7 +5,7 @@
  * shipping address, tracking, and action buttons.
  */
 
-import { cn, formatCurrency } from '@cgk/ui'
+import { cn, formatCurrency } from '@cgk-platform/ui'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'

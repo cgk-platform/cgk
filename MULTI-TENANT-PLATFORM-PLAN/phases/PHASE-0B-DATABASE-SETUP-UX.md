@@ -1,5 +1,7 @@
 # PHASE-0B: Database Setup UX
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 > **STATUS**: Not Started
 > **Target Start**: Anytime (no dependencies, can run in parallel with other work)
 
@@ -29,10 +31,12 @@ Current pain points for new users:
 
 ```bash
 # From fresh clone to working database in one command
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
 git clone https://github.com/cgk/cgk-platform
 cd cgk-platform
 pnpm install
-npx @cgk/cli init
+npx @cgk-platform/cli init
 
 # Output:
 # Checking environment...
@@ -70,7 +74,7 @@ npx @cgk/cli init
 
 ## Success Criteria
 
-- [ ] `npx @cgk/cli init` works from fresh clone with zero errors
+- [ ] `npx @cgk-platform/cli init` works from fresh clone with zero errors
 - [ ] `cgk doctor` catches and explains all common setup issues
 - [ ] `cgk migrate --dry-run` shows exactly what will change
 - [ ] All migrations pass without syntax errors
@@ -264,7 +268,7 @@ The agent implementing this phase MUST update:
 
 ## Definition of Done
 
-- [ ] `npx @cgk/cli init` works from fresh clone
+- [ ] `npx @cgk-platform/cli init` works from fresh clone
 - [ ] `cgk doctor` identifies and explains all setup issues
 - [ ] `cgk migrate --dry-run` shows accurate preview
 - [ ] `cgk migrate --status` shows clear migration table

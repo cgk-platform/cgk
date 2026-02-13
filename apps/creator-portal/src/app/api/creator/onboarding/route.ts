@@ -4,7 +4,7 @@
  * POST /api/creator/onboarding - Submit completed application
  */
 
-import { sql, withTenant, getTenantFromRequest } from '@cgk/db'
+import { sql, withTenant, getTenantFromRequest } from '@cgk-platform/db'
 import { validateForm } from '../../../../lib/onboarding/validation'
 import type { CreatorApplicationForm, SurveyQuestion } from '../../../../lib/onboarding/types'
 

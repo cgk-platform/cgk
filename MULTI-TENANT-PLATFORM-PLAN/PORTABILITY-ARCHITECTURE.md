@@ -35,7 +35,7 @@ Secrets: Store npm token for eventual publishing
 ```json
 {
   "dependencies": {
-    "@cgk/db": "workspace:*"  // Local reference, no npm
+    "@cgk-platform/db": "workspace:*"  // Local reference, no npm
   }
 }
 ```
@@ -63,7 +63,7 @@ cgk/                                 # Main repo (open source)
 ├── CHANGELOG.md                     # Auto-generated from changesets
 ├── LICENSE                          # MIT or similar
 │
-├── packages/                        # PUBLISHED TO NPM (@cgk/*)
+├── packages/                        # PUBLISHED TO NPM (@cgk-platform/*)
 │   ├── core/                        # Types, utilities, config schemas
 │   │   ├── CLAUDE.md               # AI context for this package
 │   │   ├── package.json
@@ -110,7 +110,7 @@ All packages are published under a configurable namespace. The namespace is defi
 
 ```json
 {
-  "name": "@cgk/monorepo",
+  "name": "@cgk-platform/monorepo",
   "config": {
     "packageNamespace": "@cgk"
   }
@@ -120,20 +120,20 @@ All packages are published under a configurable namespace. The namespace is defi
 **Package list**:
 
 ```
-@cgk/core           # Core utilities, types
-@cgk/db             # Database client
-@cgk/auth           # Authentication
-@cgk/ui             # UI components
-@cgk/commerce       # **Commerce provider abstraction (Shopify + Custom)**
-@cgk/shopify        # Shopify client (used by commerce provider)
-@cgk/payments       # Payment providers (Stripe + Wise for payouts)
-@cgk/jobs           # Background jobs
-@cgk/mcp            # MCP server utilities
-@cgk/analytics      # Analytics & attribution
-@cgk/commerce-hooks # Headless commerce hooks
-@cgk/logging        # Structured logging
-@cgk/cli            # CLI tool
-@cgk/config         # Shared configs
+@cgk-platform/core           # Core utilities, types
+@cgk-platform/db             # Database client
+@cgk-platform/auth           # Authentication
+@cgk-platform/ui             # UI components
+@cgk-platform/commerce       # **Commerce provider abstraction (Shopify + Custom)**
+@cgk-platform/shopify        # Shopify client (used by commerce provider)
+@cgk-platform/payments       # Payment providers (Stripe + Wise for payouts)
+@cgk-platform/jobs           # Background jobs
+@cgk-platform/mcp            # MCP server utilities
+@cgk-platform/analytics      # Analytics & attribution
+@cgk-platform/commerce-hooks # Headless commerce hooks
+@cgk-platform/logging        # Structured logging
+@cgk-platform/cli            # CLI tool
+@cgk-platform/config         # Shared configs
 ```
 
 **Note**: During development, packages can remain unpublished. Publishing to npm only required when you want external brand sites to consume the packages.
@@ -144,14 +144,14 @@ All packages are published under a configurable namespace. The namespace is defi
 
 ### Semantic Versioning with Lockstep
 
-All `@cgk/*` packages share the same version number (like React or Next.js):
+All `@cgk-platform/*` packages share the same version number (like React or Next.js):
 
 ```json
 {
   "dependencies": {
-    "@cgk/core": "2.4.1",
-    "@cgk/db": "2.4.1",
-    "@cgk/auth": "2.4.1"
+    "@cgk-platform/core": "2.4.1",
+    "@cgk-platform/db": "2.4.1",
+    "@cgk-platform/auth": "2.4.1"
   }
 }
 ```
@@ -200,46 +200,46 @@ PATCH (0.0.X) - Bug Fixes
 
 ## CLI Tool
 
-### `@cgk/cli` Commands
+### `@cgk-platform/cli` Commands
 
 ```bash
 # === PROJECT CREATION ===
-npx @cgk/cli create my-brand          # Create new brand site
-npx @cgk/cli create my-brand --template=basic
-npx @cgk/cli create my-brand --template=full
-npx @cgk/cli init                      # Initialize in existing project
+npx @cgk-platform/cli create my-brand          # Create new brand site
+npx @cgk-platform/cli create my-brand --template=basic
+npx @cgk-platform/cli create my-brand --template=full
+npx @cgk-platform/cli init                      # Initialize in existing project
 
 # === HEALTH & DIAGNOSTICS ===
-npx @cgk/cli doctor                    # Check system requirements
-npx @cgk/cli status                    # Show platform status
+npx @cgk-platform/cli doctor                    # Check system requirements
+npx @cgk-platform/cli status                    # Show platform status
 
 # === UPDATES ===
-npx @cgk/cli check-updates             # Check for new versions
-npx @cgk/cli update                    # Update all packages
-npx @cgk/cli update --channel=beta     # Update from beta channel
-npx @cgk/cli changelog 2.4.0           # View changelog
+npx @cgk-platform/cli check-updates             # Check for new versions
+npx @cgk-platform/cli update                    # Update all packages
+npx @cgk-platform/cli update --channel=beta     # Update from beta channel
+npx @cgk-platform/cli changelog 2.4.0           # View changelog
 
 # === DATABASE ===
-npx @cgk/cli migrate                   # Run pending migrations
-npx @cgk/cli migrate --status          # Check migration status
-npx @cgk/cli migrate --rollback        # Rollback last migration
-npx @cgk/cli migrate:create add-foo    # Create new migration
+npx @cgk-platform/cli migrate                   # Run pending migrations
+npx @cgk-platform/cli migrate --status          # Check migration status
+npx @cgk-platform/cli migrate --rollback        # Rollback last migration
+npx @cgk-platform/cli migrate:create add-foo    # Create new migration
 
 # === TENANT MANAGEMENT ===
-npx @cgk/cli tenant:create             # Interactive tenant setup
-npx @cgk/cli tenant:list               # List all tenants
-npx @cgk/cli tenant:export rawdog      # Export tenant data
-npx @cgk/cli tenant:import backup.sql  # Import tenant data
+npx @cgk-platform/cli tenant:create             # Interactive tenant setup
+npx @cgk-platform/cli tenant:list               # List all tenants
+npx @cgk-platform/cli tenant:export rawdog      # Export tenant data
+npx @cgk-platform/cli tenant:import backup.sql  # Import tenant data
 
 # === DEVELOPMENT ===
-npx @cgk/cli dev                       # Start dev server
-npx @cgk/cli build                     # Build for production
-npx @cgk/cli typecheck                 # Run TypeScript checks
+npx @cgk-platform/cli dev                       # Start dev server
+npx @cgk-platform/cli build                     # Build for production
+npx @cgk-platform/cli typecheck                 # Run TypeScript checks
 
 # === DEPLOYMENT ===
-npx @cgk/cli deploy                    # Deploy to Vercel
-npx @cgk/cli deploy --preview          # Preview deployment
-npx @cgk/cli env:push                  # Push env vars to Vercel
+npx @cgk-platform/cli deploy                    # Deploy to Vercel
+npx @cgk-platform/cli deploy --preview          # Preview deployment
+npx @cgk-platform/cli env:push                  # Push env vars to Vercel
 ```
 
 ---
@@ -252,18 +252,18 @@ npx @cgk/cli env:push                  # Push env vars to Vercel
 
 ```bash
 # Check for updates
-npx @cgk/cli check-updates
+npx @cgk-platform/cli check-updates
 
 # Update all platform packages
-pnpm update "@cgk/*" --latest
+pnpm update "@cgk-platform/*" --latest
 
 # Run migrations if needed
-npx @cgk/cli migrate
+npx @cgk-platform/cli migrate
 ```
 
 ### Protected Customization Layers
 
-1. **Core Layer** (`@cgk/*` packages): Never edit, just update
+1. **Core Layer** (`@cgk-platform/*` packages): Never edit, just update
 2. **Extension Layer**: Hook points for customization
 3. **Override Layer**: Local files that take precedence
 
@@ -272,10 +272,10 @@ npx @cgk/cli migrate
 // src/components/ui/button.tsx
 
 // Option 1: Re-export core unchanged
-export { Button } from '@cgk/ui'
+export { Button } from '@cgk-platform/ui'
 
 // Option 2: Wrap with customizations
-import { Button as CoreButton } from '@cgk/ui'
+import { Button as CoreButton } from '@cgk-platform/ui'
 export const Button = styled(CoreButton, customStyles)
 
 // Option 3: Complete replacement
@@ -286,7 +286,7 @@ export const Button = MyCustomButton
 
 ```typescript
 // platform.config.ts - Brand site configuration
-import { defineConfig } from '@cgk/core'
+import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({
   // Brand identity
@@ -350,16 +350,16 @@ migrations/
 
 ```bash
 # Run all pending migrations
-npx @cgk/cli migrate
+npx @cgk-platform/cli migrate
 
 # Dry run (preview)
-npx @cgk/cli migrate --dry-run
+npx @cgk-platform/cli migrate --dry-run
 
 # Rollback last migration
-npx @cgk/cli migrate --rollback
+npx @cgk-platform/cli migrate --rollback
 
 # Show migration status
-npx @cgk/cli migrate --status
+npx @cgk-platform/cli migrate --status
 ```
 
 ---
@@ -374,7 +374,7 @@ Storefronts communicate with the platform via:
 2. **REST API** (fallback): Simpler integrations
 3. **SDK Hooks** (React): Pre-built client logic
 
-### Hook Library (`@cgk/commerce-hooks`)
+### Hook Library (`@cgk-platform/commerce-hooks`)
 
 Headless hooks for any React-based storefront:
 
@@ -385,7 +385,7 @@ import {
   useABTest,
   useFreeGifts,
   useLandingPage
-} from '@cgk/commerce-hooks'
+} from '@cgk-platform/commerce-hooks'
 
 function ProductPage() {
   const { config, isSaleActive } = useDynamicConfig()
@@ -401,9 +401,9 @@ function ProductPage() {
 
 | Tier | Package | Purpose |
 |------|---------|---------|
-| 1 | `@cgk/commerce-hooks` | Headless logic (required) |
-| 2 | `@cgk/commerce-primitives` | Unstyled, accessible components (optional) |
-| 3 | `@cgk/ui` | Fully styled reference components (optional) |
+| 1 | `@cgk-platform/commerce-hooks` | Headless logic (required) |
+| 2 | `@cgk-platform/commerce-primitives` | Unstyled, accessible components (optional) |
+| 3 | `@cgk-platform/ui` | Fully styled reference components (optional) |
 
 Brands can use any tier or mix-and-match.
 
@@ -485,15 +485,15 @@ Default for new tenants: **Shared** (RLS-based)
 Upgrade path: CLI command to migrate tenant to higher tier:
 
 ```bash
-npx @cgk/cli tenant:upgrade rawdog --tier=schema
-npx @cgk/cli tenant:upgrade enterprise-client --tier=dedicated
+npx @cgk-platform/cli tenant:upgrade rawdog --tier=schema
+npx @cgk-platform/cli tenant:upgrade enterprise-client --tier=dedicated
 ```
 
 ---
 
 ## Success Criteria
 
-- [ ] `npx @cgk/cli create my-brand` works end-to-end
+- [ ] `npx @cgk-platform/cli create my-brand` works end-to-end
 - [ ] Brand sites can update packages without breaking customizations
 - [ ] Documentation sufficient for AI agents to implement features
 - [ ] Logging useful for debugging without overwhelming production

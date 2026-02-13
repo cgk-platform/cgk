@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 
-import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk/ui'
+import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk-platform/ui'
 
-import type { AgentCSATScore, CSATMetrics } from '@cgk/support'
+import type { AgentCSATScore, CSATMetrics } from '@cgk-platform/support'
 
 export default function CSATDashboardPage() {
   const [metrics, setMetrics] = useState<CSATMetrics | null>(null)

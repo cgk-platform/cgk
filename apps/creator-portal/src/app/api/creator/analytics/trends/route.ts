@@ -4,7 +4,7 @@
  * GET /api/creator/analytics/trends - Fetch time-series earnings data for charts
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

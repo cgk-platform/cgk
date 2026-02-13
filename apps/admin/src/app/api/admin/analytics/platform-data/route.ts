@@ -5,7 +5,7 @@
  * Returns e-commerce platform metrics (Shopify, etc.)
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getPlatformData } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

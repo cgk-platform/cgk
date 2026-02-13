@@ -4,7 +4,7 @@
  * GET /api/admin/esign/webhooks/[id]/deliveries - Get delivery log
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getWebhookDeliveries } from '@/lib/esign'
 

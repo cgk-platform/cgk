@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, cn } from '@cgk/ui'
+import { Badge, Card, cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 import type { BrandSummary } from '../../types/platform'

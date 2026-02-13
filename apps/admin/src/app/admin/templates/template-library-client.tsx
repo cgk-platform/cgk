@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 import { BarChart3, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState, useTransition } from 'react'

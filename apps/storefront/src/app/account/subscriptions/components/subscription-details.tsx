@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { Badge, Button, Card, CardContent, cn } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, cn } from '@cgk-platform/ui'
 import {
   formatCardBrand,
   formatCardExpiry,

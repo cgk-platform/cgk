@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Button, Card, CardContent, CardHeader, Input } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input } from '@cgk-platform/ui'
 import { ArrowLeft, Save, Phone, Send, ExternalLink } from 'lucide-react'
 
 export default function SmsConfigPage() {

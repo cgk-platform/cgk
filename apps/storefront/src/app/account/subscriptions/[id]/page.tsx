@@ -11,7 +11,7 @@
  * - Order history
  */
 
-import { Container, Spinner } from '@cgk/ui'
+import { Container, Spinner } from '@cgk-platform/ui'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'

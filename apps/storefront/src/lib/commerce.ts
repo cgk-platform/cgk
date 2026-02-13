@@ -5,8 +5,8 @@
  * Product reads go to local PostgreSQL database first, with fallback to Shopify API.
  */
 
-import { createCommerceProvider } from '@cgk/commerce'
-import type { CommerceProvider, ListParams, PaginatedResult, Product } from '@cgk/commerce'
+import { createCommerceProvider } from '@cgk-platform/commerce'
+import type { CommerceProvider, ListParams, PaginatedResult, Product } from '@cgk-platform/commerce'
 import { cache } from 'react'
 
 import { getProductByHandleFromLocalDB, getProductsFromLocalDB, searchProductsInLocalDB } from './products-db'

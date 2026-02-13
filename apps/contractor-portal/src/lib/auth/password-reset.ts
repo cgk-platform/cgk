@@ -4,7 +4,7 @@
 
 import { createHash, randomBytes } from 'crypto'
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 const RESET_TOKEN_LENGTH = 48
 const RESET_TOKEN_EXPIRATION_HOURS = 1 // 1 hour expiry for security

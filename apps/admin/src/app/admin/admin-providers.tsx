@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { TenantProvider, type TenantInfo } from '@cgk/ui'
+import { TenantProvider, type TenantInfo } from '@cgk-platform/ui'
 
 interface AdminProvidersProps {
   initialTenant: TenantInfo | null

@@ -8,7 +8,7 @@
  * @ai-critical Enforce 160 char limit for single-segment messages
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { calculateSegmentCount } from './compliance.js'
 import type {

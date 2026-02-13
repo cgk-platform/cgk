@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, CardContent } from '@cgk/ui'
+import { Badge, Card, CardContent } from '@cgk-platform/ui'
 import * as React from 'react'
 
 import type { PermissionsByCategory, Role } from './types'

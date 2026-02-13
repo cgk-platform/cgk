@@ -5,7 +5,7 @@
  * PUT /api/creator/brand-preferences - Update creator's general brand preferences
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type {

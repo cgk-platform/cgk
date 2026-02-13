@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import { Send, Plus, MessageSquare, Lock, Clock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useCallback, useRef, useEffect } from 'react'

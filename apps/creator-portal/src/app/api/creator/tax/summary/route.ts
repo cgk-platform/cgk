@@ -4,7 +4,7 @@
  * GET /api/creator/tax/summary - Fetch tax summary data including YTD earnings and W-9 status
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

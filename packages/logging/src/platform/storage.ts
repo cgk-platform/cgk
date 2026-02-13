@@ -52,8 +52,8 @@ export async function writeToDatabase(entries: PlatformLogEntry[]): Promise<void
     return
   }
 
-  // Import sql from @cgk/db dynamically to avoid circular deps
-  const { sql } = await import('@cgk/db')
+  // Import sql from @cgk-platform/db dynamically to avoid circular deps
+  const { sql } = await import('@cgk-platform/db')
 
   // Build the values list for batch insert
   const values = entries.map((entry) => ({

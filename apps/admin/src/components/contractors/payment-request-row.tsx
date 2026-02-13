@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Textarea, cn } from '@cgk/ui'
+import { Button, Input, Textarea, cn } from '@cgk-platform/ui'
 import { Check, X, ChevronDown, ChevronUp, Paperclip, ExternalLink, Loader2 } from 'lucide-react'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'

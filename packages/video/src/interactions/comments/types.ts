@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Video Comments Types
+ * @cgk-platform/video - Video Comments Types
  *
  * Type definitions for timestamped video comments with threading.
  */

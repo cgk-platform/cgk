@@ -1,5 +1,5 @@
 {
-  "extends": "@cgk/typescript-config/base.json",
+  "extends": "@cgk-platform/typescript-config/base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src"

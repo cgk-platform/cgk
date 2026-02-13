@@ -1,4 +1,4 @@
-import { Spinner } from '@cgk/ui'
+import { Spinner } from '@cgk-platform/ui'
 import { Suspense } from 'react'
 
 

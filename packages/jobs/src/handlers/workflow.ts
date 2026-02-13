@@ -8,7 +8,7 @@
  * - Execution log cleanup (daily)
  * - Snoozed threads processing
  *
- * NOTE: These jobs require the @cgk/admin-core/workflow module to be implemented.
+ * NOTE: These jobs require the @cgk-platform/admin-core/workflow module to be implemented.
  * Currently stubbed to allow build to pass.
  */
 
@@ -35,13 +35,13 @@ export const processScheduledActionsJob = defineJob<ProcessScheduledActionsPaylo
       }
     }
 
-    // @cgk/admin-core/workflow not yet available
+    // @cgk-platform/admin-core/workflow not yet available
     console.log(`[workflow/process-scheduled-actions] tenantId=${tenantId}`)
 
     return {
       success: false,
       error: {
-        message: '@cgk/admin-core/workflow module not yet implemented',
+        message: '@cgk-platform/admin-core/workflow module not yet implemented',
         retryable: false,
       },
     }
@@ -73,13 +73,13 @@ export const checkTimeElapsedTriggersJob = defineJob<CheckTimeElapsedTriggersPay
       }
     }
 
-    // @cgk/admin-core/workflow not yet available
+    // @cgk-platform/admin-core/workflow not yet available
     console.log(`[workflow/check-time-elapsed-triggers] tenantId=${tenantId} entityType=${entityType || 'all'}`)
 
     return {
       success: false,
       error: {
-        message: '@cgk/admin-core/workflow module not yet implemented',
+        message: '@cgk-platform/admin-core/workflow module not yet implemented',
         retryable: false,
       },
     }
@@ -110,13 +110,13 @@ export const cleanupExecutionLogsJob = defineJob<CleanupExecutionLogsPayload>({
       }
     }
 
-    // @cgk/admin-core/workflow not yet available
+    // @cgk-platform/admin-core/workflow not yet available
     console.log(`[workflow/cleanup-execution-logs] tenantId=${tenantId} retentionDays=${retentionDays}`)
 
     return {
       success: false,
       error: {
-        message: '@cgk/admin-core/workflow module not yet implemented',
+        message: '@cgk-platform/admin-core/workflow module not yet implemented',
         retryable: false,
       },
     }
@@ -146,13 +146,13 @@ export const processSnoozedThreadsJob = defineJob<ProcessSnoozedThreadsPayload>(
       }
     }
 
-    // @cgk/admin-core/workflow not yet available
+    // @cgk-platform/admin-core/workflow not yet available
     console.log(`[workflow/process-snoozed-threads] tenantId=${tenantId}`)
 
     return {
       success: false,
       error: {
-        message: '@cgk/admin-core/workflow module not yet implemented',
+        message: '@cgk-platform/admin-core/workflow module not yet implemented',
         retryable: false,
       },
     }

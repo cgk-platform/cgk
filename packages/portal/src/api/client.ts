@@ -4,7 +4,7 @@
  * GraphQL client for Shopify Customer Account API queries.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type { GraphQLRequest, GraphQLResponse } from '../types'
 
 const API_VERSION = '2025-01'

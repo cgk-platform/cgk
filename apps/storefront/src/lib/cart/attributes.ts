@@ -5,7 +5,7 @@
  * These attributes flow through to Shopify order note_attributes.
  */
 
-import type { CartAttribute } from '@cgk/commerce'
+import type { CartAttribute } from '@cgk-platform/commerce'
 import type { PlatformCartAttributes } from './types'
 
 /**

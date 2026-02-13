@@ -2,7 +2,7 @@
  * Sample Orders Stats API
  * GET: Get statistics for sample orders
  */
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

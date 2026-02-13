@@ -5,7 +5,7 @@
  * @ai-note Retry delay doubles with each attempt: 1m, 2m, 4m, 8m, 16m...
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { QueueEntry, QueueType } from './types.js'
 

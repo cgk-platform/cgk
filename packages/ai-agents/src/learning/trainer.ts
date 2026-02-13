@@ -4,7 +4,7 @@
  * Provides explicit knowledge import through training sessions.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { createMemory } from '../memory/storage.js'
 import { TRAINING_TO_MEMORY_TYPE } from '../memory/types.js'
 import type {

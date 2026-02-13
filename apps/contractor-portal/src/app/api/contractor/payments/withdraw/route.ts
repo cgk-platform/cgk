@@ -11,7 +11,7 @@ import {
   getPayeeBalance,
   WithdrawalError,
   type ContractorWithdrawalStatus,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

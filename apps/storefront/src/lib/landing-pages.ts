@@ -5,7 +5,7 @@
  * Respects tenant isolation - pages are scoped to the current tenant.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { cache } from 'react'
 import type {
   LandingPageConfig,

@@ -1,5 +1,5 @@
-import { getTenantContext } from '@cgk/auth'
-import { getTikTokConnection, selectTikTokAdvertiser } from '@cgk/integrations'
+import { getTenantContext } from '@cgk-platform/auth'
+import { getTikTokConnection, selectTikTokAdvertiser } from '@cgk-platform/integrations'
 
 export const dynamic = 'force-dynamic'
 

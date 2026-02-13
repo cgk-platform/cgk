@@ -9,7 +9,7 @@ import {
   getSmsTemplateByType,
   previewSmsTemplate,
   updateSmsTemplate,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 interface RouteParams {
   params: Promise<{ type: string }>

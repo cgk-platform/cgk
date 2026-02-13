@@ -5,7 +5,7 @@
  * Returns sales funnel and pipeline metrics
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getPipelineData } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

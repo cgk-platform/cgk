@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Button, Card, CardContent, CardHeader, Badge, Input } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Badge, Input } from '@cgk-platform/ui'
 
 import type { AnalyticsReport } from '@/lib/analytics'
 

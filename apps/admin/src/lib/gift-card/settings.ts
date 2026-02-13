@@ -2,7 +2,7 @@
  * Gift Card Settings Management
  * All operations must be called within withTenant() context
  */
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type { GiftCardSettings, GiftCardEmailTemplate } from './types'
 import { DEFAULT_GIFT_CARD_SETTINGS } from './types'

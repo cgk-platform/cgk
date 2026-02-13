@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Switch, Label, Alert, AlertDescription } from '@cgk/ui'
+import { Button, Card, CardContent, Switch, Label, Alert, AlertDescription } from '@cgk-platform/ui'
 import { Save, RefreshCw, Loader2 } from 'lucide-react'
 import { useEffect, useState, useCallback } from 'react'
 

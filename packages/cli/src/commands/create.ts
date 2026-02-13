@@ -122,10 +122,10 @@ async function createBasicStructure(
       typecheck: 'tsc --noEmit',
     },
     dependencies: {
-      '@cgk/core': 'workspace:*',
-      '@cgk/db': 'workspace:*',
-      '@cgk/auth': 'workspace:*',
-      '@cgk/ui': 'workspace:*',
+      '@cgk-platform/core': 'workspace:*',
+      '@cgk-platform/db': 'workspace:*',
+      '@cgk-platform/auth': 'workspace:*',
+      '@cgk-platform/ui': 'workspace:*',
       next: '^14.1.0',
       react: '^18.2.0',
       'react-dom': '^18.2.0',
@@ -228,7 +228,7 @@ async function createPlatformConfig(
   slug: string,
   name: string
 ): Promise<void> {
-  const config = `import { defineConfig } from '@cgk/core'
+  const config = `import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({
   brand: {

@@ -1,7 +1,7 @@
 'use client'
 
-import { Button, Spinner } from '@cgk/ui'
-import type { PlatformLogEntry } from '@cgk/logging'
+import { Button, Spinner } from '@cgk-platform/ui'
+import type { PlatformLogEntry } from '@cgk-platform/logging'
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react'
 import { useCallback, useState } from 'react'
 

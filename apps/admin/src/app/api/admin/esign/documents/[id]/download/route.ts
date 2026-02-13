@@ -4,7 +4,7 @@
  * GET /api/admin/esign/documents/[id]/download - Get document download URL
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getDocumentWithSigners, addAuditLogEntry } from '@/lib/esign'
 

@@ -4,7 +4,7 @@
  * GET /api/creator/analytics/earnings - Fetch earnings data with period filtering
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

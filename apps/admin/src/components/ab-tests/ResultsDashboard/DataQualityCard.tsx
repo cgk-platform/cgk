@@ -2,7 +2,7 @@
 
 import { AlertTriangle, CheckCircle, Info } from 'lucide-react'
 
-import { Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Card, CardHeader, CardContent, cn } from '@cgk-platform/ui'
 
 import { useSRMAnalysis } from '@/lib/ab-tests/hooks'
 

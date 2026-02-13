@@ -3,7 +3,7 @@
  * GET: Fetch UGC submissions with stats
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 
 import { getUGCGalleryStats, getUGCSubmissions } from '@/lib/admin-utilities/db'

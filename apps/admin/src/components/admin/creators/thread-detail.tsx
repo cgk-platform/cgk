@@ -1,4 +1,4 @@
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 import { formatDateTime } from '@/lib/format'
 import type { Thread, Message } from '@/lib/messaging/types'

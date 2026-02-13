@@ -1,7 +1,12 @@
+/**
+ * KPI Card Components
+ *
+ * Dashboard metric cards using design system tokens.
+ */
+
 'use client'
 
-import { Card } from '@cgk/ui'
-import { cn } from '@cgk/ui'
+import { Card, cn } from '@cgk-platform/ui'
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 
@@ -78,8 +83,8 @@ export function KPICard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden p-4 transition-colors',
-        onClick && 'cursor-pointer hover:bg-accent/50',
+        'relative overflow-hidden p-4 transition-all duration-normal',
+        onClick && 'cursor-pointer hover:bg-accent/50 hover:-translate-y-0.5',
         className
       )}
       onClick={onClick}
@@ -94,27 +99,29 @@ export function KPICard({
           <p className="text-2xl font-bold tracking-tight">{displayValue}</p>
         </div>
         {icon && (
-          <div className="rounded-md bg-muted p-2 text-muted-foreground">
+          <div className="rounded-lg bg-primary/10 p-2 text-primary">
             {icon}
           </div>
         )}
       </div>
 
       {hasChange && (
-        <div className="mt-2 flex items-center gap-1">
-          {isPositiveChange ? (
-            <ArrowUpIcon className="h-3 w-3 text-green-500" />
-          ) : (
-            <ArrowDownIcon className="h-3 w-3 text-red-500" />
-          )}
-          <span
+        <div className="mt-2 flex items-center gap-1.5">
+          <div
             className={cn(
-              'text-xs font-medium',
-              isPositiveChange ? 'text-green-500' : 'text-red-500'
+              'flex items-center gap-0.5 rounded-full px-1.5 py-0.5',
+              isPositiveChange
+                ? 'bg-success/10 text-success'
+                : 'bg-destructive/10 text-destructive'
             )}
           >
-            {Math.abs(change).toFixed(1)}%
-          </span>
+            {isPositiveChange ? (
+              <ArrowUpIcon className="h-3 w-3" />
+            ) : (
+              <ArrowDownIcon className="h-3 w-3" />
+            )}
+            <span className="text-xs font-medium">{Math.abs(change).toFixed(1)}%</span>
+          </div>
           {changeLabel && (
             <span className="text-xs text-muted-foreground">{changeLabel}</span>
           )}
@@ -152,16 +159,16 @@ export function StatusKPICard({
 }: StatusKPICardProps) {
   const statusText = statusLabel || status.charAt(0).toUpperCase() + status.slice(1)
   const statusColor = {
-    healthy: 'text-green-500',
-    degraded: 'text-yellow-500',
-    critical: 'text-red-500',
+    healthy: 'text-success',
+    degraded: 'text-warning',
+    critical: 'text-destructive',
   }[status]
 
   return (
     <Card
       className={cn(
-        'relative overflow-hidden p-4 transition-colors',
-        onClick && 'cursor-pointer hover:bg-accent/50',
+        'relative overflow-hidden p-4 transition-all duration-normal',
+        onClick && 'cursor-pointer hover:bg-accent/50 hover:-translate-y-0.5',
         className
       )}
       onClick={onClick}
@@ -211,8 +218,8 @@ export function AlertsKPICard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden p-4 transition-colors',
-        onClick && 'cursor-pointer hover:bg-accent/50',
+        'relative overflow-hidden p-4 transition-all duration-normal',
+        onClick && 'cursor-pointer hover:bg-accent/50 hover:-translate-y-0.5',
         className
       )}
       onClick={onClick}
@@ -224,16 +231,16 @@ export function AlertsKPICard({
       </p>
       <p className="mt-1 text-2xl font-bold tracking-tight">{total}</p>
       <div className="mt-2 flex items-center gap-3">
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-red-500" />
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-destructive" />
           <span className="text-xs font-medium">P1: {p1}</span>
         </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-orange-500" />
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-warning" />
           <span className="text-xs font-medium">P2: {p2}</span>
         </span>
-        <span className="flex items-center gap-1">
-          <span className="h-2 w-2 rounded-full bg-yellow-500" />
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 rounded-full bg-gold" />
           <span className="text-xs font-medium">P3: {p3}</span>
         </span>
       </div>

@@ -10,7 +10,7 @@ import {
   getUpcomingMaturations,
   getWithdrawalBlockingStatus,
   MINIMUM_WITHDRAWAL_CENTS,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

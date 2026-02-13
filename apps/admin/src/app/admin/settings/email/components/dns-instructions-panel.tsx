@@ -1,9 +1,9 @@
 'use client'
 
-import { Button, Card, CardContent, Select, SelectOption, Spinner } from '@cgk/ui'
+import { Button, Card, CardContent, Select, SelectOption, Spinner } from '@cgk-platform/ui'
 import { useEffect, useState } from 'react'
 
-import type { EmailDomain } from '@cgk/communications'
+import type { EmailDomain } from '@cgk-platform/communications'
 
 interface DNSInstructionsPanelProps {
   domain: EmailDomain

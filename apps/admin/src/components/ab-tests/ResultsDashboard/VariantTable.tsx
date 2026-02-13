@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardHeader, CardContent, cn } from '@cgk-platform/ui'
 
 import type { TestResults, VariantResult } from '@/lib/ab-tests/types'
 

@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, Badge } from '@cgk/ui'
-import { getTicket, getComments, getTicketAuditLog } from '@cgk/support'
+import { Card, CardContent, CardHeader, Badge } from '@cgk-platform/ui'
+import { getTicket, getComments, getTicketAuditLog } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'

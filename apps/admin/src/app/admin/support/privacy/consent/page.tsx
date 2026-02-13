@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from '@cgk-platform/ui'
 
-import type { ConsentRecord, ConsentType } from '@cgk/support'
+import type { ConsentRecord, ConsentType } from '@cgk-platform/support'
 
 export default function ConsentBrowserPage() {
   const [records, setRecords] = useState<ConsentRecord[]>([])

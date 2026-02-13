@@ -5,7 +5,7 @@ import {
   disconnectPlatformWorkspace,
   getPlatformWorkspace,
   revokeToken,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
 
 /**

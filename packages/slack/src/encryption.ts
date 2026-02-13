@@ -1,5 +1,5 @@
 /**
- * @cgk/slack - Token encryption utilities
+ * @cgk-platform/slack - Token encryption utilities
  *
  * @ai-pattern encryption
  * @ai-note AES-256-CBC encryption for Slack tokens with SCRYPT key derivation

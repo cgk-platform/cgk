@@ -4,12 +4,12 @@
  * POST /api/admin/workflows/rules - Create new rule
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   createWorkflowRule,
   getWorkflowRules,
   type CreateWorkflowRuleInput,
-} from '@cgk/admin-core'
+} from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

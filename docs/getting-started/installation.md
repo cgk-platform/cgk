@@ -13,7 +13,7 @@
 
 ```bash
 # Create a new CGK brand site
-npx @cgk/cli create my-brand
+npx @cgk-platform/cli create my-brand
 
 # Navigate to project
 cd my-brand
@@ -46,7 +46,7 @@ pnpm dev
 
 ```bash
 # Check system requirements
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 
 # Expected output:
 # ✓ Node.js: 22.x.x

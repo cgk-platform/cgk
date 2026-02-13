@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -9,7 +9,7 @@ import {
   createSyncHistory,
   completeSyncHistory,
 } from '@/lib/google-feed/db'
-import { generateGoogleFeed, type ShopifyProductData } from '@cgk/commerce'
+import { generateGoogleFeed, type ShopifyProductData } from '@cgk-platform/commerce'
 
 /**
  * POST /api/admin/google-feed/sync

@@ -5,7 +5,7 @@
  * POST /api/admin/analytics/reports - Create a new report
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { createAnalyticsReport, getAnalyticsReports } from '@/lib/analytics'
 import type { ReportCreate } from '@/lib/analytics'

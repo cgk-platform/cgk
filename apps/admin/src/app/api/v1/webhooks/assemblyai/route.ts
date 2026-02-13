@@ -16,14 +16,14 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 import { NextResponse } from 'next/server'
-import { sql } from '@cgk/db'
-import { sendJob } from '@cgk/jobs'
+import { sql } from '@cgk-platform/db'
+import { sendJob } from '@cgk-platform/jobs'
 import {
   verifyAssemblyAIWebhookSignature,
   getTranscriptionProvider,
   saveTranscriptionResult,
   failTranscription,
-} from '@cgk/video'
+} from '@cgk-platform/video'
 
 interface AssemblyAIWebhookBody {
   transcript_id: string

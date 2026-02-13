@@ -5,7 +5,7 @@
  * All tools use withTenant() for proper tenant isolation.
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import { defineTool, jsonResult, errorResult } from '../tools'
 import {
   progressChunk,

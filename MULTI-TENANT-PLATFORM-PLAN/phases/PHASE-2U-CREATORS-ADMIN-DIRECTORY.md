@@ -1,5 +1,7 @@
 # PHASE-2U-CREATORS-ADMIN-DIRECTORY: Creator Directory & Detail Pages
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Duration**: 1 week (Week 20)
 **Depends On**: PHASE-4A (creator portal), PHASE-4B (payments), PHASE-4G (creator analytics)
@@ -453,7 +455,7 @@ confirm-modal.tsx             // Confirmation modal for delete/deactivate
 ### [PARALLEL] Database & Types
 - [x] Create `creator_conversations` table migration
 - [x] Create `creator_messages` table migration
-- [x] Define TypeScript interfaces in `@cgk/admin-core`
+- [x] Define TypeScript interfaces in `@cgk-platform/admin-core`
 - [x] Create Zod validation schemas
 
 ### [PARALLEL with types] Data Layer

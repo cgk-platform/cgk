@@ -1,4 +1,4 @@
-# @cgk/scheduling - AI Development Guide
+# @cgk-platform/scheduling - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2026-02-10
@@ -20,7 +20,7 @@ import {
   createBooking,
   acquireBookingLock,
   releaseBookingLock,
-} from '@cgk/scheduling'
+} from '@cgk-platform/scheduling'
 
 // Get available slots for a date
 const slots = calculateAvailableSlots('2026-02-15', {
@@ -52,7 +52,7 @@ if (lock.acquired) {
 All database operations are tenant-isolated using `withTenant()`:
 
 ```typescript
-import { getEventTypesByUser, createBooking } from '@cgk/scheduling'
+import { getEventTypesByUser, createBooking } from '@cgk-platform/scheduling'
 
 // All operations require tenantId as first parameter
 const eventTypes = await getEventTypesByUser(tenantId, userId)
@@ -64,7 +64,7 @@ const booking = await createBooking(tenantId, input, eventType, host)
 Calculate available time slots considering all constraints:
 
 ```typescript
-import { calculateAvailableSlots, getAvailability, getBlockedDates, getBookingsForHost } from '@cgk/scheduling'
+import { calculateAvailableSlots, getAvailability, getBlockedDates, getBookingsForHost } from '@cgk-platform/scheduling'
 
 // Gather context
 const availability = await getAvailability(tenantId, userId)
@@ -87,7 +87,7 @@ const slots = calculateAvailableSlots('2026-02-15', {
 Use distributed locks to prevent race conditions:
 
 ```typescript
-import { acquireBookingLock, releaseBookingLock, isSlotAvailable } from '@cgk/scheduling'
+import { acquireBookingLock, releaseBookingLock, isSlotAvailable } from '@cgk-platform/scheduling'
 
 const lock = await acquireBookingLock(tenantId, hostUserId, startTime)
 
@@ -114,7 +114,7 @@ try {
 Protect public endpoints from abuse:
 
 ```typescript
-import { checkBookingRateLimit } from '@cgk/scheduling'
+import { checkBookingRateLimit } from '@cgk-platform/scheduling'
 
 const rateLimit = await checkBookingRateLimit(tenantId, clientIP)
 
@@ -248,8 +248,8 @@ const slots = calculateAvailableSlots(date, {
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/db` | Database access and tenant isolation |
-| `@cgk/core` | Shared types |
+| `@cgk-platform/db` | Database access and tenant isolation |
+| `@cgk-platform/core` | Shared types |
 | `date-fns` | Date manipulation |
 | `date-fns-tz` | Timezone handling |
 
@@ -262,5 +262,5 @@ const slots = calculateAvailableSlots(date, {
 - `apps/storefront` - Public booking pages (future)
 
 ### Uses:
-- `@cgk/db` - Database and cache
-- `@cgk/auth` - User context (via API routes)
+- `@cgk-platform/db` - Database and cache
+- `@cgk-platform/auth` - User context (via API routes)

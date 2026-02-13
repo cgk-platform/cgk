@@ -6,8 +6,8 @@
 
 import { createHash, randomBytes } from 'crypto'
 
-import { sql } from '@cgk/db'
-import { createLogger } from '@cgk/logging'
+import { sql } from '@cgk-platform/db'
+import { createLogger } from '@cgk-platform/logging'
 
 import type { UserInvitation } from './types.js'
 

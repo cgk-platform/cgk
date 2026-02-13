@@ -1,11 +1,11 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { CheckCircle2, Circle, Loader2, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import type { VideoStatus } from '@cgk/video'
-import type { SSEEvent, VideoStatusEventData } from '@cgk/video/creator-tools'
+import type { VideoStatus } from '@cgk-platform/video'
+import type { SSEEvent, VideoStatusEventData } from '@cgk-platform/video/creator-tools'
 
 interface StatusIndicatorProps {
   videoId: string

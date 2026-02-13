@@ -18,7 +18,7 @@ import {
   updateScript,
   validateScriptInput,
   type UpdateScriptInput,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 
 interface RouteParams {
   params: Promise<{ id: string }>

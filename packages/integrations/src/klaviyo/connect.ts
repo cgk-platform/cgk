@@ -5,7 +5,7 @@
  * @ai-note Klaviyo uses API keys instead of OAuth
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { encryptToken, decryptToken } from '../encryption.js'
 import type { KlaviyoConnectResult, KlaviyoConnection, KlaviyoList } from '../types.js'

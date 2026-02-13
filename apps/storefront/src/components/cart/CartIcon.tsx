@@ -6,7 +6,7 @@
 
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 import { useCartCount } from './CartProvider'

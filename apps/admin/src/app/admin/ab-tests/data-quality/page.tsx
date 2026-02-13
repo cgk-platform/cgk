@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import { headers } from 'next/headers'
 
-import { Card, CardHeader, CardContent } from '@cgk/ui'
+import { Card, CardHeader, CardContent } from '@cgk-platform/ui'
 
 import { getDataQualityOverview, getABTests, getSRMAnalysis } from '@/lib/ab-tests/db'
 import { DataQualityOverview } from '@/components/ab-tests/DataQuality/Overview'

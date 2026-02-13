@@ -7,7 +7,7 @@
  * @ai-note Final step of email onboarding
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { listDomains } from '../sender/domains.js'
 import { listSenderAddresses } from '../sender/addresses.js'

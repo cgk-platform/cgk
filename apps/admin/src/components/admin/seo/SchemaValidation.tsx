@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Card, CardContent, CardHeader } from '@cgk/ui'
+import { Badge, Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import { CheckCircle, XCircle, AlertTriangle, Info, FileCode } from 'lucide-react'
 import { useState } from 'react'
 

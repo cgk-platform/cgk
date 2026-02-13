@@ -5,7 +5,7 @@
  * Returns high-level KPIs for the analytics dashboard
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getAnalyticsOverview } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

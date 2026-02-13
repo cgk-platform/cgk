@@ -11,14 +11,14 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import {
   getInboundEmailById,
   updateInboundLogStatus,
   routeEmail,
   type InboundEmail,
   type InboundAddressPurpose,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 interface RouteParams {
   params: Promise<{ id: string }>

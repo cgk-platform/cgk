@@ -4,7 +4,7 @@
  * Handles retrieval and caching of decrypted Shopify credentials.
  */
 
-import { sql, withTenant, createTenantCache } from '@cgk/db'
+import { sql, withTenant, createTenantCache } from '@cgk-platform/db'
 import { decryptToken } from './encryption.js'
 import { ShopifyError } from './errors.js'
 import type {

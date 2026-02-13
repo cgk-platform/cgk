@@ -4,7 +4,7 @@
  * GET /api/contractor/tax/forms - List tax forms (1099-NEC)
  */
 
-import { getTaxForms } from '@cgk/payments'
+import { getTaxForms } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

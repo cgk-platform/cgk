@@ -3,7 +3,7 @@
  *
  * Periodically retries failed webhook events.
  *
- * NOTE: This job requires the @cgk/shopify/webhooks module to be built and available.
+ * NOTE: This job requires the @cgk-platform/shopify/webhooks module to be built and available.
  * Currently stubbed to allow build to pass.
  */
 
@@ -37,13 +37,13 @@ export const retryFailedWebhooksJob = defineJob<{ tenantId: string; config?: Par
     const { tenantId, config = {} } = job.payload
     const { maxRetries, hoursAgo, batchSize } = { ...DEFAULT_CONFIG, ...config }
 
-    // @cgk/shopify/webhooks module needs to be built first
+    // @cgk-platform/shopify/webhooks module needs to be built first
     console.log(`[webhooks/retry-failed] tenantId=${tenantId} maxRetries=${maxRetries} hoursAgo=${hoursAgo} batchSize=${batchSize}`)
 
     return {
       success: false,
       error: {
-        message: '@cgk/shopify/webhooks module must be built before this job can run',
+        message: '@cgk-platform/shopify/webhooks module must be built before this job can run',
         retryable: false,
       },
       data: {

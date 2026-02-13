@@ -1,12 +1,12 @@
 /**
  * Background Jobs for Creator Admin Operations
  *
- * These job definitions follow the @cgk/jobs patterns and include tenantId
+ * These job definitions follow the @cgk-platform/jobs patterns and include tenantId
  * in all event payloads for proper tenant isolation.
  */
 
-import { defineJob, type Job } from '@cgk/jobs'
-import { withTenant, sql } from '@cgk/db'
+import { defineJob, type Job } from '@cgk-platform/jobs'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import type { SampleStatus } from './types'
 

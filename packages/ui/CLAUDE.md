@@ -1,4 +1,4 @@
-# @cgk/ui - AI Development Guide
+# @cgk-platform/ui - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -14,8 +14,8 @@ React UI components using shadcn/ui patterns. Provides a consistent design syste
 ## Quick Reference
 
 ```typescript
-import { Button, Card, CardHeader, CardContent, Input, Container } from '@cgk/ui'
-import { cn } from '@cgk/ui'
+import { Button, Card, CardHeader, CardContent, Input, Container } from '@cgk-platform/ui'
+import { cn } from '@cgk-platform/ui'
 ```
 
 ---
@@ -25,7 +25,7 @@ import { cn } from '@cgk/ui'
 ### Pattern 1: Using Components
 
 ```tsx
-import { Button, Card, CardHeader, CardContent } from '@cgk/ui'
+import { Button, Card, CardHeader, CardContent } from '@cgk-platform/ui'
 
 export function OrderCard({ order }) {
   return (
@@ -43,7 +43,7 @@ export function OrderCard({ order }) {
 ### Pattern 2: Class Merging with cn()
 
 ```tsx
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 function CustomButton({ className, ...props }) {
   return (
@@ -138,4 +138,4 @@ This package requires React 18+ as a peer dependency. Ensure your app has React 
 - `apps/admin`
 
 ### Uses:
-- `@cgk/core` - Types only
+- `@cgk-platform/core` - Types only

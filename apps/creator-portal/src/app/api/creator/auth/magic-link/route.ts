@@ -5,7 +5,7 @@
  * Sends a magic link email for passwordless authentication.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import {
   checkRateLimit,

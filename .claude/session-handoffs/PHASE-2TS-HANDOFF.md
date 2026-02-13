@@ -86,7 +86,7 @@ Built the Tenant Settings system in `apps/admin/`. This provides tenant-scoped A
 
 - Settings-related type errors: **PASS** (0 errors in new code)
 - Lint for new files: **PASS** (0 errors in new files)
-- Pre-existing errors remain in `@cgk/logging` (not related to this phase)
+- Pre-existing errors remain in `@cgk-platform/logging` (not related to this phase)
 
 ## Key Patterns Used
 

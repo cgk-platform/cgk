@@ -1,4 +1,4 @@
-import { completeMetaOAuth } from '@cgk/integrations'
+import { completeMetaOAuth } from '@cgk-platform/integrations'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'

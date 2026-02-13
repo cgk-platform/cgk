@@ -5,7 +5,7 @@
  * PUT /api/admin/analytics/settings - Update analytics settings
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { getAnalyticsSettings, updateAnalyticsSettings } from '@/lib/analytics'
 import type { AnalyticsSettingsUpdate } from '@/lib/analytics'

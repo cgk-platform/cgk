@@ -8,7 +8,7 @@ import {
   setAuthCookie,
   signJWT,
   verifyPassword,
-} from '@cgk/auth'
+} from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 

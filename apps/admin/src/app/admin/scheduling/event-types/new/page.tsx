@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, Input, Label, Textarea, Select, SelectOption } from '@cgk/ui'
+import { Button, Card, CardContent, CardHeader, Input, Label, Textarea, Select, SelectOption } from '@cgk-platform/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { ArrowLeft } from 'lucide-react'

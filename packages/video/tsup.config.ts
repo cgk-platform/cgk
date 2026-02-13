@@ -14,5 +14,5 @@ export default defineConfig({
   sourcemap: true,
   splitting: false,
   treeshake: true,
-  external: ['@cgk/core', '@cgk/db', '@anthropic-ai/sdk', '@mux/mux-node'],
+  external: ['@cgk-platform/core', '@cgk-platform/db', '@anthropic-ai/sdk', '@mux/mux-node'],
 })

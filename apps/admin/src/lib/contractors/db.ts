@@ -5,7 +5,7 @@
  * Contractors are stored in tenant schema (unlike creators in public schema).
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   Contractor,

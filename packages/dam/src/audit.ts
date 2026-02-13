@@ -2,7 +2,7 @@
  * Audit Logging
  * Tracks all changes to DAM entities for compliance and debugging
  */
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type {
   AuditLog,

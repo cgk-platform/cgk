@@ -1,9 +1,9 @@
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   createSchedulingUser,
   getSchedulingUsers,
   type CreateSchedulingUserInput,
-} from '@cgk/scheduling'
+} from '@cgk-platform/scheduling'
 
 export const dynamic = 'force-dynamic'
 

@@ -2,7 +2,7 @@
  * Sample Orders API (Tag-based detection)
  * GET: List orders detected as samples (UGC + TikTok) based on tags
  */
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

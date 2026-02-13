@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Badge, Button, Card, CardContent, CardHeader, Input, Textarea } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, Input, Textarea } from '@cgk-platform/ui'
 import {
   Lightbulb,
   Plus,

@@ -4,7 +4,7 @@
  * Job definitions for processing bulk sends, webhooks, reminders, and expirations.
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import {
   getScheduledBulkSends,
   getPendingRecipients,
@@ -20,7 +20,7 @@ import {
 } from './index'
 import type { EsignWebhookEvent, EsignWebhookPayload } from './types'
 
-// Local type definitions for job system (until @cgk/jobs module resolution is fixed)
+// Local type definitions for job system (until @cgk-platform/jobs module resolution is fixed)
 interface Job<T = unknown> {
   id: string
   name: string

@@ -3,7 +3,7 @@
  * Page-by-page SEO analysis and scoring
  * All operations must be called within withTenant() context
  */
-import { sql, createTenantCache } from '@cgk/db'
+import { sql, createTenantCache } from '@cgk-platform/db'
 
 import type { SEOAudit, PageSEOAnalysis, AuditSummary } from './types'
 

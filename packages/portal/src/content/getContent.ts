@@ -4,7 +4,7 @@
  * Retrieves content strings for the customer portal with tenant customization support.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type { ContentKey, ContentStrings } from '../types'
 import { DEFAULT_CONTENT } from './defaults'
 

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { getTemplateAnalytics } from '@cgk/communications'
+import { getTemplateAnalytics } from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

@@ -4,8 +4,8 @@
  * Responsive grid layout for displaying product cards.
  */
 
-import type { Product } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Product } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 
 import { ProductCard } from './ProductCard'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent } from '@cgk/ui'
+import { Button, Card, CardContent } from '@cgk-platform/ui'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 

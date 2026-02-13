@@ -1,5 +1,5 @@
 /**
- * @cgk/jobs - Background Job Infrastructure
+ * @cgk-platform/jobs - Background Job Infrastructure
  *
  * Vendor-agnostic background job processing for the CGK platform.
  *
@@ -13,7 +13,7 @@
  *
  * @example
  * // Send a job
- * import { sendJob } from '@cgk/jobs'
+ * import { sendJob } from '@cgk-platform/jobs'
  *
  * await sendJob('order.created', {
  *   tenantId: 'rawdog',  // REQUIRED
@@ -24,7 +24,7 @@
  *
  * @example
  * // Create a client with specific provider
- * import { createJobClient } from '@cgk/jobs'
+ * import { createJobClient } from '@cgk-platform/jobs'
  *
  * const client = createJobClient({
  *   provider: 'trigger.dev',

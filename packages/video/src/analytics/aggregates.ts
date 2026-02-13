@@ -1,10 +1,10 @@
 /**
- * @cgk/video - View aggregates
+ * @cgk-platform/video - View aggregates
  *
  * Aggregate analytics for video views and watch time.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { VideoAnalytics } from '../types.js'
 

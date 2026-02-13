@@ -11,8 +11,8 @@
 
 import { NextResponse } from 'next/server'
 import crypto from 'crypto'
-import { withTenant, sql } from '@cgk/db'
-import { sendJob } from '@cgk/jobs'
+import { withTenant, sql } from '@cgk-platform/db'
+import { sendJob } from '@cgk-platform/jobs'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -311,7 +311,7 @@ async function handleCheckoutUpdate(
     })
 
     // Notify that checkout was recovered
-    // Note: The 'recovery.checkoutUpdated' event is defined in @cgk/jobs events.ts
+    // Note: The 'recovery.checkoutUpdated' event is defined in @cgk-platform/jobs events.ts
     await sendJob('recovery.checkoutUpdated', {
       tenantId: tenantSlug,
       shopifyCheckoutId,

@@ -4,7 +4,7 @@
  * GET /api/creator/messages - List conversations with unread counts
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

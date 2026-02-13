@@ -1,5 +1,5 @@
-import { getTenantContext } from '@cgk/auth'
-import { disconnectKlaviyo } from '@cgk/integrations'
+import { getTenantContext } from '@cgk-platform/auth'
+import { disconnectKlaviyo } from '@cgk-platform/integrations'
 
 export const dynamic = 'force-dynamic'
 

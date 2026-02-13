@@ -79,7 +79,7 @@ const cached = await cache.get(cacheKey)
 ```
 
 ### Database Queries
-Proper use of `sql` template from `@cgk/db` with parameterized queries:
+Proper use of `sql` template from `@cgk-platform/db` with parameterized queries:
 ```typescript
 const result = await sql`
   SELECT ... FROM attribution_channel_summary acs
@@ -157,8 +157,8 @@ The queries assume these tables exist (from Phase 2AT-ATTRIBUTION-CORE):
 - Phase 2AT-ATTRIBUTION-CORE - Attribution core types, settings, and base queries
 
 ### Uses
-- `@cgk/db` - Database client and tenant isolation
-- `@cgk/ui` - UI components (Card, Button, etc.)
+- `@cgk-platform/db` - Database client and tenant isolation
+- `@cgk-platform/ui` - UI components (Card, Button, etc.)
 - React hooks (useState, useEffect, useCallback)
 
 ---

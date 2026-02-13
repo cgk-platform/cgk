@@ -1,4 +1,4 @@
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 import { ThreadStatusBadge } from '@/components/commerce/status-badge'

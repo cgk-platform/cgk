@@ -15,7 +15,7 @@ export const revalidate = 0
 
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { updateTaskCompletion, getVideoTranscription } from '@cgk/video'
+import { updateTaskCompletion, getVideoTranscription } from '@cgk-platform/video'
 
 interface TaskUpdateBody {
   taskIndex: number

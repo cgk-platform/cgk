@@ -16,7 +16,7 @@ import {
   replaceCTAButtons,
   validateCTAInput,
   type CTAButtonInput,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 
 interface RouteParams {
   params: Promise<{ id: string }>

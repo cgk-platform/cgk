@@ -5,8 +5,8 @@
  * This module provides type-safe queries against the tenant's products table.
  */
 
-import type { Money, PageInfo, PaginatedResult, Product, ProductImage, ProductVariant } from '@cgk/commerce'
-import { sql, withTenant } from '@cgk/db'
+import type { Money, PageInfo, PaginatedResult, Product, ProductImage, ProductVariant } from '@cgk-platform/commerce'
+import { sql, withTenant } from '@cgk-platform/db'
 
 
 /**

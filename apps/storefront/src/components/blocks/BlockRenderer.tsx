@@ -5,7 +5,7 @@
  * Handles unknown block types gracefully with a console warning.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { LandingPageBlock, BlockType } from './types'
 import { isValidBlockType } from './registry'
 

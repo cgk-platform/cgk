@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 import type { WizardStep, WizardStepId } from '../../lib/onboarding-wizard/types'
 

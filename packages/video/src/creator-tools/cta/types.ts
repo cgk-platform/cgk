@@ -1,5 +1,5 @@
 /**
- * @cgk/video - CTA Button Types
+ * @cgk-platform/video - CTA Button Types
  *
  * Type definitions for video call-to-action buttons.
  */

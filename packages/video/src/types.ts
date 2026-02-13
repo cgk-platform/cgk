@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Type definitions
+ * @cgk-platform/video - Type definitions
  *
  * Core types for video management, folders, permissions, and analytics.
  */

@@ -148,7 +148,7 @@ cd /Users/holdenthemic/Documents/cgk/packages/auth && pnpm build
 
 1. Run the database migration to create the super admin tables:
    ```bash
-   npx @cgk/cli migrate
+   npx @cgk-platform/cli migrate
    ```
 
 2. Create the first super admin user manually:

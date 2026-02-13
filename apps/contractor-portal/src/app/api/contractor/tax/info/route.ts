@@ -14,7 +14,7 @@ import {
   type CheckAddress,
   type SubmitW9Input,
   type TaxEntityType,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

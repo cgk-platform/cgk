@@ -81,7 +81,7 @@ export async function getReviewById(reviewId: string): Promise<Review | null> {
 
   // For internal reviews, fetch from database
   // Yotpo reviews would need a different approach (not supported in widget API)
-  const { withTenant, sql } = await import('@cgk/db')
+  const { withTenant, sql } = await import('@cgk-platform/db')
 
   return withTenant(tenantSlug, async () => {
     const result = await sql<{
@@ -140,7 +140,7 @@ export async function markReviewHelpful(reviewId: string): Promise<void> {
     return
   }
 
-  const { withTenant, sql } = await import('@cgk/db')
+  const { withTenant, sql } = await import('@cgk-platform/db')
 
   await withTenant(tenantSlug, async () => {
     await sql`

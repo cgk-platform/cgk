@@ -8,8 +8,8 @@
  * 3. Session cookie (for browser-based clients)
  */
 
-import { verifyJWT } from '@cgk/auth'
-import { JSONRPCErrorCodes, type JSONRPCError } from '@cgk/mcp'
+import { verifyJWT } from '@cgk-platform/auth'
+import { JSONRPCErrorCodes, type JSONRPCError } from '@cgk-platform/mcp'
 
 // =============================================================================
 // Types
@@ -189,7 +189,7 @@ function extractAuthCookie(cookieHeader: string): string | null {
   const cookies = cookieHeader.split(';').map((c) => c.trim())
 
   for (const cookie of cookies) {
-    // Check for cgk-auth cookie (matches AUTH_COOKIE_NAME from @cgk/auth)
+    // Check for cgk-auth cookie (matches AUTH_COOKIE_NAME from @cgk-platform/auth)
     if (cookie.startsWith('cgk-auth=')) {
       return cookie.slice(9)
     }

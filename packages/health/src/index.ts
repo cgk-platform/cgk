@@ -1,5 +1,5 @@
 /**
- * @cgk/health - Platform health monitoring
+ * @cgk-platform/health - Platform health monitoring
  *
  * Provides service health checks, alert system, and monitoring dashboard support.
  *

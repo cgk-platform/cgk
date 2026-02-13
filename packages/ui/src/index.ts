@@ -1,15 +1,27 @@
 /**
- * @cgk/ui - React UI components using shadcn/ui patterns
+ * @cgk-platform/ui - React UI components using shadcn/ui patterns
  *
  * @ai-pattern ui-components
  * @ai-note Uses Radix primitives with Tailwind CSS styling
  */
 
+// ============================================================================
+// Design Tokens
+// ============================================================================
+export * from './tokens/colors'
+export * from './tokens/typography'
+export * from './tokens/spacing'
+export * from './tokens/animation'
+
+// ============================================================================
 // Utilities
+// ============================================================================
 export { cn } from './utils/cn'
 export { formatCurrency, formatPercent, formatNumber, formatCompact, formatBytes } from './utils/format'
 
-// Component primitives
+// ============================================================================
+// Component Primitives
+// ============================================================================
 export { Button, buttonVariants, type ButtonProps } from './components/button'
 export { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription, type CardProps } from './components/card'
 export { Input, type InputProps } from './components/input'
@@ -18,7 +30,9 @@ export { Select, SelectOption, selectVariants, type SelectProps } from './compon
 export { Switch, type SwitchProps } from './components/switch'
 export { Textarea, type TextareaProps } from './components/textarea'
 
-// Radix Select components (for complex dropdowns)
+// ============================================================================
+// Radix Select (complex dropdowns)
+// ============================================================================
 export {
   RadixSelect,
   SelectGroup,
@@ -30,20 +44,157 @@ export {
   SelectSeparator,
 } from './components/radix-select'
 
+// ============================================================================
 // Tabs
+// ============================================================================
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/tabs'
 
-// Form components
+// ============================================================================
+// Form Components
+// ============================================================================
 export { Checkbox } from './components/checkbox'
 export { Slider } from './components/slider'
 export { Progress } from './components/progress'
 
-// Feedback components
+// ============================================================================
+// Feedback Components
+// ============================================================================
 export { Alert, AlertTitle, AlertDescription, alertVariants, type AlertProps } from './components/alert'
 export { Badge, badgeVariants, type BadgeProps } from './components/badge'
 export { Spinner, spinnerVariants, type SpinnerProps } from './components/spinner'
+export {
+  StatusBadge,
+  statusBadgeVariants,
+  statusVariantMap,
+  formatStatus,
+  getVariantFromStatus,
+  type StatusBadgeProps,
+} from './components/status-badge'
 
-// Layout components
+// ============================================================================
+// Dialog/Modal
+// ============================================================================
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+  AlertDialog,
+  dialogContentVariants,
+  type DialogContentProps,
+  type AlertDialogProps,
+} from './components/dialog'
+
+// ============================================================================
+// Toast/Notifications
+// ============================================================================
+export { Toaster, toast } from './components/toast'
+
+// ============================================================================
+// Skeleton/Loading
+// ============================================================================
+export {
+  Skeleton,
+  SkeletonText,
+  SkeletonCard,
+  SkeletonTable,
+  SkeletonList,
+  SkeletonStats,
+  skeletonVariants,
+  type SkeletonProps,
+} from './components/skeleton'
+
+// ============================================================================
+// Dropdown Menu
+// ============================================================================
+export {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+} from './components/dropdown-menu'
+
+// ============================================================================
+// Table
+// ============================================================================
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+  SortableHeader,
+  TableEmpty,
+  TablePagination,
+  ColumnVisibility,
+  TableCheckbox,
+  BulkActionBar,
+  TableToolbar,
+  type SortDirection,
+  type SortableHeaderProps,
+  type TableEmptyProps,
+  type TablePaginationProps,
+  type ColumnVisibilityProps,
+  type TableCheckboxProps,
+  type BulkActionBarProps,
+  type TableToolbarProps,
+} from './components/table'
+
+// ============================================================================
+// Tooltip
+// ============================================================================
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+  SimpleTooltip,
+  InfoTooltip,
+  TruncatedText,
+  type SimpleTooltipProps,
+  type InfoTooltipProps,
+  type TruncatedTextProps,
+} from './components/tooltip'
+
+// ============================================================================
+// Breadcrumb
+// ============================================================================
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+  SimpleBreadcrumbs,
+  type BreadcrumbItemData,
+  type SimpleBreadcrumbsProps,
+} from './components/breadcrumb'
+
+// ============================================================================
+// Layout Components
+// ============================================================================
 export { Container, type ContainerProps } from './components/container'
 
 // Permission context

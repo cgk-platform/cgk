@@ -11,12 +11,12 @@
  * @ai-pattern tenant-isolation
  */
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import {
   getVideo,
   getVideoAnalytics,
-} from '@cgk/video'
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+} from '@cgk-platform/video'
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 import { ArrowLeft, Edit, Share2, Trash2 } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'

@@ -4,7 +4,7 @@ import {
   getTemplates,
   seedDefaultTemplates,
   type TemplateFilters,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

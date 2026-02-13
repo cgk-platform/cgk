@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Playback URL generation
+ * @cgk-platform/video - Playback URL generation
  *
  * Generates URLs for video streaming, thumbnails, and storyboards.
  */

@@ -1,5 +1,5 @@
 /**
- * @cgk/ab-testing/server - Server-Only Exports
+ * @cgk-platform/ab-testing/server - Server-Only Exports
  *
  * This module exports server-side utilities that require database access.
  * These should never be imported in client-side code.

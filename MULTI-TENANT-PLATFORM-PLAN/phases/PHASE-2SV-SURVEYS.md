@@ -1,5 +1,7 @@
 # PHASE-2SV: Surveys & Post-Purchase Attribution
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE (2026-02-11)
 
 **Duration**: 2 weeks (Week 13-14)
@@ -583,6 +585,8 @@ interface NpsTrendData {
     test/route.ts                    # POST send test
 
 # Public API (for Shopify extension)
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
 /api/public/surveys/
   [tenant]/[slug]/route.ts           # GET survey for display
   [tenant]/responses/route.ts        # POST submit response

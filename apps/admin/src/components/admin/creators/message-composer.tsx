@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Textarea } from '@cgk/ui'
+import { Button, Textarea } from '@cgk-platform/ui'
 import { Send } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'

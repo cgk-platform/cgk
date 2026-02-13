@@ -4,7 +4,7 @@
  * DELETE: Delete submission
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 
 import {

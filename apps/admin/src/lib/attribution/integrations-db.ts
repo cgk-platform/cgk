@@ -6,7 +6,7 @@
  * All operations assume tenant context is already set via withTenant().
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type {
   CustomDashboard,

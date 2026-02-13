@@ -1,8 +1,8 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
-import type { SupportTicket } from '@cgk/support'
+import type { SupportTicket } from '@cgk-platform/support'
 
 import { DataTable, type Column } from '@/components/commerce/data-table'
 import { TicketStatusBadge } from './ticket-status-badge'

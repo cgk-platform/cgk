@@ -109,7 +109,7 @@ export async function persistAssignment(
   tenantSlug: string,
   assignment: ABAssignment
 ): Promise<void> {
-  const { withTenant, sql } = await import('@cgk/db')
+  const { withTenant, sql } = await import('@cgk-platform/db')
 
   await withTenant(tenantSlug, async () => {
     await sql`
@@ -138,7 +138,7 @@ export async function getPersistedAssignment(
   testId: string,
   visitorId: string
 ): Promise<string | null> {
-  const { withTenant, sql } = await import('@cgk/db')
+  const { withTenant, sql } = await import('@cgk-platform/db')
 
   return withTenant(tenantSlug, async () => {
     const result = await sql<{ variant_id: string }>`
@@ -160,7 +160,7 @@ export async function getAllPersistedAssignments(
   tenantSlug: string,
   visitorId: string
 ): Promise<Record<string, string>> {
-  const { withTenant, sql } = await import('@cgk/db')
+  const { withTenant, sql } = await import('@cgk-platform/db')
 
   return withTenant(tenantSlug, async () => {
     const result = await sql<{ test_id: string; variant_id: string }>`

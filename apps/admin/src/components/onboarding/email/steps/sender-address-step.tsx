@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button } from '@cgk/ui'
-import { Input } from '@cgk/ui'
-import { Label } from '@cgk/ui'
-import { Card, CardContent, CardHeader } from '@cgk/ui'
-import { Badge } from '@cgk/ui'
-import { RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
+import { Input } from '@cgk-platform/ui'
+import { Label } from '@cgk-platform/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
+import { Badge } from '@cgk-platform/ui'
+import { RadixSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@cgk-platform/ui'
 
-import type { SenderAddressWithDomain, SenderPurpose } from '@cgk/communications'
+import type { SenderAddressWithDomain, SenderPurpose } from '@cgk-platform/communications'
 import type { SenderAddressStepProps } from '../types'
 
 interface RecommendedSender {

@@ -5,7 +5,7 @@
  * POST /api/creator/onboarding-wizard - Save wizard progress
  */
 
-import { sql, withTenant, getTenantFromRequest } from '@cgk/db'
+import { sql, withTenant, getTenantFromRequest } from '@cgk-platform/db'
 import type { OnboardingWizardData } from '../../../../lib/onboarding-wizard/types'
 
 export const dynamic = 'force-dynamic'

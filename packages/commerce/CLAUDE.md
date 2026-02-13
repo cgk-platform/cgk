@@ -1,4 +1,4 @@
-# @cgk/commerce - AI Development Guide
+# @cgk-platform/commerce - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -14,8 +14,8 @@ Commerce provider abstraction for the CGK platform. Provides a unified interface
 ## Quick Reference
 
 ```typescript
-import { createCommerceClient, type CommerceClient } from '@cgk/commerce'
-import type { Product, Order, Cart } from '@cgk/commerce'
+import { createCommerceClient, type CommerceClient } from '@cgk-platform/commerce'
+import type { Product, Order, Cart } from '@cgk-platform/commerce'
 ```
 
 ---
@@ -25,7 +25,7 @@ import type { Product, Order, Cart } from '@cgk/commerce'
 ### Pattern 1: Creating a Commerce Client
 
 ```typescript
-import { createCommerceClient } from '@cgk/commerce'
+import { createCommerceClient } from '@cgk-platform/commerce'
 
 const commerce = createCommerceClient({
   provider: 'shopify',
@@ -109,8 +109,8 @@ createCommerceClient(config: CommerceConfig): CommerceClient
 
 | Dependency | Why |
 |------------|-----|
-| `@cgk/core` | Shared types |
-| `@cgk/db` | Order persistence |
+| `@cgk-platform/core` | Shared types |
+| `@cgk-platform/db` | Order persistence |
 
 ---
 
@@ -141,9 +141,9 @@ const numericPrice = parseFloat(price) // 29.99
 
 ### Used by:
 - `apps/storefront` - Product display, cart
-- `@cgk/mcp` - Commerce tools for AI
-- `@cgk/analytics` - E-commerce tracking
+- `@cgk-platform/mcp` - Commerce tools for AI
+- `@cgk-platform/analytics` - E-commerce tracking
 
 ### Uses:
-- `@cgk/core` - Types
-- `@cgk/db` - Order storage
+- `@cgk-platform/core` - Types
+- `@cgk-platform/db` - Order storage

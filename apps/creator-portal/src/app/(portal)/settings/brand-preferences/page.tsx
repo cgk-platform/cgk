@@ -14,7 +14,7 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import { useCallback, useEffect, useState } from 'react'
 
 import {

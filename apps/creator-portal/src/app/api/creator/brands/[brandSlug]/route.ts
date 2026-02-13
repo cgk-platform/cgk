@@ -4,7 +4,7 @@
  * GET /api/creator/brands/[brandSlug] - Get full brand detail with earnings
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { BrandDetail, BrandProject } from '@/lib/types'

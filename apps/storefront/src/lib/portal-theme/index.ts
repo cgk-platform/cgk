@@ -2,7 +2,7 @@
  * Portal Theme Module
  *
  * Complete theming system for the customer portal.
- * Extends @cgk/portal/theme with portal-specific configuration.
+ * Extends @cgk-platform/portal/theme with portal-specific configuration.
  *
  * @example
  * ```tsx

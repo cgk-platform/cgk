@@ -1,5 +1,5 @@
 /**
- * @cgk/portal - Customer Portal Package
+ * @cgk-platform/portal - Customer Portal Package
  *
  * Provides authentication, API access, content management, and feature flags
  * for the customer-facing account portal.

@@ -4,7 +4,7 @@
  * GET /api/contractor/payments/balance - Get contractor balance
  */
 
-import { getPayeeBalance } from '@cgk/payments'
+import { getPayeeBalance } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

@@ -6,7 +6,7 @@
 
 import { createHash, randomBytes } from 'crypto'
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 const MAGIC_LINK_TOKEN_LENGTH = 48
 const MAGIC_LINK_EXPIRATION_HOURS = 24

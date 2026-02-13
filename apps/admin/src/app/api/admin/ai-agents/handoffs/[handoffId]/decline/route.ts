@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -39,7 +39,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { declineHandoff, getHandoffById } = await import('@cgk/ai-agents')
+    const { declineHandoff, getHandoffById } = await import('@cgk-platform/ai-agents')
 
     // Validate required field
     if (!body.agentId) {

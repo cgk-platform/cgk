@@ -1,12 +1,12 @@
 /**
- * @cgk/slack - Slack integration package
+ * @cgk-platform/slack - Slack integration package
  *
  * @ai-pattern slack-integration
  * @ai-note Handles Slack notifications, scheduled reports, and ops alerting
  *
  * @example
  * ```typescript
- * import { sendNotification, sendAlert, SlackClient } from '@cgk/slack'
+ * import { sendNotification, sendAlert, SlackClient } from '@cgk-platform/slack'
  *
  * // Send tenant notification
  * await sendNotification('rawdog', 'commerce.order.new', {

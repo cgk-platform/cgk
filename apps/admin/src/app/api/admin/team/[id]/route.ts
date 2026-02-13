@@ -7,7 +7,7 @@ import {
   updateMemberRole,
   type AuthContext,
   type UserRole,
-} from '@cgk/auth'
+} from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

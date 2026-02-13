@@ -9,7 +9,7 @@ import {
   getShopifyConnection,
   updateLastSyncAt,
   ShopifyError,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 /**
  * POST /api/admin/shopify-app/refresh

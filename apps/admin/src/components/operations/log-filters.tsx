@@ -1,7 +1,7 @@
 'use client'
 
-import { Button, Input } from '@cgk/ui'
-import type { LogLevelName, ServiceName } from '@cgk/logging'
+import { Button, Input } from '@cgk-platform/ui'
+import type { LogLevelName, ServiceName } from '@cgk-platform/logging'
 import { Search, X } from 'lucide-react'
 import { useCallback, useState } from 'react'
 

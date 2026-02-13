@@ -1,5 +1,5 @@
 /**
- * @cgk/onboarding - Brand Onboarding Wizard
+ * @cgk-platform/onboarding - Brand Onboarding Wizard
  *
  * Provides services for the 9-step brand onboarding wizard:
  * 1. Basic Info - Brand name, slug, colors, logo

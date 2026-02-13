@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, Badge, Input, Label, Textarea, cn } from '@cgk/ui'
+import { Button, Card, CardContent, Badge, Input, Label, Textarea, cn } from '@cgk-platform/ui'
 import {
   Globe,
   RefreshCw,

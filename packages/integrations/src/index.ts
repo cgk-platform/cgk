@@ -1,5 +1,5 @@
 /**
- * @cgk/integrations - OAuth and API integrations for ad platforms
+ * @cgk-platform/integrations - OAuth and API integrations for ad platforms
  *
  * @ai-pattern integrations
  * @ai-required All tokens MUST be encrypted before storage

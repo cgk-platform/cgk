@@ -24,11 +24,11 @@ Welcome to the CGK (Commerce Growth Kit) documentation.
 
 ```bash
 # Create a new brand site
-npx @cgk/cli create my-brand
+npx @cgk-platform/cli create my-brand
 
 # Check system requirements
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 
 # Run setup wizard
-npx @cgk/cli setup
+npx @cgk-platform/cli setup
 ```

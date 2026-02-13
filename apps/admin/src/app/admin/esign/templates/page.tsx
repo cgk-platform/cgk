@@ -4,7 +4,7 @@
  * Template library management.
  */
 
-import { Button, Card, CardContent, cn } from '@cgk/ui'
+import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 import { FileStack, Plus } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'

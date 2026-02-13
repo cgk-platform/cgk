@@ -3,7 +3,7 @@
  * CRUD operations for document signers with tenant isolation
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { nanoid } from 'nanoid'
 import type { EsignSigner, CreateSignerInput, UpdateSignerInput, SignerStatus } from '../types.js'
 import { DOCUMENT_DEFAULTS } from '../constants.js'

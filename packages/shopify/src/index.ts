@@ -1,5 +1,5 @@
 /**
- * @cgk/shopify - Shopify Admin and Storefront API clients
+ * @cgk-platform/shopify - Shopify Admin and Storefront API clients
  *
  * @ai-pattern shopify-integration
  * @ai-note Provides typed clients for Shopify APIs

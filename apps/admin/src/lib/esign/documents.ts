@@ -4,7 +4,7 @@
  * Functions for managing e-signature documents with tenant isolation.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type {
   EsignDocument,
   EsignDocumentFilters,

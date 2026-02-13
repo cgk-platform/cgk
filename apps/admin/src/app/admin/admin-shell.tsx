@@ -26,20 +26,28 @@ export function AdminShell({ tenant, user, impersonationInfo, children }: AdminS
   const closeMobileNav = useCallback(() => setMobileNavOpen(false), [])
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Impersonation Banner - displayed at top when session is impersonated */}
       <ImpersonationBanner impersonationInfo={impersonationInfo ?? null} />
 
       <div className="flex flex-1">
         {/* Desktop sidebar */}
         <div className="hidden lg:block">
-          <div className="fixed inset-y-0 left-0 w-64" style={{ top: impersonationInfo ? '44px' : 0 }}>
+          <div
+            className="fixed inset-y-0 left-0 w-64"
+            style={{ top: impersonationInfo ? '44px' : 0 }}
+          >
             <Sidebar tenant={tenant} user={user} />
           </div>
         </div>
 
         {/* Mobile navigation */}
-        <MobileNav open={mobileNavOpen} onClose={closeMobileNav} tenant={tenant} />
+        <MobileNav
+          open={mobileNavOpen}
+          onClose={closeMobileNav}
+          tenant={tenant}
+          user={user}
+        />
 
         {/* Main content */}
         <div className="flex flex-1 flex-col lg:pl-64">
@@ -47,7 +55,11 @@ export function AdminShell({ tenant, user, impersonationInfo, children }: AdminS
             tenantName={tenant.name}
             onMenuToggle={() => setMobileNavOpen(true)}
           />
-          <main className="flex-1 p-4 lg:p-8">{children}</main>
+          <main className="flex-1 p-4 lg:p-6 xl:p-8">
+            <div className="mx-auto max-w-7xl animate-fade-up">
+              {children}
+            </div>
+          </main>
         </div>
       </div>
     </div>

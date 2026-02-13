@@ -5,8 +5,8 @@
  */
 
 import { cookies } from 'next/headers'
-import { sql } from '@cgk/db'
-import { encryptToken, decryptToken } from '@cgk/shopify'
+import { sql } from '@cgk-platform/db'
+import { encryptToken, decryptToken } from '@cgk-platform/shopify'
 import type { CustomerSessionData, CustomerTokens, CustomerFromToken } from './types'
 import { refreshCustomerToken } from './oauth'
 

@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
 import { Loader2 } from 'lucide-react'
-import type { TicketComment, TicketStatus, TicketPriority } from '@cgk/support'
+import type { TicketComment, TicketStatus, TicketPriority } from '@cgk-platform/support'
 
 import { CommentThread } from '@/components/support/comment-thread'
 import { AgentSelector } from '@/components/support/agent-selector'

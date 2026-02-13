@@ -1,4 +1,4 @@
-# @cgk/core - AI Development Guide
+# @cgk-platform/core - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -15,14 +15,14 @@ Core utilities, types, and configuration schemas for the CGK platform. This pack
 
 ```typescript
 // Configuration
-import { defineConfig, type PlatformConfig } from '@cgk/core'
+import { defineConfig, type PlatformConfig } from '@cgk-platform/core'
 
 // Types
-import type { TenantContext, TenantId, UserId } from '@cgk/core'
-import type { ApiResponse, PaginatedResponse } from '@cgk/core'
+import type { TenantContext, TenantId, UserId } from '@cgk-platform/core'
+import type { ApiResponse, PaginatedResponse } from '@cgk-platform/core'
 
 // Utilities
-import { invariant, createId } from '@cgk/core'
+import { invariant, createId } from '@cgk-platform/core'
 ```
 
 ---
@@ -35,7 +35,7 @@ import { invariant, createId } from '@cgk/core'
 
 ```typescript
 // platform.config.ts
-import { defineConfig } from '@cgk/core'
+import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({
   brand: {
@@ -58,8 +58,8 @@ export default defineConfig({
 **When to use**: When working with entity IDs
 
 ```typescript
-import { createId } from '@cgk/core'
-import type { TenantId, UserId } from '@cgk/core'
+import { createId } from '@cgk-platform/core'
+import type { TenantId, UserId } from '@cgk-platform/core'
 
 const userId = createId('usr') as UserId      // 'usr_ckl3j2k4m0000'
 const tenantId = createId('tnt') as TenantId  // 'tnt_ckl3j2k4m0001'
@@ -70,7 +70,7 @@ const tenantId = createId('tnt') as TenantId  // 'tnt_ckl3j2k4m0001'
 **When to use**: When defining API route return types
 
 ```typescript
-import type { ApiResponse, PaginatedResponse, ApiError } from '@cgk/core'
+import type { ApiResponse, PaginatedResponse, ApiError } from '@cgk-platform/core'
 
 // Success response
 const success: ApiResponse<{ order: Order }> = {
@@ -181,8 +181,8 @@ startServer(config)
 ## Integration Points
 
 ### Used by:
-- All `@cgk/*` packages use core types
-- `@cgk/cli` uses config schema
+- All `@cgk-platform/*` packages use core types
+- `@cgk-platform/cli` uses config schema
 - `apps/*` use configuration
 
 ### Uses:

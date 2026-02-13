@@ -8,7 +8,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Button, Card, CardContent, cn, Input, Tabs, TabsContent, TabsList, TabsTrigger } from '@cgk/ui'
+import { Button, Card, CardContent, cn, Input, Tabs, TabsContent, TabsList, TabsTrigger } from '@cgk-platform/ui'
 import { Check, Eraser, Pencil, Type, Upload, X, RotateCcw } from 'lucide-react'
 
 export type SignatureMethod = 'draw' | 'type' | 'upload'

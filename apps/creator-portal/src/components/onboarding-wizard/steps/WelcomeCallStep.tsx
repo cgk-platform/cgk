@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useCallback, useEffect, useState } from 'react'
 
 import type { WelcomeCallData } from '../../../lib/onboarding-wizard/types'

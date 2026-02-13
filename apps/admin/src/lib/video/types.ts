@@ -2,7 +2,7 @@
  * Video types for admin UI
  */
 
-import type { Video, VideoFolder } from '@cgk/video'
+import type { Video, VideoFolder } from '@cgk-platform/video'
 
 /**
  * Video row with computed fields for display

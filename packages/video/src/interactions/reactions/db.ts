@@ -1,10 +1,10 @@
 /**
- * @cgk/video - Video Reactions Database Operations
+ * @cgk-platform/video - Video Reactions Database Operations
  *
  * CRUD operations for video reactions with tenant isolation.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import {
   type AddReactionInput,

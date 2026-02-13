@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Card, CardContent, CardHeader } from '@cgk/ui'
-import { Button } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
+import { Button } from '@cgk-platform/ui'
 
 import type {
   DomainConfigStatus,
   EmailOnboardingSubStep,
   SenderAddressWithDomain,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 import { ResendAccountStep } from './steps/resend-account-step'
 import { DomainConfigStep } from './steps/domain-config-step'

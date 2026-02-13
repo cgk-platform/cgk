@@ -4,7 +4,7 @@
  * Seeds the platform flags on first run.
  */
 
-import { createLogger } from '@cgk/logging'
+import { createLogger } from '@cgk-platform/logging'
 
 import { PLATFORM_FLAGS } from './platform-flags.js'
 import { seedFlags } from './repository.js'
@@ -66,7 +66,7 @@ export async function seedPlatformFlags(userId?: string): Promise<{
  * Returns true if any platform flags are missing
  */
 export async function needsSeeding(): Promise<boolean> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   // Check count of existing platform flags
   const result = await sql`

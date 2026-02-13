@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -35,7 +35,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getAutonomySettings, getActionAutonomyList } = await import('@cgk/ai-agents')
+    const { getAutonomySettings, getActionAutonomyList } = await import('@cgk-platform/ai-agents')
 
     const result = await withTenant(tenantId, async () => {
       const [settings, actions] = await Promise.all([
@@ -85,7 +85,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { updateAutonomySettings } = await import('@cgk/ai-agents')
+    const { updateAutonomySettings } = await import('@cgk-platform/ai-agents')
 
     const settings = await withTenant(tenantId, async () => {
       return updateAutonomySettings(agentId, {

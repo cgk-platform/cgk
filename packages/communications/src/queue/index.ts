@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { claimScheduledEntries, markAsSent } from '@cgk/communications/queue'
+ * import { claimScheduledEntries, markAsSent } from '@cgk-platform/communications/queue'
  *
  * // Claim entries for processing
  * const entries = await claimScheduledEntries(tenantId, 'review', runId, 50)

@@ -19,7 +19,7 @@ export type {
   ShopifyCredentials,
   WebhookTopic,
   WebhookHandler,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 // Extension configuration types
 export interface ExtensionSettings {

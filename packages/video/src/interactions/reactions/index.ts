@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Reactions Module
+ * @cgk-platform/video - Reactions Module
  *
  * Re-exports for video reaction types and database operations.
  */

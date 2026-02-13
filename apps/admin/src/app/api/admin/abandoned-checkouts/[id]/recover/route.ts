@@ -5,9 +5,9 @@
 
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk/db'
-import { sendJob } from '@cgk/jobs'
-import type { JobEvents } from '@cgk/jobs'
+import { withTenant } from '@cgk-platform/db'
+import { sendJob } from '@cgk-platform/jobs'
+import type { JobEvents } from '@cgk-platform/jobs'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -104,7 +104,7 @@ export async function POST(
     }
 
     // Send job to process the recovery email
-    // Note: The 'recovery.emailScheduled' event is defined in @cgk/jobs events.ts
+    // Note: The 'recovery.emailScheduled' event is defined in @cgk-platform/jobs events.ts
     await sendJob('recovery.emailScheduled' as keyof JobEvents, {
       tenantId: tenantSlug,
       emailId: result.email.id,

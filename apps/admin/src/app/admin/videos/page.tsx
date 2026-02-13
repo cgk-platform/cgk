@@ -6,8 +6,8 @@
  * @ai-pattern tenant-isolation
  */
 
-import { withTenant } from '@cgk/db'
-import { getAllFolders, getVideos, type VideoStatus } from '@cgk/video'
+import { withTenant } from '@cgk-platform/db'
+import { getAllFolders, getVideos, type VideoStatus } from '@cgk-platform/video'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 

@@ -107,7 +107,7 @@ CREATE TABLE tenant_config (
 ### Security Pattern (WordPress-inspired)
 ```typescript
 // packages/config/src/tenant-config.ts
-import { encrypt, decrypt } from '@cgk/crypto'
+import { encrypt, decrypt } from '@cgk-platform/crypto'
 
 export class TenantConfig {
   private encryptionKey: string
@@ -154,33 +154,33 @@ export class TenantConfig {
 ### Package Updates via NPM
 Core platform packages published to npm:
 ```
-@cgk/core       - Core utilities
-@cgk/db         - Database client
-@cgk/auth       - Authentication
-@cgk/ui         - UI components
-@cgk/commerce   - Commerce abstraction
-@cgk/jobs       - Background jobs
-@cgk/mcp        - MCP server utilities
-@cgk/cli        - CLI tool
+@cgk-platform/core       - Core utilities
+@cgk-platform/db         - Database client
+@cgk-platform/auth       - Authentication
+@cgk-platform/ui         - UI components
+@cgk-platform/commerce   - Commerce abstraction
+@cgk-platform/jobs       - Background jobs
+@cgk-platform/mcp        - MCP server utilities
+@cgk-platform/cli        - CLI tool
 ```
 
 **Update command**:
 ```bash
 # Update all CGK packages
-pnpm update "@cgk/*"
+pnpm update "@cgk-platform/*"
 
 # Update to specific version
-pnpm update "@cgk/*@1.2.0"
+pnpm update "@cgk-platform/*@1.2.0"
 
 # Check for updates
-npx @cgk/cli doctor --check-updates
+npx @cgk-platform/cli doctor --check-updates
 ```
 
 ### App Customizations via Git
 Apps (admin, storefront, creator-portal) are cloned/forked:
 ```bash
 # Initial setup
-npx @cgk/cli create my-brand --template=full
+npx @cgk-platform/cli create my-brand --template=full
 
 # Updates: merge from upstream
 git remote add cgk-upstream https://github.com/cgk/platform.git
@@ -201,16 +201,16 @@ canary   - Latest features, may have bugs
 ### CLI Update Commands
 ```bash
 # Check current versions
-npx @cgk/cli version
+npx @cgk-platform/cli version
 
 # Check for updates
-npx @cgk/cli doctor --check-updates
+npx @cgk-platform/cli doctor --check-updates
 
 # Update packages
-npx @cgk/cli update
+npx @cgk-platform/cli update
 
 # Update to specific channel
-npx @cgk/cli update --channel=beta
+npx @cgk-platform/cli update --channel=beta
 ```
 
 ---

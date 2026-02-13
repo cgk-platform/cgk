@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@cgk/ui'],
+  transpilePackages: ['@cgk-platform/ui'],
 }
 
 module.exports = nextConfig

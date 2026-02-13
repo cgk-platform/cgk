@@ -4,8 +4,8 @@
  * Manages onboarding sessions for brand creation.
  */
 
-import { sql } from '@cgk/db'
-import { createLogger } from '@cgk/logging'
+import { sql } from '@cgk-platform/db'
+import { createLogger } from '@cgk-platform/logging'
 
 import type {
   CreateSessionInput,

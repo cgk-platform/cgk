@@ -1,10 +1,10 @@
 /**
- * @cgk/video - Mux Clip Creation
+ * @cgk-platform/video - Mux Clip Creation
  *
  * Creates video clips using Mux's input clipping feature.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { TrimRequest, TrimResult } from './types.js'
 

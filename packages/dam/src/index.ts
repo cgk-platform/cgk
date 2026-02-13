@@ -1,5 +1,5 @@
 /**
- * @cgk/dam - Digital Asset Management
+ * @cgk-platform/dam - Digital Asset Management
  *
  * Provides centralized media management for tenant content including
  * product images, marketing assets, creator content, and ad creatives.

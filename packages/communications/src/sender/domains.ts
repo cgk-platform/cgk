@@ -8,7 +8,7 @@
  * @ai-required Use withTenant() wrapper when calling these functions
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type {
   CreateDomainInput,

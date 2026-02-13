@@ -11,14 +11,14 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import {
   getQueueEntries,
   getQueueStats,
   type QueueFilters,
   type QueueStatus,
   type QueueType,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

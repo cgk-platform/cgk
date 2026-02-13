@@ -3,12 +3,12 @@
  * POST /api/admin/workflows/rules/[id]/test - Test rule execution
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import {
   computeFields,
   evaluateConditions,
   getWorkflowRule,
-} from '@cgk/admin-core'
+} from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

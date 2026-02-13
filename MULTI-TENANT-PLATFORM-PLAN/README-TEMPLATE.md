@@ -42,7 +42,7 @@ A portable, open-source multi-tenant e-commerce platform for building white-labe
 
 ```bash
 # Create a new brand using the CLI
-npx @cgk/cli create my-brand
+npx @cgk-platform/cli create my-brand
 
 # Navigate to the project
 cd my-brand
@@ -55,7 +55,7 @@ cp .env.example .env.local
 # Edit .env.local with your credentials
 
 # Run database migrations
-npx @cgk/cli migrate
+npx @cgk-platform/cli migrate
 
 # Start development server
 pnpm dev
@@ -70,7 +70,7 @@ Your admin portal is now running at `http://localhost:3000`!
 ### Option 1: Create New Project (Recommended)
 
 ```bash
-npx @cgk/cli create my-brand --template=full
+npx @cgk-platform/cli create my-brand --template=full
 ```
 
 Templates available:
@@ -81,7 +81,7 @@ Templates available:
 ### Option 2: Add to Existing Project
 
 ```bash
-npx @cgk/cli init
+npx @cgk-platform/cli init
 ```
 
 ### Option 3: Clone and Customize
@@ -102,7 +102,7 @@ pnpm dev
 Create `platform.config.ts` in your project root:
 
 ```typescript
-import { defineConfig } from '@cgk/core'
+import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({
   brand: {
@@ -187,29 +187,29 @@ my-brand/
 
 ```bash
 # Project management
-npx @cgk/cli create <name>      # Create new brand site
-npx @cgk/cli init               # Initialize in existing project
-npx @cgk/cli doctor             # Check system requirements
+npx @cgk-platform/cli create <name>      # Create new brand site
+npx @cgk-platform/cli init               # Initialize in existing project
+npx @cgk-platform/cli doctor             # Check system requirements
 
 # Updates
-npx @cgk/cli check-updates      # Check for platform updates
-npx @cgk/cli update             # Update all packages
-npx @cgk/cli changelog <ver>    # View changelog
+npx @cgk-platform/cli check-updates      # Check for platform updates
+npx @cgk-platform/cli update             # Update all packages
+npx @cgk-platform/cli changelog <ver>    # View changelog
 
 # Database
-npx @cgk/cli migrate            # Run migrations
-npx @cgk/cli migrate --status   # Check migration status
-npx @cgk/cli migrate --rollback # Rollback last migration
+npx @cgk-platform/cli migrate            # Run migrations
+npx @cgk-platform/cli migrate --status   # Check migration status
+npx @cgk-platform/cli migrate --rollback # Rollback last migration
 
 # Tenants
-npx @cgk/cli tenant:create      # Create new tenant
-npx @cgk/cli tenant:list        # List tenants
-npx @cgk/cli tenant:export <id> # Export tenant data
+npx @cgk-platform/cli tenant:create      # Create new tenant
+npx @cgk-platform/cli tenant:list        # List tenants
+npx @cgk-platform/cli tenant:export <id> # Export tenant data
 
 # Development
-npx @cgk/cli dev                # Start dev server
-npx @cgk/cli build              # Build for production
-npx @cgk/cli typecheck          # Run TypeScript checks
+npx @cgk-platform/cli dev                # Start dev server
+npx @cgk-platform/cli build              # Build for production
+npx @cgk-platform/cli typecheck          # Run TypeScript checks
 ```
 
 ---
@@ -218,18 +218,18 @@ npx @cgk/cli typecheck          # Run TypeScript checks
 
 | Package | Description |
 |---------|-------------|
-| `@cgk/core` | Types, utilities, config schemas |
-| `@cgk/db` | Database client, tenant utilities |
-| `@cgk/auth` | JWT, sessions, middleware |
-| `@cgk/ui` | shadcn/ui components |
-| `@cgk/shopify` | Shopify Admin/Storefront clients |
-| `@cgk/payments` | Stripe + Wise payment abstraction |
-| `@cgk/jobs` | Background job abstraction (Inngest) |
-| `@cgk/mcp` | MCP server utilities |
-| `@cgk/analytics` | GA4, attribution tracking |
-| `@cgk/commerce-hooks` | Headless React hooks |
-| `@cgk/logging` | Structured logging |
-| `@cgk/cli` | Command-line interface |
+| `@cgk-platform/core` | Types, utilities, config schemas |
+| `@cgk-platform/db` | Database client, tenant utilities |
+| `@cgk-platform/auth` | JWT, sessions, middleware |
+| `@cgk-platform/ui` | shadcn/ui components |
+| `@cgk-platform/shopify` | Shopify Admin/Storefront clients |
+| `@cgk-platform/payments` | Stripe + Wise payment abstraction |
+| `@cgk-platform/jobs` | Background job abstraction (Inngest) |
+| `@cgk-platform/mcp` | MCP server utilities |
+| `@cgk-platform/analytics` | GA4, attribution tracking |
+| `@cgk-platform/commerce-hooks` | Headless React hooks |
+| `@cgk-platform/logging` | Structured logging |
+| `@cgk-platform/cli` | Command-line interface |
 
 ---
 
@@ -241,7 +241,7 @@ Create files in `src/components/overrides/` to customize platform components:
 
 ```typescript
 // src/components/overrides/Button.tsx
-import { Button as CoreButton } from '@cgk/ui'
+import { Button as CoreButton } from '@cgk-platform/ui'
 
 // Extend with custom styles
 export const Button = styled(CoreButton, {
@@ -292,10 +292,10 @@ export async function GET() {
 
 ```bash
 # Deploy to Vercel
-npx @cgk/cli deploy
+npx @cgk-platform/cli deploy
 
 # Preview deployment
-npx @cgk/cli deploy --preview
+npx @cgk-platform/cli deploy --preview
 ```
 
 ### Self-Hosted
@@ -322,33 +322,33 @@ docker run -p 3000:3000 my-brand
 ### Check for Updates
 
 ```bash
-npx @cgk/cli check-updates
+npx @cgk-platform/cli check-updates
 ```
 
 ### Apply Updates
 
 ```bash
 # Update packages
-pnpm update "@cgk/*" --latest
+pnpm update "@cgk-platform/*" --latest
 
 # Run any new migrations
-npx @cgk/cli migrate
+npx @cgk-platform/cli migrate
 
 # Check for breaking changes
-npx @cgk/cli changelog
+npx @cgk-platform/cli changelog
 ```
 
 ### Release Channels
 
 ```bash
 # Stable (default)
-pnpm update "@cgk/*" --latest
+pnpm update "@cgk-platform/*" --latest
 
 # Beta
-pnpm update "@cgk/*@beta"
+pnpm update "@cgk-platform/*@beta"
 
 # Canary (daily builds)
-pnpm update "@cgk/*@canary"
+pnpm update "@cgk-platform/*@canary"
 ```
 
 ---
@@ -369,7 +369,7 @@ When using AI coding tools, they can read these files for context-aware assistan
 Logs are structured for AI parsing:
 
 ```typescript
-import { logger } from '@cgk/logging'
+import { logger } from '@cgk-platform/logging'
 
 logger.info('order.sync.complete', {
   orderId: 'order_123',
@@ -380,7 +380,7 @@ logger.info('order.sync.complete', {
 
 Query logs with:
 ```bash
-npx @cgk/cli logs --action="order.*" --since="1h"
+npx @cgk-platform/cli logs --action="order.*" --since="1h"
 ```
 
 ---

@@ -5,13 +5,13 @@
  * GET /api/platform/onboarding - Get active session or list sessions (admin)
  */
 
-import { requireAuth } from '@cgk/auth'
-import { createLogger } from '@cgk/logging'
+import { requireAuth } from '@cgk-platform/auth'
+import { createLogger } from '@cgk-platform/logging'
 import {
   createSession,
   getActiveSessionForUser,
   getInProgressSessions,
-} from '@cgk/onboarding'
+} from '@cgk-platform/onboarding'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

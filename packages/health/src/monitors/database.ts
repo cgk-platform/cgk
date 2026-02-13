@@ -4,7 +4,7 @@
  * Checks database connectivity and performance metrics.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { evaluateLatencyHealth } from '../evaluator.js'
 import type { HealthCheckResult, HealthMonitor } from '../types.js'

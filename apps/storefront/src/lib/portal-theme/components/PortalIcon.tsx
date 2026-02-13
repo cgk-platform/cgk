@@ -7,7 +7,7 @@
  * Supports multiple icon sets with fallback chain.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { CSSProperties } from 'react'
 
 /**

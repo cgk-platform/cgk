@@ -6,8 +6,8 @@ import {
   revokeAllSessions,
   validateSessionById,
   verifyJWT,
-} from '@cgk/auth'
-import type { OrgContext } from '@cgk/auth'
+} from '@cgk-platform/auth'
+import type { OrgContext } from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 

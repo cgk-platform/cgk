@@ -5,7 +5,7 @@
  * POST /api/admin/analytics/targets - Create a new target
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { createAnalyticsTarget, getAnalyticsTargets } from '@/lib/analytics'
 import type { TargetCreate } from '@/lib/analytics'

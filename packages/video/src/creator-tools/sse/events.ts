@@ -1,10 +1,10 @@
 /**
- * @cgk/video - SSE Event Stream
+ * @cgk-platform/video - SSE Event Stream
  *
  * Server-Sent Events implementation for real-time video status updates.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { VideoStatus } from '../../types.js'
 

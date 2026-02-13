@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
     // In a full implementation, this would send a test Slack message
     // For now, we return success to indicate the config is valid
-    // The actual sending would be done via the @cgk/jobs package
+    // The actual sending would be done via the @cgk-platform/jobs package
 
     return NextResponse.json({
       success: true,

@@ -1,4 +1,4 @@
-import { getAllPermissions, getPermissionsByCategory } from '@cgk/auth'
+import { getAllPermissions, getPermissionsByCategory } from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

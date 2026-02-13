@@ -125,19 +125,19 @@ export const GIFT_CARD_PRODUCTS_QUERY = `
 
 /**
  * Placeholder for Shopify API call
- * In production, this would use @cgk/shopify client
+ * In production, this would use @cgk-platform/shopify client
  */
 export async function fetchGiftCardProductsFromShopify(
   _shopifyClient: unknown
 ): Promise<ShopifyProductData[]> {
   // This is a placeholder that returns an empty array
   // Real implementation would:
-  // 1. Use the Shopify GraphQL client from @cgk/shopify
+  // 1. Use the Shopify GraphQL client from @cgk-platform/shopify
   // 2. Execute GIFT_CARD_PRODUCTS_QUERY
   // 3. Handle pagination
   // 4. Return array of ShopifyProductData
 
-  // For now, return empty array - integration with @cgk/shopify would be done in Phase 3B
+  // For now, return empty array - integration with @cgk-platform/shopify would be done in Phase 3B
   console.log('fetchGiftCardProductsFromShopify: Shopify integration pending')
   return []
 }

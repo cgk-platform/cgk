@@ -4,7 +4,7 @@
  * Displays store credit balance and transaction history.
  */
 
-import { cn, formatCurrency } from '@cgk/ui'
+import { cn, formatCurrency } from '@cgk-platform/ui'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Suspense } from 'react'

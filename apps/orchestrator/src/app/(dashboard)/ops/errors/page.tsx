@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, CardHeader, cn, Input, Select, SelectOption } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, cn, Input, Select, SelectOption } from '@cgk-platform/ui'
 import { AlertCircle, CheckCircle, Clock, ExternalLink, RefreshCw, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'

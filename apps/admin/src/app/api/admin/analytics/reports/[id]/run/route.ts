@@ -4,7 +4,7 @@
  * POST /api/admin/analytics/reports/[id]/run - Execute a report
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { completeReportRun, createReportRun, getAnalyticsReportById } from '@/lib/analytics'
 

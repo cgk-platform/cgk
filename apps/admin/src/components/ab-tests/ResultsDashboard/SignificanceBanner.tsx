@@ -2,7 +2,7 @@
 
 import { Trophy, CheckCircle, AlertTriangle, Clock } from 'lucide-react'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 
 import type { TestResults } from '@/lib/ab-tests/types'
 

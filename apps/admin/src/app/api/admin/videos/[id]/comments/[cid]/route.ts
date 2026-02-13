@@ -15,7 +15,7 @@ import {
   updateComment,
   validateCommentInput,
   type UpdateCommentInput,
-} from '@cgk/video/interactions'
+} from '@cgk-platform/video/interactions'
 
 interface RouteParams {
   params: Promise<{ id: string; cid: string }>

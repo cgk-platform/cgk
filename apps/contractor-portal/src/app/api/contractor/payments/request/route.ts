@@ -11,7 +11,7 @@ import {
   PaymentRequestError,
   type PaymentRequestStatus,
   type WorkType,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

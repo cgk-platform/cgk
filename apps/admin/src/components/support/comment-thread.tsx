@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, cn, Textarea } from '@cgk/ui'
+import { Button, cn, Textarea } from '@cgk-platform/ui'
 import { MessageSquare, User, Bot, Lock, Send, Loader2 } from 'lucide-react'
-import type { TicketComment } from '@cgk/support'
+import type { TicketComment } from '@cgk-platform/support'
 import { InternalNoteBadge } from './internal-note-badge'
 
 interface CommentThreadProps {

@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, Switch, Tabs, TabsList, TabsTrigger, TabsContent, Badge } from '@cgk/ui'
+import { Card, CardContent, Switch, Tabs, TabsList, TabsTrigger, TabsContent, Badge } from '@cgk-platform/ui'
 import { Settings, Users, Palette, MessageSquare, BarChart3, Power } from 'lucide-react'
 import { useState, useTransition, useCallback } from 'react'
 

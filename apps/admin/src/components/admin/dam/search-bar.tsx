@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn, Input } from '@cgk/ui'
+import { Button, cn, Input } from '@cgk-platform/ui'
 import {
   Search,
   X,
@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-import type { AssetType } from '@cgk/dam'
+import type { AssetType } from '@cgk-platform/dam'
 
 export interface SearchFilters {
   query: string

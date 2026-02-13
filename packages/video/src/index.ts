@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Video Management Package
+ * @cgk-platform/video - Video Management Package
  *
  * Provides:
  * - Video hosting and streaming via Mux

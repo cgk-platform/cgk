@@ -1,5 +1,5 @@
-import { getTenantContext } from '@cgk/auth'
-import { getBooking } from '@cgk/scheduling'
+import { getTenantContext } from '@cgk-platform/auth'
+import { getBooking } from '@cgk-platform/scheduling'
 
 export const dynamic = 'force-dynamic'
 

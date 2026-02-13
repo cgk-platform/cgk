@@ -1,55 +1,40 @@
-import { Badge } from '@cgk/ui'
-import type { ComponentProps } from 'react'
+/**
+ * Gift Card Status Badges
+ *
+ * Thin wrappers around @cgk-platform/ui StatusBadge for gift card domain.
+ */
 
-type BadgeVariant = ComponentProps<typeof Badge>['variant']
+import { StatusBadge, type StatusBadgeProps } from '@cgk-platform/ui'
 
-const transactionStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
-  pending: { label: 'Pending', variant: 'warning' },
-  credited: { label: 'Credited', variant: 'success' },
-  failed: { label: 'Failed', variant: 'destructive' },
-}
-
-const emailStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
-  pending: { label: 'Pending', variant: 'warning' },
-  sent: { label: 'Sent', variant: 'success' },
-  failed: { label: 'Failed', variant: 'destructive' },
-  skipped: { label: 'Skipped', variant: 'outline' },
-}
-
-const productStatusMap: Record<string, { label: string; variant: BadgeVariant }> = {
-  active: { label: 'Active', variant: 'success' },
-  archived: { label: 'Archived', variant: 'outline' },
-}
-
-const sourceMap: Record<string, { label: string; variant: BadgeVariant }> = {
-  bundle_builder: { label: 'Bundle Builder', variant: 'default' },
-  manual: { label: 'Manual', variant: 'secondary' },
-  promotion: { label: 'Promotion', variant: 'info' },
-}
-
-function StatusBadge({
-  status,
-  map,
-}: {
+interface StatusBadgeWrapperProps extends Omit<StatusBadgeProps, 'status'> {
   status: string
-  map: Record<string, { label: string; variant: BadgeVariant }>
-}) {
-  const config = map[status] || { label: status, variant: 'secondary' as BadgeVariant }
-  return <Badge variant={config.variant}>{config.label}</Badge>
 }
 
-export function TransactionStatusBadge({ status }: { status: string }) {
-  return <StatusBadge status={status} map={transactionStatusMap} />
+export function TransactionStatusBadge({ status, ...props }: StatusBadgeWrapperProps) {
+  return <StatusBadge status={status} {...props} />
 }
 
-export function EmailStatusBadge({ status }: { status: string }) {
-  return <StatusBadge status={status} map={emailStatusMap} />
+export function EmailStatusBadge({ status, ...props }: StatusBadgeWrapperProps) {
+  return <StatusBadge status={status} {...props} />
 }
 
-export function ProductStatusBadge({ status }: { status: string }) {
-  return <StatusBadge status={status} map={productStatusMap} />
+export function ProductStatusBadge({ status, ...props }: StatusBadgeWrapperProps) {
+  return <StatusBadge status={status} {...props} />
 }
 
-export function SourceBadge({ source }: { source: string }) {
-  return <StatusBadge status={source} map={sourceMap} />
+export function SourceBadge({ source, ...props }: { source: string } & Omit<StatusBadgeProps, 'status'>) {
+  const sourceLabels: Record<string, string> = {
+    bundle_builder: 'Bundle Builder',
+    manual: 'Manual',
+    promotion: 'Promotion',
+  }
+
+  return (
+    <StatusBadge
+      status={source}
+      label={sourceLabels[source] || source}
+      variant="info"
+      {...props}
+    />
+  )
 }

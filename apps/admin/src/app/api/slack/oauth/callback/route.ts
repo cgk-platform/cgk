@@ -1,13 +1,13 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { withTenant, sql, createTenantCache } from '@cgk/db'
+import { withTenant, sql, createTenantCache } from '@cgk-platform/db'
 import {
   deserializeOAuthState,
   validateOAuthState,
   exchangeCodeForTokens,
   processOAuthResponse,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 
 /**
  * GET /api/slack/oauth/callback

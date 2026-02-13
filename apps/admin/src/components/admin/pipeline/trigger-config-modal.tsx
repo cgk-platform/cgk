@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { Plus, Trash2, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 

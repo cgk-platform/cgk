@@ -5,7 +5,7 @@
  * DELETE /api/admin/analytics/targets/[id] - Delete a target
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 
 import { deleteAnalyticsTarget, updateAnalyticsTarget } from '@/lib/analytics'
 import type { TargetCreate } from '@/lib/analytics'

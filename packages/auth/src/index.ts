@@ -1,5 +1,5 @@
 /**
- * @cgk/auth - Authentication utilities
+ * @cgk-platform/auth - Authentication utilities
  *
  * @ai-pattern authentication
  * @ai-required Use getTenantContext() at the start of every API route

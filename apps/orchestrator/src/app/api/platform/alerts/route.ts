@@ -1,4 +1,4 @@
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type { AlertPriority, AlertStatus, PlatformAlert } from '../../../../types/platform'
 

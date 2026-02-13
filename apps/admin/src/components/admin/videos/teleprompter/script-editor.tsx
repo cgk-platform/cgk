@@ -1,16 +1,16 @@
 'use client'
 
-import { Button, cn, Input, Label, Textarea } from '@cgk/ui'
+import { Button, cn, Input, Label, Textarea } from '@cgk-platform/ui'
 import { FileText, Loader2, Save, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
-import type { CreateScriptInput, TeleprompterScript, UpdateScriptInput } from '@cgk/video/creator-tools'
+import type { CreateScriptInput, TeleprompterScript, UpdateScriptInput } from '@cgk-platform/video/creator-tools'
 import {
   FONT_SIZE_MAX,
   FONT_SIZE_MIN,
   SCROLL_SPEED_MAX,
   SCROLL_SPEED_MIN,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 
 interface ScriptEditorProps {
   script?: TeleprompterScript | null

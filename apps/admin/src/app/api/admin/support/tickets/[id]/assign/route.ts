@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext } from '@cgk/auth'
-import { assignTicket, autoAssignTicket, unassignTicket } from '@cgk/support'
+import { requireAuth, type AuthContext } from '@cgk-platform/auth'
+import { assignTicket, autoAssignTicket, unassignTicket } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

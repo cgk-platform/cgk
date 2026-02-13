@@ -5,7 +5,7 @@
  * POST /api/creator/onboarding/draft - Save draft
  */
 
-import { sql, withTenant, getTenantFromRequest } from '@cgk/db'
+import { sql, withTenant, getTenantFromRequest } from '@cgk-platform/db'
 import type { CreatorApplicationForm } from '../../../../../lib/onboarding/types'
 
 export const dynamic = 'force-dynamic'

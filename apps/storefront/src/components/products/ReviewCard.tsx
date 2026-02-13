@@ -8,7 +8,7 @@
 'use client'
 
 import type { Review } from '@/lib/reviews'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import Image from 'next/image'
 import { useState } from 'react'
 

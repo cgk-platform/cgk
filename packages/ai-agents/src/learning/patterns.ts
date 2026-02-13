@@ -4,7 +4,7 @@
  * Captures successful interaction patterns for replication.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import type { AgentPattern, CreatePatternInput } from '../memory/types.js'
 
 // Helper to convert snake_case DB rows to camelCase

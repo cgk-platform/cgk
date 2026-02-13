@@ -5,7 +5,7 @@
  * @ai-note Use for dashboard displays and alerting
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { QueueFilters, QueueStats, QueueType } from './types.js'
 

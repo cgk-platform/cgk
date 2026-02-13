@@ -4,8 +4,8 @@
  * Handles orders/create, orders/updated, orders/paid, orders/cancelled, orders/fulfilled
  */
 
-import { withTenant, sql } from '@cgk/db'
-import { createJobQueue } from '@cgk/jobs'
+import { withTenant, sql } from '@cgk-platform/db'
+import { createJobQueue } from '@cgk-platform/jobs'
 import type { ShopifyOrderPayload } from '../types'
 import { parseCents, mapFinancialStatus, mapFulfillmentStatus } from '../utils'
 

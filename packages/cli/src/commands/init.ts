@@ -84,7 +84,7 @@ export const initCommand = new Command('init')
       {}
     )
 
-    const config = `import { defineConfig } from '@cgk/core'
+    const config = `import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({
   brand: {
@@ -106,10 +106,10 @@ export default defineConfig({
     const pkg = await fs.readJson(pkgPath)
 
     pkg.dependencies = pkg.dependencies || {}
-    pkg.dependencies['@cgk/core'] = 'workspace:*'
-    pkg.dependencies['@cgk/db'] = 'workspace:*'
-    pkg.dependencies['@cgk/auth'] = 'workspace:*'
-    pkg.dependencies['@cgk/ui'] = 'workspace:*'
+    pkg.dependencies['@cgk-platform/core'] = 'workspace:*'
+    pkg.dependencies['@cgk-platform/db'] = 'workspace:*'
+    pkg.dependencies['@cgk-platform/auth'] = 'workspace:*'
+    pkg.dependencies['@cgk-platform/ui'] = 'workspace:*'
 
     await fs.writeJson(pkgPath, pkg, { spaces: 2 })
     spinner.succeed('Package.json updated')

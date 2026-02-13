@@ -18,7 +18,7 @@ export async function queryLogs(
   filters: LogQueryFilters,
   pagination: LogQueryPagination = {}
 ): Promise<LogQueryResult> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const { limit = 50, offset = 0 } = pagination
 
@@ -132,7 +132,7 @@ export async function queryLogs(
  * Get a single log entry by ID
  */
 export async function getLogById(id: string): Promise<PlatformLogEntry | null> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const result = await sql`
     SELECT
@@ -167,7 +167,7 @@ export async function getLogsByTraceId(
   traceId: string,
   limit: number = 100
 ): Promise<PlatformLogEntry[]> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const result = await sql`
     SELECT

@@ -1,4 +1,4 @@
-import { Badge, Button, Card, CardContent, CardHeader } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 
@@ -124,7 +124,7 @@ async function FilingStatsLoader({ taxYear }: { taxYear: number }) {
   void (await headers())
   void taxYear
 
-  // Mock data - would use @cgk/tax
+  // Mock data - would use @cgk-platform/tax
   const stats = {
     readyToFile: 15,
     filedWithIRS: 8,

@@ -162,7 +162,7 @@ async function createTenantSchema(tenantSlug: string): Promise<void> {
   await pool.query(`CREATE SCHEMA IF NOT EXISTS ${schemaName}`)
 
   // Run tenant migrations to create tables
-  // Note: This would typically use @cgk/db/migrations but we're in tooling
+  // Note: This would typically use @cgk-platform/db/migrations but we're in tooling
   // For now, we assume the schema and tables are already created by the main app
 
   console.log(`[SCHEMA] Schema "${schemaName}" is ready`)

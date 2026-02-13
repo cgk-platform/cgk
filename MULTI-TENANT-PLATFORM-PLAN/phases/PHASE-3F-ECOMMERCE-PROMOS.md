@@ -1,5 +1,7 @@
 # PHASE-3F: Promo Codes, Promotions & Selling Plans
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Duration**: 1.5 weeks (Week 15-16)
 **Depends On**: Phase 3A (Storefront Foundation), Phase 2B (Admin Commerce)

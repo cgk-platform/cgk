@@ -13,7 +13,7 @@ import {
 import type { ExecutionContext } from '../workflow/types'
 
 // Mock the database module to avoid actual DB calls
-vi.mock('@cgk/db', () => ({
+vi.mock('@cgk-platform/db', () => ({
   sql: vi.fn().mockImplementation(() => Promise.resolve({ rows: [] })),
   withTenant: vi.fn().mockImplementation((_, fn) => fn()),
 }))

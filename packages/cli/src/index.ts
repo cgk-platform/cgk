@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * @cgk/cli - CLI tool for CGK platform
+ * @cgk-platform/cli - CLI tool for CGK platform
  *
  * Commands:
  * - create <name>     : Create a new brand site

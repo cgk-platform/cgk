@@ -4,8 +4,8 @@
  * Handles app/uninstalled webhook
  */
 
-import { withTenant, sql } from '@cgk/db'
-import { createJobQueue } from '@cgk/jobs'
+import { withTenant, sql } from '@cgk-platform/db'
+import { createJobQueue } from '@cgk-platform/jobs'
 
 // Create job queue for app-related background jobs
 const appJobQueue = createJobQueue({ name: 'app-webhooks' })

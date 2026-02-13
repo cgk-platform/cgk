@@ -2,7 +2,7 @@
  * Product Components Index
  *
  * Provider-agnostic product display components.
- * All components use unified Commerce types from @cgk/commerce.
+ * All components use unified Commerce types from @cgk-platform/commerce.
  */
 
 export { ProductCard } from './ProductCard'

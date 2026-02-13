@@ -1,6 +1,6 @@
 'use client'
 
-import { cn, Input } from '@cgk/ui'
+import { cn, Input } from '@cgk-platform/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface UserSearchBarProps {

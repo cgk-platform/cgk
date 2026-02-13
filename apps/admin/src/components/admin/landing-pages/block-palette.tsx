@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@cgk/ui'
+import { Input } from '@cgk-platform/ui'
 import {
   Layout,
   Type,

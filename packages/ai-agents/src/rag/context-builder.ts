@@ -4,7 +4,7 @@
  * Builds context sections from agent memories for injection into prompts.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { recordMemoryAccess as _recordMemoryAccess } from '../memory/storage.js'
 import { estimateTokens } from '../memory/embeddings.js'
 import { searchMemories } from './search.js'

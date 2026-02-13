@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { AgreementData, AgreementDocument } from '../../../lib/onboarding-wizard/types'

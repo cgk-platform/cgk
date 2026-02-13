@@ -3,7 +3,7 @@
  * Automated tasks for document workflows, reminders, and expiration
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type { EsignDocument } from '../types.js'
 import { getDocumentsNeedingReminders, getExpiredDocuments, expireDocument, updateLastReminder } from './documents.js'
 import { getDocumentSigners } from './signers.js'

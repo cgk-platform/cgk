@@ -1,5 +1,5 @@
-import { logAuditAction } from '@cgk/auth'
-import { sql } from '@cgk/db'
+import { logAuditAction } from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 

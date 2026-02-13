@@ -7,9 +7,9 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-import { requireAuth, type AuthContext } from '@cgk/auth'
-import { queryLogs, type LogQueryFilters, type ServiceName } from '@cgk/logging'
-import type { LogLevelName } from '@cgk/logging'
+import { requireAuth, type AuthContext } from '@cgk-platform/auth'
+import { queryLogs, type LogQueryFilters, type ServiceName } from '@cgk-platform/logging'
+import type { LogLevelName } from '@cgk-platform/logging'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

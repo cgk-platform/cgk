@@ -1,9 +1,9 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, Spinner } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, Spinner } from '@cgk-platform/ui'
 import { useEffect, useState } from 'react'
 
-import type { SenderAddressWithDomain, SenderPurpose } from '@cgk/communications'
+import type { SenderAddressWithDomain, SenderPurpose } from '@cgk-platform/communications'
 
 interface ListState {
   addresses: SenderAddressWithDomain[]

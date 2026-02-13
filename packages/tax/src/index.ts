@@ -1,5 +1,5 @@
 /**
- * @cgk/tax - Tax Compliance Package
+ * @cgk-platform/tax - Tax Compliance Package
  *
  * Provides W-9 collection, TIN encryption, 1099 generation,
  * IRS IRIS filing, and tax document management.

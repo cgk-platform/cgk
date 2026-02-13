@@ -2,7 +2,7 @@
 
 import { Clock, GitBranch, Play, Timer, Zap } from 'lucide-react'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 type TriggerType = 'status_change' | 'time_elapsed' | 'scheduled' | 'event' | 'manual'
 

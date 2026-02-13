@@ -2,7 +2,7 @@
 
 import { TrendingDown, TrendingUp, Minus, HelpCircle } from 'lucide-react'
 
-import { Badge, Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardHeader, CardContent, cn } from '@cgk-platform/ui'
 
 import type { ABTest, NoveltyAnalysis } from '@/lib/ab-tests/types'
 

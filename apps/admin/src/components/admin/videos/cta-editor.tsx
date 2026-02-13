@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn, Input, Label } from '@cgk/ui'
+import { Button, cn, Input, Label } from '@cgk-platform/ui'
 import { ExternalLink, GripVertical, Loader2, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -12,7 +12,7 @@ import {
   type CTAButtonInput,
   type CTAPosition,
   type CTAStyle,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 
 interface CTAEditorProps {
   buttons: CTAButton[]

@@ -4,7 +4,7 @@
  * GET /api/admin/esign/documents/[id]/audit - Get document audit trail
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getDocumentAuditLog, getDocumentWithSigners } from '@/lib/esign'
 import type { EsignAuditAction } from '@/lib/esign/types'

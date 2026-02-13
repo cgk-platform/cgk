@@ -6,7 +6,7 @@
 
 'use client'
 
-import { Button, cn, formatCurrency } from '@cgk/ui'
+import { Button, cn, formatCurrency } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 import type {

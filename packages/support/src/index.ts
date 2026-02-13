@@ -1,5 +1,5 @@
 /**
- * @cgk/support - Support System Package
+ * @cgk-platform/support - Support System Package
  *
  * Provides ticket management, live chat, CSAT surveys, and privacy compliance.
  * Phase 2SP-TICKETS: Ticket system

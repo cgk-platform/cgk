@@ -8,7 +8,7 @@ import {
   hasValidTwilioConfig,
   normalizeToE164,
   sendTestSms,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * POST /api/admin/sms/test

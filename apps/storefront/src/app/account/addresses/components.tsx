@@ -6,7 +6,7 @@
 
 'use client'
 
-import { Button, cn, Input, Label } from '@cgk/ui'
+import { Button, cn, Input, Label } from '@cgk-platform/ui'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 

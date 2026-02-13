@@ -12,7 +12,7 @@
  */
 
 import { useState } from 'react'
-import { Badge, Button, Spinner } from '@cgk/ui'
+import { Badge, Button, Spinner } from '@cgk-platform/ui'
 
 export type TranscriptionStatusType = 'pending' | 'processing' | 'completed' | 'failed'
 

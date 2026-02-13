@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -36,7 +36,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getAvailableVoices } = await import('@cgk/ai-agents')
+    const { getAvailableVoices } = await import('@cgk-platform/ai-agents')
 
     const voices = await getAvailableVoices(tenantId, provider as 'elevenlabs' | 'openai' | 'google')
 

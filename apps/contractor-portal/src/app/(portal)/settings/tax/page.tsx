@@ -17,7 +17,7 @@ import {
   Input,
   Label,
   Spinner,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 
 interface W9Info {
   taxIdType: 'ssn' | 'ein'

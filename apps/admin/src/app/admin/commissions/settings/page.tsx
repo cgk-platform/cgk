@@ -1,7 +1,7 @@
 'use client'
 
-import { Card, CardContent, CardHeader } from '@cgk/ui'
-import { Button, Input, Label, Switch } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
+import { Button, Input, Label, Switch } from '@cgk-platform/ui'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 

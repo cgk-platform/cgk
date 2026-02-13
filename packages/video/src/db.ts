@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Database operations
+ * @cgk-platform/video - Database operations
  *
  * Tenant-isolated CRUD operations for videos, folders, permissions, and views.
  *
@@ -7,7 +7,7 @@
  * @ai-required All queries MUST use withTenant() wrapper
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   CreateFolderInput,

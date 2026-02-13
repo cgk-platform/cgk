@@ -6,7 +6,7 @@
 
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import { useState } from 'react'
 
 import type { PortalContentStrings, ShareWishlistResponse } from '@/lib/account/types'

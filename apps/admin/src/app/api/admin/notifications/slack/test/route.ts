@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { sendTestNotification, type NotificationType } from '@cgk/slack'
+import { sendTestNotification, type NotificationType } from '@cgk-platform/slack'
 
 /**
  * POST /api/admin/notifications/slack/test

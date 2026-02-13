@@ -1,4 +1,4 @@
-import { completeTikTokOAuth } from '@cgk/integrations'
+import { completeTikTokOAuth } from '@cgk-platform/integrations'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'

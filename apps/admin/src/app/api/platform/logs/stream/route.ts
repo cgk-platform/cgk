@@ -7,8 +7,8 @@
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-import { requireAuth } from '@cgk/auth'
-import { readFromStream } from '@cgk/logging'
+import { requireAuth } from '@cgk-platform/auth'
+import { readFromStream } from '@cgk-platform/logging'
 import { headers } from 'next/headers'
 
 export async function GET(request: Request) {

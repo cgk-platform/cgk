@@ -5,7 +5,7 @@
  * is a known creator. This allows tracking all creator communications in one place.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type { EsignDocument, EsignSigner } from './types'
 
 /**

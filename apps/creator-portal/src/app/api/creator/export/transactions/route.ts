@@ -4,7 +4,7 @@
  * POST /api/creator/export/transactions - Generate and download transaction history as CSV
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

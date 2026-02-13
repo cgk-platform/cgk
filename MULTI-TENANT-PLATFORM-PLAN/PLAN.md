@@ -63,7 +63,7 @@ Every infrastructure component must be **easy for installing users to set up**:
 
 | Requirement | What It Means |
 |-------------|---------------|
-| **CLI-First** | `npx @cgk/cli setup:[component]` should handle setup |
+| **CLI-First** | `npx @cgk-platform/cli setup:[component]` should handle setup |
 | **Minimal Web Config** | Only API keys from web dashboards, everything else via CLI/env |
 | **< 15 Min Setup** | Each component should take < 15 minutes to configure |
 | **Clear Docs** | Every component needs a `docs/setup/[COMPONENT].md` guide |
@@ -73,7 +73,7 @@ Every infrastructure component must be **easy for installing users to set up**:
 1. Document how users will set it up
 2. Prefer solutions with good CLI tooling
 3. Create setup documentation
-4. Add CLI setup command to `@cgk/cli`
+4. Add CLI setup command to `@cgk-platform/cli`
 
 See each phase doc for component-specific portability requirements.
 
@@ -331,7 +331,7 @@ class ChosenProvider implements BackgroundJobProvider { ... }
 - **Feature flag controlled**: Switch providers without code changes
 
 **Implementation Strategy**:
-- Unified `CommerceProvider` interface in `@cgk/commerce` package
+- Unified `CommerceProvider` interface in `@cgk-platform/commerce` package
 - Shopify provider fully implemented from day one
 - Custom provider interface ready, checkout flow deferred until needed
 - All storefront components use the abstraction layer

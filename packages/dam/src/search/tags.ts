@@ -2,7 +2,7 @@
  * Tag Management and Search
  * Handles tag operations and autocomplete
  */
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 export interface TagWithCount {
   tag: string

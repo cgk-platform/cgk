@@ -1,5 +1,5 @@
-import { requireAuth } from '@cgk/auth'
-import { getBooking, updateBookingStatus } from '@cgk/scheduling'
+import { requireAuth } from '@cgk-platform/auth'
+import { getBooking, updateBookingStatus } from '@cgk-platform/scheduling'
 
 export const dynamic = 'force-dynamic'
 

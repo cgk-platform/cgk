@@ -314,19 +314,19 @@ interface AILogQueryResponse {
 
 ```bash
 # Quick error summary
-npx @cgk/cli logs --action="*.failed" --since="1h"
+npx @cgk-platform/cli logs --action="*.failed" --since="1h"
 
 # Specific tenant debugging
-npx @cgk/cli logs --tenant=rawdog --level=error --since="24h"
+npx @cgk-platform/cli logs --tenant=rawdog --level=error --since="24h"
 
 # Performance analysis
-npx @cgk/cli logs --action="db.*" --slow=5000 --since="1h"
+npx @cgk-platform/cli logs --action="db.*" --slow=5000 --since="1h"
 
 # Full causality trace for a request
-npx @cgk/cli logs --request-id="abc123" --show-chain
+npx @cgk-platform/cli logs --request-id="abc123" --show-chain
 
 # Export for AI analysis
-npx @cgk/cli logs --since="24h" --format=json > logs.json
+npx @cgk-platform/cli logs --since="24h" --format=json > logs.json
 ```
 
 ---
@@ -388,7 +388,7 @@ Phase: PHASE-2-ADMIN
 Patterns-Used: admin-table, tenant-query, batch-save
 Files-Explored: 12
 Decisions:
-  - Used DataTable from @cgk/ui (existing pattern)
+  - Used DataTable from @cgk-platform/ui (existing pattern)
   - Added pagination (matching orders page pattern)
 [/AI-SESSION]
 
@@ -507,5 +507,5 @@ This addendum adds to the base LOGGING-SPEC:
 1. **Types**: Add AIEnhancedLogEntry to LogEntry union
 2. **Sampler**: Add sampling layer before storage
 3. **API**: Add `/api/platform/logs/ai-query` endpoint
-4. **CLI**: Add `logs` command to @cgk/cli
+4. **CLI**: Add `logs` command to @cgk-platform/cli
 5. **Budgets**: Add per-tenant log counting

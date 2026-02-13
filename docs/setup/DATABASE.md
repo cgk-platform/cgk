@@ -24,7 +24,7 @@ The easiest way to set up the database:
    ```
 6. Run database setup:
    ```bash
-   npx @cgk/cli setup:database
+   npx @cgk-platform/cli setup:database
    ```
 
 This automatically provisions a Neon PostgreSQL database and sets up all the required environment variables.
@@ -54,7 +54,7 @@ POSTGRES_URL=postgresql://user:password@ep-xxx-xxx.us-east-2.aws.neon.tech/neond
 #### Step 3: Run Database Setup
 
 ```bash
-npx @cgk/cli setup:database
+npx @cgk-platform/cli setup:database
 ```
 
 This command will:
@@ -65,7 +65,7 @@ This command will:
 #### Step 4: Create Your First Tenant
 
 ```bash
-npx @cgk/cli tenant:create my_brand --name "My Brand"
+npx @cgk-platform/cli tenant:create my_brand --name "My Brand"
 ```
 
 This creates:
@@ -81,13 +81,13 @@ Test connection and run migrations:
 
 ```bash
 # Full setup
-npx @cgk/cli setup:database
+npx @cgk-platform/cli setup:database
 
 # Dry run (see what would happen)
-npx @cgk/cli setup:database --dry-run
+npx @cgk-platform/cli setup:database --dry-run
 
 # Skip migrations (just test connection)
-npx @cgk/cli setup:database --skip-migrations
+npx @cgk-platform/cli setup:database --skip-migrations
 ```
 
 ### `tenant:create`
@@ -96,14 +96,14 @@ Create a new tenant:
 
 ```bash
 # Basic usage
-npx @cgk/cli tenant:create <slug> --name "<Display Name>"
+npx @cgk-platform/cli tenant:create <slug> --name "<Display Name>"
 
 # Examples
-npx @cgk/cli tenant:create rawdog --name "RAWDOG"
-npx @cgk/cli tenant:create my_brand --name "My Brand"
+npx @cgk-platform/cli tenant:create rawdog --name "RAWDOG"
+npx @cgk-platform/cli tenant:create my_brand --name "My Brand"
 
 # Dry run
-npx @cgk/cli tenant:create test_brand --dry-run
+npx @cgk-platform/cli tenant:create test_brand --dry-run
 ```
 
 Slug requirements:
@@ -117,13 +117,13 @@ List all tenants:
 
 ```bash
 # List all
-npx @cgk/cli tenant:list
+npx @cgk-platform/cli tenant:list
 
 # Filter by status
-npx @cgk/cli tenant:list --status active
+npx @cgk-platform/cli tenant:list --status active
 
 # Output as JSON
-npx @cgk/cli tenant:list --json
+npx @cgk-platform/cli tenant:list --json
 ```
 
 ### `doctor`
@@ -131,7 +131,7 @@ npx @cgk/cli tenant:list --json
 Check system status:
 
 ```bash
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 ```
 
 ## Architecture
@@ -170,7 +170,7 @@ PostgreSQL Database
 Always use `withTenant()` for tenant-scoped queries:
 
 ```typescript
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 // CORRECT - Queries run against tenant schema
 const orders = await withTenant('rawdog', async () => {
@@ -186,7 +186,7 @@ const orders = await sql`SELECT * FROM orders`  // Don't do this!
 Use `createTenantCache()` for tenant-isolated Redis caching:
 
 ```typescript
-import { createTenantCache } from '@cgk/db'
+import { createTenantCache } from '@cgk-platform/db'
 
 const cache = createTenantCache('rawdog')
 
@@ -307,8 +307,8 @@ vercel env pull .env.local
 
 After database setup:
 
-1. **Create your first tenant**: `npx @cgk/cli tenant:create my_brand`
-2. **Run the full setup wizard**: `npx @cgk/cli setup`
+1. **Create your first tenant**: `npx @cgk-platform/cli tenant:create my_brand`
+2. **Run the full setup wizard**: `npx @cgk-platform/cli setup`
 3. **Start development**: `pnpm dev`
 
 For more information, see the [main documentation](../README.md).

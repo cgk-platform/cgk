@@ -5,7 +5,7 @@
  * - Slack notifications config (Redis)
  */
 
-import { createTenantCache, sql, withTenant } from '@cgk/db'
+import { createTenantCache, sql, withTenant } from '@cgk-platform/db'
 
 import type {
   CreateShipmentParams,

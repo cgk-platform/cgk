@@ -32,13 +32,13 @@ This session completed the execution of 65+ Phase 2 sub-phases via parallel agen
 - Communications (Email Queue, Templates, Sender DNS, Inbound, SMS, Slack, Template Library, Resend Onboarding)
 
 ### TypeScript Fixes Applied:
-1. **@cgk/jobs package**:
-   - Stubbed `treasury.ts` - requires @cgk/treasury package (not yet created)
-   - Stubbed `voice.ts` - requires @cgk/ai-agents exports (circular dep)
-   - Stubbed `workflow.ts` - requires @cgk/admin-core/workflow (not yet exported)
+1. **@cgk-platform/jobs package**:
+   - Stubbed `treasury.ts` - requires @cgk-platform/treasury package (not yet created)
+   - Stubbed `voice.ts` - requires @cgk-platform/ai-agents exports (circular dep)
+   - Stubbed `workflow.ts` - requires @cgk-platform/admin-core/workflow (not yet exported)
    - Stubbed `webhooks/health-check.ts` and `webhooks/retry-failed.ts`
 
-2. **@cgk/scheduling package**:
+2. **@cgk-platform/scheduling package**:
    - Fixed array parameters for PostgreSQL (converted to string literals)
    - Fixed SQL template fragment concatenation
    - Removed unused date-fns imports
@@ -50,22 +50,22 @@ This session completed the execution of 65+ Phase 2 sub-phases via parallel agen
 
 | Package | Status | Notes |
 |---------|--------|-------|
-| @cgk/db | ✅ Passes | |
-| @cgk/auth | ✅ Passes | |
-| @cgk/jobs | ✅ Passes | Some handlers stubbed |
-| @cgk/scheduling | ✅ Passes | |
-| @cgk/support | ✅ Passes | |
-| @cgk/shopify | ✅ Passes | |
-| @cgk/admin-core | ⚠️ Has errors | Inbox/workflow SQL patterns need fixing |
+| @cgk-platform/db | ✅ Passes | |
+| @cgk-platform/auth | ✅ Passes | |
+| @cgk-platform/jobs | ✅ Passes | Some handlers stubbed |
+| @cgk-platform/scheduling | ✅ Passes | |
+| @cgk-platform/support | ✅ Passes | |
+| @cgk-platform/shopify | ✅ Passes | |
+| @cgk-platform/admin-core | ⚠️ Has errors | Inbox/workflow SQL patterns need fixing |
 
 ## What's Next
 
-1. **Fix @cgk/admin-core package** - The workflow and inbox modules have SQL composition issues with @vercel/postgres
+1. **Fix @cgk-platform/admin-core package** - The workflow and inbox modules have SQL composition issues with @vercel/postgres
 
 2. **Un-stub job handlers** when dependencies are ready:
-   - Create @cgk/treasury package with treasury functions
-   - Export workflow engine from @cgk/admin-core
-   - Build @cgk/shopify/webhooks before jobs package
+   - Create @cgk-platform/treasury package with treasury functions
+   - Export workflow engine from @cgk-platform/admin-core
+   - Build @cgk-platform/shopify/webhooks before jobs package
 
 3. **Continue with remaining Phase 2 phases** (if any)
 
@@ -75,7 +75,7 @@ This session completed the execution of 65+ Phase 2 sub-phases via parallel agen
 
 ```bash
 # Type check core packages
-pnpm turbo typecheck --filter=@cgk/db --filter=@cgk/auth --filter=@cgk/jobs --filter=@cgk/scheduling --filter=@cgk/support
+pnpm turbo typecheck --filter=@cgk-platform/db --filter=@cgk-platform/auth --filter=@cgk-platform/jobs --filter=@cgk-platform/scheduling --filter=@cgk-platform/support
 
 # Full build (may have errors in admin-core)
 pnpm turbo build

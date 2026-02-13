@@ -1,5 +1,5 @@
 /**
- * @cgk/payments - Stripe and Wise payment abstraction
+ * @cgk-platform/payments - Stripe and Wise payment abstraction
  *
  * @ai-pattern payments-abstraction
  * @ai-note Unified interface for payment providers

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import { CheckCircle, XCircle, Clock, Database, Cloud, Server } from 'lucide-react'
 
 export const metadata = {

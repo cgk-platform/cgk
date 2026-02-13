@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button } from '@cgk/ui'
+import { Badge, Button } from '@cgk-platform/ui'
 
 interface SessionCardProps {
   id: string

@@ -3,8 +3,8 @@
  * POST /api/admin/inbox/threads/[id]/close - Close thread
  */
 
-import { requireAuth } from '@cgk/auth'
-import { closeThread } from '@cgk/admin-core'
+import { requireAuth } from '@cgk-platform/auth'
+import { closeThread } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

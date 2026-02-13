@@ -5,8 +5,8 @@
  * Uses unified Commerce types for provider-agnostic rendering.
  */
 
-import type { Product } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Product } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 import Image from 'next/image'
 import Link from 'next/link'
 

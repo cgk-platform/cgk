@@ -1,6 +1,12 @@
+/**
+ * Status Dot Component
+ *
+ * Visual indicators for health/status using design system tokens.
+ */
+
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 type StatusType = 'healthy' | 'degraded' | 'unhealthy' | 'critical'
 
@@ -17,38 +23,31 @@ interface StatusDotProps {
 
 const sizeClasses = {
   sm: 'h-2 w-2',
-  md: 'h-3 w-3',
-  lg: 'h-4 w-4',
+  md: 'h-2.5 w-2.5',
+  lg: 'h-3 w-3',
 }
 
 const statusColors: Record<StatusType, { bg: string; ring: string }> = {
   healthy: {
-    bg: 'bg-green-500',
-    ring: 'ring-green-500/30',
+    bg: 'bg-success',
+    ring: 'ring-success/30',
   },
   degraded: {
-    bg: 'bg-yellow-500',
-    ring: 'ring-yellow-500/30',
+    bg: 'bg-warning',
+    ring: 'ring-warning/30',
   },
   unhealthy: {
-    bg: 'bg-red-500',
-    ring: 'ring-red-500/30',
+    bg: 'bg-destructive',
+    ring: 'ring-destructive/30',
   },
   critical: {
-    bg: 'bg-red-600',
-    ring: 'ring-red-600/30',
+    bg: 'bg-destructive',
+    ring: 'ring-destructive/50',
   },
 }
 
 /**
  * StatusDot component for displaying health/status indicators
- *
- * @example
- * ```tsx
- * <StatusDot status="healthy" />
- * <StatusDot status="degraded" animate />
- * <StatusDot status="critical" size="lg" />
- * ```
  */
 export function StatusDot({
   status,

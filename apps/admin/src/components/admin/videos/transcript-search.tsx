@@ -13,7 +13,7 @@
  */
 
 import { useState, useMemo, useCallback } from 'react'
-import { Input, Card, CardContent, CardHeader, CardTitle, Badge } from '@cgk/ui'
+import { Input, Card, CardContent, CardHeader, CardTitle, Badge } from '@cgk-platform/ui'
 
 export interface TranscriptionWord {
   text: string

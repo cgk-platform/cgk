@@ -51,7 +51,7 @@ export const checkApprovalRemindersJob = defineJob<
     // In a full implementation, this would:
     // 1. Get all active tenants from public.organizations
     // 2. For each tenant, call the reminder processing logic
-    // 3. Use @cgk/db withTenant() for tenant isolation
+    // 3. Use @cgk-platform/db withTenant() for tenant isolation
     // 4. Queue email/SMS jobs via sendJob()
 
     console.log('[checkApprovalReminders] Processing approval reminders...')
@@ -199,7 +199,7 @@ export const syncCreatorShipmentsJob = defineJob<
     )
 
     // In a full implementation, this would:
-    // 1. Use @cgk/db withTenant() for tenant isolation
+    // 1. Use @cgk-platform/db withTenant() for tenant isolation
     // 2. Call getShipmentsForSync() to get pending shipments
     // 3. For each shipment, fetch order from Shopify
     // 4. Check fulfillment status and tracking info

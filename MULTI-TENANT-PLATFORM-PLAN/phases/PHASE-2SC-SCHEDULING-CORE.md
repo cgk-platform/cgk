@@ -1,5 +1,7 @@
 # PHASE-2SC: Scheduling & Booking - Core System
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Completed**: 2026-02-10
 
@@ -387,7 +389,7 @@ interface SchedulingAnalytics {
 
 ### [PARALLEL] Database & Types
 - [x] Create database migration for scheduling tables
-- [x] Define TypeScript types in `@cgk/scheduling` package
+- [x] Define TypeScript types in `@cgk-platform/scheduling` package
 - [x] Implement tenant-isolated database operations
 - [x] Add changelog logging for audit trail
 
@@ -476,7 +478,7 @@ interface SchedulingAnalytics {
 ### Tenant Isolation Pattern
 ```typescript
 // ALWAYS use withTenant for all scheduling queries
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 
 export async function getEventTypes(tenantId: string, userId: string) {
   return await withTenant(tenantId, async () => {
@@ -491,7 +493,7 @@ export async function getEventTypes(tenantId: string, userId: string) {
 
 ### Distributed Lock Pattern (Double-Booking Prevention)
 ```typescript
-import { createTenantCache } from '@cgk/cache'
+import { createTenantCache } from '@cgk-platform/cache'
 
 export async function acquireBookingLock(
   tenantId: string,
@@ -511,8 +513,8 @@ export async function acquireBookingLock(
 ### Public Route Pattern (No Auth, Rate Limited)
 ```typescript
 // /api/public/scheduling/[tenantSlug]/bookings/route.ts
-import { getTenantBySlug } from '@cgk/db'
-import { checkBookingRateLimit } from '@cgk/scheduling'
+import { getTenantBySlug } from '@cgk-platform/db'
+import { checkBookingRateLimit } from '@cgk-platform/scheduling'
 
 export async function POST(req: Request, { params }: { params: { tenantSlug: string } }) {
   const ip = req.headers.get('x-forwarded-for') || 'unknown'
@@ -641,7 +643,7 @@ const displayTime = formatInTimeZone(booking.startTime, booking.timezone, 'PPpp'
 
 - [x] Read RAWDOG scheduling implementation (`src/lib/scheduling/`)
 - [x] Create database migration
-- [x] Implement `@cgk/scheduling` package
+- [x] Implement `@cgk-platform/scheduling` package
 - [x] Build admin UI pages
 - [ ] Build public booking pages - deferred to PHASE-2SF-BOOKING
 - [ ] Integrate with communications (email queue) - deferred to PHASE-2CM

@@ -1,10 +1,10 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { Clock, MessageSquare, Reply, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
-import { formatCommentTimestamp, type VideoComment } from '@cgk/video/interactions'
+import { formatCommentTimestamp, type VideoComment } from '@cgk-platform/video/interactions'
 
 import { CommentInput } from './comment-input'
 

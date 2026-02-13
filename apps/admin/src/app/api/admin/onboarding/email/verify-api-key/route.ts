@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -9,7 +9,7 @@ import {
   sendTestEmailWithKey,
   verifyResendApiKey,
   type VerifyApiKeyInput,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * POST /api/admin/onboarding/email/verify-api-key

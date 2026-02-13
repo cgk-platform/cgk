@@ -8,7 +8,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { BlockProps, CountdownConfig } from '../types'
 
 /**

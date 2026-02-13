@@ -1,5 +1,7 @@
 # PHASE-2AI-CORE: AI Assistant Core
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Completed**: 2026-02-10
 
@@ -786,7 +788,7 @@ const result = await sql`
 ## Deliverables Checklist
 
 - [ ] Database schema for all core tables
-- [ ] `@cgk/ai-agents` package with registry, personality, autonomy modules
+- [ ] `@cgk-platform/ai-agents` package with registry, personality, autonomy modules
 - [ ] API routes for agent CRUD, personality, autonomy, actions
 - [ ] Admin UI: Agent list, configuration, action log, approval queue
 - [ ] Background jobs for cleanup and stats

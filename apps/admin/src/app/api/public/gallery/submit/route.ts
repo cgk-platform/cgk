@@ -3,7 +3,7 @@
  * POST: Submit UGC photos (public, no auth required)
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 
 import { createUGCSubmission, logChange } from '@/lib/admin-utilities/db'

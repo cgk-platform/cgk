@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@cgk/ui', '@cgk/commerce'],
+  transpilePackages: ['@cgk-platform/ui', '@cgk-platform/commerce'],
   images: {
     domains: ['cdn.shopify.com'],
   },

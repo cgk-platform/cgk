@@ -2,7 +2,7 @@
  * Segment Customers API
  * GET: List customers in a specific segment (Shopify or RFM)
  */
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

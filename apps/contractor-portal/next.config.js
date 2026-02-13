@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@cgk/core', '@cgk/db', '@cgk/auth', '@cgk/ui', '@cgk/payments'],
+  transpilePackages: ['@cgk-platform/core', '@cgk-platform/db', '@cgk-platform/auth', '@cgk-platform/ui', '@cgk-platform/payments'],
   typedRoutes: true,
 }
 

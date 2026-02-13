@@ -6,13 +6,13 @@
  * Manually retry a failed webhook event
  */
 
-import { getTenantContext } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { getTenantContext } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import {
   getWebhookEvent,
   updateWebhookStatus,
   routeToHandler,
-} from '@cgk/shopify/webhooks'
+} from '@cgk-platform/shopify/webhooks'
 
 export const dynamic = 'force-dynamic'
 

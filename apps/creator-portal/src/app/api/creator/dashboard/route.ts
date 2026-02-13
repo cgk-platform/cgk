@@ -4,7 +4,7 @@
  * GET /api/creator/dashboard - Fetch dashboard data with cross-brand statistics
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 

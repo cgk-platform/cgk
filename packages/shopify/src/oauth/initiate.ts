@@ -2,7 +2,7 @@
  * Shopify OAuth initiation
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { generateSecureToken } from './encryption.js'
 import { ShopifyError } from './errors.js'
 import { getScopesString } from './scopes.js'

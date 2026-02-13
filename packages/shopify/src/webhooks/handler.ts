@@ -4,7 +4,7 @@
  * Entry point for all incoming Shopify webhooks
  */
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { routeToHandler } from './router'
 import type { WebhookTopic } from './types'
 import {
@@ -154,7 +154,7 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
  * @example
  * ```ts
  * // app/api/webhooks/shopify/route.ts
- * import { createWebhookRoute } from '@cgk/shopify/webhooks'
+ * import { createWebhookRoute } from '@cgk-platform/shopify/webhooks'
  *
  * export const POST = createWebhookRoute()
  * ```

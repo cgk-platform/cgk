@@ -5,7 +5,7 @@
  * POST /api/admin/esign/documents/[id]/in-person/[sessionToken] - Complete signing
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import {
   getInPersonSessionByToken,

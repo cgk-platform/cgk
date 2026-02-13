@@ -1,4 +1,4 @@
-import { getUserPermissions } from '@cgk/auth'
+import { getUserPermissions } from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

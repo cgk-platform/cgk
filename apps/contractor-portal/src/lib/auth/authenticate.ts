@@ -5,7 +5,7 @@
  * Contractors are single-tenant (stored in tenant schema).
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { Contractor, ContractorStatus, ContractorWithStats } from '../types'
 import { verifyPassword } from './password'

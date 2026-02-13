@@ -1,6 +1,6 @@
 'use client'
 
-import { cn, Input, Label } from '@cgk/ui'
+import { cn, Input, Label } from '@cgk-platform/ui'
 import { useCallback, useState } from 'react'
 
 import type { SocialData, SocialConnection } from '../../../lib/onboarding-wizard/types'

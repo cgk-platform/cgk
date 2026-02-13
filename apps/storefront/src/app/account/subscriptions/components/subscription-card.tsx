@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Badge, Card, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardContent, cn } from '@cgk-platform/ui'
 import { formatDate, formatFrequency, formatPrice, formatRelativeDate, getStatusDisplay } from '@/lib/subscriptions/format'
 import type { Subscription } from '@/lib/subscriptions/types'
 

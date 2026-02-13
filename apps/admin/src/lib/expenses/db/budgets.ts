@@ -3,7 +3,7 @@
  * Phase 2H: Financial Expenses & P&L
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   ExpenseBudget,

@@ -8,7 +8,7 @@ Built the platform-wide structured logging system with `PlatformLogger` class, P
 
 ## Completed Tasks
 
-### Package: @cgk/logging (packages/logging/)
+### Package: @cgk-platform/logging (packages/logging/)
 
 #### Platform Logger Core (src/platform/)
 
@@ -137,9 +137,9 @@ Updated `apps/admin/src/lib/navigation.ts` to add "Logs" link under Operations s
 ## Verification
 
 ```bash
-pnpm turbo typecheck --filter=@cgk/logging  # PASSES
-pnpm turbo lint --filter=@cgk/logging       # PASSES
-pnpm turbo build --filter=@cgk/logging      # PASSES
+pnpm turbo typecheck --filter=@cgk-platform/logging  # PASSES
+pnpm turbo lint --filter=@cgk-platform/logging       # PASSES
+pnpm turbo build --filter=@cgk-platform/logging      # PASSES
 ```
 
 ## Key Patterns Used
@@ -190,8 +190,8 @@ apps/admin/src/app/admin/operations/health/page.tsx
 ### Modified Files (4)
 ```
 packages/logging/src/index.ts (added platform exports)
-packages/logging/package.json (added @cgk/db dependency)
-apps/admin/package.json (added @cgk/logging dependency)
+packages/logging/package.json (added @cgk-platform/db dependency)
+apps/admin/package.json (added @cgk-platform/logging dependency)
 apps/admin/src/lib/navigation.ts (added Logs nav item)
 ```
 
@@ -199,12 +199,12 @@ apps/admin/src/lib/navigation.ts (added Logs nav item)
 
 - Unit tests for logger buffering
 - Integration tests for stream delivery
-- Admin app health components have unrelated type errors (from @cgk/health phase)
+- Admin app health components have unrelated type errors (from @cgk-platform/health phase)
 
 ## Usage Example
 
 ```typescript
-import { createPlatformLogger, createRequestLogger } from '@cgk/logging'
+import { createPlatformLogger, createRequestLogger } from '@cgk-platform/logging'
 
 // Create base logger
 const logger = createPlatformLogger({

@@ -197,7 +197,7 @@ type CreatorNotificationType =
 ```
 
 **Product Selection Flow**:
-1. Modal fetches active products from Shopify via existing `@cgk/shopify` package
+1. Modal fetches active products from Shopify via existing `@cgk-platform/shopify` package
 2. Shows all variants with images, SKUs, prices
 3. Quantity selection (1-5 units per variant)
 4. Address validation before allowing send

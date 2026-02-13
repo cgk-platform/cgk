@@ -5,7 +5,7 @@
  * All database operations use tenant isolation via the db layer.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import {
   getBRIMetrics,

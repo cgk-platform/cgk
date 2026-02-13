@@ -5,7 +5,7 @@
  * All operations expect to be run within a tenant context via withTenant().
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import { generateMemoryEmbedding } from './embeddings.js'
 import { SOURCE_WEIGHTS } from './types.js'
 import type {

@@ -4,7 +4,7 @@ import {
   buildAuthorizationUrl,
   generateOAuthState,
   serializeOAuthState,
-} from '@cgk/slack'
+} from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
 
 /**

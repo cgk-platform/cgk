@@ -1,5 +1,7 @@
 # Phase 0: Portability & Open Source Setup
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Duration**: 2 weeks (before Phase 1)
 **Depends On**: None (first phase)
 **Parallel With**: None
@@ -87,6 +89,8 @@ See `MASTER-EXECUTION-GUIDE.md` for full execution context.
 
 ```yaml
 # .github/workflows/release.yml
+
+> **STATUS**: ✅ COMPLETE (2026-02-13)
 name: Release
 on:
   push:
@@ -139,7 +143,7 @@ packages/
 **CLAUDE.md Template for Packages:**
 
 ```markdown
-# @cgk/{package-name} - AI Development Guide
+# @cgk-platform/{package-name} - AI Development Guide
 
 ## Purpose
 [1-2 sentences on what this package does]
@@ -147,7 +151,7 @@ packages/
 ## Quick Reference
 \`\`\`typescript
 // Most common import pattern
-import { ... } from '@cgk/{package-name}'
+import { ... } from '@cgk-platform/{package-name}'
 \`\`\`
 
 ## Key Patterns
@@ -249,7 +253,7 @@ program.parse()
 
 #### [SEQUENTIAL] Test End-to-End Flow
 
-- [x] Test `npx @cgk/cli create test-brand`
+- [x] Test `npx @cgk-platform/cli create test-brand`
 - [x] Verify template copies correctly
 - [x] Test `pnpm install` works
 - [x] Test `pnpm dev` starts correctly
@@ -331,9 +335,9 @@ cgk/
 
 ## Success Criteria
 
-- [x] `npx @cgk/cli create my-brand --template=basic` works
-- [x] `npx @cgk/cli setup` launches platform setup wizard
-- [x] `npx @cgk/cli doctor` shows configuration status
+- [x] `npx @cgk-platform/cli create my-brand --template=basic` works
+- [x] `npx @cgk-platform/cli setup` launches platform setup wizard
+- [x] `npx @cgk-platform/cli doctor` shows configuration status
 - [x] `pnpm install && pnpm dev` starts without errors
 - [ ] Fresh install auto-redirects to `/setup` wizard (Phase 1B)
 - [ ] Vercel integrations provision Neon/Upstash with one click (Phase 1B)
@@ -362,10 +366,10 @@ After cloning and running `pnpm dev`, the platform detects it's a fresh install 
 
 ```bash
 # Interactive setup (mirrors web wizard)
-npx @cgk/cli setup
+npx @cgk-platform/cli setup
 
 # Check configuration status
-npx @cgk/cli doctor
+npx @cgk-platform/cli doctor
 # Output:
 #   ✓ Database: Connected (Neon PostgreSQL)
 #   ✓ Cache: Connected (Upstash Redis)
@@ -373,8 +377,8 @@ npx @cgk/cli doctor
 #   ✓ Admin: 1 super admin configured
 
 # Provision specific services
-npx @cgk/cli setup --database
-npx @cgk/cli setup --cache
+npx @cgk-platform/cli setup --database
+npx @cgk-platform/cli setup --cache
 ```
 
 ### One-Click Vercel Deploy
@@ -400,8 +404,8 @@ Vercel integrations automatically add environment variables for Neon, Upstash, a
 - [x] All files under 650 lines
 
 ### Deliverables Verified
-- [x] `npx @cgk/cli create my-brand --template=basic` works
-- [x] `npx @cgk/cli doctor` shows configuration status
+- [x] `npx @cgk-platform/cli create my-brand --template=basic` works
+- [x] `npx @cgk-platform/cli doctor` shows configuration status
 - [x] Packages can be published to npm (dry-run tested)
 - [x] GitHub Actions CI workflow runs successfully
 - [x] Changesets configured and tested

@@ -5,7 +5,7 @@
  * Can be hidden on mobile devices.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { BlockProps, SpacerConfig } from '../types'
 
 /**

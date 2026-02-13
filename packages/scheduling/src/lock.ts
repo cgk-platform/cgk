@@ -4,7 +4,7 @@
  * Prevents double-booking by using Redis-based distributed locks
  */
 
-import { createTenantCache } from '@cgk/db'
+import { createTenantCache } from '@cgk-platform/db'
 
 import type { LockResult, RateLimitResult } from './types.js'
 

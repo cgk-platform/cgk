@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 
-import type { ChatSession } from '@cgk/support'
+import type { ChatSession } from '@cgk-platform/support'
 
 interface ChatQueueProps {
   tenantId: string

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { getAlertHistory, type AlertSeverity } from '@cgk/slack'
+import { getAlertHistory, type AlertSeverity } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
 
 /**

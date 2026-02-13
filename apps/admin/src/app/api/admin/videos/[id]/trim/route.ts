@@ -9,14 +9,14 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { getVideo } from '@cgk/video'
+import { getVideo } from '@cgk-platform/video'
 import {
   createClip,
   getTrimJobs,
   validateTrimRequest,
   type MuxClient,
   type TrimRequest,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -24,7 +24,7 @@ interface RouteParams {
 
 // Lazy load Mux client to avoid issues if not configured
 async function getMuxClient() {
-  const { getMuxClient: getClient } = await import('@cgk/video')
+  const { getMuxClient: getClient } = await import('@cgk-platform/video')
   return getClient()
 }
 

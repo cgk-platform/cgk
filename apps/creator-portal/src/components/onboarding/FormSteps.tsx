@@ -1,6 +1,6 @@
 'use client'
 
-import { Input, Label, Checkbox } from '@cgk/ui'
+import { Input, Label, Checkbox } from '@cgk-platform/ui'
 import { US_STATES } from '../../lib/onboarding/types'
 import type { CreatorApplicationForm, SurveyQuestion } from '../../lib/onboarding/types'
 import type { ValidationErrors } from '../../lib/onboarding/validation'

@@ -1,6 +1,6 @@
 'use client'
 
-import { cn, Input, Label } from '@cgk/ui'
+import { cn, Input, Label } from '@cgk-platform/ui'
 import { useCallback, useRef, useState } from 'react'
 
 import type { TaxData } from '../../../lib/onboarding-wizard/types'

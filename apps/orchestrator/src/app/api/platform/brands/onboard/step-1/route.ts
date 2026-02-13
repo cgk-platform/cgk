@@ -4,8 +4,8 @@
  * POST /api/platform/brands/onboard/step-1 - Create organization from basic info
  */
 
-import { requireAuth } from '@cgk/auth'
-import { createLogger } from '@cgk/logging'
+import { requireAuth } from '@cgk-platform/auth'
+import { createLogger } from '@cgk-platform/logging'
 import {
   addUserToOrganization,
   createOrganization,
@@ -13,7 +13,7 @@ import {
   updateSession,
   validateBasicInfo,
   type BasicInfoData,
-} from '@cgk/onboarding'
+} from '@cgk-platform/onboarding'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

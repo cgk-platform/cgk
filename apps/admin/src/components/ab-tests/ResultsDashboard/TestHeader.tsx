@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { Edit2, ExternalLink } from 'lucide-react'
 
-import { Badge, Button, cn } from '@cgk/ui'
+import { Badge, Button, cn } from '@cgk-platform/ui'
 
 import type { ABTest, ABVariant } from '@/lib/ab-tests/types'
 

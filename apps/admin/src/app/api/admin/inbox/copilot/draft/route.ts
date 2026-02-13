@@ -3,8 +3,8 @@
  * POST /api/admin/inbox/copilot/draft - Generate AI draft
  */
 
-import { requireAuth } from '@cgk/auth'
-import { generateDraft } from '@cgk/admin-core'
+import { requireAuth } from '@cgk-platform/auth'
+import { generateDraft } from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

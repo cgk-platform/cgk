@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { Button } from '@cgk/ui'
-import { Card, CardHeader } from '@cgk/ui'
-import { Switch } from '@cgk/ui'
-import { Badge } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
+import { Card, CardHeader } from '@cgk-platform/ui'
+import { Switch } from '@cgk-platform/ui'
+import { Badge } from '@cgk-platform/ui'
 
-import type { SenderAddressWithDomain } from '@cgk/communications'
+import type { SenderAddressWithDomain } from '@cgk-platform/communications'
 import type { InboundEmailStepProps } from '../types'
 
 interface InboundAddress {

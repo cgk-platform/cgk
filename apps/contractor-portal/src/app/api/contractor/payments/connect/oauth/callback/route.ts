@@ -4,7 +4,7 @@
  * GET /api/contractor/payments/connect/oauth/callback - Handle OAuth callback
  */
 
-import { handleStripeOAuthCallback, StripeConnectError } from '@cgk/payments'
+import { handleStripeOAuthCallback, StripeConnectError } from '@cgk-platform/payments'
 
 import { getContractorAuthContext } from '@/lib/auth/middleware'
 

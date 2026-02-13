@@ -1,4 +1,4 @@
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 

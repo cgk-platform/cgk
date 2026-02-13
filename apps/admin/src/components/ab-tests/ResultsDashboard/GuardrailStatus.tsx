@@ -2,7 +2,7 @@
 
 import { Shield, AlertTriangle, CheckCircle } from 'lucide-react'
 
-import { Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Card, CardHeader, CardContent, cn } from '@cgk-platform/ui'
 
 import type { Guardrail } from '@/lib/ab-tests/types'
 

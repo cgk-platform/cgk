@@ -21,7 +21,7 @@ import {
   Textarea,
   Alert,
   AlertDescription,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import { Loader2, Play, Phone, Mic, Volume2, Settings2 } from 'lucide-react'
 
 interface VoiceConfig {

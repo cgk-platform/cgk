@@ -1,5 +1,5 @@
 /**
- * @cgk/slack - Slack API client wrapper
+ * @cgk-platform/slack - Slack API client wrapper
  *
  * @ai-pattern slack-client
  * @ai-note Wrapper around @slack/web-api with additional utilities

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import { LogIn, Loader2, Unplug } from 'lucide-react'
 import { useState } from 'react'
 

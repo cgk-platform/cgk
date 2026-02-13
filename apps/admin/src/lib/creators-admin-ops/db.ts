@@ -3,7 +3,7 @@
  * All functions use tenant isolation via withTenant()
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 import type {
   Commission,

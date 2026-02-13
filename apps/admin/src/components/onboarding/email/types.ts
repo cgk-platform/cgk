@@ -9,7 +9,7 @@ import type {
   EmailSetupStatus,
   NotificationTypeInfo,
   SenderAddressWithDomain,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * Email setup wizard step

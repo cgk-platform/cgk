@@ -5,7 +5,7 @@
  * viewing pending documents, signing, and audit logging.
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { put } from '@vercel/blob'
 import { nanoid } from 'nanoid'
 

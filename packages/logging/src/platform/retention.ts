@@ -25,7 +25,7 @@ export interface CleanupResult {
  * Delete old logs based on retention policy
  */
 export async function cleanupLogsByRetention(): Promise<CleanupResult> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const startTime = Date.now()
   let totalDeleted = 0
@@ -82,7 +82,7 @@ export async function cleanupLogsByRetention(): Promise<CleanupResult> {
  * Drop old partitions (older than 90 days)
  */
 export async function dropOldPartitions(): Promise<string[]> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   // Get partitions older than 90 days
   const cutoffDate = new Date()
@@ -126,7 +126,7 @@ export async function dropOldPartitions(): Promise<string[]> {
  * Create new monthly partition if needed
  */
 export async function ensureCurrentPartition(): Promise<string | null> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const now = new Date()
   const currentYYYYMM = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`
@@ -156,7 +156,7 @@ export async function ensureCurrentPartition(): Promise<string | null> {
  * Create next month's partition proactively
  */
 export async function ensureNextMonthPartition(): Promise<string | null> {
-  const { sql } = await import('@cgk/db')
+  const { sql } = await import('@cgk-platform/db')
 
   const now = new Date()
   const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
@@ -184,7 +184,7 @@ export async function ensureNextMonthPartition(): Promise<string | null> {
 }
 
 /**
- * Get the cleanup job definition for use with @cgk/jobs
+ * Get the cleanup job definition for use with @cgk-platform/jobs
  */
 export function getCleanupJobDefinition(): CleanupJobConfig {
   return {

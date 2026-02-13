@@ -181,7 +181,7 @@ These should be addressed in the respective phases that created them.
 ## Testing Notes
 
 To test the implementation:
-1. Run migrations: `npx @cgk/cli migrate`
+1. Run migrations: `npx @cgk-platform/cli migrate`
 2. Seed templates: POST to `/api/admin/settings/email/templates` with `{ "action": "seed" }`
 3. View templates at `/admin/settings/email/templates`
 4. Edit any template and verify:

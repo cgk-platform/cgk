@@ -7,7 +7,7 @@
 
 'use client'
 
-import type { Cart } from '@cgk/commerce'
+import type { Cart } from '@cgk-platform/commerce'
 import {
   createContext,
   useContext,

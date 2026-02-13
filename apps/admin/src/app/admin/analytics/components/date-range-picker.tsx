@@ -1,6 +1,6 @@
 'use client'
 
-import { Select, SelectOption } from '@cgk/ui'
+import { Select, SelectOption } from '@cgk-platform/ui'
 
 import type { DateRange, DateRangePreset } from '@/lib/analytics'
 

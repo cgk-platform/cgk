@@ -11,7 +11,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import {
   verifyResendSignature,
   verifySvixSignature,
@@ -23,7 +23,7 @@ import {
   analyzeEmail,
   routeEmail,
   getEmailTypeFromPurpose,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 /**
  * Get webhook secret from environment

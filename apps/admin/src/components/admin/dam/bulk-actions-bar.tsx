@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import {
   X,
   Folder,
@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 
-import type { BulkOperation } from '@cgk/dam'
+import type { BulkOperation } from '@cgk-platform/dam'
 
 export interface BulkActionsBarProps {
   selectedCount: number

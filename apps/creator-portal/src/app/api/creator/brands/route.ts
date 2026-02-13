@@ -4,7 +4,7 @@
  * GET /api/creator/brands - List all brand memberships with stats
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { BrandMembership } from '@/lib/types'

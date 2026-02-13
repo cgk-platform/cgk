@@ -1,5 +1,5 @@
 /**
- * @cgk/slack - Type definitions
+ * @cgk-platform/slack - Type definitions
  *
  * @ai-pattern slack-types
  * @ai-note All Slack-related type definitions

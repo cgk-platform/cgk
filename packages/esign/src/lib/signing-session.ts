@@ -3,7 +3,7 @@
  * Handles the complete signing flow from token validation to completion
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import type {
   EsignDocument,
   EsignSigner,

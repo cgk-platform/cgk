@@ -4,7 +4,7 @@
  * POST: Create a top-up
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 
 import { createStripeTopup, logChange } from '@/lib/admin-utilities/db'

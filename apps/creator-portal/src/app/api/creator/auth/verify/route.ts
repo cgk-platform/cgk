@@ -5,7 +5,7 @@
  * Verifies a magic link token and creates a session.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import {
   createCreatorSession,

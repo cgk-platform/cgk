@@ -1,10 +1,10 @@
 'use client'
 
-import { Button, cn, Input, Label } from '@cgk/ui'
+import { Button, cn, Input, Label } from '@cgk-platform/ui'
 import { Loader2, Scissors, X } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
 
-import { formatTimestamp, parseTimestamp, type TrimRequest } from '@cgk/video/creator-tools'
+import { formatTimestamp, parseTimestamp, type TrimRequest } from '@cgk-platform/video/creator-tools'
 
 interface TrimModalProps {
   videoDuration: number

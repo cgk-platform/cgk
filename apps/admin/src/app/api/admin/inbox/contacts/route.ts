@@ -4,13 +4,13 @@
  * POST /api/admin/inbox/contacts - Create new contact
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   createContact,
   getContacts,
   type ContactFilters,
   type CreateContactInput,
-} from '@cgk/admin-core'
+} from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

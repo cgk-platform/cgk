@@ -6,8 +6,8 @@
  * DELETE /api/platform/flags/[key] - Delete flag
  */
 
-import { requireAuth } from '@cgk/auth'
-import type { UpdateFlagInput } from '@cgk/feature-flags'
+import { requireAuth } from '@cgk-platform/auth'
+import type { UpdateFlagInput } from '@cgk-platform/feature-flags'
 import {
   deleteFlag,
   getAuditLog,
@@ -16,8 +16,8 @@ import {
   invalidateFlag,
   killFlag,
   updateFlag,
-} from '@cgk/feature-flags/server'
-import { createLogger } from '@cgk/logging'
+} from '@cgk-platform/feature-flags/server'
+import { createLogger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

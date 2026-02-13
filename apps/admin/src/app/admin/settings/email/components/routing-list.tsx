@@ -1,9 +1,9 @@
 'use client'
 
-import { Badge, Card, CardContent, Select, SelectOption, Spinner, Switch } from '@cgk/ui'
+import { Badge, Card, CardContent, Select, SelectOption, Spinner, Switch } from '@cgk-platform/ui'
 import { useEffect, useState } from 'react'
 
-import type { NotificationChannel, SenderAddressWithDomain } from '@cgk/communications'
+import type { NotificationChannel, SenderAddressWithDomain } from '@cgk-platform/communications'
 
 interface RoutingItem {
   notificationType: string

@@ -152,7 +152,7 @@ cd /Users/holdenthemic/Documents/cgk/apps/orchestrator && npx eslint "src/compon
 
 1. Run the database migration to create the user activity log table:
    ```bash
-   npx @cgk/cli migrate
+   npx @cgk-platform/cli migrate
    ```
 
 2. The user management UI is now accessible at `/users` in the Orchestrator app.

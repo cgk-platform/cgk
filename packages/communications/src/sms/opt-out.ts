@@ -8,7 +8,7 @@
  * @ai-critical TCPA requires immediate honoring of STOP requests
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { normalizeToE164 } from './compliance.js'
 import type {

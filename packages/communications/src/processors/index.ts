@@ -6,7 +6,7 @@
  *
  * @example
  * ```ts
- * import { createReviewProcessor } from '@cgk/communications/processors'
+ * import { createReviewProcessor } from '@cgk-platform/communications/processors'
  *
  * const runProcessor = createReviewProcessor({
  *   tenantId: 'rawdog',

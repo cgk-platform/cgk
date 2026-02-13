@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { createTicket } from '@cgk/support'
+import { createTicket } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

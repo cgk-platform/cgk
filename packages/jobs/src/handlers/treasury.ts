@@ -9,7 +9,7 @@
  * - Low balance alerts
  *
  * NOTE: These jobs require the treasury library functions to be implemented
- * in a shared package (e.g., @cgk/treasury) before they can be fully functional.
+ * in a shared package (e.g., @cgk-platform/treasury) before they can be fully functional.
  * Currently stubbed to allow build to pass.
  */
 
@@ -54,14 +54,14 @@ export const treasurySendApprovalEmailJob = defineJob<TreasurySendApprovalEmailP
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    // Treasury library functions need to be implemented in @cgk/treasury package
+    // Treasury library functions need to be implemented in @cgk-platform/treasury package
     // This is a stub that logs the request for now
     console.log(`[treasury/send-approval-email] tenantId=${tenantId} requestId=${requestId}`)
 
     return {
       success: false,
       error: {
-        message: 'Treasury library not yet implemented. Create @cgk/treasury package.',
+        message: 'Treasury library not yet implemented. Create @cgk-platform/treasury package.',
         retryable: false,
       },
     }
@@ -81,13 +81,13 @@ export const treasuryAutoSendApprovedJob = defineJob<TreasuryAutoSendApprovedPay
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    // Treasury library functions need to be implemented in @cgk/treasury package
+    // Treasury library functions need to be implemented in @cgk-platform/treasury package
     console.log(`[treasury/auto-send-approved] tenantId=${tenantId} requestId=${requestId || 'batch'}`)
 
     return {
       success: false,
       error: {
-        message: 'Treasury library not yet implemented. Create @cgk/treasury package.',
+        message: 'Treasury library not yet implemented. Create @cgk-platform/treasury package.',
         retryable: false,
       },
     }
@@ -107,13 +107,13 @@ export const treasurySyncTopupStatusesJob = defineJob<TreasurySyncTopupStatusesP
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    // Treasury library functions need to be implemented in @cgk/treasury package
+    // Treasury library functions need to be implemented in @cgk-platform/treasury package
     console.log(`[treasury/sync-topup-statuses] tenantId=${tenantId} topupId=${topupId || 'all'}`)
 
     return {
       success: false,
       error: {
-        message: 'Treasury library not yet implemented. Create @cgk/treasury package.',
+        message: 'Treasury library not yet implemented. Create @cgk-platform/treasury package.',
         retryable: false,
       },
     }
@@ -133,13 +133,13 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    // Treasury library functions need to be implemented in @cgk/treasury package
+    // Treasury library functions need to be implemented in @cgk-platform/treasury package
     console.log(`[treasury/low-balance-alert] tenantId=${tenantId}`)
 
     return {
       success: false,
       error: {
-        message: 'Treasury library not yet implemented. Create @cgk/treasury package.',
+        message: 'Treasury library not yet implemented. Create @cgk-platform/treasury package.',
         retryable: false,
       },
     }

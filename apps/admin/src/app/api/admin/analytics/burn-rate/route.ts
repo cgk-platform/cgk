@@ -5,7 +5,7 @@
  * Returns cash flow, burn rate, and runway analysis
  */
 
-import { getTenantContext } from '@cgk/auth'
+import { getTenantContext } from '@cgk-platform/auth'
 
 import { getBurnRate } from '@/lib/analytics'
 import type { DateRange } from '@/lib/analytics'

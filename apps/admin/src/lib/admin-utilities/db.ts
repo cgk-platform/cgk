@@ -3,7 +3,7 @@
  * Database operations for gallery, stripe top-ups, sync operations
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   ChangelogEntry,

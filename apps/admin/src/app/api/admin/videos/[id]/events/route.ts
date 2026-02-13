@@ -12,7 +12,7 @@ import { headers } from 'next/headers'
 import {
   createSSEResponse,
   createVideoStatusStream,
-} from '@cgk/video/creator-tools'
+} from '@cgk-platform/video/creator-tools'
 
 interface RouteParams {
   params: Promise<{ id: string }>

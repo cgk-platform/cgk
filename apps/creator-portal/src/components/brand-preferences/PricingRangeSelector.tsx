@@ -1,6 +1,6 @@
 'use client'
 
-import { cn, Switch } from '@cgk/ui'
+import { cn, Switch } from '@cgk-platform/ui'
 
 import { PRICING_RANGES } from '@/lib/brand-preferences/constants'
 import type { PricingRange } from '@/lib/types'

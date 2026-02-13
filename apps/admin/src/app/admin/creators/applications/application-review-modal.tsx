@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Input, Label } from '@cgk/ui'
+import { Button, Input, Label } from '@cgk-platform/ui'
 
 import type { CreatorApplication } from '@/lib/creators-admin-ops'
 import { REJECTION_TEMPLATES } from '@/lib/creators-admin-ops'

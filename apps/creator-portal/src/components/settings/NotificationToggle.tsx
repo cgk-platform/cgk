@@ -1,6 +1,6 @@
 'use client'
 
-import { Switch } from '@cgk/ui'
+import { Switch } from '@cgk-platform/ui'
 
 interface NotificationToggleProps {
   type: string

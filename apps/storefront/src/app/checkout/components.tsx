@@ -11,8 +11,8 @@
 
 'use client'
 
-import type { Cart } from '@cgk/commerce'
-import { cn } from '@cgk/ui'
+import type { Cart } from '@cgk-platform/commerce'
+import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useCallback, useMemo } from 'react'

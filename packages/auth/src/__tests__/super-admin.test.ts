@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock the database module
-vi.mock('@cgk/db', () => ({
+vi.mock('@cgk-platform/db', () => ({
   sql: vi.fn(),
 }))
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 import {
   isSuperAdmin,
   getSuperAdminUser,

@@ -3,7 +3,7 @@
  * OAuth and data fetching for keyword metrics
  * All operations must be called within withTenant() context
  */
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type { GSCConnection, GSCSyncResult } from './types'
 import { updateKeywordMetrics, recordHistorySnapshot, getKeywordByText } from './keyword-tracker'

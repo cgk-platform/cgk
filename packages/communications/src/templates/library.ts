@@ -8,7 +8,7 @@
  * @ai-note This is read-only aggregation - editing happens in per-function editors
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { getAllDefaultTemplates } from './defaults.js'
 import type { TemplateCategory } from './types.js'

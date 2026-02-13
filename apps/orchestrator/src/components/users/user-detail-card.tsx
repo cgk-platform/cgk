@@ -1,7 +1,7 @@
 'use client'
 
-import { Card, CardContent, CardHeader, Badge } from '@cgk/ui'
-import { cn } from '@cgk/ui'
+import { Card, CardContent, CardHeader, Badge } from '@cgk-platform/ui'
+import { cn } from '@cgk-platform/ui'
 
 import { UserAvatar } from './user-avatar'
 import { UserStatusBadge, SuperAdminBadge } from './user-status-badge'

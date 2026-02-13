@@ -5,8 +5,8 @@
  * POST /api/admin/esign/documents - Create and send new document
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
-import { prepareAndSendDocument } from '@cgk/esign'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
+import { prepareAndSendDocument } from '@cgk-platform/esign'
 import { NextResponse } from 'next/server'
 import { getDocuments } from '@/lib/esign'
 import type { EsignDocumentFilters } from '@/lib/esign/types'

@@ -2,7 +2,7 @@
  * Expense database operations with tenant isolation
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { Expense, ExpenseFilters, ExpenseSummary, ExpenseCategory_Legacy } from './types'
 

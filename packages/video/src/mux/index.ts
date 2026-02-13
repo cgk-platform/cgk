@@ -1,5 +1,5 @@
 /**
- * @cgk/video/mux - Mux integration exports
+ * @cgk-platform/video/mux - Mux integration exports
  */
 
 export { getMuxClient, isMuxConfigured, getMuxWebhookSecret, isTestMode } from './client.js'

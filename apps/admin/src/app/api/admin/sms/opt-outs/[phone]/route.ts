@@ -7,7 +7,7 @@ import {
   getOptOut,
   normalizeToE164,
   removeOptOut,
-} from '@cgk/communications'
+} from '@cgk-platform/communications'
 
 interface RouteParams {
   params: Promise<{ phone: string }>

@@ -1,4 +1,4 @@
-# @cgk/payments - AI Development Guide
+# @cgk-platform/payments - AI Development Guide
 
 > **Package Version**: 0.0.0
 > **Last Updated**: 2025-02-10
@@ -14,8 +14,8 @@ Stripe and Wise payment abstraction for the CGK platform. Provides unified payme
 ## Quick Reference
 
 ```typescript
-import { createStripeClient, createWiseClient } from '@cgk/payments'
-import { createPaymentProvider, type PaymentProvider } from '@cgk/payments'
+import { createStripeClient, createWiseClient } from '@cgk-platform/payments'
+import { createPaymentProvider, type PaymentProvider } from '@cgk-platform/payments'
 ```
 
 ---
@@ -25,7 +25,7 @@ import { createPaymentProvider, type PaymentProvider } from '@cgk/payments'
 ### Pattern 1: Stripe Payments
 
 ```typescript
-import { createStripeClient } from '@cgk/payments'
+import { createStripeClient } from '@cgk-platform/payments'
 
 const stripe = createStripeClient({
   secretKey: process.env.STRIPE_SECRET_KEY!,
@@ -42,7 +42,7 @@ const intent = await stripe.createPaymentIntent({
 ### Pattern 2: Wise Payouts
 
 ```typescript
-import { createWiseClient } from '@cgk/payments'
+import { createWiseClient } from '@cgk-platform/payments'
 
 const wise = createWiseClient({
   apiToken: process.env.WISE_API_TOKEN!,
@@ -68,7 +68,7 @@ await wise.fundTransfer(transfer.id)
 ### Pattern 3: Unified Provider
 
 ```typescript
-import { createPaymentProvider } from '@cgk/payments'
+import { createPaymentProvider } from '@cgk-platform/payments'
 
 const payments = createPaymentProvider({
   provider: 'stripe',
@@ -88,7 +88,7 @@ if (result.success) {
 ### Pattern 4: Webhook Handling
 
 ```typescript
-import { verifyStripeWebhook } from '@cgk/payments'
+import { verifyStripeWebhook } from '@cgk-platform/payments'
 
 export async function POST(req: Request) {
   const body = await req.text()
@@ -128,8 +128,8 @@ export async function POST(req: Request) {
 | Dependency | Why |
 |------------|-----|
 | `stripe` | Stripe API client |
-| `@cgk/core` | Shared types |
-| `@cgk/db` | Transaction logging |
+| `@cgk-platform/core` | Shared types |
+| `@cgk-platform/db` | Transaction logging |
 
 ---
 
@@ -166,9 +166,9 @@ Never trust webhook payloads without signature verification.
 
 ### Used by:
 - `apps/checkout` - Payment processing
-- `@cgk/jobs` - Payout processing jobs
+- `@cgk-platform/jobs` - Payout processing jobs
 - Creator payout system
 
 ### Uses:
-- `@cgk/core` - Types
-- `@cgk/db` - Transaction records
+- `@cgk-platform/core` - Types
+- `@cgk-platform/db` - Transaction records

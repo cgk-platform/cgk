@@ -9,7 +9,7 @@
  */
 
 import { defineTool, jsonResult, errorResult } from '../tools.js'
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import type { ToolDefinition } from '../tools.js'
 
 // =============================================================================

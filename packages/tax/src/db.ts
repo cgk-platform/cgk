@@ -8,7 +8,7 @@
  * @ai-required Use withTenant for all queries
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   Address,

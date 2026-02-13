@@ -4,7 +4,7 @@
  * POST /api/creator/onboarding-wizard/complete - Mark wizard as complete
  */
 
-import { sql, withTenant, getTenantFromRequest } from '@cgk/db'
+import { sql, withTenant, getTenantFromRequest } from '@cgk-platform/db'
 import type { OnboardingWizardData } from '../../../../../lib/onboarding-wizard/types'
 import { areAllRequiredStepsComplete } from '../../../../../lib/onboarding-wizard/validation'
 

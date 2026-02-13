@@ -4,7 +4,7 @@
  * Displays the complete audit history for a document.
  */
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 import {
   ArrowLeft,
   Check,

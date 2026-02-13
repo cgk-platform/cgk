@@ -7,7 +7,7 @@ import {
   checkConnectionHealth,
   getShopifyCredentials,
   ShopifyError,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 /**
  * POST /api/admin/shopify-app/test

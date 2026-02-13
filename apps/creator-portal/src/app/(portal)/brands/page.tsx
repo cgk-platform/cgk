@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, formatCurrency, Spinner } from '@cgk/ui'
+import { Badge, formatCurrency, Spinner } from '@cgk-platform/ui'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 

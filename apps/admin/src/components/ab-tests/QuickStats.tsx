@@ -2,7 +2,7 @@
 
 import { FlaskConical, TrendingUp, Calendar, Users } from 'lucide-react'
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 
 import type { ABTestQuickStatsData } from '@/lib/ab-tests/types'
 

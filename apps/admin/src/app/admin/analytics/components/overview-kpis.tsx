@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 import type { AnalyticsOverview, DateRange } from '@/lib/analytics'
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format'

@@ -5,7 +5,7 @@
  * Interactive changelog viewer with filtering
  */
 
-import { Badge, Button, cn } from '@cgk/ui'
+import { Badge, Button, cn } from '@cgk-platform/ui'
 import {
   Calendar,
   ChevronDown,

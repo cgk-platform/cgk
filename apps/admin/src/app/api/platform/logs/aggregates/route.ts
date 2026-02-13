@@ -7,13 +7,13 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-import { requireAuth, type AuthContext } from '@cgk/auth'
+import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import {
   getErrorAggregates,
   getErrorsBySignature,
   type ErrorAggregateFilters,
   type ServiceName,
-} from '@cgk/logging'
+} from '@cgk-platform/logging'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

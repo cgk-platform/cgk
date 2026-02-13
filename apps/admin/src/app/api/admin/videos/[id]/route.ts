@@ -8,14 +8,14 @@ export const dynamic = 'force-dynamic'
  * DELETE - Soft delete video
  */
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import {
   getVideo,
   updateVideo,
   deleteVideo,
   deleteAsset,
   type UpdateVideoInput,
-} from '@cgk/video'
+} from '@cgk-platform/video'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

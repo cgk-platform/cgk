@@ -2,33 +2,114 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Editorial font imports for wizard */
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* ========================================================================
+       CGK Design System - Creator Portal
+       Editorial aesthetic with Navy + Gold accent
+       ======================================================================== */
+
+    /* Background & Foreground */
+    --background: 40 20% 98%;
+    --foreground: 40 10% 10%;
+
+    /* Card */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 40 10% 10%;
+
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --popover-foreground: 40 10% 10%;
+
+    /* Primary (Deep Navy) */
+    --primary: 222 47% 11%;
+    --primary-foreground: 40 20% 98%;
+
+    /* Secondary */
+    --secondary: 40 15% 95%;
+    --secondary-foreground: 222 47% 11%;
+
+    /* Muted */
+    --muted: 40 15% 95%;
+    --muted-foreground: 40 5% 55%;
+
+    /* Accent */
+    --accent: 40 15% 95%;
+    --accent-foreground: 222 47% 11%;
+
+    /* Destructive */
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 40 20% 98%;
+
+    /* Border & Input */
+    --border: 40 10% 88%;
+    --input: 40 10% 88%;
+    --ring: 222 47% 11%;
+
+    /* Radius */
     --radius: 0.5rem;
 
-    /* Onboarding Wizard Theme - Editorial aesthetic */
+    /* ========================================================================
+       Gold Accent (The differentiator)
+       ======================================================================== */
+    --gold: 38 92% 50%;
+    --gold-light: 38 85% 65%;
+    --gold-dark: 38 95% 42%;
+
+    /* ========================================================================
+       Semantic Colors
+       ======================================================================== */
+    --success: 152 45% 42%;
+    --success-foreground: 40 20% 98%;
+
+    --warning: 38 75% 50%;
+    --warning-foreground: 40 10% 10%;
+
+    --info: 210 55% 50%;
+    --info-foreground: 40 20% 98%;
+
+    /* ========================================================================
+       Extended Gray Scale (warm undertones)
+       ======================================================================== */
+    --gray-50: 40 20% 98%;
+    --gray-100: 40 15% 95%;
+    --gray-200: 40 10% 88%;
+    --gray-300: 40 8% 78%;
+    --gray-400: 40 8% 65%;
+    --gray-500: 40 5% 55%;
+    --gray-600: 40 6% 42%;
+    --gray-700: 40 8% 28%;
+    --gray-800: 40 8% 18%;
+    --gray-900: 40 10% 10%;
+
+    /* ========================================================================
+       Navy Scale
+       ======================================================================== */
+    --navy-50: 222 40% 96%;
+    --navy-100: 222 42% 92%;
+    --navy-200: 222 44% 84%;
+    --navy-300: 222 45% 70%;
+    --navy-400: 222 46% 55%;
+    --navy-500: 222 47% 40%;
+    --navy-600: 222 47% 28%;
+    --navy-700: 222 47% 20%;
+    --navy-800: 222 47% 14%;
+    --navy-900: 222 47% 11%;
+
+    /* ========================================================================
+       Animation Timing
+       ======================================================================== */
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --duration-slow: 300ms;
+    --duration-slower: 500ms;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+    /* ========================================================================
+       Legacy Onboarding Wizard Theme (preserved for compatibility)
+       ======================================================================== */
     --wizard-bg: #faf9f7;
     --wizard-text: #1a1a1a;
     --wizard-muted: #6b7280;
@@ -40,25 +121,91 @@
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    /* Background & Foreground */
+    --background: 222 47% 6%;
+    --foreground: 40 15% 95%;
+
+    /* Card */
+    --card: 222 47% 8%;
+    --card-foreground: 40 15% 95%;
+
+    /* Popover */
+    --popover: 222 47% 8%;
+    --popover-foreground: 40 15% 95%;
+
+    /* Primary */
+    --primary: 40 15% 95%;
+    --primary-foreground: 222 47% 11%;
+
+    /* Secondary */
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 40 15% 95%;
+
+    /* Muted */
+    --muted: 217 32% 17%;
+    --muted-foreground: 40 8% 65%;
+
+    /* Accent */
+    --accent: 217 32% 17%;
+    --accent-foreground: 40 15% 95%;
+
+    /* Destructive */
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 40 15% 95%;
+
+    /* Border & Input */
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 40 8% 78%;
+
+    /* Gold (slightly adjusted for dark mode) */
+    --gold: 38 88% 55%;
+    --gold-light: 38 82% 65%;
+    --gold-dark: 38 90% 45%;
+
+    /* Semantic Colors (dark mode variants) */
+    --success: 152 40% 45%;
+    --success-foreground: 40 20% 98%;
+
+    --warning: 38 70% 55%;
+    --warning-foreground: 40 10% 10%;
+
+    --info: 210 50% 55%;
+    --info-foreground: 40 20% 98%;
+
+    /* Gray Scale (dark mode) */
+    --gray-50: 222 47% 6%;
+    --gray-100: 222 45% 10%;
+    --gray-200: 222 40% 15%;
+    --gray-300: 222 35% 22%;
+    --gray-400: 222 25% 35%;
+    --gray-500: 222 20% 45%;
+    --gray-600: 222 15% 58%;
+    --gray-700: 222 12% 72%;
+    --gray-800: 222 10% 85%;
+    --gray-900: 222 8% 95%;
+
+    /* Navy Scale (inverted for dark mode) */
+    --navy-50: 222 47% 6%;
+    --navy-100: 222 47% 11%;
+    --navy-200: 222 47% 14%;
+    --navy-300: 222 47% 20%;
+    --navy-400: 222 47% 28%;
+    --navy-500: 222 47% 40%;
+    --navy-600: 222 46% 55%;
+    --navy-700: 222 45% 70%;
+    --navy-800: 222 44% 84%;
+    --navy-900: 222 42% 92%;
+
+    /* Wizard dark mode overrides */
+    --wizard-bg: #0c1320;
+    --wizard-text: #f5f5f4;
+    --wizard-muted: #9ca3af;
+    --wizard-border: #374151;
+    --wizard-hover: #1f2937;
+    --wizard-accent: #14b8a6;
+    --wizard-accent-hover: #0d9488;
+    --wizard-success: #10b981;
   }
 }
 
@@ -66,23 +213,124 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  /* Wizard typography */
-  .font-serif {
-    font-family: 'DM Serif Display', Georgia, serif;
+  /* Typography defaults */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans tracking-tight;
   }
 
-  /* Wizard background class */
+  /* Focus visible styles */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Wizard background class (legacy) */
   .bg-onboarding-bg {
     background-color: var(--wizard-bg);
   }
 }
 
-/* Wizard color utilities */
 @layer utilities {
+  /* Typography utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gold accent utilities */
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+
+  /* Semantic color utilities */
+  .text-success {
+    color: hsl(var(--success));
+  }
+
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+
+  .text-info {
+    color: hsl(var(--info));
+  }
+
+  /* Animation utilities */
+  .animate-fade-up {
+    animation: fade-up var(--duration-normal) var(--ease-out);
+  }
+
+  .animate-fade-in {
+    animation: fade-in var(--duration-normal) var(--ease-out);
+  }
+
+  .animate-scale-in {
+    animation: scale-in var(--duration-normal) var(--ease-out);
+  }
+
+  /* Stagger animation delays */
+  .stagger-1 { animation-delay: 50ms; }
+  .stagger-2 { animation-delay: 100ms; }
+  .stagger-3 { animation-delay: 150ms; }
+  .stagger-4 { animation-delay: 200ms; }
+  .stagger-5 { animation-delay: 250ms; }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-sm;
+  }
+
+  /* Card hover effect */
+  .card-hover {
+    @apply transition-all duration-normal ease-smooth-out;
+  }
+
+  .card-hover:hover {
+    @apply shadow-lg -translate-y-0.5;
+  }
+
+  /* Interactive states */
+  .interactive {
+    @apply transition-colors duration-fast;
+  }
+
+  .interactive:hover {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  /* ========================================================================
+     Legacy Wizard Color Utilities (preserved for compatibility)
+     ======================================================================== */
   .text-wizard-text { color: var(--wizard-text); }
   .text-wizard-muted { color: var(--wizard-muted); }
   .text-wizard-accent { color: var(--wizard-accent); }
@@ -99,4 +347,27 @@
   .border-wizard-success { border-color: var(--wizard-success); }
 
   .ring-wizard-accent { --tw-ring-color: var(--wizard-accent); }
+}
+
+/* Sonner toast overrides */
+[data-sonner-toaster] {
+  --normal-bg: hsl(var(--card));
+  --normal-border: hsl(var(--border));
+  --normal-text: hsl(var(--foreground));
+
+  --success-bg: hsl(var(--success) / 0.15);
+  --success-border: hsl(var(--success) / 0.3);
+  --success-text: hsl(var(--success));
+
+  --error-bg: hsl(var(--destructive) / 0.15);
+  --error-border: hsl(var(--destructive) / 0.3);
+  --error-text: hsl(var(--destructive));
+
+  --warning-bg: hsl(var(--warning) / 0.15);
+  --warning-border: hsl(var(--warning) / 0.3);
+  --warning-text: hsl(var(--warning));
+
+  --info-bg: hsl(var(--info) / 0.15);
+  --info-border: hsl(var(--info) / 0.3);
+  --info-text: hsl(var(--info));
 }

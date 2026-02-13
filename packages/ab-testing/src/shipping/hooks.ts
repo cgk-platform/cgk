@@ -88,7 +88,7 @@ export async function syncShippingVariantToCart(
  * Usage in storefront:
  * ```tsx
  * import { useEffect, useState, useCallback } from 'react'
- * import { createShippingABTestSyncHook } from '@cgk/ab-testing/shipping'
+ * import { createShippingABTestSyncHook } from '@cgk-platform/ab-testing/shipping'
  *
  * export function useShippingABTestSync(testId: string) {
  *   const config = createShippingABTestSyncHook(testId)

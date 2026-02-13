@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Input, Label } from '@cgk/ui'
+import { Button, Input, Label } from '@cgk-platform/ui'
 import { useCallback, useState } from 'react'
 
 import { RATE_CARD_TEMPLATES } from '@/lib/brand-preferences/constants'

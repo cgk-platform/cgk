@@ -3,7 +3,7 @@
  * These jobs handle periodic maintenance tasks
  */
 
-import { withTenant } from '@cgk/db'
+import { withTenant } from '@cgk-platform/db'
 import { syncOrgChart, validateOrgChart } from '../org-chart/sync.js'
 import { applyFamiliarityDecay } from '../relationships/familiarity.js'
 import { archiveOldHandoffs, getHandoffStats } from '../db/handoffs-queries.js'
@@ -111,7 +111,7 @@ export async function cleanupHandoffsJob(
 }
 
 /**
- * Job definitions for use with @cgk/jobs
+ * Job definitions for use with @cgk-platform/jobs
  */
 export const teamsJobDefinitions = {
   'ai-agents/sync-org-chart': {

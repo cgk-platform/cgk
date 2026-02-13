@@ -12,14 +12,14 @@ export const dynamic = 'force-dynamic'
  * - video.asset.static_renditions.ready - MP4 renditions ready (triggers transcription)
  */
 
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 import {
   verifyWebhookSignature,
   parseWebhookPayload,
   processWebhookEvent,
   updateVideoStatus,
   getThumbnailUrl,
-} from '@cgk/video'
+} from '@cgk-platform/video'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {

@@ -7,7 +7,7 @@ import {
   initiateOAuth,
   normalizeShopDomain,
   ShopifyError,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 /**
  * GET /api/admin/shopify-app/auth

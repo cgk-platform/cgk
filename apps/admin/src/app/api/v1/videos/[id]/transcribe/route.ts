@@ -12,9 +12,9 @@ export const revalidate = 0
 
 import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { withTenant, sql } from '@cgk/db'
-import { sendJob } from '@cgk/jobs'
-import { resetTranscription } from '@cgk/video'
+import { withTenant, sql } from '@cgk-platform/db'
+import { sendJob } from '@cgk-platform/jobs'
+import { resetTranscription } from '@cgk-platform/video'
 
 interface VideoRow {
   id: string

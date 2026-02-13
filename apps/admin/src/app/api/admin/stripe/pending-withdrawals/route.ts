@@ -3,8 +3,8 @@
  * GET: Fetch pending creator/vendor withdrawals awaiting funds
  */
 
-import { getTenantContext } from '@cgk/auth'
-import { withTenant, sql } from '@cgk/db'
+import { getTenantContext } from '@cgk-platform/auth'
+import { withTenant, sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 
 import type { PendingWithdrawal } from '@/lib/admin-utilities/types'

@@ -350,7 +350,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
  * @example
  * // In your task file (e.g., src/trigger/order-created.ts)
  * import { task } from '@trigger.dev/sdk/v3'
- * import { defineTriggerTask } from '@cgk/jobs'
+ * import { defineTriggerTask } from '@cgk-platform/jobs'
  *
  * export const orderCreatedTask = defineTriggerTask('order.created', {
  *   handler: async (ctx) => {

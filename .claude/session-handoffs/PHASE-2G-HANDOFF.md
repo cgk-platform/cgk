@@ -135,7 +135,7 @@ Completed prerequisites:
 **apps/orchestrator**: PRE-EXISTING ERRORS ONLY (not related to Phase 2G)
 
 Pre-existing errors in admin/orchestrator relate to:
-- Missing `@cgk/scheduling` and `@cgk/communications` packages
+- Missing `@cgk-platform/scheduling` and `@cgk-platform/communications` packages
 - Unused variable warnings
 - Type inference issues
 
@@ -175,7 +175,7 @@ Pre-existing errors in admin/orchestrator relate to:
 
 ## Next Steps
 
-1. Run database migration: `npx @cgk/cli migrate`
+1. Run database migration: `npx @cgk-platform/cli migrate`
 2. Test context switching with users who have multiple org memberships
 3. Consider implementing URL-based context (`/admin/[tenant]/...`) for bookmarkable tenant URLs
 4. Add E2E tests for full switch flow
@@ -185,6 +185,6 @@ Pre-existing errors in admin/orchestrator relate to:
 
 ## Notes for Next Session
 
-- The `@cgk/scheduling` and `@cgk/communications` packages referenced in admin app don't exist yet - these will be implemented in future phases
+- The `@cgk-platform/scheduling` and `@cgk-platform/communications` packages referenced in admin app don't exist yet - these will be implemented in future phases
 - Some unused variable warnings exist in orchestrator but are unrelated to this phase
 - The impersonation.ts file had an unused `hashToken` function and `createHash` import that were cleaned up

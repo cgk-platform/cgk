@@ -13,7 +13,7 @@
  */
 
 import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@cgk/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 
 export interface TranscriptionChapter {
   headline: string

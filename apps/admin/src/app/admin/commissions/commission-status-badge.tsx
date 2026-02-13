@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge } from '@cgk/ui'
+import { Badge } from '@cgk-platform/ui'
 
 import type { CommissionStatus } from '@/lib/creators-admin-ops'
 

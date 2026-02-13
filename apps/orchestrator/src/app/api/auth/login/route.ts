@@ -1,4 +1,4 @@
-import { createMagicLink, sendMagicLinkEmail, getUserByEmail } from '@cgk/auth'
+import { createMagicLink, sendMagicLinkEmail, getUserByEmail } from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, cn } from '@cgk/ui'
+import { Button, cn } from '@cgk-platform/ui'
 import { Download, Loader2, Play, Trash2, Upload } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 

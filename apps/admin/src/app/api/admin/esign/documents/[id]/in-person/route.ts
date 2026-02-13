@@ -4,7 +4,7 @@
  * POST /api/admin/esign/documents/[id]/in-person - Start in-person signing session
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import {
   createInPersonSession,

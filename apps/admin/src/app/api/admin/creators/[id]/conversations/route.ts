@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic'
 
-import { getUserById } from '@cgk/auth'
+import { getUserById } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

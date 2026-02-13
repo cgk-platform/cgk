@@ -1,5 +1,5 @@
 /**
- * @cgk/mcp - MCP (Model Context Protocol) server utilities
+ * @cgk-platform/mcp - MCP (Model Context Protocol) server utilities
  *
  * Provides Streamable HTTP transport for MCP servers with:
  * - Per-request authentication

@@ -4,13 +4,13 @@
  * POST /api/admin/inbox/threads - Create new thread
  */
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   createThread,
   getThreads,
   type CreateThreadInput,
   type ThreadFilters,
-} from '@cgk/admin-core'
+} from '@cgk-platform/admin-core'
 
 export const dynamic = 'force-dynamic'
 

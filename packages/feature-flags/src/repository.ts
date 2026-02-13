@@ -5,7 +5,7 @@
  * Uses the public schema (platform-wide, not tenant-specific).
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { generateFlagSalt } from './hash.js'
 import type {

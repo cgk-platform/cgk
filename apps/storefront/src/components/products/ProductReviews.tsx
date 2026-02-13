@@ -13,7 +13,7 @@ import type {
   Review,
   ReviewSortOrder,
 } from '@/lib/reviews'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useCallback, useState, useTransition } from 'react'
 
 import { ReviewCard } from './ReviewCard'

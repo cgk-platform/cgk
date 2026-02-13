@@ -10,7 +10,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 
-import { getTenantContext, requireAuth } from '@cgk/auth'
+import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import {
   getDaysUntilDeadline,
   getPrivacyRequest,
@@ -19,7 +19,7 @@ import {
   updateRequestStatus,
   type PrivacyRequestStatus,
   type UpdatePrivacyRequestInput,
-} from '@cgk/support'
+} from '@cgk-platform/support'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

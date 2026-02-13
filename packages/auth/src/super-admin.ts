@@ -5,7 +5,7 @@
  * Super admins have platform-level access separate from regular user roles.
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { sha256, generateSecureToken } from './crypto'
 

@@ -6,7 +6,7 @@ import {
   handleOAuthCallback,
   registerWebhooks,
   ShopifyError,
-} from '@cgk/shopify'
+} from '@cgk-platform/shopify'
 
 /**
  * GET /api/admin/shopify-app/callback

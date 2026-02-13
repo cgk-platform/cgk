@@ -13,7 +13,7 @@ During rapid development for Vercel deployment, several TypeScript "unused varia
 
 ---
 
-## @cgk/ai-agents Package
+## @cgk-platform/ai-agents Package
 
 ### Autonomy System
 

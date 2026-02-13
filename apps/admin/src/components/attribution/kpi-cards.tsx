@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, cn } from '@cgk/ui'
+import { Card, CardContent, cn } from '@cgk-platform/ui'
 import { DollarSign, ShoppingCart, TrendingDown, TrendingUp, Target, BarChart3 } from 'lucide-react'
 
 import type { AttributionKPIs } from '@/lib/attribution'

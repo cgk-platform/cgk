@@ -2,7 +2,7 @@
  * PHASE-2H-PRODUCTIVITY: Task database operations with tenant isolation
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   Task,

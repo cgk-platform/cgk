@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, CardContent, cn, Progress } from '@cgk/ui'
+import { Button, Card, CardContent, cn, Progress } from '@cgk-platform/ui'
 import { Calendar, Check, Clock, MoreHorizontal, Send, Users, X } from 'lucide-react'
 import Link from 'next/link'
 

@@ -4,7 +4,7 @@
  * All operations are tenant-scoped using withTenant().
  */
 
-import { sql, withTenant } from '@cgk/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   ContractorDashboardStats,

@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 import { FORM_STEPS } from '../../lib/onboarding/types'
 

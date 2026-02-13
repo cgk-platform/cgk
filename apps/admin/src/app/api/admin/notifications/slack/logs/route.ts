@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { getNotificationLogs, type NotificationType, type NotificationStatus } from '@cgk/slack'
+import { getNotificationLogs, type NotificationType, type NotificationStatus } from '@cgk-platform/slack'
 
 /**
  * GET /api/admin/notifications/slack/logs

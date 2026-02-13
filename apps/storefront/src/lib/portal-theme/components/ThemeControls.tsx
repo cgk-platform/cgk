@@ -7,7 +7,7 @@
  * Provides color pickers, typography controls, and layout options.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import { useState, useCallback, useMemo } from 'react'
 
 import { usePortalTheme } from './PortalThemeProvider'

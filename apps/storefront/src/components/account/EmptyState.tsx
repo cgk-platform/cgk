@@ -4,7 +4,7 @@
  * Displays a friendly message when no data is available.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { ReactNode } from 'react'
 
 interface EmptyStateProps {

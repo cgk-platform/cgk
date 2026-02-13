@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 const tabs = [
   { name: 'All Tests', href: '/admin/ab-tests' },

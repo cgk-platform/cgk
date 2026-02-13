@@ -1,5 +1,5 @@
 /**
- * @cgk/video - CTA Module
+ * @cgk-platform/video - CTA Module
  *
  * Re-exports for CTA button types and database operations.
  */

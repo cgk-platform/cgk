@@ -1,5 +1,5 @@
-import { getTenantContext } from '@cgk/auth'
-import { getSchedulingAnalytics, getSchedulingUser } from '@cgk/scheduling'
+import { getTenantContext } from '@cgk-platform/auth'
+import { getSchedulingAnalytics, getSchedulingUser } from '@cgk-platform/scheduling'
 
 export const dynamic = 'force-dynamic'
 

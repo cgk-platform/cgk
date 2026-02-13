@@ -3,7 +3,7 @@
  * Handles initial and incremental sync of Drive folders
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import type { GDriveConnection, GDriveFileMapping, ImportQueueItem } from '../types.js'
 import {

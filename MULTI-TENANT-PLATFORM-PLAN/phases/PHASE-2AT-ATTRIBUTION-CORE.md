@@ -1,5 +1,7 @@
 # PHASE-2AT-A: Attribution Core - Dashboard, Settings & Data Quality
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: COMPLETE
 **Completed**: 2026-02-10
 **Duration**: 1 week (Week 9-10)
@@ -271,7 +273,7 @@ Shared navigation wrapper for all attribution pages.
 
 ## Constraints
 
-- Must use `@cgk/db` sql template tag (never raw db.query)
+- Must use `@cgk-platform/db` sql template tag (never raw db.query)
 - All queries wrapped with `withTenant(tenantId, ...)`
 - Model and window selectors persist to URL query params
 - Use shadcn/ui components exclusively

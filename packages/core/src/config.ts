@@ -58,7 +58,7 @@ export interface PlatformConfig {
  * @example
  * ```ts
  * // platform.config.ts
- * import { defineConfig } from '@cgk/core'
+ * import { defineConfig } from '@cgk-platform/core'
  *
  * export default defineConfig({
  *   brand: {

@@ -1,9 +1,9 @@
 'use client'
 
-import { Badge, Button, Spinner } from '@cgk/ui'
+import { Badge, Button, Spinner } from '@cgk-platform/ui'
 import { useEffect, useState } from 'react'
 
-import type { SenderAddressWithDomain, SenderPurpose } from '@cgk/communications'
+import type { SenderAddressWithDomain, SenderPurpose } from '@cgk-platform/communications'
 import { AddSenderAddressModal } from './add-sender-address-modal'
 import { TestEmailModal } from './test-email-modal'
 

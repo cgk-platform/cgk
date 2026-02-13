@@ -5,7 +5,7 @@
  * POST /api/admin/esign/bulk-send/[id]/cancel - Cancel bulk send
  */
 
-import { requireAuth } from '@cgk/auth'
+import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getBulkSendWithRecipients, cancelBulkSend } from '@/lib/esign'
 

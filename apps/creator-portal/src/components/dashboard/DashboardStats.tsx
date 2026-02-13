@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent } from '@cgk/ui'
+import { Card, CardContent } from '@cgk-platform/ui'
 
 interface DashboardStatsProps {
   totalBalanceCents: number

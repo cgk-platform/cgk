@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Package, RefreshCw } from 'lucide-react'
 
-import { Button, Card, CardContent } from '@cgk/ui'
+import { Button, Card, CardContent } from '@cgk-platform/ui'
 
 import type { ProductShipment } from '../../../lib/creators/lifecycle-types'
 import { getTrackingUrl } from '../../../lib/creators/lifecycle-types'

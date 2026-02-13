@@ -2,8 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { withTenant, sql, createTenantCache } from '@cgk/db'
-import type { NotificationType } from '@cgk/slack'
+import { withTenant, sql, createTenantCache } from '@cgk-platform/db'
+import type { NotificationType } from '@cgk-platform/slack'
 
 interface MappingRecord {
   id: string

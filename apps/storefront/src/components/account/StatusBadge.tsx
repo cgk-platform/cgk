@@ -4,7 +4,7 @@
  * Displays order, return, and ticket status with appropriate colors.
  */
 
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 
 type StatusType =
   | 'order'

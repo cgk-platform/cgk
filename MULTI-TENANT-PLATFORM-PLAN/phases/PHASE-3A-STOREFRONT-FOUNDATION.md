@@ -1,5 +1,7 @@
 # PHASE-3A: Storefront Foundation
 
+> **STATUS**: ✅ COMPLETE (2026-02-13)
+
 **Status**: ✅ COMPLETE (2026-02-11)
 
 **Duration**: 1 week (Week 11)
@@ -94,7 +96,7 @@ Build the multi-tenant storefront app foundation with Commerce Provider integrat
 ## Constraints
 
 - All product fetching MUST go through Commerce Provider, never direct Shopify calls in components
-- Components MUST use unified types from `@cgk/commerce`, not provider-specific types
+- Components MUST use unified types from `@cgk-platform/commerce`, not provider-specific types
 - Feature flag `commerce.provider` controls backend selection - default is `shopify`
 - Mobile-first responsive design (390px and 1440px breakpoints)
 - Target LCP < 2.5s for product pages
@@ -167,7 +169,7 @@ Layout:
 - Minimum touch target 44px for mobile buttons
 
 Design constraints:
-- Using unified Product type from @cgk/commerce (not Shopify-specific)
+- Using unified Product type from @cgk-platform/commerce (not Shopify-specific)
 - Must handle missing images gracefully (placeholder)
 - Accessible: keyboard focus states, alt text
 

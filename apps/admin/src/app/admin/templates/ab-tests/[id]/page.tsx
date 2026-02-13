@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
-import { Badge, Card, CardHeader, CardContent, cn } from '@cgk/ui'
+import { Badge, Card, CardHeader, CardContent, cn } from '@cgk-platform/ui'
 
 interface PageProps {
   params: Promise<{ id: string }>

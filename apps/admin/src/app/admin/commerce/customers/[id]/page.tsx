@@ -1,5 +1,5 @@
-import { withTenant, sql } from '@cgk/db'
-import { Badge, Card, CardContent, CardHeader } from '@cgk/ui'
+import { withTenant, sql } from '@cgk-platform/db'
+import { Badge, Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import { ArrowLeft, Mail, Phone, ShoppingCart, DollarSign, Calendar } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'

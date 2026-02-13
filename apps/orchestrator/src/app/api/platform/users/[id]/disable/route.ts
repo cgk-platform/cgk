@@ -1,4 +1,4 @@
-import { disableUser, getSuperAdminUser, logAuditAction } from '@cgk/auth'
+import { disableUser, getSuperAdminUser, logAuditAction } from '@cgk-platform/auth'
 
 export const dynamic = 'force-dynamic'
 

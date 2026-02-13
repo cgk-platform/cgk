@@ -9,7 +9,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { cn } from '@cgk/ui'
+import { cn } from '@cgk-platform/ui'
 import type { BlockProps, FeatureCardsConfig, FeatureCardItem } from '../types'
 import { LucideIcon } from '../icons'
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, formatCurrency } from '@cgk/ui'
+import { Badge, Button, Card, CardContent, formatCurrency } from '@cgk-platform/ui'
 import { useCallback, useState } from 'react'
 
 interface DiscountCodeShareProps {

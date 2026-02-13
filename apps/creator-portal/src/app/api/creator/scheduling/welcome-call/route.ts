@@ -5,7 +5,7 @@
  * POST /api/creator/scheduling/welcome-call - Book a slot
  */
 
-import { sql, withTenant, getTenantFromRequest } from '@cgk/db'
+import { sql, withTenant, getTenantFromRequest } from '@cgk-platform/db'
 import type { WelcomeCallSlot } from '../../../../../lib/onboarding/types'
 
 export const dynamic = 'force-dynamic'

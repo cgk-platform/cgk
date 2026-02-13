@@ -6,7 +6,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@cgk/ui'
+} from '@cgk-platform/ui'
 import {
   ArrowLeft,
   BanknoteIcon,

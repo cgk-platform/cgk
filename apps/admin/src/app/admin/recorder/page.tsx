@@ -5,7 +5,7 @@
 
 'use client'
 
-import { Badge, Button, cn } from '@cgk/ui'
+import { Badge, Button, cn } from '@cgk-platform/ui'
 import {
   Camera,
   Check,

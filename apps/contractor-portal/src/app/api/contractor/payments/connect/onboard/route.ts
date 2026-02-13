@@ -11,7 +11,7 @@ import {
   getPayoutMethods,
   StripeConnectError,
   type StripeBusinessType,
-} from '@cgk/payments'
+} from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,

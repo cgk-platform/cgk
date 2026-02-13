@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle, cn } from '@cgk/ui'
+import { Card, CardContent, CardHeader, CardTitle, cn } from '@cgk-platform/ui'
 import { DollarSign, TrendingUp, CreditCard, PiggyBank } from 'lucide-react'
 
 import type { EarningsAnalytics } from '@/lib/creators/analytics-types'

@@ -1,4 +1,4 @@
-const baseConfig = require('@cgk/tailwind-config')
+const baseConfig = require('@cgk-platform/tailwind-config')
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {

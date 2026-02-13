@@ -1,5 +1,5 @@
 /**
- * @cgk/video - Mux API client
+ * @cgk-platform/video - Mux API client
  *
  * Wrapper around Mux SDK for video hosting and streaming.
  */

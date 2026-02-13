@@ -2,7 +2,7 @@
 
 import { AlertCircle, Mail, MessageSquare, Plus, Trash2 } from 'lucide-react'
 
-import { Alert, AlertDescription, Badge, Button, Input, Switch } from '@cgk/ui'
+import { Alert, AlertDescription, Badge, Button, Input, Switch } from '@cgk-platform/ui'
 
 import type { ReminderChannel, ReminderStep } from '../../../lib/creators/lifecycle-types'
 

@@ -5,7 +5,7 @@
  * PATCH /api/creator/brands/[brandSlug]/preferences - Update brand-specific preferences
  */
 
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type {

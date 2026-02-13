@@ -5,7 +5,7 @@ import {
   requireAuth,
   resendInvitation,
   type AuthContext,
-} from '@cgk/auth'
+} from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 

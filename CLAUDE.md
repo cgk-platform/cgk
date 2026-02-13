@@ -86,8 +86,8 @@ pnpm test                     # Run all tests
 pnpm test:e2e                 # Run Playwright E2E tests
 
 # Database
-npx @cgk/cli migrate          # Run migrations
-npx @cgk/cli doctor           # Check configuration
+npx @cgk-platform/cli migrate          # Run migrations
+npx @cgk-platform/cli doctor           # Check configuration
 ```
 
 ---
@@ -217,7 +217,7 @@ See `/MULTI-TENANT-PLATFORM-PLAN/phases/PHASE-0B-DATABASE-SETUP-UX.md` for detai
 **CRITICAL**: Always use `withTenant()` for tenant-scoped queries:
 
 ```typescript
-import { withTenant, sql } from '@cgk/db'
+import { withTenant, sql } from '@cgk-platform/db'
 
 // CORRECT - Queries run against tenant schema
 const orders = await withTenant('rawdog', async () => {
@@ -231,7 +231,7 @@ const orders = await sql`SELECT * FROM orders`
 ### Cache Isolation
 
 ```typescript
-import { createTenantCache } from '@cgk/cache'
+import { createTenantCache } from '@cgk-platform/cache'
 
 // CORRECT - Cache keys prefixed with tenant
 const cache = createTenantCache(tenantId)
@@ -256,6 +256,77 @@ await jobs.send('order/created', {
 })
 ```
 
+### Tenant-Managed Integrations (CRITICAL)
+
+**Architecture**: Tenants own their own accounts for ALL third-party services. The platform only provides encryption infrastructure.
+
+```
+TENANT A (rawdog):
+├── Stripe: sk_live_xxx (THEIR account)
+├── Resend: re_xxx (THEIR account)
+├── Wise: api_xxx (THEIR account)
+├── Mux: mux_xxx (THEIR account)
+├── AssemblyAI: aai_xxx (THEIR account)
+└── Anthropic: sk-ant-xxx (THEIR account)
+
+PLATFORM provides:
+├── INTEGRATION_ENCRYPTION_KEY (encrypts all credentials)
+├── SHOPIFY_TOKEN_ENCRYPTION_KEY (Shopify OAuth tokens)
+└── Infrastructure (database, hosting, jobs)
+```
+
+**Service Client Pattern**:
+
+```typescript
+import { getTenantStripeClient, requireTenantStripeClient } from '@cgk-platform/integrations'
+import { getTenantResendClient } from '@cgk-platform/integrations'
+
+// In API routes - get tenant's own Stripe client
+export async function POST(req: Request) {
+  const { tenantId } = await getTenantContext(req)
+
+  // Returns null if not configured
+  const stripe = await getTenantStripeClient(tenantId)
+  if (!stripe) {
+    return Response.json({ error: 'Stripe not configured' }, { status: 400 })
+  }
+
+  // Or throw if not configured
+  const stripe = await requireTenantStripeClient(tenantId)
+
+  // Use tenant's own Stripe account
+  const customer = await stripe.customers.create({ email })
+}
+
+// In background jobs - same pattern
+export const sendOrderConfirmation = task({
+  id: 'send-order-confirmation',
+  run: async (payload: { tenantId: string; orderId: string }) => {
+    const { tenantId, orderId } = payload
+
+    // Get tenant's Resend client
+    const resend = await getTenantResendClient(tenantId)
+    if (!resend) throw new Error('Resend not configured')
+
+    // Send using tenant's own Resend account
+    await resend.emails.send({ from, to, subject, html })
+  },
+})
+```
+
+**Credential Tables** (in tenant schema):
+- `tenant_stripe_config` - Stripe secret key, publishable key, webhook secret
+- `tenant_resend_config` - Resend API key, sender settings
+- `tenant_wise_config` - Wise API key for international payouts
+- `tenant_api_credentials` - Generic table for Mux, AssemblyAI, Anthropic, OpenAI
+
+**CRITICAL Rules**:
+1. **NEVER use platform-level API keys for tenant operations**
+2. **ALWAYS use `getTenant*Client()` functions** - they handle decryption and caching
+3. **Clients are cached for 5 minutes** per tenant to avoid repeated decryption
+4. **All credentials encrypted with AES-256-GCM** using `INTEGRATION_ENCRYPTION_KEY`
+5. **Admin UI at** `/admin/settings/integrations/credentials` for credential management
+
 ---
 
 ## Authentication
@@ -263,7 +334,7 @@ await jobs.send('order/created', {
 ### JWT + Session Auth (Custom, No Clerk)
 
 ```typescript
-import { validateSession, requireAuth, getTenantContext } from '@cgk/auth'
+import { validateSession, requireAuth, getTenantContext } from '@cgk-platform/auth'
 
 // API routes
 export async function GET(req: Request) {
@@ -320,18 +391,18 @@ export async function GET(req: Request) {
 
 ---
 
-## @cgk/ui Import Pattern (CRITICAL)
+## @cgk-platform/ui Import Pattern (CRITICAL)
 
-All UI components must be imported from the main `@cgk/ui` entry point:
+All UI components must be imported from the main `@cgk-platform/ui` entry point:
 
 ```typescript
 // WRONG - subpath exports don't exist
-import { Button } from '@cgk/ui/button'
-import { Card } from '@cgk/ui/card'
-import { Button } from '@cgk/ui/components/button'
+import { Button } from '@cgk-platform/ui/button'
+import { Card } from '@cgk-platform/ui/card'
+import { Button } from '@cgk-platform/ui/components/button'
 
 // CORRECT - all exports from main index
-import { Button, Card, Input, Badge } from '@cgk/ui'
+import { Button, Card, Input, Badge } from '@cgk-platform/ui'
 ```
 
 ---
@@ -471,7 +542,7 @@ const { used, _intentionallySkipped } = config
 
 ---
 
-## @cgk/auth Permission Patterns (CRITICAL)
+## @cgk-platform/auth Permission Patterns (CRITICAL)
 
 ### checkPermissionOrRespond Signature
 
@@ -498,7 +569,7 @@ if (permissionDenied) return permissionDenied
 ### requireAuth Returns AuthContext
 
 ```typescript
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
 
 export async function GET(request: Request) {
   let auth: AuthContext
@@ -585,6 +656,182 @@ Constraints:
 - shadcn/ui components
 - Tailwind CSS
 ```
+
+---
+
+## Design System Rules (Admin, Orchestrator, Creator Portal)
+
+> **SCOPE**: These rules apply to `apps/admin`, `apps/orchestrator`, and `apps/creator-portal` ONLY.
+> **EXCLUDED**: `apps/storefront` follows tenant-specific theming and does NOT use these design tokens.
+
+### Aesthetic: "Editorial Precision"
+
+A refined, magazine-quality feel with bold typography, generous whitespace, and subtle motion. Navy + Gold palette creates a distinctive, premium aesthetic.
+
+### Color Palette
+
+**Primary Colors**:
+```css
+--primary:   hsl(222 47% 11%);   /* Deep Navy - buttons, links, primary actions */
+--gold:      hsl(38 92% 50%);    /* Gold accent - CTAs, highlights, special badges */
+```
+
+**Semantic Colors** (use these token names, not raw values):
+| Token | Usage |
+|-------|-------|
+| `bg-success`, `text-success` | Healthy status, positive changes, completed states |
+| `bg-warning`, `text-warning` | Degraded status, caution, pending states |
+| `bg-destructive`, `text-destructive` | Critical status, errors, destructive actions |
+| `bg-gold`, `text-gold` | Premium highlights, revenue, super admin badge |
+| `bg-info`, `text-info` | Informational states, customer-related |
+
+```typescript
+// CORRECT - Use semantic tokens
+<div className="bg-success/10 text-success">Active</div>
+<div className="bg-gold/15 text-gold border border-gold/20">Premium</div>
+
+// WRONG - Hardcoded colors
+<div className="bg-green-500 text-green-700">Active</div>
+<div className="bg-amber-500 text-amber-700">Premium</div>
+```
+
+### Typography
+
+**Font Stack** (loaded via next/font/google in layout.tsx):
+- **Display**: Instrument Serif (400, 500) - Headlines, hero text
+- **Headings/Body**: Geist Sans (400-700) - All UI text
+- **Mono**: Geist Mono (400) - Code, IDs, numbers
+
+### Icons
+
+**MANDATORY**: Use `lucide-react` exclusively. No inline SVGs.
+
+```typescript
+// CORRECT - lucide-react
+import { User, Settings, CreditCard } from 'lucide-react'
+<User className="h-4 w-4" />
+
+// WRONG - inline SVGs
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">...</svg>
+```
+
+**Icon Size Scale**:
+| Size | Class | Usage |
+|------|-------|-------|
+| sm | `h-3 w-3` | Badges, inline icons |
+| md | `h-4 w-4` | Navigation, buttons |
+| lg | `h-5 w-5` | Mobile navigation, headers |
+
+### Status Badges
+
+**ALWAYS use `@cgk-platform/ui StatusBadge`** - it auto-maps status strings to variants:
+
+```typescript
+import { StatusBadge } from '@cgk-platform/ui'
+
+// Simple usage - variant auto-detected from status
+<StatusBadge status="active" />
+<StatusBadge status="pending" />
+<StatusBadge status="failed" />
+
+// With options
+<StatusBadge status="connected" showDot />
+<StatusBadge status="super_admin" label="Super Admin" className="bg-gold/15 text-gold" />
+
+// With custom icon
+<StatusBadge status="processing">
+  <Loader2 className="h-3 w-3 animate-spin" />
+</StatusBadge>
+```
+
+**Supported statuses** (auto-mapped to variants):
+- Success: `active`, `completed`, `approved`, `connected`, `healthy`, `signed`, `ready`
+- Warning: `pending`, `pending_verification`, `degraded`, `invited`, `sent`, `viewed`
+- Destructive: `failed`, `rejected`, `disabled`, `disconnected`, `unhealthy`, `critical`, `deleted`
+- Default: `draft`, `paused`, `unknown`
+
+### Animation System
+
+**Duration Tokens**:
+```css
+--duration-fast: 150ms;    /* Micro-interactions, hover states */
+--duration-normal: 200ms;  /* Component transitions */
+--duration-slow: 300ms;    /* Page transitions, modals */
+```
+
+**Tailwind Classes**:
+| Class | Usage |
+|-------|-------|
+| `duration-fast` | Hover states, button clicks |
+| `duration-normal` | Card transitions, menu opens |
+| `duration-slow` | Modal entrances, drawer slides |
+| `animate-fade-up` | Page content entrance |
+| `ease-smooth-out` | Deceleration easing |
+
+**Staggered Animations** (for lists):
+```typescript
+{items.map((item, index) => (
+  <Card
+    key={item.id}
+    className="animate-fade-up"
+    style={{ animationDelay: `${index * 75}ms` }}
+  >
+    {item.content}
+  </Card>
+))}
+```
+
+### Component Patterns
+
+**Cards with hover states**:
+```typescript
+<Card className={cn(
+  'transition-all duration-normal',
+  'hover:shadow-lg hover:-translate-y-0.5',
+  onClick && 'cursor-pointer'
+)}>
+```
+
+**Gold accent for special items** (e.g., revenue cards):
+```typescript
+<Card className={cn(
+  isHighlighted && 'ring-1 ring-gold/20 bg-gradient-to-br from-gold/5 to-transparent'
+)}>
+```
+
+**Status dots with pulse animation**:
+```typescript
+<StatusDot status="healthy" animate />  // Pulses when connected/healthy
+```
+
+### Mobile Navigation
+
+All portal apps MUST have:
+1. **Desktop sidebar**: Hidden below `lg:` breakpoint
+2. **Mobile header**: Fixed top bar with hamburger menu
+3. **Mobile drawer**: Slide-in navigation with backdrop blur
+
+```typescript
+// Mobile header bar
+<div className="fixed inset-x-0 top-0 z-50 border-b bg-card/95 backdrop-blur lg:hidden">
+
+// Mobile drawer
+<div className={cn(
+  'fixed inset-y-0 left-0 z-50 w-80 bg-card shadow-2xl',
+  'transition-transform duration-slow ease-smooth-out',
+  mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+)}>
+```
+
+### AVOID These Patterns
+
+| Pattern | Why | Use Instead |
+|---------|-----|-------------|
+| Hardcoded colors (`green-500`) | Breaks theme consistency | Semantic tokens (`bg-success`) |
+| Inline SVGs | Inconsistent sizing, bloated JSX | `lucide-react` icons |
+| Custom badge components | Duplicates StatusBadge | `@cgk-platform/ui StatusBadge` |
+| No mobile nav | Unusable on phones | Mobile drawer pattern |
+| No hover states | Feels unresponsive | `transition-all duration-normal` |
 
 ---
 
@@ -845,7 +1092,7 @@ function generateToken(length: number): string {
 }
 ```
 
-**Note**: `@cgk/auth` uses Edge-compatible crypto utilities in `packages/auth/src/crypto.ts`.
+**Note**: `@cgk-platform/auth` uses Edge-compatible crypto utilities in `packages/auth/src/crypto.ts`.
 
 ### 7. turbo.json Env Var Declaration
 
@@ -886,13 +1133,13 @@ Next.js middleware runs in **Edge Runtime**, which does NOT support Node.js APIs
 }
 
 // In middleware (Edge Runtime) - OK
-import { sql, withTenant } from '@cgk/db'  // ✓ Safe
+import { sql, withTenant } from '@cgk-platform/db'  // ✓ Safe
 
 // In CLI/API routes (Node.js) - OK
-import { runPublicMigrations } from '@cgk/db/migrations'  // ✓ Safe
+import { runPublicMigrations } from '@cgk-platform/db/migrations'  // ✓ Safe
 
 // In middleware - BREAKS (fs/path not available)
-import { runPublicMigrations } from '@cgk/db/migrations'  // ❌ NEVER
+import { runPublicMigrations } from '@cgk-platform/db/migrations'  // ❌ NEVER
 ```
 
 **Why barrel exports cause issues:**
@@ -915,8 +1162,8 @@ export { runMigrations } from './migrations/index.js'
 
 | Package | Entry Point | Runtime | Purpose |
 |---------|-------------|---------|---------|
-| `@cgk/db` | Main | Edge + Node.js | `sql`, `withTenant`, cache |
-| `@cgk/db/migrations` | Subpath | Node.js ONLY | Migration utilities |
+| `@cgk-platform/db` | Main | Edge + Node.js | `sql`, `withTenant`, cache |
+| `@cgk-platform/db/migrations` | Subpath | Node.js ONLY | Migration utilities |
 
 ---
 
@@ -925,13 +1172,16 @@ export { runMigrations } from './migrations/index.js'
 | Phase | Status | Notes |
 |-------|--------|-------|
 | **Phase 0** | ✅ Complete | Monorepo, CLI, starters, docs |
-| **Phase 1A** | ✅ Complete | App stubs (orchestrator, admin, storefront, creator-portal) |
-| **Phase 1B** | ✅ Complete | Database Foundation (schema-per-tenant, migrations) |
-| **Phase 1C** | ✅ Complete | Authentication (JWT, sessions, magic links, middleware) |
-| **Phase 1D** | ✅ Complete | Shared Packages (UI, Shopify, Commerce, testing) |
-| **Phase 2A** | ✅ Complete | Admin Shell & Configuration |
-| **Phase 2B** | ✅ Complete | Admin Commerce (Orders, Customers, Subscriptions, Reviews) |
-| Phase 2C+ | 🔜 Next | See PLAN.md for full timeline |
+| **Phase 1A-1D** | ✅ Complete | Foundation (Monorepo, Database, Auth, Packages) |
+| **Phase 2 (All)** | ✅ Complete | Admin, Commerce, Content, Finance, Team, Platform Ops, Services, Analytics |
+| **Phase 3A-3F** | ✅ Complete | Storefront, Cart, Features, Theming, Video, DAM |
+| **Phase 3CP** | ✅ Complete | Customer Portal (Pages, Admin, Subscriptions, Theming) |
+| **Phase 4A-4F** | ✅ Complete | Creator Portal, Payments, E-Sign, Contractor, Vendor |
+| **Phase 5A-5G** | ✅ Complete | Jobs Setup, Handlers, Trigger.dev Tasks, Tenant Integrations |
+| **Phase 6A-6B** | ✅ Complete | MCP Transport & Tools |
+| **Phase 7A-7C** | ⏸️ Skipped | Migration (run when deploying to production) |
+| **Phase 8** | 🔄 In Progress | Final Audit |
+| **Phase FINAL** | ⏳ Pending | Feature Verification |
 
 ---
 

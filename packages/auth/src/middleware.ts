@@ -1,4 +1,4 @@
-import { sql } from '@cgk/db'
+import { sql } from '@cgk-platform/db'
 
 import { getAuthCookie } from './cookies'
 import { verifyJWT } from './jwt'

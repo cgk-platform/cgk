@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk/auth'
-import { withTenant } from '@cgk/db'
+import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { getTeam, listTeamMembers } = await import('@cgk/ai-agents')
+    const { getTeam, listTeamMembers } = await import('@cgk-platform/ai-agents')
 
     const [team, members] = await withTenant(tenantId, async () => {
       const t = await getTeam(teamId)
@@ -88,7 +88,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   try {
     const body = await request.json()
-    const { updateTeam } = await import('@cgk/ai-agents')
+    const { updateTeam } = await import('@cgk-platform/ai-agents')
 
     const team = await withTenant(tenantId, async () => {
       return updateTeam(teamId, body)
@@ -135,7 +135,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   if (permissionDenied) return permissionDenied
 
   try {
-    const { deleteTeam } = await import('@cgk/ai-agents')
+    const { deleteTeam } = await import('@cgk-platform/ai-agents')
 
     const deleted = await withTenant(tenantId, async () => {
       return deleteTeam(teamId)

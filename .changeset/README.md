@@ -38,5 +38,5 @@ This will publish all packages that have new versions.
 
 ## Lockstep Versioning
 
-All `@cgk/*` packages are configured for lockstep versioning. This means all packages
+All `@cgk-platform/*` packages are configured for lockstep versioning. This means all packages
 will have the same version number, similar to React or Next.js.

@@ -1,7 +1,7 @@
 'use client'
 
-import { Button } from '@cgk/ui'
-import { Card, CardContent, CardHeader } from '@cgk/ui'
+import { Button } from '@cgk-platform/ui'
+import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 import {
   Clock,
   CheckCircle2,

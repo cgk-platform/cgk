@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Badge, Card, CardContent, CardHeader, Switch } from '@cgk/ui'
+import { Badge, Card, CardContent, CardHeader, Switch } from '@cgk-platform/ui'
 import {
   Bot,
   MessageSquare,
