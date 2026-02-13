@@ -1,0 +1,31 @@
+{
+  "name": "@cgk/migration-tools",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Migration tools for RAWDOG to CGK multi-tenant platform",
+  "main": "dist/migrate-rawdog.js",
+  "scripts": {
+    "build": "tsc",
+    "migrate": "tsx migrate-rawdog.ts",
+    "migrate:dry-run": "tsx migrate-rawdog.ts --dry-run",
+    "migrate:resume": "tsx migrate-rawdog.ts --resume",
+    "validate": "tsx validate-migration.ts",
+    "validate:verbose": "tsx validate-migration.ts --verbose",
+    "validate:json": "tsx validate-migration.ts --json",
+    "validate:count-only": "tsx validate-migration.ts --skip-sum --skip-sample --skip-fk",
+    "rollback": "tsx rollback.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vercel/postgres": "^0.10.0",
+    "dotenv": "^16.4.5",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0"
+  }
+}
