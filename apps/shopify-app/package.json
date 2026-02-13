@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/shopify-app",
+  "name": "@cgk-platform/shopify-app",
   "version": "0.0.0",
   "private": true,
   "description": "CGK Platform Shopify App with Extensions - Delivery Customization, Session Stitching, and Post-Purchase Survey",
@@ -24,15 +24,15 @@
     "clean": "rm -rf dist .shopify"
   },
   "dependencies": {
-    "@cgk/shopify": "workspace:*",
+    "@cgk-platform/shopify": "workspace:*",
     "@shopify/shopify-app-remix": "^3.4.0",
     "@shopify/shopify-api": "^12.3.0",
     "@shopify/admin-api-client": "^1.0.0",
     "@shopify/storefront-api-client": "^1.0.0"
   },
   "devDependencies": {
-    "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@shopify/cli": "^3.58.0",
     "@shopify/app": "^3.58.0",
     "@types/node": "^22.0.0",
