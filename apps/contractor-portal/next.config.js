@@ -2,9 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@cgk/core', '@cgk/db', '@cgk/auth', '@cgk/ui', '@cgk/payments'],
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
 }
 
 module.exports = nextConfig

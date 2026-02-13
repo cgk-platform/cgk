@@ -312,11 +312,11 @@ async function handleCheckoutUpdate(
 
     // Notify that checkout was recovered
     // Note: The 'recovery.checkoutUpdated' event is defined in @cgk/jobs events.ts
-    await sendJob('recovery.checkoutUpdated' as keyof import('@cgk/jobs').JobEvents, {
+    await sendJob('recovery.checkoutUpdated', {
       tenantId: tenantSlug,
       shopifyCheckoutId,
       completed: true,
-    } as never)
+    })
   } else {
     // Just an update - refresh the checkout data
     await handleCheckoutCreate(tenantSlug, payload)

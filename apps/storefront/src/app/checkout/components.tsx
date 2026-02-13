@@ -15,7 +15,7 @@ import type { Cart } from '@cgk/commerce'
 import { cn } from '@cgk/ui'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 
 import { formatMoney } from '@/lib/cart/types'
 
@@ -46,13 +46,13 @@ export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: C
     shippingMethod: '',
   })
 
-  const steps: { key: CheckoutStep; label: string }[] = [
+  const steps = useMemo<{ key: CheckoutStep; label: string }[]>(() => [
     { key: 'contact', label: 'Contact' },
     { key: 'shipping', label: 'Shipping' },
     { key: 'delivery', label: 'Delivery' },
     { key: 'payment', label: 'Payment' },
     { key: 'review', label: 'Review' },
-  ]
+  ], [])
 
   const currentStepIndex = steps.findIndex((s) => s.key === currentStep)
 

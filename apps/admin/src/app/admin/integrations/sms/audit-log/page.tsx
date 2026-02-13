@@ -11,7 +11,7 @@ import {
   Mail,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import type { SmsAuditLogEntry } from '@/lib/integrations/types'
 
@@ -48,7 +48,7 @@ export default function SmsAuditLogPage() {
   const [dateTo, setDateTo] = useState('')
   const [exporting, setExporting] = useState(false)
 
-  const fetchAuditLog = async (searchTerm: string) => {
+  const fetchAuditLog = useCallback(async (searchTerm: string) => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
@@ -72,11 +72,11 @@ export default function SmsAuditLogPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, actionFilter, sourceFilter, dateFrom, dateTo])
 
   useEffect(() => {
     fetchAuditLog(search)
-  }, [page, actionFilter, sourceFilter, dateFrom, dateTo, search])
+  }, [fetchAuditLog, search])
 
   const handleSearch = () => {
     setPage(1)

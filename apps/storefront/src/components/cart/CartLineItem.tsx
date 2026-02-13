@@ -47,6 +47,17 @@ export function CartLineItem({
     .map((opt) => opt.value)
     .join(' / ')
 
+  // Handle item removal
+  const handleRemove = useCallback(async () => {
+    setIsRemoving(true)
+    try {
+      await removeItem(line.id)
+    } catch (error) {
+      console.error('Failed to remove item:', error)
+      setIsRemoving(false)
+    }
+  }, [line.id, removeItem])
+
   // Handle quantity change
   const handleQuantityChange = useCallback(
     async (newQuantity: number) => {
@@ -59,19 +70,8 @@ export function CartLineItem({
       setLocalQuantity(newQuantity)
       await updateQuantity(line.id, newQuantity)
     },
-    [line.id, updateQuantity]
+    [line.id, updateQuantity, handleRemove]
   )
-
-  // Handle item removal
-  const handleRemove = useCallback(async () => {
-    setIsRemoving(true)
-    try {
-      await removeItem(line.id)
-    } catch (error) {
-      console.error('Failed to remove item:', error)
-      setIsRemoving(false)
-    }
-  }, [line.id, removeItem])
 
   // Product link
   const productUrl = productHandle ? `/products/${productHandle}` : '#'

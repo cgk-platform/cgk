@@ -41,7 +41,6 @@ interface CartProviderProps {
 export function CartProvider({
   children,
   initialCart = null,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   tenantSlug: _tenantSlug,
 }: CartProviderProps) {
   const [cart, setCart] = useState<Cart | null>(initialCart)

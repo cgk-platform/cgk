@@ -4,7 +4,7 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk/ui
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { formatDate, formatMoney, formatNumber } from '@/lib/format'
 import { RFM_SEGMENT_INFO, type RfmSegmentType } from '@/lib/segments/types'
@@ -48,7 +48,7 @@ export default function SegmentDetailPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
 
-  const fetchData = async (page: number) => {
+  const fetchData = useCallback(async (page: number) => {
     setIsLoading(true)
     try {
       const res = await fetch(
@@ -64,11 +64,11 @@ export default function SegmentDetailPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [segmentId, segmentType])
 
   useEffect(() => {
     fetchData(1)
-  }, [segmentId, segmentType])
+  }, [fetchData])
 
   const isRfmSegment = segmentData?.segmentType === 'rfm'
   const segmentInfo = isRfmSegment ? RFM_SEGMENT_INFO[segmentId as RfmSegmentType] : null

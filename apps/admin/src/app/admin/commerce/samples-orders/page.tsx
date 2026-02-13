@@ -3,7 +3,7 @@
 import { Badge, Button, Card, CardContent, Input, Label, Switch, Tabs, TabsList, TabsTrigger } from '@cgk/ui'
 import { ChevronLeft, ChevronRight, ExternalLink, Package, Settings, X } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { formatDate, formatMoney } from '@/lib/format'
 import {
   FULFILLMENT_STATUS_INFO,
@@ -69,7 +69,7 @@ export default function SamplesOrdersPage() {
   const [channelPatternInput, setChannelPatternInput] = useState('')
   const [isSavingSettings, setIsSavingSettings] = useState(false)
 
-  const fetchSamples = async (page: number = 1) => {
+  const fetchSamples = useCallback(async (page: number = 1) => {
     setIsLoading(true)
     try {
       const type = activeTab === 'all' ? '' : activeTab
@@ -94,7 +94,7 @@ export default function SamplesOrdersPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [activeTab, fulfillmentFilter, search])
 
   const fetchStats = async () => {
     try {
@@ -120,15 +120,16 @@ export default function SamplesOrdersPage() {
     }
   }
 
+  // Fetch stats and config only on mount
   useEffect(() => {
-    fetchSamples(1)
     fetchStats()
     fetchConfig()
   }, [])
 
+  // Fetch samples on mount and when filters change
   useEffect(() => {
     fetchSamples(1)
-  }, [activeTab, fulfillmentFilter])
+  }, [fetchSamples])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
