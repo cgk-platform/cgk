@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/cli",
+  "name": "@cgk-platform/cli",
   "version": "0.0.0",
   "description": "CLI tool for CGK platform - create, setup, and manage brand sites",
   "license": "MIT",
@@ -27,9 +27,9 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*",
-    "@cgk/jobs": "workspace:*",
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/jobs": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^12.0.0",
     "fs-extra": "^11.2.0",
@@ -37,8 +37,8 @@
     "ora": "^8.0.1"
   },
   "devDependencies": {
-    "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
     "eslint": "^9.18.0",

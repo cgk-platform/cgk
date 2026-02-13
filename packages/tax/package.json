@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/tax",
+  "name": "@cgk-platform/tax",
   "version": "0.0.0",
   "description": "Tax compliance system for CGK platform - W-9, 1099, TIN encryption",
   "license": "MIT",
@@ -25,12 +25,12 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*"
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*"
   },
   "devDependencies": {
-    "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "tsup": "^8.3.0",

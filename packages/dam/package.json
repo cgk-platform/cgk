@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/dam",
+  "name": "@cgk-platform/dam",
   "version": "0.0.0",
   "description": "Digital Asset Management package for CGK platform",
   "license": "MIT",
@@ -25,15 +25,15 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*",
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*",
     "@vercel/blob": "^0.27.0",
     "googleapis": "^144.0.0",
     "sharp": "^0.33.0"
   },
   "devDependencies": {
-    "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "tsup": "^8.3.0",

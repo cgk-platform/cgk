@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/video",
+  "name": "@cgk-platform/video",
   "version": "0.0.0",
   "description": "Video hosting, streaming, transcription, and AI content for CGK platform",
   "license": "MIT",
@@ -42,13 +42,13 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*",
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*",
     "@mux/mux-node": "^9.0.0"
   },
   "devDependencies": {
-    "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "eslint": "^9.18.0",
     "tsup": "^8.3.0",
     "typescript": "^5.9.0",

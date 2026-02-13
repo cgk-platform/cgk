@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/portal",
+  "name": "@cgk-platform/portal",
   "version": "0.0.0",
   "private": true,
   "description": "Customer portal utilities for authentication, content, and features",
@@ -39,15 +39,15 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*",
-    "@cgk/shopify": "workspace:*"
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/shopify": "workspace:*"
   },
   "peerDependencies": {
     "next": ">=14.0.0"
   },
   "devDependencies": {
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@types/node": "^22.0.0",
     "next": "^16.0.0",
     "typescript": "^5.9.0"

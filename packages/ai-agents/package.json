@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/ai-agents",
+  "name": "@cgk-platform/ai-agents",
   "version": "0.0.0",
   "description": "AI Agent system (BRII) for CGK platform - agent configuration, personality, autonomy, action logging, memory system, RAG, multi-channel integrations, and voice capabilities",
   "license": "MIT",
@@ -25,13 +25,13 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*",
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*",
     "openai": "^4.77.0"
   },
   "devDependencies": {
-    "@cgk/eslint-config": "workspace:*",
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "tsup": "^8.3.0",

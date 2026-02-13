@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/onboarding",
+  "name": "@cgk-platform/onboarding",
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,12 +18,12 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@cgk/auth": "workspace:*",
-    "@cgk/db": "workspace:*",
-    "@cgk/logging": "workspace:*"
+    "@cgk-platform/auth": "workspace:*",
+    "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/logging": "workspace:*"
   },
   "devDependencies": {
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "tsup": "^8.0.0",
     "typescript": "^5.9.0",
     "vitest": "^3.0.0"

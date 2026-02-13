@@ -1,5 +1,5 @@
 {
-  "name": "@cgk/support",
+  "name": "@cgk-platform/support",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,11 +14,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cgk/core": "workspace:*",
-    "@cgk/db": "workspace:*"
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/db": "workspace:*"
   },
   "devDependencies": {
-    "@cgk/typescript-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "typescript": "^5.9.0-beta",
     "vitest": "^3.0.4"
   }
