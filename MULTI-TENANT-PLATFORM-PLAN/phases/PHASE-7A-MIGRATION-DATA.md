@@ -18,14 +18,14 @@ Migrate all RAWDOG production data to the new multi-tenant schema with batch pro
 
 ## Success Criteria
 
-- [ ] Tenant schema created for RAWDOG (tenant_rawdog)
-- [ ] Organization record created in public.organizations
-- [ ] All 14 tables migrated with batch processing (1000 rows per batch)
-- [ ] Data transformations applied (type normalization, missing columns)
-- [ ] Count validation: old count == new count for all tables
-- [ ] Sum validation: financial totals match exactly
-- [ ] Sample data validation: random row comparisons pass
-- [ ] Foreign key integrity validated across all relationships
+- [x] Tenant schema created for RAWDOG (tenant_rawdog)
+- [x] Organization record created in public.organizations
+- [x] All 14 tables migrated with batch processing (1000 rows per batch)
+- [x] Data transformations applied (type normalization, missing columns)
+- [x] Count validation: old count == new count for all tables
+- [x] Sum validation: financial totals match exactly
+- [x] Sample data validation: random row comparisons pass
+- [x] Foreign key integrity validated across all relationships
 
 ---
 
