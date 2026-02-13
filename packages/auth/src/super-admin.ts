@@ -684,7 +684,9 @@ export async function checkIpAllowlist(ipAddress: string): Promise<boolean> {
     SELECT COUNT(*) as count FROM super_admin_ip_allowlist WHERE is_active = TRUE
   `
 
-  const count = (countResult.rows[0] as Record<string, unknown>).count as number
+  // COUNT(*) returns bigint which becomes string in JS - convert to number
+  const countRaw = (countResult.rows[0] as Record<string, unknown>).count
+  const count = Number(countRaw)
 
   if (count === 0) {
     // No allowlist entries, allow all
