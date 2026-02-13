@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/jobs",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Background job abstraction for CGK platform - supports Trigger.dev, Inngest, or local execution",
   "license": "MIT",
   "type": "module",

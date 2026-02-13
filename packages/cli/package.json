@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/cli",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "CLI tool for CGK platform - create, setup, and manage brand sites",
   "license": "MIT",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/ai-agents",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "AI Agent system (BRII) for CGK platform - agent configuration, personality, autonomy, action logging, memory system, RAG, multi-channel integrations, and voice capabilities",
   "license": "MIT",
   "type": "module",

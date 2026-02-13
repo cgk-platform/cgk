@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/ab-testing",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "A/B testing infrastructure with multi-variant support, MAB allocation, and targeting rules",
   "license": "MIT",
   "type": "module",
