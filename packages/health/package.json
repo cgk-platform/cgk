@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/health",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Platform health monitoring for CGK multi-tenant platform",
   "license": "MIT",
   "type": "module",

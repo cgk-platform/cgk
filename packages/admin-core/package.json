@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/admin-core",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Core admin functionality: Workflow engine, Smart Inbox, and shared admin utilities",
   "license": "MIT",
   "type": "module",

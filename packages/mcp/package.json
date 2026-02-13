@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/mcp",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "MCP (Model Context Protocol) server utilities for CGK platform",
   "license": "MIT",
   "type": "module",

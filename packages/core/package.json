@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/core",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Core utilities, types, and configuration schemas for CGK platform",
   "license": "MIT",
   "type": "module",

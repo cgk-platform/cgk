@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/esign",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "E-Signature system core for CGK platform",
   "license": "MIT",
   "type": "module",

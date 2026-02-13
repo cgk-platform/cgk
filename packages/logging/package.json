@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/logging",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Structured logging for CGK platform",
   "license": "MIT",
   "type": "module",

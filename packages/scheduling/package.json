@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/scheduling",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Scheduling and booking system for CGK platform",
   "license": "MIT",
   "type": "module",

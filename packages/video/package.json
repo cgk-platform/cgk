@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/video",
-  "version": "0.0.0",
+  "version": "1.1.0",
   "description": "Video hosting, streaming, transcription, and AI content for CGK platform",
   "license": "MIT",
   "type": "module",
