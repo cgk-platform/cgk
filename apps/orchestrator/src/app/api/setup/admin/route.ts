@@ -74,6 +74,7 @@ export async function POST(request: Request) {
         name,
         role,
         status,
+        email_verified,
         email_verified_at,
         created_at,
         updated_at
@@ -85,6 +86,7 @@ export async function POST(request: Request) {
         ${name.trim()},
         'super_admin',
         'active',
+        true,
         NOW(),
         NOW(),
         NOW()
@@ -97,6 +99,30 @@ export async function POST(request: Request) {
     if (!user) {
       throw new Error('Failed to create user')
     }
+
+    // Also add to super_admin_users table (required for orchestrator login)
+    await sql`
+      INSERT INTO public.super_admin_users (
+        user_id,
+        granted_by,
+        notes,
+        can_access_all_tenants,
+        can_impersonate,
+        can_manage_super_admins,
+        mfa_enabled,
+        is_active
+      )
+      VALUES (
+        ${user.id as string},
+        ${user.id as string},
+        'Initial super admin created via setup wizard',
+        true,
+        true,
+        true,
+        false,
+        true
+      )
+    `
 
     return NextResponse.json({
       success: true,

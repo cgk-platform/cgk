@@ -1,5 +1,4 @@
 import {
-  checkRateLimit,
   createSuperAdminSession,
   getSuperAdminUser,
   getUserByEmail,
@@ -48,26 +47,9 @@ export async function POST(request: Request) {
 
     const email = body.email.toLowerCase().trim()
 
-    // Rate limit login attempts by IP (5 attempts per minute)
-    const withinRateLimit = await checkRateLimit(
-      `login:${clientIp}`,
-      'login',
-      5,
-      60
-    )
-
-    if (!withinRateLimit) {
-      return Response.json(
-        {
-          error: 'Too many login attempts. Please try again later.',
-          retryAfter: 60,
-        },
-        {
-          status: 429,
-          headers: { 'Retry-After': '60' },
-        }
-      )
-    }
+    // TODO: Implement IP-based rate limiting (current checkRateLimit requires userId UUID)
+    // The checkRateLimit function uses super_admin_rate_limits table with user_id FK constraint
+    // For now, IP rate limiting is disabled. Re-enable when we have a proper IP-based limiter.
 
     // Get user by email
     const user = await getUserByEmail(email)
