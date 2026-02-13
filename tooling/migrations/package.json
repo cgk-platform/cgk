@@ -15,7 +15,14 @@
     "validate:json": "tsx validate-migration.ts --json",
     "validate:count-only": "tsx validate-migration.ts --skip-sum --skip-sample --skip-fk",
     "rollback": "tsx rollback.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "test:perf": "vitest run tests/performance/",
+    "test:coverage": "vitest run --coverage",
+    "test:all": "pnpm test:unit && pnpm test:e2e && pnpm test:perf"
   },
   "dependencies": {
     "@vercel/postgres": "^0.10.0",
@@ -25,7 +32,9 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "@types/pg": "^8.11.10",
+    "@vitest/coverage-v8": "^3.0.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "vitest": "^3.0.0"
   }
 }
