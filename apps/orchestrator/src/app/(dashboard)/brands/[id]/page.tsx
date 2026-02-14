@@ -202,20 +202,41 @@ export default function BrandDetailPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Open admin portal for this brand
+                // In production, use custom domain or pass tenant context
+                const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://cgk-admin.vercel.app'
+                window.open(`${adminUrl}?tenant=${brand.slug}`, '_blank')
+              }}
+            >
               <ExternalLink className="mr-2 h-4 w-4" />
               Open Admin
             </Button>
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Open storefront for this brand
+                const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'https://cgk-storefront.vercel.app'
+                window.open(`${storefrontUrl}?tenant=${brand.slug}`, '_blank')
+              }}
+            >
               <ExternalLink className="mr-2 h-4 w-4" />
               Open Storefront
             </Button>
-            <Button variant="outline" size="sm">
-              View Logs
-            </Button>
-            <Button variant="outline" size="sm">
-              View Orders
-            </Button>
+            <Link href={`/ops/logs?tenant=${brand.slug}`}>
+              <Button variant="outline" size="sm">
+                View Logs
+              </Button>
+            </Link>
+            <Link href={`/ops/errors?tenant=${brand.slug}`}>
+              <Button variant="outline" size="sm">
+                View Errors
+              </Button>
+            </Link>
           </div>
         </CardContent>
       </Card>
