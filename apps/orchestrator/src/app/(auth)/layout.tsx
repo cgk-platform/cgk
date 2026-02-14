@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 
-import '../globals.css'
-
 export const metadata: Metadata = {
   title: 'Login - CGK Orchestrator',
   description: 'Super Admin Authentication',
@@ -12,6 +10,9 @@ export const metadata: Metadata = {
  *
  * Minimal layout for authentication pages (login, MFA, unauthorized).
  * These pages don't have the main navigation sidebar.
+ *
+ * Note: This is a route group layout - it should NOT include <html> or <body>
+ * tags. Those are only in the root layout.tsx.
  */
 export default function AuthLayout({
   children,
@@ -19,10 +20,8 @@ export default function AuthLayout({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-background font-sans antialiased">
-        {children}
-      </body>
-    </html>
+    <div className="min-h-screen bg-background">
+      {children}
+    </div>
   )
 }

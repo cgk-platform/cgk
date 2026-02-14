@@ -1,26 +1,5 @@
 import { Toaster } from '@cgk-platform/ui'
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-
-import '../globals.css'
-
-/**
- * Body font - Geist Sans
- */
-const geistSans = Geist({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-sans',
-})
-
-/**
- * Mono font - Geist Mono
- */
-const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-mono',
-})
 
 export const metadata: Metadata = {
   title: 'Platform Setup - CGK Orchestrator',
@@ -32,6 +11,9 @@ export const metadata: Metadata = {
  *
  * Minimal layout for the setup wizard pages.
  * No authentication required - this is for fresh installations.
+ *
+ * Note: This is a route group layout - it should NOT include <html> or <body>
+ * tags. Those are only in the root layout.tsx.
  */
 export default function SetupLayout({
   children,
@@ -39,25 +21,23 @@ export default function SetupLayout({
   children: React.ReactNode
 }): React.JSX.Element {
   return (
-    <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable}`}>
-      <body className="min-h-screen bg-[#0a0e14] font-sans antialiased">
-        {/* Subtle grid background */}
-        <div
-          className="fixed inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #3b82f6 1px, transparent 1px),
-              linear-gradient(to bottom, #3b82f6 1px, transparent 1px)
-            `,
-            backgroundSize: '24px 24px',
-          }}
-        />
+    <div className="min-h-screen bg-[#0a0e14]">
+      {/* Subtle grid background */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.03]"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, #3b82f6 1px, transparent 1px),
+            linear-gradient(to bottom, #3b82f6 1px, transparent 1px)
+          `,
+          backgroundSize: '24px 24px',
+        }}
+      />
 
-        {/* Main content */}
-        <div className="relative z-10">{children}</div>
+      {/* Main content */}
+      <div className="relative z-10">{children}</div>
 
-        <Toaster position="bottom-right" richColors closeButton theme="dark" />
-      </body>
-    </html>
+      <Toaster position="bottom-right" richColors closeButton theme="dark" />
+    </div>
   )
 }
