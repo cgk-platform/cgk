@@ -23,7 +23,7 @@ import type {
   CollectionSyncPayload,
   CollectionProductsSyncPayload,
 } from '../../handlers/commerce/product-customer-sync'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -384,7 +384,7 @@ export const productFullSyncScheduledTask = schedules.task({
   cron: '0 3 * * *',
   run: async () => {
     logger.info('Running scheduled product full sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await productSyncTask.trigger({ tenantId, fullSync: true })
     }
@@ -397,7 +397,7 @@ export const customerFullSyncScheduledTask = schedules.task({
   cron: '0 4 * * *',
   run: async () => {
     logger.info('Running scheduled customer full sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await customerSyncTask.trigger({ tenantId, fullSync: true })
     }
@@ -410,7 +410,7 @@ export const inventorySyncScheduledTask = schedules.task({
   cron: '0 * * * *',
   run: async () => {
     logger.info('Running scheduled inventory sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await inventoryBatchSyncTask.trigger({ tenantId, fullSync: false })
     }
@@ -423,7 +423,7 @@ export const collectionSyncScheduledTask = schedules.task({
   cron: '0 5 * * *',
   run: async () => {
     logger.info('Running scheduled collection sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await collectionSyncTask.trigger({ tenantId, fullSync: true })
     }

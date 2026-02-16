@@ -68,7 +68,10 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   try {
-    const body = await req.json().catch(() => ({}))
+    const body = await req.json().catch(() => {
+      // Empty body is valid - dates will default to last 12 months
+      return {}
+    })
     const { startDate, endDate, types } = body as {
       startDate?: string
       endDate?: string

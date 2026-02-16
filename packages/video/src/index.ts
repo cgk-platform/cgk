@@ -74,18 +74,34 @@ export {
 // Mux integration
 export {
   getMuxClient,
+  getMuxClientAsync,
   isMuxConfigured,
+  isMuxConfiguredAsync,
   getMuxWebhookSecret,
   isTestMode,
+  clearMuxClientCache,
+  // Upload functions (platform-level)
   createDirectUpload,
   cancelDirectUpload,
   getUploadStatus,
+  // Upload functions (tenant-aware)
+  createDirectUploadForTenant,
+  cancelDirectUploadForTenant,
+  getUploadStatusForTenant,
+  // Asset functions (platform-level)
   getAsset,
   deleteAsset,
   createPlaybackId,
   deletePlaybackId,
   getMp4DownloadUrl,
   updateAssetPassthrough,
+  // Asset functions (tenant-aware)
+  getAssetForTenant,
+  deleteAssetForTenant,
+  createPlaybackIdForTenant,
+  deletePlaybackIdForTenant,
+  getMp4DownloadUrlForTenant,
+  updateAssetPassthroughForTenant,
   getStreamUrl,
   getThumbnailUrl,
   getAnimatedThumbnailUrl,
@@ -99,6 +115,7 @@ export {
   parsePassthrough,
   createPassthrough,
   type DirectUploadOptions,
+  type TenantDirectUploadOptions,
   type WebhookVerificationResult,
   type WebhookHandlers,
   type StoryboardOptions,

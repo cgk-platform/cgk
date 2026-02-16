@@ -32,8 +32,14 @@ export async function GET(request: Request): Promise<Response> {
     )
   }
 
-  // In production, get creatorId from authenticated session
-  const creatorId = request.headers.get('x-creator-id') || 'demo-creator'
+  // Get creatorId from authenticated session header
+  const creatorId = request.headers.get('x-creator-id')
+  if (!creatorId) {
+    return Response.json(
+      { error: 'Authentication required - missing creator ID' },
+      { status: 401 }
+    )
+  }
 
   const progress = await withTenant(tenant.slug, async () => {
     const result = await sql<WizardProgressRecord>`
@@ -92,8 +98,14 @@ export async function POST(request: Request): Promise<Response> {
     )
   }
 
-  // In production, get creatorId from authenticated session
-  const creatorId = request.headers.get('x-creator-id') || wizardData.creatorId || 'demo-creator'
+  // Get creatorId from authenticated session header
+  const creatorId = request.headers.get('x-creator-id') || wizardData.creatorId
+  if (!creatorId) {
+    return Response.json(
+      { error: 'Authentication required - missing creator ID' },
+      { status: 401 }
+    )
+  }
 
   // Update the wizard data with current timestamp
   const updatedWizardData: OnboardingWizardData = {

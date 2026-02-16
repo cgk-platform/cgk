@@ -22,7 +22,7 @@ import type {
   ScheduleFollowUpPayload,
   ReviewEmailStatsPayload,
 } from '../../handlers/commerce/review-email'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -341,7 +341,7 @@ export const processReviewEmailQueueScheduledTask = schedules.task({
   run: async () => {
     logger.info('Running scheduled review email queue processing')
 
-    const tenants = ['system'] // Placeholder for all active tenants
+    const tenants = await getActiveTenants()
 
     const results = []
     for (const tenantId of tenants) {
@@ -377,7 +377,7 @@ export const retryFailedReviewEmailsScheduledTask = schedules.task({
   run: async () => {
     logger.info('Running scheduled retry failed review emails')
 
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
 
     const results = []
     for (const tenantId of tenants) {
@@ -413,7 +413,7 @@ export const reviewEmailAwaitingDeliveryScheduledTask = schedules.task({
   run: async () => {
     logger.info('Running scheduled awaiting delivery check')
 
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
 
     const results = []
     for (const tenantId of tenants) {

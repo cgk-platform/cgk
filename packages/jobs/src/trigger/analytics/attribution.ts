@@ -27,7 +27,7 @@ import type {
   AttributionProcessUnattributedPayload,
   AttributionWebhookQueuePayload,
 } from '../../handlers/analytics/types'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -346,7 +346,7 @@ export const attributionDailyMetricsScheduledTask = schedules.task({
   cron: '10 2 * * *', // 2:10 AM daily
   run: async () => {
     logger.info('Running scheduled attribution daily metrics')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionDailyMetricsTask.trigger({ tenantId })
     }
@@ -359,7 +359,7 @@ export const attributionExportScheduledTask = schedules.task({
   cron: '*/15 * * * *', // Every 15 minutes
   run: async () => {
     logger.info('Running scheduled attribution export')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionExportSchedulerTask.trigger({ tenantId })
     }
@@ -372,7 +372,7 @@ export const attributionFairingBridgeScheduledTask = schedules.task({
   cron: '15 * * * *', // Every hour at :15
   run: async () => {
     logger.info('Running scheduled Fairing bridge sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionFairingBridgeTask.trigger({ tenantId })
     }
@@ -385,7 +385,7 @@ export const attributionOrderReconciliationScheduledTask = schedules.task({
   cron: '45 * * * *', // Every hour at :45
   run: async () => {
     logger.info('Running scheduled order reconciliation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionOrderReconciliationTask.trigger({ tenantId })
     }
@@ -398,7 +398,7 @@ export const attributionRecalculateRecentScheduledTask = schedules.task({
   cron: '0 4 * * *', // 4 AM daily
   run: async () => {
     logger.info('Running scheduled recalculate recent')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionRecalculateRecentTask.trigger({ tenantId })
     }
@@ -411,7 +411,7 @@ export const syncTikTokSpendScheduledTask = schedules.task({
   cron: '0 3 * * *', // 3 AM daily
   run: async () => {
     logger.info('Running scheduled TikTok spend sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await syncTikTokSpendDailyTask.trigger({ tenantId })
     }
@@ -424,7 +424,7 @@ export const attributionVTASyncScheduledTask = schedules.task({
   cron: '30 2 * * *', // 2:30 AM daily
   run: async () => {
     logger.info('Running scheduled VTA sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionVTASyncTask.trigger({ tenantId })
     }
@@ -437,7 +437,7 @@ export const attributionProcessUnattributedScheduledTask = schedules.task({
   cron: '30 * * * *', // Every hour at :30
   run: async () => {
     logger.info('Running scheduled process unattributed')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionProcessUnattributedTask.trigger({ tenantId })
     }
@@ -450,7 +450,7 @@ export const attributionWebhookQueueScheduledTask = schedules.task({
   cron: '*/5 * * * *', // Every 5 minutes
   run: async () => {
     logger.info('Running scheduled webhook queue processing')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionWebhookQueueTask.trigger({ tenantId })
     }

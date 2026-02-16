@@ -21,7 +21,7 @@ import type {
   BatchDetectFacesPayload,
   ScanAllForFacesPayload,
 } from '../../handlers/scheduled/media-processing'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -244,7 +244,7 @@ export const damBulkIngestScheduledTask = schedules.task({
   cron: '0 4 * * *', // 4 AM daily
   run: async () => {
     logger.info('Running scheduled DAM bulk ingest')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await damBulkIngestTask.trigger({ tenantId })
     }
@@ -257,7 +257,7 @@ export const scanAllForFacesScheduledTask = schedules.task({
   cron: '0 3 * * 0', // 3 AM every Sunday
   run: async () => {
     logger.info('Running scheduled face scan')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await scanAllForFacesTask.trigger({ tenantId })
     }

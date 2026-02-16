@@ -158,6 +158,7 @@ export {
 export {
   createJsonResponse,
   createTwimlResponse,
+  getTwilioAuthTokenForWebhook,
   handleIncomingSmsWebhook,
   handleStatusWebhook,
   parseFormData,

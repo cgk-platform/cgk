@@ -5,6 +5,7 @@
  * @ai-required Use HMAC-signed state for CSRF protection
  */
 
+import { fetchWithTimeout, FETCH_TIMEOUTS } from '@cgk-platform/core'
 import { sql, withTenant } from '@cgk-platform/db'
 
 import { encryptToken } from '../encryption.js'
@@ -77,7 +78,7 @@ export async function completeMetaOAuth(params: {
   const payload = await validateOAuthState(params.state, appSecret)
 
   // 2. Exchange code for short-lived token
-  const tokenResponse = await fetch(META_OAUTH_CONFIG.tokenUrl, {
+  const tokenResponse = await fetchWithTimeout(META_OAUTH_CONFIG.tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -86,6 +87,7 @@ export async function completeMetaOAuth(params: {
       code: params.code,
       redirect_uri: redirectUri,
     }),
+    timeout: FETCH_TIMEOUTS.OAUTH,
   })
 
   if (!tokenResponse.ok) {
@@ -97,7 +99,7 @@ export async function completeMetaOAuth(params: {
   const shortLivedToken = tokenData.access_token
 
   // 3. Exchange for long-lived token (60 days)
-  const longLivedResponse = await fetch(META_OAUTH_CONFIG.exchangeTokenUrl, {
+  const longLivedResponse = await fetchWithTimeout(META_OAUTH_CONFIG.exchangeTokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -106,6 +108,7 @@ export async function completeMetaOAuth(params: {
       client_secret: appSecret,
       fb_exchange_token: shortLivedToken,
     }),
+    timeout: FETCH_TIMEOUTS.OAUTH,
   })
 
   if (!longLivedResponse.ok) {
@@ -121,8 +124,9 @@ export async function completeMetaOAuth(params: {
   const expires_in = longLivedData.expires_in
 
   // 4. Debug token to get metadata
-  const debugResponse = await fetch(
-    `${META_OAUTH_CONFIG.debugTokenUrl}?input_token=${longLivedToken}&access_token=${appId}|${appSecret}`
+  const debugResponse = await fetchWithTimeout(
+    `${META_OAUTH_CONFIG.debugTokenUrl}?input_token=${longLivedToken}&access_token=${appId}|${appSecret}`,
+    { timeout: FETCH_TIMEOUTS.OAUTH }
   )
 
   if (!debugResponse.ok) {
@@ -135,8 +139,9 @@ export async function completeMetaOAuth(params: {
   const tokenDebug = debugData.data
 
   // 5. Fetch ad accounts
-  const accountsResponse = await fetch(
-    `${META_OAUTH_CONFIG.graphApiUrl}/me/adaccounts?fields=id,name,account_status,currency&access_token=${longLivedToken}`
+  const accountsResponse = await fetchWithTimeout(
+    `${META_OAUTH_CONFIG.graphApiUrl}/me/adaccounts?fields=id,name,account_status,currency&access_token=${longLivedToken}`,
+    { timeout: FETCH_TIMEOUTS.OAUTH }
   )
 
   if (!accountsResponse.ok) {

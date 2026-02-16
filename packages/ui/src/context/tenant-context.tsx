@@ -138,7 +138,10 @@ export function TenantProvider({
             onSwitch?.(data.tenant)
           }
         } else {
-          const data = await response.json().catch(() => ({}))
+          const data = await response.json().catch((parseError) => {
+            console.warn('[tenant-context] Failed to parse switch response:', parseError)
+            return {}
+          })
           setError(data.error || 'Failed to switch tenant')
           throw new Error(data.error || 'Failed to switch tenant')
         }
@@ -177,7 +180,10 @@ export function TenantProvider({
             setCurrentTenant((prev) => (prev ? { ...prev, isDefault: true } : prev))
           }
         } else {
-          const data = await response.json().catch(() => ({}))
+          const data = await response.json().catch((parseError) => {
+            console.warn('[tenant-context] Failed to parse default response:', parseError)
+            return {}
+          })
           setError(data.error || 'Failed to set default tenant')
           throw new Error(data.error || 'Failed to set default tenant')
         }

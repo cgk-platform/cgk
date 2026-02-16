@@ -33,7 +33,10 @@ export async function POST(req: Request, { params }: RouteParams) {
     }
 
     // Get advertiser name from request body or use ID
-    const body = await req.json().catch(() => ({}))
+    const body = await req.json().catch(() => {
+      // Empty body is valid - advertiser name is optional
+      return {}
+    })
     const advertiserName = body.advertiserName || `Advertiser ${advertiserId}`
 
     await selectTikTokAdvertiser(tenantId, advertiserId, advertiserName)

@@ -17,7 +17,7 @@ import type {
   AtRiskProjectsAlertPayload,
   CreatorWeeklyDigestPayload,
 } from '../../handlers/scheduled/digests'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -129,7 +129,7 @@ export const adminDailyDigestScheduledTask = schedules.task({
   cron: '0 8 * * *', // 8 AM daily
   run: async () => {
     logger.info('Running scheduled admin daily digest')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await adminDailyDigestTask.trigger({ tenantId })
     }
@@ -142,7 +142,7 @@ export const atRiskProjectsScheduledTask = schedules.task({
   cron: '0 9 * * *', // 9 AM daily
   run: async () => {
     logger.info('Running scheduled at-risk projects check')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await atRiskProjectsAlertTask.trigger({ tenantId, alertTime: 'morning' })
     }
@@ -155,7 +155,7 @@ export const creatorWeeklyDigestScheduledTask = schedules.task({
   cron: '0 10 * * 1', // 10 AM every Monday
   run: async () => {
     logger.info('Running scheduled creator weekly digest')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await creatorWeeklyDigestTask.trigger({ tenantId })
     }

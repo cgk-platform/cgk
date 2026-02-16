@@ -33,7 +33,10 @@ export async function POST(req: Request, { params }: RouteParams) {
     }
 
     // Get customer name from request body or use ID
-    const body = await req.json().catch(() => ({}))
+    const body = await req.json().catch(() => {
+      // Empty body is valid - customer name is optional
+      return {}
+    })
     const customerName = body.customerName || `Account ${customerId}`
 
     await selectGoogleAdsCustomer(tenantId, customerId, customerName)

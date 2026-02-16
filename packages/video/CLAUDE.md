@@ -113,7 +113,45 @@ if (!result.allowed) {
 }
 ```
 
-### Pattern 4: Webhook Handling
+### Pattern 4: Tenant-Managed Mux Credentials (RECOMMENDED)
+
+**When to use**: Tenants with their own Mux accounts
+
+The video package supports both platform-level and tenant-managed Mux credentials. Prefer tenant credentials when available.
+
+```typescript
+import {
+  getMuxClientAsync,
+  isMuxConfiguredAsync,
+  createDirectUploadForTenant,
+  getAssetForTenant,
+} from '@cgk-platform/video'
+
+// Check if Mux is configured for tenant or platform
+const isConfigured = await isMuxConfiguredAsync(tenantId)
+
+// Create upload using tenant's Mux account (falls back to platform)
+const { uploadUrl, uploadId } = await createDirectUploadForTenant({
+  tenantId,  // Will use tenant's Mux credentials if configured
+  corsOrigin: '*',
+  passthrough: createPassthrough(tenantId, video.id),
+})
+
+// Get asset info using tenant credentials
+const asset = await getAssetForTenant(assetId, tenantId)
+
+// Direct client access (prefer higher-level functions)
+const mux = await getMuxClientAsync(tenantId)
+if (!mux) throw new Error('Mux not configured')
+```
+
+**Priority order**:
+1. Tenant-specific credentials (from `tenant_api_credentials` table)
+2. Platform-level credentials (`MUX_TOKEN_ID` / `MUX_TOKEN_SECRET` env vars)
+
+**Backwards compatibility**: Original sync functions (`getMuxClient`, `createDirectUpload`, etc.) still work with platform credentials only.
+
+### Pattern 5: Webhook Handling
 
 **When to use**: Processing Mux webhook events
 
@@ -158,9 +196,9 @@ export async function POST(req: Request) {
 | `types.ts` | Type definitions | Video, VideoFolder, VideoPermission, etc. |
 | `schema.ts` | SQL schemas | VIDEO_MIGRATION_SQL |
 | `db.ts` | Database CRUD | getVideo, createVideo, updateVideo |
-| `mux/client.ts` | Mux API client | getMuxClient, isMuxConfigured |
-| `mux/uploads.ts` | Direct uploads | createDirectUpload, getUploadStatus |
-| `mux/assets.ts` | Asset management | getAsset, deleteAsset |
+| `mux/client.ts` | Mux API client | getMuxClient, getMuxClientAsync, isMuxConfigured, isMuxConfiguredAsync |
+| `mux/uploads.ts` | Direct uploads | createDirectUpload, createDirectUploadForTenant, getUploadStatus |
+| `mux/assets.ts` | Asset management | getAsset, getAssetForTenant, deleteAsset, deleteAssetForTenant |
 | `mux/playback.ts` | URL generation | getStreamUrl, getThumbnailUrl |
 | `mux/webhooks.ts` | Webhook handling | verifyWebhookSignature, processWebhookEvent |
 | `permissions/` | Access control | checkVideoPermission, createPermission |
@@ -171,7 +209,7 @@ export async function POST(req: Request) {
 ## Environment Variables
 
 ```bash
-# Required for Mux
+# Platform-level Mux credentials (used as fallback if tenant not configured)
 MUX_TOKEN_ID=your_mux_token_id
 MUX_TOKEN_SECRET=your_mux_token_secret
 MUX_WEBHOOK_SECRET=your_webhook_signing_secret
@@ -179,6 +217,8 @@ MUX_WEBHOOK_SECRET=your_webhook_signing_secret
 # Optional
 MUX_TEST_MODE=true  # Use Mux test mode
 ```
+
+**Tenant-Managed Credentials**: Tenants can configure their own Mux credentials via the Admin UI at `/admin/settings/integrations/credentials`. These are stored encrypted in the `tenant_api_credentials` table and take priority over platform-level env vars when using the `*ForTenant` functions.
 
 ---
 
@@ -208,20 +248,37 @@ deleteFolder(tenantId, folderId): Promise<boolean>
 ### Mux Integration
 
 ```typescript
-// Client
+// Client (platform-level, sync)
 getMuxClient(): Mux
 isMuxConfigured(): boolean
 
-// Uploads
+// Client (tenant-aware, async) - RECOMMENDED
+getMuxClientAsync(tenantId?): Promise<Mux | null>
+isMuxConfiguredAsync(tenantId?): Promise<boolean>
+
+// Uploads (platform-level)
 createDirectUpload(options): Promise<DirectUploadResult>
 cancelDirectUpload(uploadId): Promise<void>
 getUploadStatus(uploadId): Promise<UploadStatus>
 
-// Assets
+// Uploads (tenant-aware) - RECOMMENDED
+createDirectUploadForTenant(options): Promise<DirectUploadResult>
+cancelDirectUploadForTenant(uploadId, tenantId?): Promise<void>
+getUploadStatusForTenant(uploadId, tenantId?): Promise<UploadStatus>
+
+// Assets (platform-level)
 getAsset(assetId): Promise<MuxAssetInfo>
 deleteAsset(assetId): Promise<void>
 
-// Playback URLs
+// Assets (tenant-aware) - RECOMMENDED
+getAssetForTenant(assetId, tenantId?): Promise<MuxAssetInfo>
+deleteAssetForTenant(assetId, tenantId?): Promise<void>
+createPlaybackIdForTenant(assetId, policy?, tenantId?): Promise<string>
+deletePlaybackIdForTenant(assetId, playbackId, tenantId?): Promise<void>
+getMp4DownloadUrlForTenant(assetId, tenantId?): Promise<string | null>
+updateAssetPassthroughForTenant(assetId, passthrough, tenantId?): Promise<void>
+
+// Playback URLs (no tenant needed - URLs are public)
 getStreamUrl(playbackId): string
 getThumbnailUrl(playbackId, options?): string
 getAnimatedThumbnailUrl(playbackId, options?): string
@@ -296,6 +353,7 @@ if (video.status !== 'ready') {
 | `@mux/mux-node` | Mux API SDK |
 | `@cgk-platform/db` | Database and tenant isolation |
 | `@cgk-platform/core` | Shared types |
+| `@cgk-platform/integrations` | Tenant-managed credentials support |
 
 ---
 

@@ -12,7 +12,7 @@
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
 import type { AttributionMLTrainingPayload } from '../../handlers/analytics/types'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -64,7 +64,7 @@ export const attributionMLTrainingScheduledTask = schedules.task({
   cron: '0 4 * * *', // 4 AM daily
   run: async () => {
     logger.info('Running scheduled attribution ML training')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await attributionMLTrainingTask.trigger({ tenantId, trainingDays: 90 })
     }

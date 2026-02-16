@@ -16,7 +16,7 @@ import type {
   HourlyMetricsRollupPayload,
   WeeklyMetricsSummaryPayload,
 } from '../../handlers/analytics/types'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -120,7 +120,7 @@ export const aggregateDailyMetricsScheduledTask = schedules.task({
   cron: '0 2 * * *', // 2 AM daily
   run: async () => {
     logger.info('Running scheduled daily metrics aggregation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await aggregateDailyMetricsTask.trigger({ tenantId })
     }
@@ -133,7 +133,7 @@ export const hourlyMetricsRollupScheduledTask = schedules.task({
   cron: '5 * * * *', // Every hour at :05
   run: async () => {
     logger.info('Running scheduled hourly metrics rollup')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await hourlyMetricsRollupTask.trigger({ tenantId })
     }
@@ -146,7 +146,7 @@ export const weeklyMetricsSummaryScheduledTask = schedules.task({
   cron: '0 8 * * 1', // Monday at 8 AM
   run: async () => {
     logger.info('Running scheduled weekly metrics summary')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await weeklyMetricsSummaryTask.trigger({ tenantId, includeTrends: true })
     }

@@ -5,6 +5,7 @@
  * @ai-required Must use offline access for refresh tokens
  */
 
+import { fetchWithTimeout, FETCH_TIMEOUTS } from '@cgk-platform/core'
 import { sql, withTenant } from '@cgk-platform/db'
 
 import { encryptToken } from '../encryption.js'
@@ -76,7 +77,7 @@ export async function completeGoogleAdsOAuth(params: {
   )
 
   // 2. Exchange code for tokens
-  const tokenResponse = await fetch(GOOGLE_ADS_OAUTH_CONFIG.tokenUrl, {
+  const tokenResponse = await fetchWithTimeout(GOOGLE_ADS_OAUTH_CONFIG.tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -86,6 +87,7 @@ export async function completeGoogleAdsOAuth(params: {
       grant_type: 'authorization_code',
       redirect_uri: redirectUri,
     }),
+    timeout: FETCH_TIMEOUTS.OAUTH,
   })
 
   if (!tokenResponse.ok) {
@@ -160,13 +162,14 @@ export async function completeGoogleAdsOAuth(params: {
 async function listAccessibleCustomers(accessToken: string): Promise<string[]> {
   const developerToken = getGoogleAdsDeveloperToken()
 
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${GOOGLE_ADS_OAUTH_CONFIG.adsApiUrl}/customers:listAccessibleCustomers`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'developer-token': developerToken,
       },
+      timeout: FETCH_TIMEOUTS.OAUTH,
     }
   )
 

@@ -10,7 +10,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import crypto from 'crypto'
 
-import { sql, withTenant } from '@cgk-platform/db'
+import { sql, withTenant, checkAndMarkWebhook } from '@cgk-platform/db'
 import { logInboundEmail } from '@/lib/treasury/db/communications'
 import {
   approveDrawRequest,
@@ -41,12 +41,17 @@ interface InboundEmailPayload {
 
 /**
  * Verify Resend webhook signature
+ * SECURITY: Signature verification is MANDATORY - never skip in any environment
  */
-function verifyResendSignature(payload: string, signature: string): boolean {
+function verifyResendSignature(payload: string, signature: string): { valid: boolean; error?: string } {
   const webhookSecret = process.env.RESEND_WEBHOOK_SECRET
   if (!webhookSecret) {
-    console.warn('RESEND_WEBHOOK_SECRET not configured, skipping signature verification')
-    return true // Allow in development
+    console.error('RESEND_WEBHOOK_SECRET not configured - rejecting webhook request')
+    return { valid: false, error: 'Webhook secret not configured' }
+  }
+
+  if (!signature) {
+    return { valid: false, error: 'Missing signature header' }
   }
 
   const expectedSignature = crypto
@@ -54,10 +59,15 @@ function verifyResendSignature(payload: string, signature: string): boolean {
     .update(payload)
     .digest('hex')
 
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  )
+  try {
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    )
+    return { valid: isValid, error: isValid ? undefined : 'Invalid signature' }
+  } catch {
+    return { valid: false, error: 'Signature verification failed' }
+  }
 }
 
 /**
@@ -139,12 +149,11 @@ export async function POST(request: Request) {
   // Get raw body for signature verification
   const rawBody = await request.text()
 
-  // Verify signature in production
-  if (process.env.NODE_ENV === 'production') {
-    if (!verifyResendSignature(rawBody, signature)) {
-      console.error('Invalid webhook signature')
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-    }
+  // SECURITY: Always verify signature - no exceptions for any environment
+  const signatureResult = verifyResendSignature(rawBody, signature)
+  if (!signatureResult.valid) {
+    console.error('Webhook signature verification failed:', signatureResult.error)
+    return NextResponse.json({ error: signatureResult.error }, { status: 401 })
   }
 
   let payload: InboundEmailPayload
@@ -155,6 +164,21 @@ export async function POST(request: Request) {
   }
 
   const { from, to, subject, text, headers: emailHeaders } = payload
+
+  // Check idempotency using messageId
+  const messageId = payload.messageId || ''
+  if (messageId) {
+    const isDuplicate = await checkAndMarkWebhook('resend-treasury', messageId, {
+      from,
+      to,
+      subject,
+    })
+
+    if (isDuplicate) {
+      console.log('[Treasury Webhook] Duplicate email ignored:', messageId)
+      return NextResponse.json({ status: 'duplicate_ignored' })
+    }
+  }
 
   // Validate required fields
   if (!from || !to || !text) {

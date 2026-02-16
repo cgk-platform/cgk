@@ -16,6 +16,64 @@ interface LoginRequestBody {
   password: string
 }
 
+// IP-based rate limiting configuration
+const IP_RATE_LIMIT_MAX_ATTEMPTS = 5
+const IP_RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000 // 15 minutes
+
+interface IpRateLimitEntry {
+  attempts: number
+  resetAt: number
+}
+
+// In-memory rate limit store (resets on server restart)
+// For production, consider using Redis or a database-backed solution
+const ipRateLimiter = new Map<string, IpRateLimitEntry>()
+
+// Clean up expired entries periodically to prevent memory leaks
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000 // 5 minutes
+let lastCleanup = Date.now()
+
+function cleanupExpiredEntries(): void {
+  const now = Date.now()
+  if (now - lastCleanup < CLEANUP_INTERVAL_MS) {
+    return
+  }
+  lastCleanup = now
+
+  for (const [ip, entry] of ipRateLimiter.entries()) {
+    if (now > entry.resetAt) {
+      ipRateLimiter.delete(ip)
+    }
+  }
+}
+
+function checkIpRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  // Run cleanup on each check (lazy cleanup)
+  cleanupExpiredEntries()
+
+  const now = Date.now()
+  const entry = ipRateLimiter.get(ip)
+
+  // No existing entry or entry has expired - allow and start fresh
+  if (!entry || now > entry.resetAt) {
+    ipRateLimiter.set(ip, {
+      attempts: 1,
+      resetAt: now + IP_RATE_LIMIT_WINDOW_MS,
+    })
+    return { allowed: true }
+  }
+
+  // Check if limit exceeded
+  if (entry.attempts >= IP_RATE_LIMIT_MAX_ATTEMPTS) {
+    const retryAfter = Math.ceil((entry.resetAt - now) / 1000)
+    return { allowed: false, retryAfter }
+  }
+
+  // Increment attempts and allow
+  entry.attempts++
+  return { allowed: true }
+}
+
 /**
  * POST /api/platform/auth/login
  *
@@ -35,21 +93,54 @@ export async function POST(request: Request) {
     'unknown'
 
   try {
-    const body = (await request.json()) as LoginRequestBody
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch {
+      return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
 
-    // Validate required fields
-    if (!body.email || !body.password) {
+    // Type guard for request body
+    if (
+      typeof body !== 'object' ||
+      body === null ||
+      typeof (body as Record<string, unknown>).email !== 'string' ||
+      typeof (body as Record<string, unknown>).password !== 'string'
+    ) {
       return Response.json(
         { error: 'Email and password are required' },
         { status: 400 }
       )
     }
 
-    const email = body.email.toLowerCase().trim()
+    const validatedBody = body as LoginRequestBody
 
-    // TODO: Implement IP-based rate limiting (current checkRateLimit requires userId UUID)
-    // The checkRateLimit function uses super_admin_rate_limits table with user_id FK constraint
-    // For now, IP rate limiting is disabled. Re-enable when we have a proper IP-based limiter.
+    // Validate required fields
+    if (!validatedBody.email || !validatedBody.password) {
+      return Response.json(
+        { error: 'Email and password are required' },
+        { status: 400 }
+      )
+    }
+
+    const email = validatedBody.email.toLowerCase().trim()
+
+    // IP-based rate limiting - applied BEFORE user identification
+    const rateCheck = checkIpRateLimit(clientIp)
+    if (!rateCheck.allowed) {
+      return Response.json(
+        {
+          error: 'Too many login attempts. Please try again later.',
+          retryAfter: rateCheck.retryAfter,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(rateCheck.retryAfter),
+          },
+        }
+      )
+    }
 
     // Get user by email
     const user = await getUserByEmail(email)
@@ -69,7 +160,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const passwordValid = await verifyPassword(body.password, user.passwordHash)
+    const passwordValid = await verifyPassword(validatedBody.password, user.passwordHash)
     if (!passwordValid) {
       // Log failed attempt
       await logAuditAction({

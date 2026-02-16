@@ -128,7 +128,20 @@ export const adminDailyDigestJob = defineJob<TenantEvent<AdminDailyDigestPayload
     console.log(`[Digest] Admin digest metrics:`, metrics)
 
     // Would send email here via email.send job
-    const recipientList = recipients || ['admin@example.com']
+    const recipientList = recipients || []
+    if (recipientList.length === 0) {
+      console.log(`[Digest] No recipients configured for tenant ${tenantId}`)
+      return {
+        success: true,
+        data: {
+          tenantId,
+          sentTo: 0,
+          metrics,
+          generatedAt: new Date(),
+          message: 'No recipients configured',
+        },
+      }
+    }
     console.log(`[Digest] Sending to ${recipientList.length} recipients`)
 
     return {

@@ -209,15 +209,27 @@ export async function POST(request: Request) {
       )
     }
 
-    const body = await request.json() as MfaRequestBody
+    let body: unknown
+    try {
+      body = await request.json()
+    } catch {
+      return Response.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
+
+    // Validate body is a MfaRequestBody
+    if (typeof body !== 'object' || body === null) {
+      return Response.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
+    const mfaBody = body as MfaRequestBody
 
     // Handle setup request
-    if (isSetupRequest(body)) {
+    if (isSetupRequest(mfaBody)) {
       return handleMfaSetup(payload.sub, request)
     }
 
     // Handle verification
-    if (!isVerifyRequest(body) || body.code.length !== 6) {
+    if (!isVerifyRequest(mfaBody) || mfaBody.code.length !== 6) {
       return Response.json(
         { error: 'Invalid MFA code format' },
         { status: 400 }
@@ -260,7 +272,7 @@ export async function POST(request: Request) {
 
     // Verify the TOTP code
     const secret = row.mfa_secret_encrypted as string
-    const isValid = verifyTOTP(secret, body.code)
+    const isValid = verifyTOTP(secret, mfaBody.code)
 
     if (!isValid) {
       // Log failed attempt

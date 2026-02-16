@@ -5,6 +5,8 @@
  * Each tenant has their own Wise Business account for international payouts.
  */
 
+import { fetchWithTimeout, FETCH_TIMEOUTS } from '@cgk-platform/core'
+
 import { getTenantWiseApiKey, getTenantWiseConfig } from '../storage.js'
 import type { TenantWiseConfig } from '../types.js'
 
@@ -164,13 +166,14 @@ export async function getTenantWiseClient(
 
   // Create request helper
   async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
-    const response = await fetch(`${baseUrl}${path}`, {
+    const response = await fetchWithTimeout(`${baseUrl}${path}`, {
       method,
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: body ? JSON.stringify(body) : undefined,
+      timeout: FETCH_TIMEOUTS.PAYMENT,
     })
 
     if (!response.ok) {

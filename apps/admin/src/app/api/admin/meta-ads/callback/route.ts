@@ -12,7 +12,10 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+  if (!appUrl) {
+    return NextResponse.redirect(new URL('/admin/integrations/meta-ads?error=config_missing', 'http://localhost:3001'))
+  }
 
   if (!code || !state) {
     return NextResponse.redirect(

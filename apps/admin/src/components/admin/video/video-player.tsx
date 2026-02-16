@@ -93,8 +93,9 @@ export function VideoPlayer({
           setAvailableQualities(['auto', ...new Set(levels)])
 
           if (autoPlay) {
-            video.play().catch(() => {
-              // Autoplay might be blocked
+            video.play().catch((error) => {
+              // Autoplay might be blocked by browser policy
+              console.debug('[video-player] Autoplay blocked:', error)
               setIsPlaying(false)
             })
           }
@@ -128,7 +129,10 @@ export function VideoPlayer({
         video.addEventListener('loadedmetadata', () => {
           setIsLoading(false)
           if (autoPlay) {
-            video.play().catch(() => setIsPlaying(false))
+            video.play().catch((error) => {
+              console.debug('[video-player] Play blocked:', error)
+              setIsPlaying(false)
+            })
           }
         })
       } else {

@@ -219,10 +219,10 @@ export function BrandsListCompact({
             className={cn(
               'ml-auto h-2 w-2 rounded-full',
               brand.health === 'healthy'
-                ? 'bg-green-500'
+                ? 'bg-success'
                 : brand.health === 'degraded'
-                  ? 'bg-yellow-500'
-                  : 'bg-red-500'
+                  ? 'bg-warning'
+                  : 'bg-destructive'
             )}
           />
         </Link>

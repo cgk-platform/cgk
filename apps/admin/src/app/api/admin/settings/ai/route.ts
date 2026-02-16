@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
+import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { createTenantCache, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -15,7 +16,20 @@ import {
 const AI_SETTINGS_CACHE_KEY = 'ai-settings'
 const CACHE_TTL = 300 // 5 minutes
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Require authentication
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Only admins and above can view AI settings
+  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')
@@ -45,10 +59,23 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  // Require authentication
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Only admins and above can update AI settings
+  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')
-  const userId = headerList.get('x-user-id')
+  const userId = auth.userId
 
   if (!tenantSlug || !tenantId) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })

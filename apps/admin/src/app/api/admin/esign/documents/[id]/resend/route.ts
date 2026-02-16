@@ -21,7 +21,10 @@ export async function POST(
     }
 
     const { id } = await params
-    const body = await request.json().catch(() => ({}))
+    const body = await request.json().catch(() => {
+      // Empty body is valid - signerId is optional for resend
+      return {}
+    })
     const { signerId } = body
 
     const result = await resendDocument(auth.tenantId, id, signerId)

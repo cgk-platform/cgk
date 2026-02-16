@@ -1,11 +1,102 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+
+// Types for tax data
+interface W9Status {
+  hasW9: boolean
+  status: 'not_submitted' | 'approved' | 'expired'
+  tinLastFour: string | null
+  certifiedAt: string | null
+  certifiedName: string | null
+  eDeliveryConsent: boolean
+}
+
+interface TaxDocument {
+  id: string
+  year: number
+  formType: string
+  totalAmountCents: number
+  status: string
+  filedAt: string | null
+  deliveredAt: string | null
+}
+
+interface TaxData {
+  w9: W9Status
+  documents: TaxDocument[]
+  currentYearEarnings: number | null
+  threshold: number
+}
 
 // Creator Tax Documents Page
 // Shows W-9 form submission and 1099 document viewing/download
 
 export default function CreatorTaxPage() {
+  const [taxData, setTaxData] = useState<TaxData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchTaxData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const response = await fetch('/api/creator/tax')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to fetch tax data')
+      }
+      const data = await response.json()
+      setTaxData(data)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch tax data')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchTaxData()
+  }, [fetchTaxData])
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Tax Documents</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your tax information and download tax documents
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Tax Documents</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage your tax information and download tax documents
+          </p>
+        </div>
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-4 text-center">
+          <p className="text-destructive">{error}</p>
+          <button
+            onClick={fetchTaxData}
+            className="mt-2 text-sm text-primary hover:underline"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -16,35 +107,39 @@ export default function CreatorTaxPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <W9Section />
-        <TaxDocumentsSection />
+        <W9Section w9Status={taxData?.w9 || null} onUpdate={fetchTaxData} />
+        <TaxDocumentsSection documents={taxData?.documents || []} />
       </div>
     </div>
   )
 }
 
-function W9Section() {
+function W9Section({ w9Status, onUpdate }: { w9Status: W9Status | null; onUpdate: () => void }) {
   const [showForm, setShowForm] = useState(false)
 
-  // Mock W9 status - would come from API
-  const w9Status = {
-    hasW9: true,
-    status: 'approved' as const,
-    tinLastFour: '1234',
-    certifiedAt: '2024-06-15',
-    certifiedName: 'John Creator',
+  const handleFormSuccess = () => {
+    setShowForm(false)
+    onUpdate()
   }
 
-  if (w9Status.hasW9 && !showForm) {
+  if (w9Status?.hasW9 && !showForm) {
+    const statusLabel = w9Status.status === 'approved'
+      ? 'Approved'
+      : w9Status.status === 'expired'
+        ? 'Expired - Please Update'
+        : 'Pending Review'
+
+    const isExpired = w9Status.status === 'expired'
+
     return (
       <div className="rounded-lg border bg-card p-6">
         <h2 className="mb-4 text-lg font-semibold">W-9 Information</h2>
 
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
+            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isExpired ? 'bg-yellow-100' : 'bg-green-100'}`}>
               <svg
-                className="h-5 w-5 text-green-600"
+                className={`h-5 w-5 ${isExpired ? 'text-yellow-600' : 'text-green-600'}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -53,32 +148,38 @@ function W9Section() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M5 13l4 4L19 7"
+                  d={isExpired ? "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" : "M5 13l4 4L19 7"}
                 />
               </svg>
             </div>
             <div>
               <div className="font-medium">W-9 On File</div>
-              <div className="text-sm text-muted-foreground">
-                Status: {w9Status.status === 'approved' ? 'Approved' : 'Pending Review'}
+              <div className={`text-sm ${isExpired ? 'text-yellow-600' : 'text-muted-foreground'}`}>
+                Status: {statusLabel}
               </div>
             </div>
           </div>
 
           <div className="rounded-md border p-4">
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">TIN (Last 4)</dt>
-                <dd className="font-mono">***-**-{w9Status.tinLastFour}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Certified Name</dt>
-                <dd>{w9Status.certifiedName}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-muted-foreground">Certified Date</dt>
-                <dd>{new Date(w9Status.certifiedAt).toLocaleDateString()}</dd>
-              </div>
+              {w9Status.tinLastFour && (
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">TIN (Last 4)</dt>
+                  <dd className="font-mono">***-**-{w9Status.tinLastFour}</dd>
+                </div>
+              )}
+              {w9Status.certifiedName && (
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Certified Name</dt>
+                  <dd>{w9Status.certifiedName}</dd>
+                </div>
+              )}
+              {w9Status.certifiedAt && (
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">Certified Date</dt>
+                  <dd>{new Date(w9Status.certifiedAt).toLocaleDateString()}</dd>
+                </div>
+              )}
             </dl>
           </div>
 
@@ -86,7 +187,7 @@ function W9Section() {
             onClick={() => setShowForm(true)}
             className="text-sm text-primary hover:underline"
           >
-            Update W-9 Information
+            {isExpired ? 'Update W-9 (Required)' : 'Update W-9 Information'}
           </button>
         </div>
       </div>
@@ -96,13 +197,17 @@ function W9Section() {
   return (
     <div className="rounded-lg border bg-card p-6">
       <h2 className="mb-4 text-lg font-semibold">W-9 Tax Form</h2>
-      <W9Form onCancel={w9Status.hasW9 ? () => setShowForm(false) : undefined} />
+      <W9Form
+        onCancel={w9Status?.hasW9 ? () => setShowForm(false) : undefined}
+        onSuccess={handleFormSuccess}
+      />
     </div>
   )
 }
 
-function W9Form({ onCancel }: { onCancel?: () => void }) {
+function W9Form({ onCancel, onSuccess }: { onCancel?: () => void; onSuccess?: () => void }) {
   const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     legalName: '',
     businessName: '',
@@ -121,14 +226,27 @@ function W9Form({ onCancel }: { onCancel?: () => void }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+    setSubmitError(null)
 
     try {
-      // Would call API to submit W-9
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      alert('W-9 submitted successfully!')
-      onCancel?.()
-    } catch {
-      alert('Failed to submit W-9')
+      const response = await fetch('/api/creator/tax', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit W-9')
+      }
+
+      // Success
+      onSuccess?.()
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to submit W-9')
     } finally {
       setSubmitting(false)
     }
@@ -310,6 +428,12 @@ function W9Form({ onCancel }: { onCancel?: () => void }) {
         </label>
       </div>
 
+      {submitError && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          {submitError}
+        </div>
+      )}
+
       <div className="flex gap-2">
         <button
           type="submit"
@@ -332,34 +456,17 @@ function W9Form({ onCancel }: { onCancel?: () => void }) {
   )
 }
 
-function TaxDocumentsSection() {
-  const currentYear = new Date().getFullYear()
-
-  // Mock documents - would come from API
-  const documents = [
-    {
-      id: '1',
-      year: currentYear - 1,
-      type: '1099-NEC',
-      amount: 125000,
-      status: 'available',
-      filedAt: '2024-01-28',
-    },
-    {
-      id: '2',
-      year: currentYear - 2,
-      type: '1099-NEC',
-      amount: 85000,
-      status: 'available',
-      filedAt: '2023-01-30',
-    },
-  ]
+function TaxDocumentsSection({ documents }: { documents: TaxDocument[] }) {
+  // Filter to only show filed/delivered documents
+  const availableDocuments = documents.filter(
+    (doc) => doc.status === 'filed' || doc.status === 'approved'
+  )
 
   return (
     <div className="rounded-lg border bg-card p-6">
       <h2 className="mb-4 text-lg font-semibold">Tax Documents</h2>
 
-      {documents.length === 0 ? (
+      {availableDocuments.length === 0 ? (
         <div className="rounded-md border border-dashed p-8 text-center">
           <p className="text-muted-foreground">
             No tax documents available yet.
@@ -371,21 +478,23 @@ function TaxDocumentsSection() {
         </div>
       ) : (
         <div className="space-y-3">
-          {documents.map((doc) => (
+          {availableDocuments.map((doc) => (
             <div
               key={doc.id}
               className="flex items-center justify-between rounded-md border p-4"
             >
               <div>
                 <div className="font-medium">
-                  {doc.type} ({doc.year})
+                  {doc.formType} ({doc.year})
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  Amount: ${(doc.amount / 100).toFixed(2)}
+                  Amount: ${(doc.totalAmountCents / 100).toFixed(2)}
                 </div>
-                <div className="text-xs text-muted-foreground">
-                  Filed: {new Date(doc.filedAt).toLocaleDateString()}
-                </div>
+                {doc.filedAt && (
+                  <div className="text-xs text-muted-foreground">
+                    Filed: {new Date(doc.filedAt).toLocaleDateString()}
+                  </div>
+                )}
               </div>
               <div className="flex gap-2">
                 <button className="rounded-md border px-3 py-1 text-sm hover:bg-muted">

@@ -34,7 +34,10 @@ export default function OnboardingSettingsPage() {
         }
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch((error) => {
+        console.error('[onboarding-settings] Failed to load settings:', error)
+        setLoading(false)
+      })
   }, [])
 
   const handleSave = async () => {

@@ -29,7 +29,7 @@ import type {
   ApprovalRemindersPayload,
 } from '../../handlers/creators/communications'
 import type { CreatorSetupCompletePayload } from '../../events'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -438,7 +438,7 @@ export const processEmailQueueScheduledTask = schedules.task({
   cron: '*/5 * * * *', // Every 5 minutes
   run: async () => {
     logger.info('Running scheduled email queue processing')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await processCreatorEmailQueueTask.trigger({ tenantId })
     }
@@ -451,7 +451,7 @@ export const approvalRemindersScheduledTask = schedules.task({
   cron: '0 9 * * *', // Daily at 9 AM UTC
   run: async () => {
     logger.info('Running scheduled approval reminders')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await checkApprovalRemindersTask.trigger({ tenantId })
     }
@@ -464,7 +464,7 @@ export const productDeliveryRemindersScheduledTask = schedules.task({
   cron: '0 10 * * *', // Daily at 10 AM UTC
   run: async () => {
     logger.info('Running scheduled product delivery reminders')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await creatorProductDeliveryRemindersTask.trigger({ tenantId })
     }
@@ -477,7 +477,7 @@ export const deadlineRemindersScheduledTask = schedules.task({
   cron: '0 9 * * *', // Daily at 9 AM UTC
   run: async () => {
     logger.info('Running scheduled deadline reminders')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await creatorDeadlineRemindersTask.trigger({ tenantId })
     }
@@ -490,7 +490,7 @@ export const noResponseRemindersScheduledTask = schedules.task({
   cron: '0 14 * * *', // Daily at 2 PM UTC
   run: async () => {
     logger.info('Running scheduled no response reminders')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await creatorNoResponseRemindersTask.trigger({ tenantId })
     }
@@ -503,7 +503,7 @@ export const abandonedApplicationRemindersScheduledTask = schedules.task({
   cron: '15 * * * *', // Every hour at :15
   run: async () => {
     logger.info('Running scheduled abandoned application reminders')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     // Run all check types
     const checkTypes = ['1h_sms', '24h_email', '48h_final'] as const
     for (const tenantId of tenants) {
@@ -520,7 +520,7 @@ export const retryFailedEmailsScheduledTask = schedules.task({
   cron: '30 * * * *', // Every hour at :30
   run: async () => {
     logger.info('Running scheduled retry failed emails')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await retryFailedCreatorEmailsTask.trigger({ tenantId })
     }

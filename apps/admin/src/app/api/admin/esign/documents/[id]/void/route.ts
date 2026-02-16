@@ -21,7 +21,10 @@ export async function POST(
     }
 
     const { id } = await params
-    const body = await request.json().catch(() => ({}))
+    const body = await request.json().catch(() => {
+      // Empty body is valid - reason is optional for void
+      return {}
+    })
     const { reason } = body
 
     const success = await voidDocument(auth.tenantId, id, reason, auth.userId)

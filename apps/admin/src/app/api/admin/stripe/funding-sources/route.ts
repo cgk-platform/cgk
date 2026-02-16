@@ -5,6 +5,7 @@
  */
 
 import { getTenantContext, requireAuth } from '@cgk-platform/auth'
+import { getTenantStripeClient } from '@cgk-platform/integrations'
 import { NextResponse } from 'next/server'
 
 import {
@@ -25,24 +26,47 @@ export async function GET(req: Request) {
   }
 
   try {
-    // In production, this would fetch from Stripe API
-    // For now, return mock data
-    const sources: StripeFundingSource[] = [
-      {
-        id: 'ba_mock_1234567890',
-        last4: '6789',
-        bankName: 'Chase',
-        status: 'verified',
-        type: 'bank_account',
-      },
-      {
-        id: 'ba_mock_0987654321',
-        last4: '4321',
-        bankName: 'Bank of America',
-        status: 'verified',
-        type: 'bank_account',
-      },
-    ]
+    // Get tenant's Stripe client
+    const stripe = await getTenantStripeClient(tenantId)
+
+    if (!stripe) {
+      // Stripe not configured - return empty sources
+      const settings = await getStripeTopupSettings(tenantId)
+      return NextResponse.json({
+        sources: [],
+        settings,
+        configuredInDashboard: false,
+        error: 'Stripe is not configured for this tenant',
+      })
+    }
+
+    // Fetch bank accounts from Stripe
+    // Using payment methods API for US bank accounts
+    const sources: StripeFundingSource[] = []
+
+    try {
+      // List US bank account payment methods
+      const paymentMethods = await stripe.paymentMethods.list({
+        type: 'us_bank_account',
+        limit: 10,
+      })
+
+      for (const pm of paymentMethods.data) {
+        if (pm.us_bank_account) {
+          sources.push({
+            id: pm.id,
+            last4: pm.us_bank_account.last4 ?? '****',
+            bankName: pm.us_bank_account.bank_name ?? 'Bank Account',
+            status: pm.us_bank_account.status_details?.blocked ? 'errored' : 'verified',
+            type: 'bank_account',
+          })
+        }
+      }
+    } catch (error) {
+      // Payment methods API may require customer context
+      // Log and continue with empty sources
+      console.warn('Failed to list payment methods:', error)
+    }
 
     const settings = await getStripeTopupSettings(tenantId)
 

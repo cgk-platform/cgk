@@ -42,20 +42,23 @@ export async function POST(request: Request) {
   // Get raw body for signature verification
   const rawBody = await request.text()
 
-  // Verify webhook signature if secret is configured
+  // Verify webhook signature - MANDATORY
   const secret = process.env.ASSEMBLYAI_WEBHOOK_SECRET
-  if (secret) {
-    const signature = request.headers.get('x-assemblyai-signature')
-    if (!signature) {
-      console.warn('[assemblyai-webhook] Missing signature header')
-      return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
-    }
+  if (!secret) {
+    console.error('[assemblyai-webhook] ASSEMBLYAI_WEBHOOK_SECRET not configured')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 })
+  }
 
-    const isValid = await verifyAssemblyAIWebhookSignature(rawBody, signature, secret)
-    if (!isValid) {
-      console.warn('[assemblyai-webhook] Invalid signature')
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-    }
+  const signature = request.headers.get('x-assemblyai-signature')
+  if (!signature) {
+    console.warn('[assemblyai-webhook] Missing signature header')
+    return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
+  }
+
+  const isValid = await verifyAssemblyAIWebhookSignature(rawBody, signature, secret)
+  if (!isValid) {
+    console.warn('[assemblyai-webhook] Invalid signature')
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
   let body: AssemblyAIWebhookBody
@@ -84,7 +87,10 @@ export async function POST(request: Request) {
     ) v
     WHERE v.id IS NOT NULL
     LIMIT 1
-  `.catch(() => ({ rows: [] }))
+  `.catch((error) => {
+    console.warn('[assemblyai-webhook] Failed to search for video:', error)
+    return { rows: [] }
+  })
 
   // Fallback: Try direct query if cross-schema search not available
   let video: VideoWithTenant | null = videoResult.rows[0] || null

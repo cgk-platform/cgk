@@ -213,7 +213,10 @@ export class RetellVoiceCalls {
     }
 
     // Create new Retell agent
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.example.com'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+    if (!appUrl) {
+      throw new Error('APP_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+    }
 
     const response = await fetch(`${RETELL_API_BASE}/v2/create-agent`, {
       method: 'POST',
@@ -395,18 +398,18 @@ export function createRetellClient(apiKey: string, tenantId: string): RetellVoic
 }
 
 /**
- * Verify Retell webhook signature
+ * Verify Retell webhook signature - MANDATORY
+ * Returns false if secret is not configured or signature is invalid
  */
 export function verifyRetellSignature(body: string, signature: string | null): boolean {
   if (!signature) return false
 
   // Retell uses HMAC-SHA256 for webhook signatures
-  // In production, you would verify using the webhook secret
   const webhookSecret = process.env.RETELL_WEBHOOK_SECRET
 
   if (!webhookSecret) {
-    console.warn('RETELL_WEBHOOK_SECRET not set, skipping signature verification')
-    return true // Allow in development
+    console.error('RETELL_WEBHOOK_SECRET not configured - rejecting webhook')
+    return false // Reject if secret not configured
   }
 
   // Use crypto to verify HMAC

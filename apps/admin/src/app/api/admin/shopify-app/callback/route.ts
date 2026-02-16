@@ -17,7 +17,10 @@ import {
  */
 export async function GET(request: Request) {
   const url = new URL(request.url)
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+  if (!appUrl) {
+    return NextResponse.redirect(new URL('/admin/integrations/shopify-app?error=config_missing', 'http://localhost:3001'))
+  }
 
   // Extract OAuth parameters
   const code = url.searchParams.get('code')

@@ -8,54 +8,119 @@
 
 import { NextResponse } from 'next/server'
 
+import {
+  getW9Status,
+  listTaxForms,
+  saveW9,
+  logTaxAction,
+  THRESHOLD_CENTS,
+  type TaxClassification,
+} from '@cgk-platform/tax'
+
+import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth/middleware'
+
 export const dynamic = 'force-dynamic'
 
-// GET - Get creator's tax status and documents
-export async function GET() {
-  // Would get creator from session
-  // const creatorId = 'creator_123' // TODO: Get from session
+/**
+ * Get active tenant slug from creator auth context
+ */
+function getActiveTenantSlug(auth: CreatorAuthContext): string | null {
+  const activeMembership = auth.memberships.find((m) => m.status === 'active')
+  return activeMembership?.brandSlug || null
+}
 
-  // Mock response - would use @cgk-platform/tax package
-  const taxStatus = {
-    w9: {
-      hasW9: true,
-      status: 'approved',
-      tinLastFour: '1234',
-      certifiedAt: '2024-06-15T00:00:00Z',
-      certifiedName: 'John Creator',
-      eDeliveryConsent: true,
-    },
-    documents: [
-      {
-        id: '1099_abc123',
-        year: 2024,
-        formType: '1099-NEC',
-        totalAmountCents: 125000,
-        status: 'filed',
-        filedAt: '2025-01-28T00:00:00Z',
-        deliveredAt: '2025-01-28T00:00:00Z',
-      },
-      {
-        id: '1099_def456',
-        year: 2023,
-        formType: '1099-NEC',
-        totalAmountCents: 85000,
-        status: 'filed',
-        filedAt: '2024-01-30T00:00:00Z',
-        deliveredAt: '2024-01-30T00:00:00Z',
-      },
-    ],
-    currentYearEarnings: 45000, // Cents
-    threshold: 60000, // Cents ($600)
+// GET - Get creator's tax status and documents
+export async function GET(request: Request) {
+  let auth: CreatorAuthContext
+  try {
+    auth = await requireCreatorAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  return NextResponse.json(taxStatus)
+  const tenantSlug = getActiveTenantSlug(auth)
+  if (!tenantSlug) {
+    return NextResponse.json({ error: 'No active membership' }, { status: 400 })
+  }
+
+  try {
+    // Get W-9 status
+    const w9Status = await getW9Status(tenantSlug, auth.creatorId, 'creator')
+
+    // Get 1099 forms for this creator
+    const { forms } = await listTaxForms(tenantSlug, {
+      payeeType: 'creator',
+      limit: 50,
+    })
+
+    // Filter forms for this specific creator
+    const creatorForms = forms.filter((form) => form.payeeId === auth.creatorId)
+
+    // Map forms to response format
+    const documents = creatorForms.map((form) => ({
+      id: form.id,
+      year: form.taxYear,
+      formType: form.formType,
+      totalAmountCents: form.totalAmountCents,
+      status: form.status,
+      filedAt: form.irsFiledAt?.toISOString() || null,
+      deliveredAt: form.deliveredAt?.toISOString() || null,
+    }))
+
+    // Log tax info viewed
+    await logTaxAction(
+      tenantSlug,
+      'tax_info_viewed',
+      null,
+      auth.creatorId,
+      'creator',
+      auth.creatorId,
+      {
+        ipAddress: request.headers.get('x-forwarded-for') || undefined,
+        userAgent: request.headers.get('user-agent') || undefined,
+        notes: 'Creator viewed tax status via portal',
+      }
+    )
+
+    const taxStatus = {
+      w9: {
+        hasW9: w9Status.hasW9,
+        status: w9Status.status,
+        tinLastFour: w9Status.tinLastFour || null,
+        certifiedAt: w9Status.certifiedAt?.toISOString() || null,
+        certifiedName: w9Status.certifiedName || null,
+        eDeliveryConsent: w9Status.eDeliveryConsent || false,
+      },
+      documents,
+      // Note: currentYearEarnings would require aggregating from payouts table
+      // For now, return null to indicate it's not available
+      currentYearEarnings: null,
+      threshold: THRESHOLD_CENTS,
+    }
+
+    return NextResponse.json(taxStatus)
+  } catch (error) {
+    console.error('Error fetching tax status:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch tax status' },
+      { status: 500 }
+    )
+  }
 }
 
 // POST - Submit W-9 form
 export async function POST(request: Request) {
-  // Would get creator from session
-  // const creatorId = 'creator_123' // TODO: Get from session
+  let auth: CreatorAuthContext
+  try {
+    auth = await requireCreatorAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const tenantSlug = getActiveTenantSlug(auth)
+  if (!tenantSlug) {
+    return NextResponse.json({ error: 'No active membership' }, { status: 400 })
+  }
 
   let body: {
     legalName: string
@@ -109,33 +174,47 @@ export async function POST(request: Request) {
     )
   }
 
-  // Would validate and save using @cgk-platform/tax package
-  // await saveW9(tenantSlug, {
-  //   payeeId: creatorId,
-  //   payeeType: 'creator',
-  //   legalName: body.legalName,
-  //   businessName: body.businessName,
-  //   taxClassification: body.taxClassification,
-  //   address: {
-  //     line1: body.addressLine1,
-  //     line2: body.addressLine2,
-  //     city: body.city,
-  //     state: body.state,
-  //     postalCode: body.postalCode,
-  //     country: 'US',
-  //   },
-  //   tin: body.tin,
-  //   tinType: body.tinType,
-  //   certificationDate: new Date(),
-  //   certificationName: body.certificationName,
-  //   certificationIp: request.headers.get('x-forwarded-for') || 'unknown',
-  //   eDeliveryConsent: body.eDeliveryConsent,
-  //   eDeliveryConsentAt: body.eDeliveryConsent ? new Date() : undefined,
-  // }, creatorId)
+  try {
+    // Save W-9 using the tax package
+    await saveW9(
+      tenantSlug,
+      {
+        payeeId: auth.creatorId,
+        payeeType: 'creator',
+        legalName: body.legalName,
+        businessName: body.businessName,
+        taxClassification: body.taxClassification as TaxClassification,
+        address: {
+          line1: body.addressLine1,
+          line2: body.addressLine2,
+          city: body.city,
+          state: body.state,
+          postalCode: body.postalCode,
+          country: 'US',
+        },
+        tin: body.tin,
+        tinType: body.tinType,
+        certificationDate: new Date(),
+        certificationName: body.certificationName,
+        certificationIp: request.headers.get('x-forwarded-for') || 'unknown',
+        eDeliveryConsent: body.eDeliveryConsent,
+        eDeliveryConsentAt: body.eDeliveryConsent ? new Date() : undefined,
+      },
+      auth.creatorId,
+      {
+        ipAddress: request.headers.get('x-forwarded-for') || undefined,
+        userAgent: request.headers.get('user-agent') || undefined,
+      }
+    )
 
-  return NextResponse.json({
-    success: true,
-    message: 'W-9 submitted successfully',
-    status: 'pending_review',
-  })
+    return NextResponse.json({
+      success: true,
+      message: 'W-9 submitted successfully',
+      status: 'approved', // W-9 is approved immediately after validation
+    })
+  } catch (error) {
+    console.error('Error saving W-9:', error)
+    const message = error instanceof Error ? error.message : 'Failed to save W-9'
+    return NextResponse.json({ error: message }, { status: 400 })
+  }
 }

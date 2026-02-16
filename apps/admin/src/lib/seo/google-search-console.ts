@@ -8,48 +8,93 @@ import { sql } from '@cgk-platform/db'
 import type { GSCConnection, GSCSyncResult } from './types'
 import { updateKeywordMetrics, recordHistorySnapshot, getKeywordByText } from './keyword-tracker'
 
-// GSC OAuth configuration
-const GSC_CLIENT_ID = process.env.GSC_CLIENT_ID || ''
-const GSC_CLIENT_SECRET = process.env.GSC_CLIENT_SECRET || ''
-const GSC_REDIRECT_URI = process.env.GSC_REDIRECT_URI || ''
+// GSC OAuth configuration - lazily validated when needed
+function getGSCConfig(): { clientId: string; clientSecret: string; redirectUri: string } {
+  const clientId = process.env.GSC_CLIENT_ID
+  const clientSecret = process.env.GSC_CLIENT_SECRET
+  const redirectUri = process.env.GSC_REDIRECT_URI
 
-// Simple encryption for token storage (in production, use a proper secret manager)
-const ENCRYPTION_KEY = process.env.GSC_ENCRYPTION_KEY || 'default-dev-key-change-in-prod'
-
-/**
- * Simple XOR-based encryption for development
- * In production, use proper encryption (e.g., AWS KMS, Google Cloud KMS)
- */
-function encrypt(text: string): string {
-  let result = ''
-  for (let i = 0; i < text.length; i++) {
-    result += String.fromCharCode(
-      text.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length)
+  if (!clientId || !clientSecret || !redirectUri) {
+    throw new Error(
+      'Google Search Console not configured. Set GSC_CLIENT_ID, GSC_CLIENT_SECRET, and GSC_REDIRECT_URI environment variables.'
     )
   }
-  return Buffer.from(result).toString('base64')
+
+  return { clientId, clientSecret, redirectUri }
+}
+
+// Check if GSC is configured (for feature gating)
+export function isGSCConfigured(): boolean {
+  return !!(
+    process.env.GSC_CLIENT_ID &&
+    process.env.GSC_CLIENT_SECRET &&
+    process.env.GSC_REDIRECT_URI &&
+    process.env.GSC_ENCRYPTION_KEY
+  )
+}
+
+// Encryption key must be exactly 32 bytes for AES-256
+function getEncryptionKey(): Buffer {
+  const key = process.env.GSC_ENCRYPTION_KEY
+  if (!key) {
+    throw new Error(
+      'GSC_ENCRYPTION_KEY environment variable is required for secure token storage.'
+    )
+  }
+  // Hash the key to ensure exactly 32 bytes for AES-256
+  const crypto = require('crypto')
+  return crypto.createHash('sha256').update(key).digest()
+}
+
+/**
+ * AES-256-GCM encryption for secure token storage
+ */
+function encrypt(text: string): string {
+  const crypto = require('crypto')
+  const key = getEncryptionKey()
+  const iv = crypto.randomBytes(16)
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
+
+  let encrypted = cipher.update(text, 'utf8', 'hex')
+  encrypted += cipher.final('hex')
+  const authTag = cipher.getAuthTag()
+
+  // Format: iv:authTag:ciphertext (all hex encoded)
+  return `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`
 }
 
 function decrypt(encoded: string): string {
-  const text = Buffer.from(encoded, 'base64').toString()
-  let result = ''
-  for (let i = 0; i < text.length; i++) {
-    result += String.fromCharCode(
-      text.charCodeAt(i) ^ ENCRYPTION_KEY.charCodeAt(i % ENCRYPTION_KEY.length)
-    )
+  const crypto = require('crypto')
+  const key = getEncryptionKey()
+
+  const parts = encoded.split(':')
+  if (parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) {
+    throw new Error('Invalid encrypted token format')
   }
-  return result
+
+  const iv = Buffer.from(parts[0], 'hex')
+  const authTag = Buffer.from(parts[1], 'hex')
+  const ciphertext = parts[2]
+
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv)
+  decipher.setAuthTag(authTag)
+
+  let decrypted = decipher.update(ciphertext, 'hex', 'utf8')
+  decrypted += decipher.final('utf8')
+
+  return decrypted
 }
 
 /**
  * Generate OAuth authorization URL
  */
 export function getOAuthAuthorizationUrl(state: string): string {
+  const config = getGSCConfig()
   const scopes = ['https://www.googleapis.com/auth/webmasters.readonly']
 
   const params = new URLSearchParams({
-    client_id: GSC_CLIENT_ID,
-    redirect_uri: GSC_REDIRECT_URI,
+    client_id: config.clientId,
+    redirect_uri: config.redirectUri,
     response_type: 'code',
     scope: scopes.join(' '),
     access_type: 'offline',
@@ -68,15 +113,16 @@ export async function exchangeCodeForTokens(code: string): Promise<{
   refreshToken: string
   expiresAt: Date
 }> {
+  const config = getGSCConfig()
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: GSC_CLIENT_ID,
-      client_secret: GSC_CLIENT_SECRET,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
       code,
       grant_type: 'authorization_code',
-      redirect_uri: GSC_REDIRECT_URI,
+      redirect_uri: config.redirectUri,
     }),
   })
 
@@ -105,12 +151,13 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
   accessToken: string
   expiresAt: Date
 }> {
+  const config = getGSCConfig()
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: GSC_CLIENT_ID,
-      client_secret: GSC_CLIENT_SECRET,
+      client_id: config.clientId,
+      client_secret: config.clientSecret,
       refresh_token: refreshToken,
       grant_type: 'refresh_token',
     }),

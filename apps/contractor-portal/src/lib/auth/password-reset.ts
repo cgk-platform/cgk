@@ -154,7 +154,10 @@ export async function sendPasswordResetEmail(
   token: string,
   tenantSlug: string
 ): Promise<void> {
-  const baseUrl = process.env.CONTRACTOR_PORTAL_URL || 'http://localhost:3500'
+  const baseUrl = process.env.CONTRACTOR_PORTAL_URL
+  if (!baseUrl) {
+    throw new Error('CONTRACTOR_PORTAL_URL environment variable is required')
+  }
   const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}&tenant=${encodeURIComponent(tenantSlug)}`
 
   // Check if Resend is configured

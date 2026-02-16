@@ -23,7 +23,10 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+  if (!appUrl) {
+    return NextResponse.json({ error: 'APP_URL not configured' }, { status: 500 })
+  }
 
   // Get shop domain from query
   const url = new URL(request.url)
@@ -88,7 +91,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Shop domain required' }, { status: 400 })
     }
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+    if (!appUrl) {
+      return NextResponse.json({ error: 'APP_URL not configured' }, { status: 500 })
+    }
     const normalizedShop = normalizeShopDomain(shopDomain)
     const redirectUri = `${appUrl}/api/admin/shopify-app/callback`
 

@@ -20,7 +20,7 @@ import type {
   SyncGoogleAdsSpendPayload,
   SyncMetaAdsSpendPayload,
 } from '../../handlers/analytics/types'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -187,7 +187,7 @@ export const syncGoogleAdsSpendScheduledTask = schedules.task({
   cron: '0 5 * * *', // 5 AM daily
   run: async () => {
     logger.info('Running scheduled Google Ads spend sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await syncGoogleAdsSpendTask.trigger({ tenantId })
     }
@@ -200,7 +200,7 @@ export const syncMetaAdsSpendScheduledTask = schedules.task({
   cron: '0 5 * * *', // 5 AM daily
   run: async () => {
     logger.info('Running scheduled Meta Ads spend sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await syncMetaAdsSpendTask.trigger({ tenantId })
     }

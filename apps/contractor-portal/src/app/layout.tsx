@@ -1,3 +1,6 @@
+// Environment validation - must be first import to fail fast on missing env vars
+import '@/lib/env-validation'
+
 import type { Metadata } from 'next'
 
 import './globals.css'

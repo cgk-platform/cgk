@@ -17,8 +17,9 @@ interface RouteParams {
 /**
  * Extract tenant slug from request
  * For signing, we need to determine the tenant from the hostname or a query param
+ * Returns null if tenant cannot be determined - callers must handle this case
  */
-function getTenantSlug(req: Request): string {
+function getTenantSlug(req: Request): string | null {
   const url = new URL(req.url)
 
   // Check query param first (for development)
@@ -31,10 +32,10 @@ function getTenantSlug(req: Request): string {
   const hostname = url.hostname
   const parts = hostname.split('.')
 
-  // Skip localhost and direct IP addresses
+  // For localhost and direct IP addresses, require explicit tenant query param
   if (hostname === 'localhost' || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) {
-    // Default to 'rawdog' for development
-    return 'rawdog'
+    // Tenant must be provided via query param for local development
+    return null
   }
 
   // Handle subdomains
@@ -46,8 +47,8 @@ function getTenantSlug(req: Request): string {
     }
   }
 
-  // Default fallback
-  return 'rawdog'
+  // Cannot determine tenant - return null
+  return null
 }
 
 /**
@@ -57,6 +58,13 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
   try {
     const { token } = await params
     const tenantSlug = getTenantSlug(req)
+
+    if (!tenantSlug) {
+      return Response.json({
+        error: 'Tenant context required',
+        code: 'TENANT_REQUIRED',
+      }, { status: 401 })
+    }
 
     const session = await getSigningSessionByToken(tenantSlug, token)
 
@@ -114,6 +122,13 @@ export async function POST(req: Request, { params }: RouteParams): Promise<Respo
     const { token } = await params
     const tenantSlug = getTenantSlug(req)
 
+    if (!tenantSlug) {
+      return Response.json({
+        error: 'Tenant context required',
+        code: 'TENANT_REQUIRED',
+      }, { status: 401 })
+    }
+
     const body = (await req.json()) as SignDocumentInput
 
     // Validate required fields
@@ -156,6 +171,13 @@ export async function DELETE(req: Request, { params }: RouteParams): Promise<Res
   try {
     const { token } = await params
     const tenantSlug = getTenantSlug(req)
+
+    if (!tenantSlug) {
+      return Response.json({
+        error: 'Tenant context required',
+        code: 'TENANT_REQUIRED',
+      }, { status: 401 })
+    }
 
     const body = (await req.json()) as { reason?: string }
     const reason = body.reason || 'No reason provided'

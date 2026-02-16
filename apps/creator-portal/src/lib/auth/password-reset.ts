@@ -174,7 +174,10 @@ export async function sendPasswordResetEmail(
   email: string,
   token: string
 ): Promise<void> {
-  const baseUrl = process.env.CREATOR_PORTAL_URL || 'http://localhost:3400'
+  const baseUrl = process.env.CREATOR_PORTAL_URL
+  if (!baseUrl) {
+    throw new Error('CREATOR_PORTAL_URL environment variable is required')
+  }
   const resetUrl = `${baseUrl}/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
 
   // Check if Resend is configured

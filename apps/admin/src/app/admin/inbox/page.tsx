@@ -16,7 +16,10 @@ async function getThreads(
   tenantId: string,
   params: { status?: string; priority?: string; search?: string }
 ) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+  if (!baseUrl) {
+    throw new Error('APP_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+  }
   const searchParams = new URLSearchParams()
 
   searchParams.set('status', params.status || 'open')

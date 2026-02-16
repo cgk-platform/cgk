@@ -400,7 +400,11 @@ export async function createVideo(
         updated_at as "updatedAt",
         deleted_at as "deletedAt"
     `
-    return result.rows[0] as Video
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create video')
+    }
+    return row as Video
   })
 }
 
@@ -682,7 +686,11 @@ export async function createFolder(
         name,
         created_at as "createdAt"
     `
-    return result.rows[0] as VideoFolder
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create folder')
+    }
+    return row as VideoFolder
   })
 }
 

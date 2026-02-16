@@ -572,20 +572,39 @@ export async function getAllAuditEntries(
   offset: number = 0,
   action?: string
 ): Promise<{ entries: FlagAuditEntry[]; total: number }> {
-  let countQuery = 'SELECT COUNT(*) as count FROM feature_flag_audit'
-  let dataQuery = 'SELECT * FROM feature_flag_audit'
-
+  // Use parameterized queries to prevent SQL injection
+  // Separate query branches for with/without action filter
   if (action) {
-    countQuery += ` WHERE action = '${action}'`
-    dataQuery += ` WHERE action = '${action}'`
+    const countResult = await sql`
+      SELECT COUNT(*) as count FROM feature_flag_audit
+      WHERE action = ${action}
+    `
+    const total = parseInt(countResult.rows[0]?.count as string ?? '0', 10)
+
+    const result = await sql`
+      SELECT * FROM feature_flag_audit
+      WHERE action = ${action}
+      ORDER BY created_at DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `
+
+    return {
+      entries: result.rows.map((row) => rowToAudit(row as AuditRow)),
+      total,
+    }
   }
 
-  dataQuery += ' ORDER BY created_at DESC'
+  // No action filter - query all entries
+  const countResult = await sql`
+    SELECT COUNT(*) as count FROM feature_flag_audit
+  `
+  const total = parseInt(countResult.rows[0]?.count as string ?? '0', 10)
 
-  const countResult = await sql.query(countQuery)
-  const total = parseInt(countResult.rows[0].count as string, 10)
-
-  const result = await sql.query(`${dataQuery} LIMIT ${limit} OFFSET ${offset}`)
+  const result = await sql`
+    SELECT * FROM feature_flag_audit
+    ORDER BY created_at DESC
+    LIMIT ${limit} OFFSET ${offset}
+  `
 
   return {
     entries: result.rows.map((row) => rowToAudit(row as AuditRow)),

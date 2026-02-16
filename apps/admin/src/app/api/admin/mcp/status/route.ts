@@ -17,7 +17,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
 
   const result = await withTenant(tenantSlug, async () => {
     // Check if mcp_api_keys table exists

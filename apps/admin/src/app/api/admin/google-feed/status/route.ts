@@ -31,7 +31,7 @@ export async function GET() {
     // Build feed URL if settings exist
     let feedUrl: string | null = null
     if (settings?.feedToken) {
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://admin.example.com'
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
       feedUrl = `${baseUrl}/api/feeds/google/${settings.feedToken}/products.${settings.feedFormat || 'xml'}`
     }
 

@@ -1,5 +1,7 @@
 export const dynamic = 'force-dynamic'
 
+import { createCommerceProvider, type Product } from '@cgk-platform/commerce'
+import { sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -29,14 +31,68 @@ interface ShopifyProduct {
 }
 
 /**
+ * Transform commerce Product to ShopifyProduct format for the modal
+ */
+function transformProduct(product: Product): ShopifyProduct {
+  return {
+    id: product.id,
+    title: product.title,
+    handle: product.handle,
+    description: product.description,
+    images: product.images.map((img) => ({
+      url: img.url,
+      altText: img.altText ?? undefined,
+    })),
+    status: product.availableForSale ? 'active' : 'draft',
+    variants: product.variants.map((v) => ({
+      id: v.id,
+      title: v.title,
+      sku: v.sku || '',
+      price: v.price.amount,
+      // Inventory quantity not available from storefront API; use availability flag
+      inventoryQuantity: v.availableForSale ? 1 : 0,
+      availableForSale: v.availableForSale,
+    })),
+  }
+}
+
+/**
+ * Get tenant's Shopify configuration from database
+ */
+async function getTenantShopifyConfig(tenantSlug: string): Promise<{
+  storeDomain: string
+  storefrontAccessToken: string
+} | null> {
+  const result = await sql`
+    SELECT shopify_store_domain, settings
+    FROM organizations
+    WHERE slug = ${tenantSlug}
+  `
+
+  const row = result.rows[0]
+  if (!row || !row.shopify_store_domain) {
+    return null
+  }
+
+  const settings = (row.settings as Record<string, unknown>) || {}
+  const shopifySettings = (settings.shopify as Record<string, unknown>) || {}
+
+  // The storefront access token should be in settings
+  const storefrontAccessToken = shopifySettings.storefrontAccessToken as string
+
+  if (!storefrontAccessToken) {
+    return null
+  }
+
+  return {
+    storeDomain: row.shopify_store_domain as string,
+    storefrontAccessToken,
+  }
+}
+
+/**
  * GET /api/admin/products/available
  * Returns active products with variants from Shopify for the SendProductModal
- *
- * In a full implementation, this would:
- * 1. Get tenant's Shopify credentials from tenant_settings
- * 2. Use @cgk-platform/shopify package to fetch products
- * 3. Filter to only active products with available inventory
- * 4. Implement pagination for large catalogs
  */
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -51,129 +107,33 @@ export async function GET(request: Request) {
   const limit = parseInt(searchParams.get('limit') || '50', 10)
 
   try {
-    // In production, this would fetch from Shopify:
-    // const shopifyClient = await getShopifyClient(tenantSlug)
-    // const products = await shopifyClient.product.list({
-    //   status: 'active',
-    //   limit,
-    //   query: search,
-    // })
+    // Get tenant's Shopify configuration
+    const shopifyConfig = await getTenantShopifyConfig(tenantSlug)
 
-    // Placeholder products for development
-    const mockProducts: ShopifyProduct[] = [
-      {
-        id: 'gid://shopify/Product/1',
-        title: 'Daily Cleanser',
-        handle: 'daily-cleanser',
-        description: 'Gentle daily face cleanser for all skin types',
-        images: [{ url: '/placeholder-product.jpg', altText: 'Daily Cleanser' }],
-        status: 'active',
-        variants: [
-          {
-            id: 'gid://shopify/ProductVariant/101',
-            title: '4oz',
-            sku: 'CLN-001-4',
-            price: '18.00',
-            inventoryQuantity: 50,
-            availableForSale: true,
-          },
-          {
-            id: 'gid://shopify/ProductVariant/102',
-            title: '8oz',
-            sku: 'CLN-001-8',
-            price: '28.00',
-            inventoryQuantity: 35,
-            availableForSale: true,
-          },
-        ],
-      },
-      {
-        id: 'gid://shopify/Product/2',
-        title: 'Hydrating Moisturizer',
-        handle: 'hydrating-moisturizer',
-        description: 'Deep hydration for dry and combination skin',
-        images: [{ url: '/placeholder-product.jpg', altText: 'Hydrating Moisturizer' }],
-        status: 'active',
-        variants: [
-          {
-            id: 'gid://shopify/ProductVariant/201',
-            title: 'Regular',
-            sku: 'MOI-002',
-            price: '42.00',
-            inventoryQuantity: 28,
-            availableForSale: true,
-          },
-        ],
-      },
-      {
-        id: 'gid://shopify/Product/3',
-        title: 'Eye Cream',
-        handle: 'eye-cream',
-        description: 'Anti-aging eye cream with peptides',
-        images: [{ url: '/placeholder-product.jpg', altText: 'Eye Cream' }],
-        status: 'active',
-        variants: [
-          {
-            id: 'gid://shopify/ProductVariant/301',
-            title: '15ml',
-            sku: 'EYE-003',
-            price: '38.00',
-            inventoryQuantity: 42,
-            availableForSale: true,
-          },
-        ],
-      },
-      {
-        id: 'gid://shopify/Product/4',
-        title: 'Vitamin C Serum',
-        handle: 'vitamin-c-serum',
-        description: 'Brightening serum with 20% Vitamin C',
-        images: [{ url: '/placeholder-product.jpg', altText: 'Vitamin C Serum' }],
-        status: 'active',
-        variants: [
-          {
-            id: 'gid://shopify/ProductVariant/401',
-            title: '30ml',
-            sku: 'SER-004',
-            price: '55.00',
-            inventoryQuantity: 22,
-            availableForSale: true,
-          },
-        ],
-      },
-      {
-        id: 'gid://shopify/Product/5',
-        title: 'SPF 50 Sunscreen',
-        handle: 'spf-50-sunscreen',
-        description: 'Lightweight daily sunscreen',
-        images: [{ url: '/placeholder-product.jpg', altText: 'SPF 50 Sunscreen' }],
-        status: 'active',
-        variants: [
-          {
-            id: 'gid://shopify/ProductVariant/501',
-            title: '50ml',
-            sku: 'SUN-005',
-            price: '32.00',
-            inventoryQuantity: 60,
-            availableForSale: true,
-          },
-        ],
-      },
-    ]
-
-    // Filter by search if provided
-    let filteredProducts = mockProducts
-    if (search) {
-      const searchLower = search.toLowerCase()
-      filteredProducts = mockProducts.filter(
-        (p) =>
-          p.title.toLowerCase().includes(searchLower) ||
-          p.variants.some((v) => v.sku.toLowerCase().includes(searchLower))
+    if (!shopifyConfig) {
+      return NextResponse.json(
+        {
+          products: [],
+          error: 'Shopify is not configured for this tenant. Please configure Shopify credentials in Settings.',
+        },
+        { status: 200 }
       )
     }
 
-    // Apply limit
-    const products = filteredProducts.slice(0, limit)
+    // Create commerce provider with tenant's Shopify credentials
+    const commerce = createCommerceProvider({
+      provider: 'shopify',
+      storeDomain: shopifyConfig.storeDomain,
+      storefrontAccessToken: shopifyConfig.storefrontAccessToken,
+    })
+
+    // Fetch products from Shopify via commerce provider
+    const result = search
+      ? await commerce.products.search(search, { first: limit })
+      : await commerce.products.list({ first: limit })
+
+    // Transform to expected format
+    const products: ShopifyProduct[] = result.items.map(transformProduct)
 
     return NextResponse.json({ products })
   } catch (error) {

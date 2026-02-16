@@ -57,6 +57,70 @@ const ENTITY_TYPES = [
   { value: 'sole_proprietor', label: 'Sole Proprietor' },
 ] as const
 
+// Tax ID validation functions
+const validateSSN = (ssn: string): string | null => {
+  // Remove dashes and spaces for validation
+  const clean = ssn.replace(/[-\s]/g, '')
+
+  if (!clean) return 'SSN is required'
+  if (!/^\d+$/.test(clean)) return 'SSN must contain only numbers'
+  if (clean.length !== 9) return 'SSN must be 9 digits'
+
+  // Check for invalid SSN patterns (IRS rules)
+  // Cannot start with 9 (reserved for ITINs)
+  if (clean.startsWith('9')) return 'Invalid SSN (cannot start with 9)'
+  // Cannot be all zeros in any section
+  if (clean.substring(0, 3) === '000') return 'Invalid SSN (area number cannot be 000)'
+  if (clean.substring(3, 5) === '00') return 'Invalid SSN (group number cannot be 00)'
+  if (clean.substring(5, 9) === '0000') return 'Invalid SSN (serial number cannot be 0000)'
+  // Check for known invalid SSNs
+  if (clean === '078051120' || clean === '219099999') {
+    return 'This SSN is known to be invalid'
+  }
+
+  return null
+}
+
+const validateEIN = (ein: string): string | null => {
+  // Remove dashes and spaces for validation
+  const clean = ein.replace(/[-\s]/g, '')
+
+  if (!clean) return 'EIN is required'
+  if (!/^\d+$/.test(clean)) return 'EIN must contain only numbers'
+  if (clean.length !== 9) return 'EIN must be 9 digits'
+
+  // First two digits must be valid EIN prefix (IRS assigned)
+  const validPrefixes = [
+    '01', '02', '03', '04', '05', '06', '10', '11', '12', '13', '14', '15',
+    '16', '20', '21', '22', '23', '24', '25', '26', '27', '30', '32', '33',
+    '34', '35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45',
+    '46', '47', '48', '50', '51', '52', '53', '54', '55', '56', '57', '58',
+    '59', '60', '61', '62', '63', '64', '65', '66', '67', '68', '71', '72',
+    '73', '74', '75', '76', '77', '80', '81', '82', '83', '84', '85', '86',
+    '87', '88', '90', '91', '92', '93', '94', '95', '98', '99'
+  ]
+  const prefix = clean.substring(0, 2)
+  if (!validPrefixes.includes(prefix)) {
+    return 'Invalid EIN prefix'
+  }
+
+  return null
+}
+
+// Format helpers for display
+const formatSSNInput = (value: string): string => {
+  const clean = value.replace(/[^\d]/g, '').slice(0, 9)
+  if (clean.length <= 3) return clean
+  if (clean.length <= 5) return `${clean.slice(0, 3)}-${clean.slice(3)}`
+  return `${clean.slice(0, 3)}-${clean.slice(3, 5)}-${clean.slice(5)}`
+}
+
+const formatEINInput = (value: string): string => {
+  const clean = value.replace(/[^\d]/g, '').slice(0, 9)
+  if (clean.length <= 2) return clean
+  return `${clean.slice(0, 2)}-${clean.slice(2)}`
+}
+
 function formatCents(cents: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -74,6 +138,7 @@ export default function TaxSettingsPage() {
   const [success, setSuccess] = useState<string | null>(null)
 
   const [showForm, setShowForm] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [formData, setFormData] = useState({
     taxIdType: 'ssn' as 'ssn' | 'ein',
     taxId: '',
@@ -120,16 +185,51 @@ export default function TaxSettingsPage() {
     e.preventDefault()
     setError(null)
     setSuccess(null)
+    setFieldErrors({})
+
+    const errors: Record<string, string> = {}
 
     if (!formData.certify) {
       setError('You must certify the information is correct')
       return
     }
 
-    // Validate tax ID
-    const taxIdClean = formData.taxId.replace(/[^0-9]/g, '')
-    if (taxIdClean.length !== 9) {
-      setError(`${formData.taxIdType === 'ssn' ? 'SSN' : 'EIN'} must be 9 digits`)
+    // Validate tax ID with proper format checking
+    const taxIdError = formData.taxIdType === 'ssn'
+      ? validateSSN(formData.taxId)
+      : validateEIN(formData.taxId)
+
+    if (taxIdError) {
+      errors.taxId = taxIdError
+    }
+
+    // Validate other required fields
+    if (!formData.legalName.trim()) {
+      errors.legalName = 'Legal name is required'
+    }
+
+    if (!formData.addressLine1.trim()) {
+      errors.addressLine1 = 'Street address is required'
+    }
+
+    if (!formData.city.trim()) {
+      errors.city = 'City is required'
+    }
+
+    if (!formData.state.trim()) {
+      errors.state = 'State is required'
+    } else if (!/^[A-Z]{2}$/.test(formData.state.toUpperCase())) {
+      errors.state = 'Use 2-letter state code (e.g., NY)'
+    }
+
+    if (!formData.postalCode.trim()) {
+      errors.postalCode = 'ZIP code is required'
+    } else if (!/^\d{5}(-\d{4})?$/.test(formData.postalCode)) {
+      errors.postalCode = 'Invalid ZIP code format'
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
       return
     }
 
@@ -329,12 +429,28 @@ export default function TaxSettingsPage() {
                   type="password"
                   placeholder={formData.taxIdType === 'ssn' ? 'XXX-XX-XXXX' : 'XX-XXXXXXX'}
                   value={formData.taxId}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, taxId: e.target.value }))}
+                  onChange={(e) => {
+                    // Format the input based on type
+                    const formatted = formData.taxIdType === 'ssn'
+                      ? formatSSNInput(e.target.value)
+                      : formatEINInput(e.target.value)
+                    setFormData((prev) => ({ ...prev, taxId: formatted }))
+                    if (fieldErrors.taxId) {
+                      setFieldErrors((prev) => ({ ...prev, taxId: '' }))
+                    }
+                  }}
+                  className={fieldErrors.taxId ? 'border-destructive' : ''}
                   required
                 />
-                <p className="text-xs text-muted-foreground">
-                  Your tax ID is encrypted and securely stored.
-                </p>
+                {fieldErrors.taxId ? (
+                  <p className="text-sm text-destructive">{fieldErrors.taxId}</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    {formData.taxIdType === 'ssn'
+                      ? 'Format: XXX-XX-XXXX. Your SSN is encrypted and securely stored.'
+                      : 'Format: XX-XXXXXXX. Your EIN is encrypted and securely stored.'}
+                  </p>
+                )}
               </div>
 
               {/* Legal Name */}
@@ -344,9 +460,18 @@ export default function TaxSettingsPage() {
                   id="legalName"
                   placeholder="As shown on your tax return"
                   value={formData.legalName}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, legalName: e.target.value }))}
+                  onChange={(e) => {
+                    setFormData((prev) => ({ ...prev, legalName: e.target.value }))
+                    if (fieldErrors.legalName) {
+                      setFieldErrors((prev) => ({ ...prev, legalName: '' }))
+                    }
+                  }}
+                  className={fieldErrors.legalName ? 'border-destructive' : ''}
                   required
                 />
+                {fieldErrors.legalName && (
+                  <p className="text-sm text-destructive">{fieldErrors.legalName}</p>
+                )}
               </div>
 
               {/* Business Name */}
@@ -393,11 +518,18 @@ export default function TaxSettingsPage() {
                   <Input
                     id="addressLine1"
                     value={formData.addressLine1}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setFormData((prev) => ({ ...prev, addressLine1: e.target.value }))
-                    }
+                      if (fieldErrors.addressLine1) {
+                        setFieldErrors((prev) => ({ ...prev, addressLine1: '' }))
+                      }
+                    }}
+                    className={fieldErrors.addressLine1 ? 'border-destructive' : ''}
                     required
                   />
+                  {fieldErrors.addressLine1 && (
+                    <p className="text-sm text-destructive">{fieldErrors.addressLine1}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -417,32 +549,57 @@ export default function TaxSettingsPage() {
                     <Input
                       id="city"
                       value={formData.city}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, city: e.target.value }))}
+                      onChange={(e) => {
+                        setFormData((prev) => ({ ...prev, city: e.target.value }))
+                        if (fieldErrors.city) {
+                          setFieldErrors((prev) => ({ ...prev, city: '' }))
+                        }
+                      }}
+                      className={fieldErrors.city ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors.city && (
+                      <p className="text-sm text-destructive">{fieldErrors.city}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="state">State</Label>
                     <Input
                       id="state"
                       maxLength={2}
+                      placeholder="NY"
                       value={formData.state}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setFormData((prev) => ({ ...prev, state: e.target.value.toUpperCase() }))
-                      }
+                        if (fieldErrors.state) {
+                          setFieldErrors((prev) => ({ ...prev, state: '' }))
+                        }
+                      }}
+                      className={fieldErrors.state ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors.state && (
+                      <p className="text-sm text-destructive">{fieldErrors.state}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="postalCode">ZIP Code</Label>
                     <Input
                       id="postalCode"
+                      placeholder="10001"
                       value={formData.postalCode}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setFormData((prev) => ({ ...prev, postalCode: e.target.value }))
-                      }
+                        if (fieldErrors.postalCode) {
+                          setFieldErrors((prev) => ({ ...prev, postalCode: '' }))
+                        }
+                      }}
+                      className={fieldErrors.postalCode ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors.postalCode && (
+                      <p className="text-sm text-destructive">{fieldErrors.postalCode}</p>
+                    )}
                   </div>
                 </div>
               </div>

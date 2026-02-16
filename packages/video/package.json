@@ -44,6 +44,7 @@
     "@anthropic-ai/sdk": "^0.39.0",
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/integrations": "workspace:*",
     "@mux/mux-node": "^9.0.0"
   },
   "devDependencies": {

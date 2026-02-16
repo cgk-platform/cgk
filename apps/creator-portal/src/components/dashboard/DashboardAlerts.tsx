@@ -78,7 +78,7 @@ export function DashboardAlerts({
             You have {unsignedContractsCount} unsigned{' '}
             {unsignedContractsCount === 1 ? 'contract' : 'contracts'}.{' '}
             <Link
-              href="/contracts"
+              href="/projects"
               className="font-medium underline underline-offset-2 hover:no-underline"
             >
               Review and sign

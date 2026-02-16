@@ -24,7 +24,10 @@ export async function GET() {
   }
 
   const metaAppId = process.env.META_APP_ID
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+  if (!appUrl) {
+    return NextResponse.json({ error: 'APP_URL not configured' }, { status: 500 })
+  }
 
   if (!metaAppId) {
     return NextResponse.json(

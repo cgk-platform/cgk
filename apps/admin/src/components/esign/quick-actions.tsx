@@ -64,13 +64,13 @@ export function EsignQuickActions() {
           Quick Actions
         </h2>
         <div className="flex items-center gap-2">
-          <Link href="/admin/esign/documents/new">
+          <Link href="/admin/esign/documents">
             <Button size="sm" className="gap-1.5">
               <Plus className="h-4 w-4" />
               New Document
             </Button>
           </Link>
-          <Link href="/admin/esign/settings">
+          <Link href="/admin/esign/webhooks">
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Settings className="h-4 w-4" />
             </Button>

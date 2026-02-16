@@ -83,7 +83,10 @@ export async function GET(request: Request) {
     )
 
     // Get storefront URL
-    const storefrontUrl = process.env.STOREFRONT_URL || `https://${tenantSlug}.example.com`
+    const storefrontUrl = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_STOREFRONT_URL
+    if (!storefrontUrl) {
+      return { error: 'STOREFRONT_URL not configured', status: 500 }
+    }
 
     // Transform products
     interface ProductRow {

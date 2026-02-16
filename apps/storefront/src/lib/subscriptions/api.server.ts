@@ -36,44 +36,6 @@ async function getProviderConfig() {
   return config
 }
 
-/**
- * Create mock subscription data for development
- * This will be replaced with actual provider integrations
- */
-function createMockSubscription(id: string): Subscription {
-  const now = new Date()
-  const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-
-  return {
-    id,
-    externalId: `ext_${id}`,
-    customerId: 'cust_mock',
-    customerEmail: 'mock@example.com',
-    status: 'active',
-    currencyCode: 'USD',
-    nextOrderDate: nextWeek,
-    pausedUntil: null,
-    cancelledAt: null,
-    cancellationReason: null,
-    frequency: {
-      interval: 'month',
-      intervalCount: 1,
-      label: 'Every month',
-    },
-    items: [],
-    subtotalCents: 0,
-    discountCents: 0,
-    shippingCents: 0,
-    taxCents: 0,
-    totalCents: 0,
-    shippingAddress: null,
-    billingAddress: null,
-    paymentMethod: null,
-    discounts: [],
-    createdAt: now,
-    updatedAt: now,
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Server-side Data Fetching Functions
@@ -99,17 +61,16 @@ export async function listSubscriptionsServer(
 
 /**
  * Get a single subscription by ID (server-side)
+ *
+ * Returns null until subscription provider integration is implemented.
+ * Subscription providers (Loop, ReCharge, etc.) will be integrated in a future phase.
  */
-export async function getSubscriptionServer(id: string): Promise<Subscription | null> {
+export async function getSubscriptionServer(_id: string): Promise<Subscription | null> {
   // Validate tenant context
   await getProviderConfig()
 
-  // TODO: Implement actual provider integration
-  // For now, return mock data for development
-  if (process.env.NODE_ENV === 'development') {
-    return createMockSubscription(id)
-  }
-
+  // Subscription provider integration not yet implemented
+  // Will support Loop, ReCharge, and other subscription platforms
   return null
 }
 

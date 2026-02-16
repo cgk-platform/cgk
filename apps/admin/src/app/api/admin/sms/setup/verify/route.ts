@@ -51,7 +51,10 @@ export async function POST(request: Request) {
   }
 
   // Optionally send a test SMS if recipient provided
-  const body = await request.json().catch(() => ({}))
+  const body = await request.json().catch(() => {
+    // Empty body is valid - test recipient is optional
+    return {}
+  })
   const { testRecipient } = body
 
   if (testRecipient) {

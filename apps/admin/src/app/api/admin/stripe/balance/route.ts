@@ -5,6 +5,7 @@
  */
 
 import { getTenantContext, requireAuth } from '@cgk-platform/auth'
+import { getTenantStripeClient } from '@cgk-platform/integrations'
 import { NextResponse } from 'next/server'
 
 import { createStripeTopup, logChange } from '@/lib/admin-utilities/db'
@@ -29,16 +30,31 @@ export async function GET(req: Request) {
   }
 
   try {
-    // In production, this would call the Stripe API
-    // For now, return mock data
+    // Get tenant's Stripe client
+    const stripe = await getTenantStripeClient(tenantId)
+
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured for this tenant' },
+        { status: 400 }
+      )
+    }
+
+    // Fetch real balance from Stripe
+    const stripeBalance = await stripe.balance.retrieve()
+
+    // Extract USD amounts (or default to 0)
+    const availableUsd = stripeBalance.available.find((b) => b.currency === 'usd')?.amount ?? 0
+    const pendingUsd = stripeBalance.pending.find((b) => b.currency === 'usd')?.amount ?? 0
+
     const balance: StripeBalance = {
       available: {
-        usd: 2500000, // $25,000.00
-        usdFormatted: formatCents(2500000),
+        usd: availableUsd,
+        usdFormatted: formatCents(availableUsd),
       },
       pending: {
-        usd: 150000, // $1,500.00
-        usdFormatted: formatCents(150000),
+        usd: pendingUsd,
+        usdFormatted: formatCents(pendingUsd),
       },
     }
 
@@ -67,19 +83,39 @@ export async function POST(req: Request) {
       )
     }
 
-    // In production, this would create a Stripe top-up via the API
-    // For now, create a record with a mock Stripe ID
-    const mockStripeTopupId = `tu_mock_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+    // Get tenant's Stripe client
+    const stripe = await getTenantStripeClient(tenantId)
+
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured for this tenant' },
+        { status: 400 }
+      )
+    }
+
+    // Create real Stripe top-up
+    const stripeTopup = await stripe.topups.create({
+      amount: amountCents,
+      currency: 'usd',
+      description: description || 'Balance top-up',
+      source: sourceId,
+      metadata: {
+        tenant_id: tenantId,
+        created_by: email || userId,
+      },
+    })
 
     const topup = await createStripeTopup(tenantId, {
-      stripeTopupId: mockStripeTopupId,
+      stripeTopupId: stripeTopup.id,
       stripeSourceId: sourceId,
       amountCents,
-      status: 'pending',
+      status: stripeTopup.status === 'succeeded' ? 'succeeded' : 'pending',
       description,
       createdBy: email || userId,
       linkedWithdrawalIds,
-      expectedAvailableAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days
+      expectedAvailableAt: stripeTopup.expected_availability_date
+        ? new Date(stripeTopup.expected_availability_date * 1000).toISOString()
+        : new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
     })
 
     // Log the action
@@ -89,7 +125,7 @@ export async function POST(req: Request) {
       entityType: 'stripe_topup',
       entityId: topup.id,
       summary: `Created top-up for ${formatCents(amountCents)}`,
-      details: { amountCents, stripeTopupId: mockStripeTopupId, description },
+      details: { amountCents, stripeTopupId: stripeTopup.id, description },
       userId,
       userEmail: email,
     })

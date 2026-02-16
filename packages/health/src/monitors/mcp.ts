@@ -36,7 +36,15 @@ interface MCPInitializeResponse {
 export async function checkMCP(tenantId?: string): Promise<HealthCheckResult> {
   const startTime = Date.now()
 
-  const mcpServerUrl = process.env.MCP_SERVER_URL || 'http://localhost:3001'
+  const mcpServerUrl = process.env.MCP_SERVER_URL
+  if (!mcpServerUrl) {
+    return {
+      status: 'unhealthy' as const,
+      latencyMs: 0,
+      details: {},
+      error: 'MCP_SERVER_URL environment variable is not configured',
+    }
+  }
 
   try {
     // Send MCP initialize request

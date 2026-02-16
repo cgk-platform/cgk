@@ -92,18 +92,12 @@ export default function ApplicationSuccessPage(): React.JSX.Element {
         </p>
 
         {/* CTA buttons */}
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+        <div className="mt-8 flex justify-center">
           <Link
             href="/"
-            className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-          >
-            Return to Homepage
-          </Link>
-          <Link
-            href="/products"
             className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-primary/90"
           >
-            Check Out Products
+            Return to Homepage
           </Link>
         </div>
       </div>

@@ -5,6 +5,8 @@
  * Handles recipient creation, quotes, and transfers.
  */
 
+import { fetchWithTimeout, FETCH_TIMEOUTS } from '@cgk-platform/core'
+
 import type {
   PayoutProvider,
   CreateAccountParams,
@@ -84,13 +86,14 @@ export function createWiseBusinessProvider(config: WiseBusinessConfig): PayoutPr
     path: string,
     body?: unknown
   ): Promise<T> {
-    const response = await fetch(`${baseUrl}${path}`, {
+    const response = await fetchWithTimeout(`${baseUrl}${path}`, {
       method,
       headers: {
         'Authorization': `Bearer ${config.apiToken}`,
         'Content-Type': 'application/json',
       },
       body: body ? JSON.stringify(body) : undefined,
+      timeout: FETCH_TIMEOUTS.PAYMENT,
     })
 
     if (!response.ok) {
@@ -357,7 +360,7 @@ export async function createWiseRecipient(
     : 'https://api.transferwise.com'
 
   try {
-    const response = await fetch(`${baseUrl}/v1/accounts`, {
+    const response = await fetchWithTimeout(`${baseUrl}/v1/accounts`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${config.apiToken}`,
@@ -370,6 +373,7 @@ export async function createWiseRecipient(
         type: params.type,
         details: params.details,
       }),
+      timeout: FETCH_TIMEOUTS.PAYMENT,
     })
 
     if (!response.ok) {
@@ -407,12 +411,13 @@ export async function getWiseAccountRequirements(
     ? 'https://api.sandbox.transferwise.tech'
     : 'https://api.transferwise.com'
 
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${baseUrl}/v1/account-requirements?source=${sourceCurrency}&target=${targetCurrency}&sourceAmount=1000`,
     {
       headers: {
         'Authorization': `Bearer ${config.apiToken}`,
       },
+      timeout: FETCH_TIMEOUTS.PAYMENT,
     }
   )
 

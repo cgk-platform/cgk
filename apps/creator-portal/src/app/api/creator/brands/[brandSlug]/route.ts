@@ -166,7 +166,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
 
     // Build share link for discount code
     const shareLink = membership.discountCode
-      ? `${process.env.STOREFRONT_URL || 'https://store.example.com'}/d/${membership.discountCode}`
+      ? `${process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_STOREFRONT_URL || ''}/d/${membership.discountCode}`
       : null
 
     if (!membership) {

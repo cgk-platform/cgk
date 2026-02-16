@@ -29,7 +29,7 @@ import type {
   ABTestSchedulerPayload,
   ABAggregateTestMetricsPayload,
 } from '../../handlers/commerce/ab-testing'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -497,7 +497,7 @@ export const abHourlyAggregationScheduledTask = schedules.task({
   cron: '15 * * * *',
   run: async () => {
     logger.info('Running scheduled hourly aggregation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abHourlyMetricsAggregationTask.trigger({ tenantId })
     }
@@ -510,7 +510,7 @@ export const abOrderReconciliationScheduledTask = schedules.task({
   cron: '15 * * * *',
   run: async () => {
     logger.info('Running scheduled order reconciliation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abOrderReconciliationTask.trigger({ tenantId })
     }
@@ -523,7 +523,7 @@ export const abOptimizationScheduledTask = schedules.task({
   cron: '*/15 * * * *',
   run: async () => {
     logger.info('Running scheduled optimization')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abOptimizationTask.trigger({ tenantId })
     }
@@ -536,7 +536,7 @@ export const abTestSchedulerScheduledTask = schedules.task({
   cron: '*/5 * * * *',
   run: async () => {
     logger.info('Running scheduled test scheduler')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abTestSchedulerTask.trigger({ tenantId })
     }
@@ -549,7 +549,7 @@ export const abRedisSyncScheduledTask = schedules.task({
   cron: '0 */6 * * *',
   run: async () => {
     logger.info('Running scheduled Redis sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abSyncRedisToPostgresTask.trigger({ tenantId })
     }
@@ -562,7 +562,7 @@ export const abNightlyReconciliationScheduledTask = schedules.task({
   cron: '0 2 * * *',
   run: async () => {
     logger.info('Running scheduled nightly reconciliation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abNightlyReconciliationTask.trigger({ tenantId })
     }
@@ -575,7 +575,7 @@ export const abDailySummaryScheduledTask = schedules.task({
   cron: '0 8 * * *',
   run: async () => {
     logger.info('Running scheduled daily summary')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abDailyMetricsSummaryTask.trigger({ tenantId })
     }
@@ -588,7 +588,7 @@ export const abOptimizationSummaryScheduledTask = schedules.task({
   cron: '0 9 * * *',
   run: async () => {
     logger.info('Running scheduled optimization summary')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await abOptimizationSummaryTask.trigger({ tenantId })
     }

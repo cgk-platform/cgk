@@ -98,20 +98,32 @@ export function verifyWebhookSignature(
  * @returns Parsed webhook payload
  */
 export function parseWebhookPayload(body: string): MuxWebhookPayload {
-  const parsed = JSON.parse(body)
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(body)
+  } catch {
+    throw new Error('Invalid JSON in webhook payload')
+  }
+
+  // Type guard for parsed object
+  if (typeof parsed !== 'object' || parsed === null) {
+    throw new Error('Webhook payload must be an object')
+  }
+
+  const payload = parsed as Record<string, unknown>
+  const data = (payload.data ?? payload.object ?? {}) as Record<string, unknown>
 
   return {
-    type: parsed.type as MuxWebhookEventType,
+    type: (payload.type as MuxWebhookEventType) ?? 'unknown',
     data: {
-      id: parsed.data?.id ?? parsed.object?.id,
-      upload_id: parsed.data?.upload_id ?? parsed.object?.upload_id,
-      playback_ids: parsed.data?.playback_ids ?? parsed.object?.playback_ids,
-      duration: parsed.data?.duration ?? parsed.object?.duration,
-      aspect_ratio: parsed.data?.aspect_ratio ?? parsed.object?.aspect_ratio,
-      resolution_tier:
-        parsed.data?.resolution_tier ?? parsed.object?.resolution_tier,
-      status: parsed.data?.status ?? parsed.object?.status,
-      errors: parsed.data?.errors ?? parsed.object?.errors,
+      id: (data.id as string) ?? '',
+      upload_id: data.upload_id as string | undefined,
+      playback_ids: data.playback_ids as Array<{ id: string; policy: string }> | undefined,
+      duration: data.duration as number | undefined,
+      aspect_ratio: data.aspect_ratio as string | undefined,
+      resolution_tier: data.resolution_tier as string | undefined,
+      status: data.status as string | undefined,
+      errors: data.errors as Array<{ type: string; message: string }> | undefined,
     },
   }
 }
@@ -211,14 +223,19 @@ export function parsePassthrough(
   }
 
   try {
-    const parsed = JSON.parse(passthrough)
+    const parsed: unknown = JSON.parse(passthrough)
+    // Validate expected shape
     if (
-      typeof parsed.tenantId === 'string' &&
-      typeof parsed.videoId === 'string'
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'tenantId' in parsed &&
+      'videoId' in parsed &&
+      typeof (parsed as Record<string, unknown>).tenantId === 'string' &&
+      typeof (parsed as Record<string, unknown>).videoId === 'string'
     ) {
       return {
-        tenantId: parsed.tenantId,
-        videoId: parsed.videoId,
+        tenantId: (parsed as Record<string, unknown>).tenantId as string,
+        videoId: (parsed as Record<string, unknown>).videoId as string,
       }
     }
   } catch {

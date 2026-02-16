@@ -4,6 +4,7 @@
  * Implements OAuth 2.0 PKCE flow for Shopify Customer Account API.
  */
 
+import { fetchWithTimeout, FETCH_TIMEOUTS } from '@cgk-platform/core'
 import { sql } from '@cgk-platform/db'
 import { decryptToken } from '@cgk-platform/shopify'
 import { generatePKCEChallenge, generateNonce, generateState } from './pkce'
@@ -150,7 +151,7 @@ export async function handleShopifyCallback(
   // Exchange code for tokens
   const tokenUrl = `https://shopify.com/${config.shopId}/auth/oauth/token`
 
-  const tokenResponse = await fetch(tokenUrl, {
+  const tokenResponse = await fetchWithTimeout(tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -163,6 +164,7 @@ export async function handleShopifyCallback(
       code,
       code_verifier: stateData.codeVerifier,
     }),
+    timeout: FETCH_TIMEOUTS.OAUTH,
   })
 
   if (!tokenResponse.ok) {
@@ -216,7 +218,7 @@ export async function refreshCustomerToken(
 
   const tokenUrl = `https://shopify.com/${config.shopId}/auth/oauth/token`
 
-  const response = await fetch(tokenUrl, {
+  const response = await fetchWithTimeout(tokenUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -227,6 +229,7 @@ export async function refreshCustomerToken(
       client_secret: config.clientSecret,
       refresh_token: refreshToken,
     }),
+    timeout: FETCH_TIMEOUTS.OAUTH,
   })
 
   if (!response.ok) {
@@ -272,13 +275,14 @@ async function getCustomerFromToken(
     }
   `
 
-  const response = await fetch(apiUrl, {
+  const response = await fetchWithTimeout(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: accessToken,
     },
     body: JSON.stringify({ query }),
+    timeout: FETCH_TIMEOUTS.API,
   })
 
   if (!response.ok) {

@@ -27,12 +27,14 @@ export async function GET(request: Request) {
   }
 
   // Build filters from query params
+  const pageParam = url.searchParams.get('page')
+  const limitParam = url.searchParams.get('limit')
   const filters: ABTestFilters = {
     status: url.searchParams.get('status') as ABTestFilters['status'] ?? undefined,
     testType: url.searchParams.get('testType') as ABTestFilters['testType'] ?? undefined,
     search: url.searchParams.get('search') ?? undefined,
-    page: url.searchParams.get('page') ? parseInt(url.searchParams.get('page')!, 10) : 1,
-    limit: url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')!, 10) : 20,
+    page: pageParam ? (parseInt(pageParam, 10) || 1) : 1,
+    limit: limitParam ? (parseInt(limitParam, 10) || 20) : 20,
     sort: url.searchParams.get('sort') ?? undefined,
     dir: url.searchParams.get('dir') as 'asc' | 'desc' ?? undefined,
   }

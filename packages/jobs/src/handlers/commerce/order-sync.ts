@@ -9,6 +9,18 @@
  * - Order-triggered creator commission credit
  * - Order-triggered review email scheduling
  *
+ * INTEGRATION REQUIREMENTS:
+ * - Tenant must have Shopify credentials configured via OAuth or admin setup
+ * - Use `getTenantShopifyClient(tenantId)` from @cgk-platform/integrations
+ * - Shopify webhooks must be registered for orders/create, orders/updated, orders/fulfilled
+ *
+ * IMPLEMENTATION STATUS:
+ * These handlers define the job structure and validation.
+ * Full implementation requires:
+ * 1. Shopify GraphQL API integration via @cgk-platform/shopify
+ * 2. Database operations via withTenant() for tenant isolation
+ * 3. Downstream job triggers for attribution, commission, and review emails
+ *
  * @ai-pattern tenant-isolation
  * @ai-critical All handlers require tenantId
  */

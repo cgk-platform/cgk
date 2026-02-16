@@ -289,7 +289,11 @@ export async function createProject(
       RETURNING *
     `
 
-    const project = mapRowToProject(result.rows[0] as Record<string, unknown>)
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create project')
+    }
+    const project = mapRowToProject(row as Record<string, unknown>)
 
     // Send job event
     await sendJob('project.created', {
@@ -341,7 +345,11 @@ export async function updateProject(
       RETURNING *
     `
 
-    return mapRowToProject(result.rows[0] as Record<string, unknown>)
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to update project')
+    }
+    return mapRowToProject(row as Record<string, unknown>)
   })
 }
 
@@ -391,7 +399,11 @@ export async function submitProject(
       RETURNING *
     `
 
-    const project = mapRowToProject(result.rows[0] as Record<string, unknown>)
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to submit project')
+    }
+    const project = mapRowToProject(row as Record<string, unknown>)
 
     // If this was a revision response, update the revision record
     if (currentStatus === 'revision_requested') {
@@ -513,7 +525,11 @@ export async function addProjectFile(
       RETURNING *
     `
 
-    const projectFile = mapRowToFile(result.rows[0] as Record<string, unknown>)
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to upload file')
+    }
+    const projectFile = mapRowToFile(row as Record<string, unknown>)
 
     // Send job event
     await sendJob('creator.file.uploaded', {

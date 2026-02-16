@@ -24,7 +24,12 @@ import type {
   OrderReviewEmailPayload,
 } from '../../handlers/commerce/order-sync'
 import type { OrderCreatedPayload, OrderFulfilledPayload } from '../../events'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
+import {
+  createPermanentError,
+  handleJobResult,
+  generateIdempotencyKey,
+} from '../errors'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -60,11 +65,11 @@ export const syncOrderTask = task({
     const { tenantId, orderId, shopifyOrderId, source } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     if (!orderId && !shopifyOrderId) {
-      throw new Error('Either orderId or shopifyOrderId is required')
+      throw createPermanentError('Either orderId or shopifyOrderId is required', 'MISSING_REQUIRED_FIELD')
     }
 
     logger.info('Syncing order', { tenantId, orderId, shopifyOrderId, source })
@@ -75,11 +80,7 @@ export const syncOrderTask = task({
       createJobFromPayload('sync-order', payload, { maxAttempts: 5 })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Sync failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Order sync')
   },
 })
 
@@ -99,7 +100,7 @@ export const syncOrderBatchTask = task({
     const { tenantId, orderIds, shopifyOrderIds, startDate, endDate, limit, cursor } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Batch syncing orders', {
@@ -117,11 +118,7 @@ export const syncOrderBatchTask = task({
       createJobFromPayload('sync-order-batch', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Batch sync failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Batch order sync')
   },
 })
 
@@ -141,7 +138,7 @@ export const orderReconciliationTask = task({
     const { tenantId, lookbackHours = 2, maxOrders = 500 } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Running order reconciliation', { tenantId, lookbackHours, maxOrders })
@@ -152,11 +149,7 @@ export const orderReconciliationTask = task({
       createJobFromPayload('order-reconciliation', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Reconciliation failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Order reconciliation')
   },
 })
 
@@ -176,11 +169,11 @@ export const orderAttributionTask = task({
     const { tenantId, orderId, customerId, sessionId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     if (!orderId) {
-      throw new Error('orderId is required')
+      throw createPermanentError('orderId is required', 'MISSING_REQUIRED_FIELD')
     }
 
     logger.info('Processing order attribution', { tenantId, orderId, customerId, sessionId })
@@ -191,11 +184,7 @@ export const orderAttributionTask = task({
       createJobFromPayload('order-attribution', payload, { maxAttempts: 5 })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Attribution failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Order attribution')
   },
 })
 
@@ -207,6 +196,9 @@ export const orderAttributionTask = task({
  * Credit creator commission for an order
  *
  * Task ID: commerce-order-commission
+ *
+ * CRITICAL: This task handles financial operations (commission credits).
+ * It MUST be idempotent to prevent double-crediting on retries.
  */
 export const orderCommissionTask = task({
   id: 'commerce-order-commission',
@@ -215,26 +207,40 @@ export const orderCommissionTask = task({
     const { tenantId, orderId, discountCode, orderTotal, currency } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     if (!orderId) {
-      throw new Error('orderId is required')
+      throw createPermanentError('orderId is required', 'MISSING_REQUIRED_FIELD')
     }
 
-    logger.info('Processing order commission', { tenantId, orderId, discountCode, orderTotal, currency })
+    // Generate idempotency key to prevent double-crediting
+    // Commission is uniquely identified by tenant + order
+    const idempotencyKey = generateIdempotencyKey(
+      tenantId,
+      'order_commission',
+      orderId
+    )
+
+    logger.info('Processing order commission', {
+      tenantId,
+      orderId,
+      discountCode,
+      orderTotal,
+      currency,
+      idempotencyKey,
+    })
 
     const { orderCommissionJob } = await import('../../handlers/commerce/order-sync.js')
 
     const result = await orderCommissionJob.handler(
-      createJobFromPayload('order-commission', payload, { maxAttempts: 5 })
+      createJobFromPayload('order-commission', {
+        ...payload,
+        idempotencyKey,
+      }, { maxAttempts: 5 })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Commission processing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Order commission processing')
   },
 })
 
@@ -254,11 +260,11 @@ export const orderReviewEmailTask = task({
     const { tenantId, orderId, customerId, customerEmail, fulfillmentId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     if (!orderId) {
-      throw new Error('orderId is required')
+      throw createPermanentError('orderId is required', 'MISSING_REQUIRED_FIELD')
     }
 
     logger.info('Scheduling review email', { tenantId, orderId, customerId, customerEmail, fulfillmentId })
@@ -269,11 +275,7 @@ export const orderReviewEmailTask = task({
       createJobFromPayload('order-review-email', payload, { maxAttempts: 5 })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Review email scheduling failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Review email scheduling')
   },
 })
 
@@ -293,7 +295,7 @@ export const handleOrderCreatedTask = task({
     const { tenantId, orderId, shopifyOrderId, customerId, totalAmount, currency } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Processing new order', { tenantId, orderId, shopifyOrderId, customerId, totalAmount, currency })
@@ -304,11 +306,7 @@ export const handleOrderCreatedTask = task({
       createJobFromPayload('handle-order-created', payload, { maxAttempts: 5 })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Order created handling failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Order created handling')
   },
 })
 
@@ -328,7 +326,7 @@ export const handleOrderFulfilledTask = task({
     const { tenantId, orderId, fulfillmentId, trackingNumber, carrier } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Processing order fulfillment', { tenantId, orderId, fulfillmentId, trackingNumber, carrier })
@@ -339,11 +337,7 @@ export const handleOrderFulfilledTask = task({
       createJobFromPayload('handle-order-fulfilled', payload, { maxAttempts: 5 })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Order fulfilled handling failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Order fulfilled handling')
   },
 })
 
@@ -363,8 +357,7 @@ export const orderReconciliationScheduledTask = schedules.task({
     logger.info('Running scheduled order reconciliation')
 
     // Get all active tenants and process each
-    // In production, this would query the organizations table
-    const tenants = ['system'] // Placeholder
+    const tenants = await getActiveTenants()
 
     const results = []
     for (const tenantId of tenants) {

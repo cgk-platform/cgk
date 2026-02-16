@@ -383,12 +383,19 @@ export async function getContractorDashboardStats(
     }
   }
 
+  const activeCount = parseInt(String(row.active_count ?? '0'), 10)
+  const upcomingCount = parseInt(String(row.upcoming_count ?? '0'), 10)
+  const pendingReviewCount = parseInt(String(row.pending_review_count ?? '0'), 10)
+  const revisionCount = parseInt(String(row.revision_count ?? '0'), 10)
+  const pendingPayout = parseInt(String(row.pending_payout ?? '0'), 10)
+  const totalEarned = parseInt(String(row.total_earned ?? '0'), 10)
+
   return {
-    activeProjectsCount: parseInt(row.active_count as string, 10) || 0,
-    upcomingProjectsCount: parseInt(row.upcoming_count as string, 10) || 0,
-    pendingReviewCount: parseInt(row.pending_review_count as string, 10) || 0,
-    revisionRequestedCount: parseInt(row.revision_count as string, 10) || 0,
-    pendingPayoutCents: parseInt(row.pending_payout as string, 10) || 0,
-    totalEarnedCents: parseInt(row.total_earned as string, 10) || 0,
+    activeProjectsCount: Number.isNaN(activeCount) ? 0 : activeCount,
+    upcomingProjectsCount: Number.isNaN(upcomingCount) ? 0 : upcomingCount,
+    pendingReviewCount: Number.isNaN(pendingReviewCount) ? 0 : pendingReviewCount,
+    revisionRequestedCount: Number.isNaN(revisionCount) ? 0 : revisionCount,
+    pendingPayoutCents: Number.isNaN(pendingPayout) ? 0 : pendingPayout,
+    totalEarnedCents: Number.isNaN(totalEarned) ? 0 : totalEarned,
   }
 }

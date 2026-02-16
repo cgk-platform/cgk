@@ -1,0 +1,28 @@
+-- Migration Consolidation Notes
+--
+-- This file documents known migration version conflicts.
+-- The migration loader sorts by version number first, then alphabetically.
+--
+-- DUPLICATE VERSIONS IN PUBLIC SCHEMA:
+-- 008: super_admin, team_management
+-- 009: platform_alerts, platform_logs, roles, user_management
+-- 012: context_switching, feature_flags
+--
+-- DUPLICATE VERSIONS IN TENANT SCHEMA:
+-- 009: 5 files
+-- 010: 7 files
+-- 015: 10 files (ai_memory, bri_admin, commission_config, etc.)
+-- 016: 9 files
+--
+-- DUPLICATE TABLE DEFINITIONS:
+-- projects: 012_productivity.sql (UUID id) vs 015_pipeline_config.sql (TEXT id)
+-- surveys: 015_surveys.sql vs 016_surveys.sql
+-- stripe_topups: 015_treasury.sql vs 016_stripe_topups.sql
+--
+-- RESOLUTION:
+-- The IF NOT EXISTS clauses prevent errors, but the first alphabetically wins.
+-- For new installations, this is consistent. For existing installations,
+-- schemas depend on original migration order.
+--
+-- This is a documentation-only migration.
+SELECT 1;

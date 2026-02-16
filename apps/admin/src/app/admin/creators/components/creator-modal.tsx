@@ -64,7 +64,10 @@ export function CreatorModal({ mode, creatorId, onClose, onSuccess }: CreatorMod
             })
           }
         })
-        .catch(() => setError('Failed to load creator'))
+        .catch((error) => {
+          console.error('[creator-modal] Failed to load creator:', error)
+          setError('Failed to load creator')
+        })
         .finally(() => setIsLoading(false))
     }
   }, [mode, creatorId])

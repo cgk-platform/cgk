@@ -78,7 +78,10 @@ async function FeedOverview() {
 
       let feedUrl: string | null = null
       if (settings?.feedToken) {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://admin.example.com'
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+        if (!baseUrl) {
+          throw new Error('APP_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+        }
         feedUrl = `${baseUrl}/api/feeds/google/${settings.feedToken}/products.${settings.feedFormat || 'xml'}`
       }
 

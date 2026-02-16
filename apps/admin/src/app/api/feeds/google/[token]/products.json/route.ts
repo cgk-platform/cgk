@@ -105,7 +105,10 @@ export async function GET(
       (overridesResult.rows as Array<{ shopify_product_id: string }>).map((o) => [o.shopify_product_id, o])
     )
 
-    const storefrontUrl = process.env.STOREFRONT_URL || `https://${tenantSlug}.example.com`
+    const storefrontUrl = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_STOREFRONT_URL
+    if (!storefrontUrl) {
+      return NextResponse.json({ error: 'STOREFRONT_URL not configured' }, { status: 500 })
+    }
 
     // Transform products
     interface ProductRow {

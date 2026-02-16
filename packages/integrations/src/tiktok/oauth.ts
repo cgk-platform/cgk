@@ -5,6 +5,7 @@
  * @ai-note TikTok uses code=0 for success responses
  */
 
+import { fetchWithTimeout, FETCH_TIMEOUTS } from '@cgk-platform/core'
 import { sql, withTenant } from '@cgk-platform/db'
 
 import { encryptToken } from '../encryption.js'
@@ -71,7 +72,7 @@ export async function completeTikTokOAuth(params: {
   )
 
   // 2. Exchange code for tokens
-  const tokenResponse = await fetch(TIKTOK_OAUTH_CONFIG.tokenUrl, {
+  const tokenResponse = await fetchWithTimeout(TIKTOK_OAUTH_CONFIG.tokenUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -79,6 +80,7 @@ export async function completeTikTokOAuth(params: {
       auth_code: params.code,
       secret: appSecret,
     }),
+    timeout: FETCH_TIMEOUTS.OAUTH,
   })
 
   const result = (await tokenResponse.json()) as {

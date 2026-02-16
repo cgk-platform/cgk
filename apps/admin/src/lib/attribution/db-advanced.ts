@@ -83,50 +83,68 @@ export async function getCustomerJourneys(
     LIMIT ${limit} OFFSET ${offset}
   `
 
-  const journeys: CustomerJourney[] = []
+  // No journeys found - return early
+  if (journeysResult.rows.length === 0) {
+    return { journeys: [], total }
+  }
 
-  for (const row of journeysResult.rows) {
+  // Extract conversion IDs for batch touchpoint query
+  const conversionIds = journeysResult.rows.map(
+    (row) => (row as Record<string, unknown>).conversionId as string
+  )
+
+  // Single query to get all touchpoints for all conversions (eliminates N+1)
+  const touchpointsResult = await sql`
+    SELECT
+      c.id as "conversionId",
+      t.id,
+      t.occurred_at as timestamp,
+      t.channel,
+      t.platform,
+      t.campaign,
+      t.adset_id as "adSet",
+      t.ad_id as ad,
+      t.device_type as device
+    FROM attribution_touchpoints t
+    JOIN attribution_conversions c ON t.customer_id = c.customer_id
+    WHERE c.id = ANY(${`{${conversionIds.join(',')}}`}::text[])
+      AND t.occurred_at <= c.converted_at
+      AND t.occurred_at >= c.converted_at - INTERVAL '1 day' * ${windowDays}
+    ORDER BY c.id, t.occurred_at ASC
+  `
+
+  // Group touchpoints by conversion ID
+  const touchpointsByConversion = new Map<string, Array<Record<string, unknown>>>()
+  for (const tp of touchpointsResult.rows) {
+    const t = tp as Record<string, unknown>
+    const convId = t.conversionId as string
+    if (!touchpointsByConversion.has(convId)) {
+      touchpointsByConversion.set(convId, [])
+    }
+    touchpointsByConversion.get(convId)!.push(t)
+  }
+
+  // Build journeys with their touchpoints
+  const journeys: CustomerJourney[] = journeysResult.rows.map((row) => {
     const r = row as Record<string, unknown>
     const conversionId = r.conversionId as string
+    const rawTouchpoints = touchpointsByConversion.get(conversionId) || []
+    const totalTouchpoints = rawTouchpoints.length
 
-    const touchpointsResult = await sql`
-      SELECT
-        t.id,
-        t.occurred_at as timestamp,
-        t.channel,
-        t.platform,
-        t.campaign,
-        t.adset_id as "adSet",
-        t.ad_id as ad,
-        t.device_type as device
-      FROM attribution_touchpoints t
-      JOIN attribution_conversions c ON t.customer_id = c.customer_id
-      WHERE c.id = ${conversionId}
-        AND t.occurred_at <= c.converted_at
-        AND t.occurred_at >= c.converted_at - INTERVAL '1 day' * ${windowDays}
-      ORDER BY t.occurred_at ASC
-    `
+    const touchpoints: JourneyTouchpoint[] = rawTouchpoints.map((t, i) => ({
+      id: t.id as string,
+      timestamp: (t.timestamp as Date).toISOString(),
+      channel: t.channel as string,
+      platform: t.platform as string | undefined,
+      campaign: t.campaign as string | undefined,
+      adSet: t.adSet as string | undefined,
+      ad: t.ad as string | undefined,
+      device: (t.device as string) ?? 'unknown',
+      browser: undefined,
+      creditByModel: calculateCreditByModel(i, totalTouchpoints),
+    }))
 
-    const touchpoints: JourneyTouchpoint[] = []
-    const totalTouchpoints = touchpointsResult.rows.length
-
-    for (let i = 0; i < totalTouchpoints; i++) {
-      const t = touchpointsResult.rows[i] as Record<string, unknown>
-      touchpoints.push({
-        id: t.id as string,
-        timestamp: (t.timestamp as Date).toISOString(),
-        channel: t.channel as string,
-        platform: t.platform as string | undefined,
-        campaign: t.campaign as string | undefined,
-        adSet: t.adSet as string | undefined,
-        ad: t.ad as string | undefined,
-        device: (t.device as string) ?? 'unknown',
-        browser: undefined,
-        creditByModel: calculateCreditByModel(i, totalTouchpoints),
-      })
-    }
-
-    journeys.push({
+    return {
       conversionId,
       orderId: r.orderId as string,
       orderNumber: r.orderNumber as string,
@@ -136,8 +154,8 @@ export async function getCustomerJourneys(
       conversionDate: (r.conversionDate as Date).toISOString(),
       touchpointCount: Number(r.touchpointCount),
       touchpoints,
-    })
-  }
+    }
+  })
 
   return { journeys, total }
 }

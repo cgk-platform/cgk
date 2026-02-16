@@ -15,6 +15,7 @@
     "@cgk-platform/db": "workspace:*",
     "@cgk-platform/feature-flags": "workspace:*",
     "@cgk-platform/health": "workspace:*",
+    "@cgk-platform/integrations": "workspace:*",
     "@cgk-platform/logging": "workspace:*",
     "@cgk-platform/onboarding": "workspace:*",
     "@cgk-platform/slack": "workspace:*",

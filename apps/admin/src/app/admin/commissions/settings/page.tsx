@@ -36,7 +36,10 @@ export default function CommissionSettingsPage() {
         }
         setLoading(false)
       })
-      .catch(() => setLoading(false))
+      .catch((error) => {
+        console.error('[commissions-settings] Failed to load config:', error)
+        setLoading(false)
+      })
   }, [])
 
   const handleSave = async () => {

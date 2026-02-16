@@ -255,7 +255,11 @@ export async function createUser(data: {
       updated_at as "updatedAt"
   `
 
-  return result.rows[0] as User
+  const row = result.rows[0]
+  if (!row) {
+    throw new Error('Failed to create user')
+  }
+  return row as User
 }
 
 /**

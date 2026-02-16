@@ -84,12 +84,50 @@ export async function POST(request: Request) {
     )
   }
 
-  // Validate reply-to if provided
+  // Validate reply-to if provided with RFC-compliant validation
   if (body.replyToAddress) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    // RFC 5321 limits: local part max 64 chars, domain max 255 chars, total max 254 chars
+    const MAX_EMAIL_LENGTH = 254
+    const MAX_LOCAL_PART_LENGTH = 64
+    const MAX_DOMAIN_LENGTH = 255
+
+    if (body.replyToAddress.length > MAX_EMAIL_LENGTH) {
+      return NextResponse.json(
+        { error: `Reply-to email address exceeds maximum length of ${MAX_EMAIL_LENGTH} characters` },
+        { status: 400 }
+      )
+    }
+
+    // More comprehensive email regex that validates:
+    // - Local part: alphanumeric, dots, hyphens, underscores, plus signs (no consecutive dots, no leading/trailing dots)
+    // - Domain: valid hostname format with at least one dot and valid TLD
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/
     if (!emailRegex.test(body.replyToAddress)) {
       return NextResponse.json(
-        { error: 'Invalid reply-to email address' },
+        { error: 'Invalid reply-to email address format' },
+        { status: 400 }
+      )
+    }
+
+    // Additional validation: check local part and domain lengths
+    const [localPart, domain] = body.replyToAddress.split('@')
+    if (localPart && localPart.length > MAX_LOCAL_PART_LENGTH) {
+      return NextResponse.json(
+        { error: `Email local part exceeds maximum length of ${MAX_LOCAL_PART_LENGTH} characters` },
+        { status: 400 }
+      )
+    }
+    if (domain && domain.length > MAX_DOMAIN_LENGTH) {
+      return NextResponse.json(
+        { error: `Email domain exceeds maximum length of ${MAX_DOMAIN_LENGTH} characters` },
+        { status: 400 }
+      )
+    }
+
+    // Check for consecutive dots in local part
+    if (localPart && localPart.includes('..')) {
+      return NextResponse.json(
+        { error: 'Email local part cannot contain consecutive dots' },
         { status: 400 }
       )
     }

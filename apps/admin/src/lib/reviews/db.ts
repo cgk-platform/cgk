@@ -189,10 +189,12 @@ export async function getPendingReviews(
 
     const mediaByReview = new Map<string, ReviewMedia[]>()
     for (const media of mediaResult.rows as ReviewMedia[]) {
-      if (!mediaByReview.has(media.review_id)) {
-        mediaByReview.set(media.review_id, [])
+      const existing = mediaByReview.get(media.review_id)
+      if (existing) {
+        existing.push(media)
+      } else {
+        mediaByReview.set(media.review_id, [media])
       }
-      mediaByReview.get(media.review_id)!.push(media)
     }
 
     return reviews.map((review) => ({
@@ -261,7 +263,11 @@ export async function createReview(
       )
       RETURNING *
     `
-    return result.rows[0] as Review
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create review')
+    }
+    return row as Review
   })
 }
 
@@ -719,7 +725,11 @@ export async function createBulkSendTemplate(
       )
       RETURNING *
     `
-    return result.rows[0] as ReviewBulkSendTemplate
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create bulk send template')
+    }
+    return row as ReviewBulkSendTemplate
   })
 }
 
@@ -863,7 +873,11 @@ export async function createBulkCampaign(
       )
       RETURNING *
     `
-    return result.rows[0] as ReviewBulkCampaign
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create bulk campaign')
+    }
+    return row as ReviewBulkCampaign
   })
 }
 
@@ -1544,10 +1558,12 @@ export async function getProductReviewStats(
 
     const distributionsByProduct = new Map<string, Record<number, number>>()
     for (const row of distributionResult.rows as Array<{ product_id: string; rating: number; count: string }>) {
-      if (!distributionsByProduct.has(row.product_id)) {
-        distributionsByProduct.set(row.product_id, { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 })
+      let distribution = distributionsByProduct.get(row.product_id)
+      if (!distribution) {
+        distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        distributionsByProduct.set(row.product_id, distribution)
       }
-      distributionsByProduct.get(row.product_id)![row.rating] = Number(row.count)
+      distribution[row.rating] = Number(row.count)
     }
 
     return products.map((p) => ({
@@ -1612,7 +1628,11 @@ export async function createMigration(
       VALUES (${migrationType}, ${source || null}, ${destination || null})
       RETURNING *
     `
-    return result.rows[0] as ReviewMigration
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create migration')
+    }
+    return row as ReviewMigration
   })
 }
 

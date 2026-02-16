@@ -19,7 +19,16 @@ export function getAttributionFromCookie(): AttributionCookieData | null {
   if (!match || !match[1]) return null
 
   try {
-    return JSON.parse(decodeURIComponent(match[1]))
+    const parsed: unknown = JSON.parse(decodeURIComponent(match[1]))
+    // Validate expected shape
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'visitorId' in parsed
+    ) {
+      return parsed as AttributionCookieData
+    }
+    return null
   } catch {
     return null
   }
@@ -74,7 +83,16 @@ export function parseServerAttributionCookie(cookieHeader: string): AttributionC
   if (!attrCookie) return null
 
   try {
-    return JSON.parse(decodeURIComponent(attrCookie))
+    const parsed: unknown = JSON.parse(decodeURIComponent(attrCookie))
+    // Validate expected shape
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'visitorId' in parsed
+    ) {
+      return parsed as AttributionCookieData
+    }
+    return null
   } catch {
     return null
   }

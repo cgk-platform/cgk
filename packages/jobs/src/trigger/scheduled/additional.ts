@@ -48,7 +48,7 @@ import type {
   BrandStalenessCheckPayload,
   BrandUrlSyncPayload,
 } from '../../handlers/scheduled/additional-tasks'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -479,7 +479,7 @@ export const briGmailSyncScheduledTask = schedules.task({
   cron: '*/30 * * * *',
   run: async () => {
     logger.info('Running scheduled Gmail sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await briGmailSyncTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },
@@ -490,7 +490,7 @@ export const briSlackSyncScheduledTask = schedules.task({
   cron: '*/30 * * * *',
   run: async () => {
     logger.info('Running scheduled Slack sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await briSlackSyncTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },
@@ -501,7 +501,7 @@ export const damRightsExpiryScheduledTask = schedules.task({
   cron: '0 8 * * *',
   run: async () => {
     logger.info('Running scheduled rights expiry check')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await damRightsExpiryCheckTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },
@@ -512,7 +512,7 @@ export const escalationCheckScheduledTask = schedules.task({
   cron: '0 */2 * * *',
   run: async () => {
     logger.info('Running scheduled escalation check')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await escalationCheckTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },
@@ -523,7 +523,7 @@ export const commissionMaturationScheduledTask = schedules.task({
   cron: '0 6 * * *',
   run: async () => {
     logger.info('Running scheduled commission maturation check')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await commissionMaturationCheckTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },
@@ -534,7 +534,7 @@ export const onboardingCheckScheduledTask = schedules.task({
   cron: '0 10,16 * * *',
   run: async () => {
     logger.info('Running scheduled onboarding check')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await onboardingCheckTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },
@@ -545,7 +545,7 @@ export const agentMemoryDecayScheduledTask = schedules.task({
   cron: '0 5 * * *',
   run: async () => {
     logger.info('Running scheduled agent memory decay')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await agentMemoryDecayTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },
@@ -556,7 +556,7 @@ export const brandContextCleanupScheduledTask = schedules.task({
   cron: '0 */6 * * *',
   run: async () => {
     logger.info('Running scheduled brand context cleanup')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) { await brandContextCleanupTask.trigger({ tenantId }) }
     return { triggered: tenants.length }
   },

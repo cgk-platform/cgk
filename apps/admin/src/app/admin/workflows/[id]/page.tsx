@@ -8,7 +8,10 @@ interface PageProps {
 }
 
 async function getRule(id: string, tenantId: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3001'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+  if (!baseUrl) {
+    throw new Error('APP_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+  }
 
   const res = await fetch(`${baseUrl}/api/admin/workflows/rules/${id}`, {
     headers: {

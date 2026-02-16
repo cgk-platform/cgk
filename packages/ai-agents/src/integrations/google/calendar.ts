@@ -312,7 +312,8 @@ export class GoogleCalendarClient {
       expiration: String(expiration),
     })
 
-    const expirationDate = new Date(parseInt(response.expiration))
+    const expirationTs = parseInt(response.expiration, 10)
+    const expirationDate = new Date(Number.isNaN(expirationTs) ? Date.now() + 86400000 : expirationTs)
 
     // Store watch info
     await updateAgentGoogleOAuthWatch(

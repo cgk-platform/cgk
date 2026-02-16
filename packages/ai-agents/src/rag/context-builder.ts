@@ -199,8 +199,9 @@ export async function buildMemoryContext(options: RAGContextOptions): Promise<RA
   }
 
   // Record memory access for all used memories (async, don't wait)
-  recordMemoryAccessBatch(memoriesUsed).catch(() => {
-    // Ignore errors in background recording
+  recordMemoryAccessBatch(memoriesUsed).catch((error) => {
+    // Non-critical: memory access tracking is for analytics only
+    console.debug('[rag] Failed to record memory access:', error)
   })
 
   // Combine sections

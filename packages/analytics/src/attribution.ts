@@ -41,11 +41,17 @@ export function parseAttributionParams(url: string | URL): Partial<AttributionDa
   }
 
   // UTM parameters
-  if (params.get('utm_source')) data.source = categorizeSource(params.get('utm_source')!)
-  if (params.get('utm_medium')) data.medium = params.get('utm_medium')!
-  if (params.get('utm_campaign')) data.campaign = params.get('utm_campaign')!
-  if (params.get('utm_term')) data.term = params.get('utm_term')!
-  if (params.get('utm_content')) data.content = params.get('utm_content')!
+  const utmSource = params.get('utm_source')
+  const utmMedium = params.get('utm_medium')
+  const utmCampaign = params.get('utm_campaign')
+  const utmTerm = params.get('utm_term')
+  const utmContent = params.get('utm_content')
+
+  if (utmSource) data.source = categorizeSource(utmSource)
+  if (utmMedium) data.medium = utmMedium
+  if (utmCampaign) data.campaign = utmCampaign
+  if (utmTerm) data.term = utmTerm
+  if (utmContent) data.content = utmContent
 
   // Creator code (custom parameter)
   if (params.get('ref') || params.get('creator')) {
@@ -121,7 +127,17 @@ export function getAttributionFromCookie(): AttributionData | null {
   if (!match || !match[1]) return null
 
   try {
-    return JSON.parse(decodeURIComponent(match[1]))
+    const parsed: unknown = JSON.parse(decodeURIComponent(match[1]))
+    // Validate that parsed data has expected shape
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      'source' in parsed &&
+      'timestamp' in parsed
+    ) {
+      return parsed as AttributionData
+    }
+    return null
   } catch {
     return null
   }

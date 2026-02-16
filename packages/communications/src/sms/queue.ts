@@ -86,7 +86,11 @@ export async function createSmsQueueEntry(
     `
   })
 
-  return result.rows[0] as SmsQueueEntry
+  const row = result.rows[0]
+  if (!row) {
+    throw new Error('Failed to create SMS queue entry')
+  }
+  return row as SmsQueueEntry
 }
 
 /**

@@ -137,7 +137,38 @@ function PayoutMethodsContent() {
     checkState: '',
     checkPostalCode: '',
   })
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Validation functions
+  const validateEmail = (email: string): string | null => {
+    if (!email) return 'Email is required'
+    if (email.length > 254) return 'Email is too long (max 254 characters)'
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) return 'Invalid email format'
+    // Check for valid domain structure
+    const parts = email.split('@')
+    if (parts.length !== 2 || !parts[1]) return 'Invalid email format'
+    const domain = parts[1]
+    if (!domain.includes('.') || domain.startsWith('.') || domain.endsWith('.')) {
+      return 'Invalid email domain'
+    }
+    return null
+  }
+
+  const validateVenmoHandle = (handle: string): string | null => {
+    if (!handle) return 'Venmo handle is required'
+    // Remove @ prefix for validation
+    const cleanHandle = handle.replace(/^@/, '')
+    if (cleanHandle.length < 5) return 'Venmo handle must be at least 5 characters'
+    if (cleanHandle.length > 30) return 'Venmo handle must be 30 characters or less'
+    // Venmo handles can contain letters, numbers, underscores, and hyphens
+    const handleRegex = /^[a-zA-Z0-9_-]+$/
+    if (!handleRegex.test(cleanHandle)) {
+      return 'Venmo handle can only contain letters, numbers, underscores, and hyphens'
+    }
+    return null
+  }
 
   async function fetchMethods() {
     try {
@@ -161,32 +192,60 @@ function PayoutMethodsContent() {
     e.preventDefault()
     if (!showAddForm) return
 
-    setIsSubmitting(true)
+    // Clear previous errors
+    setFieldErrors({})
     setError(null)
+
+    // Client-side validation
+    const errors: Record<string, string> = {}
+
+    if (showAddForm === 'paypal') {
+      const emailError = validateEmail(formData.paypalEmail)
+      if (emailError) {
+        errors.paypalEmail = emailError
+      }
+    } else if (showAddForm === 'venmo') {
+      const handleError = validateVenmoHandle(formData.venmoHandle)
+      if (handleError) {
+        errors.venmoHandle = handleError
+      }
+    } else if (showAddForm === 'check') {
+      if (!formData.checkName.trim()) errors.checkName = 'Full name is required'
+      if (!formData.checkLine1.trim()) errors.checkLine1 = 'Address is required'
+      if (!formData.checkCity.trim()) errors.checkCity = 'City is required'
+      if (!formData.checkState.trim()) {
+        errors.checkState = 'State is required'
+      } else if (!/^[A-Z]{2}$/.test(formData.checkState.toUpperCase())) {
+        errors.checkState = 'Use 2-letter state code (e.g., NY)'
+      }
+      if (!formData.checkPostalCode.trim()) {
+        errors.checkPostalCode = 'ZIP code is required'
+      } else if (!/^\d{5}(-\d{4})?$/.test(formData.checkPostalCode)) {
+        errors.checkPostalCode = 'Invalid ZIP code (use 5 or 9 digit format)'
+      }
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      return
+    }
+
+    setIsSubmitting(true)
 
     try {
       const body: Record<string, unknown> = { type: showAddForm }
 
       if (showAddForm === 'paypal') {
-        if (!formData.paypalEmail || !formData.paypalEmail.includes('@')) {
-          throw new Error('Valid PayPal email is required')
-        }
         body.paypalEmail = formData.paypalEmail
       } else if (showAddForm === 'venmo') {
-        if (!formData.venmoHandle) {
-          throw new Error('Venmo handle is required')
-        }
         body.venmoHandle = formData.venmoHandle.replace('@', '')
       } else if (showAddForm === 'check') {
-        if (!formData.checkName || !formData.checkLine1 || !formData.checkCity || !formData.checkState || !formData.checkPostalCode) {
-          throw new Error('Complete address is required')
-        }
         body.checkAddress = {
           name: formData.checkName,
           line1: formData.checkLine1,
           line2: formData.checkLine2 || null,
           city: formData.checkCity,
-          state: formData.checkState,
+          state: formData.checkState.toUpperCase(),
           postalCode: formData.checkPostalCode,
           country: 'US',
         }
@@ -459,11 +518,18 @@ function PayoutMethodsContent() {
                       type="email"
                       placeholder="your@email.com"
                       value={formData.paypalEmail}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setFormData((prev) => ({ ...prev, paypalEmail: e.target.value }))
-                      }
+                        if (fieldErrors.paypalEmail) {
+                          setFieldErrors((prev) => ({ ...prev, paypalEmail: '' }))
+                        }
+                      }}
+                      className={fieldErrors.paypalEmail ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors.paypalEmail && (
+                      <p className="text-sm text-destructive">{fieldErrors.paypalEmail}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={() => setShowAddForm(null)}>
@@ -506,11 +572,21 @@ function PayoutMethodsContent() {
                       id="venmoHandle"
                       placeholder="@username"
                       value={formData.venmoHandle}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setFormData((prev) => ({ ...prev, venmoHandle: e.target.value }))
-                      }
+                        if (fieldErrors.venmoHandle) {
+                          setFieldErrors((prev) => ({ ...prev, venmoHandle: '' }))
+                        }
+                      }}
+                      className={fieldErrors.venmoHandle ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors.venmoHandle && (
+                      <p className="text-sm text-destructive">{fieldErrors.venmoHandle}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      5-30 characters, letters, numbers, underscores, and hyphens only
+                    </p>
                   </div>
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={() => setShowAddForm(null)}>
@@ -554,11 +630,18 @@ function PayoutMethodsContent() {
                         id="checkName"
                         placeholder="John Doe"
                         value={formData.checkName}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setFormData((prev) => ({ ...prev, checkName: e.target.value }))
-                        }
+                          if (fieldErrors.checkName) {
+                            setFieldErrors((prev) => ({ ...prev, checkName: '' }))
+                          }
+                        }}
+                        className={fieldErrors.checkName ? 'border-destructive' : ''}
                         required
                       />
+                      {fieldErrors.checkName && (
+                        <p className="text-sm text-destructive">{fieldErrors.checkName}</p>
+                      )}
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="checkLine1">Address Line 1</Label>
@@ -566,11 +649,18 @@ function PayoutMethodsContent() {
                         id="checkLine1"
                         placeholder="123 Main St"
                         value={formData.checkLine1}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setFormData((prev) => ({ ...prev, checkLine1: e.target.value }))
-                        }
+                          if (fieldErrors.checkLine1) {
+                            setFieldErrors((prev) => ({ ...prev, checkLine1: '' }))
+                          }
+                        }}
+                        className={fieldErrors.checkLine1 ? 'border-destructive' : ''}
                         required
                       />
+                      {fieldErrors.checkLine1 && (
+                        <p className="text-sm text-destructive">{fieldErrors.checkLine1}</p>
+                      )}
                     </div>
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="checkLine2">Address Line 2 (Optional)</Label>
@@ -589,11 +679,18 @@ function PayoutMethodsContent() {
                         id="checkCity"
                         placeholder="New York"
                         value={formData.checkCity}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setFormData((prev) => ({ ...prev, checkCity: e.target.value }))
-                        }
+                          if (fieldErrors.checkCity) {
+                            setFieldErrors((prev) => ({ ...prev, checkCity: '' }))
+                          }
+                        }}
+                        className={fieldErrors.checkCity ? 'border-destructive' : ''}
                         required
                       />
+                      {fieldErrors.checkCity && (
+                        <p className="text-sm text-destructive">{fieldErrors.checkCity}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="checkState">State</Label>
@@ -602,11 +699,18 @@ function PayoutMethodsContent() {
                         placeholder="NY"
                         maxLength={2}
                         value={formData.checkState}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setFormData((prev) => ({ ...prev, checkState: e.target.value.toUpperCase() }))
-                        }
+                          if (fieldErrors.checkState) {
+                            setFieldErrors((prev) => ({ ...prev, checkState: '' }))
+                          }
+                        }}
+                        className={fieldErrors.checkState ? 'border-destructive' : ''}
                         required
                       />
+                      {fieldErrors.checkState && (
+                        <p className="text-sm text-destructive">{fieldErrors.checkState}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="checkPostalCode">ZIP Code</Label>
@@ -614,11 +718,18 @@ function PayoutMethodsContent() {
                         id="checkPostalCode"
                         placeholder="10001"
                         value={formData.checkPostalCode}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setFormData((prev) => ({ ...prev, checkPostalCode: e.target.value }))
-                        }
+                          if (fieldErrors.checkPostalCode) {
+                            setFieldErrors((prev) => ({ ...prev, checkPostalCode: '' }))
+                          }
+                        }}
+                        className={fieldErrors.checkPostalCode ? 'border-destructive' : ''}
                         required
                       />
+                      {fieldErrors.checkPostalCode && (
+                        <p className="text-sm text-destructive">{fieldErrors.checkPostalCode}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2">

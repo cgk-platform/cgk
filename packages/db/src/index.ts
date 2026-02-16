@@ -41,6 +41,14 @@ export {
 // Import from '@cgk-platform/db/migrations' instead for migration functions.
 // See: packages/db/src/migrations.ts
 
+// Webhook idempotency utilities
+export {
+  checkWebhookIdempotency,
+  markWebhookProcessed,
+  checkAndMarkWebhook,
+  cleanupIdempotencyKeys,
+} from './webhook-idempotency.js'
+
 // Types
 export type { QueryConfig, QueryResult } from './types.js'
 

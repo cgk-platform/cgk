@@ -241,7 +241,10 @@ async function fetchAuditData(
   summary: AuditSummary
 } | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+    if (!baseUrl) {
+      throw new Error('APP_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+    }
     const res = await fetch(`${baseUrl}/api/admin/esign/documents/${documentId}/audit`, {
       headers: {
         'x-tenant-slug': tenantSlug,

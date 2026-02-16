@@ -164,7 +164,10 @@ async function sendTeamInvitationEmail(
   tenantName: string,
   personalMessage?: string
 ): Promise<void> {
-  const baseUrl = process.env.APP_URL || 'http://localhost:3000'
+  const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL
+  if (!baseUrl) {
+    throw new Error('APP_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+  }
   const inviteUrl = `${baseUrl}/join?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
 
   const resendApiKey = process.env.RESEND_API_KEY

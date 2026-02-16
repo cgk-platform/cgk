@@ -279,8 +279,9 @@ async function executeSlackNotify(
       )
       ON CONFLICT DO NOTHING
     `
-  }).catch(() => {
-    // Table might not exist yet - that's okay
+  }).catch((error) => {
+    // Table might not exist yet or other DB error - log but don't fail
+    console.debug('[workflow] Failed to save Slack notification:', error)
   })
 
   return {
@@ -324,8 +325,9 @@ async function executeSuggestAction(
       )
       ON CONFLICT DO NOTHING
     `
-  }).catch(() => {
-    // Table might not exist yet
+  }).catch((error) => {
+    // Table might not exist yet or other DB error - log but don't fail
+    console.debug('[workflow] Failed to save suggestion:', error)
   })
 
   return {
@@ -736,8 +738,7 @@ function formatDate(date: unknown): string {
 }
 
 function buildAdminUrl(context: ExecutionContext): string {
-  // TODO: Get base URL from config
-  const baseUrl = process.env.ADMIN_BASE_URL || 'https://admin.example.com'
+  const baseUrl = process.env.ADMIN_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
   return `${baseUrl}/${context.entityType}s/${context.entityId}`
 }
 

@@ -208,7 +208,11 @@ export default function BrandDetailPage() {
               onClick={() => {
                 // Open admin portal for this brand
                 // In production, use custom domain or pass tenant context
-                const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'https://cgk-admin.vercel.app'
+                const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL
+                if (!adminUrl) {
+                  console.error('NEXT_PUBLIC_ADMIN_URL not configured')
+                  return
+                }
                 window.open(`${adminUrl}?tenant=${brand.slug}`, '_blank')
               }}
             >
@@ -220,7 +224,11 @@ export default function BrandDetailPage() {
               size="sm"
               onClick={() => {
                 // Open storefront for this brand
-                const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL || 'https://cgk-storefront.vercel.app'
+                const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL
+                if (!storefrontUrl) {
+                  console.error('NEXT_PUBLIC_STOREFRONT_URL not configured')
+                  return
+                }
                 window.open(`${storefrontUrl}?tenant=${brand.slug}`, '_blank')
               }}
             >

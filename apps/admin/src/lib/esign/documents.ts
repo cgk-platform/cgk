@@ -113,26 +113,43 @@ export async function getDocuments(
 
     const total = Number(countResult.rows[0]?.count || 0)
 
-    // Get signers for each document
-    const documents: EsignDocumentWithSigners[] = []
-    for (const row of result.rows) {
-      const signerResult = await sql`
-        SELECT
-          id, document_id as "documentId", name, email, role,
-          signing_order as "signingOrder", status, access_token as "accessToken",
-          is_internal as "isInternal", ip_address as "ipAddress",
-          user_agent as "userAgent", sent_at as "sentAt", viewed_at as "viewedAt",
-          signed_at as "signedAt", declined_at as "declinedAt",
-          decline_reason as "declineReason", created_at as "createdAt"
-        FROM esign_signers
-        WHERE document_id = ${row.id}
-        ORDER BY signing_order ASC
-      `
-      documents.push({
-        ...(row as unknown as EsignDocumentWithSigners),
-        signers: signerResult.rows as unknown as EsignSigner[],
-      })
+    // No documents - return early
+    if (result.rows.length === 0) {
+      return { documents: [], total }
     }
+
+    // Get all document IDs for batch signer query (eliminates N+1)
+    const docIds = result.rows.map((row) => row.id as string)
+
+    // Single query to get all signers for all documents
+    const signerResult = await sql`
+      SELECT
+        id, document_id as "documentId", name, email, role,
+        signing_order as "signingOrder", status, access_token as "accessToken",
+        is_internal as "isInternal", ip_address as "ipAddress",
+        user_agent as "userAgent", sent_at as "sentAt", viewed_at as "viewedAt",
+        signed_at as "signedAt", declined_at as "declinedAt",
+        decline_reason as "declineReason", created_at as "createdAt"
+      FROM esign_signers
+      WHERE document_id = ANY(${`{${docIds.join(',')}}`}::text[])
+      ORDER BY document_id, signing_order ASC
+    `
+
+    // Group signers by document ID
+    const signersByDoc = new Map<string, EsignSigner[]>()
+    for (const signer of signerResult.rows) {
+      const s = signer as unknown as EsignSigner
+      if (!signersByDoc.has(s.documentId)) {
+        signersByDoc.set(s.documentId, [])
+      }
+      signersByDoc.get(s.documentId)!.push(s)
+    }
+
+    // Build documents with their signers
+    const documents: EsignDocumentWithSigners[] = result.rows.map((row) => ({
+      ...(row as unknown as EsignDocumentWithSigners),
+      signers: signersByDoc.get(row.id as string) || [],
+    }))
 
     return { documents, total }
   })
@@ -235,34 +252,54 @@ export async function getPendingDocuments(
       ORDER BY d.updated_at ASC
     `
 
-    // Get signers for all documents
-    const addSigners = async (
-      docs: Array<{ id: string } & Record<string, unknown>>
-    ): Promise<EsignDocumentWithSigners[]> => {
-      const results: EsignDocumentWithSigners[] = []
-      for (const doc of docs) {
-        const signerResult = await sql`
-          SELECT
-            id, document_id as "documentId", name, email, role,
-            signing_order as "signingOrder", status, is_internal as "isInternal",
-            sent_at as "sentAt", viewed_at as "viewedAt", signed_at as "signedAt",
-            created_at as "createdAt"
-          FROM esign_signers WHERE document_id = ${doc.id}
-          ORDER BY signing_order ASC
-        `
-        results.push({
-          ...(doc as unknown as EsignDocument),
-          signers: signerResult.rows as unknown as EsignSigner[],
-        })
+    // Collect all unique document IDs from all result sets (eliminates N+1)
+    const allDocs = [
+      ...awaitingResult.rows,
+      ...overdueResult.rows,
+      ...expiringSoonResult.rows,
+      ...staleResult.rows,
+    ] as Array<{ id: string } & Record<string, unknown>>
+
+    const allDocIds = [...new Set(allDocs.map((doc) => doc.id))]
+
+    // Single query to get all signers for all documents
+    let signersByDoc = new Map<string, EsignSigner[]>()
+    if (allDocIds.length > 0) {
+      const signerResult = await sql`
+        SELECT
+          id, document_id as "documentId", name, email, role,
+          signing_order as "signingOrder", status, is_internal as "isInternal",
+          sent_at as "sentAt", viewed_at as "viewedAt", signed_at as "signedAt",
+          created_at as "createdAt"
+        FROM esign_signers
+        WHERE document_id = ANY(${`{${allDocIds.join(',')}}`}::text[])
+        ORDER BY document_id, signing_order ASC
+      `
+
+      // Group signers by document ID
+      for (const signer of signerResult.rows) {
+        const s = signer as unknown as EsignSigner
+        if (!signersByDoc.has(s.documentId)) {
+          signersByDoc.set(s.documentId, [])
+        }
+        signersByDoc.get(s.documentId)!.push(s)
       }
-      return results
     }
 
+    // Helper to attach signers to documents (no additional queries)
+    const attachSigners = (
+      docs: Array<{ id: string } & Record<string, unknown>>
+    ): EsignDocumentWithSigners[] =>
+      docs.map((doc) => ({
+        ...(doc as unknown as EsignDocument),
+        signers: signersByDoc.get(doc.id) || [],
+      }))
+
     return {
-      awaitingYourSignature: await addSigners(awaitingResult.rows as Array<{ id: string } & Record<string, unknown>>),
-      overdue: await addSigners(overdueResult.rows as Array<{ id: string } & Record<string, unknown>>),
-      expiringSoon: await addSigners(expiringSoonResult.rows as Array<{ id: string } & Record<string, unknown>>),
-      stale: await addSigners(staleResult.rows as Array<{ id: string } & Record<string, unknown>>),
+      awaitingYourSignature: attachSigners(awaitingResult.rows as Array<{ id: string } & Record<string, unknown>>),
+      overdue: attachSigners(overdueResult.rows as Array<{ id: string } & Record<string, unknown>>),
+      expiringSoon: attachSigners(expiringSoonResult.rows as Array<{ id: string } & Record<string, unknown>>),
+      stale: attachSigners(staleResult.rows as Array<{ id: string } & Record<string, unknown>>),
     }
   })
 }
@@ -290,23 +327,41 @@ export async function getCounterSignQueue(
       ORDER BY d.created_at ASC
     `
 
-    const documents: EsignDocumentWithSigners[] = []
-    for (const row of result.rows) {
-      const signerResult = await sql`
-        SELECT
-          id, document_id as "documentId", name, email, role,
-          signing_order as "signingOrder", status, is_internal as "isInternal",
-          sent_at as "sentAt", viewed_at as "viewedAt", signed_at as "signedAt",
-          created_at as "createdAt"
-        FROM esign_signers
-        WHERE document_id = ${row.id}
-        ORDER BY signing_order ASC
-      `
-      documents.push({
-        ...(row as unknown as EsignDocument),
-        signers: signerResult.rows as unknown as EsignSigner[],
-      })
+    // No documents - return early
+    if (result.rows.length === 0) {
+      return []
     }
+
+    // Get all document IDs for batch signer query (eliminates N+1)
+    const docIds = result.rows.map((row) => row.id as string)
+
+    // Single query to get all signers for all documents
+    const signerResult = await sql`
+      SELECT
+        id, document_id as "documentId", name, email, role,
+        signing_order as "signingOrder", status, is_internal as "isInternal",
+        sent_at as "sentAt", viewed_at as "viewedAt", signed_at as "signedAt",
+        created_at as "createdAt"
+      FROM esign_signers
+      WHERE document_id = ANY(${`{${docIds.join(',')}}`}::text[])
+      ORDER BY document_id, signing_order ASC
+    `
+
+    // Group signers by document ID
+    const signersByDoc = new Map<string, EsignSigner[]>()
+    for (const signer of signerResult.rows) {
+      const s = signer as unknown as EsignSigner
+      if (!signersByDoc.has(s.documentId)) {
+        signersByDoc.set(s.documentId, [])
+      }
+      signersByDoc.get(s.documentId)!.push(s)
+    }
+
+    // Build documents with their signers
+    const documents: EsignDocumentWithSigners[] = result.rows.map((row) => ({
+      ...(row as unknown as EsignDocument),
+      signers: signersByDoc.get(row.id as string) || [],
+    }))
 
     return documents
   })

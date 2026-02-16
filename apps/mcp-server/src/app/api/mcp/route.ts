@@ -7,6 +7,9 @@
  * @route POST /api/mcp
  */
 
+// Environment validation - must be imported first
+import { ensureEnvValidated } from '@/lib/env-validation'
+
 import {
   MCPHandler,
   MCPProtocolError,
@@ -133,6 +136,9 @@ export async function POST(request: Request): Promise<Response> {
   const corsHeaders = createCORSHeaders(request)
 
   try {
+    // Validate environment variables (only runs once)
+    ensureEnvValidated()
+
     // Authenticate the request
     const auth = await authenticateRequest(request)
 

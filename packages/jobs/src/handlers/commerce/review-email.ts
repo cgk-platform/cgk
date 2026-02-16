@@ -10,6 +10,33 @@
  *
  * Rate limiting: 10 emails/second per tenant (respecting Resend 0.55s delay)
  *
+ * INTEGRATION REQUIREMENTS:
+ * - Tenant must have Resend API key configured in tenant_resend_config
+ * - Use `getTenantResendClient(tenantId)` from @cgk-platform/integrations
+ * - Email templates must be set up in tenant's email_templates table
+ * - Review settings configured in tenant's review_settings table
+ *
+ * IMPLEMENTATION STATUS:
+ * These handlers define the job structure and validation.
+ * Full implementation requires:
+ * 1. Resend API integration via @cgk-platform/integrations
+ * 2. Email template rendering with tenant branding
+ * 3. Database operations via withTenant() for tenant isolation
+ * 4. Rate limiting enforcement per tenant (max 10 emails/second)
+ *
+ * SENDING EMAILS:
+ * ```typescript
+ * const resend = await getTenantResendClient(tenantId)
+ * if (!resend) throw new Error('Resend not configured for tenant')
+ *
+ * const result = await resend.emails.send({
+ *   from: tenantEmailSettings.fromAddress,
+ *   to: customerEmail,
+ *   subject: 'How was your order?',
+ *   html: renderedTemplate,
+ * })
+ * ```
+ *
  * @ai-pattern tenant-isolation
  * @ai-critical All handlers require tenantId
  */

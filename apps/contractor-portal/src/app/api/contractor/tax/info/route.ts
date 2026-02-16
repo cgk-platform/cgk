@@ -96,6 +96,61 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Tax ID is required' }, { status: 400 })
   }
 
+  // Validate tax ID format based on type
+  // Remove any non-digit characters for validation
+  const taxIdDigitsOnly = body.taxId.replace(/\D/g, '')
+
+  if (body.taxIdType === 'ssn') {
+    // SSN format: XXX-XX-XXXX (9 digits)
+    // Valid patterns: 123-45-6789, 123456789
+    const ssnRegex = /^(?!000|666|9\d{2})\d{3}(?!00)\d{2}(?!0000)\d{4}$/
+
+    if (taxIdDigitsOnly.length !== 9) {
+      return Response.json(
+        { error: 'SSN must contain exactly 9 digits' },
+        { status: 400 }
+      )
+    }
+
+    if (!ssnRegex.test(taxIdDigitsOnly)) {
+      return Response.json(
+        { error: 'Invalid SSN format. SSN cannot start with 000, 666, or 9XX. Area and group numbers cannot be all zeros.' },
+        { status: 400 }
+      )
+    }
+  } else if (body.taxIdType === 'ein') {
+    // EIN format: XX-XXXXXXX (9 digits)
+    // First two digits must be a valid campus code (01-99, excluding certain codes)
+    const einRegex = /^\d{9}$/
+
+    if (taxIdDigitsOnly.length !== 9) {
+      return Response.json(
+        { error: 'EIN must contain exactly 9 digits' },
+        { status: 400 }
+      )
+    }
+
+    if (!einRegex.test(taxIdDigitsOnly)) {
+      return Response.json(
+        { error: 'Invalid EIN format. EIN must be 9 digits.' },
+        { status: 400 }
+      )
+    }
+
+    // Validate EIN prefix (first two digits)
+    // IRS assigns prefixes based on campus location - 00 and certain codes are invalid
+    const einPrefix = parseInt(taxIdDigitsOnly.substring(0, 2), 10)
+    if (einPrefix === 0 || einPrefix === 7 || einPrefix === 8 || einPrefix === 9 ||
+        einPrefix === 17 || einPrefix === 18 || einPrefix === 19 || einPrefix === 28 ||
+        einPrefix === 29 || einPrefix === 49 || einPrefix === 69 || einPrefix === 70 ||
+        einPrefix === 78 || einPrefix === 79 || einPrefix === 89 || einPrefix >= 97) {
+      return Response.json(
+        { error: 'Invalid EIN prefix. The first two digits must be a valid IRS campus code.' },
+        { status: 400 }
+      )
+    }
+  }
+
   if (!body.legalName) {
     return Response.json({ error: 'Legal name is required' }, { status: 400 })
   }

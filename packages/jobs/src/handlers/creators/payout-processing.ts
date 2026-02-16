@@ -461,6 +461,68 @@ export const checkPaymentsBecomeAvailableJob = defineJob<
 })
 
 // ============================================================
+// IDEMPOTENCY TRACKING (In-memory for development, use Redis in production)
+// ============================================================
+
+/**
+ * In-memory idempotency store for development.
+ *
+ * PRODUCTION NOTE: Replace with Redis-based idempotency:
+ * - Use `SETNX` with TTL for atomic idempotency checks
+ * - Key format: `payout:idempotency:{idempotencyKey}`
+ * - TTL: 24 hours minimum to prevent duplicate payouts
+ * - Store: { status, payoutId, transferId, processedAt }
+ *
+ * Example Redis implementation:
+ * ```typescript
+ * const redis = getTenantRedisClient(tenantId)
+ * const key = `payout:idempotency:${idempotencyKey}`
+ * const existing = await redis.get(key)
+ * if (existing) return JSON.parse(existing)
+ * await redis.setex(key, 86400, JSON.stringify(result))
+ * ```
+ */
+const idempotencyStore = new Map<string, {
+  status: 'initiated' | 'pending' | 'completed' | 'failed'
+  payoutId: string
+  transferId?: string
+  processedAt: Date
+}>()
+
+/**
+ * Check if a payout has already been processed
+ * Returns the existing result if found, null if this is a new request
+ */
+function checkIdempotency(idempotencyKey: string): PayoutOrchestrationResult | null {
+  const existing = idempotencyStore.get(idempotencyKey)
+  if (!existing) return null
+
+  return {
+    payoutId: existing.payoutId,
+    status: existing.status,
+    provider: existing.transferId?.startsWith('wise_') ? 'wise' : 'stripe',
+    transferId: existing.transferId,
+  }
+}
+
+/**
+ * Record a payout processing attempt for idempotency
+ */
+function recordIdempotency(
+  idempotencyKey: string,
+  payoutId: string,
+  status: 'initiated' | 'pending' | 'completed' | 'failed',
+  transferId?: string
+): void {
+  idempotencyStore.set(idempotencyKey, {
+    status,
+    payoutId,
+    transferId,
+    processedAt: new Date(),
+  })
+}
+
+// ============================================================
 // PROCESS INTERNATIONAL PAYOUT (Wise)
 // ============================================================
 
@@ -477,6 +539,11 @@ export const checkPaymentsBecomeAvailableJob = defineJob<
  * 6. Queue notifications
  *
  * CRITICAL: Must be idempotent - check existing transfer before creating
+ *
+ * INTEGRATION REQUIREMENTS:
+ * - Tenant must have Wise API credentials configured in tenant_wise_config
+ * - Creator must have wiseRecipientId set up via Wise recipient creation
+ * - Use `getTenantWiseClient(tenantId)` from @cgk-platform/integrations
  */
 export const processInternationalPayoutJob = defineJob<
   TenantEvent<InternationalPayoutPayload>,
@@ -496,30 +563,80 @@ export const processInternationalPayoutJob = defineJob<
       }
     }
 
+    // CRITICAL: Validate idempotency key is provided for payouts
+    if (!idempotencyKey) {
+      return {
+        success: false,
+        error: {
+          message: 'idempotencyKey is required for payout operations to prevent duplicate payments',
+          retryable: false,
+        },
+      }
+    }
+
+    // CRITICAL: Check if this payout was already processed
+    const existingResult = checkIdempotency(idempotencyKey)
+    if (existingResult) {
+      console.log(
+        `[processInternationalPayout] IDEMPOTENT: Payout ${payoutId} already processed with key ${idempotencyKey}`,
+        { existingResult }
+      )
+      return {
+        success: true,
+        data: existingResult,
+      }
+    }
+
     console.log(
       `[processInternationalPayout] Processing payout ${payoutId} for creator ${creatorId} in tenant ${tenantId}`,
       { amount, currency, wiseRecipientId, idempotencyKey }
     )
 
-    // Implementation would:
-    // 1. Check idempotency - look for existing transfer with this key
-    // 2. If exists and completed, return early (idempotent)
-    // 3. Get Wise profile and check balance
-    // 4. Create quote for the transfer
-    // 5. Create transfer with the quote
-    // 6. Fund the transfer from Wise balance
-    // 7. Update payout status to 'processing'
-    // 8. Store wise_transfer_id on payout
-    // 9. Queue status check job
+    // Record that we're processing this payout (prevents race conditions)
+    recordIdempotency(idempotencyKey, payoutId, 'pending')
 
-    return {
-      success: true,
-      data: {
-        payoutId,
-        status: 'initiated',
-        provider: 'wise',
-        transferId: `wise_${Date.now()}`,
-      },
+    try {
+      // Implementation steps (requires Wise API integration):
+      // 1. Get Wise client: const wise = await getTenantWiseClient(tenantId)
+      // 2. Get Wise profile and check balance
+      // 3. Create quote for the transfer:
+      //    const quote = await wise.quotes.create({ sourceCurrency, targetCurrency, targetAmount })
+      // 4. Create transfer with the quote:
+      //    const transfer = await wise.transfers.create({ targetAccount: wiseRecipientId, quoteUuid: quote.id })
+      // 5. Fund the transfer from Wise balance:
+      //    await wise.transfers.fund(transfer.id, { type: 'BALANCE' })
+      // 6. Update payout status in database:
+      //    await withTenant(tenantId, () => sql`UPDATE payouts SET status = 'processing', wise_transfer_id = ${transfer.id} WHERE id = ${payoutId}`)
+      // 7. Queue notification:
+      //    await sendJob('payout.initiated', { tenantId, payoutId, creatorId, amount, provider: 'wise' })
+
+      const transferId = `wise_${Date.now()}`
+
+      // Record successful initiation
+      recordIdempotency(idempotencyKey, payoutId, 'initiated', transferId)
+
+      return {
+        success: true,
+        data: {
+          payoutId,
+          status: 'initiated',
+          provider: 'wise',
+          transferId,
+        },
+      }
+    } catch (error) {
+      // Record failure for idempotency
+      recordIdempotency(idempotencyKey, payoutId, 'failed')
+
+      console.error(`[processInternationalPayout] Failed for payout ${payoutId}:`, error)
+
+      return {
+        success: false,
+        error: {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          retryable: true,
+        },
+      }
     }
   },
   retry: { maxAttempts: 3, backoff: 'exponential', initialDelay: 10000 },
@@ -596,6 +713,11 @@ export const checkPendingInternationalPayoutsJob = defineJob<
  * 5. Queue notifications
  *
  * CRITICAL: Must be idempotent - use idempotency key with Stripe
+ *
+ * INTEGRATION REQUIREMENTS:
+ * - Tenant must have Stripe credentials configured in tenant_stripe_config
+ * - Creator must have Stripe Connect account (stripeConnectAccountId)
+ * - Use `getTenantStripeClient(tenantId)` from @cgk-platform/integrations
  */
 export const processDomesticPayoutJob = defineJob<
   TenantEvent<DomesticPayoutPayload>,
@@ -615,31 +737,87 @@ export const processDomesticPayoutJob = defineJob<
       }
     }
 
+    // CRITICAL: Validate idempotency key is provided for payouts
+    if (!idempotencyKey) {
+      return {
+        success: false,
+        error: {
+          message: 'idempotencyKey is required for payout operations to prevent duplicate payments',
+          retryable: false,
+        },
+      }
+    }
+
+    // CRITICAL: Check if this payout was already processed
+    const existingResult = checkIdempotency(idempotencyKey)
+    if (existingResult) {
+      console.log(
+        `[processDomesticPayout] IDEMPOTENT: Payout ${payoutId} already processed with key ${idempotencyKey}`,
+        { existingResult }
+      )
+      return {
+        success: true,
+        data: existingResult,
+      }
+    }
+
     console.log(
       `[processDomesticPayout] Processing payout ${payoutId} for creator ${creatorId} in tenant ${tenantId}`,
       { amount, currency, stripeConnectAccountId, idempotencyKey }
     )
 
-    // Implementation would:
-    // 1. Check idempotency - look for existing transfer with this key
-    // 2. Verify Stripe Connect account is active and verified
-    // 3. Create Stripe Transfer with idempotency key:
-    //    stripe.transfers.create({
-    //      amount, currency, destination: stripeConnectAccountId,
-    //      metadata: { payoutId, tenantId, creatorId }
-    //    }, { idempotencyKey })
-    // 4. Update payout with stripe_transfer_id
-    // 5. Update status to 'processing' (instant) or 'pending_arrival' (standard)
-    // 6. Queue completion notification
+    // Record that we're processing this payout (prevents race conditions)
+    recordIdempotency(idempotencyKey, payoutId, 'pending')
 
-    return {
-      success: true,
-      data: {
-        payoutId,
-        status: 'initiated',
-        provider: 'stripe',
-        transferId: `tr_${Date.now()}`,
-      },
+    try {
+      // Implementation steps (requires Stripe integration):
+      // 1. Get Stripe client: const stripe = await getTenantStripeClient(tenantId)
+      // 2. Verify Stripe Connect account is active:
+      //    const account = await stripe.accounts.retrieve(stripeConnectAccountId)
+      //    if (!account.charges_enabled) throw new Error('Account not verified')
+      // 3. Create Stripe Transfer with idempotency key:
+      //    const transfer = await stripe.transfers.create({
+      //      amount,
+      //      currency,
+      //      destination: stripeConnectAccountId,
+      //      metadata: { payoutId, tenantId, creatorId }
+      //    }, { idempotencyKey })
+      //
+      //    NOTE: Stripe's idempotency key ensures the same transfer won't be created twice,
+      //    even if this job retries. Keys are scoped per Stripe account and expire after 24h.
+      //
+      // 4. Update payout in database:
+      //    await withTenant(tenantId, () => sql`UPDATE payouts SET status = 'processing', stripe_transfer_id = ${transfer.id} WHERE id = ${payoutId}`)
+      // 5. Queue notification:
+      //    await sendJob('payout.initiated', { tenantId, payoutId, creatorId, amount, provider: 'stripe' })
+
+      const transferId = `tr_${Date.now()}`
+
+      // Record successful initiation
+      recordIdempotency(idempotencyKey, payoutId, 'initiated', transferId)
+
+      return {
+        success: true,
+        data: {
+          payoutId,
+          status: 'initiated',
+          provider: 'stripe',
+          transferId,
+        },
+      }
+    } catch (error) {
+      // Record failure for idempotency
+      recordIdempotency(idempotencyKey, payoutId, 'failed')
+
+      console.error(`[processDomesticPayout] Failed for payout ${payoutId}:`, error)
+
+      return {
+        success: false,
+        error: {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          retryable: true,
+        },
+      }
     }
   },
   retry: { maxAttempts: 3, backoff: 'exponential', initialDelay: 10000 },

@@ -126,8 +126,10 @@ class RedisCache {
     if (result === null) return undefined
 
     try {
-      return JSON.parse(result) as T
+      const parsed: unknown = JSON.parse(result)
+      return parsed as T
     } catch {
+      // If parsing fails, return the raw string as the value
       return result as unknown as T
     }
   }

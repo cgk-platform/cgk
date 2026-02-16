@@ -9,6 +9,7 @@
  *
  * @ai-pattern trigger-tasks
  * @ai-critical All tasks require tenantId in payload
+ * @ai-critical Financial operations MUST use proper error handling
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
@@ -30,7 +31,12 @@ import type {
   ExpenseSyncPayload,
   CommissionMaturedPayload,
 } from '../../events'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
+import {
+  createPermanentError,
+  handleJobResult,
+  generateIdempotencyKey,
+} from '../errors'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -68,7 +74,7 @@ export const onPaymentAvailableTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Payment available notification', { tenantId })
@@ -79,11 +85,7 @@ export const onPaymentAvailableTask = task({
       createJobFromPayload('payment', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Payment available notification failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Payment available notification')
   },
 })
 
@@ -94,7 +96,7 @@ export const onPayoutInitiatedTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Payout initiated notification', { tenantId })
@@ -105,11 +107,7 @@ export const onPayoutInitiatedTask = task({
       createJobFromPayload('payout', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Payout initiated notification failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Payout initiated notification')
   },
 })
 
@@ -120,7 +118,7 @@ export const onPayoutCompleteTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Payout complete notification', { tenantId })
@@ -131,11 +129,7 @@ export const onPayoutCompleteTask = task({
       createJobFromPayload('payout', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Payout complete notification failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Payout complete notification')
   },
 })
 
@@ -146,7 +140,7 @@ export const onPayoutFailedTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Payout failed notification', { tenantId })
@@ -157,11 +151,7 @@ export const onPayoutFailedTask = task({
       createJobFromPayload('payout', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Payout failed notification failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Payout failed notification')
   },
 })
 
@@ -173,25 +163,39 @@ export const processInternationalPayoutTask = task({
   id: 'payout-process-international',
   retry: PAYOUT_RETRY,
   run: async (payload: TenantEvent<InternationalPayoutPayload>) => {
-    const { tenantId } = payload
+    const { tenantId, payoutId, idempotencyKey } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
-    logger.info('Processing international payout', { tenantId })
+    if (!payoutId) {
+      throw createPermanentError('payoutId is required', 'MISSING_REQUIRED_FIELD')
+    }
+
+    // Generate idempotency key if not provided
+    const effectiveIdempotencyKey = idempotencyKey || generateIdempotencyKey(
+      tenantId,
+      'international_payout',
+      payoutId
+    )
+
+    logger.info('Processing international payout', {
+      tenantId,
+      payoutId,
+      idempotencyKey: effectiveIdempotencyKey,
+    })
 
     const { processInternationalPayoutJob } = await import('../../handlers/creators/payout-processing.js')
 
     const result = await processInternationalPayoutJob.handler(
-      createJobFromPayload('international', payload)
+      createJobFromPayload('international', {
+        ...payload,
+        idempotencyKey: effectiveIdempotencyKey,
+      })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'International payout processing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'International payout processing')
   },
 })
 
@@ -199,25 +203,39 @@ export const processDomesticPayoutTask = task({
   id: 'payout-process-domestic',
   retry: PAYOUT_RETRY,
   run: async (payload: TenantEvent<DomesticPayoutPayload>) => {
-    const { tenantId } = payload
+    const { tenantId, payoutId, idempotencyKey } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
-    logger.info('Processing domestic payout', { tenantId })
+    if (!payoutId) {
+      throw createPermanentError('payoutId is required', 'MISSING_REQUIRED_FIELD')
+    }
+
+    // Generate idempotency key if not provided
+    const effectiveIdempotencyKey = idempotencyKey || generateIdempotencyKey(
+      tenantId,
+      'domestic_payout',
+      payoutId
+    )
+
+    logger.info('Processing domestic payout', {
+      tenantId,
+      payoutId,
+      idempotencyKey: effectiveIdempotencyKey,
+    })
 
     const { processDomesticPayoutJob } = await import('../../handlers/creators/payout-processing.js')
 
     const result = await processDomesticPayoutJob.handler(
-      createJobFromPayload('domestic', payload)
+      createJobFromPayload('domestic', {
+        ...payload,
+        idempotencyKey: effectiveIdempotencyKey,
+      })
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Domestic payout processing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Domestic payout processing')
   },
 })
 
@@ -232,7 +250,7 @@ export const checkPaymentsBecomeAvailableTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Checking payments become available', { tenantId })
@@ -243,11 +261,7 @@ export const checkPaymentsBecomeAvailableTask = task({
       createJobFromPayload('check', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Check payments available failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Check payments available')
   },
 })
 
@@ -258,7 +272,7 @@ export const checkPendingInternationalPayoutsTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Checking pending international payouts', { tenantId })
@@ -269,11 +283,7 @@ export const checkPendingInternationalPayoutsTask = task({
       createJobFromPayload('check', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Check pending international payouts failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Check pending international payouts')
   },
 })
 
@@ -284,7 +294,7 @@ export const checkPendingDomesticPayoutsTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Checking pending domestic payouts', { tenantId })
@@ -295,11 +305,7 @@ export const checkPendingDomesticPayoutsTask = task({
       createJobFromPayload('check', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Check pending domestic payouts failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Check pending domestic payouts')
   },
 })
 
@@ -314,7 +320,7 @@ export const onTopupSucceededTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Processing topup succeeded', { tenantId })
@@ -325,11 +331,7 @@ export const onTopupSucceededTask = task({
       createJobFromPayload('topup', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Topup succeeded processing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Topup succeeded processing')
   },
 })
 
@@ -340,7 +342,7 @@ export const dailyExpenseSyncTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Running daily expense sync', { tenantId })
@@ -351,11 +353,7 @@ export const dailyExpenseSyncTask = task({
       createJobFromPayload('daily', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Daily expense sync failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Daily expense sync')
   },
 })
 
@@ -366,7 +364,7 @@ export const monthlyPaymentSummaryTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Generating monthly payment summary', { tenantId })
@@ -377,11 +375,7 @@ export const monthlyPaymentSummaryTask = task({
       createJobFromPayload('monthly', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Monthly payment summary failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Monthly payment summary')
   },
 })
 
@@ -392,7 +386,7 @@ export const monthlyPLSnapshotTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Generating monthly P&L snapshot', { tenantId })
@@ -403,11 +397,7 @@ export const monthlyPLSnapshotTask = task({
       createJobFromPayload('monthly', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Monthly P&L snapshot failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Monthly P&L snapshot')
   },
 })
 
@@ -415,13 +405,19 @@ export const onCommissionMaturedTask = task({
   id: 'payout-on-commission-matured',
   retry: NOTIFICATION_RETRY,
   run: async (payload: TenantEvent<CommissionMaturedPayload>) => {
-    const { tenantId } = payload
+    const { tenantId, commissionId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
-    logger.info('Processing commission matured', { tenantId })
+    // Generate idempotency key for commission maturation
+    // This ensures we don't double-credit balances if the task is retried
+    const idempotencyKey = commissionId
+      ? generateIdempotencyKey(tenantId, 'commission_matured', commissionId)
+      : undefined
+
+    logger.info('Processing commission matured', { tenantId, commissionId, idempotencyKey })
 
     const { onCommissionMaturedJob } = await import('../../handlers/creators/payout-processing.js')
 
@@ -429,11 +425,7 @@ export const onCommissionMaturedTask = task({
       createJobFromPayload('commission', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Commission matured processing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Commission matured processing')
   },
 })
 
@@ -446,7 +438,7 @@ export const checkPaymentsAvailableScheduledTask = schedules.task({
   cron: '0 8 * * *', // Daily at 8 AM UTC
   run: async () => {
     logger.info('Running scheduled check payments available')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await checkPaymentsBecomeAvailableTask.trigger({ tenantId })
     }
@@ -459,7 +451,7 @@ export const checkPendingInternationalScheduledTask = schedules.task({
   cron: '0 * * * *', // Every hour
   run: async () => {
     logger.info('Running scheduled check pending international payouts')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await checkPendingInternationalPayoutsTask.trigger({ tenantId, payoutType: 'international' })
     }
@@ -472,7 +464,7 @@ export const checkPendingDomesticScheduledTask = schedules.task({
   cron: '30 * * * *', // Every hour at :30
   run: async () => {
     logger.info('Running scheduled check pending domestic payouts')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await checkPendingDomesticPayoutsTask.trigger({ tenantId, payoutType: 'domestic' })
     }
@@ -485,7 +477,7 @@ export const dailyExpenseSyncScheduledTask = schedules.task({
   cron: '0 6 * * *', // Daily at 6 AM UTC
   run: async () => {
     logger.info('Running scheduled daily expense sync')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await dailyExpenseSyncTask.trigger({ tenantId })
     }
@@ -498,7 +490,7 @@ export const monthlyPaymentSummaryScheduledTask = schedules.task({
   cron: '0 9 1 * *', // 9 AM on 1st of month
   run: async () => {
     logger.info('Running scheduled monthly payment summary')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     const now = new Date()
     const month = now.getMonth() || 12 // Previous month (0 = Jan -> use 12 for Dec of last year)
     const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()
@@ -514,7 +506,7 @@ export const monthlyPLSnapshotScheduledTask = schedules.task({
   cron: '0 2 2 * *', // 2 AM on 2nd of month
   run: async () => {
     logger.info('Running scheduled monthly P&L snapshot')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     const now = new Date()
     const month = now.getMonth() || 12
     const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear()

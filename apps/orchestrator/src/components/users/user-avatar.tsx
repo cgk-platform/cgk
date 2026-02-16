@@ -31,20 +31,21 @@ function getInitials(name: string | null): string {
 }
 
 /**
- * Generate a consistent color from a string
+ * Generate a consistent color from a string using theme-compatible colors
  */
 function stringToColor(str: string): string {
+  // Theme-compatible color palette using HSL values that work with the design system
   const colors = [
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-yellow-500',
-    'bg-red-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-indigo-500',
-    'bg-teal-500',
-    'bg-orange-500',
-    'bg-cyan-500',
+    'bg-primary',           // Deep Navy
+    'bg-primary/80',        // Lighter Navy
+    'bg-gold',              // Gold accent
+    'bg-gold/80',           // Lighter Gold
+    'bg-info',              // Info blue
+    'bg-success',           // Success green
+    'bg-warning',           // Warning amber
+    'bg-[hsl(280,60%,50%)]', // Purple (theme-compatible)
+    'bg-[hsl(340,60%,50%)]', // Pink (theme-compatible)
+    'bg-[hsl(180,60%,40%)]', // Teal (theme-compatible)
   ]
 
   let hash = 0

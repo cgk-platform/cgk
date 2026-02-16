@@ -152,7 +152,10 @@ export async function renderEmailTemplate(
     : htmlToPlainText(bodyHtml)
 
   // Get sender info
-  const senderAddress = template.senderEmail || brandVariables.supportEmail || 'noreply@example.com'
+  const senderAddress = template.senderEmail || brandVariables.supportEmail
+  if (!senderAddress) {
+    throw new Error('Sender email address is required (template.senderEmail or brandVariables.supportEmail)')
+  }
   const senderName = template.senderName || brandVariables.brandName || 'Support'
   const replyTo = template.replyToEmail || undefined
 

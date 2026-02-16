@@ -57,7 +57,10 @@ export async function POST(
       )
     }
 
-    const body = await req.json().catch(() => ({}))
+    const body = await req.json().catch(() => {
+      // Empty body is valid for retry requests
+      return {}
+    })
     const { scheduledAt, forceRetry, additionalAttempts } = body
 
     // Verify entry exists

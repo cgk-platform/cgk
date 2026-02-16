@@ -109,7 +109,10 @@ export async function sendMagicLinkEmail(
   token: string,
   purpose: MagicLinkPurpose
 ): Promise<void> {
-  const baseUrl = process.env.APP_URL || 'http://localhost:3000'
+  const baseUrl = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL
+  if (!baseUrl) {
+    throw new Error('APP_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+  }
   const magicLinkUrl = `${baseUrl}/auth/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
 
   const subject = getEmailSubject(purpose)

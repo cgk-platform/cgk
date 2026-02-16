@@ -17,7 +17,7 @@ import type {
   GenerateWeeklyCreatorSummaryPayload,
   GenerateMonthlyCreatorReportPayload,
 } from '../../handlers/creators/analytics-aggregation'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -121,7 +121,7 @@ export const aggregateDailyMetricsScheduledTask = schedules.task({
   cron: '0 3 * * *', // Daily at 3 AM UTC
   run: async () => {
     logger.info('Running scheduled daily metrics aggregation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await aggregateCreatorDailyMetricsTask.trigger({ tenantId })
     }
@@ -134,7 +134,7 @@ export const generateWeeklySummaryScheduledTask = schedules.task({
   cron: '0 6 * * 0', // Sunday at 6 AM UTC
   run: async () => {
     logger.info('Running scheduled weekly summary generation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await generateWeeklyCreatorSummaryTask.trigger({ tenantId, notifyAdmins: true })
     }
@@ -147,7 +147,7 @@ export const generateMonthlyReportScheduledTask = schedules.task({
   cron: '0 4 1 * *', // 1st of month at 4 AM UTC
   run: async () => {
     logger.info('Running scheduled monthly report generation')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await generateMonthlyCreatorReportTask.trigger({
         tenantId,

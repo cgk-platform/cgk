@@ -97,7 +97,13 @@ export async function POST(request: Request) {
   const pages = await withTenant(tenantSlug, () => getAnalyzablePages())
 
   // Get the base URL from environment or request
-  const baseUrl = process.env.STOREFRONT_URL || request.headers.get('origin') || 'http://localhost:3000'
+  const baseUrl = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_STOREFRONT_URL || request.headers.get('origin')
+  if (!baseUrl) {
+    return NextResponse.json(
+      { error: 'STOREFRONT_URL environment variable is required' },
+      { status: 500 }
+    )
+  }
 
   const pageResults: PageSEOAnalysis[] = []
 

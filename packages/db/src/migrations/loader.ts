@@ -63,8 +63,29 @@ async function loadFromDirectory(dir: string): Promise<Migration[]> {
     })
   }
 
-  // Sort by version
-  return migrations.sort((a, b) => a.version - b.version)
+  // Sort by version, then by name for consistent ordering
+  const sorted = migrations.sort((a, b) => {
+    if (a.version !== b.version) return a.version - b.version
+    return a.name.localeCompare(b.name)
+  })
+
+  // Check for duplicate version numbers and warn
+  const versions = new Map<number, string[]>()
+  for (const migration of sorted) {
+    const existing = versions.get(migration.version) || []
+    existing.push(migration.name)
+    versions.set(migration.version, existing)
+  }
+
+  for (const [version, names] of versions) {
+    if (names.length > 1) {
+      console.warn(
+        `Warning: Duplicate migration version ${String(version).padStart(3, '0')}: ${names.join(', ')}`
+      )
+    }
+  }
+
+  return sorted
 }
 
 /**

@@ -82,7 +82,10 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
       fetch('/api/admin/settings/ai/usage')
         .then((res) => res.json())
         .then((data) => setUsage(data.usage))
-        .catch(() => {})
+        .catch((error) => {
+          // Non-critical: usage data is supplementary
+          console.warn('[ai-settings] Failed to load usage data:', error)
+        })
     }
   }, [initialSettings, fetchSettings])
 

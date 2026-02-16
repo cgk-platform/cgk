@@ -7,7 +7,26 @@
  * @ai-pattern trigger-tasks
  */
 
+import { sql } from '@cgk-platform/db'
 import type { Job, JobStatus } from '../types'
+
+/**
+ * Fetch all active tenant IDs from the organizations table
+ *
+ * CRITICAL: Used by scheduled tasks to process all tenants.
+ * Never hardcode tenant IDs - always query the database.
+ *
+ * @returns Array of active tenant IDs (organization slugs)
+ */
+export async function getActiveTenants(): Promise<string[]> {
+  const result = await sql<{ slug: string }>`
+    SELECT slug FROM public.organizations
+    WHERE status = 'active'
+    ORDER BY slug
+    LIMIT 1000
+  `
+  return result.rows.map(r => r.slug)
+}
 
 /**
  * Create a Job object from a Trigger.dev payload

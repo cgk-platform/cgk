@@ -6,9 +6,14 @@
  */
 
 import { requireAuth } from '@cgk-platform/auth'
+import {
+  getTenantResendClient,
+  getTenantResendSenderConfig,
+} from '@cgk-platform/integrations'
 import { createLogger } from '@cgk-platform/logging'
 import {
   createInvitation,
+  getOrganization,
   getOrganizationInvitations,
   markInvitationSent,
   revokeInvitation,
@@ -116,9 +121,60 @@ export async function POST(req: Request) {
       auth.userId
     )
 
-    // TODO: Send invitation email via communications package
-    // For now, just mark as sent
-    // await sendInvitationEmail(email, token, organizationId)
+    // Get organization details for the email
+    const organization = await getOrganization(organizationId)
+    const orgName = organization?.name || 'the platform'
+    const orgSlug = organization?.slug || ''
+
+    // Try to send invitation email via tenant's Resend client
+    let emailSent = false
+    if (orgSlug) {
+      const resend = await getTenantResendClient(orgSlug)
+      if (resend) {
+        const senderConfig = await getTenantResendSenderConfig(orgSlug)
+        const fromEmail = senderConfig?.from || `noreply@${orgSlug}.com`
+        const acceptUrl = `${process.env.NEXT_PUBLIC_ORCHESTRATOR_URL || 'https://orchestrator.cgk.com'}/accept-invite?token=${token}`
+
+        try {
+          await resend.emails.send({
+            from: fromEmail,
+            to: email,
+            replyTo: senderConfig?.replyTo,
+            subject: `You've been invited to join ${orgName}`,
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2>You've been invited to join ${orgName}</h2>
+                <p>You've been invited to join <strong>${orgName}</strong> as a ${role}.</p>
+                <p>Click the button below to accept your invitation and create your account:</p>
+                <p style="margin: 24px 0;">
+                  <a href="${acceptUrl}" style="background-color: #1e3a5f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                    Accept Invitation
+                  </a>
+                </p>
+                <p style="color: #666; font-size: 14px;">
+                  This invitation will expire in 7 days.
+                </p>
+                <p style="color: #666; font-size: 14px;">
+                  If you didn't expect this invitation, you can safely ignore this email.
+                </p>
+              </div>
+            `,
+          })
+          emailSent = true
+          logger.info('Invitation email sent', { email, organizationId })
+        } catch (emailError) {
+          logger.error('Failed to send invitation email', emailError as Error, {
+            email,
+            organizationId,
+          })
+        }
+      } else {
+        logger.warn('Resend not configured for tenant, skipping email', {
+          tenantSlug: orgSlug,
+        })
+      }
+    }
+
     await markInvitationSent(invitation.id)
 
     logger.info('Invitation created', {
@@ -134,6 +190,7 @@ export async function POST(req: Request) {
           role: invitation.role,
           status: 'sent',
         },
+        emailSent,
         // Include token for development/testing
         // In production, this should only be sent via email
         ...(process.env.NODE_ENV === 'development' && { token }),

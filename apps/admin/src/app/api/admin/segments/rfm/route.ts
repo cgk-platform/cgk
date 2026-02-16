@@ -125,7 +125,10 @@ export async function POST(req: Request) {
   }
 
   try {
-    const body = await req.json().catch(() => ({}))
+    const body = await req.json().catch(() => {
+      // Empty body is valid - defaults will be used
+      return {}
+    })
     const { daysBack = 365, clearExisting = false } = body as {
       daysBack?: number
       clearExisting?: boolean

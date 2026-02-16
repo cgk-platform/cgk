@@ -32,7 +32,10 @@ export function BulkActionModal({ action, creatorIds, onClose, onSuccess }: Bulk
     fetch('/api/admin/creators?view=tags')
       .then((res) => res.json())
       .then((data) => setAvailableTags(data.tags || []))
-      .catch(() => {})
+      .catch((error) => {
+        // Non-critical: tags are optional, just log the error
+        console.warn('[bulk-action-modal] Failed to load tags:', error)
+      })
   }, [])
 
   const getTitle = () => {

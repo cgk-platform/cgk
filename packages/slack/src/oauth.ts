@@ -6,8 +6,11 @@
  */
 
 import { randomBytes } from 'crypto'
-import type { SlackOAuthState, SlackOAuthResponse } from './types'
+
+import { fetchWithTimeout, FETCH_TIMEOUTS } from '@cgk-platform/core'
+
 import { encryptToken } from './encryption'
+import type { SlackOAuthState, SlackOAuthResponse } from './types'
 
 // Bot token scopes (40+)
 export const BOT_SCOPES = [
@@ -190,12 +193,13 @@ export async function exchangeCodeForTokens(
     redirect_uri: config.redirectUri,
   })
 
-  const response = await fetch('https://slack.com/api/oauth.v2.access', {
+  const response = await fetchWithTimeout('https://slack.com/api/oauth.v2.access', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: params.toString(),
+    timeout: FETCH_TIMEOUTS.OAUTH,
   })
 
   if (!response.ok) {
@@ -243,12 +247,13 @@ export function processOAuthResponse(response: SlackOAuthResponse): {
  */
 export async function revokeToken(token: string): Promise<boolean> {
   try {
-    const response = await fetch('https://slack.com/api/auth.revoke', {
+    const response = await fetchWithTimeout('https://slack.com/api/auth.revoke', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+      timeout: FETCH_TIMEOUTS.OAUTH,
     })
 
     const data = await response.json() as { ok: boolean }

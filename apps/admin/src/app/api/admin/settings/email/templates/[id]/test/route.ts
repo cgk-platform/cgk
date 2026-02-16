@@ -5,6 +5,10 @@ import {
   previewTemplate,
   getSampleDataForType,
 } from '@cgk-platform/communications'
+import {
+  getTenantResendClient,
+  getTenantResendSenderConfig,
+} from '@cgk-platform/integrations'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -69,39 +73,56 @@ export async function POST(
     variables: allVariables,
   })
 
-  // In a real implementation, this would send via the email provider
-  // For now, we'll just simulate success
-  // TODO: Integrate with actual email sending when email provider is configured
+  // Get tenant's Resend client
+  const resend = await getTenantResendClient(tenantSlug)
 
-  // Simulate email sending
-  const mockSend = async () => {
-    // Add [TEST] prefix to subject
-    const testSubject = `[TEST] ${rendered.subject}`
-
-    // Log the test send (in production, this would actually send)
-    console.log('Test email would be sent:', {
-      to: body.recipientEmail,
-      subject: testSubject,
-      from: template.senderEmail || brandVariables.supportEmail,
-    })
-
-    return {
-      success: true,
-      messageId: `test_${Date.now()}`,
-    }
+  if (!resend) {
+    return NextResponse.json(
+      {
+        error: 'Email not configured. Please configure Resend in Settings > Integrations.',
+      },
+      { status: 400 }
+    )
   }
 
+  // Get sender config
+  const senderConfig = await getTenantResendSenderConfig(tenantSlug)
+  const fromEmail =
+    template.senderEmail ||
+    senderConfig?.from ||
+    brandVariables.supportEmail ||
+    `noreply@${tenantSlug}.com`
+
+  // Add [TEST] prefix to subject
+  const testSubject = `[TEST] ${rendered.subject}`
+
   try {
-    const result = await mockSend()
+    const result = await resend.emails.send({
+      from: fromEmail,
+      to: body.recipientEmail,
+      replyTo: senderConfig?.replyTo,
+      subject: testSubject,
+      html: rendered.bodyHtml,
+    })
+
+    if (result.error) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: result.error.message || 'Failed to send test email',
+        },
+        { status: 500 }
+      )
+    }
 
     return NextResponse.json({
       success: true,
       message: `Test email sent to ${body.recipientEmail}`,
-      messageId: result.messageId,
+      messageId: result.data?.id || `test_${Date.now()}`,
       preview: {
-        subject: `[TEST] ${rendered.subject}`,
+        subject: testSubject,
         to: body.recipientEmail,
-        from: template.senderEmail || brandVariables.supportEmail,
+        from: fromEmail,
       },
     })
   } catch (error) {

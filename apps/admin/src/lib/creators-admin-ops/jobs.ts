@@ -7,6 +7,10 @@
 
 import { defineJob, type Job } from '@cgk-platform/jobs'
 import { withTenant, sql } from '@cgk-platform/db'
+import {
+  getTenantResendClient,
+  getTenantResendSenderConfig,
+} from '@cgk-platform/integrations'
 
 import type { SampleStatus } from './types'
 
@@ -206,12 +210,42 @@ export const sendOnboardingRemindersJob = defineJob({
         )
 
         if (shouldRemind) {
-          // TODO: Actually send the email here
-          // await sendEmail({
-          //   to: row.email,
-          //   template: 'onboarding-reminder',
-          //   data: { name: row.first_name, step: step.name }
-          // })
+          // Send reminder email via tenant's Resend client
+          const resend = await getTenantResendClient(tenantId)
+          if (resend) {
+            const senderConfig = await getTenantResendSenderConfig(tenantId)
+            const fromEmail = senderConfig?.from || `noreply@${tenantId}.com`
+
+            try {
+              await resend.emails.send({
+                from: fromEmail,
+                to: row.email as string,
+                replyTo: senderConfig?.replyTo,
+                subject: `Reminder: Complete your onboarding - ${step.name}`,
+                html: `
+                  <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h2>Hi ${row.first_name || 'there'},</h2>
+                    <p>We noticed you haven't completed the <strong>${step.name}</strong> step in your onboarding process.</p>
+                    <p>Don't forget to complete your setup so you can start collaborating with us!</p>
+                    <p style="margin: 24px 0;">
+                      <a href="${process.env.NEXT_PUBLIC_CREATOR_PORTAL_URL || 'https://creators.cgk.com'}/onboarding"
+                         style="background-color: #1e3a5f; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
+                        Continue Onboarding
+                      </a>
+                    </p>
+                    <p style="color: #666; font-size: 14px;">
+                      If you have any questions, feel free to reply to this email.
+                    </p>
+                  </div>
+                `,
+              })
+            } catch {
+              // Log error but continue processing other reminders
+              console.error(
+                `Failed to send reminder email to ${row.email as string}`
+              )
+            }
+          }
 
           // Update reminder tracking
           const nextReminderDay = reminderDays.find(

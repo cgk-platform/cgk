@@ -149,16 +149,22 @@ export async function POST(request: Request) {
   return row?.shopify_webhook_secret
   })
 
-  // Verify HMAC if secret is configured
-  if (webhookSecret) {
-    const isValid = verifyWebhookSignature(rawBody, hmacHeader, webhookSecret)
-    if (!isValid) {
-      console.warn(`[Webhook] Invalid HMAC signature for ${shopDomain}`)
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 },
-      )
-    }
+  // Verify HMAC signature - MANDATORY
+  if (!webhookSecret) {
+    console.error(`[Webhook] Shopify webhook secret not configured for tenant ${tenant.slug}`)
+    return NextResponse.json(
+      { error: 'Webhook not configured' },
+      { status: 503 },
+    )
+  }
+
+  const isValid = verifyWebhookSignature(rawBody, hmacHeader, webhookSecret)
+  if (!isValid) {
+    console.warn(`[Webhook] Invalid HMAC signature for ${shopDomain}`)
+    return NextResponse.json(
+      { error: 'Invalid signature' },
+      { status: 401 },
+    )
   }
 
   // Parse the webhook payload

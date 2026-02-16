@@ -26,7 +26,8 @@ import type {
   SubscriptionAnalyticsSnapshotPayload,
   SubscriptionUpcomingReminderPayload,
 } from '../../handlers/scheduled/subscriptions'
-import { createJobFromPayload } from '../utils'
+import { createJobFromPayload, getActiveTenants } from '../utils'
+import { createPermanentError, handleJobResult } from '../errors'
 
 // ============================================================
 // RETRY CONFIGURATION
@@ -57,7 +58,7 @@ export const subscriptionDailyBillingTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Running daily billing', { tenantId })
@@ -68,11 +69,7 @@ export const subscriptionDailyBillingTask = task({
       createJobFromPayload('daily', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Daily billing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Daily billing')
   },
 })
 
@@ -87,7 +84,7 @@ export const subscriptionProcessBillingTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Processing billing', { tenantId })
@@ -98,11 +95,7 @@ export const subscriptionProcessBillingTask = task({
       createJobFromPayload('process', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Process billing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Process billing')
   },
 })
 
@@ -117,7 +110,7 @@ export const subscriptionBatchBillingTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Processing batch billing', { tenantId })
@@ -128,11 +121,7 @@ export const subscriptionBatchBillingTask = task({
       createJobFromPayload('batch', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Batch billing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Batch billing')
   },
 })
 
@@ -147,7 +136,7 @@ export const subscriptionRetryFailedTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Retrying failed subscriptions', { tenantId })
@@ -158,11 +147,7 @@ export const subscriptionRetryFailedTask = task({
       createJobFromPayload('retry', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Retry failed subscriptions failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Retry failed subscriptions')
   },
 })
 
@@ -177,7 +162,7 @@ export const subscriptionCatchupBillingTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Running catchup billing', { tenantId })
@@ -188,11 +173,7 @@ export const subscriptionCatchupBillingTask = task({
       createJobFromPayload('catchup', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Catchup billing failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Catchup billing')
   },
 })
 
@@ -207,7 +188,7 @@ export const subscriptionShadowValidationTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Running shadow validation', { tenantId })
@@ -218,11 +199,7 @@ export const subscriptionShadowValidationTask = task({
       createJobFromPayload('shadow', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Shadow validation failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Shadow validation')
   },
 })
 
@@ -237,7 +214,7 @@ export const subscriptionAnalyticsSnapshotTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Creating analytics snapshot', { tenantId })
@@ -248,11 +225,7 @@ export const subscriptionAnalyticsSnapshotTask = task({
       createJobFromPayload('analytics', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Analytics snapshot failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Analytics snapshot')
   },
 })
 
@@ -267,7 +240,7 @@ export const subscriptionUpcomingReminderTask = task({
     const { tenantId } = payload
 
     if (!tenantId) {
-      throw new Error('tenantId is required')
+      throw createPermanentError('tenantId is required', 'MISSING_TENANT_ID')
     }
 
     logger.info('Sending upcoming reminders', { tenantId })
@@ -278,11 +251,7 @@ export const subscriptionUpcomingReminderTask = task({
       createJobFromPayload('upcoming', payload)
     )
 
-    if (!result.success) {
-      throw new Error(result.error?.message || 'Upcoming reminder failed')
-    }
-
-    return result.data
+    return handleJobResult(result, 'Upcoming reminder')
   },
 })
 
@@ -295,7 +264,7 @@ export const subscriptionDailyBillingScheduledTask = schedules.task({
   cron: '0 6 * * *', // 6 AM daily
   run: async () => {
     logger.info('Running scheduled daily billing')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await subscriptionDailyBillingTask.trigger({ tenantId })
     }
@@ -321,7 +290,7 @@ export const subscriptionAnalyticsSnapshotScheduledTask = schedules.task({
   cron: '0 2 * * *', // 2 AM daily
   run: async () => {
     logger.info('Running scheduled analytics snapshot')
-    const tenants = ['system']
+    const tenants = await getActiveTenants()
     for (const tenantId of tenants) {
       await subscriptionAnalyticsSnapshotTask.trigger({ tenantId })
     }

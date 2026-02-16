@@ -9,10 +9,16 @@ import * as jose from 'jose'
 
 import type { ContractorJWTPayload } from '../types'
 
-// Use separate secret for contractor tokens
-const CONTRACTOR_JWT_SECRET = new TextEncoder().encode(
-  process.env.CONTRACTOR_JWT_SECRET || process.env.JWT_SECRET || 'contractor-development-secret'
-)
+// Use separate secret for contractor tokens - MUST be set in environment
+function getContractorJWTSecret(): Uint8Array {
+  const secret = process.env.CONTRACTOR_JWT_SECRET || process.env.JWT_SECRET
+  if (!secret) {
+    throw new Error(
+      'JWT secret not configured. Set CONTRACTOR_JWT_SECRET or JWT_SECRET environment variable.'
+    )
+  }
+  return new TextEncoder().encode(secret)
+}
 
 export const CONTRACTOR_JWT_EXPIRATION = '7d'
 
@@ -49,7 +55,7 @@ export async function signContractorJWT(input: SignContractorJWTInput): Promise<
     .setIssuedAt()
     .setExpirationTime(CONTRACTOR_JWT_EXPIRATION)
     .setIssuer('cgk-contractor-portal')
-    .sign(CONTRACTOR_JWT_SECRET)
+    .sign(getContractorJWTSecret())
 }
 
 /**
@@ -60,7 +66,7 @@ export async function signContractorJWT(input: SignContractorJWTInput): Promise<
  * @throws Error if JWT is invalid or expired
  */
 export async function verifyContractorJWT(token: string): Promise<ContractorJWTPayload> {
-  const { payload } = await jose.jwtVerify(token, CONTRACTOR_JWT_SECRET, {
+  const { payload } = await jose.jwtVerify(token, getContractorJWTSecret(), {
     issuer: 'cgk-contractor-portal',
   })
   return payload as unknown as ContractorJWTPayload

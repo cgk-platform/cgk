@@ -30,7 +30,10 @@ export default async function SupportDashboardPage() {
 
   const [metrics, alerts] = await Promise.all([
     getMetrics(tenantId),
-    getUnacknowledgedAlerts(tenantId).catch(() => []),
+    getUnacknowledgedAlerts(tenantId).catch((error) => {
+      console.error('[support] Failed to load alerts:', error)
+      return []
+    }),
   ])
 
   const statCards = [

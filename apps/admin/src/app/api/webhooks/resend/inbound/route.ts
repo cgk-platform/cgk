@@ -11,7 +11,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
-import { withTenant } from '@cgk-platform/db'
+import { withTenant, checkAndMarkWebhook } from '@cgk-platform/db'
 import {
   verifyResendSignature,
   verifySvixSignature,
@@ -86,6 +86,25 @@ export async function POST(request: Request) {
       processed: false,
       reason: `Event type ${eventType} not handled`,
     })
+  }
+
+  // Check idempotency - prevent duplicate processing
+  const eventId = (payload.data as { id?: string })?.id ||
+    (payload as { id?: string }).id ||
+    ''
+  if (eventId) {
+    const isDuplicate = await checkAndMarkWebhook('resend', eventId, {
+      type: eventType,
+    })
+
+    if (isDuplicate) {
+      console.log('[Resend Webhook] Duplicate event ignored:', eventId)
+      return NextResponse.json({
+        received: true,
+        processed: false,
+        reason: 'Duplicate event',
+      })
+    }
   }
 
   // Parse the inbound email

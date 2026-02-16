@@ -1047,15 +1047,17 @@ export async function getSurveyStats(
     const questionStatsMap = new Map<string, { questionId: string; questionText: string; answerCounts: Record<string, number> }>()
     for (const row of questionStatsResult.rows) {
       const key = row.question_id as string
-      if (!questionStatsMap.has(key)) {
-        questionStatsMap.set(key, {
+      let stats = questionStatsMap.get(key)
+      if (!stats) {
+        stats = {
           questionId: key,
           questionText: row.question_text as string,
           answerCounts: {},
-        })
+        }
+        questionStatsMap.set(key, stats)
       }
       if (row.answer_value) {
-        questionStatsMap.get(key)!.answerCounts[row.answer_value as string] = Number(row.count)
+        stats.answerCounts[row.answer_value as string] = Number(row.count)
       }
     }
 
@@ -1229,9 +1231,11 @@ function parseQuestionRow(row: Record<string, unknown>): SurveyQuestion {
 function parseJsonField<T>(value: unknown): T {
   if (typeof value === 'string') {
     try {
-      return JSON.parse(value) as T
+      const parsed: unknown = JSON.parse(value)
+      return parsed as T
     } catch {
-      return value as T
+      // If parsing fails, return value as-is (will be coerced to T)
+      return value as unknown as T
     }
   }
   return value as T

@@ -90,14 +90,23 @@ async function TreasuryDashboard() {
     await Promise.all([
       getTreasurySummary(tenantSlug),
       getLowBalanceAlerts(tenantSlug),
-      getDrawRequests(tenantSlug, { status: undefined }).catch(() => []),
-      getReceipts(tenantSlug, { limit: 5 }).catch(() => ({ receipts: [], totalCount: 0 })),
-      getReceiptSummary(tenantSlug).catch(() => ({
-        pending_count: 0,
-        processed_count: 0,
-        archived_count: 0,
-        total_amount_cents: 0,
-      })),
+      getDrawRequests(tenantSlug, { status: undefined }).catch((error) => {
+        console.error('[treasury] Failed to load draw requests:', error)
+        return []
+      }),
+      getReceipts(tenantSlug, { limit: 5 }).catch((error) => {
+        console.error('[treasury] Failed to load receipts:', error)
+        return { receipts: [], totalCount: 0 }
+      }),
+      getReceiptSummary(tenantSlug).catch((error) => {
+        console.error('[treasury] Failed to load receipt summary:', error)
+        return {
+          pending_count: 0,
+          processed_count: 0,
+          archived_count: 0,
+          total_amount_cents: 0,
+        }
+      }),
     ])
 
   const pendingRequests = drawRequests.filter((r) => r.status === 'pending')

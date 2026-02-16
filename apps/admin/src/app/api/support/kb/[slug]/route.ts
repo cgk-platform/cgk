@@ -38,8 +38,9 @@ export async function GET(request: Request, { params }: RouteParams) {
 
   // Increment view count in the background
   if (trackView) {
-    withTenant(tenantSlug, () => incrementViewCount(article.id)).catch(() => {
-      // Silently ignore view count errors
+    withTenant(tenantSlug, () => incrementViewCount(article.id)).catch((error) => {
+      // Non-critical: view count is for analytics only
+      console.debug('[kb] Failed to increment view count:', error)
     })
   }
 

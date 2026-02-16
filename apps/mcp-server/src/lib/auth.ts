@@ -9,6 +9,7 @@
  */
 
 import { verifyJWT } from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 import { JSONRPCErrorCodes, type JSONRPCError } from '@cgk-platform/mcp'
 
 // =============================================================================
@@ -130,10 +131,27 @@ async function authenticateJWT(token: string): Promise<AuthResult> {
 }
 
 /**
+ * Hash a string using SHA-256 (Edge-compatible)
+ *
+ * @param input - String to hash
+ * @returns Hex-encoded SHA-256 hash
+ */
+async function sha256(input: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(input)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+/**
  * Authenticate using API key
  *
  * API keys are scoped to a tenant and optionally a user.
- * Format: cgk_{tenant_id}_{key_id}_{secret}
+ * Format: cgk_{tenant_slug}_{key_id}_{secret}
+ *
+ * The key_id is the UUID of the API key record in the database.
+ * The secret is hashed with SHA-256 and compared against the stored key_hash.
  */
 async function authenticateAPIKey(apiKey: string): Promise<AuthResult> {
   // Validate API key format
@@ -144,7 +162,7 @@ async function authenticateAPIKey(apiKey: string): Promise<AuthResult> {
     )
   }
 
-  // Parse API key parts
+  // Parse API key parts: cgk_{tenant_slug}_{key_id}_{secret}
   const parts = apiKey.split('_')
   if (parts.length < 4) {
     throw new MCPAuthError(
@@ -153,32 +171,99 @@ async function authenticateAPIKey(apiKey: string): Promise<AuthResult> {
     )
   }
 
-  const tenantId = parts[1]
+  const tenantSlug = parts[1]
+  const keyId = parts[2]
+  // The secret is everything after the third underscore (in case secret contains underscores)
+  const secret = parts.slice(3).join('_')
 
-  // In a real implementation, we would:
-  // 1. Look up the API key in the database
-  // 2. Verify it's not revoked
-  // 3. Check rate limits
-  // 4. Get the associated user ID
-  //
-  // For now, we'll validate the format and return a placeholder
-  // This will be replaced with actual database lookup in a future phase
-
-  // Placeholder: API key validation would happen here
-  // For development, accept any well-formed key
-  if (!tenantId || tenantId.length < 3) {
+  if (!tenantSlug || tenantSlug.length < 1) {
     throw new MCPAuthError(
-      'Invalid API key: tenant ID not found',
+      'Invalid API key: tenant slug not found',
       JSONRPCErrorCodes.AUTHENTICATION_REQUIRED
     )
   }
 
-  // Return placeholder auth result
-  // In production, this would come from database lookup
+  if (!keyId || !secret) {
+    throw new MCPAuthError(
+      'Invalid API key format',
+      JSONRPCErrorCodes.AUTHENTICATION_REQUIRED
+    )
+  }
+
+  // Hash the full API key for comparison
+  const keyHash = await sha256(apiKey)
+
+  // Query the api_keys table joined with organizations to verify:
+  // 1. Key exists and matches hash
+  // 2. Key is not revoked
+  // 3. Key is not expired
+  // 4. Organization slug matches
+  const result = await sql`
+    SELECT
+      ak.id,
+      ak.name,
+      ak.scopes,
+      ak.expires_at,
+      ak.revoked_at,
+      o.slug as tenant_slug,
+      o.id as organization_id
+    FROM public.api_keys ak
+    JOIN public.organizations o ON ak.organization_id = o.id
+    WHERE ak.id = ${keyId}::uuid
+      AND ak.key_hash = ${keyHash}
+      AND o.slug = ${tenantSlug}
+  `
+
+  const keyRecord = result.rows[0] as
+    | {
+        id: string
+        name: string
+        scopes: string[]
+        expires_at: string | null
+        revoked_at: string | null
+        tenant_slug: string
+        organization_id: string
+      }
+    | undefined
+
+  if (!keyRecord) {
+    throw new MCPAuthError(
+      'Invalid API key',
+      JSONRPCErrorCodes.AUTHENTICATION_REQUIRED
+    )
+  }
+
+  // Check if the key has been revoked
+  if (keyRecord.revoked_at) {
+    throw new MCPAuthError(
+      'API key has been revoked',
+      JSONRPCErrorCodes.AUTHENTICATION_REQUIRED
+    )
+  }
+
+  // Check if the key has expired
+  if (keyRecord.expires_at && new Date(keyRecord.expires_at) < new Date()) {
+    throw new MCPAuthError(
+      'API key has expired',
+      JSONRPCErrorCodes.AUTHENTICATION_REQUIRED
+    )
+  }
+
+  // Update last_used_at timestamp (fire and forget - don't await to avoid latency)
+  sql`
+    UPDATE public.api_keys
+    SET last_used_at = NOW()
+    WHERE id = ${keyId}::uuid
+  `.catch(() => {
+    // Silently ignore update errors - logging is not critical for auth flow
+  })
+
+  // Return auth result with tenant context
+  // API keys are organization-scoped, so we use a synthetic user ID based on the key
   return {
-    tenantId,
-    userId: `api_${parts[2]}`, // Key ID becomes user context
-    email: `api-key@${tenantId}.cgk.local`,
+    tenantId: keyRecord.tenant_slug,
+    userId: `api_key:${keyRecord.id}`,
+    email: `api-key-${keyRecord.name.toLowerCase().replace(/\s+/g, '-')}@${keyRecord.tenant_slug}.cgk.local`,
   }
 }
 

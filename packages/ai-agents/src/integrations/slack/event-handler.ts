@@ -158,9 +158,9 @@ async function handleMessage(
     event.user
   )
 
-  // Add thinking reaction
-  await ctx.client.addReaction(event.channel, event.ts, 'thinking_face').catch(() => {
-    // Ignore reaction errors
+  // Add thinking reaction (non-critical, best effort)
+  await ctx.client.addReaction(event.channel, event.ts, 'thinking_face').catch((error) => {
+    console.debug('[slack] Failed to add thinking reaction:', error)
   })
 
   try {
@@ -207,7 +207,9 @@ async function handleMessage(
     })
   } catch (error) {
     console.error('[slack] Error processing message:', error)
-    await ctx.client.addReaction(event.channel, event.ts, 'x').catch(() => {})
+    await ctx.client.addReaction(event.channel, event.ts, 'x').catch((reactionError) => {
+      console.debug('[slack] Failed to add error reaction:', reactionError)
+    })
     throw error
   }
 }

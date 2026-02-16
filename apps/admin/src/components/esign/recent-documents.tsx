@@ -26,7 +26,7 @@ export function RecentDocuments({ documents }: RecentDocumentsProps) {
               No recent documents
             </p>
             <Link
-              href="/admin/esign/documents/new"
+              href="/admin/esign/documents"
               className="mt-2 text-sm font-medium text-primary hover:underline"
             >
               Create your first document

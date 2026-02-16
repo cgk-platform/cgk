@@ -132,8 +132,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
     // Update membership activity (fire and forget)
     if (tenantId) {
-      updateMembershipActivity(payload.sub, tenantId).catch(() => {
-        // Ignore errors - this is non-critical
+      updateMembershipActivity(payload.sub, tenantId).catch((error) => {
+        // Non-critical: log but don't block request
+        console.warn('[middleware] Failed to update membership activity:', error)
       })
     }
 

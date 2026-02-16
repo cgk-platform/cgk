@@ -469,7 +469,11 @@ export async function signDocument(
     const updatedResult = await sql`
       SELECT * FROM esign_documents WHERE id = ${document.id}
     `
-    const updatedDocument = mapRowToDocument(updatedResult.rows[0] as Record<string, unknown>)
+    const updatedRow = updatedResult.rows[0]
+    if (!updatedRow) {
+      return { success: false, error: 'Document not found after update' }
+    }
+    const updatedDocument = mapRowToDocument(updatedRow as Record<string, unknown>)
 
     return { success: true, document: updatedDocument }
   })

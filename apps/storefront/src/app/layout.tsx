@@ -5,6 +5,9 @@
  * Tenant context and theme are extracted from middleware headers.
  */
 
+// Environment validation - must be first import to fail fast on missing env vars
+import '@/lib/env-validation'
+
 import type { Metadata } from 'next'
 
 import { getTenantConfig, getTenantSlug } from '@/lib/tenant'

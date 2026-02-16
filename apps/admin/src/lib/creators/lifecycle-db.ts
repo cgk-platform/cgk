@@ -196,7 +196,11 @@ export async function createShipment(
         created_at as "createdAt",
         updated_at as "updatedAt"
     `
-    return result.rows[0] as ProductShipment
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create shipment')
+    }
+    return row as ProductShipment
   })
 }
 
@@ -505,7 +509,11 @@ export async function upsertReminderConfig(
         created_at as "createdAt",
         updated_at as "updatedAt"
     `
-    return result.rows[0] as CreatorReminderConfig
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to save reminder config')
+    }
+    return row as CreatorReminderConfig
   })
 }
 

@@ -76,7 +76,10 @@ async function sendSingleWebhook(
     })
 
     const durationMs = Date.now() - startTime
-    const responseBody = await response.text().catch(() => '')
+    const responseBody = await response.text().catch((parseError) => {
+      console.debug('[esign-webhook] Failed to parse response body:', parseError)
+      return ''
+    })
 
     await logWebhookDelivery(tenantSlug, {
       webhookId: webhook.id,

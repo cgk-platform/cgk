@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
  * - video.asset.static_renditions.ready - MP4 renditions ready (triggers transcription)
  */
 
-import { withTenant, sql } from '@cgk-platform/db'
+import { withTenant, sql, checkAndMarkWebhook } from '@cgk-platform/db'
 import {
   verifyWebhookSignature,
   parseWebhookPayload,
@@ -49,6 +49,19 @@ export async function POST(request: Request) {
   }
 
   console.log('[Mux Webhook] Received event:', payload.type, payload.data.id)
+
+  // Check idempotency - prevent duplicate processing
+  // Mux webhooks are identified by type + data.id combination
+  const eventId = `${payload.type}:${payload.data.id}`
+  const isDuplicate = await checkAndMarkWebhook('mux', eventId, {
+    type: payload.type,
+    dataId: payload.data.id,
+  })
+
+  if (isDuplicate) {
+    console.log('[Mux Webhook] Duplicate event ignored:', eventId)
+    return NextResponse.json({ received: true, duplicate: true })
+  }
 
   // Process the webhook event
   await processWebhookEvent(payload, {

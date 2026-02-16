@@ -327,11 +327,16 @@ export default function UserDetailPage(): React.JSX.Element {
         userEmail={user.email}
         isOpen={showImpersonateDialog}
         onClose={() => setShowImpersonateDialog(false)}
-        onSuccess={(token, tenant) => {
+        onSuccess={(token, _tenant) => {
           // Store impersonation token and redirect to admin portal
           document.cookie = `auth-token=${token}; path=/; max-age=3600`
           // In production, this would redirect to the tenant admin portal
-          const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || `https://${tenant.slug}.admin.example.com`
+          const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL
+          if (!adminUrl) {
+            console.error('NEXT_PUBLIC_ADMIN_URL not configured')
+            return
+          }
+          // Note: tenant parameter is intentionally unused - URL comes from env
           window.open(adminUrl, '_blank')
           setShowImpersonateDialog(false)
         }}

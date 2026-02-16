@@ -40,14 +40,37 @@ export const navigation: NavSection[] = [
     href: '/admin',
   },
   {
-    label: 'Content',
+    label: 'Blog',
     icon: FileText,
-    href: '/admin/content',
+    href: '/admin/blog',
     children: [
-      { label: 'Blog', href: '/admin/content/blog' },
-      { label: 'Landing Pages', href: '/admin/content/pages' },
-      { label: 'SEO', href: '/admin/content/seo' },
-      { label: 'Brand Context', href: '/admin/content/brand' },
+      { label: 'All Posts', href: '/admin/blog' },
+      { label: 'New Post', href: '/admin/blog/new' },
+      { label: 'Categories', href: '/admin/blog/categories' },
+      { label: 'Authors', href: '/admin/blog/authors' },
+    ],
+  },
+  {
+    label: 'Landing Pages',
+    icon: FileText,
+    href: '/admin/landing-pages',
+    children: [
+      { label: 'All Pages', href: '/admin/landing-pages' },
+      { label: 'New Page', href: '/admin/landing-pages/new' },
+    ],
+  },
+  {
+    label: 'SEO',
+    icon: BarChart3,
+    href: '/admin/seo',
+    children: [
+      { label: 'Overview', href: '/admin/seo' },
+      { label: 'Keywords', href: '/admin/seo/keywords' },
+      { label: 'Analysis', href: '/admin/seo/analysis' },
+      { label: 'Content Gap', href: '/admin/seo/content-gap' },
+      { label: 'Redirects', href: '/admin/seo/redirects' },
+      { label: 'Schema', href: '/admin/seo/schema' },
+      { label: 'Settings', href: '/admin/seo/settings' },
     ],
   },
   {
@@ -59,7 +82,7 @@ export const navigation: NavSection[] = [
       { label: 'Customers', href: '/admin/commerce/customers' },
       { label: 'Subscriptions', href: '/admin/commerce/subscriptions' },
       { label: 'Reviews', href: '/admin/commerce/reviews' },
-      { label: 'A/B Tests', href: '/admin/commerce/ab-tests' },
+      { label: 'A/B Tests', href: '/admin/ab-tests' },
       { label: 'Promotions', href: '/admin/commerce/promotions' },
     ],
   },
@@ -99,7 +122,7 @@ export const navigation: NavSection[] = [
       { label: 'Overview', href: '/admin/attribution' },
       { label: 'Channels', href: '/admin/attribution/channels' },
       { label: 'Journeys', href: '/admin/attribution/journeys' },
-      { label: 'AI Insights', href: '/admin/attribution/insights' },
+      { label: 'AI Insights', href: '/admin/attribution/ai-insights' },
     ],
   },
   {
@@ -110,7 +133,7 @@ export const navigation: NavSection[] = [
     children: [
       { label: 'Directory', href: '/admin/creators' },
       { label: 'Applications', href: '/admin/creators/applications' },
-      { label: 'Pipeline', href: '/admin/creators/pipeline' },
+      { label: 'Pipeline', href: '/admin/creator-pipeline' },
       { label: 'Analytics', href: '/admin/creators/analytics' },
       { label: 'Inbox', href: '/admin/creators/inbox' },
     ],
@@ -169,12 +192,12 @@ export const navigation: NavSection[] = [
   {
     label: 'Finance',
     icon: Wallet,
-    href: '/admin/finance',
+    href: '/admin/payouts',
     children: [
-      { label: 'Payouts', href: '/admin/finance/payouts' },
-      { label: 'Treasury', href: '/admin/finance/treasury' },
-      { label: 'Expenses', href: '/admin/finance/expenses' },
-      { label: 'Tax / 1099', href: '/admin/finance/tax' },
+      { label: 'Payouts', href: '/admin/payouts' },
+      { label: 'Treasury', href: '/admin/treasury' },
+      { label: 'Expenses', href: '/admin/expenses' },
+      { label: 'Tax / 1099', href: '/admin/tax' },
     ],
   },
   {

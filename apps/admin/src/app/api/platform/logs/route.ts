@@ -62,30 +62,57 @@ export async function GET(request: Request) {
   }
 
   // Other filters
-  if (url.searchParams.get('userId')) {
-    filters.userId = url.searchParams.get('userId')!
+  const userIdParam = url.searchParams.get('userId')
+  if (userIdParam) {
+    filters.userId = userIdParam
   }
-  if (url.searchParams.get('requestId')) {
-    filters.requestId = url.searchParams.get('requestId')!
+  const requestIdParam = url.searchParams.get('requestId')
+  if (requestIdParam) {
+    filters.requestId = requestIdParam
   }
-  if (url.searchParams.get('traceId')) {
-    filters.traceId = url.searchParams.get('traceId')!
+  const traceIdParam = url.searchParams.get('traceId')
+  if (traceIdParam) {
+    filters.traceId = traceIdParam
   }
-  if (url.searchParams.get('action')) {
-    filters.action = url.searchParams.get('action')!
+  const actionParam = url.searchParams.get('action')
+  if (actionParam) {
+    filters.action = actionParam
   }
-  if (url.searchParams.get('search')) {
-    filters.search = url.searchParams.get('search')!
+  const searchParam = url.searchParams.get('search')
+  if (searchParam) {
+    filters.search = searchParam
   }
 
-  // Time range
+  // Time range with validation
   const startTime = url.searchParams.get('startTime')
   const endTime = url.searchParams.get('endTime')
   if (startTime) {
-    filters.startTime = new Date(startTime)
+    const parsedStartTime = new Date(startTime)
+    if (isNaN(parsedStartTime.getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid startTime format. Use ISO 8601 format (e.g., 2024-01-15T00:00:00Z)' },
+        { status: 400 }
+      )
+    }
+    filters.startTime = parsedStartTime
   }
   if (endTime) {
-    filters.endTime = new Date(endTime)
+    const parsedEndTime = new Date(endTime)
+    if (isNaN(parsedEndTime.getTime())) {
+      return NextResponse.json(
+        { error: 'Invalid endTime format. Use ISO 8601 format (e.g., 2024-01-15T23:59:59Z)' },
+        { status: 400 }
+      )
+    }
+    filters.endTime = parsedEndTime
+  }
+
+  // Validate time range logic
+  if (filters.startTime && filters.endTime && filters.startTime > filters.endTime) {
+    return NextResponse.json(
+      { error: 'startTime must be before endTime' },
+      { status: 400 }
+    )
   }
 
   // Error filter

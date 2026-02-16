@@ -61,8 +61,14 @@ export async function POST(request: Request): Promise<Response> {
     )
   }
 
-  // In production, get creatorId from authenticated session
-  const creatorId = request.headers.get('x-creator-id') || wizardData.creatorId || 'demo-creator'
+  // Get creatorId from authenticated session header
+  const creatorId = request.headers.get('x-creator-id') || wizardData.creatorId
+  if (!creatorId) {
+    return Response.json(
+      { error: 'Authentication required - missing creator ID' },
+      { status: 401 }
+    )
+  }
 
   const completedAt = new Date().toISOString()
 

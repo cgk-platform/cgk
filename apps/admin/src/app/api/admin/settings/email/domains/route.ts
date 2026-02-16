@@ -55,21 +55,81 @@ export async function POST(request: Request) {
     )
   }
 
-  // Validate domain format
-  const domainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
-  if (!domainRegex.test(body.domain)) {
+  // RFC 1035 / RFC 2181 domain validation constants
+  const MAX_DOMAIN_LENGTH = 253  // Total domain name max length
+  const MAX_LABEL_LENGTH = 63   // Individual label (between dots) max length
+  const MIN_LABEL_LENGTH = 1    // Labels must have at least one character
+
+  // Check total domain length
+  if (body.domain.length > MAX_DOMAIN_LENGTH) {
     return NextResponse.json(
-      { error: 'Invalid domain format' },
+      { error: `Domain name exceeds maximum length of ${MAX_DOMAIN_LENGTH} characters` },
       { status: 400 }
     )
   }
 
+  // Check for consecutive dots
+  if (body.domain.includes('..')) {
+    return NextResponse.json(
+      { error: 'Domain name cannot contain consecutive dots' },
+      { status: 400 }
+    )
+  }
+
+  // Validate domain format with regex
+  const domainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}$/i
+  if (!domainRegex.test(body.domain)) {
+    return NextResponse.json(
+      { error: 'Invalid domain format. Domain must start and end with alphanumeric characters, and labels cannot start or end with hyphens.' },
+      { status: 400 }
+    )
+  }
+
+  // Validate each label (part between dots)
+  const labels = body.domain.split('.')
+  for (const label of labels) {
+    if (label.length < MIN_LABEL_LENGTH) {
+      return NextResponse.json(
+        { error: 'Domain labels (parts between dots) must have at least one character' },
+        { status: 400 }
+      )
+    }
+    if (label.length > MAX_LABEL_LENGTH) {
+      return NextResponse.json(
+        { error: `Domain label "${label}" exceeds maximum length of ${MAX_LABEL_LENGTH} characters` },
+        { status: 400 }
+      )
+    }
+    if (label.startsWith('-') || label.endsWith('-')) {
+      return NextResponse.json(
+        { error: `Domain label "${label}" cannot start or end with a hyphen` },
+        { status: 400 }
+      )
+    }
+  }
+
   // Validate subdomain format if provided
   if (body.subdomain) {
+    // Check subdomain length
+    if (body.subdomain.length > MAX_LABEL_LENGTH) {
+      return NextResponse.json(
+        { error: `Subdomain exceeds maximum length of ${MAX_LABEL_LENGTH} characters` },
+        { status: 400 }
+      )
+    }
+
     const subdomainRegex = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/i
     if (!subdomainRegex.test(body.subdomain)) {
       return NextResponse.json(
-        { error: 'Invalid subdomain format' },
+        { error: 'Invalid subdomain format. Subdomain must start and end with alphanumeric characters.' },
+        { status: 400 }
+      )
+    }
+
+    // Check for leading/trailing hyphens
+    if (body.subdomain.startsWith('-') || body.subdomain.endsWith('-')) {
+      return NextResponse.json(
+        { error: 'Subdomain cannot start or end with a hyphen' },
         { status: 400 }
       )
     }

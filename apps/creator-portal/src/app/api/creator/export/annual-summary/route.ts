@@ -46,7 +46,10 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   try {
-    const body = await req.json().catch(() => ({}))
+    const body = await req.json().catch(() => {
+      // Empty body is valid - year will default to last year
+      return {}
+    })
     const { year } = body as { year?: number }
 
     const targetYear = year || new Date().getFullYear() - 1 // Default to last year

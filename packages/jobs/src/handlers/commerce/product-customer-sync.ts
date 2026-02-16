@@ -7,6 +7,24 @@
  * - Inventory updates
  * - Collection sync
  *
+ * INTEGRATION REQUIREMENTS:
+ * - Tenant must have Shopify credentials configured via OAuth or admin setup
+ * - Use `getTenantShopifyClient(tenantId)` from @cgk-platform/integrations
+ * - Shopify webhooks registered for products/*, customers/*, inventory_levels/*
+ *
+ * IMPLEMENTATION STATUS:
+ * These handlers define the job structure and validation.
+ * Full implementation requires:
+ * 1. Shopify GraphQL API integration via @cgk-platform/shopify
+ * 2. Database operations via withTenant() for tenant isolation
+ * 3. Pagination support for large catalogs (cursor-based)
+ *
+ * SCHEDULED SYNCS:
+ * - Product full sync: Daily at 3 AM
+ * - Customer full sync: Daily at 4 AM
+ * - Inventory sync: Every hour
+ * - Collection sync: Daily at 5 AM
+ *
  * @ai-pattern tenant-isolation
  * @ai-critical All handlers require tenantId
  */

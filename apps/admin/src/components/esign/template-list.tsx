@@ -124,7 +124,7 @@ export function TemplateList({
               <SelectItem value="archived">Archived</SelectItem>
             </SelectContent>
           </RadixSelect>
-          <Link href="/admin/esign/templates/new">
+          <Link href="/admin/esign/templates">
             <Button className="gap-1.5">
               <Plus className="h-4 w-4" />
               New Template
@@ -147,7 +147,7 @@ export function TemplateList({
                 : 'Get started by creating your first template'}
             </p>
             {!search && statusFilter === 'all' && (
-              <Link href="/admin/esign/templates/new" className="mt-4">
+              <Link href="/admin/esign/templates" className="mt-4">
                 <Button className="gap-1.5">
                   <Plus className="h-4 w-4" />
                   Create Template

@@ -7,7 +7,10 @@
  *
  * @ai-pattern webhook
  * @ai-critical Always respond with valid TwiML
+ * @ai-critical Always verify webhook signatures before processing
  */
+
+import twilio from 'twilio'
 
 import { isOptInMessage, isOptOutMessage } from './compliance.js'
 import { findTenantByTwilioNumber, handleStartKeyword, handleStopKeyword } from './opt-out.js'
@@ -184,32 +187,61 @@ export async function handleStatusWebhook(
 /**
  * Verify Twilio webhook signature
  *
- * Note: In production, implement proper signature verification using
- * Twilio's validateRequest function with your auth token.
+ * Uses Twilio's validateRequest function to verify that the webhook
+ * request actually came from Twilio.
+ *
+ * @param authToken - The Twilio Auth Token (from tenant settings or env)
+ * @param signature - The X-Twilio-Signature header value
+ * @param url - The full URL of the webhook endpoint
+ * @param params - The POST parameters from the webhook request
+ * @returns true if the signature is valid, false otherwise
+ *
+ * @see https://www.twilio.com/docs/usage/security#validating-requests
  */
 export function verifyTwilioSignature(
   authToken: string,
   signature: string,
   url: string,
-  _params: Record<string, string>
+  params: Record<string, string>
 ): boolean {
-  // Implementation note:
-  // Use Twilio's validateRequest from the twilio package
-  // For now, this is a placeholder that should be implemented properly
-  //
-  // Example with twilio package:
-  // import twilio from 'twilio'
-  // return twilio.validateRequest(authToken, signature, url, params)
-  //
-  // For production, always validate the X-Twilio-Signature header
-
-  // Placeholder - in production, implement proper verification
-  if (!authToken || !signature || !url) {
+  if (!authToken) {
+    console.error('[Twilio Webhook] Auth token not provided')
     return false
   }
 
-  // TODO: Implement proper Twilio signature verification
-  return true
+  if (!signature) {
+    console.error('[Twilio Webhook] Signature header missing')
+    return false
+  }
+
+  if (!url) {
+    console.error('[Twilio Webhook] URL not provided')
+    return false
+  }
+
+  try {
+    // Use Twilio's official validation function
+    // This validates that the signature matches what Twilio would generate
+    // using the auth token and the request parameters
+    return twilio.validateRequest(authToken, signature, url, params)
+  } catch (error) {
+    console.error('[Twilio Webhook] Signature verification error:', error)
+    return false
+  }
+}
+
+/**
+ * Get the Twilio auth token for webhook verification
+ *
+ * For incoming webhooks, we may not know the tenant yet (incoming SMS),
+ * so we fall back to the platform-level TWILIO_AUTH_TOKEN env var.
+ *
+ * For status webhooks, we should use the tenant's auth token.
+ */
+export function getTwilioAuthTokenForWebhook(): string | null {
+  // Fall back to platform-level token for incoming SMS webhooks
+  // where we don't know the tenant yet
+  return process.env.TWILIO_AUTH_TOKEN || null
 }
 
 // ============================================================================

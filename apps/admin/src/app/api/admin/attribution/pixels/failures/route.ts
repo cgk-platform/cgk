@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const platform = searchParams.get('platform') as PixelPlatform | null
   const resolved = searchParams.get('resolved') === 'true'
-  const limit = parseInt(searchParams.get('limit') ?? '50')
+  const limit = parseInt(searchParams.get('limit') ?? '50', 10) || 50
 
   const failures = await withTenant(tenantSlug, () =>
     getPixelFailures(tenantId, {

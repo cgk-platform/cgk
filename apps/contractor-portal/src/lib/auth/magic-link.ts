@@ -135,7 +135,10 @@ export async function sendContractorMagicLinkEmail(
   purpose: MagicLinkPurpose,
   tenantSlug: string
 ): Promise<void> {
-  const baseUrl = process.env.CONTRACTOR_PORTAL_URL || 'http://localhost:3500'
+  const baseUrl = process.env.CONTRACTOR_PORTAL_URL
+  if (!baseUrl) {
+    throw new Error('CONTRACTOR_PORTAL_URL environment variable is required')
+  }
   const magicLinkUrl = `${baseUrl}/auth/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}&tenant=${encodeURIComponent(tenantSlug)}`
 
   const subject = getEmailSubject(purpose)

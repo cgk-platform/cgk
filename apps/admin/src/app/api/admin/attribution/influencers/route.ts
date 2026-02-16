@@ -25,8 +25,8 @@ export async function GET(request: Request) {
   const search = searchParams.get('search')
   const sortBy = searchParams.get('sortBy') as 'name' | 'revenue' | 'conversions' | 'roas' | null
   const sortOrder = searchParams.get('sortOrder') as 'asc' | 'desc' | null
-  const limit = parseInt(searchParams.get('limit') ?? '50')
-  const offset = parseInt(searchParams.get('offset') ?? '0')
+  const limit = parseInt(searchParams.get('limit') ?? '50', 10) || 50
+  const offset = parseInt(searchParams.get('offset') ?? '0', 10) || 0
 
   const result = await withTenant(tenantSlug, () =>
     getInfluencers(tenantId, {
