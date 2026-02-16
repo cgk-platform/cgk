@@ -1,6 +1,6 @@
 {
   "name": "@cgk-platform/tax",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Tax compliance system for CGK platform - W-9, 1099, TIN encryption",
   "license": "MIT",
   "type": "module",
