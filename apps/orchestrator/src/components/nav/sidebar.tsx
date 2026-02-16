@@ -224,7 +224,7 @@ export function Sidebar({ mfaVerified = false, userName, userEmail }: SidebarPro
           <div className="mb-2 px-2">
             <p className="truncate text-sm font-medium">{userName || 'Super Admin'}</p>
             <p className="truncate text-xs text-muted-foreground">
-              {userEmail || 'admin@platform.com'}
+              {userEmail || 'No email'}
             </p>
           </div>
           <Button

@@ -1,3 +1,4 @@
+import { getUserById } from '@cgk-platform/auth'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 
@@ -24,11 +25,19 @@ export default async function DashboardLayout({
   // Get user info from middleware-injected headers
   const headersList = await headers()
   const mfaVerified = headersList.get('x-mfa-verified') === 'true'
+  const userId = headersList.get('x-user-id')
 
-  // Get user details (would normally come from a user service)
-  // In production, this would fetch from user service using userId from headers
-  const userName = 'Platform Admin'
-  const userEmail = 'admin@platform.com'
+  // Fetch actual user details from database
+  let userName = 'Unknown User'
+  let userEmail = ''
+
+  if (userId) {
+    const user = await getUserById(userId)
+    if (user) {
+      userName = user.name || user.email.split('@')[0] || 'Super Admin'
+      userEmail = user.email
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
