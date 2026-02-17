@@ -25,6 +25,7 @@ import type {
   PaginatedArticles,
   KBAnalytics,
 } from './types'
+import { generateAndStoreArticleEmbedding, hybridSearchArticles } from './embeddings'
 
 // =============================================================================
 // Category Operations
@@ -289,7 +290,12 @@ export async function createArticle(data: CreateArticleInput): Promise<KBArticle
               is_published, is_internal, view_count, helpful_count, not_helpful_count,
               author_id, meta_title, meta_description, created_at, updated_at, published_at
   `
-  return rowToArticle(result.rows[0]!)
+  const article = rowToArticle(result.rows[0]!)
+
+  // Generate embedding async (fire-and-forget)
+  generateAndStoreArticleEmbedding(article.id, article.title, article.content).catch(() => {})
+
+  return article
 }
 
 export async function updateArticle(articleId: string, data: UpdateArticleInput): Promise<KBArticle | null> {
@@ -333,7 +339,14 @@ export async function updateArticle(articleId: string, data: UpdateArticleInput)
               is_published, is_internal, view_count, helpful_count, not_helpful_count,
               author_id, meta_title, meta_description, created_at, updated_at, published_at
   `
-  return result.rows[0] ? rowToArticle(result.rows[0]) : null
+  const updated = result.rows[0] ? rowToArticle(result.rows[0]) : null
+
+  // Re-generate embedding when title or content change
+  if (updated && (data.title !== undefined || data.content !== undefined)) {
+    generateAndStoreArticleEmbedding(updated.id, updated.title, updated.content).catch(() => {})
+  }
+
+  return updated
 }
 
 export async function deleteArticle(articleId: string): Promise<boolean> {
@@ -406,6 +419,26 @@ export async function searchArticles(query: string, options: SearchOptions = {})
     article: rowToArticleWithCategory(row),
     rank: row.rank,
   }))
+}
+
+/**
+ * Hybrid search combining full-text ranking and vector similarity via RRF.
+ * Falls back to FTS-only if embeddings aren't available.
+ */
+export async function searchArticlesHybrid(
+  query: string,
+  options: SearchOptions = {}
+): Promise<SearchResult[]> {
+  try {
+    const results = await hybridSearchArticles(query, options)
+    return results.map((r) => ({
+      article: r.article,
+      rank: r.score,
+    }))
+  } catch {
+    // Fallback to FTS-only if vector search fails (e.g., no OpenAI key)
+    return searchArticles(query, options)
+  }
 }
 
 export async function getRelatedArticles(articleId: string, limit = 5): Promise<KBArticleWithCategory[]> {
