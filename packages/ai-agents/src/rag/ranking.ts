@@ -13,14 +13,11 @@ import type { MemorySearchResult, MemoryType } from '../memory/types.js'
  */
 export const MEMORY_TYPE_WEIGHTS: Record<MemoryType, number> = {
   policy: 1.2,        // Policies are critical - must follow
-  brand_rule: 1.15,   // Brand rules guide creative output
   procedure: 1.1,     // Procedures guide actions
-  design_pattern: 1.05, // Design patterns inform creative work
   preference: 1.0,    // User preferences are important
   team_member: 0.95,  // Team info is useful
   creator: 0.95,      // Creator info is useful
   project_pattern: 0.9, // Patterns help but aren't critical
-  ad_analysis: 0.85,  // Ad analyses are reference material
   fact: 0.85,         // Facts are background info
 }
 
@@ -195,12 +192,9 @@ export const MEMORY_TYPE_PRIORITY: MemoryType[] = [
   'policy',
   'procedure',
   'preference',
-  'brand_rule',
-  'design_pattern',
   'team_member',
   'creator',
   'project_pattern',
-  'ad_analysis',
   'fact',
 ]
 

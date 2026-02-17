@@ -11,9 +11,6 @@ export type MemoryType =
   | 'preference'
   | 'procedure'
   | 'fact'
-  | 'design_pattern'
-  | 'brand_rule'
-  | 'ad_analysis'
 
 // Memory source tracking
 export type MemorySource =
