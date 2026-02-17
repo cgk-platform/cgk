@@ -12,21 +12,36 @@ A multi-tenant e-commerce platform designed for agencies managing multiple DTC b
 
 ## Quick Start
 
-Get a brand site running in under 5 minutes:
+Get a brand site running in under 10 minutes:
 
 ```bash
-# Create a new brand site
+# 1. Create a new brand site
 npx @cgk-platform/cli create my-brand
 
-# Navigate to the project
+# 2. Navigate to the project
 cd my-brand
 
-# Install dependencies
-pnpm install
+# 3. Configure environment (copy and edit)
+cp apps/admin/.env.example apps/admin/.env.local
 
-# Start development server
+# 4. Set minimum required variables in .env.local:
+#    - POSTGRES_URL (or DATABASE_URL)
+#    - JWT_SECRET
+#    - SESSION_SECRET
+#    - APP_URL=http://localhost:3200
+
+# 5. Run database migrations
+pnpm db:migrate
+
+# 6. Start development server
 pnpm dev
 ```
+
+**Minimum Required Environment Variables:**
+- `POSTGRES_URL` or `DATABASE_URL` - PostgreSQL connection string
+- `JWT_SECRET` - Secret for JWT signing (generate with: `openssl rand -base64 32`)
+- `SESSION_SECRET` - Secret for session encryption (generate with: `openssl rand -base64 32`)
+- `APP_URL` - Your app URL (http://localhost:3200 for local dev)
 
 ## Prerequisites
 
@@ -197,25 +212,80 @@ This will:
 
 ```
 cgk/
-├── apps/              # Applications (docs, admin)
-├── packages/          # Shared packages (@cgk-platform/*)
-├── starters/          # Project templates
-└── docs/              # Documentation
+├── apps/
+│   ├── admin/                 # Tenant admin dashboard (port 3200)
+│   ├── orchestrator/          # Super admin platform (port 3201)
+│   ├── storefront/            # Customer-facing storefront (port 3202)
+│   ├── creator-portal/        # Creator/influencer portal (port 3203)
+│   ├── contractor-portal/     # Contractor workspace (port 3204)
+│   ├── mcp-server/            # Claude MCP integration (port 3205)
+│   └── shopify-app/           # Shopify embedded app
+├── packages/                   # 30+ shared packages (@cgk-platform/*)
+│   ├── core/                  # Core configuration and types
+│   ├── db/                    # Database utilities with tenant isolation
+│   ├── auth/                  # JWT + session authentication
+│   ├── ui/                    # React components (shadcn/ui)
+│   ├── commerce/              # Commerce provider abstraction
+│   ├── shopify/               # Shopify Admin & Storefront clients
+│   ├── payments/              # Stripe + Wise payment handling
+│   ├── jobs/                  # Background job abstraction
+│   ├── integrations/          # Third-party integrations
+│   ├── video/                 # Mux video processing
+│   ├── dam/                   # Digital asset management
+│   ├── esign/                 # E-signature (Docusign)
+│   ├── tax/                   # Tax calculation (TaxJar)
+│   ├── ai-agents/             # AI agent utilities
+│   ├── ab-testing/            # A/B testing framework
+│   ├── communications/        # Email/SMS (Resend/Twilio)
+│   ├── analytics/             # GA4 and attribution tracking
+│   ├── health/                # Health checks and monitoring
+│   ├── logging/               # Structured logging
+│   ├── feature-flags/         # Feature flag management
+│   ├── scheduling/            # Task scheduling
+│   ├── support/               # Support ticket integration
+│   └── cli/                   # Command-line tools
+├── starters/                   # Project templates (basic, full, storefront-only)
+└── MULTI-TENANT-PLATFORM-PLAN/ # Architecture documentation
 ```
 
 ### Commands
 
 ```bash
 # Development
-pnpm dev              # Start all packages in dev mode
-pnpm build            # Build all packages
-pnpm typecheck        # Run TypeScript checks
-pnpm lint             # Run ESLint
-pnpm test             # Run tests
+pnpm dev                          # Start all apps in dev mode
+pnpm dev --filter admin           # Start only admin app
+pnpm dev --filter orchestrator    # Start only orchestrator
+pnpm build                        # Build all packages
+pnpm typecheck                    # Run TypeScript checks
+pnpm lint                         # Run ESLint
+pnpm test                         # Run tests
+
+# Database
+pnpm db:migrate                   # Run migrations
+pnpm db:seed                      # Seed database
 
 # Package Management
-pnpm changeset        # Create a changeset for releases
+pnpm changeset                    # Create a changeset for releases
+pnpm version-packages             # Version packages
+pnpm release                      # Publish to npm
 ```
+
+### Docker Development
+
+Use `docker-compose` for local development with PostgreSQL and Redis:
+
+```bash
+# Start services
+docker-compose up -d
+
+# Stop services
+docker-compose down
+```
+
+The `docker-compose.yml` provides:
+- PostgreSQL 17 (port 5432)
+- Redis 8 (port 6379)
+- Adminer web UI (port 8080)
 
 ## Contributing
 
@@ -227,6 +297,6 @@ MIT - see [LICENSE](./LICENSE) for details.
 
 ## Support
 
-- **Documentation**: [docs.cgk.dev](https://docs.cgk.dev)
-- **Issues**: [GitHub Issues](https://github.com/your-org/cgk/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-org/cgk/discussions)
+- **Repository**: [github.com/cgk-platform/cgk](https://github.com/cgk-platform/cgk)
+- **Issues**: [GitHub Issues](https://github.com/cgk-platform/cgk/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/cgk-platform/cgk/discussions)
