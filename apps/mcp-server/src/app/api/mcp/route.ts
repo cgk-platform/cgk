@@ -193,6 +193,65 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 /**
+ * Handle GET requests for SSE stream (Streamable HTTP transport)
+ *
+ * The MCP Streamable HTTP transport uses GET to open an SSE stream for
+ * server-to-client notifications. For stateless edge deployments, we keep
+ * the stream open briefly to allow initialization, then close it.
+ */
+export async function GET(request: Request): Promise<Response> {
+  const corsHeaders = createCORSHeaders(request)
+
+  try {
+    // Authenticate the request
+    await authenticateRequest(request)
+
+    // Return a minimal SSE stream that stays open for the session
+    const stream = new ReadableStream({
+      start(controller) {
+        // Send an initial comment to establish the connection
+        controller.enqueue(new TextEncoder().encode(':ok\n\n'))
+      },
+      cancel() {
+        // Client disconnected
+      },
+    })
+
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+        ...corsHeaders,
+      },
+    })
+  } catch (error) {
+    if (error instanceof MCPAuthError) {
+      return createAuthErrorResponse(error)
+    }
+
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      }
+    )
+  }
+}
+
+/**
+ * Handle DELETE requests for session termination (Streamable HTTP transport)
+ */
+export async function DELETE(request: Request): Promise<Response> {
+  return new Response(null, {
+    status: 204,
+    headers: createCORSHeaders(request),
+  })
+}
+
+/**
  * Handle OPTIONS requests for CORS preflight
  */
 export async function OPTIONS(request: Request): Promise<Response> {
