@@ -67,6 +67,9 @@ npx @cgk-platform/cli create my-brand
 # Create with specific template
 npx @cgk-platform/cli create my-brand --template storefront-only
 npx @cgk-platform/cli create my-brand --template basic
+
+# Install dependencies (auto-run by CLI, or manual)
+pnpm install --frozen-lockfile  # Uses pnpm-lock.yaml for reproducible builds
 ```
 
 ### Existing Project
@@ -268,7 +271,13 @@ pnpm db:seed                      # Seed database
 pnpm changeset                    # Create a changeset for releases
 pnpm version-packages             # Version packages
 pnpm release                      # Publish to npm
+
+# Lockfile Management
+pnpm install --frozen-lockfile    # Install with exact versions (CI/production)
+pnpm install                      # Update pnpm-lock.yaml (development)
 ```
+
+> **Note on Lockfile**: Always commit `pnpm-lock.yaml`. Use `--frozen-lockfile` in CI/Docker for reproducible builds.
 
 ### Docker Development
 
