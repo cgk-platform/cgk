@@ -85,8 +85,17 @@ export const createCommand = new Command('create')
       // Install dependencies
       if (!options.skipInstall) {
         spinner.start('Installing dependencies...')
-        // TODO: Run pnpm install
-        spinner.succeed('Dependencies installed')
+        const { exec } = await import('child_process')
+        const { promisify } = await import('util')
+        const execAsync = promisify(exec)
+        
+        try {
+          await execAsync('pnpm install', { cwd: targetDir })
+          spinner.succeed('Dependencies installed')
+        } catch (err) {
+          spinner.warn('Failed to install dependencies')
+          console.log(chalk.yellow('  Run `pnpm install` manually in the project directory'))
+        }
       }
 
       // Success message

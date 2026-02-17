@@ -20,9 +20,9 @@ export const doctorCommand = new Command('doctor')
     const nodeMajor = parseInt(nodeVersion.slice(1).split('.')[0] ?? '0', 10)
     results.push({
       name: 'Node.js',
-      status: nodeMajor >= 20 ? 'pass' : 'fail',
+      status: nodeMajor >= 22 ? 'pass' : 'fail',
       message: `${nodeVersion}`,
-      details: nodeMajor >= 20 ? undefined : 'Node.js 20+ required',
+      details: nodeMajor >= 22 ? undefined : 'Node.js 22+ required',
     })
 
     // Check pnpm
