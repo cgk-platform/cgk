@@ -53,6 +53,11 @@ export interface RefundResult {
   error?: PaymentError
 }
 
+/**
+ * @deprecated Use UnifiedPaymentProviderConfig from provider.ts instead.
+ * This config was designed for direct secret key configuration, but the platform
+ * now uses tenant-owned credentials loaded from the integrations system.
+ */
 export interface PaymentProviderConfig {
   provider: 'stripe' | 'wise'
   secretKey: string

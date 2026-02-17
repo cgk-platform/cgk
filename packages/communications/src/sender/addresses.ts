@@ -2,13 +2,13 @@
  * Sender Address Management
  *
  * CRUD operations for sender email addresses.
- * All operations are tenant-isolated via the calling context.
+ * All operations are tenant-isolated via withTenant() wrapper.
  *
  * @ai-pattern tenant-isolation
- * @ai-required Use withTenant() wrapper when calling these functions
+ * @ai-critical All functions require tenantId and use withTenant() for DB queries
  */
 
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   CreateSenderAddressInput,
@@ -54,274 +54,304 @@ function mapRowToAddressWithDomain(
 /**
  * List all sender addresses for the tenant
  */
-export async function listSenderAddresses(): Promise<SenderAddressWithDomain[]> {
-  const result = await sql`
-    SELECT
-      sa.id, sa.domain_id, sa.email_address, sa.display_name,
-      sa.purpose, sa.is_default, sa.is_inbound_enabled,
-      sa.reply_to_address, sa.created_at, sa.updated_at,
-      d.domain, d.subdomain, d.verification_status
-    FROM tenant_sender_addresses sa
-    JOIN tenant_email_domains d ON d.id = sa.domain_id
-    ORDER BY sa.created_at DESC
-  `
+export async function listSenderAddresses(tenantId: string): Promise<SenderAddressWithDomain[]> {
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        sa.id, sa.domain_id, sa.email_address, sa.display_name,
+        sa.purpose, sa.is_default, sa.is_inbound_enabled,
+        sa.reply_to_address, sa.created_at, sa.updated_at,
+        d.domain, d.subdomain, d.verification_status
+      FROM tenant_sender_addresses sa
+      JOIN tenant_email_domains d ON d.id = sa.domain_id
+      ORDER BY sa.created_at DESC
+    `
 
-  return result.rows.map((row) => mapRowToAddressWithDomain(row as Record<string, unknown>))
+    return result.rows.map((row) => mapRowToAddressWithDomain(row as Record<string, unknown>))
+  })
 }
 
 /**
  * List sender addresses for a specific domain
  */
 export async function listSenderAddressesByDomain(
+  tenantId: string,
   domainId: string
 ): Promise<SenderAddress[]> {
-  const result = await sql`
-    SELECT
-      id, domain_id, email_address, display_name,
-      purpose, is_default, is_inbound_enabled,
-      reply_to_address, created_at, updated_at
-    FROM tenant_sender_addresses
-    WHERE domain_id = ${domainId}
-    ORDER BY created_at DESC
-  `
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        id, domain_id, email_address, display_name,
+        purpose, is_default, is_inbound_enabled,
+        reply_to_address, created_at, updated_at
+      FROM tenant_sender_addresses
+      WHERE domain_id = ${domainId}
+      ORDER BY created_at DESC
+    `
 
-  return result.rows.map((row) => mapRowToAddress(row as Record<string, unknown>))
+    return result.rows.map((row) => mapRowToAddress(row as Record<string, unknown>))
+  })
 }
 
 /**
  * Get a sender address by ID
  */
 export async function getSenderAddressById(
+  tenantId: string,
   id: string
 ): Promise<SenderAddressWithDomain | null> {
-  const result = await sql`
-    SELECT
-      sa.id, sa.domain_id, sa.email_address, sa.display_name,
-      sa.purpose, sa.is_default, sa.is_inbound_enabled,
-      sa.reply_to_address, sa.created_at, sa.updated_at,
-      d.domain, d.subdomain, d.verification_status
-    FROM tenant_sender_addresses sa
-    JOIN tenant_email_domains d ON d.id = sa.domain_id
-    WHERE sa.id = ${id}
-  `
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        sa.id, sa.domain_id, sa.email_address, sa.display_name,
+        sa.purpose, sa.is_default, sa.is_inbound_enabled,
+        sa.reply_to_address, sa.created_at, sa.updated_at,
+        d.domain, d.subdomain, d.verification_status
+      FROM tenant_sender_addresses sa
+      JOIN tenant_email_domains d ON d.id = sa.domain_id
+      WHERE sa.id = ${id}
+    `
 
-  const row = result.rows[0]
-  if (!row) {
-    return null
-  }
+    const row = result.rows[0]
+    if (!row) {
+      return null
+    }
 
-  return mapRowToAddressWithDomain(row as Record<string, unknown>)
+    return mapRowToAddressWithDomain(row as Record<string, unknown>)
+  })
 }
 
 /**
  * Get sender addresses by purpose
  */
 export async function getSenderAddressesByPurpose(
+  tenantId: string,
   purpose: SenderPurpose
 ): Promise<SenderAddressWithDomain[]> {
-  const result = await sql`
-    SELECT
-      sa.id, sa.domain_id, sa.email_address, sa.display_name,
-      sa.purpose, sa.is_default, sa.is_inbound_enabled,
-      sa.reply_to_address, sa.created_at, sa.updated_at,
-      d.domain, d.subdomain, d.verification_status
-    FROM tenant_sender_addresses sa
-    JOIN tenant_email_domains d ON d.id = sa.domain_id
-    WHERE sa.purpose = ${purpose}
-    ORDER BY sa.is_default DESC, sa.created_at ASC
-  `
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        sa.id, sa.domain_id, sa.email_address, sa.display_name,
+        sa.purpose, sa.is_default, sa.is_inbound_enabled,
+        sa.reply_to_address, sa.created_at, sa.updated_at,
+        d.domain, d.subdomain, d.verification_status
+      FROM tenant_sender_addresses sa
+      JOIN tenant_email_domains d ON d.id = sa.domain_id
+      WHERE sa.purpose = ${purpose}
+      ORDER BY sa.is_default DESC, sa.created_at ASC
+    `
 
-  return result.rows.map((row) => mapRowToAddressWithDomain(row as Record<string, unknown>))
+    return result.rows.map((row) => mapRowToAddressWithDomain(row as Record<string, unknown>))
+  })
 }
 
 /**
  * Get the default sender address for a purpose
  */
 export async function getDefaultSenderForPurpose(
+  tenantId: string,
   purpose: SenderPurpose
 ): Promise<SenderAddressWithDomain | null> {
-  const result = await sql`
-    SELECT
-      sa.id, sa.domain_id, sa.email_address, sa.display_name,
-      sa.purpose, sa.is_default, sa.is_inbound_enabled,
-      sa.reply_to_address, sa.created_at, sa.updated_at,
-      d.domain, d.subdomain, d.verification_status
-    FROM tenant_sender_addresses sa
-    JOIN tenant_email_domains d ON d.id = sa.domain_id
-    WHERE sa.purpose = ${purpose}
-    AND d.verification_status = 'verified'
-    ORDER BY sa.is_default DESC, sa.created_at ASC
-    LIMIT 1
-  `
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        sa.id, sa.domain_id, sa.email_address, sa.display_name,
+        sa.purpose, sa.is_default, sa.is_inbound_enabled,
+        sa.reply_to_address, sa.created_at, sa.updated_at,
+        d.domain, d.subdomain, d.verification_status
+      FROM tenant_sender_addresses sa
+      JOIN tenant_email_domains d ON d.id = sa.domain_id
+      WHERE sa.purpose = ${purpose}
+      AND d.verification_status = 'verified'
+      ORDER BY sa.is_default DESC, sa.created_at ASC
+      LIMIT 1
+    `
 
-  const row = result.rows[0]
-  if (!row) {
-    return null
-  }
+    const row = result.rows[0]
+    if (!row) {
+      return null
+    }
 
-  return mapRowToAddressWithDomain(row as Record<string, unknown>)
+    return mapRowToAddressWithDomain(row as Record<string, unknown>)
+  })
 }
 
 /**
  * Get the default sender address (any purpose)
  */
-export async function getDefaultSender(): Promise<SenderAddressWithDomain | null> {
-  const result = await sql`
-    SELECT
-      sa.id, sa.domain_id, sa.email_address, sa.display_name,
-      sa.purpose, sa.is_default, sa.is_inbound_enabled,
-      sa.reply_to_address, sa.created_at, sa.updated_at,
-      d.domain, d.subdomain, d.verification_status
-    FROM tenant_sender_addresses sa
-    JOIN tenant_email_domains d ON d.id = sa.domain_id
-    WHERE d.verification_status = 'verified'
-    ORDER BY sa.is_default DESC, sa.created_at ASC
-    LIMIT 1
-  `
+export async function getDefaultSender(tenantId: string): Promise<SenderAddressWithDomain | null> {
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        sa.id, sa.domain_id, sa.email_address, sa.display_name,
+        sa.purpose, sa.is_default, sa.is_inbound_enabled,
+        sa.reply_to_address, sa.created_at, sa.updated_at,
+        d.domain, d.subdomain, d.verification_status
+      FROM tenant_sender_addresses sa
+      JOIN tenant_email_domains d ON d.id = sa.domain_id
+      WHERE d.verification_status = 'verified'
+      ORDER BY sa.is_default DESC, sa.created_at ASC
+      LIMIT 1
+    `
 
-  const row = result.rows[0]
-  if (!row) {
-    return null
-  }
+    const row = result.rows[0]
+    if (!row) {
+      return null
+    }
 
-  return mapRowToAddressWithDomain(row as Record<string, unknown>)
+    return mapRowToAddressWithDomain(row as Record<string, unknown>)
+  })
 }
 
 /**
  * Check if an email address already exists
  */
-export async function emailAddressExists(emailAddress: string): Promise<boolean> {
-  const result = await sql`
-    SELECT 1 FROM tenant_sender_addresses
-    WHERE email_address = ${emailAddress}
-  `
+export async function emailAddressExists(tenantId: string, emailAddress: string): Promise<boolean> {
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT 1 FROM tenant_sender_addresses
+      WHERE email_address = ${emailAddress}
+    `
 
-  return result.rows.length > 0
+    return result.rows.length > 0
+  })
 }
 
 /**
  * Create a sender address
  */
 export async function createSenderAddress(
+  tenantId: string,
   input: CreateSenderAddressInput
 ): Promise<SenderAddress> {
-  // Get the domain to build the email address
-  const domainResult = await sql`
-    SELECT domain, subdomain FROM tenant_email_domains
-    WHERE id = ${input.domainId}
-  `
-
-  if (domainResult.rows.length === 0) {
-    throw new Error(`Domain not found: ${input.domainId}`)
-  }
-
-  const domain = domainResult.rows[0] as { domain: string; subdomain: string | null }
-  const fullDomain = domain.subdomain
-    ? `${domain.subdomain}.${domain.domain}`
-    : domain.domain
-  const emailAddress = `${input.localPart}@${fullDomain}`
-
-  // Check for duplicates
-  const exists = await emailAddressExists(emailAddress)
-  if (exists) {
-    throw new Error(`Email address already exists: ${emailAddress}`)
-  }
-
-  // If this is set as default, unset other defaults for this purpose
-  if (input.isDefault) {
-    await sql`
-      UPDATE tenant_sender_addresses
-      SET is_default = false, updated_at = NOW()
-      WHERE purpose = ${input.purpose}
-      AND is_default = true
+  return withTenant(tenantId, async () => {
+    // Get the domain to build the email address
+    const domainResult = await sql`
+      SELECT domain, subdomain FROM tenant_email_domains
+      WHERE id = ${input.domainId}
     `
-  }
 
-  const result = await sql`
-    INSERT INTO tenant_sender_addresses (
-      domain_id, email_address, display_name, purpose,
-      is_default, is_inbound_enabled, reply_to_address
-    ) VALUES (
-      ${input.domainId},
-      ${emailAddress},
-      ${input.displayName},
-      ${input.purpose},
-      ${input.isDefault ?? false},
-      ${input.isInboundEnabled ?? false},
-      ${input.replyToAddress ?? null}
-    )
-    RETURNING
-      id, domain_id, email_address, display_name,
-      purpose, is_default, is_inbound_enabled,
-      reply_to_address, created_at, updated_at
-  `
+    if (domainResult.rows.length === 0) {
+      throw new Error(`Domain not found: ${input.domainId}`)
+    }
 
-  return mapRowToAddress(result.rows[0] as Record<string, unknown>)
+    const domain = domainResult.rows[0] as { domain: string; subdomain: string | null }
+    const fullDomain = domain.subdomain
+      ? `${domain.subdomain}.${domain.domain}`
+      : domain.domain
+    const emailAddress = `${input.localPart}@${fullDomain}`
+
+    // Check for duplicates within this tenant context
+    const existingResult = await sql`
+      SELECT 1 FROM tenant_sender_addresses
+      WHERE email_address = ${emailAddress}
+    `
+
+    if (existingResult.rows.length > 0) {
+      throw new Error(`Email address already exists: ${emailAddress}`)
+    }
+
+    // If this is set as default, unset other defaults for this purpose
+    if (input.isDefault) {
+      await sql`
+        UPDATE tenant_sender_addresses
+        SET is_default = false, updated_at = NOW()
+        WHERE purpose = ${input.purpose}
+        AND is_default = true
+      `
+    }
+
+    const result = await sql`
+      INSERT INTO tenant_sender_addresses (
+        domain_id, email_address, display_name, purpose,
+        is_default, is_inbound_enabled, reply_to_address
+      ) VALUES (
+        ${input.domainId},
+        ${emailAddress},
+        ${input.displayName},
+        ${input.purpose},
+        ${input.isDefault ?? false},
+        ${input.isInboundEnabled ?? false},
+        ${input.replyToAddress ?? null}
+      )
+      RETURNING
+        id, domain_id, email_address, display_name,
+        purpose, is_default, is_inbound_enabled,
+        reply_to_address, created_at, updated_at
+    `
+
+    return mapRowToAddress(result.rows[0] as Record<string, unknown>)
+  })
 }
 
 /**
  * Update a sender address
  */
 export async function updateSenderAddress(
+  tenantId: string,
   id: string,
   input: UpdateSenderAddressInput
 ): Promise<SenderAddress | null> {
   // Get current address to check purpose if setting default
-  const current = await getSenderAddressById(id)
+  const current = await getSenderAddressById(tenantId, id)
   if (!current) {
     return null
   }
 
-  // If setting as default, unset other defaults for this purpose
-  if (input.isDefault && !current.isDefault) {
-    const purpose = input.purpose ?? current.purpose
-    await sql`
+  return withTenant(tenantId, async () => {
+    // If setting as default, unset other defaults for this purpose
+    if (input.isDefault && !current.isDefault) {
+      const purpose = input.purpose ?? current.purpose
+      await sql`
+        UPDATE tenant_sender_addresses
+        SET is_default = false, updated_at = NOW()
+        WHERE purpose = ${purpose}
+        AND is_default = true
+        AND id != ${id}
+      `
+    }
+
+    const result = await sql`
       UPDATE tenant_sender_addresses
-      SET is_default = false, updated_at = NOW()
-      WHERE purpose = ${purpose}
-      AND is_default = true
-      AND id != ${id}
+      SET
+        display_name = COALESCE(${input.displayName ?? null}, display_name),
+        purpose = COALESCE(${input.purpose ?? null}, purpose),
+        is_default = COALESCE(${input.isDefault ?? null}, is_default),
+        is_inbound_enabled = COALESCE(${input.isInboundEnabled ?? null}, is_inbound_enabled),
+        reply_to_address = CASE
+          WHEN ${input.replyToAddress !== undefined} THEN ${input.replyToAddress ?? null}
+          ELSE reply_to_address
+        END,
+        updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING
+        id, domain_id, email_address, display_name,
+        purpose, is_default, is_inbound_enabled,
+        reply_to_address, created_at, updated_at
     `
-  }
 
-  const result = await sql`
-    UPDATE tenant_sender_addresses
-    SET
-      display_name = COALESCE(${input.displayName ?? null}, display_name),
-      purpose = COALESCE(${input.purpose ?? null}, purpose),
-      is_default = COALESCE(${input.isDefault ?? null}, is_default),
-      is_inbound_enabled = COALESCE(${input.isInboundEnabled ?? null}, is_inbound_enabled),
-      reply_to_address = CASE
-        WHEN ${input.replyToAddress !== undefined} THEN ${input.replyToAddress ?? null}
-        ELSE reply_to_address
-      END,
-      updated_at = NOW()
-    WHERE id = ${id}
-    RETURNING
-      id, domain_id, email_address, display_name,
-      purpose, is_default, is_inbound_enabled,
-      reply_to_address, created_at, updated_at
-  `
+    const row = result.rows[0]
+    if (!row) {
+      return null
+    }
 
-  const row = result.rows[0]
-  if (!row) {
-    return null
-  }
-
-  return mapRowToAddress(row as Record<string, unknown>)
+    return mapRowToAddress(row as Record<string, unknown>)
+  })
 }
 
 /**
  * Delete a sender address
  */
-export async function deleteSenderAddress(id: string): Promise<boolean> {
-  const result = await sql`
-    DELETE FROM tenant_sender_addresses
-    WHERE id = ${id}
-    RETURNING id
-  `
+export async function deleteSenderAddress(tenantId: string, id: string): Promise<boolean> {
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      DELETE FROM tenant_sender_addresses
+      WHERE id = ${id}
+      RETURNING id
+    `
 
-  return result.rows.length > 0
+    return result.rows.length > 0
+  })
 }
 
 /**
@@ -337,18 +367,20 @@ export function formatSenderAddress(address: SenderAddress): string {
 /**
  * Get all verified sender addresses
  */
-export async function getVerifiedSenderAddresses(): Promise<SenderAddressWithDomain[]> {
-  const result = await sql`
-    SELECT
-      sa.id, sa.domain_id, sa.email_address, sa.display_name,
-      sa.purpose, sa.is_default, sa.is_inbound_enabled,
-      sa.reply_to_address, sa.created_at, sa.updated_at,
-      d.domain, d.subdomain, d.verification_status
-    FROM tenant_sender_addresses sa
-    JOIN tenant_email_domains d ON d.id = sa.domain_id
-    WHERE d.verification_status = 'verified'
-    ORDER BY sa.is_default DESC, sa.created_at ASC
-  `
+export async function getVerifiedSenderAddresses(tenantId: string): Promise<SenderAddressWithDomain[]> {
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        sa.id, sa.domain_id, sa.email_address, sa.display_name,
+        sa.purpose, sa.is_default, sa.is_inbound_enabled,
+        sa.reply_to_address, sa.created_at, sa.updated_at,
+        d.domain, d.subdomain, d.verification_status
+      FROM tenant_sender_addresses sa
+      JOIN tenant_email_domains d ON d.id = sa.domain_id
+      WHERE d.verification_status = 'verified'
+      ORDER BY sa.is_default DESC, sa.created_at ASC
+    `
 
-  return result.rows.map((row) => mapRowToAddressWithDomain(row as Record<string, unknown>))
+    return result.rows.map((row) => mapRowToAddressWithDomain(row as Record<string, unknown>))
+  })
 }

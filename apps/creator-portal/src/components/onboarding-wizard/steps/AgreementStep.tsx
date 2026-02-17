@@ -11,38 +11,6 @@ interface AgreementStepProps {
   onChange: (data: AgreementData) => void
 }
 
-// Mock documents - in production these would come from the API
-const MOCK_DOCUMENTS: AgreementDocument[] = [
-  {
-    id: 'creator-agreement',
-    title: 'Creator Program Agreement',
-    version: '2.1',
-    url: '/agreements/creator-agreement.pdf',
-    required: true,
-  },
-  {
-    id: 'content-guidelines',
-    title: 'Content Guidelines',
-    version: '1.4',
-    url: '/agreements/content-guidelines.pdf',
-    required: true,
-  },
-  {
-    id: 'nda',
-    title: 'Non-Disclosure Agreement',
-    version: '1.0',
-    url: '/agreements/nda.pdf',
-    required: true,
-  },
-  {
-    id: 'marketing-consent',
-    title: 'Marketing Communications Consent',
-    version: '1.1',
-    url: '/agreements/marketing-consent.pdf',
-    required: false,
-  },
-]
-
 /**
  * Agreement Signing Step
  *
@@ -73,22 +41,38 @@ export function AgreementStep({
     onChangeRef.current = onChange
   }, [data, onChange])
 
-  // Load documents and initialize agreements (runs once on mount)
+  // Load documents from API and initialize agreements (runs once on mount)
   useEffect(() => {
-    // In production, fetch from API
-    setDocuments(MOCK_DOCUMENTS)
+    const fetchDocuments = async () => {
+      try {
+        const response = await fetch('/api/creator/onboarding/agreements')
+        if (response.ok) {
+          const data = await response.json()
+          const docs: AgreementDocument[] = data.documents || []
+          setDocuments(docs)
 
-    // Initialize agreements array if empty and not already initialized
-    if (!hasInitializedRef.current && dataRef.current.agreements.length === 0) {
-      hasInitializedRef.current = true
-      const initialAgreements = MOCK_DOCUMENTS.map((doc) => ({
-        documentId: doc.id,
-        signed: false,
-        signedAt: null,
-        signatureData: null,
-      }))
-      onChangeRef.current({ ...dataRef.current, agreements: initialAgreements })
+          // Initialize agreements array if empty and not already initialized
+          if (!hasInitializedRef.current && dataRef.current.agreements.length === 0) {
+            hasInitializedRef.current = true
+            const initialAgreements = docs.map((doc) => ({
+              documentId: doc.id,
+              signed: false,
+              signedAt: null,
+              signatureData: null,
+            }))
+            onChangeRef.current({ ...dataRef.current, agreements: initialAgreements })
+          }
+        } else {
+          console.error('Failed to fetch agreement documents')
+          setDocuments([])
+        }
+      } catch (error) {
+        console.error('Error fetching agreement documents:', error)
+        setDocuments([])
+      }
     }
+
+    fetchDocuments()
   }, [])
 
   const getAgreementStatus = useCallback(

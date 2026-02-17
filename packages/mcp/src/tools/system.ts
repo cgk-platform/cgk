@@ -356,7 +356,9 @@ export const listRecentErrorsTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const limit = Math.min(args.limit as number | undefined ?? 20, 100)
     const type = args.type as string | undefined
     const since = args.since as string | undefined
@@ -462,7 +464,9 @@ export const getJobQueueStatusTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const queueName = args.queueName as string | undefined
 
     return withTenant(tenantId, async () => {
@@ -540,7 +544,9 @@ export const getTenantConfigTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const section = args.section as string | undefined
 
     return withTenant(tenantId, async () => {
@@ -612,7 +618,9 @@ export const updateTenantConfigTool: ToolDefinition = defineTool({
     required: ['tenantId', 'section', 'settings'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const section = args.section as string
     const settings = args.settings as Record<string, unknown>
 
@@ -674,7 +682,9 @@ export const getFeatureFlagsTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const flagName = args.flagName as string | undefined
 
     return withTenant(tenantId, async () => {
@@ -757,7 +767,9 @@ export const toggleFeatureFlagTool: ToolDefinition = defineTool({
     required: ['tenantId', 'flagName', 'enabled'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const flagName = args.flagName as string
     const enabled = args.enabled as boolean
 
@@ -833,7 +845,9 @@ export const sendNotificationTool: ToolDefinition = defineTool({
     required: ['tenantId', 'type', 'recipient', 'body'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const type = args.type as 'email' | 'sms' | 'slack' | 'webhook'
     const recipient = args.recipient as string
     const subject = args.subject as string | undefined
@@ -933,7 +947,9 @@ export const listNotificationsTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const type = args.type as string | undefined
     const status = args.status as string | undefined
     const limit = Math.min(args.limit as number | undefined ?? 50, 100)
@@ -1053,7 +1069,9 @@ export const getNotificationStatsTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const period = args.period as string | undefined ?? 'week'
 
     const intervalMap: Record<string, string> = {
@@ -1163,7 +1181,9 @@ export const listUsersTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const role = args.role as string | undefined
     const status = args.status as string | undefined
     const search = args.search as string | undefined
@@ -1368,7 +1388,9 @@ export const getUserTool: ToolDefinition = defineTool({
     required: ['tenantId', 'userId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const userId = args.userId as string
 
     return withTenant(tenantId, async () => {
@@ -1435,7 +1457,9 @@ export const updateUserRoleTool: ToolDefinition = defineTool({
     required: ['tenantId', 'userId', 'role'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const userId = args.userId as string
     const role = args.role as string
     const permissions = args.permissions as string[] | undefined
@@ -1520,7 +1544,9 @@ export const inviteUserTool: ToolDefinition = defineTool({
     required: ['tenantId', 'email', 'invitedBy'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const email = args.email as string
     const role = args.role as string | undefined ?? 'member'
     const name = args.name as string | undefined
@@ -1653,7 +1679,9 @@ export const getAuditLogTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const userId = args.userId as string | undefined
     const action = args.action as string | undefined
     const resource = args.resource as string | undefined
@@ -1812,7 +1840,9 @@ export const searchLogsTool: ToolDefinition = defineTool({
     required: ['tenantId', 'query'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const query = args.query as string
     const level = args.level as string | undefined
     const source = args.source as string | undefined
@@ -1967,7 +1997,9 @@ export const exportAuditLogTool: ToolDefinition = defineTool({
   async *handler(args) {
     const { progressChunk, partialChunk, completeChunk } = await import('../streaming')
 
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const format = args.format as string | undefined ?? 'json'
     const since = args.since as string | undefined
     const until = args.until as string | undefined
@@ -2121,7 +2153,9 @@ export const clearCacheTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
     const pattern = args.pattern as string | undefined
     const clearAll = args.clearAll as boolean | undefined ?? false
 
@@ -2180,7 +2214,9 @@ export const getCacheStatsTool: ToolDefinition = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = args.tenantId as string
+    // CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+    // NEVER trust tenantId from client args - it can be spoofed
+    const tenantId = args._tenantId as string
 
     // Cache stats would come from Redis INFO command in production
     // Using simulated stats based on in-memory cache

@@ -1,0 +1,213 @@
+# CGK Platform - Docker Compose Configuration
+# For local development and testing
+#
+# Usage:
+#   docker-compose up -d              # Start all services
+#   docker-compose up -d postgres     # Start just postgres
+#   docker-compose logs -f admin      # Follow admin logs
+#   docker-compose down -v            # Stop and remove volumes
+
+version: '3.8'
+
+services:
+  # =============================================================================
+  # PostgreSQL Database
+  # =============================================================================
+  postgres:
+    image: postgres:17-alpine
+    container_name: cgk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cgk
+      POSTGRES_PASSWORD: cgk_dev_password
+      POSTGRES_DB: cgk_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cgk -d cgk_development"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================================================
+  # Redis Cache
+  # =============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: cgk-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes
+
+  # =============================================================================
+  # Admin App
+  # =============================================================================
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: admin-runner
+    container_name: cgk-admin
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      POSTGRES_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-in-production}
+      SESSION_SECRET: ${SESSION_SECRET:-local-dev-session-secret-change-in-production}
+      NEXT_PUBLIC_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # =============================================================================
+  # Orchestrator App (Super Admin)
+  # =============================================================================
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: orchestrator-runner
+    container_name: cgk-orchestrator
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      POSTGRES_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-in-production}
+      SESSION_SECRET: ${SESSION_SECRET:-local-dev-session-secret-change-in-production}
+      NEXT_PUBLIC_URL: http://localhost:3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # =============================================================================
+  # Storefront App
+  # =============================================================================
+  storefront:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: storefront-runner
+    container_name: cgk-storefront
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      POSTGRES_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-in-production}
+      NEXT_PUBLIC_URL: http://localhost:3002
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # =============================================================================
+  # Creator Portal
+  # =============================================================================
+  creator-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: creator-portal-runner
+    container_name: cgk-creator-portal
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      POSTGRES_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-in-production}
+      NEXT_PUBLIC_URL: http://localhost:3003
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # =============================================================================
+  # Contractor Portal
+  # =============================================================================
+  contractor-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: contractor-portal-runner
+    container_name: cgk-contractor-portal
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      POSTGRES_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-local-dev-jwt-secret-change-in-production}
+      NEXT_PUBLIC_URL: http://localhost:3004
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # =============================================================================
+  # MCP Server
+  # =============================================================================
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: mcp-server-runner
+    container_name: cgk-mcp-server
+    restart: unless-stopped
+    ports:
+      - "3005:3005"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      POSTGRES_URL: postgresql://cgk:cgk_dev_password@postgres:5432/cgk_development
+      REDIS_URL: redis://redis:6379
+      MCP_AUTH_TOKEN: ${MCP_AUTH_TOKEN:-local-dev-mcp-token}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# =============================================================================
+# Networks (default bridge network is used)
+# =============================================================================
+# All services are on the default bridge network and can communicate
+# using service names as hostnames (e.g., postgres, redis)

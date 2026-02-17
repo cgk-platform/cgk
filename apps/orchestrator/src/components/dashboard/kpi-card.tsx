@@ -6,11 +6,9 @@
 
 'use client'
 
-import { Card, cn } from '@cgk-platform/ui'
+import { Card, cn, StatusDot } from '@cgk-platform/ui'
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
-
-import { StatusDot } from '../ui/status-dot'
 
 interface KPICardProps {
   /** Card title/label */

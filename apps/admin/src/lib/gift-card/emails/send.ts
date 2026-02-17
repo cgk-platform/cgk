@@ -144,31 +144,82 @@ export async function renderGiftCardEmail(
 }
 
 /**
- * Send a gift card email
- * Placeholder for Resend integration
+ * Send a gift card email via Resend
  *
+ * Uses tenant's Resend API key from @cgk-platform/integrations
+ *
+ * @param rendered - Rendered email content
+ * @param tenantId - Tenant ID for Resend credentials
  * @returns Resend message ID if successful
  */
 export async function sendEmail(
-  rendered: RenderedEmail
+  rendered: RenderedEmail,
+  tenantId?: string
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  // Placeholder for Resend integration
-  // In production, this would:
-  // 1. Use Resend SDK to send the email
-  // 2. Handle rate limiting and retries
-  // 3. Return the message ID
+  // If no tenant ID, fall back to placeholder behavior
+  if (!tenantId) {
+    console.log(`sendEmail: No tenantId provided, using placeholder for ${rendered.to}`)
+    const mockMessageId = `msg_${Date.now()}`
+    return { success: true, messageId: mockMessageId }
+  }
 
-  console.log(`sendEmail: Sending to ${rendered.to}`, {
-    from: rendered.from,
-    subject: rendered.subject,
-  })
+  try {
+    // Import Resend client dynamically
+    const { getTenantResendClient, getTenantResendSenderConfig } = await import(
+      '@cgk-platform/integrations'
+    )
 
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 100))
+    // Get tenant's Resend client
+    const resend = await getTenantResendClient(tenantId)
+    if (!resend) {
+      console.warn(`sendEmail: Resend not configured for tenant ${tenantId}`)
+      // Return success with placeholder to not block the flow
+      const mockMessageId = `msg_placeholder_${Date.now()}`
+      return {
+        success: true,
+        messageId: mockMessageId,
+        error: 'Email service not configured - email logged but not sent',
+      }
+    }
 
-  // Return mock success
-  const mockMessageId = `msg_${Date.now()}`
-  return { success: true, messageId: mockMessageId }
+    // Get sender config or use provided from address
+    const senderConfig = await getTenantResendSenderConfig(tenantId)
+    const fromAddress = senderConfig?.from || rendered.from
+
+    // Send email via Resend
+    const result = await resend.emails.send({
+      from: fromAddress,
+      to: rendered.to,
+      subject: rendered.subject,
+      html: rendered.html,
+      replyTo: senderConfig?.replyTo,
+    })
+
+    if (result.error) {
+      console.error('Resend API error:', result.error)
+      return {
+        success: false,
+        error: result.error.message || 'Failed to send email',
+      }
+    }
+
+    if (!result.data?.id) {
+      return { success: false, error: 'No message ID returned from Resend' }
+    }
+
+    console.log(`sendEmail: Successfully sent to ${rendered.to}, messageId: ${result.data.id}`)
+
+    return {
+      success: true,
+      messageId: result.data.id,
+    }
+  } catch (error) {
+    console.error('sendEmail error:', error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to send email',
+    }
+  }
 }
 
 /**

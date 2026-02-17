@@ -300,9 +300,17 @@ export class MCPHandler {
       incrementUsage(this.session.id, 'toolCalls')
     }
 
+    // CRITICAL: Inject tenant context from authenticated session
+    // NEVER trust _tenantId or _userId from client args
+    const argsWithContext = {
+      ...args,
+      _tenantId: this.tenantId, // Injected from authenticated session
+      _userId: this.userId, // Injected from authenticated session
+    }
+
     // Execute the tool
     try {
-      const handlerResult = tool.handler(args)
+      const handlerResult = tool.handler(argsWithContext)
 
       // Handle async generator (streaming) tools
       if (isAsyncGenerator(handlerResult)) {
@@ -373,9 +381,17 @@ export class MCPHandler {
       incrementUsage(this.session.id, 'toolCalls')
     }
 
+    // CRITICAL: Inject tenant context from authenticated session
+    // NEVER trust _tenantId or _userId from client args
+    const argsWithContext = {
+      ...args,
+      _tenantId: this.tenantId, // Injected from authenticated session
+      _userId: this.userId, // Injected from authenticated session
+    }
+
     try {
       // Check if tool handler is an async generator
-      const result = tool.handler(args)
+      const result = tool.handler(argsWithContext)
 
       if (isAsyncGenerator(result)) {
         // Tool returns an async generator - yield all chunks
@@ -451,7 +467,11 @@ export class MCPHandler {
     }
 
     try {
-      const content = await resource.handler()
+      // CRITICAL: Pass tenant context to resource handler (same as tools)
+      const content = await resource.handler({
+        tenantId: this.tenantId,
+        userId: this.userId,
+      })
       completeUsage(true)
 
       return {

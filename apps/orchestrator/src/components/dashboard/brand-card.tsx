@@ -1,10 +1,9 @@
 'use client'
 
-import { Badge, Card, cn } from '@cgk-platform/ui'
+import { Badge, Card, cn, StatusDot } from '@cgk-platform/ui'
 import Link from 'next/link'
 
 import type { BrandSummary } from '../../types/platform'
-import { StatusDot } from '../ui/status-dot'
 
 interface BrandCardProps {
   /** Brand data */

@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -29,9 +28,7 @@ export async function GET(request: Request) {
   const baseUrl = `${url.protocol}//${url.host}`
 
   // Get inbound-capable addresses
-  const addresses = await withTenant(tenantSlug, () =>
-    getInboundCapableAddresses()
-  )
+  const addresses = await getInboundCapableAddresses(tenantSlug)
 
   // Get webhook URL
   const webhookInfo = getInboundWebhookUrl(baseUrl, tenantSlug)
@@ -88,9 +85,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const result = await withTenant(tenantSlug, () =>
-    configureInboundAddresses(body.addresses)
-  )
+  const result = await configureInboundAddresses(tenantSlug, body.addresses)
 
   if (!result.success) {
     return NextResponse.json(

@@ -689,28 +689,190 @@ export async function getTemplateABTests(
     const result = await sql`
       SELECT * FROM template_ab_tests ORDER BY created_at DESC
     `
-    return result.rows.map((row) => ({
-      id: row.id,
-      tenantId: row.tenant_id,
-      name: row.name,
-      description: row.description,
-      status: row.status,
-      templateAId: row.template_a_id,
-      templateAName: row.template_a_name,
-      templateBId: row.template_b_id,
-      templateBName: row.template_b_name,
-      trafficAllocation: row.traffic_allocation,
-      metrics: row.metrics,
-      isSignificant: row.is_significant,
-      winner: row.winner,
-      createdAt: new Date(row.created_at),
-      startedAt: row.started_at ? new Date(row.started_at) : undefined,
-      endedAt: row.ended_at ? new Date(row.ended_at) : undefined,
-    }))
+    return result.rows.map(mapRowToTemplateABTest)
+  })
+}
+
+/**
+ * Get a single template A/B test by ID
+ */
+export async function getTemplateABTest(
+  tenantSlug: string,
+  testId: string
+): Promise<TemplateABTest | null> {
+  return withTenant(tenantSlug, async () => {
+    const result = await sql`
+      SELECT * FROM template_ab_tests WHERE id = ${testId}
+    `
+    const row = result.rows[0]
+    if (!row) return null
+    return mapRowToTemplateABTest(row as Record<string, unknown>)
+  })
+}
+
+/**
+ * Create a new template A/B test
+ */
+export async function createTemplateABTest(
+  tenantSlug: string,
+  data: {
+    name: string
+    description?: string
+    templateAId: string
+    templateAName: string
+    templateBId: string
+    templateBName: string
+    trafficAllocation?: { a: number; b: number }
+  }
+): Promise<TemplateABTest> {
+  return withTenant(tenantSlug, async () => {
+    const trafficAllocation = data.trafficAllocation ?? { a: 50, b: 50 }
+    const result = await sql`
+      INSERT INTO template_ab_tests (
+        tenant_id,
+        name,
+        description,
+        status,
+        template_a_id,
+        template_a_name,
+        template_b_id,
+        template_b_name,
+        traffic_allocation,
+        metrics,
+        is_significant
+      ) VALUES (
+        ${tenantSlug},
+        ${data.name},
+        ${data.description ?? null},
+        'draft',
+        ${data.templateAId},
+        ${data.templateAName},
+        ${data.templateBId},
+        ${data.templateBName},
+        ${JSON.stringify(trafficAllocation)},
+        '{"opens": {"a": 0, "b": 0}, "clicks": {"a": 0, "b": 0}, "conversions": {"a": 0, "b": 0}}',
+        false
+      )
+      RETURNING *
+    `
+    const row = result.rows[0]
+    if (!row) throw new Error('Failed to create template A/B test')
+    return mapRowToTemplateABTest(row as Record<string, unknown>)
+  })
+}
+
+/**
+ * Update a template A/B test
+ */
+export async function updateTemplateABTest(
+  tenantSlug: string,
+  testId: string,
+  data: Partial<{
+    name: string
+    description: string
+    status: 'draft' | 'running' | 'paused' | 'completed'
+    trafficAllocation: { a: number; b: number }
+    metrics: { opens: { a: number; b: number }; clicks: { a: number; b: number }; conversions: { a: number; b: number } }
+    isSignificant: boolean
+    winner: 'a' | 'b' | null
+  }>
+): Promise<TemplateABTest | null> {
+  return withTenant(tenantSlug, async () => {
+    const updates: string[] = []
+    const values: unknown[] = []
+    let paramIndex = 1
+
+    if (data.name !== undefined) {
+      updates.push(`name = $${paramIndex++}`)
+      values.push(data.name)
+    }
+    if (data.description !== undefined) {
+      updates.push(`description = $${paramIndex++}`)
+      values.push(data.description)
+    }
+    if (data.status !== undefined) {
+      updates.push(`status = $${paramIndex++}`)
+      values.push(data.status)
+      // Set started_at when test starts
+      if (data.status === 'running') {
+        updates.push(`started_at = COALESCE(started_at, NOW())`)
+      }
+      // Set ended_at when test completes
+      if (data.status === 'completed') {
+        updates.push(`ended_at = NOW()`)
+      }
+    }
+    if (data.trafficAllocation !== undefined) {
+      updates.push(`traffic_allocation = $${paramIndex++}`)
+      values.push(JSON.stringify(data.trafficAllocation))
+    }
+    if (data.metrics !== undefined) {
+      updates.push(`metrics = $${paramIndex++}`)
+      values.push(JSON.stringify(data.metrics))
+    }
+    if (data.isSignificant !== undefined) {
+      updates.push(`is_significant = $${paramIndex++}`)
+      values.push(data.isSignificant)
+    }
+    if (data.winner !== undefined) {
+      updates.push(`winner = $${paramIndex++}`)
+      values.push(data.winner)
+    }
+
+    if (updates.length === 0) {
+      return getTemplateABTest(tenantSlug, testId)
+    }
+
+    updates.push(`updated_at = NOW()`)
+    values.push(testId)
+
+    const result = await sql.query(
+      `UPDATE template_ab_tests SET ${updates.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+      values
+    )
+
+    if (result.rows.length === 0) return null
+    return mapRowToTemplateABTest(result.rows[0] as Record<string, unknown>)
+  })
+}
+
+/**
+ * Delete a template A/B test
+ */
+export async function deleteTemplateABTest(
+  tenantSlug: string,
+  testId: string
+): Promise<boolean> {
+  return withTenant(tenantSlug, async () => {
+    const result = await sql`
+      DELETE FROM template_ab_tests WHERE id = ${testId}
+    `
+    return (result.rowCount ?? 0) > 0
   })
 }
 
 // Helper functions
+
+function mapRowToTemplateABTest(row: Record<string, unknown>): TemplateABTest {
+  return {
+    id: row.id as string,
+    tenantId: row.tenant_id as string,
+    name: row.name as string,
+    description: row.description as string | undefined,
+    status: row.status as TemplateABTest['status'],
+    templateAId: row.template_a_id as string,
+    templateAName: row.template_a_name as string,
+    templateBId: row.template_b_id as string,
+    templateBName: row.template_b_name as string,
+    trafficAllocation: row.traffic_allocation as { a: number; b: number },
+    metrics: row.metrics as TemplateABTest['metrics'],
+    isSignificant: row.is_significant as boolean,
+    winner: row.winner as 'a' | 'b' | undefined,
+    createdAt: new Date(row.created_at as string),
+    startedAt: row.started_at ? new Date(row.started_at as string) : undefined,
+    endedAt: row.ended_at ? new Date(row.ended_at as string) : undefined,
+  }
+}
 function mapRowToABTest(row: Record<string, unknown>): ABTest {
   return {
     id: row.id as string,

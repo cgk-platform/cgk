@@ -1,10 +1,8 @@
 'use client'
 
-import { Button, Card, CardContent, CardHeader, cn } from '@cgk-platform/ui'
+import { Button, Card, CardContent, CardHeader, cn, StatusDot } from '@cgk-platform/ui'
 import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-
-import { StatusDot } from '../../../../components/ui/status-dot'
 
 type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown'
 

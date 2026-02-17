@@ -141,6 +141,34 @@ export function PromotionStatusBadge({ status, ...props }: StatusBadgeWrapperPro
 // Subscription/Selling Plan Statuses
 // ============================================================================
 
+export function SubscriptionStatusBadge({ status, ...props }: StatusBadgeWrapperProps) {
+  return <StatusBadge status={status} showDot {...props} />
+}
+
+export function SubscriptionFrequencyBadge({
+  frequency,
+  ...props
+}: { frequency: string } & Omit<StatusBadgeProps, 'status'>) {
+  const frequencyLabels: Record<string, string> = {
+    weekly: 'Weekly',
+    biweekly: 'Every 2 Weeks',
+    monthly: 'Monthly',
+    bimonthly: 'Every 2 Months',
+    quarterly: 'Quarterly',
+    semiannually: 'Every 6 Months',
+    annually: 'Annually',
+  }
+
+  return (
+    <StatusBadge
+      status={frequency}
+      label={frequencyLabels[frequency] || frequency}
+      variant="secondary"
+      {...props}
+    />
+  )
+}
+
 export function SellingPlanStatusBadge({
   isActive,
   ...props

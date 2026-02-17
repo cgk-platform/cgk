@@ -102,8 +102,11 @@ export {
 
 export {
   defineResource,
+  platformResources,
+  exampleResources,
   type ResourceDefinition,
   type ResourceHandler,
+  type ResourceContext,
 } from './resources'
 
 // =============================================================================
@@ -197,6 +200,30 @@ export {
   SUPPORTED_PROTOCOL_VERSIONS,
   JSONRPCErrorCodes,
 } from './types'
+
+// =============================================================================
+// Rate Limiting
+// =============================================================================
+
+export {
+  // Core rate limiter
+  getRateLimiter,
+  createRateLimiter,
+  checkRateLimit,
+  RateLimitError,
+  // Response helpers
+  addRateLimitHeaders,
+  createRateLimitResponse,
+  // Constants
+  DEFAULT_RATE_LIMIT_CONFIG,
+  DEFAULT_TOOL_COSTS,
+  EXPENSIVE_TOOLS,
+  // Types
+  type RateLimitConfig,
+  type ToolRateLimit,
+  type RateLimitResult,
+  type RateLimiter,
+} from './rate-limit'
 
 // =============================================================================
 // Commerce Tools

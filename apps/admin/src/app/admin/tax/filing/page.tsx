@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardContent, CardHeader } from '@cgk-platform/ui'
+import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 
@@ -120,17 +121,39 @@ export default async function IRSFilingPage({
 }
 
 async function FilingStatsLoader({ taxYear }: { taxYear: number }) {
-  // Headers available for future tenant context
-  void (await headers())
-  void taxYear
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
 
-  // Mock data - would use @cgk-platform/tax
-  const stats = {
-    readyToFile: 15,
-    filedWithIRS: 8,
-    filedWithState: 5,
-    delivered: 8,
+  if (!tenantSlug) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground">No tenant configured</div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
+
+  const stats = await withTenant(tenantSlug, async () => {
+    const result = await sql`
+      SELECT
+        COUNT(CASE WHEN status = 'approved' AND irs_filed_at IS NULL THEN 1 END) as ready_to_file,
+        COUNT(CASE WHEN irs_filed_at IS NOT NULL THEN 1 END) as filed_with_irs,
+        COUNT(CASE WHEN state_filed_at IS NOT NULL THEN 1 END) as filed_with_state,
+        COUNT(CASE WHEN delivered_at IS NOT NULL THEN 1 END) as delivered
+      FROM tax_forms
+      WHERE tax_year = ${taxYear}
+    `
+    const row = result.rows[0]
+    return {
+      readyToFile: Number(row?.ready_to_file || 0),
+      filedWithIRS: Number(row?.filed_with_irs || 0),
+      filedWithState: Number(row?.filed_with_state || 0),
+      delivered: Number(row?.delivered || 0),
+    }
+  })
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -163,16 +186,62 @@ async function FilingStatsLoader({ taxYear }: { taxYear: number }) {
 }
 
 async function ValidationSection({ taxYear }: { taxYear: number }) {
-  void taxYear
-  // Mock validation result
-  const validation = {
-    valid: false,
-    formCount: 23,
-    errors: [
-      '1099_abc123: Missing W-9 for payee',
-      '1099_def456: Incomplete address',
-    ],
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
+
+  if (!tenantSlug) {
+    return <p className="text-sm text-muted-foreground">No tenant configured.</p>
   }
+
+  // Query approved forms that need validation before filing
+  const validation = await withTenant(tenantSlug, async () => {
+    // Get count of approved forms ready for filing
+    const formCountResult = await sql`
+      SELECT COUNT(*) as count FROM tax_forms
+      WHERE tax_year = ${taxYear}
+        AND status = 'approved'
+        AND irs_filed_at IS NULL
+    `
+
+    // Find forms with validation issues
+    const errorsResult = await sql`
+      SELECT
+        tf.id,
+        tf.recipient_name,
+        CASE
+          WHEN tp.id IS NULL THEN 'Missing W-9 for payee'
+          WHEN tp.address_line1 IS NULL OR tp.city IS NULL OR tp.state IS NULL THEN 'Incomplete address'
+          WHEN tp.tin_encrypted IS NULL THEN 'Missing TIN'
+          ELSE NULL
+        END as error
+      FROM tax_forms tf
+      LEFT JOIN tax_payees tp ON tp.payee_id = tf.payee_id AND tp.payee_type = tf.payee_type
+      WHERE tf.tax_year = ${taxYear}
+        AND tf.status = 'approved'
+        AND tf.irs_filed_at IS NULL
+        AND (
+          tp.id IS NULL
+          OR tp.address_line1 IS NULL
+          OR tp.city IS NULL
+          OR tp.state IS NULL
+          OR tp.tin_encrypted IS NULL
+        )
+      LIMIT 20
+    `
+
+    const errors: string[] = []
+    for (const row of errorsResult.rows) {
+      if (row.error) {
+        errors.push(`${row.id}: ${row.error}`)
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      formCount: Number(formCountResult.rows[0]?.count || 0),
+      errors,
+    }
+  })
 
   return (
     <div className="space-y-3">
@@ -201,6 +270,12 @@ async function ValidationSection({ taxYear }: { taxYear: number }) {
         </div>
       )}
 
+      {validation.formCount === 0 && (
+        <p className="text-sm text-muted-foreground">
+          No approved forms ready for filing. Generate and approve 1099 forms first.
+        </p>
+      )}
+
       <Button variant="outline" size="sm">
         Run Validation
       </Button>
@@ -208,25 +283,61 @@ async function ValidationSection({ taxYear }: { taxYear: number }) {
   )
 }
 
+interface FilingHistoryItem {
+  id: string
+  date: string
+  action: string
+  formCount: number
+  confirmationNumber: string | null
+  user: string
+}
+
 async function FilingHistoryLoader({ taxYear }: { taxYear: number }) {
-  // Mock history
-  const history = [
-    {
-      id: '1',
-      date: '2025-01-28',
-      action: 'CSV Generated',
-      formCount: 23,
-      user: 'admin@example.com',
-    },
-    {
-      id: '2',
-      date: '2025-01-29',
-      action: 'Filed with IRS',
-      formCount: 23,
-      confirmationNumber: 'IRS-2025-ABC123',
-      user: 'admin@example.com',
-    },
-  ]
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
+
+  if (!tenantSlug) {
+    return <p className="text-sm text-muted-foreground">No tenant configured.</p>
+  }
+
+  const history = await withTenant(tenantSlug, async () => {
+    // Query audit log for filing-related actions
+    const result = await sql`
+      SELECT
+        tal.id,
+        tal.created_at,
+        tal.action,
+        tal.performed_by,
+        tal.notes,
+        COALESCE((tal.changes->>'form_count')::integer, 1) as form_count,
+        tal.changes->>'irs_confirmation_number' as confirmation_number
+      FROM tax_form_audit_log tal
+      WHERE tal.action IN ('form_filed', 'pdf_generated', 'mail_queued', 'form_delivered')
+        AND EXISTS (
+          SELECT 1 FROM tax_forms tf
+          WHERE tf.id = tal.tax_form_id
+            AND tf.tax_year = ${taxYear}
+        )
+      ORDER BY tal.created_at DESC
+      LIMIT 50
+    `
+
+    const actionLabels: Record<string, string> = {
+      form_filed: 'Filed with IRS',
+      pdf_generated: 'CSV/PDF Generated',
+      mail_queued: 'Queued for Mail',
+      form_delivered: 'Delivered to Recipient',
+    }
+
+    return result.rows.map((row) => ({
+      id: String(row.id),
+      date: row.created_at ? new Date(String(row.created_at)).toISOString().split('T')[0] : '',
+      action: actionLabels[String(row.action)] || String(row.action),
+      formCount: Number(row.form_count || 1),
+      confirmationNumber: row.confirmation_number ? String(row.confirmation_number) : null,
+      user: String(row.performed_by || 'System'),
+    })) as FilingHistoryItem[]
+  })
 
   if (history.length === 0) {
     return (

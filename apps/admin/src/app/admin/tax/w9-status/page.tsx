@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardContent } from '@cgk-platform/ui'
+import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -110,17 +111,69 @@ function W9StatusFilter({ status, payeeType }: { status: string; payeeType: stri
 }
 
 async function W9StatsLoader() {
-  // Headers available for future tenant context
-  void (await headers())
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
 
-  // Mock stats
-  const stats = {
-    total: 150,
-    notSubmitted: 25,
-    pendingReview: 10,
-    approved: 110,
-    expired: 5,
+  if (!tenantSlug) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground">No tenant configured</div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
+
+  // Query W-9 status stats
+  // We need to count all payees who have received payments and check their W-9 status
+  const stats = await withTenant(tenantSlug, async () => {
+    // Count creators with W-9 status
+    const creatorStats = await sql`
+      SELECT
+        COUNT(*) as total,
+        COUNT(tp.id) as has_w9,
+        COUNT(CASE WHEN wct.completed_at IS NOT NULL THEN 1 END) as approved,
+        COUNT(CASE WHEN wct.completed_at IS NULL AND wct.initial_sent_at IS NOT NULL THEN 1 END) as pending,
+        COUNT(CASE WHEN tp.w9_certified_at < NOW() - INTERVAL '3 years' THEN 1 END) as expired
+      FROM creators c
+      LEFT JOIN tax_payees tp ON tp.payee_id = c.id AND tp.payee_type = 'creator'
+      LEFT JOIN w9_compliance_tracking wct ON wct.payee_id = c.id AND wct.payee_type = 'creator'
+      WHERE c.status IN ('active', 'approved')
+    `
+
+    const contractorStats = await sql`
+      SELECT
+        COUNT(*) as total,
+        COUNT(tp.id) as has_w9,
+        COUNT(CASE WHEN wct.completed_at IS NOT NULL THEN 1 END) as approved,
+        COUNT(CASE WHEN wct.completed_at IS NULL AND wct.initial_sent_at IS NOT NULL THEN 1 END) as pending,
+        COUNT(CASE WHEN tp.w9_certified_at < NOW() - INTERVAL '3 years' THEN 1 END) as expired
+      FROM contractors con
+      LEFT JOIN tax_payees tp ON tp.payee_id = con.id AND tp.payee_type = 'contractor'
+      LEFT JOIN w9_compliance_tracking wct ON wct.payee_id = con.id AND wct.payee_type = 'contractor'
+      WHERE con.status = 'active'
+    `
+
+    const cRow = creatorStats.rows[0]
+    const conRow = contractorStats.rows[0]
+
+    const total = Number(cRow?.total || 0) + Number(conRow?.total || 0)
+    const hasW9 = Number(cRow?.has_w9 || 0) + Number(conRow?.has_w9 || 0)
+    const approved = Number(cRow?.approved || 0) + Number(conRow?.approved || 0)
+    const pending = Number(cRow?.pending || 0) + Number(conRow?.pending || 0)
+    const expired = Number(cRow?.expired || 0) + Number(conRow?.expired || 0)
+    const notSubmitted = total - hasW9
+
+    return {
+      total,
+      notSubmitted,
+      pendingReview: pending,
+      approved,
+      expired,
+    }
+  })
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -158,6 +211,18 @@ async function W9StatsLoader() {
   )
 }
 
+interface W9Payee {
+  id: string
+  payeeId: string
+  payeeType: string
+  name: string
+  email: string
+  w9Status: string
+  tinLastFour: string | null
+  certifiedAt: string | null
+  remindersSent: number
+}
+
 async function W9ListLoader({
   page,
   status,
@@ -167,52 +232,153 @@ async function W9ListLoader({
   status: string
   payeeType: string
 }) {
-  // Headers available for future tenant context
-  void (await headers())
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
 
-  // Mock data
-  const payees = [
-    {
-      id: '1',
-      payeeId: 'creator_123',
-      payeeType: 'creator',
-      name: 'John Creator',
-      email: 'john@example.com',
-      w9Status: 'approved',
-      tinLastFour: '1234',
-      certifiedAt: '2024-06-15',
-      remindersSent: 0,
-    },
-    {
-      id: '2',
-      payeeId: 'creator_456',
-      payeeType: 'creator',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      w9Status: 'not_submitted',
-      tinLastFour: null,
-      certifiedAt: null,
-      remindersSent: 2,
-    },
-    {
-      id: '3',
-      payeeId: 'contractor_789',
-      payeeType: 'contractor',
-      name: 'Bob Contractor',
-      email: 'bob@example.com',
-      w9Status: 'pending_review',
-      tinLastFour: '5678',
-      certifiedAt: null,
-      remindersSent: 0,
-    },
-  ]
-
-  let filteredPayees = payees
-  if (status) {
-    filteredPayees = filteredPayees.filter((p) => p.w9Status === status)
+  if (!tenantSlug) {
+    return <p className="text-muted-foreground">No tenant configured.</p>
   }
-  if (payeeType) {
-    filteredPayees = filteredPayees.filter((p) => p.payeeType === payeeType)
+
+  const limit = 50
+  const offset = (page - 1) * limit
+
+  const { payees, totalCount } = await withTenant(tenantSlug, async () => {
+    const results: W9Payee[] = []
+    let total = 0
+
+    // Query creators (if payeeType is empty or 'creator')
+    if (!payeeType || payeeType === 'creator') {
+      const creatorResult = await sql`
+        SELECT
+          c.id,
+          c.id as payee_id,
+          'creator' as payee_type,
+          CONCAT(c.first_name, ' ', c.last_name) as name,
+          c.email,
+          tp.tin_last_four,
+          tp.w9_certified_at,
+          wct.completed_at,
+          COALESCE(
+            (CASE WHEN wct.final_notice_sent_at IS NOT NULL THEN 4
+                  WHEN wct.reminder_2_sent_at IS NOT NULL THEN 3
+                  WHEN wct.reminder_1_sent_at IS NOT NULL THEN 2
+                  WHEN wct.initial_sent_at IS NOT NULL THEN 1
+                  ELSE 0 END), 0
+          ) as reminders_sent,
+          CASE
+            WHEN tp.id IS NULL THEN 'not_submitted'
+            WHEN wct.completed_at IS NOT NULL THEN 'approved'
+            WHEN tp.w9_certified_at < NOW() - INTERVAL '3 years' THEN 'expired'
+            WHEN tp.id IS NOT NULL AND wct.completed_at IS NULL THEN 'pending_review'
+            ELSE 'not_submitted'
+          END as w9_status
+        FROM creators c
+        LEFT JOIN tax_payees tp ON tp.payee_id = c.id AND tp.payee_type = 'creator'
+        LEFT JOIN w9_compliance_tracking wct ON wct.payee_id = c.id AND wct.payee_type = 'creator'
+        WHERE c.status IN ('active', 'approved')
+        ORDER BY c.created_at DESC
+      `
+
+      for (const row of creatorResult.rows) {
+        const w9Status = String(row.w9_status || 'not_submitted')
+        // Filter by status if provided
+        if (!status || w9Status === status) {
+          let certifiedAtValue: string | null = null
+          if (row.w9_certified_at) {
+            const isoDate = new Date(String(row.w9_certified_at)).toISOString()
+            certifiedAtValue = isoDate.split('T')[0] ?? null
+          }
+          results.push({
+            id: String(row.id),
+            payeeId: String(row.payee_id),
+            payeeType: 'creator',
+            name: String(row.name || ''),
+            email: String(row.email || ''),
+            w9Status,
+            tinLastFour: row.tin_last_four ? String(row.tin_last_four) : null,
+            certifiedAt: certifiedAtValue,
+            remindersSent: Number(row.reminders_sent || 0),
+          })
+        }
+      }
+    }
+
+    // Query contractors (if payeeType is empty or 'contractor')
+    if (!payeeType || payeeType === 'contractor') {
+      const contractorResult = await sql`
+        SELECT
+          con.id,
+          con.id as payee_id,
+          'contractor' as payee_type,
+          con.name,
+          con.email,
+          tp.tin_last_four,
+          tp.w9_certified_at,
+          wct.completed_at,
+          COALESCE(
+            (CASE WHEN wct.final_notice_sent_at IS NOT NULL THEN 4
+                  WHEN wct.reminder_2_sent_at IS NOT NULL THEN 3
+                  WHEN wct.reminder_1_sent_at IS NOT NULL THEN 2
+                  WHEN wct.initial_sent_at IS NOT NULL THEN 1
+                  ELSE 0 END), 0
+          ) as reminders_sent,
+          CASE
+            WHEN tp.id IS NULL THEN 'not_submitted'
+            WHEN wct.completed_at IS NOT NULL THEN 'approved'
+            WHEN tp.w9_certified_at < NOW() - INTERVAL '3 years' THEN 'expired'
+            WHEN tp.id IS NOT NULL AND wct.completed_at IS NULL THEN 'pending_review'
+            ELSE 'not_submitted'
+          END as w9_status
+        FROM contractors con
+        LEFT JOIN tax_payees tp ON tp.payee_id = con.id AND tp.payee_type = 'contractor'
+        LEFT JOIN w9_compliance_tracking wct ON wct.payee_id = con.id AND wct.payee_type = 'contractor'
+        WHERE con.status = 'active'
+        ORDER BY con.created_at DESC
+      `
+
+      for (const row of contractorResult.rows) {
+        const w9Status = String(row.w9_status || 'not_submitted')
+        if (!status || w9Status === status) {
+          let certifiedAtValue: string | null = null
+          if (row.w9_certified_at) {
+            const isoDate = new Date(String(row.w9_certified_at)).toISOString()
+            certifiedAtValue = isoDate.split('T')[0] ?? null
+          }
+          results.push({
+            id: String(row.id),
+            payeeId: String(row.payee_id),
+            payeeType: 'contractor',
+            name: String(row.name || ''),
+            email: String(row.email || ''),
+            w9Status,
+            tinLastFour: row.tin_last_four ? String(row.tin_last_four) : null,
+            certifiedAt: certifiedAtValue,
+            remindersSent: Number(row.reminders_sent || 0),
+          })
+        }
+      }
+    }
+
+    total = results.length
+    // Apply pagination
+    const paginatedResults = results.slice(offset, offset + limit)
+
+    return {
+      payees: paginatedResults,
+      totalCount: total,
+    }
+  })
+
+  const totalPages = Math.ceil(totalCount / limit)
+
+  if (payees.length === 0) {
+    return (
+      <div className="rounded-md border p-8 text-center">
+        <p className="text-muted-foreground">
+          No payees found matching the selected filters.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -231,7 +397,7 @@ async function W9ListLoader({
             </tr>
           </thead>
           <tbody className="divide-y">
-            {filteredPayees.map((payee) => (
+            {payees.map((payee) => (
               <tr key={payee.id} className="hover:bg-muted/50">
                 <td className="px-4 py-3">
                   <div className="font-medium">{payee.name}</div>
@@ -284,9 +450,9 @@ async function W9ListLoader({
 
       <Pagination
         page={page}
-        totalPages={1}
-        totalCount={filteredPayees.length}
-        limit={50}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        limit={limit}
         basePath="/admin/tax/w9-status"
         currentFilters={{ status, payee_type: payeeType }}
       />

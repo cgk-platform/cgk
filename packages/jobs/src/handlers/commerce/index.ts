@@ -57,6 +57,7 @@ export {
   // Event handlers
   handleReviewEmailQueuedJob,
   handleReviewEmailSentJob,
+  handleReviewModeratedJob,
   // Stats
   reviewEmailStatsJob,
   // Collection

@@ -50,14 +50,14 @@ See [PAYEE-TYPE-MODEL-SPEC.md](../PAYEE-TYPE-MODEL-SPEC.md) for complete compari
 
 ## Success Criteria
 
-- [ ] Contractor interface with all required fields defined
-- [ ] `contractors` table created in tenant schema
-- [ ] `contractor_projects` table created in tenant schema
-- [ ] Contractor-payee linkage working (payee_type='contractor')
-- [ ] Contractor portal authentication functional (password + magic link)
-- [ ] Contractor dashboard displays project overview and balance
-- [ ] 6-stage Kanban board working with drag-and-drop
-- [ ] Project status transitions validated
+- [x] Contractor interface with all required fields defined
+- [x] `contractors` table created in tenant schema
+- [x] `contractor_projects` table created in tenant schema
+- [x] Contractor-payee linkage working (payee_type='contractor')
+- [x] Contractor portal authentication functional (password + magic link)
+- [x] Contractor dashboard displays project overview and balance
+- [x] 6-stage Kanban board working with drag-and-drop
+- [x] Project status transitions validated
 - [ ] Guided tour for new contractors (onboarding)
 
 ---
@@ -437,54 +437,54 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Data model and types
-- [ ] Define Contractor interface in `apps/contractor-portal/src/lib/types.ts`
-- [ ] Define ContractorProject interface
-- [ ] Define ProjectStatus type with transitions
-- [ ] Create SQL migration for `contractors` table in tenant schema
-- [ ] Create SQL migration for `contractor_projects` table
+- [x] Define Contractor interface in `apps/contractor-portal/src/lib/types.ts`
+- [x] Define ContractorProject interface
+- [x] Define ProjectStatus type with transitions
+- [x] Create SQL migration for `contractors` table in tenant schema
+- [x] Create SQL migration for `contractor_projects` table
 
 ### [PARALLEL with above] Portal scaffolding
-- [ ] Create `apps/contractor-portal/` app structure
-- [ ] Create contractor portal layout with PayeePortalGuard
-- [ ] Set up tenant-aware routing
+- [x] Create `apps/contractor-portal/` app structure
+- [x] Create contractor portal layout with PayeePortalGuard
+- [x] Set up tenant-aware routing
 
 ### [SEQUENTIAL after data model] Authentication
-- [ ] Implement contractor signup (upsertPayeeProfile pattern)
-- [ ] Implement password login with rate limiting
-- [ ] Implement magic link authentication
-- [ ] Create session management (getPayeeSession)
-- [ ] Implement forgot/reset password flow
-- [ ] Create auth middleware for protected routes
+- [x] Implement contractor signup (upsertPayeeProfile pattern)
+- [x] Implement password login with rate limiting
+- [x] Implement magic link authentication
+- [x] Create session management (getPayeeSession)
+- [x] Implement forgot/reset password flow
+- [x] Create auth middleware for protected routes
 
 ### [SEQUENTIAL after auth] Core pages
-- [ ] Build sign in page
-- [ ] Build sign up page
-- [ ] Build forgot password page
-- [ ] Build reset password page
-- [ ] Build projects Kanban page
-- [ ] Build project detail drawer/modal
+- [x] Build sign in page
+- [x] Build sign up page
+- [x] Build forgot password page
+- [x] Build reset password page
+- [x] Build projects Kanban page
+- [x] Build project detail drawer/modal
 
 ### [PARALLEL] Kanban implementation
-- [ ] Implement Kanban board with 6 columns
-- [ ] Implement drag-and-drop with validation
-- [ ] Implement project card component
-- [ ] Implement status transition API
-- [ ] Implement project submission flow
+- [x] Implement Kanban board with 6 columns
+- [x] Implement drag-and-drop with validation
+- [x] Implement project card component
+- [x] Implement status transition API
+- [x] Implement project submission flow
 
 ---
 
 ## Definition of Done
 
-- [ ] Contractor can sign up with password
-- [ ] Contractor can sign in (password or magic link)
-- [ ] Contractor can reset password
-- [ ] Contractor sees 6-column Kanban with their projects
-- [ ] Contractor can drag projects between allowed columns
-- [ ] Contractor can view project details
-- [ ] Contractor can submit work for review
-- [ ] Status transitions validated server-side
-- [ ] Tenant isolation verified
-- [ ] `npx tsc --noEmit` passes
+- [x] Contractor can sign up with password
+- [x] Contractor can sign in (password or magic link)
+- [x] Contractor can reset password
+- [x] Contractor sees 6-column Kanban with their projects
+- [x] Contractor can drag projects between allowed columns
+- [x] Contractor can view project details
+- [x] Contractor can submit work for review
+- [x] Status transitions validated server-side
+- [x] Tenant isolation verified
+- [x] `npx tsc --noEmit` passes
 - [ ] Manual testing: full flow works end-to-end
 
 ---

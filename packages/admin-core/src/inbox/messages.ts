@@ -274,22 +274,99 @@ export async function generateDraft(
       })),
     }
 
-    // TODO: Call actual AI service (e.g., OpenAI)
-    // For now, generate a simple template response
-    const draftBody = generateSimpleDraft(context)
+    // Try to generate AI draft using tenant's configured AI provider
+    let draftBody: string
+    let model = 'template'
+    let promptTokens: number | null = null
+    let completionTokens: number | null = null
+    let confidence = 0.75
+
+    try {
+      // Dynamic import to avoid circular dependencies
+      const { getTenantAnthropicClient, getTenantOpenAIClient } = await import('@cgk-platform/integrations')
+
+      // Try Anthropic first, then OpenAI
+      const anthropic = await getTenantAnthropicClient(tenantId)
+      const openai = await getTenantOpenAIClient(tenantId)
+
+      if (anthropic) {
+        // Build conversation context for Claude
+        const conversationHistory = context.messages
+          .slice(-5) // Last 5 messages
+          .map((m) => `${m.direction === 'inbound' ? 'Customer' : 'Agent'}: ${m.body}`)
+          .join('\n\n')
+
+        const response = await anthropic.createMessage({
+          model: 'claude-3-5-sonnet-20241022',
+          max_tokens: 500,
+          system: `You are a helpful customer service agent. Generate a professional, friendly response to the customer. Keep it concise (2-4 sentences) unless more detail is needed. Don't use placeholder text like [Name] - use the actual customer name if available.`,
+          messages: [
+            {
+              role: 'user',
+              content: `Customer name: ${context.contactName}\nEmail: ${context.contactEmail}\nSubject: ${context.subject || 'General inquiry'}\n\nConversation history:\n${conversationHistory}\n\nGenerate a helpful response:`,
+            },
+          ],
+        })
+
+        draftBody = response.content[0]?.text || generateSimpleDraft(context)
+        model = 'claude-3-5-sonnet'
+        promptTokens = response.usage.input_tokens
+        completionTokens = response.usage.output_tokens
+        confidence = 0.92
+      } else if (openai) {
+        // Use OpenAI
+        const conversationHistory = context.messages
+          .slice(-5)
+          .map((m) => ({
+            role: m.direction === 'inbound' ? 'user' as const : 'assistant' as const,
+            content: m.body as string,
+          }))
+
+        const response = await openai.createChatCompletion({
+          model: 'gpt-4o',
+          messages: [
+            {
+              role: 'system',
+              content: `You are a helpful customer service agent responding to ${context.contactName}. Generate a professional, friendly response. Keep it concise (2-4 sentences) unless more detail is needed.`,
+            },
+            ...conversationHistory,
+            {
+              role: 'user',
+              content: 'Generate a helpful response to the customer:',
+            },
+          ],
+          max_tokens: 500,
+        })
+
+        draftBody = response.choices[0]?.message?.content || generateSimpleDraft(context)
+        model = 'gpt-4o'
+        promptTokens = response.usage.prompt_tokens
+        completionTokens = response.usage.completion_tokens
+        confidence = 0.88
+      } else {
+        // No AI provider configured - use template
+        draftBody = generateSimpleDraft(context)
+      }
+    } catch (aiError) {
+      // AI generation failed - fall back to template
+      console.error('[inbox] AI draft generation failed:', aiError)
+      draftBody = generateSimpleDraft(context)
+    }
 
     // Insert draft
     const draftResult = await sql`
       INSERT INTO inbox_ai_drafts (
         thread_id, body, body_html, suggested_channel,
-        confidence, model, status
+        confidence, model, prompt_tokens, completion_tokens, status
       ) VALUES (
         ${threadId},
         ${draftBody},
         ${draftBody.replace(/\n/g, '<br>')},
         'email',
-        0.75,
-        'template',
+        ${confidence},
+        ${model},
+        ${promptTokens},
+        ${completionTokens},
         'pending'
       )
       RETURNING *

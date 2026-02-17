@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -29,7 +28,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   }
 
   // Get domain
-  const domain = await withTenant(tenantSlug, () => getDomainById(id))
+  const domain = await getDomainById(tenantSlug, id)
 
   if (!domain) {
     return NextResponse.json({ error: 'Domain not found' }, { status: 404 })

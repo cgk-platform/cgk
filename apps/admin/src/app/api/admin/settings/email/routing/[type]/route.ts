@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -42,9 +41,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     )
   }
 
-  const routing = await withTenant(tenantSlug, () =>
-    getNotificationRouting(type as NotificationType)
-  )
+  const routing = await getNotificationRouting(tenantSlug, type as NotificationType)
 
   return NextResponse.json({ routing })
 }
@@ -113,9 +110,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   // Validate sender address exists if provided
   if (body.senderAddressId) {
-    const sender = await withTenant(tenantSlug, () =>
-      getSenderAddressById(body.senderAddressId as string)
-    )
+    const sender = await getSenderAddressById(tenantSlug, body.senderAddressId as string)
 
     if (!sender) {
       return NextResponse.json(
@@ -133,14 +128,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   try {
-    const routing = await withTenant(tenantSlug, () =>
-      upsertNotificationRouting(type as NotificationType, body)
-    )
+    const routing = await upsertNotificationRouting(tenantSlug, type as NotificationType, body)
 
     // Get full routing with sender info
-    const fullRouting = await withTenant(tenantSlug, () =>
-      getNotificationRouting(type as NotificationType)
-    )
+    const fullRouting = await getNotificationRouting(tenantSlug, type as NotificationType)
 
     return NextResponse.json({ routing: fullRouting ?? routing })
   } catch (error) {

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import {
+  checkPermissionOrRespond,
   getInvitation,
   requireAuth,
   resendInvitation,
@@ -28,9 +29,13 @@ export async function POST(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Check permission to invite team members (resending uses invite permission)
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.invite'
+  )
+  if (permissionDenied) return permissionDenied
 
   try {
     // Verify invitation belongs to this tenant

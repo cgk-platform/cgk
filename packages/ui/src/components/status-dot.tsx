@@ -6,7 +6,7 @@
 
 'use client'
 
-import { cn } from '@cgk-platform/ui'
+import { cn } from '../utils/cn'
 
 type StatusType = 'healthy' | 'degraded' | 'unhealthy' | 'critical'
 
@@ -49,7 +49,7 @@ const statusColors: Record<StatusType, { bg: string; ring: string }> = {
 /**
  * StatusDot component for displaying health/status indicators
  */
-export function StatusDot({
+function StatusDot({
   status,
   size = 'md',
   animate = false,
@@ -87,7 +87,7 @@ interface ConnectionStatusProps {
 /**
  * Connection status indicator with optional label
  */
-export function ConnectionStatus({
+function ConnectionStatus({
   connected,
   label,
   size = 'sm',
@@ -108,3 +108,6 @@ export function ConnectionStatus({
     </span>
   )
 }
+
+export { StatusDot, ConnectionStatus }
+export type { StatusDotProps, ConnectionStatusProps, StatusType }

@@ -321,12 +321,10 @@ export const checkSampleDeliveriesJob = defineJob({
       let updated = 0
 
       for (const sample of samplesResult.rows as SampleRequestRow[]) {
-        // TODO: Integrate with carrier APIs (EasyPost, etc.) to check status
-        // For now, we'll just mark samples as in_transit if they've been
-        // shipped for more than 1 day
-
+        // Check tracking status via EasyPost integration
         const checkResult = await checkTrackingStatus(
-          sample.tracking_carrier || '',
+          tenantId,
+          sample.tracking_carrier || 'USPS',
           sample.tracking_number || ''
         )
 
@@ -339,6 +337,7 @@ export const checkSampleDeliveriesJob = defineJob({
               actual_delivery = NOW()::date,
               delivery_confirmed = true,
               delivery_confirmed_by = 'system',
+              tracking_url = COALESCE(${checkResult.trackingUrl || null}, tracking_url),
               updated_at = NOW()
             WHERE id = ${sample.id}
           `
@@ -346,7 +345,11 @@ export const checkSampleDeliveriesJob = defineJob({
         } else if (checkResult.inTransit && sample.status === 'shipped') {
           await sql`
             UPDATE sample_requests
-            SET status = 'in_transit', updated_at = NOW()
+            SET
+              status = 'in_transit',
+              tracking_url = COALESCE(${checkResult.trackingUrl || null}, tracking_url),
+              estimated_delivery = COALESCE(${checkResult.estimatedDelivery || null}::date, estimated_delivery),
+              updated_at = NOW()
             WHERE id = ${sample.id}
           `
           updated++
@@ -367,12 +370,43 @@ export const checkSampleDeliveriesJob = defineJob({
 
 // Helper function to check tracking status
 // In a real implementation, this would call carrier APIs
+/**
+ * Check tracking status using EasyPost
+ *
+ * Uses tenant's EasyPost API credentials to get real tracking data.
+ * Falls back to unknown status if EasyPost is not configured.
+ */
 async function checkTrackingStatus(
-  _carrier: string,
-  _trackingNumber: string
-): Promise<{ delivered: boolean; inTransit: boolean }> {
-  // Placeholder - would integrate with EasyPost or carrier APIs
-  return { delivered: false, inTransit: false }
+  tenantId: string,
+  carrier: string,
+  trackingNumber: string
+): Promise<{
+  delivered: boolean
+  inTransit: boolean
+  status?: string
+  estimatedDelivery?: string
+  trackingUrl?: string
+}> {
+  try {
+    const { checkEasyPostTrackingStatus } = await import('@cgk-platform/integrations')
+
+    const result = await checkEasyPostTrackingStatus(tenantId, trackingNumber, carrier)
+
+    return {
+      delivered: result.delivered,
+      inTransit: result.inTransit,
+      status: result.status,
+      estimatedDelivery: result.estimatedDelivery,
+      trackingUrl: result.trackingUrl,
+    }
+  } catch (error) {
+    console.error(
+      '[checkTrackingStatus] Error:',
+      error instanceof Error ? error.message : error
+    )
+    // Return unknown status on error - don't fail the job
+    return { delivered: false, inTransit: false }
+  }
 }
 
 // ============================================================================

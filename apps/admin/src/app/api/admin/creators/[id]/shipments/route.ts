@@ -4,6 +4,12 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import {
+  createAdminClient,
+  getShopifyCredentials,
+  isShopifyConnected,
+} from '@cgk-platform/shopify'
+
+import {
   createShipment,
   getCreatorShipments,
   updateShipmentWithOrder,
@@ -32,6 +38,137 @@ export async function GET(
   } catch (error) {
     console.error('[shipments] GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch shipments' }, { status: 500 })
+  }
+}
+
+/**
+ * Create Shopify draft order via Admin API GraphQL
+ */
+async function createShopifyDraftOrder(
+  tenantSlug: string,
+  creatorId: string,
+  products: CreateShipmentParams['products'],
+  shippingAddress: CreateShipmentParams['shippingAddress'],
+  notes?: string
+): Promise<{ draftOrderId: string; orderId: string; orderNumber: string }> {
+  // Get Shopify credentials
+  const credentials = await getShopifyCredentials(tenantSlug)
+
+  // Create Admin client
+  const admin = createAdminClient({
+    storeDomain: credentials.shop,
+    adminAccessToken: credentials.accessToken,
+    apiVersion: credentials.apiVersion,
+  })
+
+  // Build line items with 100% discount for creator samples
+  const lineItems = products.map((p) => ({
+    variantId: p.variantId.startsWith('gid://')
+      ? p.variantId
+      : `gid://shopify/ProductVariant/${p.variantId}`,
+    quantity: p.quantity,
+  }))
+
+  // GraphQL mutation to create draft order
+  const mutation = `
+    mutation draftOrderCreate($input: DraftOrderInput!) {
+      draftOrderCreate(input: $input) {
+        draftOrder {
+          id
+          name
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `
+
+  const input = {
+    lineItems,
+    shippingAddress: {
+      address1: shippingAddress.line1,
+      address2: shippingAddress.line2 || null,
+      city: shippingAddress.city,
+      provinceCode: shippingAddress.state,
+      zip: shippingAddress.postalCode,
+      countryCode: shippingAddress.country,
+    },
+    note: notes || `Creator sample shipment for creator ${creatorId}`,
+    tags: ['UGC', 'creator-sample', `creator:${creatorId}`],
+    // Apply 100% discount for creator samples
+    appliedDiscount: {
+      description: 'Creator Sample - 100% Discount',
+      valueType: 'PERCENTAGE',
+      value: 100,
+    },
+  }
+
+  const result = await admin.query<{
+    draftOrderCreate: {
+      draftOrder: { id: string; name: string } | null
+      userErrors: Array<{ field: string; message: string }>
+    }
+  }>(mutation, { input })
+
+  if (result.draftOrderCreate.userErrors.length > 0) {
+    throw new Error(result.draftOrderCreate.userErrors[0]?.message || 'Failed to create draft order')
+  }
+
+  if (!result.draftOrderCreate.draftOrder) {
+    throw new Error('Draft order creation failed: no draft order returned')
+  }
+
+  const draftOrderId = result.draftOrderCreate.draftOrder.id
+  const draftOrderName = result.draftOrderCreate.draftOrder.name
+
+  // Complete the draft order to create an actual order
+  const completeMutation = `
+    mutation draftOrderComplete($id: ID!) {
+      draftOrderComplete(id: $id) {
+        draftOrder {
+          id
+          order {
+            id
+            name
+          }
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `
+
+  const completeResult = await admin.query<{
+    draftOrderComplete: {
+      draftOrder: { id: string; order: { id: string; name: string } | null } | null
+      userErrors: Array<{ field: string; message: string }>
+    }
+  }>(completeMutation, { id: draftOrderId })
+
+  if (completeResult.draftOrderComplete.userErrors.length > 0) {
+    throw new Error(
+      completeResult.draftOrderComplete.userErrors[0]?.message || 'Failed to complete draft order'
+    )
+  }
+
+  const order = completeResult.draftOrderComplete.draftOrder?.order
+  if (!order) {
+    // If order completion failed, return draft order info
+    return {
+      draftOrderId,
+      orderId: draftOrderId,
+      orderNumber: draftOrderName,
+    }
+  }
+
+  return {
+    draftOrderId,
+    orderId: order.id,
+    orderNumber: order.name,
   }
 }
 
@@ -94,7 +231,7 @@ export async function POST(
   }
 
   try {
-    // Create the shipment record
+    // Create the shipment record first
     const shipment = await createShipment(
       tenantSlug,
       {
@@ -106,30 +243,52 @@ export async function POST(
       userId
     )
 
-    // In a full implementation, this would:
-    // 1. Create a Shopify draft order with 100% discount
-    // 2. Add tags: ['UGC', 'creator-sample', `creator:${creatorId}`]
-    // 3. Complete the draft order
-    // 4. Update the shipment record with Shopify order details
+    // Check if Shopify is connected
+    const shopifyConnected = await isShopifyConnected(tenantSlug)
 
-    // For now, simulate Shopify order creation
-    const mockOrderId = `gid://shopify/Order/${Date.now()}`
-    const mockOrderNumber = `CS${Math.floor(Math.random() * 10000)}`
+    if (!shopifyConnected) {
+      // Return shipment without Shopify order if not connected
+      return NextResponse.json({
+        success: true,
+        shipment,
+        warning: 'Shopify is not connected. Shipment created but no order was placed.',
+      })
+    }
 
+    // Create Shopify draft order
+    const { draftOrderId, orderId, orderNumber } = await createShopifyDraftOrder(
+      tenantSlug,
+      creatorId,
+      body.products,
+      body.shippingAddress,
+      body.notes
+    )
+
+    // Update shipment with Shopify order details
     const updatedShipment = await updateShipmentWithOrder(tenantSlug, shipment.id, {
-      shopifyOrderId: mockOrderId,
-      shopifyOrderNumber: mockOrderNumber,
-      shopifyDraftOrderId: `gid://shopify/DraftOrder/${Date.now()}`,
+      shopifyOrderId: orderId,
+      shopifyOrderNumber: orderNumber,
+      shopifyDraftOrderId: draftOrderId,
     })
 
     return NextResponse.json({
       success: true,
       shipment: updatedShipment || shipment,
-      shopifyOrderId: mockOrderId,
-      shopifyOrderNumber: mockOrderNumber,
+      shopifyOrderId: orderId,
+      shopifyOrderNumber: orderNumber,
     })
   } catch (error) {
     console.error('[shipments] POST error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+    // Handle Shopify-specific errors
+    if (errorMessage.includes('NOT_CONNECTED')) {
+      return NextResponse.json(
+        { error: 'Shopify is not connected. Please connect your Shopify store in Settings.' },
+        { status: 400 }
+      )
+    }
+
     return NextResponse.json({ error: 'Failed to create shipment' }, { status: 500 })
   }
 }

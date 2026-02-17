@@ -1,4 +1,5 @@
 import { Button, Card, CardContent, CardHeader, Input, Label } from '@cgk-platform/ui'
+import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 
@@ -75,12 +76,22 @@ export default async function TaxSettingsPage() {
   )
 }
 
-async function PayerInfoForm() {
-  // Headers available for future tenant context
-  void (await headers())
+interface PayerInfo {
+  name: string
+  ein: string
+  addressLine1: string
+  addressLine2: string
+  city: string
+  state: string
+  zip: string
+}
 
-  // Mock payer info - would come from tenant settings or env
-  const payerInfo = {
+async function PayerInfoForm() {
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
+
+  // Default payer info from env (fallback)
+  let payerInfo: PayerInfo = {
     name: process.env.TAX_PAYER_NAME || '',
     ein: process.env.TAX_PAYER_EIN || '',
     addressLine1: process.env.TAX_PAYER_ADDRESS_LINE1 || '',
@@ -88,6 +99,37 @@ async function PayerInfoForm() {
     city: process.env.TAX_PAYER_CITY || '',
     state: process.env.TAX_PAYER_STATE || '',
     zip: process.env.TAX_PAYER_ZIP || '',
+  }
+
+  if (tenantSlug) {
+    // Query payer info from site_config or a dedicated tax settings table
+    const dbPayerInfo = await withTenant(tenantSlug, async () => {
+      // Check if we have tax payer info in site_config's pricing_config JSON
+      const result = await sql`
+        SELECT pricing_config FROM site_config LIMIT 1
+      `
+      const row = result.rows[0]
+      if (row?.pricing_config) {
+        const config = row.pricing_config as Record<string, unknown>
+        const taxConfig = (config.taxPayerInfo || {}) as Record<string, string>
+        if (taxConfig.name) {
+          return {
+            name: taxConfig.name || '',
+            ein: taxConfig.ein || '',
+            addressLine1: taxConfig.addressLine1 || '',
+            addressLine2: taxConfig.addressLine2 || '',
+            city: taxConfig.city || '',
+            state: taxConfig.state || '',
+            zip: taxConfig.zip || '',
+          } as PayerInfo
+        }
+      }
+      return null
+    })
+
+    if (dbPayerInfo) {
+      payerInfo = dbPayerInfo
+    }
   }
 
   return (
@@ -283,10 +325,20 @@ async function W9ReminderForm() {
   )
 }
 
+interface Deadline {
+  date: string
+  title: string
+  description: string
+  priority: string
+}
+
 async function DeadlinesSection() {
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
   const currentYear = new Date().getFullYear()
 
-  const deadlines = [
+  // Default deadlines
+  let deadlines: Deadline[] = [
     {
       date: `January 31, ${currentYear + 1}`,
       title: '1099 Forms Due to Recipients',
@@ -312,6 +364,29 @@ async function DeadlinesSection() {
       priority: 'medium',
     },
   ]
+
+  if (tenantSlug) {
+    // Query reminders from tax_reminders table
+    const dbReminders = await withTenant(tenantSlug, async () => {
+      const result = await sql`
+        SELECT title, description, due_date, priority
+        FROM tax_reminders
+        WHERE status = 'pending'
+        ORDER BY due_date ASC
+        LIMIT 10
+      `
+      return result.rows.map((row) => ({
+        date: row.due_date ? new Date(String(row.due_date)).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '',
+        title: String(row.title || ''),
+        description: String(row.description || ''),
+        priority: String(row.priority || 'medium'),
+      })) as Deadline[]
+    })
+
+    if (dbReminders.length > 0) {
+      deadlines = dbReminders
+    }
+  }
 
   return (
     <div className="space-y-3">

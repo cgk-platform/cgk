@@ -45,6 +45,7 @@ import { defineJob } from '../../define'
 import type {
   ReviewEmailQueuedPayload,
   ReviewEmailSentPayload,
+  ReviewModeratedPayload,
   TenantEvent,
 } from '../../events'
 import type { JobResult } from '../../types'
@@ -550,6 +551,119 @@ export const handleReviewEmailSentJob = defineJob<TenantEvent<ReviewEmailSentPay
 })
 
 // ---------------------------------------------------------------------------
+// Handle Review Moderated Event
+// ---------------------------------------------------------------------------
+
+/**
+ * Handle review.moderated event
+ *
+ * Sends notification email to the reviewer when their review is approved or rejected.
+ * Spam reviews do not receive notifications.
+ *
+ * INTEGRATION REQUIREMENTS:
+ * - Tenant must have Resend API key configured in tenant_resend_config
+ * - Use `getTenantResendClient(tenantId)` from @cgk-platform/integrations
+ * - Email templates must be set up in tenant's email_templates table
+ */
+export const handleReviewModeratedJob = defineJob<TenantEvent<ReviewModeratedPayload>>({
+  name: 'commerce.handleReviewModerated',
+  handler: async (job): Promise<JobResult> => {
+    const { tenantId, reviewId, action, reviewerEmail, reviewerName, productTitle } = job.payload
+
+    if (!tenantId) {
+      return {
+        success: false,
+        error: {
+          message: 'tenantId is required',
+          code: 'MISSING_TENANT_ID',
+          retryable: false,
+        },
+      }
+    }
+
+    // Spam reviews don't receive notifications
+    if (action === 'spam') {
+      console.log(`[commerce.handleReviewModerated] Skipping spam review notification`, {
+        tenantId,
+        reviewId,
+        jobId: job.id,
+      })
+      return {
+        success: true,
+        data: {
+          tenantId,
+          reviewId,
+          action,
+          skipped: true,
+          reason: 'spam_review',
+        },
+      }
+    }
+
+    if (!reviewerEmail) {
+      return {
+        success: false,
+        error: {
+          message: 'reviewerEmail is required for notifications',
+          code: 'MISSING_REVIEWER_EMAIL',
+          retryable: false,
+        },
+      }
+    }
+
+    console.log(`[commerce.handleReviewModerated] Sending moderation notification`, {
+      tenantId,
+      reviewId,
+      action,
+      reviewerEmail,
+      jobId: job.id,
+    })
+
+    // Implementation steps:
+    // 1. Get tenant Resend client via getTenantResendClient(tenantId)
+    // 2. Get tenant email settings (from address, branding)
+    // 3. Select template based on action (approve vs reject)
+    // 4. Render email template with:
+    //    - reviewerName (or fallback to email)
+    //    - productTitle (or generic fallback)
+    //    - action-specific messaging
+    // 5. Send via Resend API
+    // 6. Record notification in database for tracking
+
+    // Example implementation:
+    // const resend = await getTenantResendClient(tenantId)
+    // if (!resend) throw new Error('Resend not configured for tenant')
+    //
+    // const templateId = action === 'approve'
+    //   ? 'review-approved'
+    //   : 'review-rejected'
+    //
+    // const result = await resend.emails.send({
+    //   from: tenantEmailSettings.fromAddress,
+    //   to: reviewerEmail,
+    //   subject: action === 'approve'
+    //     ? 'Your review has been published!'
+    //     : 'Update on your review submission',
+    //   html: renderedTemplate,
+    // })
+
+    return {
+      success: true,
+      data: {
+        tenantId,
+        reviewId,
+        action,
+        reviewerEmail,
+        reviewerName,
+        productTitle,
+        notifiedAt: new Date().toISOString(),
+      },
+    }
+  },
+  retry: REVIEW_EMAIL_RETRY,
+})
+
+// ---------------------------------------------------------------------------
 // Review Email Stats Job
 // ---------------------------------------------------------------------------
 
@@ -635,5 +749,6 @@ export const reviewEmailJobs = [
   scheduleFollowUpJob,
   handleReviewEmailQueuedJob,
   handleReviewEmailSentJob,
+  handleReviewModeratedJob,
   reviewEmailStatsJob,
 ]

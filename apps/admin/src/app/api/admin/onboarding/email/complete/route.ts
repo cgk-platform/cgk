@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -28,15 +27,15 @@ export async function GET(request: Request) {
   const includeState = url.searchParams.get('includeState') === 'true'
 
   // Get current status
-  const status = await withTenant(tenantSlug, () => getEmailSetupStatus())
+  const status = await getEmailSetupStatus(tenantSlug)
 
   // Check if sending is allowed
-  const sendingCheck = await withTenant(tenantSlug, () => canSendEmails())
+  const sendingCheck = await canSendEmails(tenantSlug)
 
   // Optionally include full onboarding state
   let state: Awaited<ReturnType<typeof getOnboardingState>> | undefined
   if (includeState) {
-    state = await withTenant(tenantSlug, () => getOnboardingState())
+    state = await getOnboardingState(tenantSlug)
   }
 
   return NextResponse.json({
@@ -67,7 +66,7 @@ export async function POST(request: Request) {
     body = {}
   }
 
-  const result = await withTenant(tenantSlug, () => completeEmailSetup(body))
+  const result = await completeEmailSetup(tenantSlug, body)
 
   if (!result.success) {
     return NextResponse.json(
@@ -81,7 +80,7 @@ export async function POST(request: Request) {
   }
 
   // Get updated sending status
-  const sendingCheck = await withTenant(tenantSlug, () => canSendEmails())
+  const sendingCheck = await canSendEmails(tenantSlug)
 
   return NextResponse.json({
     success: true,

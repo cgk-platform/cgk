@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import {
+  checkPermissionOrRespond,
   createInvitation,
   getInvitationCountToday,
   getInvitations,
@@ -35,9 +36,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Check permission to view invitations (uses team.view)
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.view'
+  )
+  if (permissionDenied) return permissionDenied
 
   const url = new URL(request.url)
   const page = parseInt(url.searchParams.get('page') || '1', 10)
@@ -83,10 +88,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Only owners and admins can invite
-  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Check permission to invite team members
+  const invitePermissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.invite'
+  )
+  if (invitePermissionDenied) return invitePermissionDenied
 
   // Check rate limit
   const invitationsToday = await getInvitationCountToday(tenantId)

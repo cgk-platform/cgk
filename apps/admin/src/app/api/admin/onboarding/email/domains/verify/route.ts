@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -47,9 +46,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const result = await withTenant(tenantSlug, () =>
-    verifyOnboardingDomain(body.domainId, resendConfig)
-  )
+  const result = await verifyOnboardingDomain(tenantSlug, body.domainId, resendConfig)
 
   if (result.rateLimited) {
     return NextResponse.json(

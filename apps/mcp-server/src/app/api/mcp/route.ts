@@ -14,17 +14,21 @@ import {
   MCPHandler,
   MCPProtocolError,
   JSONRPCErrorCodes,
-  defineTool,
-  textResult,
   defineResource,
   definePrompt,
   requiresStreaming,
+  commerceTools,
+  checkRateLimit,
+  RateLimitError,
+  createRateLimitResponse,
+  addRateLimitHeaders,
   type JSONRPCRequest,
   type JSONRPCResponse,
   type InitializeParams,
   type CallToolParams,
   type ReadResourceParams,
   type GetPromptParams,
+  type RateLimitResult,
 } from '@cgk-platform/mcp'
 import {
   authenticateRequest,
@@ -48,44 +52,14 @@ const SERVER_NAME = 'cgk-mcp-server'
 const SERVER_VERSION = '0.1.0'
 
 // =============================================================================
-// Example Tools (will be replaced with real implementations in Phase 6B)
+// Commerce Tools - Real implementations with database queries
 // =============================================================================
 
-const exampleTools = [
-  defineTool({
-    name: 'get_tenant_info',
-    description: 'Get information about the current tenant',
-    inputSchema: {
-      type: 'object',
-      properties: {},
-    },
-    async handler(_args) {
-      // Placeholder - will be implemented with real tenant data
-      return textResult('Tenant info would be returned here')
-    },
-  }),
-  defineTool({
-    name: 'search_orders',
-    description: 'Search orders for the current tenant',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        query: { type: 'string', description: 'Search query' },
-        status: {
-          type: 'string',
-          enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-        },
-        limit: { type: 'number', description: 'Maximum results', default: 10 },
-      },
-    },
-    async handler(args) {
-      // Placeholder - streaming tool
-      return textResult(
-        `Would search orders with query: ${args.query}, status: ${args.status}, limit: ${args.limit}`
-      )
-    },
-  }),
-]
+// Commerce tools are imported from @cgk-platform/mcp and include:
+// - list_orders, get_order, search_orders, update_order_status, cancel_order
+// - list_customers, get_customer, search_customers, get_customer_orders
+// - list_products, get_product, update_product, sync_product
+// - get_inventory, update_inventory
 
 const exampleResources = [
   defineResource({
@@ -134,6 +108,7 @@ const examplePrompts = [
  */
 export async function POST(request: Request): Promise<Response> {
   const corsHeaders = createCORSHeaders(request)
+  let rateLimitResult: RateLimitResult | null = null
 
   try {
     // Validate environment variables (only runs once)
@@ -156,6 +131,21 @@ export async function POST(request: Request): Promise<Response> {
 
     const jsonrpcRequest = body as JSONRPCRequest
 
+    // Apply rate limiting based on method
+    // Skip rate limiting for non-mutating operations like ping and list
+    const skipRateLimitMethods = ['ping', 'tools/list', 'resources/list', 'prompts/list']
+    if (!skipRateLimitMethods.includes(jsonrpcRequest.method)) {
+      // Extract tool name for tool-specific rate limiting
+      let toolName: string | undefined
+      if (jsonrpcRequest.method === 'tools/call') {
+        const toolParams = jsonrpcRequest.params as CallToolParams | undefined
+        toolName = toolParams?.name
+      }
+
+      // Check and consume rate limit quota
+      rateLimitResult = await checkRateLimit(auth.tenantId, jsonrpcRequest.method, toolName)
+    }
+
     // Create handler with tenant/user context
     const handler = new MCPHandler(auth.tenantId, auth.userId, {
       serverInfo: {
@@ -168,14 +158,19 @@ export async function POST(request: Request): Promise<Response> {
     })
 
     // Register tools, resources, prompts
-    handler.registerTools(exampleTools)
+    handler.registerTools(commerceTools)
     handler.registerResources(exampleResources)
     handler.registerPrompts(examplePrompts)
 
     // Route the request to the appropriate handler method
-    const response = await handleMethod(handler, jsonrpcRequest, corsHeaders)
+    const response = await handleMethod(handler, jsonrpcRequest, corsHeaders, rateLimitResult)
     return response
   } catch (error) {
+    // Handle rate limit errors
+    if (error instanceof RateLimitError) {
+      return createRateLimitResponse(error.result, corsHeaders)
+    }
+
     // Handle authentication errors
     if (error instanceof MCPAuthError) {
       return createAuthErrorResponse(error)
@@ -214,30 +209,36 @@ export async function OPTIONS(request: Request): Promise<Response> {
 async function handleMethod(
   handler: MCPHandler,
   request: JSONRPCRequest,
-  corsHeaders: Record<string, string>
+  corsHeaders: Record<string, string>,
+  rateLimitResult?: RateLimitResult | null
 ): Promise<Response> {
   const { id, method, params = {} } = request
+
+  // Add rate limit headers if we have a result
+  const headersWithRateLimit = rateLimitResult
+    ? addRateLimitHeaders(corsHeaders, rateLimitResult)
+    : corsHeaders
 
   try {
     switch (method) {
       case 'initialize': {
         const result = handler.initialize(params as unknown as InitializeParams)
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       case 'initialized': {
         handler.initialized()
-        return createSuccessResponse(id, {}, corsHeaders)
+        return createSuccessResponse(id, {}, headersWithRateLimit)
       }
 
       case 'ping': {
         const result = handler.ping()
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       case 'tools/list': {
         const result = handler.listTools()
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       case 'tools/call': {
@@ -250,33 +251,33 @@ async function handleMethod(
           const generator = handler.callToolStreaming(toolParams)
           return handler.createStreamingHttpResponse(generator, {
             requestId: id,
-            corsHeaders,
+            corsHeaders: headersWithRateLimit,
           })
         }
 
         // Regular tool call
         const result = await handler.callTool(toolParams)
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       case 'resources/list': {
         const result = handler.listResources()
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       case 'resources/read': {
         const result = await handler.readResource(params as unknown as ReadResourceParams)
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       case 'prompts/list': {
         const result = handler.listPrompts()
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       case 'prompts/get': {
         const result = await handler.getPrompt(params as unknown as GetPromptParams)
-        return createSuccessResponse(id, result, corsHeaders)
+        return createSuccessResponse(id, result, headersWithRateLimit)
       }
 
       default:
@@ -284,12 +285,12 @@ async function handleMethod(
           id,
           JSONRPCErrorCodes.METHOD_NOT_FOUND,
           `Method not found: ${method}`,
-          corsHeaders
+          headersWithRateLimit
         )
     }
   } catch (error) {
     if (error instanceof MCPProtocolError) {
-      return createErrorResponse(id, error.code, error.message, corsHeaders)
+      return createErrorResponse(id, error.code, error.message, headersWithRateLimit)
     }
     throw error
   }

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import {
+  checkPermissionOrRespond,
   getInvitationCountToday,
   getTeamMembers,
   requireAuth,
@@ -26,10 +27,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Only admins and owners can view team
-  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Check permission to view team members
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.view'
+  )
+  if (permissionDenied) return permissionDenied
 
   const url = new URL(request.url)
   const page = parseInt(url.searchParams.get('page') || '1', 10)

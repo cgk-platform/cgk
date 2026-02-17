@@ -3,12 +3,12 @@
 import { Spinner } from '@cgk-platform/ui'
 import { useEffect, useState } from 'react'
 
-
 import { BrandEarningsCard } from '@/components/dashboard/BrandEarningsCard'
 import { DashboardAlerts } from '@/components/dashboard/DashboardAlerts'
 import { DashboardStats } from '@/components/dashboard/DashboardStats'
 import { GuidedTour } from '@/components/dashboard/GuidedTour'
 import { QuickActions } from '@/components/dashboard/QuickActions'
+import { useBrand } from '@/lib/brand-context'
 
 interface DashboardData {
   creator: {
@@ -47,6 +47,10 @@ interface DashboardData {
     unsignedContractsCount: number
     showGuidedTour: boolean
   }
+  filter?: {
+    brandId: string | null
+    isFiltered: boolean
+  }
 }
 
 export default function DashboardPage(): React.JSX.Element {
@@ -55,8 +59,12 @@ export default function DashboardPage(): React.JSX.Element {
   const [isLoading, setIsLoading] = useState(true)
   const [showTour, setShowTour] = useState(false)
 
+  // Get brand context - will trigger re-fetch when brand changes
+  const { selectedBrand, isLoading: brandLoading } = useBrand()
+
   useEffect(() => {
     async function fetchDashboard() {
+      setIsLoading(true)
       try {
         const response = await fetch('/api/creator/dashboard')
         if (!response.ok) {
@@ -73,6 +81,7 @@ export default function DashboardPage(): React.JSX.Element {
         if (dashboardData.alerts.showGuidedTour) {
           setShowTour(true)
         }
+        setError(null)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard')
       } finally {
@@ -80,8 +89,11 @@ export default function DashboardPage(): React.JSX.Element {
       }
     }
 
-    fetchDashboard()
-  }, [])
+    // Wait for brand context to be ready before fetching
+    if (!brandLoading) {
+      fetchDashboard()
+    }
+  }, [selectedBrand?.id, brandLoading]) // Re-fetch when brand changes
 
   const handleTourComplete = async () => {
     setShowTour(false)
@@ -97,7 +109,7 @@ export default function DashboardPage(): React.JSX.Element {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || brandLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <Spinner size="lg" />
@@ -124,6 +136,12 @@ export default function DashboardPage(): React.JSX.Element {
     return <div>No data available</div>
   }
 
+  // Determine header text based on brand filter
+  const isFiltered = data.filter?.isFiltered ?? false
+  const selectedBrandName = data.memberships.find(
+    (m) => m.brandId === data.filter?.brandId
+  )?.brandName
+
   return (
     <div className="space-y-8">
       {/* Guided Tour */}
@@ -139,7 +157,9 @@ export default function DashboardPage(): React.JSX.Element {
       <div>
         <h1 className="text-3xl font-bold">Welcome back, {data.creator.name}</h1>
         <p className="mt-1 text-muted-foreground">
-          Here&apos;s an overview of your activity across all brands
+          {isFiltered && selectedBrandName
+            ? `Showing data for ${selectedBrandName}`
+            : "Here's an overview of your activity across all brands"}
         </p>
       </div>
 
@@ -160,11 +180,15 @@ export default function DashboardPage(): React.JSX.Element {
 
       {/* Brand Earnings */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold">Your Brands</h2>
+        <h2 className="mb-4 text-lg font-semibold">
+          {isFiltered ? 'Brand Details' : 'Your Brands'}
+        </h2>
         {data.memberships.length === 0 ? (
           <div className="rounded-lg border bg-muted/30 p-8 text-center">
             <p className="text-muted-foreground">
-              No brand relationships yet. Once approved, your brands will appear here.
+              {isFiltered
+                ? 'No data found for the selected brand.'
+                : 'No brand relationships yet. Once approved, your brands will appear here.'}
             </p>
           </div>
         ) : (

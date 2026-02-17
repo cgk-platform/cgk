@@ -10,30 +10,34 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cgk-platform/analytics": "workspace:*",
+    "@cgk-platform/commerce": "workspace:*",
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/integrations": "^1.1.0",
     "@cgk-platform/jobs": "workspace:*",
     "@cgk-platform/portal": "workspace:*",
-    "@cgk-platform/ui": "workspace:*",
-    "@cgk-platform/commerce": "workspace:*",
     "@cgk-platform/shopify": "workspace:*",
-    "@cgk-platform/analytics": "workspace:*",
+    "@cgk-platform/ui": "workspace:*",
+    "@stripe/react-stripe-js": "^5.6.0",
+    "@stripe/stripe-js": "^8.7.0",
     "lucide-react": "^0.469.0",
     "next": "^15.2.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",
-    "@cgk-platform/typescript-config": "workspace:*",
     "@cgk-platform/tailwind-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.4.17",
+    "eslint": "^9.18.0",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5.9.0",
-    "eslint": "^9.18.0"
+    "typescript": "^5.9.0"
   }
 }

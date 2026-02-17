@@ -71,6 +71,14 @@ export {
   type StatusBadgeProps,
 } from './components/status-badge'
 
+export {
+  StatusDot,
+  ConnectionStatus,
+  type StatusDotProps,
+  type ConnectionStatusProps,
+  type StatusType,
+} from './components/status-dot'
+
 // ============================================================================
 // Dialog/Modal
 // ============================================================================

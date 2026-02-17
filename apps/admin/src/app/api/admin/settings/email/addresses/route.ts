@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -26,7 +25,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const addresses = await withTenant(tenantSlug, () => listSenderAddresses())
+  const addresses = await listSenderAddresses(tenantSlug)
 
   return NextResponse.json({ addresses })
 }
@@ -135,7 +134,7 @@ export async function POST(request: Request) {
 
   try {
     // Verify domain exists and belongs to tenant
-    const domain = await withTenant(tenantSlug, () => getDomainById(body.domainId))
+    const domain = await getDomainById(tenantSlug, body.domainId)
 
     if (!domain) {
       return NextResponse.json(
@@ -155,7 +154,7 @@ export async function POST(request: Request) {
       replyToAddress: body.replyToAddress,
     }
 
-    const address = await withTenant(tenantSlug, () => createSenderAddress(input))
+    const address = await createSenderAddress(tenantSlug, input)
 
     return NextResponse.json({ address }, { status: 201 })
   } catch (error) {

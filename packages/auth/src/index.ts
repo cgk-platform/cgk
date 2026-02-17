@@ -232,6 +232,17 @@ export type {
   ImpersonationSession,
 } from './impersonation'
 
+// Feature Flag Enforcement
+export {
+  checkFeatureOrRespond,
+  FeatureNotEnabledError,
+  getTenantFeatures,
+  isFeatureEnabled,
+  requireFeature,
+  setTenantFeature,
+  withFeatureFlag,
+} from './feature-flags'
+
 // Types
 export type {
   AuthContext,

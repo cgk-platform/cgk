@@ -195,6 +195,20 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
       ],
     },
   },
+  'store-locator': {
+    type: 'store-locator',
+    label: 'Store Locator',
+    description: 'Find store locations with map and search',
+    category: 'interactive',
+    icon: 'map-pin',
+    defaultConfig: {
+      headline: 'Find a Store',
+      locations: [],
+      showMap: true,
+      showSearch: true,
+      layout: 'map-left',
+    },
+  },
 
   // ============================================================================
   // Layout Blocks
@@ -283,7 +297,15 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
     description: 'Promotional countdown with urgency messaging',
     category: 'promo',
     icon: 'clock',
-    defaultConfig: {},
+    defaultConfig: {
+      headline: 'Sale Ends Soon',
+      style: 'boxed',
+      showDays: true,
+      showHours: true,
+      showMinutes: true,
+      showSeconds: true,
+      size: 'md',
+    },
   },
   'promo-hero': {
     type: 'promo-hero',
@@ -291,7 +313,13 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
     description: 'Promotional hero with discount display',
     category: 'promo',
     icon: 'tag',
-    defaultConfig: {},
+    defaultConfig: {
+      headline: 'Biggest Sale of the Year',
+      subheadline: 'Up to 50% Off Everything',
+      textAlignment: 'center',
+      height: 'lg',
+      enableGradient: true,
+    },
   },
   'text-banner': {
     type: 'text-banner',
@@ -359,7 +387,17 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
     description: 'Interactive bundle configuration',
     category: 'promo',
     icon: 'package',
-    defaultConfig: {},
+    defaultConfig: {
+      headline: 'Build Your Bundle',
+      description: 'Select products to create your custom bundle',
+      items: [],
+      tiers: [],
+      minItems: 2,
+      currencySymbol: '$',
+      showSavings: true,
+      layout: 'grid',
+      enableQuantity: true,
+    },
   },
   'faq-lifestyle': {
     type: 'faq-lifestyle',
@@ -368,6 +406,41 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
     category: 'promo',
     icon: 'help-circle',
     defaultConfig: {},
+  },
+  'announcement-bar': {
+    type: 'announcement-bar',
+    label: 'Announcement Bar',
+    description: 'Top announcement bar for promotions and notifications',
+    category: 'promo',
+    icon: 'megaphone',
+    defaultConfig: {
+      messages: [{ text: 'Free shipping on orders over $50!' }],
+      style: 'solid',
+      size: 'md',
+      dismissible: true,
+      rotateInterval: 5000,
+      alignment: 'center',
+      position: 'relative',
+    },
+  },
+  'newsletter-signup': {
+    type: 'newsletter-signup',
+    label: 'Newsletter Signup',
+    description: 'Email capture form for newsletter subscriptions',
+    category: 'promo',
+    icon: 'mail',
+    defaultConfig: {
+      headline: 'Join Our Newsletter',
+      description: 'Subscribe to get exclusive offers and updates',
+      placeholder: 'Enter your email',
+      buttonText: 'Subscribe',
+      successMessage: 'Thanks for subscribing!',
+      layout: 'stacked',
+      size: 'md',
+      showNameField: false,
+      showPhoneField: false,
+      doubleOptIn: false,
+    },
   },
 
   // ============================================================================
@@ -404,6 +477,31 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
     category: 'pdp',
     icon: 'thumbs-up',
     defaultConfig: {},
+  },
+  'pdp-reviews': {
+    type: 'pdp-reviews',
+    label: 'PDP Reviews',
+    description: 'Product reviews section with filtering and sorting',
+    category: 'pdp',
+    icon: 'star',
+    defaultConfig: {
+      layout: 'list',
+      showWriteReview: true,
+      showFilters: true,
+      showSortOptions: true,
+      showRatingsSummary: true,
+    },
+  },
+  'pdp-specifications': {
+    type: 'pdp-specifications',
+    label: 'Specifications',
+    description: 'Product specifications table',
+    category: 'pdp',
+    icon: 'list',
+    defaultConfig: {
+      layout: 'table',
+      showIcons: true,
+    },
   },
   'pdp-before-after': {
     type: 'pdp-before-after',
@@ -528,6 +626,84 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
     category: 'shop',
     icon: 'arrow-right',
     defaultConfig: {},
+  },
+  'collection-grid': {
+    type: 'collection-grid',
+    label: 'Collection Grid',
+    description: 'Product collection grid with filtering and sorting',
+    category: 'shop',
+    icon: 'grid-3x3',
+    defaultConfig: {
+      columns: 3,
+      layout: 'grid',
+      showPrices: true,
+      showAddToCart: true,
+      showQuickView: true,
+      showWishlist: true,
+      products: [],
+    },
+  },
+  'collection-filters': {
+    type: 'collection-filters',
+    label: 'Collection Filters',
+    description: 'Filter sidebar for product collections',
+    category: 'shop',
+    icon: 'filter',
+    defaultConfig: {
+      layout: 'sidebar',
+      showClearAll: true,
+      showActiveCount: true,
+      collapsible: true,
+      filters: [],
+    },
+  },
+  'collection-sort': {
+    type: 'collection-sort',
+    label: 'Collection Sort',
+    description: 'Sort dropdown for product collections',
+    category: 'shop',
+    icon: 'arrow-up-down',
+    defaultConfig: {
+      layout: 'dropdown',
+      showProductCount: true,
+      options: [
+        { value: 'featured', label: 'Featured' },
+        { value: 'price-asc', label: 'Price: Low to High' },
+        { value: 'price-desc', label: 'Price: High to Low' },
+        { value: 'newest', label: 'Newest' },
+        { value: 'best-selling', label: 'Best Selling' },
+      ],
+    },
+  },
+  'quick-view-modal': {
+    type: 'quick-view-modal',
+    label: 'Quick View Modal',
+    description: 'Quick product view modal',
+    category: 'shop',
+    icon: 'eye',
+    defaultConfig: {
+      showAddToCart: true,
+      showVariantSelector: true,
+      showQuantitySelector: true,
+      showWishlist: true,
+      showViewFullDetails: true,
+      imageLayout: 'gallery',
+    },
+  },
+  'wishlist-button': {
+    type: 'wishlist-button',
+    label: 'Wishlist Button',
+    description: 'Add to wishlist button',
+    category: 'shop',
+    icon: 'heart',
+    defaultConfig: {
+      variant: 'icon',
+      size: 'md',
+      showLabel: false,
+      labelAdd: 'Add to Wishlist',
+      labelRemove: 'Remove from Wishlist',
+      position: 'top-right',
+    },
   },
 
   // ============================================================================
@@ -761,6 +937,221 @@ export const BLOCK_REGISTRY: Record<BlockType, BlockDefinition> = {
     icon: 'grid',
     defaultConfig: {},
   },
+
+  // ============================================================================
+  // Content Blocks
+  // ============================================================================
+  accordion: {
+    type: 'accordion',
+    label: 'Accordion',
+    description: 'Expandable accordion sections',
+    category: 'content',
+    icon: 'chevrons-up-down',
+    defaultConfig: {
+      items: [],
+      allowMultipleOpen: false,
+      iconStyle: 'chevron',
+    },
+  },
+  tabs: {
+    type: 'tabs',
+    label: 'Tabs',
+    description: 'Tabbed content sections',
+    category: 'content',
+    icon: 'panel-top',
+    defaultConfig: {
+      tabs: [],
+      layout: 'horizontal',
+    },
+  },
+  'image-gallery': {
+    type: 'image-gallery',
+    label: 'Image Gallery',
+    description: 'Image gallery with lightbox',
+    category: 'content',
+    icon: 'images',
+    defaultConfig: {
+      images: [],
+      layout: 'grid',
+      columns: 3,
+      showCaptions: true,
+      enableLightbox: true,
+    },
+  },
+
+  // ============================================================================
+  // Layout - Header/Footer Blocks
+  // ============================================================================
+  header: {
+    type: 'header',
+    label: 'Header',
+    description: 'Site header with navigation',
+    category: 'layout',
+    icon: 'panel-top',
+    defaultConfig: {
+      sticky: true,
+      showLogo: true,
+      showNav: true,
+      showSearch: true,
+      showCart: true,
+    },
+  },
+  footer: {
+    type: 'footer',
+    label: 'Footer',
+    description: 'Site footer with links and info',
+    category: 'layout',
+    icon: 'panel-bottom',
+    defaultConfig: {
+      showLogo: true,
+      showNewsletter: true,
+      showSocialLinks: true,
+      columns: [],
+    },
+  },
+  'mega-menu': {
+    type: 'mega-menu',
+    label: 'Mega Menu',
+    description: 'Dropdown mega menu for navigation',
+    category: 'layout',
+    icon: 'menu',
+    defaultConfig: {
+      items: [],
+      columns: 4,
+      showImages: true,
+    },
+  },
+  breadcrumb: {
+    type: 'breadcrumb',
+    label: 'Breadcrumb',
+    description: 'Navigation breadcrumb trail',
+    category: 'layout',
+    icon: 'chevron-right',
+    defaultConfig: {
+      separator: '/',
+      showHome: true,
+      homeLabel: 'Home',
+    },
+  },
+  sidebar: {
+    type: 'sidebar',
+    label: 'Sidebar',
+    description: 'Page sidebar for secondary content',
+    category: 'layout',
+    icon: 'panel-left',
+    defaultConfig: {
+      position: 'left',
+      sticky: false,
+      width: 'md',
+    },
+  },
+
+  // ============================================================================
+  // Social/UGC Blocks
+  // ============================================================================
+  'instagram-feed': {
+    type: 'instagram-feed',
+    label: 'Instagram Feed',
+    description: 'Display Instagram-style photo grid with engagement overlays',
+    category: 'social',
+    icon: 'instagram',
+    defaultConfig: {
+      items: [],
+      columns: 4,
+      showEngagement: true,
+    },
+  },
+  'social-proof': {
+    type: 'social-proof',
+    label: 'Social Proof',
+    description: 'Customer counts, review stats, press logos, and trust badges',
+    category: 'social',
+    icon: 'users',
+    defaultConfig: {
+      layout: 'horizontal',
+      showDividers: true,
+    },
+  },
+
+  // ============================================================================
+  // Conversion Blocks
+  // ============================================================================
+  'before-after': {
+    type: 'before-after',
+    label: 'Before/After',
+    description: 'Interactive image comparison slider with draggable divider',
+    category: 'conversion',
+    icon: 'git-compare',
+    defaultConfig: {
+      orientation: 'horizontal',
+      initialPosition: 50,
+      showLabels: true,
+      labelPosition: 'inside',
+    },
+  },
+  'testimonial-carousel': {
+    type: 'testimonial-carousel',
+    label: 'Testimonial Carousel',
+    description: 'Auto-rotating testimonial carousel with customer photos and ratings',
+    category: 'conversion',
+    icon: 'message-circle',
+    defaultConfig: {
+      testimonials: [],
+      autoRotate: true,
+      autoRotateInterval: 5000,
+      pauseOnHover: true,
+      showDots: true,
+      showArrows: true,
+      showRatings: true,
+      itemsPerView: 1,
+    },
+  },
+  'guarantee': {
+    type: 'guarantee',
+    label: 'Guarantee',
+    description: 'Guarantee/warranty section with icon, headline, and coverage points',
+    category: 'conversion',
+    icon: 'shield-check',
+    defaultConfig: {
+      headline: 'Our Guarantee',
+      icon: 'shield',
+      guaranteeItems: [],
+      style: 'card',
+      alignment: 'center',
+    },
+  },
+  'urgency-banner': {
+    type: 'urgency-banner',
+    label: 'Urgency Banner',
+    description: 'Countdown timer, low stock indicator, and limited time messaging',
+    category: 'conversion',
+    icon: 'clock',
+    defaultConfig: {
+      message: 'Limited Time Offer',
+      showCountdown: true,
+      showStockIndicator: false,
+      style: 'bar',
+      animate: true,
+      dismissible: false,
+    },
+  },
+  'exit-intent': {
+    type: 'exit-intent',
+    label: 'Exit Intent Popup',
+    description: 'Exit intent popup with offer, headline, and CTA',
+    category: 'conversion',
+    icon: 'log-out',
+    defaultConfig: {
+      headline: "Wait! Don't leave yet",
+      showOncePerSession: true,
+      delayMs: 0,
+      cookieDays: 7,
+      style: 'modal',
+      position: 'center',
+      showCloseButton: true,
+      closeOnOverlayClick: true,
+    },
+  },
 }
 
 /**
@@ -783,19 +1174,25 @@ export function getBlockPalette(): Array<{
     brand: 'Brand',
     interactive: 'Interactive',
     layout: 'Layout',
+    content: 'Content',
+    social: 'Social & UGC',
     promo: 'Promotional',
     pdp: 'Product Page',
     shop: 'Shop Page',
     policy: 'Policy',
     about: 'About',
     science: 'Science',
+    conversion: 'Conversion',
   }
 
   const categories: BlockCategory[] = [
     'core',
     'layout',
+    'content',
+    'social',
     'interactive',
     'promo',
+    'conversion',
     'pdp',
     'shop',
     'about',

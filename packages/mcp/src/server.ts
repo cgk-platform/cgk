@@ -168,7 +168,13 @@ export function createMCPServer(config: MCPServerConfig): MCPServer {
         throw new Error(`Resource not found: ${uri}`)
       }
 
-      return resource.handler()
+      // LEGACY: This server doesn't have tenant context.
+      // Use MCPHandler instead for proper tenant-isolated resource access.
+      // Pass empty context - resources should handle missing context gracefully.
+      return resource.handler({
+        tenantId: '',
+        userId: '',
+      })
     },
 
     async getPrompt(name, args) {

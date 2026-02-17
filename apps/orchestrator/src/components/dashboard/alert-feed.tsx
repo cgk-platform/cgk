@@ -1,11 +1,10 @@
 'use client'
 
-import { Badge, Card, cn } from '@cgk-platform/ui'
+import { Badge, Card, cn, StatusDot } from '@cgk-platform/ui'
 import { Bell, ChevronUp, Clock } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { AlertPriority, PlatformAlert } from '../../types/platform'
-import { StatusDot } from '../ui/status-dot'
 
 interface AlertFeedProps {
   /** Initial alerts to display */

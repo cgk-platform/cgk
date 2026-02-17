@@ -1,12 +1,17 @@
 /**
  * Creator Dashboard API Route
  *
- * GET /api/creator/dashboard - Fetch dashboard data with cross-brand statistics
+ * GET /api/creator/dashboard - Fetch dashboard data with optional brand filtering
+ *
+ * Supports brand context filtering via cookie:
+ * - If brand is selected: returns data for that brand only
+ * - If no brand selected ("All Brands"): returns aggregated data across all brands
  */
 
 import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { getBrandFilter } from '@/lib/brand-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,10 +29,18 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   try {
-    // Load full brand memberships with balances
-    const memberships = await loadBrandMemberships(context.creatorId)
+    // Get brand filter from cookie
+    const { brandId } = getBrandFilter(req, context)
 
-    // Aggregate statistics across all brands
+    // Load full brand memberships with balances
+    const allMemberships = await loadBrandMemberships(context.creatorId)
+
+    // Filter memberships based on brand selection
+    const memberships = brandId
+      ? allMemberships.filter((m) => m.brandId === brandId)
+      : allMemberships
+
+    // Aggregate statistics based on filtered memberships
     const totalBalanceCents = memberships.reduce((sum, m) => sum + m.balanceCents, 0)
     const totalPendingCents = memberships.reduce((sum, m) => sum + m.pendingCents, 0)
     const totalLifetimeEarningsCents = memberships.reduce(
@@ -43,17 +56,32 @@ export async function GET(req: Request): Promise<Response> {
       0
     )
 
-    // Get unread messages count
-    const unreadResult = await sql`
-      SELECT COALESCE(SUM(unread_creator), 0) as total_unread
-      FROM creator_conversations
-      WHERE creator_id = ${context.creatorId}
-        AND status != 'archived'
-    `
-    const unreadMessagesCount = parseInt(
-      (unreadResult.rows[0]?.total_unread as string) || '0',
-      10
-    )
+    // Get unread messages count - filter by brand if selected
+    let unreadMessagesCount = 0
+    if (brandId) {
+      const unreadResult = await sql`
+        SELECT COALESCE(SUM(unread_creator), 0) as total_unread
+        FROM creator_conversations
+        WHERE creator_id = ${context.creatorId}
+          AND brand_id = ${brandId}
+          AND status != 'archived'
+      `
+      unreadMessagesCount = parseInt(
+        (unreadResult.rows[0]?.total_unread as string) || '0',
+        10
+      )
+    } else {
+      const unreadResult = await sql`
+        SELECT COALESCE(SUM(unread_creator), 0) as total_unread
+        FROM creator_conversations
+        WHERE creator_id = ${context.creatorId}
+          AND status != 'archived'
+      `
+      unreadMessagesCount = parseInt(
+        (unreadResult.rows[0]?.total_unread as string) || '0',
+        10
+      )
+    }
 
     // Get creator profile data for alerts
     const creatorResult = await sql`
@@ -68,7 +96,7 @@ export async function GET(req: Request): Promise<Response> {
     `
     const creator = creatorResult.rows[0]
 
-    // Check for unsigned contracts
+    // Check for unsigned contracts (within filtered memberships)
     const unsignedContractsCount = memberships.filter(
       (m) => m.status === 'active' && !m.contractSigned
     ).length
@@ -123,6 +151,11 @@ export async function GET(req: Request): Promise<Response> {
         showGuidedTour: !creator?.guided_tour_completed,
       },
       recentActivity,
+      // Include filter info for client-side awareness
+      filter: {
+        brandId: brandId || null,
+        isFiltered: !!brandId,
+      },
     })
   } catch (error) {
     console.error('Error fetching dashboard data:', error)

@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -28,7 +27,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const domain = await withTenant(tenantSlug, () => getDomainById(id))
+  const domain = await getDomainById(tenantSlug, id)
 
   if (!domain) {
     return NextResponse.json({ error: 'Domain not found' }, { status: 404 })
@@ -51,7 +50,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   // Get domain first to check if it exists and get Resend ID
-  const domain = await withTenant(tenantSlug, () => getDomainById(id))
+  const domain = await getDomainById(tenantSlug, id)
 
   if (!domain) {
     return NextResponse.json({ error: 'Domain not found' }, { status: 404 })
@@ -70,7 +69,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   // Delete from database (will cascade to sender addresses)
-  const deleted = await withTenant(tenantSlug, () => deleteDomain(id))
+  const deleted = await deleteDomain(tenantSlug, id)
 
   if (!deleted) {
     return NextResponse.json({ error: 'Failed to delete domain' }, { status: 500 })

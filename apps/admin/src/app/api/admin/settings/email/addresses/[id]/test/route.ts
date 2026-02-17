@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -53,7 +52,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   // Get sender address
-  const address = await withTenant(tenantSlug, () => getSenderAddressById(id))
+  const address = await getSenderAddressById(tenantSlug, id)
 
   if (!address) {
     return NextResponse.json({ error: 'Sender address not found' }, { status: 404 })

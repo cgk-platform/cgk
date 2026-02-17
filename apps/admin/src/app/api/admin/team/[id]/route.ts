@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import {
+  checkPermissionOrRespond,
   getTeamMember,
   removeMember,
   requireAuth,
@@ -32,9 +33,13 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Check permission to view team members
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.view'
+  )
+  if (permissionDenied) return permissionDenied
 
   try {
     const member = await getTeamMember(tenantId, id)
@@ -72,13 +77,13 @@ export async function PATCH(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Only owners can change roles
-  if (!['owner', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json(
-      { error: 'Only owners can change team member roles' },
-      { status: 403 }
-    )
-  }
+  // Check permission to manage team members (change roles)
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.manage'
+  )
+  if (permissionDenied) return permissionDenied
 
   // Cannot change own role
   if (id === auth.userId) {
@@ -141,13 +146,13 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Only owners can remove members
-  if (!['owner', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json(
-      { error: 'Only owners can remove team members' },
-      { status: 403 }
-    )
-  }
+  // Check permission to manage team members (remove)
+  const removePermissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.manage'
+  )
+  if (removePermissionDenied) return removePermissionDenied
 
   // Cannot remove self (use leave instead)
   if (id === auth.userId) {

@@ -25,6 +25,7 @@
   "dependencies": {
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/integrations": "workspace:*",
     "stripe": "^17.0.0"
   },
   "devDependencies": {

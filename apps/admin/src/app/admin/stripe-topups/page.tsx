@@ -3,6 +3,7 @@
  * Platform balance management for creator/vendor payouts
  */
 
+import { getTenantStripeClient } from '@cgk-platform/integrations'
 import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
@@ -51,23 +52,83 @@ async function getTenantSlug(): Promise<string | null> {
   return headerList.get('x-tenant-slug')
 }
 
-async function BalanceCardsLoader() {
-  // Mock balance data (would come from Stripe API in production)
-  const balance: StripeBalance = {
-    available: {
-      usd: 2500000,
-      usdFormatted: '$25,000.00',
-    },
-    pending: {
-      usd: 150000,
-      usdFormatted: '$1,500.00',
-    },
-  }
-
-  return <BalanceDisplay balance={balance} />
+function formatCurrency(cents: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(cents / 100)
 }
 
-function BalanceDisplay({ balance }: { balance: StripeBalance }) {
+async function BalanceCardsLoader() {
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
+
+  if (!tenantSlug) {
+    return <BalanceDisplay balance={null} error="No tenant configured" />
+  }
+
+  try {
+    const stripe = await getTenantStripeClient(tenantSlug)
+
+    if (!stripe) {
+      return <BalanceDisplay balance={null} error="Stripe not configured" />
+    }
+
+    const stripeBalance = await stripe.balance.retrieve()
+
+    // Map Stripe balance to our format
+    const availableUsd = stripeBalance.available.find(b => b.currency === 'usd')?.amount || 0
+    const pendingUsd = stripeBalance.pending.find(b => b.currency === 'usd')?.amount || 0
+
+    const balance: StripeBalance = {
+      available: {
+        usd: availableUsd,
+        usdFormatted: formatCurrency(availableUsd),
+      },
+      pending: {
+        usd: pendingUsd,
+        usdFormatted: formatCurrency(pendingUsd),
+      },
+    }
+
+    return <BalanceDisplay balance={balance} />
+  } catch (error) {
+    console.error('Failed to fetch Stripe balance:', error)
+    return <BalanceDisplay balance={null} error="Failed to load balance" />
+  }
+}
+
+function BalanceDisplay({ balance, error }: { balance: StripeBalance | null; error?: string }) {
+  if (error || !balance) {
+    return (
+      <section className="border-b border-slate-700/50 px-6 py-8">
+        <div className="mx-auto max-w-6xl">
+          <div className="rounded-xl bg-slate-800/50 p-6 text-center ring-1 ring-slate-700/50">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-700/50">
+              <svg
+                className="h-6 w-6 text-slate-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                />
+              </svg>
+            </div>
+            <p className="text-slate-300">{error || 'Unable to load balance'}</p>
+            <p className="mt-2 text-sm text-slate-500">
+              Configure Stripe in Settings -&gt; Integrations
+            </p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="border-b border-slate-700/50 px-6 py-8">
       <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">

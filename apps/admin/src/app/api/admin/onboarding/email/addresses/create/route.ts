@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -25,9 +24,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const brandName = url.searchParams.get('brandName') ?? 'Your Brand'
 
-  const recommendations = await withTenant(tenantSlug, () =>
-    getRecommendedSenders(brandName)
-  )
+  const recommendations = await getRecommendedSenders(tenantSlug, brandName)
 
   return NextResponse.json({ recommendations })
 }
@@ -99,9 +96,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const address = await withTenant(tenantSlug, () =>
-      createOnboardingSenderAddress(body)
-    )
+    const address = await createOnboardingSenderAddress(tenantSlug, body)
 
     return NextResponse.json({ address }, { status: 201 })
   } catch (error) {

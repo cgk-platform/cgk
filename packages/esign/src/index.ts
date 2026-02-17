@@ -477,6 +477,11 @@ export {
   type EmbedContext,
   type VerificationResult,
   type PdfPageInfo,
+  type SignaturePosition,
+  type SignaturePlacementResult,
+  type SignatureOverlayOptions,
+  type CertificateOfCompletionData,
+  type DetectedSignatureField,
   // Main embedding
   embedFieldsInPDF,
   // PDF information
@@ -493,6 +498,16 @@ export {
   addWatermark,
   // Alternative checkbox style
   embedXMark,
+  // Signature positioning utilities
+  validateSignaturePosition,
+  calculateOptimalSignatureSize,
+  // Signature preview
+  createSignaturePreview,
+  // Certificate of completion
+  generateCertificateOfCompletion,
+  appendCertificateOfCompletion,
+  // Signature field detection
+  detectSignatureFields,
 } from './lib/pdf.js'
 
 // ============================================================================

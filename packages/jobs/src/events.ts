@@ -113,6 +113,14 @@ export interface ReviewReminderPayload {
   reminderNumber: number
 }
 
+export interface ReviewModeratedPayload {
+  reviewId: string
+  action: 'approve' | 'reject' | 'spam'
+  reviewerEmail: string
+  reviewerName: string | null
+  productTitle: string | null
+}
+
 export interface SurveyResponsePayload {
   responseId: string
   surveyId: string
@@ -643,6 +651,7 @@ export interface JobEvents {
 
   // Reviews
   'review.submitted': TenantEvent<ReviewSubmittedPayload>
+  'review.moderated': TenantEvent<ReviewModeratedPayload>
   'review.email.queued': TenantEvent<ReviewEmailQueuedPayload>
   'review.email.sent': TenantEvent<ReviewEmailSentPayload>
   'review.reminder': TenantEvent<ReviewReminderPayload>
@@ -769,6 +778,7 @@ export const EVENT_CATEGORIES = {
   ],
   reviews: [
     'review.submitted',
+    'review.moderated',
     'review.email.queued',
     'review.email.sent',
     'review.reminder',

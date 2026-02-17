@@ -1,8 +1,17 @@
 /**
  * Unified payment provider interface
+ *
+ * This provides a common interface for payment operations across different providers.
+ * For most use cases, prefer using the provider-specific implementations directly:
+ * - `createStripeProvider(config)` from './providers/stripe'
+ * - `createWiseProvider(config)` from './providers/wise'
+ *
+ * The unified interface is useful when you need to switch providers dynamically
+ * based on tenant configuration or feature flags.
  */
 
-import type { PaymentIntent, PaymentResult, RefundResult, PaymentProviderConfig } from './types'
+import type { PaymentIntent, PaymentResult, RefundResult } from './types.js'
+import { createStripeProvider, type StripeProviderConfig } from './providers/stripe.js'
 
 export interface PaymentProvider {
   readonly provider: 'stripe' | 'wise'
@@ -23,31 +32,56 @@ export interface CreatePaymentIntentParams {
 }
 
 /**
- * Create a unified payment provider
+ * Configuration for creating a unified payment provider
  */
-export function createPaymentProvider(config: PaymentProviderConfig): PaymentProvider {
-  // TODO: Implement provider-specific logic
-  return {
-    provider: config.provider,
+export interface UnifiedPaymentProviderConfig {
+  provider: 'stripe' | 'wise'
+  /** Tenant ID for credential lookup (required for tenant-owned credentials) */
+  tenantId: string
+  /** Platform fee percentage for payouts (0-100) */
+  platformFeePercent?: number
+}
 
-    async createPaymentIntent(_params) {
-      throw new Error(`Payment provider '${config.provider}' not implemented`)
-    },
+/**
+ * Create a unified payment provider for a tenant
+ *
+ * Routes to the appropriate provider implementation based on the provider type.
+ * Credentials are loaded from the tenant's integration configuration.
+ *
+ * @example
+ * ```typescript
+ * const payments = createPaymentProvider({
+ *   provider: 'stripe',
+ *   tenantId: 'rawdog',
+ * })
+ *
+ * const result = await payments.createPaymentIntent({
+ *   amount: 2999, // $29.99 in cents
+ *   currency: 'usd',
+ * })
+ * ```
+ */
+export function createPaymentProvider(config: UnifiedPaymentProviderConfig): PaymentProvider {
+  switch (config.provider) {
+    case 'stripe': {
+      const stripeConfig: StripeProviderConfig = {
+        tenantId: config.tenantId,
+        platformFeePercent: config.platformFeePercent,
+      }
+      return createStripeProvider(stripeConfig)
+    }
 
-    async confirmPaymentIntent(_intentId) {
-      throw new Error(`Payment provider '${config.provider}' not implemented`)
-    },
+    case 'wise': {
+      // Wise is primarily used for international payouts, not standard payment intents.
+      // For PaymentProvider interface operations (payment intents), use Stripe.
+      // For payouts to creators/contractors, use WiseProvider directly:
+      //   import { createWiseProvider } from './providers/wise'
+      throw new Error(
+        'Wise does not support payment intents. Use WiseProvider directly for international payouts.'
+      )
+    }
 
-    async cancelPaymentIntent(_intentId) {
-      throw new Error(`Payment provider '${config.provider}' not implemented`)
-    },
-
-    async refundPayment(_intentId, _amount) {
-      throw new Error(`Payment provider '${config.provider}' not implemented`)
-    },
-
-    async getPaymentIntent(_intentId) {
-      throw new Error(`Payment provider '${config.provider}' not implemented`)
-    },
+    default:
+      throw new Error(`Unknown payment provider: ${config.provider}`)
   }
 }

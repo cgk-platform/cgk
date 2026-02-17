@@ -4,7 +4,7 @@
  * Helpers for configuring inbound email during onboarding.
  *
  * @ai-pattern onboarding
- * @ai-note Step 5d of tenant onboarding (optional)
+ * @ai-critical All functions require tenantId for database operations
  */
 
 import { listSenderAddresses, updateSenderAddress } from '../sender/addresses.js'
@@ -48,7 +48,7 @@ export function getInboundWebhookUrl(baseUrl: string, _tenantSlug: string): Inbo
 /**
  * Get inbound-capable sender addresses
  */
-export async function getInboundCapableAddresses(): Promise<
+export async function getInboundCapableAddresses(tenantId: string): Promise<
   Array<{
     address: SenderAddressWithDomain
     defaultPurpose: string
@@ -56,7 +56,7 @@ export async function getInboundCapableAddresses(): Promise<
     currentlyEnabled: boolean
   }>
 > {
-  const addresses = await listSenderAddresses()
+  const addresses = await listSenderAddresses(tenantId)
 
   // Filter to addresses that make sense for inbound
   const inboundCandidates = addresses.filter(
@@ -78,6 +78,7 @@ export async function getInboundCapableAddresses(): Promise<
  * Configure inbound email for addresses
  */
 export async function configureInboundAddresses(
+  tenantId: string,
   configs: InboundAddressConfig[]
 ): Promise<{
   success: boolean
@@ -89,7 +90,7 @@ export async function configureInboundAddresses(
 
   for (const config of configs) {
     try {
-      await updateSenderAddress(config.senderAddressId, {
+      await updateSenderAddress(tenantId, config.senderAddressId, {
         isInboundEnabled: config.enabled,
       })
       updated++
@@ -112,16 +113,16 @@ export async function configureInboundAddresses(
 /**
  * Check if any inbound addresses are enabled
  */
-export async function hasInboundEnabled(): Promise<boolean> {
-  const addresses = await listSenderAddresses()
+export async function hasInboundEnabled(tenantId: string): Promise<boolean> {
+  const addresses = await listSenderAddresses(tenantId)
   return addresses.some((a) => a.isInboundEnabled)
 }
 
 /**
  * Get count of inbound-enabled addresses
  */
-export async function getInboundEnabledCount(): Promise<number> {
-  const addresses = await listSenderAddresses()
+export async function getInboundEnabledCount(tenantId: string): Promise<number> {
+  const addresses = await listSenderAddresses(tenantId)
   return addresses.filter((a) => a.isInboundEnabled).length
 }
 

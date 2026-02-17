@@ -5,10 +5,10 @@
  * Provides the core getSenderForNotification() function.
  *
  * @ai-pattern tenant-isolation
- * @ai-required Use withTenant() wrapper when calling these functions
+ * @ai-critical All functions require tenantId and use withTenant() for DB queries
  */
 
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type {
   NotificationChannel,
@@ -76,88 +76,119 @@ function mapRowToRoutingWithSender(
 /**
  * Get all notification routing rules
  */
-export async function listNotificationRouting(): Promise<NotificationRoutingWithSender[]> {
-  const result = await sql`
-    SELECT
-      r.id, r.notification_type, r.sender_address_id, r.is_enabled,
-      r.channel, r.delay_days, r.max_retries, r.retry_delay_minutes,
-      r.created_at, r.updated_at,
-      sa.id as sa_id, sa.domain_id as sa_domain_id,
-      sa.email_address as sa_email_address, sa.display_name as sa_display_name,
-      sa.purpose as sa_purpose, sa.is_default as sa_is_default,
-      sa.is_inbound_enabled as sa_is_inbound_enabled,
-      sa.reply_to_address as sa_reply_to_address,
-      sa.created_at as sa_created_at, sa.updated_at as sa_updated_at,
-      d.domain as d_domain, d.subdomain as d_subdomain,
-      d.verification_status as d_verification_status
-    FROM tenant_notification_routing r
-    LEFT JOIN tenant_sender_addresses sa ON sa.id = r.sender_address_id
-    LEFT JOIN tenant_email_domains d ON d.id = sa.domain_id
-    ORDER BY r.notification_type ASC
-  `
+export async function listNotificationRouting(tenantId: string): Promise<NotificationRoutingWithSender[]> {
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        r.id, r.notification_type, r.sender_address_id, r.is_enabled,
+        r.channel, r.delay_days, r.max_retries, r.retry_delay_minutes,
+        r.created_at, r.updated_at,
+        sa.id as sa_id, sa.domain_id as sa_domain_id,
+        sa.email_address as sa_email_address, sa.display_name as sa_display_name,
+        sa.purpose as sa_purpose, sa.is_default as sa_is_default,
+        sa.is_inbound_enabled as sa_is_inbound_enabled,
+        sa.reply_to_address as sa_reply_to_address,
+        sa.created_at as sa_created_at, sa.updated_at as sa_updated_at,
+        d.domain as d_domain, d.subdomain as d_subdomain,
+        d.verification_status as d_verification_status
+      FROM tenant_notification_routing r
+      LEFT JOIN tenant_sender_addresses sa ON sa.id = r.sender_address_id
+      LEFT JOIN tenant_email_domains d ON d.id = sa.domain_id
+      ORDER BY r.notification_type ASC
+    `
 
-  return result.rows.map((row) => mapRowToRoutingWithSender(row as Record<string, unknown>))
+    return result.rows.map((row) => mapRowToRoutingWithSender(row as Record<string, unknown>))
+  })
 }
 
 /**
  * Get routing for a specific notification type
  */
 export async function getNotificationRouting(
+  tenantId: string,
   notificationType: NotificationType
 ): Promise<NotificationRoutingWithSender | null> {
-  const result = await sql`
-    SELECT
-      r.id, r.notification_type, r.sender_address_id, r.is_enabled,
-      r.channel, r.delay_days, r.max_retries, r.retry_delay_minutes,
-      r.created_at, r.updated_at,
-      sa.id as sa_id, sa.domain_id as sa_domain_id,
-      sa.email_address as sa_email_address, sa.display_name as sa_display_name,
-      sa.purpose as sa_purpose, sa.is_default as sa_is_default,
-      sa.is_inbound_enabled as sa_is_inbound_enabled,
-      sa.reply_to_address as sa_reply_to_address,
-      sa.created_at as sa_created_at, sa.updated_at as sa_updated_at,
-      d.domain as d_domain, d.subdomain as d_subdomain,
-      d.verification_status as d_verification_status
-    FROM tenant_notification_routing r
-    LEFT JOIN tenant_sender_addresses sa ON sa.id = r.sender_address_id
-    LEFT JOIN tenant_email_domains d ON d.id = sa.domain_id
-    WHERE r.notification_type = ${notificationType}
-  `
+  return withTenant(tenantId, async () => {
+    const result = await sql`
+      SELECT
+        r.id, r.notification_type, r.sender_address_id, r.is_enabled,
+        r.channel, r.delay_days, r.max_retries, r.retry_delay_minutes,
+        r.created_at, r.updated_at,
+        sa.id as sa_id, sa.domain_id as sa_domain_id,
+        sa.email_address as sa_email_address, sa.display_name as sa_display_name,
+        sa.purpose as sa_purpose, sa.is_default as sa_is_default,
+        sa.is_inbound_enabled as sa_is_inbound_enabled,
+        sa.reply_to_address as sa_reply_to_address,
+        sa.created_at as sa_created_at, sa.updated_at as sa_updated_at,
+        d.domain as d_domain, d.subdomain as d_subdomain,
+        d.verification_status as d_verification_status
+      FROM tenant_notification_routing r
+      LEFT JOIN tenant_sender_addresses sa ON sa.id = r.sender_address_id
+      LEFT JOIN tenant_email_domains d ON d.id = sa.domain_id
+      WHERE r.notification_type = ${notificationType}
+    `
 
-  const row = result.rows[0]
-  if (!row) {
-    return null
-  }
+    const row = result.rows[0]
+    if (!row) {
+      return null
+    }
 
-  return mapRowToRoutingWithSender(row as Record<string, unknown>)
+    return mapRowToRoutingWithSender(row as Record<string, unknown>)
+  })
 }
 
 /**
  * Create or update notification routing
  */
 export async function upsertNotificationRouting(
+  tenantId: string,
   notificationType: NotificationType,
   input: UpdateNotificationRoutingInput
 ): Promise<NotificationRouting> {
-  // Check if routing exists
-  const existing = await sql`
-    SELECT id FROM tenant_notification_routing
-    WHERE notification_type = ${notificationType}
-  `
-
-  if (existing.rows.length > 0) {
-    // Update existing
-    const result = await sql`
-      UPDATE tenant_notification_routing
-      SET
-        sender_address_id = COALESCE(${input.senderAddressId ?? null}, sender_address_id),
-        is_enabled = COALESCE(${input.isEnabled ?? null}, is_enabled),
-        channel = COALESCE(${input.channel ?? null}, channel),
-        delay_days = COALESCE(${input.delayDays ?? null}, delay_days),
-        max_retries = COALESCE(${input.maxRetries ?? null}, max_retries),
-        retry_delay_minutes = COALESCE(${input.retryDelayMinutes ?? null}, retry_delay_minutes),
-        updated_at = NOW()
+  return withTenant(tenantId, async () => {
+    // Check if routing exists
+    const existing = await sql`
+      SELECT id FROM tenant_notification_routing
       WHERE notification_type = ${notificationType}
+    `
+
+    if (existing.rows.length > 0) {
+      // Update existing
+      const result = await sql`
+        UPDATE tenant_notification_routing
+        SET
+          sender_address_id = COALESCE(${input.senderAddressId ?? null}, sender_address_id),
+          is_enabled = COALESCE(${input.isEnabled ?? null}, is_enabled),
+          channel = COALESCE(${input.channel ?? null}, channel),
+          delay_days = COALESCE(${input.delayDays ?? null}, delay_days),
+          max_retries = COALESCE(${input.maxRetries ?? null}, max_retries),
+          retry_delay_minutes = COALESCE(${input.retryDelayMinutes ?? null}, retry_delay_minutes),
+          updated_at = NOW()
+        WHERE notification_type = ${notificationType}
+        RETURNING
+          id, notification_type, sender_address_id, is_enabled,
+          channel, delay_days, max_retries, retry_delay_minutes,
+          created_at, updated_at
+      `
+
+      return mapRowToRouting(result.rows[0] as Record<string, unknown>)
+    }
+
+    // Create new routing
+    const defaults = DEFAULT_NOTIFICATION_ROUTING[notificationType]
+    const result = await sql`
+      INSERT INTO tenant_notification_routing (
+        notification_type, sender_address_id, is_enabled,
+        channel, delay_days, max_retries, retry_delay_minutes
+      ) VALUES (
+        ${notificationType},
+        ${input.senderAddressId ?? null},
+        ${input.isEnabled ?? true},
+        ${input.channel ?? defaults?.channel ?? 'email'},
+        ${input.delayDays ?? 0},
+        ${input.maxRetries ?? 3},
+        ${input.retryDelayMinutes ?? 60}
+      )
       RETURNING
         id, notification_type, sender_address_id, is_enabled,
         channel, delay_days, max_retries, retry_delay_minutes,
@@ -165,62 +196,41 @@ export async function upsertNotificationRouting(
     `
 
     return mapRowToRouting(result.rows[0] as Record<string, unknown>)
-  }
-
-  // Create new routing
-  const defaults = DEFAULT_NOTIFICATION_ROUTING[notificationType]
-  const result = await sql`
-    INSERT INTO tenant_notification_routing (
-      notification_type, sender_address_id, is_enabled,
-      channel, delay_days, max_retries, retry_delay_minutes
-    ) VALUES (
-      ${notificationType},
-      ${input.senderAddressId ?? null},
-      ${input.isEnabled ?? true},
-      ${input.channel ?? defaults?.channel ?? 'email'},
-      ${input.delayDays ?? 0},
-      ${input.maxRetries ?? 3},
-      ${input.retryDelayMinutes ?? 60}
-    )
-    RETURNING
-      id, notification_type, sender_address_id, is_enabled,
-      channel, delay_days, max_retries, retry_delay_minutes,
-      created_at, updated_at
-  `
-
-  return mapRowToRouting(result.rows[0] as Record<string, unknown>)
+  })
 }
 
 /**
  * Seed default notification routing for a tenant
  * Creates entries for all notification types with default values
  */
-export async function seedDefaultNotificationRouting(): Promise<void> {
+export async function seedDefaultNotificationRouting(tenantId: string): Promise<void> {
   const notificationTypes = Object.values(NOTIFICATION_TYPES)
 
-  for (const notificationType of notificationTypes) {
-    const existing = await sql`
-      SELECT 1 FROM tenant_notification_routing
-      WHERE notification_type = ${notificationType}
-    `
-
-    if (existing.rows.length === 0) {
-      const defaults = DEFAULT_NOTIFICATION_ROUTING[notificationType]
-      await sql`
-        INSERT INTO tenant_notification_routing (
-          notification_type, is_enabled, channel,
-          delay_days, max_retries, retry_delay_minutes
-        ) VALUES (
-          ${notificationType},
-          true,
-          ${defaults?.channel ?? 'email'},
-          0,
-          3,
-          60
-        )
+  await withTenant(tenantId, async () => {
+    for (const notificationType of notificationTypes) {
+      const existing = await sql`
+        SELECT 1 FROM tenant_notification_routing
+        WHERE notification_type = ${notificationType}
       `
+
+      if (existing.rows.length === 0) {
+        const defaults = DEFAULT_NOTIFICATION_ROUTING[notificationType]
+        await sql`
+          INSERT INTO tenant_notification_routing (
+            notification_type, is_enabled, channel,
+            delay_days, max_retries, retry_delay_minutes
+          ) VALUES (
+            ${notificationType},
+            true,
+            ${defaults?.channel ?? 'email'},
+            0,
+            3,
+            60
+          )
+        `
+      }
     }
-  }
+  })
 }
 
 /**
@@ -236,13 +246,14 @@ export async function seedDefaultNotificationRouting(): Promise<void> {
  * @ai-critical Never hardcode sender addresses - always use this function
  */
 export async function getSenderForNotification(
+  tenantId: string,
   notificationType: NotificationType
 ): Promise<SenderResolutionResult> {
   // 1. Check for explicit routing
-  const routing = await getNotificationRouting(notificationType)
+  const routing = await getNotificationRouting(tenantId, notificationType)
 
   if (routing?.senderAddressId) {
-    const sender = await getSenderAddressById(routing.senderAddressId)
+    const sender = await getSenderAddressById(tenantId, routing.senderAddressId)
     if (sender && sender.verificationStatus === 'verified') {
       return {
         success: true,
@@ -267,7 +278,7 @@ export async function getSenderForNotification(
   // 2. Get default sender for the notification's purpose
   const defaults = DEFAULT_NOTIFICATION_ROUTING[notificationType]
   if (defaults) {
-    const purposeSender = await getDefaultSenderForPurpose(defaults.purpose)
+    const purposeSender = await getDefaultSenderForPurpose(tenantId, defaults.purpose)
     if (purposeSender && purposeSender.verificationStatus === 'verified') {
       return {
         success: true,
@@ -282,7 +293,7 @@ export async function getSenderForNotification(
   }
 
   // 3. Get any default verified sender
-  const defaultSender = await getDefaultSender()
+  const defaultSender = await getDefaultSender(tenantId)
   if (defaultSender) {
     return {
       success: true,
@@ -305,7 +316,9 @@ export async function getSenderForNotification(
 /**
  * Get all notification types with their current routing status
  */
-export async function getAllNotificationRoutingStatus(): Promise<
+export async function getAllNotificationRoutingStatus(
+  tenantId: string
+): Promise<
   Array<{
     notificationType: NotificationType
     label: string
@@ -316,7 +329,7 @@ export async function getAllNotificationRoutingStatus(): Promise<
     channel: NotificationChannel
   }>
 > {
-  const routing = await listNotificationRouting()
+  const routing = await listNotificationRouting(tenantId)
   const routingMap = new Map(routing.map((r) => [r.notificationType, r]))
 
   const categories: Record<string, string> = {

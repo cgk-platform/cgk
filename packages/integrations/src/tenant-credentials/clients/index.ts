@@ -45,7 +45,7 @@ export {
   type WiseTransfer,
 } from './wise.js'
 
-// Generic services (Mux, AssemblyAI, Anthropic, OpenAI)
+// Generic services (Mux, AssemblyAI, Anthropic, OpenAI, EasyPost)
 export {
   clearAllServicesCache,
   clearTenantAllServicesCache,
@@ -54,6 +54,8 @@ export {
   getTenantAssemblyAIClient,
   getTenantMuxClient,
   getTenantOpenAIClient,
+  getTenantEasyPostClient,
+  checkEasyPostTrackingStatus,
   hasTenantServiceConfig,
   verifyTenantServiceCredentials,
   type AnthropicClient,
@@ -67,4 +69,8 @@ export {
   type OpenAIChatParams,
   type OpenAIClient,
   type OpenAIEmbedding,
+  type EasyPostClient,
+  type EasyPostTracker,
+  type EasyPostTrackingStatus,
+  type EasyPostTrackingStatusCode,
 } from './generic.js'

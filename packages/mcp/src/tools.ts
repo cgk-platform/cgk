@@ -61,53 +61,35 @@ export function jsonResult(data: unknown): ToolResult {
 }
 
 /**
- * Example tool definitions
+ * @deprecated Use tools from '@cgk-platform/mcp/tools/commerce' instead.
+ * These are kept for backwards compatibility but will be removed in a future version.
+ *
+ * Real implementations:
+ * - listOrdersTool, getOrderTool, searchOrdersTool from './tools/commerce'
+ * - listProductsTool, getProductTool from './tools/commerce'
  */
 export const exampleTools = {
   getOrders: defineTool({
-    name: 'get_orders',
-    description: 'Get recent orders for the current tenant',
+    name: 'get_orders_example',
+    description: '[DEPRECATED] Use list_orders from commerce tools instead',
     inputSchema: {
       type: 'object',
-      properties: {
-        limit: {
-          type: 'number',
-          description: 'Maximum number of orders to return',
-          default: 10,
-        },
-        status: {
-          type: 'string',
-          description: 'Filter by order status',
-          enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
-        },
-      },
+      properties: {},
     },
-    async handler(args) {
-      // TODO: Implement with tenant context
-      return textResult(`Would fetch ${args.limit ?? 10} orders with status: ${args.status ?? 'any'}`)
+    async handler() {
+      return textResult('This tool is deprecated. Use list_orders instead.')
     },
   }),
 
   getProducts: defineTool({
-    name: 'get_products',
-    description: 'Get products from the catalog',
+    name: 'get_products_example',
+    description: '[DEPRECATED] Use list_products from commerce tools instead',
     inputSchema: {
       type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description: 'Search query',
-        },
-        limit: {
-          type: 'number',
-          description: 'Maximum number of products to return',
-          default: 10,
-        },
-      },
+      properties: {},
     },
-    async handler(args) {
-      // TODO: Implement with commerce client
-      return textResult(`Would search products for: "${args.query ?? ''}" (limit: ${args.limit ?? 10})`)
+    async handler() {
+      return textResult('This tool is deprecated. Use list_products instead.')
     },
   }),
 }

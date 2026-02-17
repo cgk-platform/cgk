@@ -1053,6 +1053,542 @@ export const comparePeriodsTool = defineTool({
   },
 })
 
+/**
+ * Get traffic metrics
+ */
+export const getTrafficMetricsTool = defineTool({
+  name: 'get_traffic_metrics',
+  description:
+    'Get traffic and session metrics for a date range including sessions, page views, bounce rate, and traffic sources.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      startDate: {
+        type: 'string',
+        description: 'Start date (ISO format)',
+      },
+      endDate: {
+        type: 'string',
+        description: 'End date (ISO format)',
+      },
+      breakdown: {
+        type: 'string',
+        description: 'Breakdown dimension',
+        enum: ['none', 'source', 'channel', 'device'],
+      },
+    },
+    required: ['startDate', 'endDate'],
+  },
+  async handler(args): Promise<ToolResult> {
+    const tenantId = (args._tenantId as string) || ''
+    if (!tenantId) {
+      return errorResult('Tenant ID is required')
+    }
+
+    try {
+      const { start, end } = parseDateRange(args.startDate, args.endDate)
+      const breakdown = (args.breakdown as string) || 'none'
+
+      const metrics = await withTenant(tenantId, async () => {
+        // Get aggregate traffic metrics from analytics_daily_metrics
+        const aggregateResult = await sql`
+          SELECT
+            COALESCE(SUM(sessions), 0) as total_sessions,
+            COALESCE(SUM(cart_adds), 0) as cart_adds,
+            COALESCE(SUM(checkouts_initiated), 0) as checkouts_initiated,
+            COALESCE(SUM(total_orders), 0) as purchases,
+            COALESCE(AVG(conversion_rate), 0) as avg_conversion_rate
+          FROM analytics_daily_metrics
+          WHERE date >= ${start.toISOString()}::date
+            AND date <= ${end.toISOString()}::date
+        `
+
+        const aggRow = aggregateResult.rows[0]
+        const totalSessions = Number(aggRow?.total_sessions) || 0
+        const purchases = Number(aggRow?.purchases) || 0
+        const cartAdds = Number(aggRow?.cart_adds) || 0
+        const checkoutsInitiated = Number(aggRow?.checkouts_initiated) || 0
+
+        // Get pipeline metrics for traffic funnel
+        const pipelineResult = await sql`
+          SELECT
+            COALESCE(SUM(website_visitors), 0) as visitors,
+            COALESCE(SUM(product_page_views), 0) as page_views,
+            COALESCE(SUM(email_signups), 0) as email_signups
+          FROM analytics_pipeline_metrics
+          WHERE date >= ${start.toISOString()}::date
+            AND date <= ${end.toISOString()}::date
+        `
+
+        const pipelineRow = pipelineResult.rows[0]
+        const visitors = Number(pipelineRow?.visitors) || totalSessions
+        const pageViews = Number(pipelineRow?.page_views) || 0
+        const emailSignups = Number(pipelineRow?.email_signups) || 0
+
+        let sourceBreakdown: Array<{
+          source: string
+          sessions: number
+          conversions: number
+          conversionRate: number
+        }> = []
+
+        // Get channel breakdown if requested
+        if (breakdown === 'source' || breakdown === 'channel') {
+          const channelResult = await sql`
+            SELECT
+              channel as source,
+              SUM(touchpoints) as sessions,
+              SUM(conversions) as conversions
+            FROM attribution_channel_summary
+            WHERE date >= ${start.toISOString()}::date
+              AND date <= ${end.toISOString()}::date
+            GROUP BY channel
+            ORDER BY touchpoints DESC
+            LIMIT 20
+          `
+
+          sourceBreakdown = channelResult.rows.map((row) => {
+            const sessions = Number(row.sessions) || 0
+            const conversions = Number(row.conversions) || 0
+            return {
+              source: row.source as string,
+              sessions,
+              conversions,
+              conversionRate: sessions > 0 ? (conversions / sessions) * 100 : 0,
+            }
+          })
+        }
+
+        // Calculate derived metrics
+        const pagesPerSession = totalSessions > 0 ? pageViews / totalSessions : 0
+        const bounceRate = totalSessions > 0 && pageViews > 0
+          ? Math.max(0, (1 - (cartAdds / totalSessions)) * 100)
+          : 0
+
+        return {
+          period: {
+            start: start.toISOString().split('T')[0],
+            end: end.toISOString().split('T')[0],
+          },
+          summary: {
+            visitors,
+            sessions: totalSessions,
+            pageViews,
+            pagesPerSession: Math.round(pagesPerSession * 100) / 100,
+            bounceRate: Math.round(bounceRate * 100) / 100,
+            emailSignups,
+          },
+          funnel: {
+            sessions: totalSessions,
+            cartAdds,
+            checkoutsInitiated,
+            purchases,
+            cartAddRate: totalSessions > 0 ? (cartAdds / totalSessions) * 100 : 0,
+            checkoutRate: cartAdds > 0 ? (checkoutsInitiated / cartAdds) * 100 : 0,
+            purchaseRate: checkoutsInitiated > 0 ? (purchases / checkoutsInitiated) * 100 : 0,
+            overallConversionRate: totalSessions > 0 ? (purchases / totalSessions) * 100 : 0,
+          },
+          ...(sourceBreakdown.length > 0 && { bySource: sourceBreakdown }),
+        }
+      })
+
+      return jsonResult(metrics)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return errorResult(`Failed to get traffic metrics: ${message}`)
+    }
+  },
+})
+
+/**
+ * Get geographic metrics
+ */
+export const getGeoMetricsTool = defineTool({
+  name: 'get_geo_metrics',
+  description:
+    'Get geographic breakdown of sales and traffic by country, region, or city.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      startDate: {
+        type: 'string',
+        description: 'Start date (ISO format)',
+      },
+      endDate: {
+        type: 'string',
+        description: 'End date (ISO format)',
+      },
+      groupBy: {
+        type: 'string',
+        description: 'Geographic grouping level',
+        enum: ['country', 'region', 'city'],
+      },
+      country: {
+        type: 'string',
+        description: 'Filter by country code (ISO 2-letter code)',
+      },
+      limit: {
+        type: 'number',
+        description: 'Maximum results to return (default: 20)',
+        minimum: 1,
+        maximum: 100,
+      },
+    },
+    required: ['startDate', 'endDate'],
+  },
+  async handler(args): Promise<ToolResult> {
+    const tenantId = (args._tenantId as string) || ''
+    if (!tenantId) {
+      return errorResult('Tenant ID is required')
+    }
+
+    try {
+      const { start, end } = parseDateRange(args.startDate, args.endDate)
+      const groupBy = (args.groupBy as string) || 'country'
+      const countryFilter = args.country as string | undefined
+      const limit = Math.min(Math.max((args.limit as number) || 20, 1), 100)
+
+      const metrics = await withTenant(tenantId, async () => {
+        // Build query based on groupBy level
+        let result
+        if (groupBy === 'country') {
+          if (countryFilter) {
+            result = await sql`
+              SELECT
+                country,
+                NULL as region,
+                NULL as city,
+                SUM(revenue_cents) as revenue_cents,
+                SUM(orders) as orders,
+                SUM(new_customers) as new_customers,
+                SUM(returning_customers) as returning_customers,
+                AVG(avg_order_value_cents) as avg_order_value_cents
+              FROM analytics_geo_metrics
+              WHERE date >= ${start.toISOString()}::date
+                AND date <= ${end.toISOString()}::date
+                AND country = ${countryFilter}
+              GROUP BY country
+              ORDER BY revenue_cents DESC
+              LIMIT ${limit}
+            `
+          } else {
+            result = await sql`
+              SELECT
+                country,
+                NULL as region,
+                NULL as city,
+                SUM(revenue_cents) as revenue_cents,
+                SUM(orders) as orders,
+                SUM(new_customers) as new_customers,
+                SUM(returning_customers) as returning_customers,
+                AVG(avg_order_value_cents) as avg_order_value_cents
+              FROM analytics_geo_metrics
+              WHERE date >= ${start.toISOString()}::date
+                AND date <= ${end.toISOString()}::date
+              GROUP BY country
+              ORDER BY revenue_cents DESC
+              LIMIT ${limit}
+            `
+          }
+        } else if (groupBy === 'region') {
+          if (countryFilter) {
+            result = await sql`
+              SELECT
+                country,
+                region,
+                NULL as city,
+                SUM(revenue_cents) as revenue_cents,
+                SUM(orders) as orders,
+                SUM(new_customers) as new_customers,
+                SUM(returning_customers) as returning_customers,
+                AVG(avg_order_value_cents) as avg_order_value_cents
+              FROM analytics_geo_metrics
+              WHERE date >= ${start.toISOString()}::date
+                AND date <= ${end.toISOString()}::date
+                AND country = ${countryFilter}
+              GROUP BY country, region
+              ORDER BY revenue_cents DESC
+              LIMIT ${limit}
+            `
+          } else {
+            result = await sql`
+              SELECT
+                country,
+                region,
+                NULL as city,
+                SUM(revenue_cents) as revenue_cents,
+                SUM(orders) as orders,
+                SUM(new_customers) as new_customers,
+                SUM(returning_customers) as returning_customers,
+                AVG(avg_order_value_cents) as avg_order_value_cents
+              FROM analytics_geo_metrics
+              WHERE date >= ${start.toISOString()}::date
+                AND date <= ${end.toISOString()}::date
+              GROUP BY country, region
+              ORDER BY revenue_cents DESC
+              LIMIT ${limit}
+            `
+          }
+        } else {
+          if (countryFilter) {
+            result = await sql`
+              SELECT
+                country,
+                region,
+                city,
+                SUM(revenue_cents) as revenue_cents,
+                SUM(orders) as orders,
+                SUM(new_customers) as new_customers,
+                SUM(returning_customers) as returning_customers,
+                AVG(avg_order_value_cents) as avg_order_value_cents
+              FROM analytics_geo_metrics
+              WHERE date >= ${start.toISOString()}::date
+                AND date <= ${end.toISOString()}::date
+                AND country = ${countryFilter}
+              GROUP BY country, region, city
+              ORDER BY revenue_cents DESC
+              LIMIT ${limit}
+            `
+          } else {
+            result = await sql`
+              SELECT
+                country,
+                region,
+                city,
+                SUM(revenue_cents) as revenue_cents,
+                SUM(orders) as orders,
+                SUM(new_customers) as new_customers,
+                SUM(returning_customers) as returning_customers,
+                AVG(avg_order_value_cents) as avg_order_value_cents
+              FROM analytics_geo_metrics
+              WHERE date >= ${start.toISOString()}::date
+                AND date <= ${end.toISOString()}::date
+              GROUP BY country, region, city
+              ORDER BY revenue_cents DESC
+              LIMIT ${limit}
+            `
+          }
+        }
+
+        const locations = result.rows.map((row) => ({
+          country: row.country as string,
+          region: row.region as string | null,
+          city: row.city as string | null,
+          revenue: formatCurrency(Number(row.revenue_cents) || 0),
+          orders: Number(row.orders) || 0,
+          newCustomers: Number(row.new_customers) || 0,
+          returningCustomers: Number(row.returning_customers) || 0,
+          avgOrderValue: formatCurrency(Number(row.avg_order_value_cents) || 0),
+        }))
+
+        // Calculate totals
+        const totals = locations.reduce(
+          (acc, loc) => ({
+            revenue: acc.revenue + loc.revenue,
+            orders: acc.orders + loc.orders,
+            newCustomers: acc.newCustomers + loc.newCustomers,
+            returningCustomers: acc.returningCustomers + loc.returningCustomers,
+          }),
+          { revenue: 0, orders: 0, newCustomers: 0, returningCustomers: 0 }
+        )
+
+        return {
+          period: {
+            start: start.toISOString().split('T')[0],
+            end: end.toISOString().split('T')[0],
+          },
+          groupBy,
+          ...(countryFilter && { countryFilter }),
+          locations,
+          totals,
+        }
+      })
+
+      return jsonResult(metrics)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return errorResult(`Failed to get geo metrics: ${message}`)
+    }
+  },
+})
+
+/**
+ * Get sales metrics (enhanced version of revenue metrics)
+ */
+export const getSalesMetricsTool = defineTool({
+  name: 'get_sales_metrics',
+  description:
+    'Get comprehensive sales metrics for a date range including revenue breakdown, order stats, customer segments, and comparisons to previous period.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      startDate: {
+        type: 'string',
+        description: 'Start date (ISO format)',
+      },
+      endDate: {
+        type: 'string',
+        description: 'End date (ISO format)',
+      },
+      compareToPrevious: {
+        type: 'boolean',
+        description: 'Include comparison to previous period of same length (default: true)',
+      },
+    },
+    required: ['startDate', 'endDate'],
+  },
+  async handler(args): Promise<ToolResult> {
+    const tenantId = (args._tenantId as string) || ''
+    if (!tenantId) {
+      return errorResult('Tenant ID is required')
+    }
+
+    try {
+      const { start, end } = parseDateRange(args.startDate, args.endDate)
+      const compareToPrevious = args.compareToPrevious !== false
+
+      const metrics = await withTenant(tenantId, async () => {
+        // Get current period metrics
+        const currentResult = await sql`
+          SELECT
+            COALESCE(SUM(gross_sales_cents), 0) as gross_sales,
+            COALESCE(SUM(discounts_cents), 0) as discounts,
+            COALESCE(SUM(refunds_cents), 0) as refunds,
+            COALESCE(SUM(net_revenue_cents), 0) as net_revenue,
+            COALESCE(SUM(total_orders), 0) as total_orders,
+            COALESCE(SUM(new_customer_orders), 0) as new_customer_orders,
+            COALESCE(SUM(returning_customer_orders), 0) as returning_customer_orders,
+            COALESCE(AVG(avg_order_value_cents), 0) as avg_order_value,
+            COALESCE(SUM(new_customers), 0) as new_customers,
+            COALESCE(SUM(returning_customers), 0) as returning_customers,
+            COALESCE(SUM(total_ad_spend_cents), 0) as ad_spend,
+            COALESCE(AVG(roas), 0) as roas
+          FROM analytics_daily_metrics
+          WHERE date >= ${start.toISOString()}::date
+            AND date <= ${end.toISOString()}::date
+        `
+
+        const current = currentResult.rows[0]
+        const grossSales = Number(current?.gross_sales) || 0
+        const discounts = Number(current?.discounts) || 0
+        const refunds = Number(current?.refunds) || 0
+        const netRevenue = Number(current?.net_revenue) || 0
+        const totalOrders = Number(current?.total_orders) || 0
+        const newCustomerOrders = Number(current?.new_customer_orders) || 0
+        const returningCustomerOrders = Number(current?.returning_customer_orders) || 0
+        const avgOrderValue = Number(current?.avg_order_value) || 0
+        const newCustomers = Number(current?.new_customers) || 0
+        const returningCustomers = Number(current?.returning_customers) || 0
+        const adSpend = Number(current?.ad_spend) || 0
+        const roas = Number(current?.roas) || 0
+
+        let comparison = null
+        if (compareToPrevious) {
+          // Calculate previous period dates
+          const periodLengthMs = end.getTime() - start.getTime()
+          const prevEnd = new Date(start.getTime() - 1) // day before current start
+          const prevStart = new Date(prevEnd.getTime() - periodLengthMs)
+
+          const prevResult = await sql`
+            SELECT
+              COALESCE(SUM(net_revenue_cents), 0) as net_revenue,
+              COALESCE(SUM(total_orders), 0) as total_orders,
+              COALESCE(AVG(avg_order_value_cents), 0) as avg_order_value,
+              COALESCE(SUM(new_customers), 0) as new_customers,
+              COALESCE(AVG(roas), 0) as roas
+            FROM analytics_daily_metrics
+            WHERE date >= ${prevStart.toISOString()}::date
+              AND date <= ${prevEnd.toISOString()}::date
+          `
+
+          const prev = prevResult.rows[0]
+          const prevNetRevenue = Number(prev?.net_revenue) || 0
+          const prevTotalOrders = Number(prev?.total_orders) || 0
+          const prevAvgOrderValue = Number(prev?.avg_order_value) || 0
+          const prevNewCustomers = Number(prev?.new_customers) || 0
+          const prevRoas = Number(prev?.roas) || 0
+
+          comparison = {
+            period: {
+              start: prevStart.toISOString().split('T')[0],
+              end: prevEnd.toISOString().split('T')[0],
+            },
+            revenue: {
+              previous: formatCurrency(prevNetRevenue),
+              change: formatCurrency(netRevenue - prevNetRevenue),
+              changePercent: percentChange(netRevenue, prevNetRevenue),
+            },
+            orders: {
+              previous: prevTotalOrders,
+              change: totalOrders - prevTotalOrders,
+              changePercent: percentChange(totalOrders, prevTotalOrders),
+            },
+            avgOrderValue: {
+              previous: formatCurrency(prevAvgOrderValue),
+              change: formatCurrency(avgOrderValue - prevAvgOrderValue),
+              changePercent: percentChange(avgOrderValue, prevAvgOrderValue),
+            },
+            newCustomers: {
+              previous: prevNewCustomers,
+              change: newCustomers - prevNewCustomers,
+              changePercent: percentChange(newCustomers, prevNewCustomers),
+            },
+            roas: {
+              previous: Math.round(prevRoas * 100) / 100,
+              change: Math.round((roas - prevRoas) * 100) / 100,
+              changePercent: percentChange(roas, prevRoas),
+            },
+          }
+        }
+
+        return {
+          period: {
+            start: start.toISOString().split('T')[0],
+            end: end.toISOString().split('T')[0],
+          },
+          revenue: {
+            grossSales: formatCurrency(grossSales),
+            discounts: formatCurrency(discounts),
+            refunds: formatCurrency(refunds),
+            netRevenue: formatCurrency(netRevenue),
+            discountRate: grossSales > 0 ? (discounts / grossSales) * 100 : 0,
+            refundRate: grossSales > 0 ? (refunds / grossSales) * 100 : 0,
+          },
+          orders: {
+            total: totalOrders,
+            fromNewCustomers: newCustomerOrders,
+            fromReturningCustomers: returningCustomerOrders,
+            avgOrderValue: formatCurrency(avgOrderValue),
+            newCustomerPercent: totalOrders > 0 ? (newCustomerOrders / totalOrders) * 100 : 0,
+          },
+          customers: {
+            newCustomers,
+            returningCustomers,
+            totalCustomers: newCustomers + returningCustomers,
+            repeatPurchaseRate: (newCustomers + returningCustomers) > 0
+              ? (returningCustomers / (newCustomers + returningCustomers)) * 100
+              : 0,
+          },
+          marketing: {
+            adSpend: formatCurrency(adSpend),
+            roas: Math.round(roas * 100) / 100,
+            cac: newCustomers > 0 ? formatCurrency(adSpend / newCustomers) : null,
+            revenuePerCustomer: (newCustomers + returningCustomers) > 0
+              ? formatCurrency(netRevenue / (newCustomers + returningCustomers))
+              : 0,
+          },
+          ...(comparison && { comparison }),
+        }
+      })
+
+      return jsonResult(metrics)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      return errorResult(`Failed to get sales metrics: ${message}`)
+    }
+  },
+})
+
 // =============================================================================
 // A/B Testing Tools
 // =============================================================================
@@ -1949,6 +2485,9 @@ export const analyticsTools: ToolDefinition[] = [
   getChannelPerformanceTool,
   getDailyMetricsTool,
   comparePeriodsTool,
+  getTrafficMetricsTool,
+  getGeoMetricsTool,
+  getSalesMetricsTool,
   // A/B testing tools
   listABTestsTool,
   getABTestTool,

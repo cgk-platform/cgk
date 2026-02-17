@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardContent } from '@cgk-platform/ui'
+import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -155,21 +156,113 @@ function ThresholdFilter({
 
 async function PaymentStatsLoader({
   taxYear,
+  payeeType,
 }: {
   taxYear: number
   payeeType: string
 }) {
-  // Headers available for future tenant context
-  void (await headers())
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
 
-  // Mock stats
-  const stats = {
-    totalPayees: 150,
-    totalAmountCents: 45000000,
-    aboveThreshold: 45,
-    approachingThreshold: 20,
-    belowThreshold: 85,
+  if (!tenantSlug) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-sm text-muted-foreground">No tenant configured</div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
+
+  // Query payouts for the tax year, aggregated by payee
+  const stats = await withTenant(tenantSlug, async () => {
+    // Get stats based on payee type
+    // For creators, use the payouts table which references creators
+    // For contractors/vendors, use their respective payout tables
+    if (payeeType === 'creator') {
+      const result = await sql`
+        SELECT
+          COUNT(DISTINCT p.creator_id) as total_payees,
+          COALESCE(SUM(p.amount_cents), 0) as total_amount_cents,
+          COUNT(DISTINCT CASE WHEN creator_totals.total_cents >= 60000 THEN p.creator_id END) as above_threshold,
+          COUNT(DISTINCT CASE WHEN creator_totals.total_cents >= 30000 AND creator_totals.total_cents < 60000 THEN p.creator_id END) as approaching_threshold,
+          COUNT(DISTINCT CASE WHEN creator_totals.total_cents < 30000 THEN p.creator_id END) as below_threshold
+        FROM payouts p
+        JOIN (
+          SELECT creator_id, SUM(amount_cents) as total_cents
+          FROM payouts
+          WHERE EXTRACT(YEAR FROM created_at) = ${taxYear}
+            AND status = 'completed'
+          GROUP BY creator_id
+        ) creator_totals ON p.creator_id = creator_totals.creator_id
+        WHERE EXTRACT(YEAR FROM p.created_at) = ${taxYear}
+          AND p.status = 'completed'
+      `
+      const row = result.rows[0]
+      return {
+        totalPayees: Number(row?.total_payees || 0),
+        totalAmountCents: Number(row?.total_amount_cents || 0),
+        aboveThreshold: Number(row?.above_threshold || 0),
+        approachingThreshold: Number(row?.approaching_threshold || 0),
+        belowThreshold: Number(row?.below_threshold || 0),
+      }
+    } else if (payeeType === 'contractor') {
+      const result = await sql`
+        SELECT
+          COUNT(DISTINCT cp.contractor_id) as total_payees,
+          COALESCE(SUM(cp.amount_cents), 0) as total_amount_cents,
+          COUNT(DISTINCT CASE WHEN contractor_totals.total_cents >= 60000 THEN cp.contractor_id END) as above_threshold,
+          COUNT(DISTINCT CASE WHEN contractor_totals.total_cents >= 30000 AND contractor_totals.total_cents < 60000 THEN cp.contractor_id END) as approaching_threshold,
+          COUNT(DISTINCT CASE WHEN contractor_totals.total_cents < 30000 THEN cp.contractor_id END) as below_threshold
+        FROM contractor_payouts cp
+        JOIN (
+          SELECT contractor_id, SUM(amount_cents) as total_cents
+          FROM contractor_payouts
+          WHERE EXTRACT(YEAR FROM created_at) = ${taxYear}
+            AND status = 'completed'
+          GROUP BY contractor_id
+        ) contractor_totals ON cp.contractor_id = contractor_totals.contractor_id
+        WHERE EXTRACT(YEAR FROM cp.created_at) = ${taxYear}
+          AND cp.status = 'completed'
+      `
+      const row = result.rows[0]
+      return {
+        totalPayees: Number(row?.total_payees || 0),
+        totalAmountCents: Number(row?.total_amount_cents || 0),
+        aboveThreshold: Number(row?.above_threshold || 0),
+        approachingThreshold: Number(row?.approaching_threshold || 0),
+        belowThreshold: Number(row?.below_threshold || 0),
+      }
+    } else {
+      // Vendor payouts
+      const result = await sql`
+        SELECT
+          COUNT(DISTINCT vp.vendor_id) as total_payees,
+          COALESCE(SUM(vp.amount_cents), 0) as total_amount_cents,
+          COUNT(DISTINCT CASE WHEN vendor_totals.total_cents >= 60000 THEN vp.vendor_id END) as above_threshold,
+          COUNT(DISTINCT CASE WHEN vendor_totals.total_cents >= 30000 AND vendor_totals.total_cents < 60000 THEN vp.vendor_id END) as approaching_threshold,
+          COUNT(DISTINCT CASE WHEN vendor_totals.total_cents < 30000 THEN vp.vendor_id END) as below_threshold
+        FROM vendor_payouts vp
+        JOIN (
+          SELECT vendor_id, SUM(amount_cents) as total_cents
+          FROM vendor_payouts
+          WHERE EXTRACT(YEAR FROM payment_date) = ${taxYear}
+          GROUP BY vendor_id
+        ) vendor_totals ON vp.vendor_id = vendor_totals.vendor_id
+        WHERE EXTRACT(YEAR FROM vp.payment_date) = ${taxYear}
+      `
+      const row = result.rows[0]
+      return {
+        totalPayees: Number(row?.total_payees || 0),
+        totalAmountCents: Number(row?.total_amount_cents || 0),
+        aboveThreshold: Number(row?.above_threshold || 0),
+        approachingThreshold: Number(row?.approaching_threshold || 0),
+        belowThreshold: Number(row?.below_threshold || 0),
+      }
+    }
+  })
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -209,6 +302,17 @@ async function PaymentStatsLoader({
   )
 }
 
+interface PayeeData {
+  id: string
+  payeeId: string
+  name: string
+  email: string
+  totalCents: number
+  percentOfThreshold: number
+  hasW9: boolean
+  formStatus: string | null
+}
+
 async function PaymentsListLoader({
   page,
   taxYear,
@@ -220,62 +324,183 @@ async function PaymentsListLoader({
   payeeType: string
   threshold?: string
 }) {
-  // Headers available for future tenant context
-  void (await headers())
+  const headerList = await headers()
+  const tenantSlug = headerList.get('x-tenant-slug')
 
-  // Mock data
-  const payees = [
-    {
-      id: '1',
-      payeeId: 'creator_123',
-      name: 'John Creator',
-      email: 'john@example.com',
-      totalCents: 125000,
-      percentOfThreshold: 208,
-      hasW9: true,
-      formStatus: 'approved',
-    },
-    {
-      id: '2',
-      payeeId: 'creator_456',
-      name: 'Jane Smith',
-      email: 'jane@example.com',
-      totalCents: 85000,
-      percentOfThreshold: 141,
-      hasW9: true,
-      formStatus: 'draft',
-    },
-    {
-      id: '3',
-      payeeId: 'creator_789',
-      name: 'Bob Johnson',
-      email: 'bob@example.com',
-      totalCents: 45000,
-      percentOfThreshold: 75,
-      hasW9: false,
-      formStatus: null,
-    },
-    {
-      id: '4',
-      payeeId: 'creator_012',
-      name: 'Alice Williams',
-      email: 'alice@example.com',
-      totalCents: 15000,
-      percentOfThreshold: 25,
-      hasW9: false,
-      formStatus: null,
-    },
-  ]
+  if (!tenantSlug) {
+    return <p className="text-muted-foreground">No tenant configured.</p>
+  }
 
-  let filteredPayees = payees
+  const limit = 50
+  const offset = (page - 1) * limit
+
+  // Build threshold filter conditions
+  // $600 = 60000 cents threshold
+  // above: >= 60000, approaching: 30000-59999 (50-99%), below: < 30000
+  let minCents = 0
+  let maxCents = Number.MAX_SAFE_INTEGER
   if (threshold === 'above') {
-    filteredPayees = filteredPayees.filter((p) => p.totalCents >= 60000)
+    minCents = 60000
   } else if (threshold === 'approaching') {
-    filteredPayees = filteredPayees.filter(
-      (p) => p.percentOfThreshold >= 50 && p.percentOfThreshold < 100
-    )
+    minCents = 30000
+    maxCents = 59999
   } else if (threshold === 'below') {
-    filteredPayees = filteredPayees.filter((p) => p.percentOfThreshold < 50)
+    maxCents = 29999
+  }
+
+  const { payees, totalCount } = await withTenant(tenantSlug, async () => {
+    if (payeeType === 'creator') {
+      // Query creators with their payout totals
+      const countResult = await sql`
+        SELECT COUNT(DISTINCT p.creator_id) as count
+        FROM payouts p
+        WHERE EXTRACT(YEAR FROM p.created_at) = ${taxYear}
+          AND p.status = 'completed'
+        GROUP BY p.creator_id
+        HAVING SUM(p.amount_cents) >= ${minCents} AND SUM(p.amount_cents) <= ${maxCents}
+      `
+
+      const result = await sql`
+        SELECT
+          c.id,
+          c.id as payee_id,
+          CONCAT(c.first_name, ' ', c.last_name) as name,
+          c.email,
+          COALESCE(payouts.total_cents, 0) as total_cents,
+          ROUND((COALESCE(payouts.total_cents, 0)::numeric / 600) * 100) as percent_of_threshold,
+          EXISTS(SELECT 1 FROM tax_payees tp WHERE tp.payee_id = c.id AND tp.payee_type = 'creator') as has_w9,
+          (SELECT tf.status FROM tax_forms tf WHERE tf.payee_id = c.id AND tf.payee_type = 'creator' AND tf.tax_year = ${taxYear} LIMIT 1) as form_status
+        FROM creators c
+        JOIN (
+          SELECT creator_id, SUM(amount_cents) as total_cents
+          FROM payouts
+          WHERE EXTRACT(YEAR FROM created_at) = ${taxYear}
+            AND status = 'completed'
+          GROUP BY creator_id
+          HAVING SUM(amount_cents) >= ${minCents} AND SUM(amount_cents) <= ${maxCents}
+        ) payouts ON c.id = payouts.creator_id
+        ORDER BY payouts.total_cents DESC
+        OFFSET ${offset} LIMIT ${limit}
+      `
+
+      return {
+        payees: result.rows.map((row) => ({
+          id: String(row.id),
+          payeeId: String(row.payee_id),
+          name: String(row.name || ''),
+          email: String(row.email || ''),
+          totalCents: Number(row.total_cents || 0),
+          percentOfThreshold: Number(row.percent_of_threshold || 0),
+          hasW9: Boolean(row.has_w9),
+          formStatus: row.form_status ? String(row.form_status) : null,
+        })) as PayeeData[],
+        totalCount: countResult.rows.length,
+      }
+    } else if (payeeType === 'contractor') {
+      const countResult = await sql`
+        SELECT COUNT(DISTINCT cp.contractor_id) as count
+        FROM contractor_payouts cp
+        WHERE EXTRACT(YEAR FROM cp.created_at) = ${taxYear}
+          AND cp.status = 'completed'
+        GROUP BY cp.contractor_id
+        HAVING SUM(cp.amount_cents) >= ${minCents} AND SUM(cp.amount_cents) <= ${maxCents}
+      `
+
+      const result = await sql`
+        SELECT
+          con.id,
+          con.id as payee_id,
+          con.name,
+          con.email,
+          COALESCE(payouts.total_cents, 0) as total_cents,
+          ROUND((COALESCE(payouts.total_cents, 0)::numeric / 600) * 100) as percent_of_threshold,
+          EXISTS(SELECT 1 FROM tax_payees tp WHERE tp.payee_id = con.id AND tp.payee_type = 'contractor') as has_w9,
+          (SELECT tf.status FROM tax_forms tf WHERE tf.payee_id = con.id AND tf.payee_type = 'contractor' AND tf.tax_year = ${taxYear} LIMIT 1) as form_status
+        FROM contractors con
+        JOIN (
+          SELECT contractor_id, SUM(amount_cents) as total_cents
+          FROM contractor_payouts
+          WHERE EXTRACT(YEAR FROM created_at) = ${taxYear}
+            AND status = 'completed'
+          GROUP BY contractor_id
+          HAVING SUM(amount_cents) >= ${minCents} AND SUM(amount_cents) <= ${maxCents}
+        ) payouts ON con.id = payouts.contractor_id
+        ORDER BY payouts.total_cents DESC
+        OFFSET ${offset} LIMIT ${limit}
+      `
+
+      return {
+        payees: result.rows.map((row) => ({
+          id: String(row.id),
+          payeeId: String(row.payee_id),
+          name: String(row.name || ''),
+          email: String(row.email || ''),
+          totalCents: Number(row.total_cents || 0),
+          percentOfThreshold: Number(row.percent_of_threshold || 0),
+          hasW9: Boolean(row.has_w9),
+          formStatus: row.form_status ? String(row.form_status) : null,
+        })) as PayeeData[],
+        totalCount: countResult.rows.length,
+      }
+    } else {
+      // Vendor payouts - vendors don't have a dedicated table, use vendor_payouts
+      const countResult = await sql`
+        SELECT COUNT(DISTINCT vp.vendor_id) as count
+        FROM vendor_payouts vp
+        WHERE EXTRACT(YEAR FROM vp.payment_date) = ${taxYear}
+        GROUP BY vp.vendor_id
+        HAVING SUM(vp.amount_cents) >= ${minCents} AND SUM(vp.amount_cents) <= ${maxCents}
+      `
+
+      const result = await sql`
+        SELECT
+          vp.vendor_id as id,
+          vp.vendor_id as payee_id,
+          vp.vendor_name as name,
+          '' as email,
+          COALESCE(payouts.total_cents, 0) as total_cents,
+          ROUND((COALESCE(payouts.total_cents, 0)::numeric / 600) * 100) as percent_of_threshold,
+          EXISTS(SELECT 1 FROM tax_payees tp WHERE tp.payee_id = vp.vendor_id AND tp.payee_type = 'vendor') as has_w9,
+          (SELECT tf.status FROM tax_forms tf WHERE tf.payee_id = vp.vendor_id AND tf.payee_type = 'vendor' AND tf.tax_year = ${taxYear} LIMIT 1) as form_status
+        FROM vendor_payouts vp
+        JOIN (
+          SELECT vendor_id, SUM(amount_cents) as total_cents
+          FROM vendor_payouts
+          WHERE EXTRACT(YEAR FROM payment_date) = ${taxYear}
+          GROUP BY vendor_id
+          HAVING SUM(amount_cents) >= ${minCents} AND SUM(amount_cents) <= ${maxCents}
+        ) payouts ON vp.vendor_id = payouts.vendor_id
+        GROUP BY vp.vendor_id, vp.vendor_name, payouts.total_cents
+        ORDER BY payouts.total_cents DESC
+        OFFSET ${offset} LIMIT ${limit}
+      `
+
+      return {
+        payees: result.rows.map((row) => ({
+          id: String(row.id || ''),
+          payeeId: String(row.payee_id || ''),
+          name: String(row.name || ''),
+          email: String(row.email || ''),
+          totalCents: Number(row.total_cents || 0),
+          percentOfThreshold: Number(row.percent_of_threshold || 0),
+          hasW9: Boolean(row.has_w9),
+          formStatus: row.form_status ? String(row.form_status) : null,
+        })) as PayeeData[],
+        totalCount: countResult.rows.length,
+      }
+    }
+  })
+
+  const totalPages = Math.ceil(totalCount / limit)
+
+  if (payees.length === 0) {
+    return (
+      <div className="rounded-md border p-8 text-center">
+        <p className="text-muted-foreground">
+          No payees found for tax year {taxYear} with the selected filters.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -293,7 +518,7 @@ async function PaymentsListLoader({
             </tr>
           </thead>
           <tbody className="divide-y">
-            {filteredPayees.map((payee) => (
+            {payees.map((payee) => (
               <tr key={payee.id} className="hover:bg-muted/50">
                 <td className="px-4 py-3">
                   <div className="font-medium">{payee.name}</div>
@@ -339,9 +564,9 @@ async function PaymentsListLoader({
 
       <Pagination
         page={page}
-        totalPages={1}
-        totalCount={filteredPayees.length}
-        limit={50}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        limit={limit}
         basePath="/admin/tax/annual-payments"
         currentFilters={{ tax_year: taxYear, payee_type: payeeType, threshold }}
       />

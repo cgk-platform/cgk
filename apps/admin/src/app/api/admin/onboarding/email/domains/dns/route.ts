@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -28,9 +27,7 @@ export async function GET(request: Request) {
 
   // If specific domain requested
   if (domainId) {
-    const instructions = await withTenant(tenantSlug, () =>
-      getDomainDNSInstructions(domainId)
-    )
+    const instructions = await getDomainDNSInstructions(tenantSlug, domainId)
 
     if (!instructions) {
       return NextResponse.json(
@@ -49,14 +46,12 @@ export async function GET(request: Request) {
   }
 
   // Return all domains with their status
-  const domains = await withTenant(tenantSlug, () => getDomainsWithStatus())
+  const domains = await getDomainsWithStatus(tenantSlug)
 
   // Get DNS instructions for each domain
   const domainsWithInstructions = await Promise.all(
     domains.map(async (domain) => {
-      const instructions = await withTenant(tenantSlug, () =>
-        getDomainDNSInstructions(domain.id)
-      )
+      const instructions = await getDomainDNSInstructions(tenantSlug, domain.id)
       return {
         ...domain,
         dnsInstructions: instructions,

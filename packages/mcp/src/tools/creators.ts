@@ -71,13 +71,17 @@ function formatCurrency(cents: number, currency = 'USD'): string {
 }
 
 /**
- * Validate required tenant context
+ * Get tenant ID from injected context
+ * CRITICAL: Use _tenantId which is injected by MCPHandler from authenticated session
+ * NEVER trust tenantId from client args - it can be spoofed
  */
-function validateTenantId(tenantId: string | undefined): string {
-  if (!tenantId) {
-    throw new Error('Tenant context required')
+function getTenantIdFromContext(args: Record<string, unknown>): string {
+  // _tenantId is injected by MCPHandler from the authenticated session
+  const tenantId = args._tenantId as string | undefined
+  if (!tenantId || typeof tenantId !== 'string' || tenantId.trim() === '') {
+    throw new Error('Tenant context required - missing _tenantId from auth context')
   }
-  return tenantId
+  return tenantId.trim()
 }
 
 // =============================================================================
@@ -122,7 +126,7 @@ export const listCreatorsTool = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const status = args.status as string | undefined
     const tier = args.tier as string | undefined
     const limit = Math.min(Math.max((args.limit as number) || 50, 1), 100)
@@ -203,7 +207,7 @@ export const getCreatorTool = defineTool({
     required: ['tenantId', 'creatorId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
 
     if (!creatorId) {
@@ -279,7 +283,7 @@ export const searchCreatorsTool = defineTool({
     required: ['tenantId', 'query'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const query = args.query as string
     const limit = Math.min(Math.max((args.limit as number) || 20, 1), 50)
 
@@ -379,7 +383,7 @@ export const updateCreatorTool = defineTool({
     required: ['tenantId', 'creatorId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
 
     if (!creatorId) {
@@ -504,7 +508,7 @@ export const approveCreatorTool = defineTool({
     required: ['tenantId', 'creatorId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const tier = (args.tier as string) || 'bronze'
     const commissionRatePct = (args.commissionRatePct as number) || 10.0
@@ -584,7 +588,7 @@ export const rejectCreatorTool = defineTool({
     required: ['tenantId', 'creatorId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const reason = args.reason as string | undefined
 
@@ -666,7 +670,7 @@ export const listProjectsTool = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string | undefined
     const status = args.status as string | undefined
     const limit = Math.min(Math.max((args.limit as number) || 50, 1), 100)
@@ -761,7 +765,7 @@ export const getProjectTool = defineTool({
     required: ['tenantId', 'projectId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const projectId = args.projectId as string
 
     if (!projectId) {
@@ -869,7 +873,7 @@ export const createProjectTool = defineTool({
     required: ['tenantId', 'creatorId', 'brandId', 'title', 'createdBy'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const brandId = args.brandId as string
     const title = args.title as string
@@ -969,7 +973,7 @@ export const updateProjectTool = defineTool({
     required: ['tenantId', 'projectId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const projectId = args.projectId as string
 
     if (!projectId) {
@@ -1071,7 +1075,7 @@ export const updateProjectStatusTool = defineTool({
     required: ['tenantId', 'projectId', 'status'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const projectId = args.projectId as string
     const newStatus = args.status as string
     const feedback = args.feedback as string | undefined
@@ -1186,7 +1190,7 @@ export const listPayoutsTool = defineTool({
     required: ['tenantId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string | undefined
     const status = args.status as string | undefined
     const limit = Math.min(Math.max((args.limit as number) || 50, 1), 100)
@@ -1292,7 +1296,7 @@ export const getPayoutTool = defineTool({
     required: ['tenantId', 'payoutId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const payoutId = args.payoutId as string
 
     if (!payoutId) {
@@ -1355,7 +1359,7 @@ export const getCreatorBalanceTool = defineTool({
     required: ['tenantId', 'creatorId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
 
     if (!creatorId) {
@@ -1456,7 +1460,7 @@ export const initiatePayoutTool = defineTool({
     required: ['tenantId', 'creatorId', 'amountCents', 'method'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const amountCents = args.amountCents as number
     const method = args.method as string
@@ -1586,7 +1590,7 @@ export const getPayoutHistoryTool = defineTool({
     required: ['tenantId', 'creatorId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const limit = Math.min(Math.max((args.limit as number) || 50, 1), 100)
 
@@ -1706,7 +1710,7 @@ export const sendCreatorEmailTool = defineTool({
     required: ['tenantId', 'creatorId', 'subject'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const subject = args.subject as string
     const contentHtml = args.contentHtml as string | undefined
@@ -1843,7 +1847,7 @@ export const listCreatorCommunicationsTool = defineTool({
     required: ['tenantId', 'creatorId'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const limit = Math.min(Math.max((args.limit as number) || 50, 1), 100)
 
@@ -1938,7 +1942,7 @@ export const scheduleReminderTool = defineTool({
     required: ['tenantId', 'creatorId', 'subject', 'contentHtml', 'scheduledFor'],
   },
   async handler(args) {
-    const tenantId = validateTenantId(args.tenantId as string | undefined)
+    const tenantId = getTenantIdFromContext(args)
     const creatorId = args.creatorId as string
     const subject = args.subject as string
     const contentHtml = args.contentHtml as string

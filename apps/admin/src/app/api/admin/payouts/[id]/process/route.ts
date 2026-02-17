@@ -1,7 +1,13 @@
 export const dynamic = 'force-dynamic'
 
-import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+
+import { requireAuth, checkPermissionOrRespond } from '@cgk-platform/auth'
+import { sql, withTenant } from '@cgk-platform/db'
+import {
+  getTenantStripeClient,
+  getTenantWiseClient,
+} from '@cgk-platform/integrations'
 
 import {
   getWithdrawal,
@@ -14,21 +20,74 @@ import {
 
 type Action = 'approve' | 'reject' | 'execute'
 
+interface PayoutMethod {
+  stripe_account_id: string | null
+  wise_recipient_id: string | null
+}
+
+/**
+ * Get creator's payout method info (Stripe account ID or Wise recipient ID)
+ */
+async function getCreatorPayoutMethod(
+  tenantSlug: string,
+  creatorId: string,
+  method: 'stripe' | 'wise'
+): Promise<PayoutMethod | null> {
+  return withTenant(tenantSlug, async () => {
+    const result = await sql`
+      SELECT
+        stripe_account_id,
+        wise_recipient_id
+      FROM payout_methods
+      WHERE payee_id = ${creatorId}
+        AND type = ${method === 'stripe' ? 'stripe_connect' : 'wise'}
+        AND status = 'active'
+      LIMIT 1
+    `
+    const row = result.rows[0]
+    if (!row) return null
+    return {
+      stripe_account_id: row.stripe_account_id as string | null,
+      wise_recipient_id: row.wise_recipient_id as string | null,
+    }
+  })
+}
+
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
-  const userId = headerList.get('x-user-id')
 
-  if (!tenantSlug) {
+  // Authenticate and get tenant context
+  let auth
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (!auth.tenantId) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Check permission
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    auth.tenantId,
+    'payouts.process'
+  )
+  if (permissionDenied) return permissionDenied
+
+  // Get tenant slug for database operations
+  const orgResult = await sql`
+    SELECT slug FROM public.organizations
+    WHERE id = ${auth.tenantId}
+    LIMIT 1
+  `
+  const tenantSlug = orgResult.rows[0]?.slug as string
+  if (!tenantSlug) {
+    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
   let body: { action?: Action; reason?: string }
@@ -42,7 +101,7 @@ export async function POST(
   if (!body.action || !validActions.includes(body.action)) {
     return NextResponse.json(
       { error: `Invalid action. Must be one of: ${validActions.join(', ')}` },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -56,12 +115,15 @@ export async function POST(
       if (withdrawal.status !== 'pending') {
         return NextResponse.json(
           { error: 'Can only approve pending withdrawals' },
-          { status: 400 },
+          { status: 400 }
         )
       }
-      const success = await approveWithdrawal(tenantSlug, id, userId)
+      const success = await approveWithdrawal(tenantSlug, id, auth.userId)
       if (!success) {
-        return NextResponse.json({ error: 'Failed to approve withdrawal' }, { status: 500 })
+        return NextResponse.json(
+          { error: 'Failed to approve withdrawal' },
+          { status: 500 }
+        )
       }
       return NextResponse.json({ success: true, status: 'approved' })
     }
@@ -70,13 +132,16 @@ export async function POST(
       if (withdrawal.status !== 'pending') {
         return NextResponse.json(
           { error: 'Can only reject pending withdrawals' },
-          { status: 400 },
+          { status: 400 }
         )
       }
       const reason = body.reason || 'Rejected by admin'
       const success = await rejectWithdrawal(tenantSlug, id, reason)
       if (!success) {
-        return NextResponse.json({ error: 'Failed to reject withdrawal' }, { status: 500 })
+        return NextResponse.json(
+          { error: 'Failed to reject withdrawal' },
+          { status: 500 }
+        )
       }
       return NextResponse.json({ success: true, status: 'rejected' })
     }
@@ -85,22 +150,31 @@ export async function POST(
       if (withdrawal.status !== 'approved') {
         return NextResponse.json(
           { error: 'Can only execute approved withdrawals' },
-          { status: 400 },
+          { status: 400 }
         )
       }
 
       await markWithdrawalProcessing(tenantSlug, id)
 
       try {
-        const transferId = await executePayoutTransfer(withdrawal)
+        const transferId = await executePayoutTransfer(
+          auth.tenantId,
+          tenantSlug,
+          withdrawal
+        )
         await processWithdrawal(tenantSlug, id, transferId)
-        return NextResponse.json({ success: true, status: 'completed', transferId })
+        return NextResponse.json({
+          success: true,
+          status: 'completed',
+          transferId,
+        })
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error'
         await failWithdrawal(tenantSlug, id, errorMessage)
         return NextResponse.json(
           { error: `Payout failed: ${errorMessage}`, status: 'failed' },
-          { status: 500 },
+          { status: 500 }
         )
       }
     }
@@ -110,70 +184,123 @@ export async function POST(
   }
 }
 
-async function executePayoutTransfer(withdrawal: {
-  id: string
-  amount_cents: number
-  currency: string
-  method: string
-  creator_email: string
-}): Promise<string> {
+async function executePayoutTransfer(
+  tenantId: string,
+  tenantSlug: string,
+  withdrawal: {
+    id: string
+    creator_id: string
+    amount_cents: number
+    currency: string
+    method: string
+    creator_email: string
+  }
+): Promise<string> {
   if (withdrawal.method === 'stripe') {
-    return executeStripeTransfer(withdrawal)
+    return executeStripeTransfer(tenantId, tenantSlug, withdrawal)
   } else if (withdrawal.method === 'wise') {
-    return executeWiseTransfer(withdrawal)
+    return executeWiseTransfer(tenantId, tenantSlug, withdrawal)
   } else {
+    // Manual payout - just generate a reference ID
     return `manual_${withdrawal.id}_${Date.now()}`
   }
 }
 
-async function executeStripeTransfer(withdrawal: {
-  id: string
-  amount_cents: number
-  currency: string
-  creator_email: string
-}): Promise<string> {
-  const stripeSecretKey = process.env.STRIPE_SECRET_KEY
-  if (!stripeSecretKey) {
-    throw new Error('Stripe is not configured')
+async function executeStripeTransfer(
+  tenantId: string,
+  tenantSlug: string,
+  withdrawal: {
+    id: string
+    creator_id: string
+    amount_cents: number
+    currency: string
+    creator_email: string
+  }
+): Promise<string> {
+  // Get tenant's Stripe client
+  const stripe = await getTenantStripeClient(tenantId)
+  if (!stripe) {
+    throw new Error('Stripe is not configured for this tenant')
   }
 
-  const response = await fetch('https://api.stripe.com/v1/transfers', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${stripeSecretKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+  // Get creator's Stripe Connect account ID
+  const payoutMethod = await getCreatorPayoutMethod(
+    tenantSlug,
+    withdrawal.creator_id,
+    'stripe'
+  )
+  if (!payoutMethod?.stripe_account_id) {
+    throw new Error(
+      'Creator does not have a connected Stripe account for payouts'
+    )
+  }
+
+  // Create the transfer using tenant's Stripe account
+  const transfer = await stripe.transfers.create({
+    amount: withdrawal.amount_cents,
+    currency: withdrawal.currency.toLowerCase(),
+    destination: payoutMethod.stripe_account_id,
+    transfer_group: `withdrawal_${withdrawal.id}`,
+    metadata: {
+      withdrawal_id: withdrawal.id,
+      creator_email: withdrawal.creator_email,
     },
-    body: new URLSearchParams({
-      amount: String(withdrawal.amount_cents),
-      currency: withdrawal.currency.toLowerCase(),
-      destination: 'CONNECTED_ACCOUNT_ID',
-      transfer_group: `withdrawal_${withdrawal.id}`,
-      metadata: JSON.stringify({
-        withdrawal_id: withdrawal.id,
-        creator_email: withdrawal.creator_email,
-      }),
-    }),
   })
 
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error?.message || 'Stripe transfer failed')
-  }
-
-  const transfer = await response.json()
   return transfer.id
 }
 
-async function executeWiseTransfer(withdrawal: {
-  id: string
-  amount_cents: number
-  currency: string
-  creator_email: string
-}): Promise<string> {
-  const wiseApiToken = process.env.WISE_API_TOKEN
-  if (!wiseApiToken) {
-    throw new Error('Wise is not configured')
+async function executeWiseTransfer(
+  tenantId: string,
+  tenantSlug: string,
+  withdrawal: {
+    id: string
+    creator_id: string
+    amount_cents: number
+    currency: string
+    creator_email: string
+  }
+): Promise<string> {
+  // Get tenant's Wise client
+  const wise = await getTenantWiseClient(tenantId)
+  if (!wise) {
+    throw new Error('Wise is not configured for this tenant')
   }
 
-  return `wise_${withdrawal.id}_${Date.now()}`
+  // Get creator's Wise recipient ID
+  const payoutMethod = await getCreatorPayoutMethod(
+    tenantSlug,
+    withdrawal.creator_id,
+    'wise'
+  )
+  if (!payoutMethod?.wise_recipient_id) {
+    throw new Error('Creator does not have a Wise recipient configured')
+  }
+
+  const wiseRecipientId = parseInt(payoutMethod.wise_recipient_id, 10)
+  if (isNaN(wiseRecipientId)) {
+    throw new Error('Invalid Wise recipient ID')
+  }
+
+  // Create a quote for the transfer
+  const quote = await wise.createQuote({
+    sourceCurrency: withdrawal.currency.toUpperCase(),
+    targetCurrency: withdrawal.currency.toUpperCase(),
+    sourceAmount: withdrawal.amount_cents / 100,
+  })
+
+  // Create the transfer
+  const transfer = await wise.createTransfer({
+    targetAccount: wiseRecipientId,
+    quoteUuid: quote.id,
+    customerTransactionId: `withdrawal_${withdrawal.id}`,
+    details: {
+      reference: `Payout ${withdrawal.id}`,
+    },
+  })
+
+  // Fund the transfer from Wise balance
+  await wise.fundTransfer(String(transfer.id))
+
+  return String(transfer.id)
 }

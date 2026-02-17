@@ -149,3 +149,92 @@ export interface NavItem {
   /** Whether this section requires MFA */
   requiresMfa?: boolean
 }
+
+// ============================================================================
+// Analytics Types
+// ============================================================================
+
+/**
+ * Time series data point for GMV/revenue trends
+ */
+export interface TimeSeriesDataPoint {
+  /** Date/time of the data point (ISO string) */
+  date: string
+  /** GMV in cents */
+  gmvCents: number
+  /** Order count */
+  orderCount: number
+  /** Customer count */
+  customerCount: number
+}
+
+/**
+ * Tenant revenue breakdown
+ */
+export interface TenantRevenue {
+  /** Tenant slug */
+  slug: string
+  /** Tenant display name */
+  name: string
+  /** Total GMV in cents for the period */
+  gmvCents: number
+  /** Order count for the period */
+  orderCount: number
+  /** Average order value in cents */
+  aovCents: number
+}
+
+/**
+ * Customer metrics
+ */
+export interface CustomerMetrics {
+  /** Total customer count */
+  totalCustomers: number
+  /** New customers in period */
+  newCustomers: number
+  /** Returning customers (made multiple purchases) */
+  returningCustomers: number
+  /** Average order value in cents */
+  aovCents: number
+  /** Previous period AOV for comparison */
+  previousAovCents: number
+}
+
+/**
+ * Growth indicators
+ */
+export interface GrowthIndicators {
+  /** Month over month GMV change percentage */
+  momGmvChange: number
+  /** Year over year GMV change percentage (if data available) */
+  yoyGmvChange: number | null
+  /** Month over month order count change percentage */
+  momOrderChange: number
+  /** Month over month customer change percentage */
+  momCustomerChange: number
+}
+
+/**
+ * Platform analytics response
+ */
+export interface PlatformAnalytics {
+  /** Date range for the data */
+  dateRange: {
+    start: string
+    end: string
+  }
+  /** Time series data for charts */
+  timeSeries: TimeSeriesDataPoint[]
+  /** Revenue breakdown by tenant (top performers) */
+  tenantRevenue: TenantRevenue[]
+  /** Customer metrics */
+  customerMetrics: CustomerMetrics
+  /** Growth indicators */
+  growth: GrowthIndicators
+  /** Summary totals */
+  totals: {
+    gmvCents: number
+    orderCount: number
+    customerCount: number
+  }
+}

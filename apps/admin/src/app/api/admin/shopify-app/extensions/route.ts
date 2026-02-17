@@ -5,7 +5,10 @@
  * Used by the admin UI to display extension deployment and configuration status.
  */
 
+import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+
+import { withTenant, sql } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -34,64 +37,143 @@ interface ExtensionsResponse {
 }
 
 /**
+ * Platform extensions that are part of the CGK Shopify app.
+ * These are deployed as part of the app and their availability
+ * depends on the Shopify connection status.
+ */
+const PLATFORM_EXTENSIONS: Omit<ExtensionStatus, 'status' | 'configured'>[] = [
+  {
+    handle: 'delivery-customization',
+    name: 'Platform Delivery Customization',
+    type: 'function',
+    version: '1.0.0',
+  },
+  {
+    handle: 'session-stitching-pixel',
+    name: 'Session Stitching Pixel',
+    type: 'web_pixel_extension',
+    version: '1.0.0',
+  },
+  {
+    handle: 'post-purchase-survey',
+    name: 'Post-Purchase Survey',
+    type: 'checkout_ui_extension',
+    version: '1.0.0',
+  },
+]
+
+/**
  * GET /api/admin/shopify-app/extensions
  *
  * Returns the status of all Shopify extensions.
- * In production, this would query Shopify's API and the platform database.
+ * Queries the shopify_connections table for connection status
+ * and returns extension availability based on that.
  */
 export async function GET(): Promise<NextResponse<ExtensionsResponse>> {
   try {
-    // TODO: Get tenant context from auth
-    // const { tenantId } = await getTenantContext(request)
+    const headerList = await headers()
+    const tenantSlug = headerList.get('x-tenant-slug')
 
-    // TODO: Check if Shopify is connected for this tenant
-    // const shopifyConnection = await withTenant(tenantId, () =>
-    //   sql`SELECT * FROM shopify_connections WHERE tenant_id = ${tenantId}`
-    // )
+    if (!tenantSlug) {
+      return NextResponse.json({
+        connected: false,
+        extensions: [],
+      })
+    }
 
-    // For now, return mock data showing extension structure
-    // In production, this would:
-    // 1. Query Shopify Admin API for deployed extensions
-    // 2. Query platform database for configuration status
-    // 3. Return combined status
+    // Query the Shopify connection for this tenant
+    const connectionResult = await withTenant(tenantSlug, async () => {
+      return sql`
+        SELECT
+          shop,
+          status,
+          pixel_id,
+          pixel_active,
+          last_sync_at,
+          installed_at
+        FROM shopify_connections
+        WHERE status = 'active'
+        LIMIT 1
+      `
+    })
 
-    const mockConnected = true
-    const mockShopDomain = 'demo-store.myshopify.com'
+    const connection = connectionResult.rows[0] as {
+      shop: string
+      status: string
+      pixel_id: string | null
+      pixel_active: boolean
+      last_sync_at: string | null
+      installed_at: string
+    } | undefined
 
-    // Mock extension statuses - in production these come from Shopify API
-    const extensions: ExtensionStatus[] = [
-      {
-        handle: 'delivery-customization',
-        name: 'Platform Delivery Customization',
-        type: 'function',
-        status: 'active',
-        lastDeployed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        version: '1.0.0',
-        configured: true, // Functions don't need additional config
-      },
-      {
-        handle: 'session-stitching-pixel',
-        name: 'Session Stitching Pixel',
-        type: 'web_pixel_extension',
-        status: 'active',
-        lastDeployed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        version: '1.0.0',
-        configured: true, // Depends on if GA4/Meta settings are configured
-      },
-      {
-        handle: 'post-purchase-survey',
-        name: 'Post-Purchase Survey',
-        type: 'checkout_ui_extension',
-        status: 'active',
-        lastDeployed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        version: '1.0.0',
-        configured: false, // Requires survey config URL
-      },
-    ]
+    if (!connection) {
+      // No active Shopify connection
+      return NextResponse.json({
+        connected: false,
+        extensions: PLATFORM_EXTENSIONS.map((ext) => ({
+          ...ext,
+          status: 'inactive' as const,
+          configured: false,
+        })),
+      })
+    }
+
+    // Check extension configuration status
+    // For now, we determine configuration based on known criteria:
+    // - Delivery customization: Always configured (function-based)
+    // - Session stitching pixel: Configured if pixel is active
+    // - Post-purchase survey: Would need survey config (check analytics config)
+
+    const analyticsConfigResult = await withTenant(tenantSlug, async () => {
+      return sql`
+        SELECT config FROM tenant_settings
+        WHERE setting_key = 'analytics'
+        LIMIT 1
+      `
+    })
+
+    const analyticsConfig = analyticsConfigResult.rows[0]?.config as {
+      ga4MeasurementId?: string
+      metaPixelId?: string
+      postPurchaseSurveyEnabled?: boolean
+    } | undefined
+
+    const extensions: ExtensionStatus[] = PLATFORM_EXTENSIONS.map((ext) => {
+      let configured = false
+      let status: ExtensionStatus['status'] = 'active'
+
+      switch (ext.handle) {
+        case 'delivery-customization':
+          // Functions are always configured once deployed
+          configured = true
+          break
+        case 'session-stitching-pixel':
+          // Pixel configured if GA4 or Meta pixel is set up
+          configured = !!(
+            connection.pixel_active ||
+            analyticsConfig?.ga4MeasurementId ||
+            analyticsConfig?.metaPixelId
+          )
+          if (!configured) status = 'pending'
+          break
+        case 'post-purchase-survey':
+          // Survey needs explicit configuration
+          configured = !!analyticsConfig?.postPurchaseSurveyEnabled
+          if (!configured) status = 'pending'
+          break
+      }
+
+      return {
+        ...ext,
+        status,
+        configured,
+        lastDeployed: connection.installed_at,
+      }
+    })
 
     return NextResponse.json({
-      connected: mockConnected,
-      shopDomain: mockShopDomain,
+      connected: true,
+      shopDomain: connection.shop,
       extensions,
     })
   } catch (error) {

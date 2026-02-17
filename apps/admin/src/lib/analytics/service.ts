@@ -260,9 +260,90 @@ export async function getSpendSensitivity(
   dateRange: DateRange
 ): Promise<SpendSensitivityData> {
   const metrics = await getDailyMetrics(tenantSlug, dateRange)
+  const { current, previous } = getDateRangeBounds(dateRange)
 
-  const totalSpend = metrics.reduce((sum, m) => sum + m.adSpend, 0)
-  const totalRevenue = metrics.reduce((sum, m) => sum + m.netRevenue, 0)
+  // Get real channel spend data from attribution_channel_summary
+  const channelData = await withTenant(tenantSlug, async () => {
+    // Current period channel metrics
+    const currentChannelResult = await sql`
+      SELECT
+        LOWER(channel) as channel,
+        COALESCE(SUM(spend), 0) as spend,
+        COALESCE(SUM(revenue), 0) as revenue,
+        COALESCE(SUM(conversions), 0) as conversions
+      FROM attribution_channel_summary
+      WHERE date >= ${current.start} AND date <= ${current.end}
+      GROUP BY LOWER(channel)
+      ORDER BY spend DESC
+    `
+
+    // Previous period channel metrics
+    const previousChannelResult = await sql`
+      SELECT
+        LOWER(channel) as channel,
+        COALESCE(SUM(spend), 0) as spend,
+        COALESCE(SUM(revenue), 0) as revenue,
+        COALESCE(SUM(conversions), 0) as conversions
+      FROM attribution_channel_summary
+      WHERE date >= ${previous.start} AND date <= ${previous.end}
+      GROUP BY LOWER(channel)
+    `
+
+    const previousChannelMap = new Map<string, { spend: number; revenue: number; conversions: number }>()
+    for (const row of previousChannelResult.rows) {
+      previousChannelMap.set(row.channel as string, {
+        spend: Number(row.spend),
+        revenue: Number(row.revenue),
+        conversions: Number(row.conversions),
+      })
+    }
+
+    return { currentChannelResult, previousChannelMap }
+  })
+
+  // Calculate totals from real data
+  let totalSpend = 0
+  let totalRevenue = 0
+  let totalConversions = 0
+  let previousTotalSpend = 0
+
+  const spendByChannelRaw: Array<{
+    channel: string
+    spend: number
+    previousSpend: number
+    revenue: number
+    conversions: number
+  }> = []
+
+  for (const row of channelData.currentChannelResult.rows) {
+    const channel = row.channel as string
+    const spend = Number(row.spend)
+    const revenue = Number(row.revenue)
+    const conversions = Number(row.conversions)
+    const prev = channelData.previousChannelMap.get(channel)
+    const previousSpend = prev?.spend || 0
+
+    totalSpend += spend
+    totalRevenue += revenue
+    totalConversions += conversions
+    previousTotalSpend += previousSpend
+
+    spendByChannelRaw.push({
+      channel,
+      spend,
+      previousSpend,
+      revenue,
+      conversions,
+    })
+  }
+
+  // Fall back to daily metrics totals if no attribution data
+  if (totalSpend === 0) {
+    totalSpend = metrics.reduce((sum, m) => sum + m.adSpend, 0)
+    totalRevenue = metrics.reduce((sum, m) => sum + m.netRevenue, 0)
+    previousTotalSpend = totalSpend * 0.9 // Estimate
+  }
+
   const totalOrders = metrics.reduce((sum, m) => sum + m.orders, 0)
   const totalCustomers = metrics.reduce((sum, m) => sum + m.newCustomers, 0)
 
@@ -270,20 +351,103 @@ export async function getSpendSensitivity(
   const cpo = totalOrders > 0 ? totalSpend / totalOrders : 0
   const cpa = totalCustomers > 0 ? totalSpend / totalCustomers : 0
 
+  // Map channels to expected types, grouping unknown channels into 'other'
+  const channelTypeMap: Record<string, 'meta' | 'google' | 'tiktok' | 'other'> = {
+    meta: 'meta',
+    facebook: 'meta',
+    instagram: 'meta',
+    google: 'google',
+    googleads: 'google',
+    tiktok: 'tiktok',
+  }
+
+  const channelAggregates = new Map<'meta' | 'google' | 'tiktok' | 'other', {
+    spend: number
+    previousSpend: number
+    revenue: number
+    conversions: number
+  }>()
+
+  for (const ch of spendByChannelRaw) {
+    const mappedChannel = channelTypeMap[ch.channel.toLowerCase()] || 'other'
+    const existing = channelAggregates.get(mappedChannel) || {
+      spend: 0,
+      previousSpend: 0,
+      revenue: 0,
+      conversions: 0,
+    }
+    channelAggregates.set(mappedChannel, {
+      spend: existing.spend + ch.spend,
+      previousSpend: existing.previousSpend + ch.previousSpend,
+      revenue: existing.revenue + ch.revenue,
+      conversions: existing.conversions + ch.conversions,
+    })
+  }
+
+  // Build spendByChannel array with real data
+  const spendByChannel: Array<{
+    channel: 'meta' | 'google' | 'tiktok' | 'other'
+    spend: number
+    previousSpend: number
+    change: number
+  }> = []
+
+  for (const channel of ['meta', 'google', 'tiktok', 'other'] as const) {
+    const data = channelAggregates.get(channel)
+    if (data && data.spend > 0) {
+      const change = data.previousSpend > 0
+        ? Math.round(((data.spend - data.previousSpend) / data.previousSpend) * 100)
+        : 0
+      spendByChannel.push({
+        channel,
+        spend: data.spend,
+        previousSpend: data.previousSpend,
+        change,
+      })
+    }
+  }
+
+  // If no channel data, return empty array (no fallback to hardcoded percentages)
+  // This lets the UI know there's no real data
+
+  // Build channelComparison with real data
+  const channelComparison: Array<{
+    channel: 'meta' | 'google' | 'tiktok' | 'other'
+    spend: number
+    revenue: number
+    roas: number
+    cpa: number
+    conversions: number
+    efficiencyRank: number
+  }> = []
+
+  let rank = 1
+  const sortedChannels = Array.from(channelAggregates.entries())
+    .filter(([, data]) => data.spend > 0)
+    .sort((a, b) => {
+      const roasA = a[1].spend > 0 ? a[1].revenue / a[1].spend : 0
+      const roasB = b[1].spend > 0 ? b[1].revenue / b[1].spend : 0
+      return roasB - roasA
+    })
+
+  for (const [channel, data] of sortedChannels) {
+    const channelRoas = data.spend > 0 ? data.revenue / data.spend : 0
+    const channelCpa = data.conversions > 0 ? data.spend / data.conversions : 0
+    channelComparison.push({
+      channel,
+      spend: data.spend,
+      revenue: data.revenue,
+      roas: channelRoas,
+      cpa: channelCpa,
+      conversions: data.conversions,
+      efficiencyRank: rank++,
+    })
+  }
+
   return {
     overview: {
-      totalSpend: createMetricWithTrend(totalSpend, totalSpend * 0.9),
-      spendByChannel: [
-        { channel: 'meta', spend: totalSpend * 0.5, previousSpend: totalSpend * 0.45, change: 11 },
-        {
-          channel: 'google',
-          spend: totalSpend * 0.35,
-          previousSpend: totalSpend * 0.35,
-          change: 0,
-        },
-        { channel: 'tiktok', spend: totalSpend * 0.1, previousSpend: totalSpend * 0.12, change: -17 },
-        { channel: 'other', spend: totalSpend * 0.05, previousSpend: totalSpend * 0.08, change: -37 },
-      ],
+      totalSpend: createMetricWithTrend(totalSpend, previousTotalSpend),
+      spendByChannel,
       spendTrend: metrics.map((m) => ({ date: m.date, spend: m.adSpend, revenue: m.netRevenue })),
     },
     efficiency: {
@@ -304,44 +468,7 @@ export async function getSpendSensitivity(
       diminishingReturnsThreshold: totalSpend * 1.3,
       currentPosition: 'optimal',
     },
-    channelComparison: [
-      {
-        channel: 'meta',
-        spend: totalSpend * 0.5,
-        revenue: totalRevenue * 0.45,
-        roas: (totalRevenue * 0.45) / (totalSpend * 0.5),
-        cpa: (totalSpend * 0.5) / (totalCustomers * 0.4),
-        conversions: Math.round(totalOrders * 0.4),
-        efficiencyRank: 1,
-      },
-      {
-        channel: 'google',
-        spend: totalSpend * 0.35,
-        revenue: totalRevenue * 0.35,
-        roas: (totalRevenue * 0.35) / (totalSpend * 0.35),
-        cpa: (totalSpend * 0.35) / (totalCustomers * 0.35),
-        conversions: Math.round(totalOrders * 0.35),
-        efficiencyRank: 2,
-      },
-      {
-        channel: 'tiktok',
-        spend: totalSpend * 0.1,
-        revenue: totalRevenue * 0.15,
-        roas: (totalRevenue * 0.15) / (totalSpend * 0.1),
-        cpa: (totalSpend * 0.1) / (totalCustomers * 0.15),
-        conversions: Math.round(totalOrders * 0.15),
-        efficiencyRank: 3,
-      },
-      {
-        channel: 'other',
-        spend: totalSpend * 0.05,
-        revenue: totalRevenue * 0.05,
-        roas: 1,
-        cpa: (totalSpend * 0.05) / (totalCustomers * 0.1),
-        conversions: Math.round(totalOrders * 0.1),
-        efficiencyRank: 4,
-      },
-    ],
+    channelComparison,
   }
 }
 
@@ -525,20 +652,142 @@ export async function getPlatformData(
   tenantSlug: string,
   dateRange: DateRange
 ): Promise<PlatformData> {
+  const { current, previous } = getDateRangeBounds(dateRange)
+
   return withTenant(tenantSlug, async () => {
-    // Get order metrics
+    // Get order metrics for current period
     const orderResult = await sql`
       SELECT
         COUNT(*) as total_orders,
         COALESCE(SUM(total_cents), 0) as total_revenue,
         COALESCE(AVG(total_cents), 0) as avg_order_value
       FROM orders
-      WHERE created_at >= ${dateRange.startDate} AND created_at <= ${dateRange.endDate}
+      WHERE created_at >= ${current.start} AND created_at <= ${current.end}
+    `
+
+    // Get order metrics for previous period
+    const prevOrderResult = await sql`
+      SELECT
+        COUNT(*) as total_orders,
+        COALESCE(SUM(total_cents), 0) as total_revenue,
+        COALESCE(AVG(total_cents), 0) as avg_order_value
+      FROM orders
+      WHERE created_at >= ${previous.start} AND created_at <= ${previous.end}
     `
 
     const totalOrders = Number(orderResult.rows[0]?.total_orders || 0)
     const totalRevenue = Number(orderResult.rows[0]?.total_revenue || 0) / 100
     const aov = Number(orderResult.rows[0]?.avg_order_value || 0) / 100
+
+    const prevTotalOrders = Number(prevOrderResult.rows[0]?.total_orders || 0)
+    const prevTotalRevenue = Number(prevOrderResult.rows[0]?.total_revenue || 0) / 100
+    const prevAov = Number(prevOrderResult.rows[0]?.avg_order_value || 0) / 100
+
+    // Get session and conversion metrics from analytics_daily_metrics
+    const conversionResult = await sql`
+      SELECT
+        COALESCE(SUM(sessions), 0) as sessions,
+        COALESCE(SUM(total_orders), 0) as orders,
+        COALESCE(AVG(conversion_rate), 0) as avg_conversion_rate,
+        COALESCE(AVG(cart_abandonment_rate), 0) as cart_abandonment_rate,
+        COALESCE(SUM(cart_adds), 0) as cart_adds,
+        COALESCE(SUM(checkouts_initiated), 0) as checkouts_initiated
+      FROM analytics_daily_metrics
+      WHERE date >= ${current.start} AND date <= ${current.end}
+    `
+
+    const prevConversionResult = await sql`
+      SELECT
+        COALESCE(SUM(sessions), 0) as sessions,
+        COALESCE(SUM(total_orders), 0) as orders,
+        COALESCE(AVG(conversion_rate), 0) as avg_conversion_rate,
+        COALESCE(AVG(cart_abandonment_rate), 0) as cart_abandonment_rate,
+        COALESCE(SUM(cart_adds), 0) as cart_adds,
+        COALESCE(SUM(checkouts_initiated), 0) as checkouts_initiated
+      FROM analytics_daily_metrics
+      WHERE date >= ${previous.start} AND date <= ${previous.end}
+    `
+
+    const sessions = Number(conversionResult.rows[0]?.sessions || 0)
+    const prevSessions = Number(prevConversionResult.rows[0]?.sessions || 0)
+
+    // Calculate conversion rate from real data
+    const calculatedConversionRate = sessions > 0 ? totalOrders / sessions : 0
+    const prevCalculatedConversionRate = prevSessions > 0 ? prevTotalOrders / prevSessions : 0
+
+    // Use calculated conversion rate, or fall back to avg from metrics table if no sessions
+    const conversionRate = sessions > 0
+      ? calculatedConversionRate
+      : Number(conversionResult.rows[0]?.avg_conversion_rate || 0)
+    const prevConversionRate = prevSessions > 0
+      ? prevCalculatedConversionRate
+      : Number(prevConversionResult.rows[0]?.avg_conversion_rate || 0)
+
+    // Cart and checkout metrics
+    const cartAbandonmentRate = Number(conversionResult.rows[0]?.cart_abandonment_rate || 0)
+    const prevCartAbandonmentRate = Number(prevConversionResult.rows[0]?.cart_abandonment_rate || 0)
+
+    const checkoutsInitiated = Number(conversionResult.rows[0]?.checkouts_initiated || 0)
+    const prevCheckoutsInitiated = Number(prevConversionResult.rows[0]?.checkouts_initiated || 0)
+
+    // Calculate checkout completion rate from real data
+    const checkoutCompletionRate = checkoutsInitiated > 0 ? totalOrders / checkoutsInitiated : 0
+    const prevCheckoutCompletionRate = prevCheckoutsInitiated > 0 ? prevTotalOrders / prevCheckoutsInitiated : 0
+
+    // Get average cart size from order items
+    const cartSizeResult = await sql`
+      SELECT COALESCE(AVG(item_count), 0) as avg_cart_size
+      FROM (
+        SELECT order_id, SUM(quantity) as item_count
+        FROM order_items
+        WHERE order_id IN (
+          SELECT id FROM orders
+          WHERE created_at >= ${current.start} AND created_at <= ${current.end}
+        )
+        GROUP BY order_id
+      ) subq
+    `
+
+    const prevCartSizeResult = await sql`
+      SELECT COALESCE(AVG(item_count), 0) as avg_cart_size
+      FROM (
+        SELECT order_id, SUM(quantity) as item_count
+        FROM order_items
+        WHERE order_id IN (
+          SELECT id FROM orders
+          WHERE created_at >= ${previous.start} AND created_at <= ${previous.end}
+        )
+        GROUP BY order_id
+      ) subq
+    `
+
+    const avgCartSize = Number(cartSizeResult.rows[0]?.avg_cart_size || 0)
+    const prevAvgCartSize = Number(prevCartSizeResult.rows[0]?.avg_cart_size || 0)
+
+    // Get payment success rate from orders (orders with paid status vs all orders)
+    const paymentResult = await sql`
+      SELECT
+        COUNT(*) as total_orders,
+        COUNT(*) FILTER (WHERE financial_status IN ('paid', 'partially_paid', 'refunded', 'partially_refunded')) as paid_orders
+      FROM orders
+      WHERE created_at >= ${current.start} AND created_at <= ${current.end}
+    `
+
+    const prevPaymentResult = await sql`
+      SELECT
+        COUNT(*) as total_orders,
+        COUNT(*) FILTER (WHERE financial_status IN ('paid', 'partially_paid', 'refunded', 'partially_refunded')) as paid_orders
+      FROM orders
+      WHERE created_at >= ${previous.start} AND created_at <= ${previous.end}
+    `
+
+    const totalOrdersForPayment = Number(paymentResult.rows[0]?.total_orders || 0)
+    const paidOrders = Number(paymentResult.rows[0]?.paid_orders || 0)
+    const prevTotalOrdersForPayment = Number(prevPaymentResult.rows[0]?.total_orders || 0)
+    const prevPaidOrders = Number(prevPaymentResult.rows[0]?.paid_orders || 0)
+
+    const paymentSuccessRate = totalOrdersForPayment > 0 ? paidOrders / totalOrdersForPayment : 0
+    const prevPaymentSuccessRate = prevTotalOrdersForPayment > 0 ? prevPaidOrders / prevTotalOrdersForPayment : 0
 
     // Get product performance
     const productResult = await sql`
@@ -549,7 +798,7 @@ export async function getPlatformData(
         COALESCE(p.inventory_quantity, 0) as inventory
       FROM products p
       LEFT JOIN order_items oi ON oi.product_id = p.id
-      LEFT JOIN orders o ON o.id = oi.order_id AND o.created_at >= ${dateRange.startDate}
+      LEFT JOIN orders o ON o.id = oi.order_id AND o.created_at >= ${current.start}
       GROUP BY p.id, p.title, p.image_url, p.inventory_quantity
       ORDER BY revenue DESC
       LIMIT 10
@@ -572,46 +821,119 @@ export async function getPlatformData(
       }
     })
 
-    // Get customer metrics
+    // Get customer metrics for current period
     const customerResult = await sql`
       SELECT
-        COUNT(*) FILTER (WHERE first_order_at >= ${dateRange.startDate}) as new_customers,
-        COUNT(*) FILTER (WHERE first_order_at < ${dateRange.startDate}) as returning_customers
+        COUNT(*) FILTER (WHERE first_order_at >= ${current.start}) as new_customers,
+        COUNT(*) FILTER (WHERE first_order_at < ${current.start}) as returning_customers
       FROM customers
       WHERE id IN (
         SELECT DISTINCT customer_id FROM orders
-        WHERE created_at >= ${dateRange.startDate} AND created_at <= ${dateRange.endDate}
+        WHERE created_at >= ${current.start} AND created_at <= ${current.end}
+      )
+    `
+
+    // Get customer metrics for previous period
+    const prevCustomerResult = await sql`
+      SELECT
+        COUNT(*) FILTER (WHERE first_order_at >= ${previous.start}) as new_customers,
+        COUNT(*) FILTER (WHERE first_order_at < ${previous.start}) as returning_customers
+      FROM customers
+      WHERE id IN (
+        SELECT DISTINCT customer_id FROM orders
+        WHERE created_at >= ${previous.start} AND created_at <= ${previous.end}
       )
     `
 
     const newCustomers = Number(customerResult.rows[0]?.new_customers || 0)
     const returningCustomers = Number(customerResult.rows[0]?.returning_customers || 0)
+    const prevNewCustomers = Number(prevCustomerResult.rows[0]?.new_customers || 0)
+    const prevReturningCustomers = Number(prevCustomerResult.rows[0]?.returning_customers || 0)
+
+    // Calculate retention and repeat purchase rates
+    const totalCustomers = newCustomers + returningCustomers
+    const prevTotalCustomers = prevNewCustomers + prevReturningCustomers
+
+    const retentionRate = totalCustomers > 0 ? returningCustomers / totalCustomers : 0
+    const prevRetentionRate = prevTotalCustomers > 0 ? prevReturningCustomers / prevTotalCustomers : 0
+
+    // Get repeat purchase rate (customers with more than one order)
+    const repeatResult = await sql`
+      SELECT
+        COUNT(*) as total_customers,
+        COUNT(*) FILTER (WHERE order_count > 1) as repeat_customers
+      FROM (
+        SELECT customer_id, COUNT(*) as order_count
+        FROM orders
+        WHERE created_at >= ${current.start} AND created_at <= ${current.end}
+        GROUP BY customer_id
+      ) subq
+    `
+
+    const prevRepeatResult = await sql`
+      SELECT
+        COUNT(*) as total_customers,
+        COUNT(*) FILTER (WHERE order_count > 1) as repeat_customers
+      FROM (
+        SELECT customer_id, COUNT(*) as order_count
+        FROM orders
+        WHERE created_at >= ${previous.start} AND created_at <= ${previous.end}
+        GROUP BY customer_id
+      ) subq
+    `
+
+    const totalCustomersForRepeat = Number(repeatResult.rows[0]?.total_customers || 0)
+    const repeatCustomers = Number(repeatResult.rows[0]?.repeat_customers || 0)
+    const prevTotalCustomersForRepeat = Number(prevRepeatResult.rows[0]?.total_customers || 0)
+    const prevRepeatCustomers = Number(prevRepeatResult.rows[0]?.repeat_customers || 0)
+
+    const repeatPurchaseRate = totalCustomersForRepeat > 0 ? repeatCustomers / totalCustomersForRepeat : 0
+    const prevRepeatPurchaseRate = prevTotalCustomersForRepeat > 0 ? prevRepeatCustomers / prevTotalCustomersForRepeat : 0
+
+    // Get data source connection status from analytics_settings
+    const settingsResult = await sql`
+      SELECT
+        shopify_connected,
+        shopify_last_sync_at,
+        ga4_connected,
+        ga4_last_sync_at
+      FROM analytics_settings
+      LIMIT 1
+    `
+
+    const settings = settingsResult.rows[0]
 
     return {
       storeHealth: {
-        totalOrders: createMetricWithTrend(totalOrders, totalOrders * 0.92),
-        totalRevenue: createMetricWithTrend(totalRevenue, totalRevenue * 0.9),
-        aov: createMetricWithTrend(aov, aov * 0.98),
-        conversionRate: createMetricWithTrend(0.032, 0.028),
+        totalOrders: createMetricWithTrend(totalOrders, prevTotalOrders),
+        totalRevenue: createMetricWithTrend(totalRevenue, prevTotalRevenue),
+        aov: createMetricWithTrend(aov, prevAov),
+        conversionRate: createMetricWithTrend(conversionRate, prevConversionRate),
       },
       topProducts: products,
       lowStockProducts: products.filter((p) => p.isLowStock),
       customers: {
-        newCustomers: createMetricWithTrend(newCustomers, newCustomers * 0.85),
-        returningCustomers: createMetricWithTrend(returningCustomers, returningCustomers * 0.95),
-        retentionRate: createMetricWithTrend(0.35, 0.32),
-        repeatPurchaseRate: createMetricWithTrend(0.28, 0.25),
+        newCustomers: createMetricWithTrend(newCustomers, prevNewCustomers),
+        returningCustomers: createMetricWithTrend(returningCustomers, prevReturningCustomers),
+        retentionRate: createMetricWithTrend(retentionRate, prevRetentionRate),
+        repeatPurchaseRate: createMetricWithTrend(repeatPurchaseRate, prevRepeatPurchaseRate),
       },
       cartCheckout: {
-        cartAbandonmentRate: createMetricWithTrend(0.72, 0.74),
-        checkoutCompletionRate: createMetricWithTrend(0.65, 0.62),
-        paymentSuccessRate: createMetricWithTrend(0.98, 0.97),
-        avgCartSize: createMetricWithTrend(2.3, 2.1),
+        cartAbandonmentRate: createMetricWithTrend(cartAbandonmentRate, prevCartAbandonmentRate),
+        checkoutCompletionRate: createMetricWithTrend(checkoutCompletionRate, prevCheckoutCompletionRate),
+        paymentSuccessRate: createMetricWithTrend(paymentSuccessRate, prevPaymentSuccessRate),
+        avgCartSize: createMetricWithTrend(avgCartSize, prevAvgCartSize),
       },
       dataSources: {
-        shopify: { connected: true, lastSync: new Date().toISOString() },
+        shopify: {
+          connected: Boolean(settings?.shopify_connected),
+          lastSync: settings?.shopify_last_sync_at ? String(settings.shopify_last_sync_at) : null,
+        },
         stripe: { connected: true, lastSync: new Date().toISOString() },
-        googleAnalytics: { connected: false, lastSync: null },
+        googleAnalytics: {
+          connected: Boolean(settings?.ga4_connected),
+          lastSync: settings?.ga4_last_sync_at ? String(settings.ga4_last_sync_at) : null,
+        },
       },
     }
   })
@@ -648,6 +970,177 @@ export async function getBRIAnalytics(
     }
   })
 
+  // Query real topic data from support_tickets using tags
+  const topicsData = await withTenant(tenantSlug, async () => {
+    // Get topic counts from support_tickets tags
+    const topicsResult = await sql`
+      SELECT
+        tag as topic,
+        COUNT(*) as count,
+        COALESCE(AVG(EXTRACT(EPOCH FROM (resolved_at - created_at))), 0) as avg_resolution_time
+      FROM support_tickets,
+           LATERAL unnest(tags) as tag
+      WHERE created_at >= ${dateRange.startDate} AND created_at <= ${dateRange.endDate}
+      GROUP BY tag
+      ORDER BY count DESC
+      LIMIT 10
+    `
+
+    // Get previous period topic counts for trend calculation
+    const { previous } = getDateRangeBounds(dateRange)
+    const previousTopicsResult = await sql`
+      SELECT
+        tag as topic,
+        COUNT(*) as count
+      FROM support_tickets,
+           LATERAL unnest(tags) as tag
+      WHERE created_at >= ${previous.start} AND created_at <= ${previous.end}
+      GROUP BY tag
+    `
+
+    const previousCounts = new Map<string, number>()
+    for (const row of previousTopicsResult.rows) {
+      previousCounts.set(row.topic as string, Number(row.count))
+    }
+
+    const topics = topicsResult.rows.map((row) => {
+      const currentCount = Number(row.count)
+      const prevCount = previousCounts.get(row.topic as string) || 0
+      let trend: TrendDirection = 'stable'
+      if (currentCount > prevCount * 1.1) trend = 'up'
+      else if (currentCount < prevCount * 0.9) trend = 'down'
+
+      return {
+        topic: row.topic as string,
+        count: currentCount,
+        avgResolutionTime: Math.round(Number(row.avg_resolution_time)),
+        trend,
+      }
+    })
+
+    // Get trending issues (tags with significant increase)
+    const trendingIssues = topics
+      .map((t) => {
+        const prevCount = previousCounts.get(t.topic) || 0
+        const changePercent = prevCount > 0 ? ((t.count - prevCount) / prevCount) * 100 : 0
+        return { issue: t.topic, count: t.count, changePercent: Math.round(changePercent) }
+      })
+      .filter((t) => t.changePercent > 20)
+      .sort((a, b) => b.changePercent - a.changePercent)
+      .slice(0, 5)
+
+    return { topics, trendingIssues }
+  })
+
+  // Get efficiency metrics from BRI metrics table
+  const efficiencyData = await withTenant(tenantSlug, async () => {
+    const efficiencyResult = await sql`
+      SELECT
+        COALESCE(SUM(automated_resolutions), 0) as automated,
+        COALESCE(SUM(total_conversations), 0) as total,
+        COALESCE(SUM(human_handoffs), 0) as handoffs,
+        COALESCE(AVG(avg_confidence_score), 0) as avg_confidence,
+        COALESCE(SUM(estimated_cost_savings_cents), 0) as savings
+      FROM analytics_bri_metrics
+      WHERE date >= ${dateRange.startDate} AND date <= ${dateRange.endDate}
+    `
+
+    const { previous } = getDateRangeBounds(dateRange)
+    const prevEfficiencyResult = await sql`
+      SELECT
+        COALESCE(SUM(automated_resolutions), 0) as automated,
+        COALESCE(SUM(total_conversations), 0) as total,
+        COALESCE(SUM(human_handoffs), 0) as handoffs,
+        COALESCE(SUM(estimated_cost_savings_cents), 0) as savings
+      FROM analytics_bri_metrics
+      WHERE date >= ${previous.start} AND date <= ${previous.end}
+    `
+
+    const row = efficiencyResult.rows[0]
+    const prevRow = prevEfficiencyResult.rows[0]
+
+    const total = Number(row?.total || 0)
+    const automated = Number(row?.automated || 0)
+    const handoffs = Number(row?.handoffs || 0)
+    const savings = Number(row?.savings || 0) / 100
+
+    const prevTotal = Number(prevRow?.total || 0)
+    const prevAutomated = Number(prevRow?.automated || 0)
+    const prevHandoffs = Number(prevRow?.handoffs || 0)
+    const prevSavings = Number(prevRow?.savings || 0) / 100
+
+    const automatedRate = total > 0 ? automated / total : 0
+    const prevAutomatedRate = prevTotal > 0 ? prevAutomated / prevTotal : 0
+    const handoffRate = total > 0 ? handoffs / total : 0
+    const prevHandoffRate = prevTotal > 0 ? prevHandoffs / prevTotal : 0
+
+    return {
+      automatedResolutionRate: createMetricWithTrend(automatedRate, prevAutomatedRate),
+      avgConfidenceScore: Number(row?.avg_confidence || 0),
+      humanHandoffRate: createMetricWithTrend(handoffRate, prevHandoffRate),
+      estimatedCostSavings: createMetricWithTrend(savings, prevSavings),
+    }
+  })
+
+  // Get quality metrics from BRI metrics table
+  const qualityData = await withTenant(tenantSlug, async () => {
+    const qualityResult = await sql`
+      SELECT
+        COALESCE(AVG(accuracy_rate), 0) as accuracy_rate,
+        COALESCE(AVG(hallucination_rate), 0) as hallucination_rate
+      FROM analytics_bri_metrics
+      WHERE date >= ${dateRange.startDate} AND date <= ${dateRange.endDate}
+    `
+
+    const { previous } = getDateRangeBounds(dateRange)
+    const prevQualityResult = await sql`
+      SELECT
+        COALESCE(AVG(accuracy_rate), 0) as accuracy_rate,
+        COALESCE(AVG(hallucination_rate), 0) as hallucination_rate
+      FROM analytics_bri_metrics
+      WHERE date >= ${previous.start} AND date <= ${previous.end}
+    `
+
+    const row = qualityResult.rows[0]
+    const prevRow = prevQualityResult.rows[0]
+
+    // Get customer feedback distribution from support_tickets sentiment scores
+    const feedbackResult = await sql`
+      SELECT
+        CASE
+          WHEN sentiment_score >= 0.8 THEN 5
+          WHEN sentiment_score >= 0.6 THEN 4
+          WHEN sentiment_score >= 0.4 THEN 3
+          WHEN sentiment_score >= 0.2 THEN 2
+          ELSE 1
+        END as rating,
+        COUNT(*) as count
+      FROM support_tickets
+      WHERE created_at >= ${dateRange.startDate}
+        AND created_at <= ${dateRange.endDate}
+        AND sentiment_score IS NOT NULL
+      GROUP BY rating
+      ORDER BY rating DESC
+    `
+
+    const customerFeedback = [5, 4, 3, 2, 1].map((rating) => {
+      const found = feedbackResult.rows.find((r) => Number(r.rating) === rating)
+      return { rating, count: found ? Number(found.count) : 0 }
+    })
+
+    return {
+      accuracyRate: createMetricWithTrend(
+        Number(row?.accuracy_rate || 0),
+        Number(prevRow?.accuracy_rate || 0)
+      ),
+      hallucinationRate: createMetricWithTrend(
+        Number(row?.hallucination_rate || 0),
+        Number(prevRow?.hallucination_rate || 0)
+      ),
+      customerFeedback,
+    }
+  })
+
   return {
     conversationVolume: {
       totalConversations: createMetricWithTrend(totalConversations, totalConversations * 0.9),
@@ -664,31 +1157,9 @@ export async function getBRIAnalytics(
       escalationRate: createMetricWithTrend(0.08, 0.1),
       csat: createMetricWithTrend(avgCsat, avgCsat * 0.98),
     },
-    topics: {
-      topics: [
-        { topic: 'Order Status', count: 150, avgResolutionTime: 120, trend: 'up' as const },
-        { topic: 'Returns', count: 85, avgResolutionTime: 180, trend: 'stable' as const },
-        { topic: 'Product Questions', count: 65, avgResolutionTime: 90, trend: 'down' as const },
-      ],
-      trendingIssues: [{ issue: 'Delayed Shipping', count: 25, changePercent: 40 }],
-    },
-    efficiency: {
-      automatedResolutionRate: createMetricWithTrend(0.72, 0.68),
-      avgConfidenceScore: 0.85,
-      humanHandoffRate: createMetricWithTrend(0.28, 0.32),
-      estimatedCostSavings: createMetricWithTrend(12500, 10000),
-    },
-    quality: {
-      accuracyRate: createMetricWithTrend(0.94, 0.92),
-      hallucinationRate: createMetricWithTrend(0.02, 0.03),
-      customerFeedback: [
-        { rating: 5, count: 450 },
-        { rating: 4, count: 280 },
-        { rating: 3, count: 90 },
-        { rating: 2, count: 30 },
-        { rating: 1, count: 15 },
-      ],
-    },
+    topics: topicsData,
+    efficiency: efficiencyData,
+    quality: qualityData,
   }
 }
 

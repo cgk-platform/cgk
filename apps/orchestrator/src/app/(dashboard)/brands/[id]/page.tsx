@@ -1,6 +1,6 @@
 'use client'
 
-import { Badge, Button, Card, CardContent, CardHeader, cn } from '@cgk-platform/ui'
+import { Badge, Button, Card, CardContent, CardHeader, cn, StatusDot } from '@cgk-platform/ui'
 import {
   ArrowLeft,
   ExternalLink,
@@ -12,8 +12,6 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-
-import { StatusDot } from '../../../../components/ui/status-dot'
 import type { BrandSummary } from '../../../../types/platform'
 
 /**

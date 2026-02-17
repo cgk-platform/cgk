@@ -1,4 +1,5 @@
 import { Badge, Button, Card, CardContent } from '@cgk-platform/ui'
+import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'
@@ -83,6 +84,16 @@ function StatusFilter({ status, taxYear }: { status: string; taxYear: number }) 
   )
 }
 
+interface TaxForm {
+  id: string
+  recipientName: string
+  payeeType: string
+  formType: string
+  totalAmountCents: number
+  status: string
+  createdAt: string
+}
+
 async function FormsListLoader({
   page,
   status,
@@ -99,37 +110,99 @@ async function FormsListLoader({
     return <p className="text-muted-foreground">No tenant configured.</p>
   }
 
-  // Mock data for now - would use @cgk-platform/tax package
-  const forms = [
-    {
-      id: '1099_abc123',
-      recipientName: 'John Creator',
-      payeeType: 'creator',
-      formType: '1099-NEC',
-      totalAmountCents: 125000,
-      status: 'draft',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: '1099_def456',
-      recipientName: 'Jane Smith',
-      payeeType: 'creator',
-      formType: '1099-NEC',
-      totalAmountCents: 85000,
-      status: 'approved',
-      createdAt: new Date().toISOString(),
-    },
-  ]
+  const limit = 50
+  const offset = (page - 1) * limit
 
-  const filteredForms = status
-    ? forms.filter((f) => f.status === status)
-    : forms
+  const { forms, totalCount } = await withTenant(tenantSlug, async () => {
+    // Query with or without status filter
+    if (status) {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM tax_forms
+        WHERE tax_year = ${taxYear} AND status = ${status}
+      `
+      const result = await sql`
+        SELECT
+          tf.id,
+          tf.recipient_name,
+          tf.payee_type,
+          tf.form_type,
+          tf.total_amount_cents,
+          tf.status,
+          tf.created_at
+        FROM tax_forms tf
+        WHERE tf.tax_year = ${taxYear}
+          AND tf.status = ${status}
+        ORDER BY tf.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      const countRow = countResult.rows[0]
+      return {
+        forms: result.rows.map((row) => ({
+          id: String(row.id),
+          recipientName: String(row.recipient_name || ''),
+          payeeType: String(row.payee_type || ''),
+          formType: String(row.form_type || ''),
+          totalAmountCents: Number(row.total_amount_cents || 0),
+          status: String(row.status || ''),
+          createdAt: row.created_at ? String(row.created_at) : new Date().toISOString(),
+        })) as TaxForm[],
+        totalCount: Number(countRow?.count || 0),
+      }
+    } else {
+      const countResult = await sql`
+        SELECT COUNT(*) as count FROM tax_forms
+        WHERE tax_year = ${taxYear}
+      `
+      const result = await sql`
+        SELECT
+          tf.id,
+          tf.recipient_name,
+          tf.payee_type,
+          tf.form_type,
+          tf.total_amount_cents,
+          tf.status,
+          tf.created_at
+        FROM tax_forms tf
+        WHERE tf.tax_year = ${taxYear}
+        ORDER BY tf.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `
+      const countRow = countResult.rows[0]
+      return {
+        forms: result.rows.map((row) => ({
+          id: String(row.id),
+          recipientName: String(row.recipient_name || ''),
+          payeeType: String(row.payee_type || ''),
+          formType: String(row.form_type || ''),
+          totalAmountCents: Number(row.total_amount_cents || 0),
+          status: String(row.status || ''),
+          createdAt: row.created_at ? String(row.created_at) : new Date().toISOString(),
+        })) as TaxForm[],
+        totalCount: Number(countRow?.count || 0),
+      }
+    }
+  })
+
+  const totalPages = Math.ceil(totalCount / limit)
+
+  if (forms.length === 0) {
+    return (
+      <div className="rounded-md border p-8 text-center">
+        <p className="text-muted-foreground">
+          No 1099 forms found for tax year {taxYear}.
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Generate 1099 forms from the Annual Payments page for payees who exceeded the $600 threshold.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          {filteredForms.length} forms found
+          {totalCount} forms found
         </p>
         <div className="flex gap-2">
           <Button size="sm" variant="outline">
@@ -157,7 +230,7 @@ async function FormsListLoader({
             </tr>
           </thead>
           <tbody className="divide-y">
-            {filteredForms.map((form) => (
+            {forms.map((form) => (
               <tr key={form.id} className="hover:bg-muted/50">
                 <td className="px-4 py-3">
                   <input type="checkbox" className="rounded" />
@@ -200,9 +273,9 @@ async function FormsListLoader({
 
       <Pagination
         page={page}
-        totalPages={1}
-        totalCount={filteredForms.length}
-        limit={50}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        limit={limit}
         basePath="/admin/tax/1099s"
         currentFilters={{ tax_year: taxYear, status }}
       />

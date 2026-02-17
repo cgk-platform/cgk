@@ -84,6 +84,7 @@ export type {
   InventorySyncPayload,
   // Reviews
   ReviewSubmittedPayload,
+  ReviewModeratedPayload,
   ReviewEmailQueuedPayload,
   ReviewEmailSentPayload,
   ReviewReminderPayload,

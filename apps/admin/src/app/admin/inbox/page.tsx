@@ -1,3 +1,4 @@
+import { getInboxStats } from '@cgk-platform/admin-core'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 
@@ -38,13 +39,14 @@ async function getThreads(
   return res.json()
 }
 
-async function getStats(_tenantId: string) {
-  // For now, return mock stats - would call a stats API endpoint
+async function getStats(tenantId: string) {
+  // Query real inbox stats from the database
+  const stats = await getInboxStats(tenantId)
   return {
-    openThreads: 12,
-    snoozedThreads: 3,
-    closedThreads: 45,
-    unreadCount: 5,
+    openThreads: stats.openThreads,
+    snoozedThreads: stats.snoozedThreads,
+    closedThreads: stats.closedThreads,
+    unreadCount: stats.unreadCount,
   }
 }
 

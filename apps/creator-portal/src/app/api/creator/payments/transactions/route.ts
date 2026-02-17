@@ -2,11 +2,16 @@
  * Creator Transactions API Route
  *
  * GET /api/creator/payments/transactions - List balance transactions
+ *
+ * Supports brand context filtering via cookie:
+ * - If brand is selected: returns transactions for that brand only
+ * - If no brand selected ("All Brands"): returns all transactions
  */
 
 import { listBalanceTransactions, type BalanceTransactionType } from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { getBrandFilter } from '@/lib/brand-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,15 +33,19 @@ export async function GET(req: Request): Promise<Response> {
 
     // Parse filters
     const type = searchParams.get('type') as BalanceTransactionType | null
-    const brandId = searchParams.get('brandId')
+    const brandIdParam = searchParams.get('brandId')
     const startDate = searchParams.get('startDate')
     const endDate = searchParams.get('endDate')
     const limit = parseInt(searchParams.get('limit') || '20', 10)
     const offset = parseInt(searchParams.get('offset') || '0', 10)
 
+    // Get brand filter - prioritize URL param, then cookie
+    const { brandId: cookieBrandId } = getBrandFilter(req, context)
+    const effectiveBrandId = brandIdParam || cookieBrandId || undefined
+
     const result = await listBalanceTransactions(context.creatorId, {
       type: type || undefined,
-      brandId: brandId || undefined,
+      brandId: effectiveBrandId,
       startDate: startDate ? new Date(startDate) : undefined,
       endDate: endDate ? new Date(endDate) : undefined,
       limit: Math.min(limit, 100), // Cap at 100
@@ -63,6 +72,10 @@ export async function GET(req: Request): Promise<Response> {
         offset: result.offset,
         limit: result.limit,
         hasMore: result.hasMore,
+      },
+      filter: {
+        brandId: effectiveBrandId || null,
+        isFiltered: !!effectiveBrandId,
       },
     })
   } catch (error) {

@@ -5,12 +5,12 @@
  * Tools are registered with the MCP handler for AI-accessible operations.
  *
  * Categories:
- * - Analytics: Attribution, metrics, A/B testing, reports (16 tools)
+ * - Analytics: Attribution, metrics, A/B testing, reports (19 tools)
  * - Commerce: Orders, customers, products, inventory (15 tools)
  * - Creators: Directory, projects, payouts, communications (18 tools)
  * - System: Health, config, notifications, users, audit, cache (20 tools)
  *
- * Total: ~69 tools
+ * Total: ~72 tools
  *
  * @ai-pattern mcp-tools
  */
@@ -32,6 +32,9 @@ export {
   getChannelPerformanceTool,
   getDailyMetricsTool,
   comparePeriodsTool,
+  getTrafficMetricsTool,
+  getGeoMetricsTool,
+  getSalesMetricsTool,
   listABTestsTool,
   getABTestTool,
   getABTestStatsTool,
@@ -306,6 +309,9 @@ export const toolAnnotations: Record<string, ToolAnnotations> = {
   get_channel_performance: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
   get_daily_metrics: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
   compare_periods: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_traffic_metrics: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_geo_metrics: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_sales_metrics: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
 
   // Analytics - A/B Testing
   list_ab_tests: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },

@@ -4,7 +4,7 @@
  * Helpers for creating sender addresses during onboarding.
  *
  * @ai-pattern onboarding
- * @ai-note Step 5c of tenant onboarding
+ * @ai-critical All functions require tenantId for database operations
  */
 
 import {
@@ -33,9 +33,10 @@ interface ResendConfig {
  * Create a sender address during onboarding
  */
 export async function createOnboardingSenderAddress(
+  tenantId: string,
   input: CreateSenderInput
 ): Promise<SenderAddress> {
-  return createSenderAddress({
+  return createSenderAddress(tenantId, {
     domainId: input.domainId,
     localPart: input.localPart,
     displayName: input.displayName,
@@ -52,6 +53,7 @@ export async function createOnboardingSenderAddress(
  * Matches recommended addresses to available domains.
  */
 export async function getRecommendedSenders(
+  tenantId: string,
   brandName: string
 ): Promise<Array<{
   recommendation: RecommendedSenderAddress
@@ -59,7 +61,7 @@ export async function getRecommendedSenders(
   suggestedEmail: string | null
   suggestedDisplayName: string
 }>> {
-  const domains = await listDomains()
+  const domains = await listDomains(tenantId)
 
   return RECOMMENDED_SENDER_ADDRESSES.map((rec) => {
     // Find best domain for this sender
@@ -176,24 +178,24 @@ export async function sendTestEmail(
 /**
  * Check if a sender address exists for a purpose
  */
-export async function hasSenderForPurpose(purpose: SenderPurpose): Promise<boolean> {
-  const addresses = await listSenderAddresses()
+export async function hasSenderForPurpose(tenantId: string, purpose: SenderPurpose): Promise<boolean> {
+  const addresses = await listSenderAddresses(tenantId)
   return addresses.some((a) => a.purpose === purpose)
 }
 
 /**
  * Get count of sender addresses
  */
-export async function getSenderAddressCount(): Promise<number> {
-  const addresses = await listSenderAddresses()
+export async function getSenderAddressCount(tenantId: string): Promise<number> {
+  const addresses = await listSenderAddresses(tenantId)
   return addresses.length
 }
 
 /**
  * Get count of verified sender addresses
  */
-export async function getVerifiedSenderCount(): Promise<number> {
-  const addresses = await getVerifiedSenderAddresses()
+export async function getVerifiedSenderCount(tenantId: string): Promise<number> {
+  const addresses = await getVerifiedSenderAddresses(tenantId)
   return addresses.length
 }
 
@@ -202,18 +204,18 @@ export async function getVerifiedSenderCount(): Promise<number> {
  *
  * At minimum, a transactional sender is required.
  */
-export async function hasMinimumSenders(): Promise<boolean> {
-  const addresses = await listSenderAddresses()
+export async function hasMinimumSenders(tenantId: string): Promise<boolean> {
+  const addresses = await listSenderAddresses(tenantId)
   return addresses.some((a) => a.purpose === 'transactional')
 }
 
 /**
  * Get senders grouped by purpose
  */
-export async function getSendersByPurpose(): Promise<
+export async function getSendersByPurpose(tenantId: string): Promise<
   Record<SenderPurpose, SenderAddressWithDomain[]>
 > {
-  const addresses = await listSenderAddresses()
+  const addresses = await listSenderAddresses(tenantId)
 
   const result: Record<SenderPurpose, SenderAddressWithDomain[]> = {
     transactional: [],

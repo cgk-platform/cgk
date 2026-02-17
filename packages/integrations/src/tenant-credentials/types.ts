@@ -12,6 +12,7 @@ export type TenantApiService =
   | 'cloudflare_r2'
   | 'google_maps'
   | 'twilio'
+  | 'easypost'
 
 /** Service display names */
 export const SERVICE_DISPLAY_NAMES: Record<TenantApiService, string> = {
@@ -23,6 +24,7 @@ export const SERVICE_DISPLAY_NAMES: Record<TenantApiService, string> = {
   cloudflare_r2: 'Cloudflare R2',
   google_maps: 'Google Maps',
   twilio: 'Twilio',
+  easypost: 'EasyPost Shipping',
 }
 
 /** Base interface for all tenant configs */

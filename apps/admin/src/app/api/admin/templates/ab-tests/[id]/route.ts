@@ -3,6 +3,12 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+import {
+  getTemplateABTest,
+  updateTemplateABTest,
+  deleteTemplateABTest,
+} from '@/lib/ab-tests/db'
+
 interface RouteContext {
   params: Promise<{ id: string }>
 }
@@ -21,29 +27,21 @@ export async function GET(_request: Request, context: RouteContext) {
 
   const { id } = await context.params
 
-  // In a real implementation, fetch from database
-  return NextResponse.json({
-    test: {
-      id,
-      tenantId: tenantSlug,
-      name: 'Email Subject Line Test',
-      description: 'Testing urgency vs. value-focused subject lines',
-      status: 'running',
-      templateAId: 'template-a-123',
-      templateAName: 'Urgency Focus',
-      templateBId: 'template-b-456',
-      templateBName: 'Value Focus',
-      trafficAllocation: { a: 50, b: 50 },
-      metrics: {
-        opens: { a: 1245, b: 1489 },
-        clicks: { a: 312, b: 398 },
-        conversions: { a: 45, b: 62 },
-      },
-      isSignificant: false,
-      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-      startedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    },
-  })
+  try {
+    const test = await getTemplateABTest(tenantSlug, id)
+
+    if (!test) {
+      return NextResponse.json({ error: 'A/B test not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ test })
+  } catch (error) {
+    console.error('Error fetching template A/B test:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch template A/B test' },
+      { status: 500 }
+    )
+  }
 }
 
 /**
@@ -63,14 +61,13 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const data = await request.json()
 
-    // In a real implementation, update in database
-    return NextResponse.json({
-      test: {
-        id,
-        ...data,
-        updatedAt: new Date(),
-      },
-    })
+    const test = await updateTemplateABTest(tenantSlug, id, data)
+
+    if (!test) {
+      return NextResponse.json({ error: 'A/B test not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ test })
   } catch (error) {
     console.error('Error updating template A/B test:', error)
     return NextResponse.json(
@@ -92,8 +89,21 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const { id: _id } = await context.params
+  const { id } = await context.params
 
-  // In a real implementation, delete from database
-  return NextResponse.json({ success: true })
+  try {
+    const deleted = await deleteTemplateABTest(tenantSlug, id)
+
+    if (!deleted) {
+      return NextResponse.json({ error: 'A/B test not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting template A/B test:', error)
+    return NextResponse.json(
+      { error: 'Failed to delete template A/B test' },
+      { status: 500 }
+    )
+  }
 }

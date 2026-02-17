@@ -4,10 +4,10 @@
  * Marks email setup as complete and updates tenant status.
  *
  * @ai-pattern onboarding
- * @ai-note Final step of email onboarding
+ * @ai-critical All functions require tenantId for database operations
  */
 
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { listDomains } from '../sender/domains.js'
 import { listSenderAddresses } from '../sender/addresses.js'
@@ -22,28 +22,30 @@ import type {
 /**
  * Get the current email setup status for a tenant
  */
-export async function getEmailSetupStatus(): Promise<EmailSetupStatus> {
-  const domains = await listDomains()
-  const addresses = await listSenderAddresses()
+export async function getEmailSetupStatus(tenantId: string): Promise<EmailSetupStatus> {
+  const domains = await listDomains(tenantId)
+  const addresses = await listSenderAddresses(tenantId)
 
   const verifiedDomains = domains.filter((d) => d.verificationStatus === 'verified')
   const inboundEnabled = addresses.some((a) => a.isInboundEnabled)
 
   // Check if setup was marked complete in tenant settings
-  const settingsResult = await sql`
-    SELECT
-      email_setup_complete,
-      email_setup_completed_at,
-      email_setup_skipped_at
-    FROM tenant_settings
-    LIMIT 1
-  `
+  const settings = await withTenant(tenantId, async () => {
+    const settingsResult = await sql`
+      SELECT
+        email_setup_complete,
+        email_setup_completed_at,
+        email_setup_skipped_at
+      FROM tenant_settings
+      LIMIT 1
+    `
 
-  const settings = settingsResult.rows[0] as {
-    email_setup_complete?: boolean
-    email_setup_completed_at?: string
-    email_setup_skipped_at?: string
-  } | undefined
+    return settingsResult.rows[0] as {
+      email_setup_complete?: boolean
+      email_setup_completed_at?: string
+      email_setup_skipped_at?: string
+    } | undefined
+  })
 
   return {
     complete: settings?.email_setup_complete ?? false,
@@ -64,27 +66,30 @@ export async function getEmailSetupStatus(): Promise<EmailSetupStatus> {
  * Complete or skip email setup
  */
 export async function completeEmailSetup(
+  tenantId: string,
   input: CompleteEmailSetupInput
 ): Promise<CompleteEmailSetupResult> {
-  const status = await getEmailSetupStatus()
+  const status = await getEmailSetupStatus(tenantId)
 
   // If skipping, mark as skipped
   if (input.skip) {
-    await sql`
-      INSERT INTO tenant_settings (
-        id,
-        email_setup_complete,
-        email_setup_skipped_at
-      ) VALUES (
-        gen_random_uuid(),
-        false,
-        NOW()
-      )
-      ON CONFLICT (id) DO UPDATE SET
-        email_setup_complete = false,
-        email_setup_skipped_at = NOW(),
-        updated_at = NOW()
-    `
+    await withTenant(tenantId, async () => {
+      await sql`
+        INSERT INTO tenant_settings (
+          id,
+          email_setup_complete,
+          email_setup_skipped_at
+        ) VALUES (
+          gen_random_uuid(),
+          false,
+          NOW()
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          email_setup_complete = false,
+          email_setup_skipped_at = NOW(),
+          updated_at = NOW()
+      `
+    })
 
     return {
       success: true,
@@ -114,7 +119,7 @@ export async function completeEmailSetup(
   }
 
   // Check for at least one transactional sender
-  const addresses = await listSenderAddresses()
+  const addresses = await listSenderAddresses(tenantId)
   const hasTransactional = addresses.some((a) => a.purpose === 'transactional')
   if (!hasTransactional) {
     return {
@@ -125,24 +130,26 @@ export async function completeEmailSetup(
   }
 
   // Mark setup as complete
-  await sql`
-    INSERT INTO tenant_settings (
-      id,
-      email_setup_complete,
-      email_setup_completed_at,
-      email_setup_skipped_at
-    ) VALUES (
-      gen_random_uuid(),
-      true,
-      NOW(),
-      NULL
-    )
-    ON CONFLICT (id) DO UPDATE SET
-      email_setup_complete = true,
-      email_setup_completed_at = NOW(),
-      email_setup_skipped_at = NULL,
-      updated_at = NOW()
-  `
+  await withTenant(tenantId, async () => {
+    await sql`
+      INSERT INTO tenant_settings (
+        id,
+        email_setup_complete,
+        email_setup_completed_at,
+        email_setup_skipped_at
+      ) VALUES (
+        gen_random_uuid(),
+        true,
+        NOW(),
+        NULL
+      )
+      ON CONFLICT (id) DO UPDATE SET
+        email_setup_complete = true,
+        email_setup_completed_at = NOW(),
+        email_setup_skipped_at = NULL,
+        updated_at = NOW()
+    `
+  })
 
   return {
     success: true,
@@ -158,8 +165,8 @@ export async function completeEmailSetup(
 /**
  * Check if email setup is complete (or skipped)
  */
-export async function isEmailSetupComplete(): Promise<boolean> {
-  const status = await getEmailSetupStatus()
+export async function isEmailSetupComplete(tenantId: string): Promise<boolean> {
+  const status = await getEmailSetupStatus(tenantId)
   return status.complete
 }
 
@@ -171,11 +178,11 @@ export async function isEmailSetupComplete(): Promise<boolean> {
  * 2. At least one verified domain
  * 3. At least one sender address
  */
-export async function canSendEmails(): Promise<{
+export async function canSendEmails(tenantId: string): Promise<{
   allowed: boolean
   reason?: string
 }> {
-  const status = await getEmailSetupStatus()
+  const status = await getEmailSetupStatus(tenantId)
 
   if (!status.complete) {
     if (status.skippedAt) {
@@ -210,10 +217,10 @@ export async function canSendEmails(): Promise<{
 /**
  * Get the current onboarding state
  */
-export async function getOnboardingState(): Promise<EmailOnboardingState> {
-  const status = await getEmailSetupStatus()
-  const domains = await listDomains()
-  const addresses = await listSenderAddresses()
+export async function getOnboardingState(tenantId: string): Promise<EmailOnboardingState> {
+  const status = await getEmailSetupStatus(tenantId)
+  const domains = await listDomains(tenantId)
+  const addresses = await listSenderAddresses(tenantId)
 
   // Determine completed steps
   const completedSteps: EmailOnboardingSubStep[] = []
@@ -267,13 +274,15 @@ export async function getOnboardingState(): Promise<EmailOnboardingState> {
 /**
  * Reset email setup (for testing or re-configuration)
  */
-export async function resetEmailSetup(): Promise<void> {
-  await sql`
-    UPDATE tenant_settings
-    SET
-      email_setup_complete = false,
-      email_setup_completed_at = NULL,
-      email_setup_skipped_at = NULL,
-      updated_at = NOW()
-  `
+export async function resetEmailSetup(tenantId: string): Promise<void> {
+  await withTenant(tenantId, async () => {
+    await sql`
+      UPDATE tenant_settings
+      SET
+        email_setup_complete = false,
+        email_setup_completed_at = NULL,
+        email_setup_skipped_at = NULL,
+        updated_at = NOW()
+    `
+  })
 }

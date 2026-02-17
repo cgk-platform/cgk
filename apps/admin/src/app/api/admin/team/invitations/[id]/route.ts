@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import {
+  checkPermissionOrRespond,
   getInvitation,
   requireAuth,
   revokeInvitation,
@@ -28,9 +29,13 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Check permission to view invitations
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.view'
+  )
+  if (permissionDenied) return permissionDenied
 
   try {
     const invitation = await getInvitation(id)
@@ -73,10 +78,13 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Only owners and admins can revoke
-  if (!['owner', 'admin', 'super_admin'].includes(auth.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  // Check permission to manage team (revoke invitations)
+  const revokePermissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    tenantId,
+    'team.manage'
+  )
+  if (revokePermissionDenied) return revokePermissionDenied
 
   try {
     // Verify invitation belongs to this tenant

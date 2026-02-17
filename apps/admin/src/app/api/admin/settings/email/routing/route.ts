@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -27,9 +26,7 @@ export async function GET(request: Request) {
 
   if (view === 'status') {
     // Return simplified status view
-    const routing = await withTenant(tenantSlug, () =>
-      getAllNotificationRoutingStatus()
-    )
+    const routing = await getAllNotificationRoutingStatus(tenantSlug)
 
     // Group by category
     const grouped: Record<string, typeof routing> = {}
@@ -44,7 +41,7 @@ export async function GET(request: Request) {
   }
 
   // Return full routing data
-  const routing = await withTenant(tenantSlug, () => listNotificationRouting())
+  const routing = await listNotificationRouting(tenantSlug)
 
   return NextResponse.json({ routing })
 }

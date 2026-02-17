@@ -419,14 +419,10 @@ async function createAdminUser(): Promise<boolean> {
 
   try {
     const db = await import('@cgk-platform/db')
+    const { hashPassword } = await import('@cgk-platform/auth')
 
-    // Simple password hashing (in production, use proper library like argon2)
-    // This is a placeholder - actual implementation should use @cgk-platform/auth
-    const crypto = await import('crypto')
-    const passwordHash = crypto
-      .createHash('sha256')
-      .update(answers.password)
-      .digest('hex')
+    // Use bcrypt-based password hashing from auth package
+    const passwordHash = await hashPassword(answers.password)
 
     await db.sql`
       INSERT INTO public.users (email, name, password_hash, role, status, email_verified)

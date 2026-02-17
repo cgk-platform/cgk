@@ -115,27 +115,44 @@ async function lookupTenantFromCustomDomain(hostname: string): Promise<string | 
     return cached.slug
   }
 
-  // In a production environment, you would call an internal API endpoint
-  // that performs the database lookup. The Edge runtime cannot directly
-  // access the database, so we use an API call:
-  //
-  // try {
-  //   const response = await fetch(`${process.env.INTERNAL_API_URL}/api/internal/domain-lookup`, {
-  //     method: 'POST',
-  //     headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.INTERNAL_API_KEY! },
-  //     body: JSON.stringify({ domain: host }),
-  //   })
-  //   if (response.ok) {
-  //     const data = await response.json()
-  //     const slug = data.tenantSlug || null
-  //     domainCache.set(host, { slug, timestamp: Date.now() })
-  //     return slug
-  //   }
-  // } catch {
-  //   // Fall through to return null
-  // }
+  // Call internal API endpoint to perform database lookup
+  // The Edge runtime cannot directly access the database
+  const internalApiUrl = process.env.INTERNAL_API_URL || process.env.APP_URL || ''
+  const internalApiKey = process.env.INTERNAL_API_KEY
 
-  // For now, cache the null result to avoid repeated lookups
+  if (!internalApiUrl) {
+    // No API URL configured, cache null result
+    domainCache.set(host, { slug: null, timestamp: Date.now() })
+    return null
+  }
+
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+
+    // Include internal API key if configured
+    if (internalApiKey) {
+      headers['x-internal-key'] = internalApiKey
+    }
+
+    const response = await fetch(`${internalApiUrl}/api/internal/domain-lookup`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ domain: host }),
+    })
+
+    if (response.ok) {
+      const data = (await response.json()) as { tenantSlug?: string | null }
+      const slug = data.tenantSlug || null
+      domainCache.set(host, { slug, timestamp: Date.now() })
+      return slug
+    }
+  } catch {
+    // Fall through to return null on network/parsing errors
+  }
+
+  // Cache null result to avoid repeated lookups for unknown domains
   domainCache.set(host, { slug: null, timestamp: Date.now() })
   return null
 }

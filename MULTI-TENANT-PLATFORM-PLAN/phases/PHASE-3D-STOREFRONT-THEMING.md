@@ -18,15 +18,15 @@ Enable per-tenant visual customization through theming, custom domain support, a
 
 ## Success Criteria
 
-- [ ] Per-tenant theming applies colors, fonts, and styling from tenant config
-- [ ] `generateThemeStyles()` produces valid CSS custom properties
-- [ ] `ThemeConfig` interface covers all customizable aspects
-- [ ] Custom domains route to correct tenant storefront
-- [ ] Domain middleware resolves tenant from hostname
-- [ ] Dynamic landing pages render from database configuration
-- [ ] `BlockRenderer` renders all block types correctly
-- [ ] 70+ block types available for landing page builder
-- [ ] `npx tsc --noEmit` passes
+- [x] Per-tenant theming applies colors, fonts, and styling from tenant config
+- [x] `generateThemeStyles()` produces valid CSS custom properties
+- [x] `ThemeConfig` interface covers all customizable aspects
+- [x] Custom domains route to correct tenant storefront
+- [x] Domain middleware resolves tenant from hostname
+- [x] Dynamic landing pages render from database configuration
+- [x] `BlockRenderer` renders all block types correctly
+- [x] 70+ block types available for landing page builder (including header, footer, sidebar, mega-menu, breadcrumb)
+- [x] `npx tsc --noEmit` passes
 
 ---
 
@@ -167,46 +167,46 @@ The implementing agent should determine the best approach for:
 ## Tasks
 
 ### [PARALLEL] Theme System
-- [ ] Create `apps/storefront/src/lib/theme/` module
-- [ ] Define `ThemeConfig` interface
-- [ ] Implement `generateThemeStyles()` function
-- [ ] Inject theme CSS in root layout
-- [ ] Create theme CSS variable definitions
+- [x] Create `apps/storefront/src/lib/theme/` module
+- [x] Define `ThemeConfig` interface
+- [x] Implement `generateThemeStyles()` function
+- [x] Inject theme CSS in root layout
+- [x] Create theme CSS variable definitions
 
 ### [PARALLEL] Custom Domain Support
-- [ ] Add domain resolution to middleware
-- [ ] Create domain -> tenant lookup
-- [ ] Handle subdomain pattern matching
-- [ ] Handle custom domain mapping
-- [ ] Test multi-domain routing
+- [x] Add domain resolution to middleware
+- [x] Create domain -> tenant lookup
+- [x] Handle subdomain pattern matching
+- [x] Handle custom domain mapping
+- [x] Test multi-domain routing
 
 ### [SEQUENTIAL after parallel tasks] Landing Page System
-- [ ] Create `/lp/[slug]` route
-- [ ] Implement `getLandingPage()` function
-- [ ] Build `BlockRenderer` component
-- [ ] Port block components (prioritize most-used)
-- [ ] Add SEO metadata injection
+- [x] Create `/lp/[slug]` route
+- [x] Implement `getLandingPage()` function
+- [x] Build `BlockRenderer` component
+- [x] Port block components (prioritize most-used)
+- [x] Add SEO metadata injection
 
 ### [SEQUENTIAL after landing pages] Block Components
-- [ ] Create block registry with all 70+ types
-- [ ] Implement core blocks (hero, cta-banner, markdown)
-- [ ] Implement PDP blocks (pdp-hero, pdp-trust-badges, etc.)
-- [ ] Implement promo blocks (bundle-builder, feature-cards)
-- [ ] Add fallback for unknown block types
+- [x] Create block registry with all 70+ types (including header, footer, sidebar, mega-menu, breadcrumb)
+- [x] Implement core blocks (hero, cta-banner, markdown)
+- [x] Implement PDP blocks (pdp-hero, pdp-trust-badges, etc.)
+- [x] Implement promo blocks (bundle-builder, feature-cards)
+- [x] Add fallback for unknown block types
 
 ---
 
 ## Definition of Done
 
-- [ ] Tenant theme colors apply to storefront
-- [ ] CSS custom properties available for all theme values
-- [ ] Custom domain resolves to correct tenant
-- [ ] Subdomain (brand.platform.com) works
-- [ ] `/lp/[slug]` renders landing pages from database
-- [ ] BlockRenderer handles all block types
-- [ ] Unknown block types skip gracefully with console warning
-- [ ] Mobile and desktop layouts work for all blocks
-- [ ] `npx tsc --noEmit` passes
+- [x] Tenant theme colors apply to storefront
+- [x] CSS custom properties available for all theme values
+- [x] Custom domain resolves to correct tenant
+- [x] Subdomain (brand.platform.com) works
+- [x] `/lp/[slug]` renders landing pages from database
+- [x] BlockRenderer handles all block types
+- [x] Unknown block types skip gracefully with console warning
+- [x] Mobile and desktop layouts work for all blocks
+- [x] `npx tsc --noEmit` passes
 
 ---
 

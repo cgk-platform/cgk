@@ -3,15 +3,16 @@
 import { Spinner } from '@cgk-platform/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-
 import { ConversationList } from '@/components/messages/ConversationList'
 import { MessageBubble } from '@/components/messages/MessageBubble'
 import { MessageComposer } from '@/components/messages/MessageComposer'
 import { TypingIndicator } from '@/components/messages/TypingIndicator'
+import { useBrand } from '@/lib/brand-context'
 
 interface Conversation {
   id: string
   subject: string | null
+  brandId: string | null
   brandName: string | null
   coordinatorName: string | null
   lastMessagePreview: string | null
@@ -45,32 +46,49 @@ export default function MessagesPage(): React.JSX.Element {
   const [coordinatorName, setCoordinatorName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
+  // Get brand context - will trigger re-fetch when brand changes
+  const { selectedBrand, isLoading: brandLoading } = useBrand()
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const lastCheckedRef = useRef<string | null>(null)
 
   // Fetch conversations
-  useEffect(() => {
-    async function fetchConversations() {
-      try {
-        const response = await fetch('/api/creator/messages')
-        if (!response.ok) {
-          if (response.status === 401) {
-            window.location.href = '/login'
-            return
-          }
-          throw new Error('Failed to load messages')
+  const fetchConversations = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/creator/messages')
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = '/login'
+          return
         }
-        const data = await response.json()
-        setConversations(data.conversations)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load messages')
-      } finally {
-        setIsLoading(false)
+        throw new Error('Failed to load messages')
       }
-    }
+      const data = await response.json()
+      setConversations(data.conversations)
+      setError(null)
 
-    fetchConversations()
-  }, [])
+      // Clear selection if selected conversation is no longer visible
+      if (selectedId) {
+        const stillExists = data.conversations.some((c: Conversation) => c.id === selectedId)
+        if (!stillExists) {
+          setSelectedId(null)
+          setMessages([])
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load messages')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [selectedId])
+
+  // Re-fetch when brand changes
+  useEffect(() => {
+    if (!brandLoading) {
+      fetchConversations()
+    }
+  }, [selectedBrand?.id, brandLoading, fetchConversations])
 
   // Fetch messages for selected conversation
   const fetchMessages = useCallback(async (conversationId: string) => {
@@ -185,7 +203,7 @@ export default function MessagesPage(): React.JSX.Element {
     }
   }
 
-  if (isLoading) {
+  if (isLoading || brandLoading) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <Spinner size="lg" />
@@ -210,7 +228,14 @@ export default function MessagesPage(): React.JSX.Element {
 
   return (
     <div className="h-[calc(100vh-8rem)]">
-      <h1 className="mb-6 text-2xl font-bold">Messages</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold">Messages</h1>
+        {selectedBrand && (
+          <p className="text-sm text-muted-foreground">
+            Showing conversations for {selectedBrand.name}
+          </p>
+        )}
+      </div>
 
       <div className="flex h-[calc(100%-4rem)] overflow-hidden rounded-lg border">
         {/* Conversation list */}

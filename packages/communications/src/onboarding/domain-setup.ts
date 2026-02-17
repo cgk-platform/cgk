@@ -4,7 +4,7 @@
  * Helpers for domain configuration during onboarding.
  *
  * @ai-pattern onboarding
- * @ai-note Step 5b of tenant onboarding
+ * @ai-critical All functions require tenantId for database operations
  */
 
 import {
@@ -38,6 +38,7 @@ interface ResendConfig {
  * Creates the domain record and registers with Resend if API key provided.
  */
 export async function addOnboardingDomain(
+  tenantId: string,
   input: AddDomainInput,
   resendConfig?: ResendConfig
 ): Promise<{
@@ -46,7 +47,7 @@ export async function addOnboardingDomain(
   warning?: string
 }> {
   // Create domain in database
-  const domain = await createDomain({
+  const domain = await createDomain(tenantId, {
     domain: input.domain.toLowerCase(),
     subdomain: input.subdomain?.toLowerCase() ?? null,
   })
@@ -60,7 +61,7 @@ export async function addOnboardingDomain(
   }
 
   // Register with Resend to get DNS records
-  const result = await registerDomainWithResend(domain, resendConfig)
+  const result = await registerDomainWithResend(tenantId, domain, resendConfig)
 
   if (!result.success) {
     return {
@@ -70,7 +71,7 @@ export async function addOnboardingDomain(
   }
 
   // Get updated domain with DNS records
-  const updatedDomain = await getDomainById(domain.id)
+  const updatedDomain = await getDomainById(tenantId, domain.id)
 
   // Generate DNS instructions
   const dnsInstructions = updatedDomain
@@ -86,8 +87,8 @@ export async function addOnboardingDomain(
 /**
  * Get all domains with their configuration status
  */
-export async function getDomainsWithStatus(): Promise<DomainConfigStatus[]> {
-  const domains = await listDomains()
+export async function getDomainsWithStatus(tenantId: string): Promise<DomainConfigStatus[]> {
+  const domains = await listDomains(tenantId)
 
   return domains.map((domain) => ({
     ...domain,
@@ -100,6 +101,7 @@ export async function getDomainsWithStatus(): Promise<DomainConfigStatus[]> {
  * Verify a domain during onboarding
  */
 export async function verifyOnboardingDomain(
+  tenantId: string,
   domainId: string,
   resendConfig: ResendConfig
 ): Promise<{
@@ -109,7 +111,7 @@ export async function verifyOnboardingDomain(
   rateLimited?: boolean
   nextCheckAt?: Date
 }> {
-  const result = await verifyDomainWithResend(domainId, resendConfig)
+  const result = await verifyDomainWithResend(tenantId, domainId, resendConfig)
 
   if (result.rateLimited) {
     return {
@@ -128,7 +130,7 @@ export async function verifyOnboardingDomain(
   }
 
   // Get updated domain
-  const domain = await getDomainById(domainId)
+  const domain = await getDomainById(tenantId, domainId)
   if (!domain) {
     return {
       success: false,
@@ -163,9 +165,10 @@ export function getRecommendedSubdomains(primaryDomain: string): Array<{
  * Get DNS instructions for a domain
  */
 export async function getDomainDNSInstructions(
+  tenantId: string,
   domainId: string
 ): Promise<DNSInstructions | null> {
-  const domain = await getDomainById(domainId)
+  const domain = await getDomainById(tenantId, domainId)
   if (!domain || !domain.dnsRecords) {
     return null
   }
@@ -176,24 +179,24 @@ export async function getDomainDNSInstructions(
 /**
  * Check if any domain is verified for a tenant
  */
-export async function hasVerifiedDomain(): Promise<boolean> {
-  const domains = await listDomains()
+export async function hasVerifiedDomain(tenantId: string): Promise<boolean> {
+  const domains = await listDomains(tenantId)
   return domains.some((d) => d.verificationStatus === 'verified')
 }
 
 /**
  * Get count of verified domains
  */
-export async function getVerifiedDomainCount(): Promise<number> {
-  const domains = await listDomains()
+export async function getVerifiedDomainCount(tenantId: string): Promise<number> {
+  const domains = await listDomains(tenantId)
   return domains.filter((d) => d.verificationStatus === 'verified').length
 }
 
 /**
  * Get primary domain (first domain added, or first verified)
  */
-export async function getPrimaryDomain(): Promise<EmailDomain | null> {
-  const domains = await listDomains()
+export async function getPrimaryDomain(tenantId: string): Promise<EmailDomain | null> {
+  const domains = await listDomains(tenantId)
 
   // Prefer verified domains
   const verified = domains.filter((d) => d.verificationStatus === 'verified')

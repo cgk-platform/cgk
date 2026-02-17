@@ -305,6 +305,200 @@ export async function getTenantOpenAIClient(tenantId: string): Promise<OpenAICli
 }
 
 // =============================================================================
+// EasyPost Client
+// =============================================================================
+
+/**
+ * EasyPost tracking status
+ */
+export interface EasyPostTrackingStatus {
+  status: EasyPostTrackingStatusCode
+  status_detail: string
+  datetime: string
+  source: string
+  carrier: string
+  tracking_location?: {
+    city: string | null
+    state: string | null
+    country: string | null
+    zip: string | null
+  }
+}
+
+export type EasyPostTrackingStatusCode =
+  | 'unknown'
+  | 'pre_transit'
+  | 'in_transit'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'available_for_pickup'
+  | 'return_to_sender'
+  | 'failure'
+  | 'cancelled'
+  | 'error'
+
+/**
+ * EasyPost tracker response
+ */
+export interface EasyPostTracker {
+  id: string
+  object: 'Tracker'
+  mode: 'test' | 'production'
+  tracking_code: string
+  status: EasyPostTrackingStatusCode
+  status_detail: string
+  created_at: string
+  updated_at: string
+  carrier: string
+  carrier_detail?: {
+    service: string | null
+    container_type: string | null
+    est_delivery_date_local: string | null
+    est_delivery_time_local: string | null
+    origin_location: string | null
+    destination_location: string | null
+    guaranteed_delivery_date: string | null
+    alternate_identifier: string | null
+    initial_delivery_attempt: string | null
+  }
+  tracking_details: EasyPostTrackingStatus[]
+  public_url: string
+  est_delivery_date: string | null
+  signed_by: string | null
+  weight: number | null
+}
+
+/**
+ * EasyPost client interface
+ */
+export interface EasyPostClient {
+  apiKey: string
+  /** Create a tracker for a tracking number */
+  createTracker(trackingCode: string, carrier?: string): Promise<EasyPostTracker>
+  /** Retrieve an existing tracker by ID */
+  getTracker(trackerId: string): Promise<EasyPostTracker>
+  /** Get tracking info directly from carrier */
+  trackShipment(trackingCode: string, carrier: string): Promise<EasyPostTracker>
+}
+
+const EASYPOST_BASE = 'https://api.easypost.com/v2'
+
+/**
+ * Get an EasyPost client for a tenant
+ */
+export async function getTenantEasyPostClient(tenantId: string): Promise<EasyPostClient | null> {
+  const apiKey = await getTenantApiKey(tenantId, 'easypost')
+  if (!apiKey) return null
+
+  const headers = {
+    Authorization: `Basic ${Buffer.from(`${apiKey}:`).toString('base64')}`,
+    'Content-Type': 'application/json',
+  }
+
+  // Helper function to create tracker
+  async function createTracker(trackingCode: string, carrier?: string): Promise<EasyPostTracker> {
+    const body: Record<string, unknown> = {
+      tracker: { tracking_code: trackingCode },
+    }
+    if (carrier) {
+      body.tracker = { ...(body.tracker as object), carrier }
+    }
+
+    const response = await fetch(`${EASYPOST_BASE}/trackers`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`EasyPost error: ${response.status} - ${error}`)
+    }
+
+    return response.json() as Promise<EasyPostTracker>
+  }
+
+  return {
+    apiKey,
+
+    createTracker,
+
+    async getTracker(trackerId: string): Promise<EasyPostTracker> {
+      const response = await fetch(`${EASYPOST_BASE}/trackers/${trackerId}`, {
+        headers,
+      })
+
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(`EasyPost error: ${response.status} - ${error}`)
+      }
+
+      return response.json() as Promise<EasyPostTracker>
+    },
+
+    async trackShipment(trackingCode: string, carrier: string): Promise<EasyPostTracker> {
+      // First try to create a tracker (this may return existing tracker)
+      return createTracker(trackingCode, carrier)
+    },
+  }
+}
+
+/**
+ * Check tracking status using EasyPost
+ *
+ * Returns normalized status for common carrier codes
+ */
+export async function checkEasyPostTrackingStatus(
+  tenantId: string,
+  trackingNumber: string,
+  carrier?: string
+): Promise<{
+  delivered: boolean
+  inTransit: boolean
+  status: EasyPostTrackingStatusCode
+  statusDetail?: string
+  estimatedDelivery?: string
+  signedBy?: string
+  trackingUrl?: string
+}> {
+  const client = await getTenantEasyPostClient(tenantId)
+
+  if (!client) {
+    // EasyPost not configured - return unknown
+    return {
+      delivered: false,
+      inTransit: false,
+      status: 'unknown',
+    }
+  }
+
+  try {
+    const tracker = await client.trackShipment(trackingNumber, carrier || 'USPS')
+
+    const delivered = tracker.status === 'delivered'
+    const inTransit = ['in_transit', 'out_for_delivery'].includes(tracker.status)
+
+    return {
+      delivered,
+      inTransit,
+      status: tracker.status,
+      statusDetail: tracker.status_detail || undefined,
+      estimatedDelivery: tracker.est_delivery_date || undefined,
+      signedBy: tracker.signed_by || undefined,
+      trackingUrl: tracker.public_url || undefined,
+    }
+  } catch (error) {
+    console.error('[easypost] Tracking error:', error instanceof Error ? error.message : error)
+    return {
+      delivered: false,
+      inTransit: false,
+      status: 'error',
+      statusDetail: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
+// =============================================================================
 // Verification
 // =============================================================================
 
@@ -359,6 +553,19 @@ export async function verifyTenantServiceCredentials(
         // Verify by listing models
         const response = await fetch(`${OPENAI_BASE}/models`, {
           headers: { Authorization: `Bearer ${client.apiKey}` },
+        })
+        if (!response.ok) return { valid: false, error: 'Invalid API key' }
+        return { valid: true }
+      }
+
+      case 'easypost': {
+        const client = await getTenantEasyPostClient(tenantId)
+        if (!client) return { valid: false, error: 'EasyPost not configured' }
+        // Verify by listing trackers (empty list is OK)
+        const response = await fetch(`${EASYPOST_BASE}/trackers?page_size=1`, {
+          headers: {
+            Authorization: `Basic ${Buffer.from(`${client.apiKey}:`).toString('base64')}`,
+          },
         })
         if (!response.ok) return { valid: false, error: 'Invalid API key' }
         return { valid: true }

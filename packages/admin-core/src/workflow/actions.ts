@@ -253,11 +253,79 @@ async function executeSlackNotify(
   const message = interpolateTemplate(config.message || '', context)
   const channel = config.channel || '#general'
 
-  // TODO: Integrate with actual Slack API
-  // For now, log the intent and return success
-  console.log(`[Workflow] Slack notification to ${channel}: ${message}`)
+  // Try to send via Slack API
+  let slackResult: { success: boolean; error?: string; ts?: string } = { success: false }
 
-  // Store in a slack_notifications table for future processing
+  try {
+    // Dynamic import to avoid circular dependencies
+    const { getTenantWorkspace, SlackClient } = await import('@cgk-platform/slack')
+
+    // Get tenant's Slack workspace
+    const workspace = await getTenantWorkspace(context.tenantId)
+
+    if (workspace?.botTokenEncrypted) {
+      const client = SlackClient.fromEncryptedTokens(
+        workspace.botTokenEncrypted,
+        workspace.userTokenEncrypted
+      )
+
+      // Build the message blocks
+      const blocks = [
+        {
+          type: 'section' as const,
+          text: { type: 'mrkdwn' as const, text: message },
+        },
+      ]
+
+      // Add mention if specified
+      let fullMessage = message
+      if (config.mention) {
+        if (config.mention === '@here') {
+          fullMessage = `<!here> ${message}`
+        } else if (config.mention === '@channel') {
+          fullMessage = `<!channel> ${message}`
+        } else if (config.mention.startsWith('@')) {
+          fullMessage = `<${config.mention}> ${message}`
+        }
+        blocks[0].text.text = fullMessage
+      }
+
+      // Add context about the entity
+      blocks.push({
+        type: 'context' as const,
+        elements: [
+          {
+            type: 'mrkdwn' as const,
+            text: `*${context.entityType}:* ${context.entityId} | *Rule:* ${context.ruleId}`,
+          },
+        ],
+      } as unknown as { type: 'section'; text: { type: 'mrkdwn'; text: string } })
+
+      // Send the message
+      const response = await client.postMessage(
+        channel,
+        blocks as import('@cgk-platform/slack').SlackBlock[],
+        fullMessage
+      )
+
+      slackResult = {
+        success: response.ok,
+        error: response.error,
+        ts: response.ts,
+      }
+    } else {
+      console.log(`[Workflow] Slack not configured for tenant ${context.tenantId}`)
+      slackResult = { success: false, error: 'Slack not configured' }
+    }
+  } catch (error) {
+    console.error('[Workflow] Slack notification error:', error)
+    slackResult = {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+
+  // Store the notification record regardless of success
   await withTenant(context.tenantId, async () => {
     await sql`
       INSERT INTO workflow_slack_notifications (
@@ -267,7 +335,9 @@ async function executeSlackNotify(
         rule_id,
         entity_type,
         entity_id,
-        status
+        status,
+        slack_ts,
+        error_message
       ) VALUES (
         ${channel},
         ${message},
@@ -275,19 +345,29 @@ async function executeSlackNotify(
         ${context.ruleId},
         ${context.entityType},
         ${context.entityId},
-        'pending'
+        ${slackResult.success ? 'sent' : 'failed'},
+        ${slackResult.ts || null},
+        ${slackResult.error || null}
       )
       ON CONFLICT DO NOTHING
     `
-  }).catch((error) => {
+  }).catch((dbError) => {
     // Table might not exist yet or other DB error - log but don't fail
-    console.debug('[workflow] Failed to save Slack notification:', error)
+    console.debug('[workflow] Failed to save Slack notification record:', dbError)
   })
 
+  // Return success even if Slack send failed - the notification was logged
+  // Actual Slack send failure is recorded in the database
   return {
     action,
-    success: true,
-    result: { channel, message: message.substring(0, 100) },
+    success: slackResult.success,
+    error: slackResult.error,
+    result: {
+      channel,
+      message: message.substring(0, 100),
+      slackTs: slackResult.ts,
+      sent: slackResult.success,
+    },
   }
 }
 

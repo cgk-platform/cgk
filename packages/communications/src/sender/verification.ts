@@ -5,7 +5,7 @@
  * Includes rate limiting to prevent excessive API calls.
  *
  * @ai-pattern resend-integration
- * @ai-note This module wraps Resend API for domain verification
+ * @ai-critical All functions require tenantId for database operations
  */
 
 import type { DNSRecords, EmailDomain, VerificationStatus } from '../types.js'
@@ -89,6 +89,7 @@ export function getNextCheckAllowedAt(domain: EmailDomain): Date | null {
  * This creates the domain in Resend and returns the DNS records needed.
  */
 export async function registerDomainWithResend(
+  tenantId: string,
   domain: EmailDomain,
   config: ResendConfig
 ): Promise<VerificationResult> {
@@ -122,7 +123,7 @@ export async function registerDomainWithResend(
     const dnsRecords = convertResendRecords(resendDomain.records)
 
     // Update domain with Resend ID and DNS records
-    await updateDomainDNSRecords(domain.id, dnsRecords, resendDomain.id)
+    await updateDomainDNSRecords(tenantId, domain.id, dnsRecords, resendDomain.id)
 
     return {
       success: true,
@@ -142,11 +143,12 @@ export async function registerDomainWithResend(
  * Verify a domain's DNS records with Resend API
  */
 export async function verifyDomainWithResend(
+  tenantId: string,
   domainId: string,
   config: ResendConfig
 ): Promise<VerificationResult> {
   // Get the domain
-  const domain = await getDomainById(domainId)
+  const domain = await getDomainById(tenantId, domainId)
   if (!domain) {
     return {
       success: false,
@@ -169,13 +171,13 @@ export async function verifyDomainWithResend(
 
   // If no Resend domain ID, register first
   if (!domain.resendDomainId) {
-    const registerResult = await registerDomainWithResend(domain, config)
+    const registerResult = await registerDomainWithResend(tenantId, domain, config)
     if (!registerResult.success) {
       return registerResult
     }
 
     // Update the domain reference
-    const updatedDomain = await getDomainById(domainId)
+    const updatedDomain = await getDomainById(tenantId, domainId)
     if (!updatedDomain || !updatedDomain.resendDomainId) {
       return {
         success: false,
@@ -203,14 +205,14 @@ export async function verifyDomainWithResend(
     )
 
     // Update last check time regardless of result
-    await updateDomainLastCheck(domain.id)
+    await updateDomainLastCheck(tenantId, domain.id)
 
     if (!verifyResponse.ok) {
       const errorBody = await verifyResponse.text()
 
       // Check if domain is already verified (some APIs return error for this)
       if (verifyResponse.status === 400 && errorBody.includes('already verified')) {
-        await updateDomainVerificationStatus(domain.id, 'verified')
+        await updateDomainVerificationStatus(tenantId, domain.id, 'verified')
         return {
           success: true,
           status: 'verified',
@@ -247,7 +249,7 @@ export async function verifyDomainWithResend(
     const newStatus = mapResendStatus(resendDomain.status)
 
     // Update our database with new status
-    await updateDomainVerificationStatus(domain.id, newStatus)
+    await updateDomainVerificationStatus(tenantId, domain.id, newStatus)
 
     return {
       success: newStatus === 'verified',
@@ -255,7 +257,7 @@ export async function verifyDomainWithResend(
       dnsRecords: convertResendRecords(resendDomain.records),
     }
   } catch (error) {
-    await updateDomainLastCheck(domain.id)
+    await updateDomainLastCheck(tenantId, domain.id)
     return {
       success: false,
       status: 'pending',
@@ -268,10 +270,11 @@ export async function verifyDomainWithResend(
  * Get domain status from Resend API
  */
 export async function getDomainStatusFromResend(
+  tenantId: string,
   domainId: string,
   config: ResendConfig
 ): Promise<VerificationResult> {
-  const domain = await getDomainById(domainId)
+  const domain = await getDomainById(tenantId, domainId)
   if (!domain || !domain.resendDomainId) {
     return {
       success: false,

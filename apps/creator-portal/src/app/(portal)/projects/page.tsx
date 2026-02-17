@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
 import { ProjectCard } from '@/components/projects/ProjectCard'
+import { useBrand } from '@/lib/brand-context'
 import type { Project, ProjectStatus } from '@/lib/projects'
 
 interface ProjectsResponse {
@@ -23,6 +24,11 @@ interface ProjectsResponse {
     offset: number
     hasMore: boolean
   }
+  filter?: {
+    brandId: string | null
+    brandSlug: string | null
+    isFiltered: boolean
+  }
 }
 
 const STATUS_FILTERS: { value: ProjectStatus | 'all'; label: string }[] = [
@@ -41,6 +47,9 @@ export default function ProjectsPage(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Get brand context - will trigger re-fetch when brand changes
+  const { selectedBrand, isLoading: brandLoading } = useBrand()
 
   const fetchProjects = useCallback(async () => {
     try {
@@ -70,9 +79,12 @@ export default function ProjectsPage(): React.JSX.Element {
     }
   }, [statusFilter, searchQuery])
 
+  // Re-fetch when brand changes or when filters change
   useEffect(() => {
-    fetchProjects()
-  }, [fetchProjects])
+    if (!brandLoading) {
+      fetchProjects()
+    }
+  }, [fetchProjects, selectedBrand?.id, brandLoading])
 
   const formatCurrency = (cents: number): string => {
     return new Intl.NumberFormat('en-US', {
@@ -81,13 +93,18 @@ export default function ProjectsPage(): React.JSX.Element {
     }).format(cents / 100)
   }
 
+  // Determine header text based on brand filter
+  const isFiltered = data?.filter?.isFiltered ?? false
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold">Projects</h1>
         <p className="text-muted-foreground">
-          Manage your content projects and deliverables
+          {isFiltered && selectedBrand
+            ? `Projects for ${selectedBrand.name}`
+            : 'Manage your content projects and deliverables'}
         </p>
       </div>
 
@@ -175,14 +192,14 @@ export default function ProjectsPage(): React.JSX.Element {
       </div>
 
       {/* Loading state */}
-      {loading && (
+      {(loading || brandLoading) && (
         <div className="flex items-center justify-center py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       )}
 
       {/* Error state */}
-      {error && (
+      {error && !loading && (
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-center">
           <p className="text-sm text-destructive">{error}</p>
           <button
@@ -195,7 +212,7 @@ export default function ProjectsPage(): React.JSX.Element {
       )}
 
       {/* Projects grid */}
-      {!loading && !error && data && (
+      {!loading && !brandLoading && !error && data && (
         <>
           {data.projects.length === 0 ? (
             <div className="rounded-lg border bg-card p-12 text-center">
@@ -219,7 +236,9 @@ export default function ProjectsPage(): React.JSX.Element {
               <p className="mt-1 text-sm text-muted-foreground">
                 {statusFilter !== 'all'
                   ? 'Try changing the filter or search query'
-                  : 'Projects assigned to you will appear here'}
+                  : isFiltered
+                    ? `No projects found for ${selectedBrand?.name || 'this brand'}`
+                    : 'Projects assigned to you will appear here'}
               </p>
             </div>
           ) : (

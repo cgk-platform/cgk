@@ -7,6 +7,35 @@
 
 // Stripe integration
 export { createStripeClient, type StripeClient } from './stripe'
+
+// Payment Providers (Tenant-scoped)
+export {
+  StripeProvider,
+  createStripeProvider,
+  type StripeProviderConfig,
+  type PayoutBatchItem,
+  type PayoutBatchResult,
+  type PayoutItemResult,
+  type PayoutStatusResult as StripePayoutStatusResult,
+  type CreateConnectAccountParams,
+  type CreateConnectAccountResult,
+  type WebhookResult,
+  // Wise Provider
+  WiseProvider,
+  createWiseProvider,
+  createTenantWiseProvider,
+  requireTenantWiseProvider,
+  type WiseProviderConfig,
+  type PayoutBatchRequest as WisePayoutBatchRequest,
+  type WisePayoutBatchItem,
+  type WisePayoutBatchResult,
+  type WiseTransferResult,
+  type WisePayoutStatus,
+  type ExchangeRateQuote,
+  type RecipientValidationResult,
+  type RecipientValidationError,
+  type CreateRecipientParams as WiseCreateRecipientParams,
+} from './providers'
 export type {
   StripePaymentIntent,
   StripeCustomer,

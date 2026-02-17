@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -36,9 +35,7 @@ export async function POST(request: Request) {
   }
 
   // Get the sender address
-  const senderAddress = await withTenant(tenantSlug, () =>
-    getSenderAddressById(body.senderAddressId)
-  )
+  const senderAddress = await getSenderAddressById(tenantSlug, body.senderAddressId)
 
   if (!senderAddress) {
     return NextResponse.json(

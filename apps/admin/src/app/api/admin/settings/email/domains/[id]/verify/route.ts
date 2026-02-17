@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -28,7 +27,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
   }
 
   // Check domain exists
-  const domain = await withTenant(tenantSlug, () => getDomainById(id))
+  const domain = await getDomainById(tenantSlug, id)
 
   if (!domain) {
     return NextResponse.json({ error: 'Domain not found' }, { status: 404 })
@@ -53,9 +52,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
   }
 
   // Verify domain
-  const result = await withTenant(tenantSlug, () =>
-    verifyDomainWithResend(id, resendConfig)
-  )
+  const result = await verifyDomainWithResend(tenantSlug, id, resendConfig)
 
   if (result.rateLimited) {
     return NextResponse.json(
@@ -79,7 +76,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
   }
 
   // Get updated domain
-  const updatedDomain = await withTenant(tenantSlug, () => getDomainById(id))
+  const updatedDomain = await getDomainById(tenantSlug, id)
 
   return NextResponse.json({
     success: result.status === 'verified',

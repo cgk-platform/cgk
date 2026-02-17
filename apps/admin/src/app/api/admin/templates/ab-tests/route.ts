@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import { getTemplateABTests } from '@/lib/ab-tests/db'
+import { getTemplateABTests, createTemplateABTest } from '@/lib/ab-tests/db'
 
 /**
  * GET /api/admin/templates/ab-tests
@@ -17,9 +17,16 @@ export async function GET() {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const tests = await getTemplateABTests(tenantSlug)
-
-  return NextResponse.json({ tests })
+  try {
+    const tests = await getTemplateABTests(tenantSlug)
+    return NextResponse.json({ tests })
+  } catch (error) {
+    console.error('Error fetching template A/B tests:', error)
+    return NextResponse.json(
+      { error: 'Failed to fetch template A/B tests' },
+      { status: 500 }
+    )
+  }
 }
 
 /**
@@ -47,25 +54,24 @@ export async function POST(request: Request) {
         { status: 400 }
       )
     }
+    if (!data.templateAName || !data.templateBName) {
+      return NextResponse.json(
+        { error: 'Template names are required' },
+        { status: 400 }
+      )
+    }
 
-    // In a real implementation, create the test
-    return NextResponse.json({
-      test: {
-        id: `template-test-${Date.now()}`,
-        tenantId: tenantSlug,
-        name: data.name,
-        description: data.description,
-        status: 'draft',
-        templateAId: data.templateAId,
-        templateAName: data.templateAName || 'Template A',
-        templateBId: data.templateBId,
-        templateBName: data.templateBName || 'Template B',
-        trafficAllocation: data.trafficAllocation || { a: 50, b: 50 },
-        metrics: { opens: { a: 0, b: 0 }, clicks: { a: 0, b: 0 }, conversions: { a: 0, b: 0 } },
-        isSignificant: false,
-        createdAt: new Date(),
-      },
+    const test = await createTemplateABTest(tenantSlug, {
+      name: data.name,
+      description: data.description,
+      templateAId: data.templateAId,
+      templateAName: data.templateAName,
+      templateBId: data.templateBId,
+      templateBName: data.templateBName,
+      trafficAllocation: data.trafficAllocation,
     })
+
+    return NextResponse.json({ test })
   } catch (error) {
     console.error('Error creating template A/B test:', error)
     return NextResponse.json(

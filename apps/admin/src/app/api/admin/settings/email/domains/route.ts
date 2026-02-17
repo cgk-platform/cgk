@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -24,7 +23,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
-  const domains = await withTenant(tenantSlug, () => listDomains())
+  const domains = await listDomains(tenantSlug)
 
   return NextResponse.json({ domains })
 }
@@ -137,19 +136,15 @@ export async function POST(request: Request) {
 
   try {
     // Create domain in database
-    const domain = await withTenant(tenantSlug, () =>
-      createDomain({
-        domain: body.domain.toLowerCase(),
-        subdomain: body.subdomain?.toLowerCase() ?? null,
-      })
-    )
+    const domain = await createDomain(tenantSlug, {
+      domain: body.domain.toLowerCase(),
+      subdomain: body.subdomain?.toLowerCase() ?? null,
+    })
 
     // Register with Resend to get DNS records
     const resendConfig = getResendConfig()
     if (resendConfig) {
-      const result = await withTenant(tenantSlug, () =>
-        registerDomainWithResend(domain, resendConfig)
-      )
+      const result = await registerDomainWithResend(tenantSlug, domain, resendConfig)
 
       if (!result.success) {
         // Domain created but Resend registration failed
@@ -164,7 +159,7 @@ export async function POST(request: Request) {
       }
 
       // Refresh domain with DNS records
-      const updatedDomains = await withTenant(tenantSlug, () => listDomains())
+      const updatedDomains = await listDomains(tenantSlug)
       const updatedDomain = updatedDomains.find((d) => d.id === domain.id)
 
       return NextResponse.json({ domain: updatedDomain ?? domain }, { status: 201 })

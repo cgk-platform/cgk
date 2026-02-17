@@ -1,11 +1,11 @@
 /**
  * Custom Checkout Components
  *
- * Multi-step checkout form scaffold:
+ * Multi-step checkout form with Stripe payment integration:
  * 1. Contact info (email, phone)
  * 2. Shipping address
  * 3. Shipping method
- * 4. Payment (Stripe Elements placeholder)
+ * 4. Payment (Stripe Elements)
  * 5. Review & place order
  */
 
@@ -15,9 +15,11 @@ import type { Cart } from '@cgk-platform/commerce'
 import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 
 import { formatMoney } from '@/lib/cart/types'
+import { StripeProvider, PaymentForm } from '@/components/checkout'
 
 type CheckoutStep = 'contact' | 'shipping' | 'delivery' | 'payment' | 'review'
 
@@ -28,6 +30,7 @@ interface CheckoutContentProps {
 }
 
 export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: CheckoutContentProps) {
+  const router = useRouter()
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('contact')
   const [completedSteps, setCompletedSteps] = useState<Set<CheckoutStep>>(new Set())
 
@@ -44,7 +47,115 @@ export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: C
     zip: '',
     country: 'US',
     shippingMethod: '',
+    shippingMethodName: '',
+    shippingPrice: 0,
   })
+
+  // Payment state
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null)
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [paymentError, setPaymentError] = useState<string | null>(null)
+  const [isCreatingPaymentIntent, setIsCreatingPaymentIntent] = useState(false)
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false)
+
+  // Create payment intent when entering payment step
+  const createPaymentIntent = useCallback(async () => {
+    if (clientSecret) return // Already have one
+
+    setIsCreatingPaymentIntent(true)
+    setPaymentError(null)
+
+    try {
+      const response = await fetch('/api/checkout/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cartId: cart.id,
+          email: formData.email,
+          shippingAddress: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address1: formData.address1,
+            address2: formData.address2,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip,
+            country: formData.country,
+          },
+          shippingMethod: formData.shippingMethod ? {
+            id: formData.shippingMethod,
+            price: formData.shippingPrice,
+          } : undefined,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to create payment')
+      }
+
+      setClientSecret(data.clientSecret)
+      setPaymentIntentId(data.paymentIntentId)
+    } catch (err) {
+      console.error('Failed to create payment intent:', err)
+      setPaymentError(err instanceof Error ? err.message : 'Failed to initialize payment')
+    } finally {
+      setIsCreatingPaymentIntent(false)
+    }
+  }, [cart.id, formData, clientSecret])
+
+  // Place order after payment is confirmed
+  const handlePlaceOrder = useCallback(async () => {
+    if (!paymentIntentId) {
+      setPaymentError('Payment not confirmed')
+      return
+    }
+
+    setIsPlacingOrder(true)
+    setPaymentError(null)
+
+    try {
+      const response = await fetch('/api/checkout/confirm-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentIntentId,
+          cartId: cart.id,
+          email: formData.email,
+          shippingAddress: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            address1: formData.address1,
+            address2: formData.address2,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip,
+            country: formData.country,
+            phone: formData.phone,
+          },
+          shippingMethod: formData.shippingMethod ? {
+            id: formData.shippingMethod,
+            name: formData.shippingMethodName,
+            price: formData.shippingPrice,
+          } : undefined,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error ?? 'Failed to place order')
+      }
+
+      // Redirect to order confirmation
+      router.push(data.redirectUrl ?? `/order-confirmation/${data.orderId}`)
+    } catch (err) {
+      console.error('Failed to place order:', err)
+      setPaymentError(err instanceof Error ? err.message : 'Failed to place order')
+      setIsPlacingOrder(false)
+    }
+  }, [paymentIntentId, cart.id, formData, router])
 
   const steps = useMemo<{ key: CheckoutStep; label: string }[]>(() => [
     { key: 'contact', label: 'Contact' },
@@ -163,14 +274,19 @@ export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: C
               {currentStep === 'delivery' && (
                 <DeliveryStep
                   formData={formData}
-                  onChange={handleInputChange}
+                  cartId={cart.id}
                   onComplete={() => completeStep('delivery')}
                   onBack={() => goToStep('shipping')}
+                  setFormData={setFormData as React.Dispatch<React.SetStateAction<Record<string, string | number>>>}
                 />
               )}
 
               {currentStep === 'payment' && (
-                <PaymentStep
+                <PaymentStepWithStripe
+                  clientSecret={clientSecret}
+                  isCreating={isCreatingPaymentIntent}
+                  error={paymentError}
+                  onInit={createPaymentIntent}
                   onComplete={() => completeStep('payment')}
                   onBack={() => goToStep('delivery')}
                 />
@@ -180,6 +296,9 @@ export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: C
                 <ReviewStep
                   cart={cart}
                   formData={formData}
+                  isPlacing={isPlacingOrder}
+                  error={paymentError}
+                  onPlaceOrder={handlePlaceOrder}
                   onBack={() => goToStep('payment')}
                 />
               )}
@@ -199,14 +318,15 @@ export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: C
 // --- Step Components ---
 
 interface StepProps {
-  formData: Record<string, string>
+  formData: Record<string, string | number>
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
   onComplete: () => void
   onBack?: () => void
 }
 
 function ContactStep({ formData, onChange, onComplete }: StepProps) {
-  const isValid = formData.email?.includes('@') ?? false
+  const email = typeof formData.email === 'string' ? formData.email : ''
+  const isValid = email.includes('@')
 
   return (
     <div className="space-y-6">
@@ -376,13 +496,158 @@ function ShippingStep({ formData, onChange, onComplete, onBack }: StepProps) {
   )
 }
 
-function DeliveryStep({ formData, onChange, onComplete, onBack }: StepProps) {
-  // Placeholder shipping rates
-  const shippingRates = [
-    { id: 'standard', name: 'Standard Shipping', price: '5.99', days: '5-7 business days' },
-    { id: 'express', name: 'Express Shipping', price: '14.99', days: '2-3 business days' },
-    { id: 'overnight', name: 'Overnight Shipping', price: '29.99', days: '1 business day' },
-  ]
+interface ShippingRate {
+  id: string
+  name: string
+  price: number
+  days: string
+  description?: string
+}
+
+interface ShippingRatesResponse {
+  rates: ShippingRate[]
+  currency: string
+  freeShippingThreshold: number | null
+  qualifiesForFreeShipping: boolean
+  cartSubtotal: number
+  error?: string
+}
+
+interface DeliveryStepProps extends Omit<StepProps, 'onChange'> {
+  cartId: string
+  setFormData: React.Dispatch<React.SetStateAction<Record<string, string | number>>>
+}
+
+function DeliveryStep({ formData, onComplete, onBack, setFormData, cartId }: DeliveryStepProps) {
+  const [shippingRates, setShippingRates] = useState<ShippingRate[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number | null>(null)
+  const [cartSubtotal, setCartSubtotal] = useState<number>(0)
+
+  // Fetch shipping rates when address changes
+  useEffect(() => {
+    async function fetchRates() {
+      // Only fetch if we have the required address info
+      if (!formData.zip || !formData.country) {
+        setShippingRates([])
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const response = await fetch('/api/checkout/shipping-rates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cartId,
+            shippingAddress: {
+              address1: formData.address1,
+              address2: formData.address2,
+              city: formData.city,
+              state: formData.state,
+              zip: formData.zip,
+              country: formData.country,
+            },
+          }),
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch shipping rates')
+        }
+
+        const data = (await response.json()) as ShippingRatesResponse
+        setShippingRates(data.rates)
+        setFreeShippingThreshold(data.freeShippingThreshold)
+        setCartSubtotal(data.cartSubtotal)
+
+        if (data.error) {
+          // Non-fatal error, we still have rates
+          console.warn('[DeliveryStep] Warning:', data.error)
+        }
+
+        // Auto-select first rate if none selected
+        if (!formData.shippingMethod && data.rates.length > 0) {
+          const firstRate = data.rates[0]
+          if (firstRate) {
+            setFormData((prev) => ({
+              ...prev,
+              shippingMethod: firstRate.id,
+              shippingMethodName: firstRate.name,
+              shippingPrice: firstRate.price,
+            }))
+          }
+        }
+      } catch (err) {
+        console.error('[DeliveryStep] Error fetching shipping rates:', err)
+        setError('Unable to load shipping options. Please try again.')
+
+        // Fallback to free shipping if rates fail
+        const fallbackRate: ShippingRate = {
+          id: 'standard',
+          name: 'Standard Shipping',
+          price: 0,
+          days: '5-7 business days',
+          description: 'Free shipping (temporary)',
+        }
+        setShippingRates([fallbackRate])
+
+        // Auto-select fallback
+        if (!formData.shippingMethod) {
+          setFormData((prev) => ({
+            ...prev,
+            shippingMethod: fallbackRate.id,
+            shippingMethodName: fallbackRate.name,
+            shippingPrice: fallbackRate.price,
+          }))
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchRates()
+  }, [formData.zip, formData.country, formData.address1, formData.address2, formData.city, formData.state, cartId, setFormData, formData.shippingMethod])
+
+  const handleRateSelect = (rate: ShippingRate) => {
+    setFormData((prev) => ({
+      ...prev,
+      shippingMethod: rate.id,
+      shippingMethodName: rate.name,
+      shippingPrice: rate.price,
+    }))
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl font-semibold">Delivery Method</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Loading shipping options...
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <LoadingSpinner />
+            <span>Calculating shipping rates for your location...</span>
+          </div>
+        </div>
+        <div className="flex gap-4">
+          <button type="button" onClick={onBack} className="btn-secondary flex-1">
+            Back
+          </button>
+          <button type="button" disabled className="btn-primary flex-1 opacity-50 cursor-not-allowed">
+            Continue to Payment
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -393,34 +658,67 @@ function DeliveryStep({ formData, onChange, onComplete, onBack }: StepProps) {
         </p>
       </div>
 
+      {/* Free shipping threshold notice */}
+      {freeShippingThreshold && !shippingRates.some((r) => r.price === 0) && (
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">
+          <p>
+            Add ${(freeShippingThreshold - cartSubtotal).toFixed(2)} more to qualify for free shipping!
+          </p>
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {/* Shipping rates */}
       <div className="space-y-3">
-        {shippingRates.map((rate) => (
-          <label
-            key={rate.id}
-            className={cn(
-              'flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors',
-              formData.shippingMethod === rate.id
-                ? 'border-foreground bg-foreground/5'
-                : 'hover:border-foreground/50'
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <input
-                type="radio"
-                name="shippingMethod"
-                value={rate.id}
-                checked={formData.shippingMethod === rate.id}
-                onChange={onChange}
-                className="h-4 w-4"
-              />
-              <div>
-                <p className="font-medium">{rate.name}</p>
-                <p className="text-sm text-muted-foreground">{rate.days}</p>
+        {shippingRates.length === 0 ? (
+          <div className="rounded-lg border border-muted p-6 text-center text-muted-foreground">
+            <p>No shipping options available for your location.</p>
+            <p className="mt-1 text-sm">Please verify your shipping address.</p>
+          </div>
+        ) : (
+          shippingRates.map((rate) => (
+            <label
+              key={rate.id}
+              className={cn(
+                'flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors',
+                formData.shippingMethod === rate.id
+                  ? 'border-foreground bg-foreground/5'
+                  : 'hover:border-foreground/50',
+                rate.price === 0 && 'border-emerald-300 bg-emerald-50'
+              )}
+            >
+              <div className="flex items-center gap-3">
+                <input
+                  type="radio"
+                  name="shippingMethod"
+                  value={rate.id}
+                  checked={formData.shippingMethod === rate.id}
+                  onChange={() => handleRateSelect(rate)}
+                  className="h-4 w-4"
+                />
+                <div>
+                  <p className="font-medium">{rate.name}</p>
+                  <p className="text-sm text-muted-foreground">{rate.days}</p>
+                  {rate.description && (
+                    <p className="text-xs text-emerald-600 mt-0.5">{rate.description}</p>
+                  )}
+                </div>
               </div>
-            </div>
-            <span className="font-medium">${rate.price}</span>
-          </label>
-        ))}
+              <span className={cn(
+                'font-medium',
+                rate.price === 0 && 'text-emerald-600'
+              )}>
+                {rate.price === 0 ? 'FREE' : `$${rate.price.toFixed(2)}`}
+              </span>
+            </label>
+          ))
+        )}
       </div>
 
       <div className="flex gap-4">
@@ -430,7 +728,7 @@ function DeliveryStep({ formData, onChange, onComplete, onBack }: StepProps) {
         <button
           type="button"
           onClick={onComplete}
-          disabled={!formData.shippingMethod}
+          disabled={!formData.shippingMethod || shippingRates.length === 0}
           className="btn-primary flex-1"
         >
           Continue to Payment
@@ -440,63 +738,123 @@ function DeliveryStep({ formData, onChange, onComplete, onBack }: StepProps) {
   )
 }
 
-interface PaymentStepProps {
+interface PaymentStepWithStripeProps {
+  clientSecret: string | null
+  isCreating: boolean
+  error: string | null
+  onInit: () => void
   onComplete: () => void
   onBack: () => void
 }
 
-function PaymentStep({ onComplete, onBack }: PaymentStepProps) {
+function PaymentStepWithStripe({
+  clientSecret,
+  isCreating,
+  error,
+  onInit,
+  onComplete,
+  onBack,
+}: PaymentStepWithStripeProps) {
+  // Initialize payment intent when component mounts
+  useEffect(() => {
+    if (!clientSecret && !isCreating && !error) {
+      onInit()
+    }
+  }, [clientSecret, isCreating, error, onInit])
+
+  if (isCreating) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl font-semibold">Payment</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            All transactions are secure and encrypted
+          </p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <LoadingSpinner />
+            <span>Preparing secure payment...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error && !clientSecret) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl font-semibold">Payment</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            All transactions are secure and encrypted
+          </p>
+        </div>
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-center">
+          <p className="text-sm text-destructive">{error}</p>
+          <button
+            type="button"
+            onClick={onInit}
+            className="mt-3 text-sm underline hover:no-underline"
+          >
+            Try again
+          </button>
+        </div>
+        <div className="flex gap-4">
+          <button type="button" onClick={onBack} className="btn-secondary flex-1">
+            Back
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!clientSecret) {
+    return null
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold">Payment</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          All transactions are secure and encrypted
-        </p>
-      </div>
+    <StripeProvider clientSecret={clientSecret}>
+      <PaymentForm onSuccess={onComplete} onBack={onBack} />
+    </StripeProvider>
+  )
+}
 
-      {/* Stripe Elements Placeholder */}
-      <div className="rounded-lg border-2 border-dashed border-muted-foreground/25 p-8 text-center">
-        <CreditCardIcon className="mx-auto h-12 w-12 text-muted-foreground/50" />
-        <p className="mt-4 font-medium text-muted-foreground">
-          Stripe Payment Element
-        </p>
-        <p className="mt-1 text-sm text-muted-foreground/75">
-          This will be replaced with the actual Stripe Elements integration
-        </p>
-      </div>
-
-      {/* Payment method icons */}
-      <div className="flex items-center justify-center gap-4">
-        <div className="rounded border px-3 py-1 text-xs text-muted-foreground">Visa</div>
-        <div className="rounded border px-3 py-1 text-xs text-muted-foreground">Mastercard</div>
-        <div className="rounded border px-3 py-1 text-xs text-muted-foreground">Amex</div>
-        <div className="rounded border px-3 py-1 text-xs text-muted-foreground">Apple Pay</div>
-      </div>
-
-      <div className="flex gap-4">
-        <button type="button" onClick={onBack} className="btn-secondary flex-1">
-          Back
-        </button>
-        <button type="button" onClick={onComplete} className="btn-primary flex-1">
-          Review Order
-        </button>
-      </div>
-    </div>
+function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn('h-5 w-5 animate-spin', className)}
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
   )
 }
 
 interface ReviewStepProps {
   cart: Cart
-  formData: Record<string, string>
+  formData: Record<string, string | number>
+  isPlacing: boolean
+  error: string | null
+  onPlaceOrder: () => void
   onBack: () => void
 }
 
-function ReviewStep({ cart, formData, onBack }: ReviewStepProps) {
-  const handlePlaceOrder = () => {
-    // This will be implemented with actual order creation
-    alert('Order placement will be implemented with Stripe integration')
-  }
+function ReviewStep({ cart, formData, isPlacing, error, onPlaceOrder, onBack }: ReviewStepProps) {
+  const shippingPrice = typeof formData.shippingPrice === 'number' ? formData.shippingPrice : 0
 
   return (
     <div className="space-y-6">
@@ -506,6 +864,12 @@ function ReviewStep({ cart, formData, onBack }: ReviewStepProps) {
           Please review your order before placing it
         </p>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
 
       {/* Order Summary */}
       <div className="space-y-4">
@@ -525,6 +889,15 @@ function ReviewStep({ cart, formData, onBack }: ReviewStepProps) {
           </p>
         </div>
 
+        {formData.shippingMethodName && (
+          <div className="rounded-lg border p-4">
+            <h3 className="font-medium mb-2">Shipping Method</h3>
+            <p className="text-sm text-muted-foreground">
+              {formData.shippingMethodName} - ${shippingPrice.toFixed(2)}
+            </p>
+          </div>
+        )}
+
         <div className="rounded-lg border p-4">
           <h3 className="font-medium mb-2">Items ({cart.totalQuantity})</h3>
           <div className="space-y-2">
@@ -538,14 +911,41 @@ function ReviewStep({ cart, formData, onBack }: ReviewStepProps) {
             ))}
           </div>
         </div>
+
+        <div className="rounded-lg border p-4">
+          <h3 className="font-medium mb-2">Payment</h3>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CreditCardIcon className="h-4 w-4" />
+            <span>Card ending in ****</span>
+            <CheckIcon className="ml-auto h-4 w-4 text-emerald-500" />
+            <span className="text-emerald-600">Authorized</span>
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-4">
-        <button type="button" onClick={onBack} className="btn-secondary flex-1">
+        <button
+          type="button"
+          onClick={onBack}
+          disabled={isPlacing}
+          className="btn-secondary flex-1"
+        >
           Back
         </button>
-        <button type="button" onClick={handlePlaceOrder} className="btn-primary flex-1">
-          Place Order
+        <button
+          type="button"
+          onClick={onPlaceOrder}
+          disabled={isPlacing}
+          className="btn-primary flex-1"
+        >
+          {isPlacing ? (
+            <span className="flex items-center justify-center gap-2">
+              <LoadingSpinner className="h-4 w-4" />
+              Placing Order...
+            </span>
+          ) : (
+            'Place Order'
+          )}
         </button>
       </div>
     </div>

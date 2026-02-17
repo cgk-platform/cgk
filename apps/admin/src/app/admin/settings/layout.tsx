@@ -9,9 +9,11 @@ const settingsTabs = [
   { label: 'AI', href: '/admin/settings/ai' },
   { label: 'Email', href: '/admin/settings/email' },
   { label: 'Payouts', href: '/admin/settings/payouts' },
+  { label: 'Costs', href: '/admin/settings/costs' },
   { label: 'Domains', href: '/admin/settings/domains' },
   { label: 'Shopify', href: '/admin/settings/shopify' },
   { label: 'Payments', href: '/admin/settings/payments' },
+  { label: 'Portal', href: '/admin/settings/portal' },
   { label: 'Team', href: '/admin/settings/team' },
   { label: 'Integrations', href: '/admin/settings/integrations' },
 ]

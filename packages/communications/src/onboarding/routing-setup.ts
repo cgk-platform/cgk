@@ -4,7 +4,7 @@
  * Helpers for configuring notification routing during onboarding.
  *
  * @ai-pattern onboarding
- * @ai-note Step 5e of tenant onboarding
+ * @ai-critical All functions require tenantId for database operations
  */
 
 import {
@@ -261,14 +261,15 @@ export function getNotificationTypesByCategory(): Record<
 /**
  * Initialize notification routing with defaults
  */
-export async function initializeNotificationRouting(): Promise<void> {
-  await seedDefaultNotificationRouting()
+export async function initializeNotificationRouting(tenantId: string): Promise<void> {
+  await seedDefaultNotificationRouting(tenantId)
 }
 
 /**
  * Configure notification routing during onboarding
  */
 export async function configureNotificationRouting(
+  tenantId: string,
   input: ConfigureRoutingInput
 ): Promise<{
   success: boolean
@@ -280,13 +281,13 @@ export async function configureNotificationRouting(
 
   // If applying defaults, seed first
   if (input.applyDefaults) {
-    await seedDefaultNotificationRouting()
+    await seedDefaultNotificationRouting(tenantId)
   }
 
   // Apply specific routing configs
   for (const config of input.routing) {
     try {
-      await upsertNotificationRouting(config.notificationType, {
+      await upsertNotificationRouting(tenantId, config.notificationType, {
         senderAddressId: config.senderAddressId,
         isEnabled: config.isEnabled,
       })
@@ -310,13 +311,13 @@ export async function configureNotificationRouting(
 /**
  * Auto-assign sender addresses to notification types based on purpose
  */
-export async function autoAssignSenderAddresses(): Promise<{
+export async function autoAssignSenderAddresses(tenantId: string): Promise<{
   success: boolean
   assigned: number
   errors: string[]
 }> {
-  const addresses = await listSenderAddresses()
-  const routing = await listNotificationRouting()
+  const addresses = await listSenderAddresses(tenantId)
+  const routing = await listNotificationRouting(tenantId)
   const errors: string[] = []
   let assigned = 0
 
@@ -350,7 +351,7 @@ export async function autoAssignSenderAddresses(): Promise<{
     if (!addressId) continue
 
     try {
-      await upsertNotificationRouting(route.notificationType, {
+      await upsertNotificationRouting(tenantId, route.notificationType, {
         senderAddressId: addressId,
       })
       assigned++
@@ -373,7 +374,7 @@ export async function autoAssignSenderAddresses(): Promise<{
 /**
  * Get current routing status for display
  */
-export async function getRoutingStatus(): Promise<
+export async function getRoutingStatus(tenantId: string): Promise<
   Array<{
     notificationType: NotificationType
     label: string
@@ -384,8 +385,8 @@ export async function getRoutingStatus(): Promise<
     isConfigured: boolean
   }>
 > {
-  const status = await getAllNotificationRoutingStatus()
-  const addresses = await listSenderAddresses()
+  const status = await getAllNotificationRoutingStatus(tenantId)
+  const addresses = await listSenderAddresses(tenantId)
   const addressMap = new Map(addresses.map((a) => [a.emailAddress, a]))
 
   return status.map((s) => {
@@ -408,6 +409,7 @@ export async function getRoutingStatus(): Promise<
  * Enable or disable all notifications in a category
  */
 export async function setAllInCategoryEnabled(
+  tenantId: string,
   category: string,
   enabled: boolean
 ): Promise<{
@@ -424,7 +426,7 @@ export async function setAllInCategoryEnabled(
 
   for (const type of types) {
     try {
-      await upsertNotificationRouting(type.type, { isEnabled: enabled })
+      await upsertNotificationRouting(tenantId, type.type, { isEnabled: enabled })
       updated++
     } catch (error) {
       errors.push(

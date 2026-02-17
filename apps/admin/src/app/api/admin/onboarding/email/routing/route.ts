@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -29,7 +28,7 @@ export async function GET(request: Request) {
   const includeTypes = url.searchParams.get('includeTypes') === 'true'
 
   // Get current routing status
-  const status = await withTenant(tenantSlug, () => getRoutingStatus())
+  const status = await getRoutingStatus(tenantSlug)
 
   // Optionally include notification type info for UI
   let typesByCategory: ReturnType<typeof getNotificationTypesByCategory> | undefined
@@ -64,13 +63,13 @@ export async function POST(request: Request) {
 
   // Initialize routing if requested
   if (body.initialize) {
-    await withTenant(tenantSlug, () => initializeNotificationRouting())
+    await initializeNotificationRouting(tenantSlug)
     return NextResponse.json({ success: true, initialized: true })
   }
 
   // Auto-assign senders if requested
   if (body.autoAssign) {
-    const result = await withTenant(tenantSlug, () => autoAssignSenderAddresses())
+    const result = await autoAssignSenderAddresses(tenantSlug)
     return NextResponse.json({
       success: result.success,
       assigned: result.assigned,
@@ -86,9 +85,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const result = await withTenant(tenantSlug, () =>
-    configureNotificationRouting(body)
-  )
+  const result = await configureNotificationRouting(tenantSlug, body)
 
   if (!result.success) {
     return NextResponse.json(

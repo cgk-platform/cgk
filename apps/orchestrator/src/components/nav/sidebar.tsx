@@ -196,7 +196,7 @@ export function Sidebar({ mfaVerified = false, userName, userEmail }: SidebarPro
 
         {/* MFA indicator */}
         {mfaVerified && (
-          <div className="mx-3 mt-3 flex items-center gap-1.5 rounded-md bg-green-500/10 px-2 py-1 text-xs text-green-500">
+          <div className="mx-3 mt-3 flex items-center gap-1.5 rounded-md bg-success/10 px-2 py-1 text-xs text-success">
             <ShieldCheck className="h-3 w-3" />
             MFA Verified
           </div>

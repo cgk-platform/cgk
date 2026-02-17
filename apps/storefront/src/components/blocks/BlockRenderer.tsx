@@ -19,6 +19,17 @@ import { MarkdownBlock } from './core/MarkdownBlock'
 // Interactive blocks
 import { FAQBlock } from './interactive/FAQBlock'
 import { CountdownBlock } from './interactive/CountdownBlock'
+import { ContactFormBlock } from './interactive/ContactFormBlock'
+import { StoreLocatorBlock } from './interactive/StoreLocatorBlock'
+
+// Policy blocks
+import { PolicyContentBlock } from './policy/PolicyContentBlock'
+
+// About blocks
+import { AboutHeroBlock } from './about/AboutHeroBlock'
+import { TeamGridBlock } from './about/TeamGridBlock'
+import { TimelineBlock } from './about/TimelineBlock'
+import { ValuesGridBlock } from './about/ValuesGridBlock'
 
 // Layout blocks
 import { ImageTextBlock } from './layout/ImageTextBlock'
@@ -26,6 +37,53 @@ import { FeatureCardsBlock } from './layout/FeatureCardsBlock'
 import { TestimonialBlock } from './layout/TestimonialBlock'
 import { SpacerBlock } from './layout/SpacerBlock'
 import { DividerBlock } from './layout/DividerBlock'
+import { HeaderBlock } from './layout/HeaderBlock'
+import { FooterBlock } from './layout/FooterBlock'
+import { MegaMenuBlock } from './layout/MegaMenuBlock'
+import { BreadcrumbBlock } from './layout/BreadcrumbBlock'
+import { SidebarBlock } from './layout/SidebarBlock'
+
+// PDP blocks
+import { PDPHeroBlock } from './pdp/PDPHeroBlock'
+import { PDPTrustBadgesBlock } from './pdp/PDPTrustBadgesBlock'
+import { PDPReviewsBlock } from './pdp/PDPReviewsBlock'
+import { PDPRecommendationsBlock } from './pdp/PDPRecommendationsBlock'
+import { PDPSpecificationsBlock } from './pdp/PDPSpecificationsBlock'
+
+// Shop blocks
+import { CollectionGridBlock } from './shop/CollectionGridBlock'
+import { CollectionFiltersBlock } from './shop/CollectionFiltersBlock'
+import { CollectionSortBlock } from './shop/CollectionSortBlock'
+
+// Promo blocks
+import { PromoHeroBlock } from './promo/PromoHeroBlock'
+import { BundleBuilderBlock } from './promo/BundleBuilderBlock'
+import { CountdownTimerBlock } from './promo/CountdownTimerBlock'
+import { AnnouncementBarBlock } from './promo/AnnouncementBarBlock'
+import { NewsletterSignupBlock } from './promo/NewsletterSignupBlock'
+
+// Social/UGC blocks
+import { InstagramFeedBlock } from './social/InstagramFeedBlock'
+import { SocialProofBlock } from './social/SocialProofBlock'
+import { UGCBannerBlock } from './social/UGCBannerBlock'
+import { TrustSignalsBlock } from './social/TrustSignalsBlock'
+import { CommunityBlock } from './social/CommunityBlock'
+
+// Content blocks
+import { VideoEmbedBlock } from './content/VideoEmbedBlock'
+import { BlogGridBlock } from './content/BlogGridBlock'
+import { IconGridBlock } from './content/IconGridBlock'
+import { ImageGalleryBlock } from './content/ImageGalleryBlock'
+import { AccordionBlock } from './content/AccordionBlock'
+import { TabsBlock } from './content/TabsBlock'
+
+// Conversion blocks
+import { ProductLineupBlock } from './conversion/ProductLineupBlock'
+import { BeforeAfterBlock } from './conversion/BeforeAfterBlock'
+import { TestimonialCarouselBlock } from './conversion/TestimonialCarouselBlock'
+import { GuaranteeBlock } from './conversion/GuaranteeBlock'
+import { UrgencyBannerBlock } from './conversion/UrgencyBannerBlock'
+import { ExitIntentBlock } from './conversion/ExitIntentBlock'
 
 /**
  * Block component type - generic to handle various config types
@@ -47,6 +105,17 @@ const BLOCK_COMPONENTS: Partial<Record<BlockType, AnyBlockComponent>> = {
   // Interactive blocks
   faq: FAQBlock,
   countdown: CountdownBlock,
+  'contact-form': ContactFormBlock,
+  'store-locator': StoreLocatorBlock,
+
+  // Policy blocks
+  'policy-content': PolicyContentBlock,
+
+  // About blocks
+  'about-hero': AboutHeroBlock,
+  'team-section': TeamGridBlock,
+  'brand-story': TimelineBlock,
+  'mission-values': ValuesGridBlock,
 
   // Layout blocks
   'image-text': ImageTextBlock,
@@ -54,6 +123,53 @@ const BLOCK_COMPONENTS: Partial<Record<BlockType, AnyBlockComponent>> = {
   testimonial: TestimonialBlock,
   spacer: SpacerBlock,
   divider: DividerBlock,
+  header: HeaderBlock,
+  footer: FooterBlock,
+  'mega-menu': MegaMenuBlock,
+  breadcrumb: BreadcrumbBlock,
+  sidebar: SidebarBlock,
+
+  // PDP blocks
+  'pdp-hero': PDPHeroBlock,
+  'pdp-trust-badges': PDPTrustBadgesBlock,
+  'pdp-reviews': PDPReviewsBlock,
+  'pdp-recommendations': PDPRecommendationsBlock,
+  'pdp-specifications': PDPSpecificationsBlock,
+
+  // Shop blocks
+  'collection-grid': CollectionGridBlock,
+  'collection-filters': CollectionFiltersBlock,
+  'collection-sort': CollectionSortBlock,
+
+  // Promo blocks
+  'promo-hero': PromoHeroBlock,
+  'bundle-builder': BundleBuilderBlock,
+  'promo-countdown': CountdownTimerBlock,
+  'announcement-bar': AnnouncementBarBlock,
+  'newsletter-signup': NewsletterSignupBlock,
+
+  // Social/UGC blocks
+  'instagram-feed': InstagramFeedBlock,
+  'social-proof': SocialProofBlock,
+  'ugc-banner': UGCBannerBlock,
+  'trust-signals': TrustSignalsBlock,
+  community: CommunityBlock,
+
+  // Content blocks
+  'video-embed': VideoEmbedBlock,
+  'blog-grid': BlogGridBlock,
+  'icon-grid': IconGridBlock,
+  'image-gallery': ImageGalleryBlock,
+  accordion: AccordionBlock,
+  tabs: TabsBlock,
+
+  // Conversion blocks
+  'product-lineup': ProductLineupBlock,
+  'before-after': BeforeAfterBlock,
+  'testimonial-carousel': TestimonialCarouselBlock,
+  guarantee: GuaranteeBlock,
+  'urgency-banner': UrgencyBannerBlock,
+  'exit-intent': ExitIntentBlock,
 }
 
 /**

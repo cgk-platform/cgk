@@ -1,6 +1,5 @@
 export const dynamic = 'force-dynamic'
 
-import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -60,14 +59,13 @@ export async function POST(request: Request) {
       ? { apiKey: body.resendApiKey }
       : getResendConfig()
 
-    const result = await withTenant(tenantSlug, () =>
-      addOnboardingDomain(
-        {
-          domain: body.domain.toLowerCase(),
-          subdomain: body.subdomain?.toLowerCase() ?? null,
-        },
-        resendConfig ?? undefined
-      )
+    const result = await addOnboardingDomain(
+      tenantSlug,
+      {
+        domain: body.domain.toLowerCase(),
+        subdomain: body.subdomain?.toLowerCase() ?? null,
+      },
+      resendConfig ?? undefined
     )
 
     return NextResponse.json(result, { status: 201 })
