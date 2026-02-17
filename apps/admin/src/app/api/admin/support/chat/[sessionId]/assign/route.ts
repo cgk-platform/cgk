@@ -24,7 +24,7 @@ export async function POST(
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
   try {
-    const { tenantId } = await getTenantContext(req)
+    const { tenantId, userId } = await getTenantContext(req)
 
     if (!tenantId) {
       return NextResponse.json(
@@ -33,15 +33,18 @@ export async function POST(
       )
     }
 
-    const { sessionId } = await params
-    const body = await req.json() as { agentId: string }
-
-    if (!body.agentId) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'Agent ID is required' },
-        { status: 400 }
+        { error: 'Authentication required' },
+        { status: 401 }
       )
     }
+
+    const { sessionId } = await params
+
+    // Use authenticated user as the agent - agentId from body is optional (for transfers)
+    const body = await req.json().catch(() => ({})) as { agentId?: string }
+    const agentId = body.agentId || userId
 
     // Verify session exists
     const session = await getChatSession(tenantId, sessionId)

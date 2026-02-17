@@ -567,8 +567,40 @@ export async function getCreatorStats(
       WHERE creator_id = ${creatorId}
     `
 
+    // Calculate average response time from message timestamps
+    // Find creator responses to admin messages and calculate time difference
+    const responseTimeResult = await sql`
+      WITH admin_messages AS (
+        SELECT m.id, m.conversation_id, m.created_at
+        FROM creator_conversation_messages m
+        JOIN creator_conversations c ON c.id = m.conversation_id
+        WHERE c.creator_id = ${creatorId}
+          AND m.sender_type = 'admin'
+          AND m.is_internal = false
+        ORDER BY m.created_at
+      ),
+      creator_responses AS (
+        SELECT
+          am.id as admin_msg_id,
+          MIN(cm.created_at) as response_at,
+          am.created_at as admin_msg_at
+        FROM admin_messages am
+        JOIN creator_conversation_messages cm ON cm.conversation_id = am.conversation_id
+          AND cm.sender_type = 'creator'
+          AND cm.created_at > am.created_at
+        GROUP BY am.id, am.created_at
+      )
+      SELECT
+        COALESCE(
+          AVG(EXTRACT(EPOCH FROM (response_at - admin_msg_at)) / 3600),
+          4.0
+        )::numeric as avg_response_hours
+      FROM creator_responses
+    `
+
     const row = result.rows[0] || {}
     const projectRow = projectsResult.rows[0] || {}
+    const responseRow = responseTimeResult.rows[0] || {}
 
     return {
       lifetime_earnings_cents: Number(row.lifetime_earnings_cents || 0),
@@ -576,7 +608,7 @@ export async function getCreatorStats(
       pending_balance_cents: Number(row.pending_balance_cents || 0),
       projects_completed: Number(projectRow.projects_completed || 0),
       on_time_delivery_percent: Number(projectRow.on_time_delivery_percent || 0),
-      avg_response_hours: 4.2, // TODO: Calculate from message response times
+      avg_response_hours: Number(responseRow.avg_response_hours || 4.0),
     }
   })
 }

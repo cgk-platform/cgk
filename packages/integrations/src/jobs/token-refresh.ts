@@ -73,6 +73,34 @@ async function getExpiringConnections(): Promise<ExpiringConnection[]> {
 }
 
 /**
+ * Provider display names for email notifications
+ */
+const PROVIDER_NAMES: Record<RefreshableProvider, string> = {
+  meta: 'Meta Ads',
+  google_ads: 'Google Ads',
+  tiktok: 'TikTok Ads',
+}
+
+/**
+ * Get admin emails for a tenant
+ */
+async function getTenantAdminEmails(tenantId: string): Promise<string[]> {
+  const result = await sql`
+    SELECT u.email
+    FROM users u
+    JOIN user_organizations uo ON u.id = uo.user_id
+    WHERE uo.organization_id = ${tenantId}
+      AND uo.role IN ('owner', 'admin')
+      AND u.email IS NOT NULL
+    ORDER BY
+      CASE uo.role WHEN 'owner' THEN 1 WHEN 'admin' THEN 2 END
+    LIMIT 3
+  `
+
+  return result.rows.map(row => (row as { email: string }).email)
+}
+
+/**
  * Notify tenant admin about token refresh failure
  */
 async function notifyTokenRefreshFailed(
@@ -80,18 +108,79 @@ async function notifyTokenRefreshFailed(
   provider: RefreshableProvider,
   error: unknown
 ): Promise<void> {
-  // Log the failure - in production, this would send an email/notification
+  const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+
+  // Always log the failure
   console.error(
     `[token-refresh] Failed to refresh ${provider} token for tenant ${tenantId}:`,
-    error instanceof Error ? error.message : error
+    errorMessage
   )
 
-  // TODO: Send notification to tenant admin via email/push
-  // await sendAdminNotification(tenantId, {
-  //   type: 'integration_token_refresh_failed',
-  //   provider,
-  //   error: error instanceof Error ? error.message : 'Unknown error',
-  // })
+  try {
+    // Get tenant's Resend client (dynamic import to avoid circular deps)
+    const { getTenantResendClient, getTenantResendSenderConfig } = await import(
+      '../tenant-credentials/clients/resend.js'
+    )
+
+    const resend = await getTenantResendClient(tenantId)
+    if (!resend) {
+      console.warn(`[token-refresh] Cannot send notification - Resend not configured for ${tenantId}`)
+      return
+    }
+
+    const senderConfig = await getTenantResendSenderConfig(tenantId)
+    const fromEmail = senderConfig?.fromEmail || 'noreply@notifications.cgk.io'
+    const fromName = senderConfig?.fromName || 'CGK Platform'
+
+    // Get admin emails
+    const adminEmails = await getTenantAdminEmails(tenantId)
+    if (adminEmails.length === 0) {
+      console.warn(`[token-refresh] No admin emails found for tenant ${tenantId}`)
+      return
+    }
+
+    const providerName = PROVIDER_NAMES[provider]
+
+    // Send notification email
+    await resend.emails.send({
+      from: `${fromName} <${fromEmail}>`,
+      to: adminEmails,
+      subject: `Action Required: ${providerName} Integration Needs Reconnection`,
+      html: `
+        <div style="font-family: system-ui, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #1e293b;">Integration Token Refresh Failed</h2>
+          <p style="color: #475569;">
+            We were unable to automatically refresh your <strong>${providerName}</strong>
+            integration credentials. This may cause your ad campaigns to stop syncing data.
+          </p>
+
+          <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; margin: 16px 0;">
+            <strong style="color: #991b1b;">Error:</strong>
+            <p style="color: #7f1d1d; margin: 4px 0 0 0;">${errorMessage}</p>
+          </div>
+
+          <h3 style="color: #1e293b; margin-top: 24px;">What to do:</h3>
+          <ol style="color: #475569; padding-left: 20px;">
+            <li>Go to <strong>Settings → Integrations</strong> in your admin dashboard</li>
+            <li>Find the ${providerName} integration</li>
+            <li>Click <strong>Reconnect</strong> to re-authorize the connection</li>
+          </ol>
+
+          <p style="color: #64748b; font-size: 14px; margin-top: 24px;">
+            If you continue to experience issues, please contact support.
+          </p>
+        </div>
+      `,
+    })
+
+    console.log(`[token-refresh] Sent failure notification to ${adminEmails.join(', ')} for ${tenantId}`)
+  } catch (emailError) {
+    // Don't let email failures break the job
+    console.error(
+      `[token-refresh] Failed to send notification email for ${tenantId}:`,
+      emailError instanceof Error ? emailError.message : emailError
+    )
+  }
 }
 
 /**

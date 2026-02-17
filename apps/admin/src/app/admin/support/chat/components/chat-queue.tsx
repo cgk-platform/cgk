@@ -49,10 +49,11 @@ export function ChatQueue({ tenantId: _tenantId }: ChatQueueProps) {
   const handleClaim = async (sessionId: string) => {
     setClaiming(sessionId)
     try {
+      // API uses authenticated user's ID as the agent ID
       const response = await fetch(`/api/admin/support/chat/${sessionId}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ agentId: 'current-user' }), // TODO: Get actual agent ID
+        body: JSON.stringify({}),
       })
 
       if (response.ok) {
