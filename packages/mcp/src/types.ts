@@ -3,6 +3,7 @@
  *
  * JSON-RPC 2.0 compliant types for the Model Context Protocol.
  * Supports protocol versions: 2024-11-05, 2025-03-26, 2025-06-18
+ * Clients requesting newer versions are negotiated down to the latest supported.
  */
 
 // =============================================================================

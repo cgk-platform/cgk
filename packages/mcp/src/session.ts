@@ -9,12 +9,13 @@
  * and recreated on each request in Streamable HTTP transport.
  */
 
-import type {
-  CreateSessionOptions,
-  MCPProtocolVersion,
-  MCPSession,
-  TokenUsageEntry,
-  MCPMethod,
+import {
+  SUPPORTED_PROTOCOL_VERSIONS,
+  type CreateSessionOptions,
+  type MCPProtocolVersion,
+  type MCPSession,
+  type TokenUsageEntry,
+  type MCPMethod,
 } from './types'
 
 // =============================================================================
@@ -381,12 +382,16 @@ export function clearTokenUsageLogs(tenantId: string): void {
  * @returns True if version is supported
  */
 export function isValidProtocolVersion(version: string): version is MCPProtocolVersion {
-  const supportedVersions: MCPProtocolVersion[] = ['2024-11-05', '2025-03-26', '2025-06-18']
-  return supportedVersions.includes(version as MCPProtocolVersion)
+  return SUPPORTED_PROTOCOL_VERSIONS.includes(version as MCPProtocolVersion)
 }
 
 /**
  * Get the best matching protocol version
+ *
+ * MCP version negotiation: if the client requests a version we support,
+ * use it exactly. If the client requests a newer version, fall back to
+ * our latest supported version. Only reject if the client requests an
+ * older version we don't support.
  *
  * @param requestedVersion - The client's requested version
  * @returns The best matching version, or null if none supported
@@ -399,8 +404,14 @@ export function negotiateProtocolVersion(
     return requestedVersion
   }
 
-  // For now, if not exact match, reject
-  // Future: Could implement version negotiation logic
+  // If the client requests a newer version than we support,
+  // negotiate down to our latest supported version
+  const latest = SUPPORTED_PROTOCOL_VERSIONS[SUPPORTED_PROTOCOL_VERSIONS.length - 1]
+  if (latest && requestedVersion > latest) {
+    return latest
+  }
+
+  // Client requested an older unsupported version — reject
   return null
 }
 
