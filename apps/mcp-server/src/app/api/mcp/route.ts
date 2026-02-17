@@ -122,13 +122,41 @@ export async function POST(request: Request): Promise<Response> {
     const auth = await authenticateRequest(request)
     const body = await request.json()
 
-    if (!isValidJSONRPCRequest(body)) {
+    if (!isValidJSONRPCMessage(body)) {
       return createErrorResponse(
         null,
         JSONRPCErrorCodes.INVALID_REQUEST,
         'Invalid JSON-RPC request',
         corsHeaders
       )
+    }
+
+    const obj = body as Record<string, unknown>
+
+    // Handle notifications (no id) — return 202 Accepted with no body
+    if (isNotification(obj)) {
+      const method = obj.method as string
+
+      // Create handler for notification processing
+      const handler = new MCPHandler(auth.tenantId, auth.userId, {
+        serverInfo: {
+          name: SERVER_NAME,
+          version: SERVER_VERSION,
+          instructions:
+            'CGK Commerce Platform MCP Server. Use tools to interact with commerce data.',
+        },
+        logUsage: true,
+      })
+
+      if (method === 'initialized') {
+        handler.initialized()
+      }
+      // Other notifications can be handled here as needed
+
+      return new Response(null, {
+        status: 202,
+        headers: corsHeaders,
+      })
     }
 
     const jsonrpcRequest = body as JSONRPCRequest
@@ -485,16 +513,28 @@ function createErrorResponse(
 // Validation Helpers
 // =============================================================================
 
-function isValidJSONRPCRequest(body: unknown): body is JSONRPCRequest {
+function isValidJSONRPCMessage(body: unknown): boolean {
   if (typeof body !== 'object' || body === null) {
     return false
   }
 
   const obj = body as Record<string, unknown>
 
-  return (
-    obj.jsonrpc === '2.0' &&
-    (typeof obj.id === 'string' || typeof obj.id === 'number') &&
-    typeof obj.method === 'string'
-  )
+  // Must have jsonrpc: "2.0" and a method string
+  if (obj.jsonrpc !== '2.0' || typeof obj.method !== 'string') {
+    return false
+  }
+
+  // id is optional (notifications like "initialized" don't have one)
+  if ('id' in obj && obj.id !== undefined) {
+    if (typeof obj.id !== 'string' && typeof obj.id !== 'number') {
+      return false
+    }
+  }
+
+  return true
+}
+
+function isNotification(body: Record<string, unknown>): boolean {
+  return !('id' in body) || body.id === undefined
 }
