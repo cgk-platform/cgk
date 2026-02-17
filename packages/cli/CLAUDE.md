@@ -31,6 +31,27 @@ npx @cgk-platform/cli setup
 npx @cgk-platform/cli migrate
 npx @cgk-platform/cli migrate --status
 npx @cgk-platform/cli migrate --rollback
+
+# Tenant management
+npx @cgk-platform/cli tenant:create my_brand
+npx @cgk-platform/cli tenant:list
+
+# Tenant export/import
+npx @cgk-platform/cli tenant:export rawdog -o backup.sql
+npx @cgk-platform/cli tenant:import backup.sql --target new_brand
+
+# Check for package updates
+npx @cgk-platform/cli check-updates
+npx @cgk-platform/cli check-updates --all
+
+# Update packages
+npx @cgk-platform/cli update
+npx @cgk-platform/cli update --dry-run
+npx @cgk-platform/cli update --all --yes
+
+# View changelog
+npx @cgk-platform/cli changelog
+npx @cgk-platform/cli changelog 1.0.0
 ```
 
 ---
@@ -95,6 +116,98 @@ Run database migrations.
 - `--rollback` - Rollback last migration
 - `--dry-run` - Preview without executing
 
+### `check-updates`
+
+Check for available package updates.
+
+**Options:**
+- `--channel <channel>` - Release channel: stable, beta, canary (default: stable)
+- `--all` - Check all packages, not just @cgk-platform/*
+
+**Example:**
+```bash
+npx @cgk-platform/cli check-updates
+npx @cgk-platform/cli check-updates --all
+npx @cgk-platform/cli check-updates --channel beta
+```
+
+### `update`
+
+Update packages to latest versions.
+
+**Options:**
+- `--dry-run` - Preview updates without applying them
+- `--all` - Update all packages, not just @cgk-platform/*
+- `--yes, -y` - Skip confirmation prompt
+- `--latest` - Update to latest versions (default: wanted versions)
+
+**Example:**
+```bash
+npx @cgk-platform/cli update
+npx @cgk-platform/cli update --dry-run
+npx @cgk-platform/cli update --all --yes
+```
+
+### `tenant:export`
+
+Export tenant data to a SQL file.
+
+**Arguments:**
+- `<slug>` - Tenant slug to export
+
+**Options:**
+- `-o, --output <file>` - Output file path (default: `{slug}-export-{timestamp}.sql`)
+- `--data-only` - Export data only (no schema)
+- `--schema-only` - Export schema only (no data)
+- `--dry-run` - Show what would be exported without creating file
+
+**Example:**
+```bash
+npx @cgk-platform/cli tenant:export rawdog
+npx @cgk-platform/cli tenant:export rawdog -o backup.sql
+npx @cgk-platform/cli tenant:export rawdog --data-only --dry-run
+```
+
+### `tenant:import`
+
+Import tenant data from a SQL file.
+
+**Arguments:**
+- `<file>` - SQL file to import
+
+**Options:**
+- `--target <slug>` - Target tenant slug (required)
+- `--dry-run` - Show what would be imported without executing
+- `--yes, -y` - Skip confirmation prompt
+- `--create-tenant` - Create the target tenant if it does not exist
+
+**Example:**
+```bash
+npx @cgk-platform/cli tenant:import backup.sql --target new_brand
+npx @cgk-platform/cli tenant:import backup.sql --target new_brand --create-tenant
+npx @cgk-platform/cli tenant:import backup.sql --target new_brand --dry-run
+```
+
+### `changelog`
+
+View changelog for a version.
+
+**Arguments:**
+- `[version]` - Version to view (default: latest)
+
+**Options:**
+- `--json` - Output as JSON
+- `--all` - Show all versions
+- `--count <n>` - Show last N versions (default: 5)
+
+**Example:**
+```bash
+npx @cgk-platform/cli changelog
+npx @cgk-platform/cli changelog 1.0.0
+npx @cgk-platform/cli changelog --all
+npx @cgk-platform/cli changelog --json
+```
+
 ---
 
 ## File Map
@@ -107,6 +220,14 @@ Run database migrations.
 | `commands/doctor.ts` | System health check |
 | `commands/setup.ts` | Platform setup wizard |
 | `commands/migrate.ts` | Database migrations |
+| `commands/migrate-create.ts` | Create new migration file |
+| `commands/tenant.ts` | Tenant create/list commands |
+| `commands/tenant-export.ts` | Export tenant data to SQL |
+| `commands/tenant-import.ts` | Import tenant data from SQL |
+| `commands/check-updates.ts` | Check for package updates |
+| `commands/update.ts` | Update packages |
+| `commands/changelog.ts` | View changelog |
+| `commands/setup-jobs.ts` | Setup background jobs provider |
 
 ---
 

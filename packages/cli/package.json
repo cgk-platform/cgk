@@ -27,6 +27,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@cgk-platform/auth": "workspace:*",
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
     "@cgk-platform/jobs": "workspace:*",
