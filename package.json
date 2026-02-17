@@ -24,7 +24,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "release": "changeset publish",
     "version-packages": "changeset version",
-    "env:pull": "for app in admin storefront orchestrator creator-portal contractor-portal; do (cd apps/$app && vercel env pull .env.local); done"
+    "env:pull": "for app in admin storefront orchestrator creator-portal contractor-portal mcp-server; do (cd apps/$app && vercel env pull .env.local); done"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
