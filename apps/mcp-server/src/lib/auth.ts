@@ -163,6 +163,8 @@ async function authenticateAPIKey(apiKey: string): Promise<AuthResult> {
   }
 
   // Parse API key parts: cgk_{tenant_slug}_{key_id}_{secret}
+  // Tenant slugs may contain underscores (e.g., cgk_linens), so we find the UUID
+  // (key_id) by pattern matching rather than splitting on a fixed index.
   const parts = apiKey.split('_')
   if (parts.length < 4) {
     throw new MCPAuthError(
@@ -171,10 +173,20 @@ async function authenticateAPIKey(apiKey: string): Promise<AuthResult> {
     )
   }
 
-  const tenantSlug = parts[1]
-  const keyId = parts[2]
-  // The secret is everything after the third underscore (in case secret contains underscores)
-  const secret = parts.slice(3).join('_')
+  // Find the UUID part (key_id) - matches standard UUID format with dashes
+  const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const uuidIndex = parts.findIndex((part, i) => i > 0 && uuidPattern.test(part))
+
+  if (uuidIndex < 2) {
+    throw new MCPAuthError(
+      'Invalid API key format: missing key ID',
+      JSONRPCErrorCodes.AUTHENTICATION_REQUIRED
+    )
+  }
+
+  const tenantSlug = parts.slice(1, uuidIndex).join('_')
+  const keyId = parts[uuidIndex]
+  const secret = parts.slice(uuidIndex + 1).join('_')
 
   if (!tenantSlug || tenantSlug.length < 1) {
     throw new MCPAuthError(
