@@ -24,6 +24,11 @@ import {
   Settings2,
   MessageSquare,
   Briefcase,
+  TrendingUp,
+  FolderKanban,
+  ImageIcon,
+  Rss,
+  Phone,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -134,6 +139,15 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    label: 'DAM',
+    icon: ImageIcon,
+    href: '/admin/dam',
+    children: [
+      { label: 'Assets', href: '/admin/dam' },
+      { label: 'Upload', href: '/admin/dam/upload' },
+    ],
+  },
+  {
     label: 'Samples',
     icon: Image,
     href: '/admin/samples',
@@ -179,6 +193,27 @@ export const navigation: NavSection[] = [
       { label: 'Exports', href: '/admin/attribution/exports' },
       { label: 'Setup', href: '/admin/attribution/setup' },
       { label: 'Settings', href: '/admin/attribution/settings' },
+    ],
+  },
+  {
+    label: 'Analytics',
+    icon: TrendingUp,
+    href: '/admin/analytics',
+    children: [
+      { label: 'Dashboard', href: '/admin/analytics' },
+      { label: 'BRI', href: '/admin/analytics/bri' },
+      { label: 'Pipeline', href: '/admin/analytics/pipeline' },
+      { label: 'P&L Breakdown', href: '/admin/analytics/pl-breakdown' },
+      { label: 'Reports', href: '/admin/analytics/reports' },
+      { label: 'Settings', href: '/admin/analytics/settings' },
+    ],
+  },
+  {
+    label: 'Segments',
+    icon: FolderKanban,
+    href: '/admin/segments',
+    children: [
+      { label: 'All Segments', href: '/admin/segments' },
     ],
   },
   {
@@ -293,6 +328,7 @@ export const navigation: NavSection[] = [
       { label: 'Creative Ideas', href: '/admin/bri/creative-ideas' },
       { label: 'Autonomy', href: '/admin/bri/autonomy' },
       { label: 'Voice', href: '/admin/bri/voice' },
+      { label: 'Voice Calls', href: '/admin/ai-team/calls' },
       { label: 'Integrations', href: '/admin/bri/integrations' },
       { label: 'Team Memories', href: '/admin/bri/team-memories' },
       { label: 'Team Defaults', href: '/admin/bri/team-defaults' },
@@ -348,6 +384,18 @@ export const navigation: NavSection[] = [
       { label: 'Klaviyo', href: '/admin/integrations/klaviyo' },
       { label: 'Yotpo', href: '/admin/integrations/yotpo' },
       { label: 'MCP', href: '/admin/integrations/mcp' },
+    ],
+  },
+  {
+    label: 'Google Feed',
+    icon: Rss,
+    href: '/admin/google-feed',
+    children: [
+      { label: 'Overview', href: '/admin/google-feed' },
+      { label: 'Products', href: '/admin/google-feed/products' },
+      { label: 'Images', href: '/admin/google-feed/images' },
+      { label: 'Preview', href: '/admin/google-feed/preview' },
+      { label: 'Settings', href: '/admin/google-feed/settings' },
     ],
   },
   {

@@ -14,6 +14,8 @@ import {
   User,
   Menu,
   X,
+  Building,
+  Receipt,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -24,16 +26,18 @@ import { BrandSelector, BrandIndicator } from '@/components/brands/BrandSelector
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/brands', label: 'Brands', icon: Building },
   { href: '/projects', label: 'Projects', icon: FolderOpen },
   { href: '/contracts', label: 'Contracts', icon: FileText },
   { href: '/payments', label: 'Payments', icon: CreditCard },
+  { href: '/tax', label: 'Tax Documents', icon: Receipt },
   { href: '/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/messages', label: 'Messages', icon: MessageSquare },
   { href: '/teleprompter', label: 'Teleprompter', icon: MonitorPlay },
 ]
 
 const bottomNavItems = [
-  { href: '/settings/profile', label: 'Settings', icon: Settings },
+  { href: '/settings', label: 'Settings', icon: Settings },
   { href: '/help', label: 'Help & FAQ', icon: HelpCircle },
 ]
 

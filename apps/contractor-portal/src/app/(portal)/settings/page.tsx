@@ -14,6 +14,8 @@ import {
   Shield,
   ChevronRight,
   Settings,
+  CreditCard,
+  Receipt,
 } from 'lucide-react'
 
 const settingsSections = [
@@ -22,6 +24,18 @@ const settingsSections = [
     description: 'Update your personal information and profile details',
     href: '/settings/profile',
     icon: User,
+  },
+  {
+    title: 'Payout Methods',
+    description: 'Manage your bank accounts and payment methods',
+    href: '/settings/payout-methods',
+    icon: CreditCard,
+  },
+  {
+    title: 'Tax Documents',
+    description: 'View and manage tax forms and 1099 information',
+    href: '/settings/tax',
+    icon: Receipt,
   },
   {
     title: 'Notifications',
