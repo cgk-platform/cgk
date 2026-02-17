@@ -1,7 +1,8 @@
 /**
- * Embedding generation using OpenAI text-embedding-3-large
+ * Embedding generation using OpenAI text-embedding-3-small
  *
- * Generates 3072-dimension vectors for semantic search and RAG.
+ * Generates 1536-dimension vectors for semantic search and RAG.
+ * Routed through LiteLLM proxy when available for cost tracking and rate limiting.
  */
 
 import OpenAI from 'openai'
@@ -15,17 +16,21 @@ function getOpenAI(): OpenAI {
     if (!apiKey) {
       throw new Error('OPENAI_API_KEY environment variable is required for embeddings')
     }
-    openaiClient = new OpenAI({ apiKey })
+    const baseURL = process.env.LITELLM_BASE_URL || undefined
+    openaiClient = new OpenAI({ apiKey, ...(baseURL ? { baseURL } : {}) })
   }
   return openaiClient
 }
 
 /**
  * Embedding model configuration
+ *
+ * Uses text-embedding-3-small (1536d) to match the pgvector column
+ * definition in 015_ai_memory.sql: `embedding public.vector(1536)`
  */
 export const EMBEDDING_CONFIG = {
-  model: 'text-embedding-3-large',
-  dimensions: 3072,
+  model: 'text-embedding-3-small',
+  dimensions: 1536,
   maxInputTokens: 8191,
 } as const
 
@@ -33,12 +38,12 @@ export const EMBEDDING_CONFIG = {
  * Generate embedding for a single text
  *
  * @param text - Text to embed
- * @returns 3072-dimension vector
+ * @returns 1536-dimension vector
  *
  * @example
  * ```ts
  * const embedding = await generateEmbedding('Sarah prefers Slack over email')
- * // Returns number[] with 3072 dimensions
+ * // Returns number[] with 1536 dimensions
  * ```
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
@@ -67,7 +72,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
  * More efficient than calling generateEmbedding multiple times.
  *
  * @param texts - Array of texts to embed
- * @returns Array of 3072-dimension vectors (same order as input)
+ * @returns Array of 1536-dimension vectors (same order as input)
  *
  * @example
  * ```ts
@@ -119,7 +124,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
  *
  * @param title - Memory title
  * @param content - Memory content
- * @returns 3072-dimension vector
+ * @returns 1536-dimension vector
  */
 export async function generateMemoryEmbedding(title: string, content: string): Promise<number[]> {
   const combinedText = `${title}\n\n${content}`
