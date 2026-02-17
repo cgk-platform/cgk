@@ -1,10 +1,13 @@
 /**
  * MCP API Route
  *
- * Main endpoint for Model Context Protocol requests.
- * Uses Streamable HTTP transport (POST-based).
+ * Dual-transport endpoint for Model Context Protocol requests.
+ * Supports both:
+ * - Streamable HTTP transport (POST-based, modern)
+ * - SSE transport (GET+POST, for mcporter and legacy clients)
  *
- * @route POST /api/mcp
+ * @route GET  /api/mcp — SSE stream (opens session, sends endpoint event)
+ * @route POST /api/mcp — JSON-RPC handler (returns response in body or via SSE)
  */
 
 // Environment validation - must be imported first
@@ -36,6 +39,13 @@ import {
   createCORSHeaders,
   MCPAuthError,
 } from '@/lib/auth'
+import {
+  generateSessionId,
+  registerSession,
+  pushSessionMessage,
+  popSessionMessages,
+  isSSEBridgeAvailable,
+} from '@/lib/sse-bridge'
 
 // =============================================================================
 // Edge Runtime Configuration
@@ -51,15 +61,14 @@ export const dynamic = 'force-dynamic'
 const SERVER_NAME = 'cgk-mcp-server'
 const SERVER_VERSION = '0.1.0'
 
+// SSE polling interval in milliseconds
+const SSE_POLL_INTERVAL_MS = 200
+// SSE session timeout (close stream after this long with no activity)
+const SSE_SESSION_TIMEOUT_MS = 5 * 60 * 1000 // 5 minutes
+
 // =============================================================================
 // Commerce Tools - Real implementations with database queries
 // =============================================================================
-
-// Commerce tools are imported from @cgk-platform/mcp and include:
-// - list_orders, get_order, search_orders, update_order_status, cancel_order
-// - list_customers, get_customer, search_customers, get_customer_orders
-// - list_products, get_product, update_product, sync_product
-// - get_inventory, update_inventory
 
 const exampleResources = [
   defineResource({
@@ -84,7 +93,7 @@ const examplePrompts = [
     arguments: [
       { name: 'period', description: 'Time period (e.g., 7d, 30d)', required: false },
     ],
-    async handler(args) {
+    async handler(args: Record<string, unknown>) {
       const period = (args.period as string) ?? '7d'
       return [
         {
@@ -100,24 +109,17 @@ const examplePrompts = [
 ]
 
 // =============================================================================
-// Request Handler
+// POST Handler — Streamable HTTP + SSE transport
 // =============================================================================
 
-/**
- * Handle POST requests to /api/mcp
- */
 export async function POST(request: Request): Promise<Response> {
   const corsHeaders = createCORSHeaders(request)
   let rateLimitResult: RateLimitResult | null = null
 
   try {
-    // Validate environment variables (only runs once)
     ensureEnvValidated()
 
-    // Authenticate the request
     const auth = await authenticateRequest(request)
-
-    // Parse the JSON-RPC request
     const body = await request.json()
 
     if (!isValidJSONRPCRequest(body)) {
@@ -131,18 +133,14 @@ export async function POST(request: Request): Promise<Response> {
 
     const jsonrpcRequest = body as JSONRPCRequest
 
-    // Apply rate limiting based on method
-    // Skip rate limiting for non-mutating operations like ping and list
+    // Rate limiting
     const skipRateLimitMethods = ['ping', 'tools/list', 'resources/list', 'prompts/list']
     if (!skipRateLimitMethods.includes(jsonrpcRequest.method)) {
-      // Extract tool name for tool-specific rate limiting
       let toolName: string | undefined
       if (jsonrpcRequest.method === 'tools/call') {
         const toolParams = jsonrpcRequest.params as CallToolParams | undefined
         toolName = toolParams?.name
       }
-
-      // Check and consume rate limit quota
       rateLimitResult = await checkRateLimit(auth.tenantId, jsonrpcRequest.method, toolName)
     }
 
@@ -157,31 +155,40 @@ export async function POST(request: Request): Promise<Response> {
       logUsage: true,
     })
 
-    // Register tools, resources, prompts
     handler.registerTools(commerceTools)
     handler.registerResources(exampleResources)
     handler.registerPrompts(examplePrompts)
 
-    // Route the request to the appropriate handler method
+    // Process the request
     const response = await handleMethod(handler, jsonrpcRequest, corsHeaders, rateLimitResult)
+
+    // Check if this is an SSE session POST (has sessionId query param)
+    const url = new URL(request.url)
+    const sessionId = url.searchParams.get('sessionId')
+
+    if (sessionId && isSSEBridgeAvailable()) {
+      // SSE transport: push response to Redis, return 202
+      const responseBody = await response.text()
+      await pushSessionMessage(sessionId, responseBody)
+
+      return new Response(null, {
+        status: 202,
+        headers: corsHeaders,
+      })
+    }
+
+    // Streamable HTTP transport: return response directly
     return response
   } catch (error) {
-    // Handle rate limit errors
     if (error instanceof RateLimitError) {
       return createRateLimitResponse(error.result, corsHeaders)
     }
-
-    // Handle authentication errors
     if (error instanceof MCPAuthError) {
       return createAuthErrorResponse(error)
     }
-
-    // Handle protocol errors
     if (error instanceof MCPProtocolError) {
       return createErrorResponse(null, error.code, error.message, corsHeaders)
     }
-
-    // Handle unexpected errors
     console.error('MCP request error:', error)
     return createErrorResponse(
       null,
@@ -192,36 +199,135 @@ export async function POST(request: Request): Promise<Response> {
   }
 }
 
+// =============================================================================
+// GET Handler — SSE transport session
+// =============================================================================
+
 /**
- * Handle GET requests - server info / health check
+ * Opens an SSE stream for MCP SSE transport.
  *
- * This server uses Streamable HTTP transport (POST-based).
- * GET returns server info for health checks and discovery.
+ * Protocol:
+ * 1. Client GETs this endpoint → receives SSE stream
+ * 2. Server sends `endpoint` event with the POST URL (includes sessionId)
+ * 3. Client POSTs JSON-RPC to that URL
+ * 4. Server sends `message` events with JSON-RPC responses
  */
 export async function GET(request: Request): Promise<Response> {
   const corsHeaders = createCORSHeaders(request)
 
-  return new Response(
-    JSON.stringify({
-      name: SERVER_NAME,
-      version: SERVER_VERSION,
-      transport: 'streamable-http',
-      endpoint: '/api/mcp',
-      methods: ['POST'],
-    }),
-    {
+  // If SSE bridge isn't configured, return server info JSON
+  if (!isSSEBridgeAvailable()) {
+    return new Response(
+      JSON.stringify({
+        name: SERVER_NAME,
+        version: SERVER_VERSION,
+        transport: 'streamable-http',
+        endpoint: '/api/mcp',
+        methods: ['POST'],
+        note: 'SSE transport unavailable (KV not configured). Use POST for Streamable HTTP.',
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      }
+    )
+  }
+
+  try {
+    // Authenticate
+    await authenticateRequest(request)
+
+    // Create session
+    const sessionId = generateSessionId()
+    await registerSession(sessionId)
+
+    // Build the POST endpoint URL with session ID
+    const url = new URL(request.url)
+    const postEndpoint = `${url.origin}/api/mcp?sessionId=${sessionId}`
+
+    // Create SSE stream
+    const encoder = new TextEncoder()
+    let closed = false
+    const startTime = Date.now()
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        // Send the endpoint event (required by MCP SSE transport)
+        controller.enqueue(
+          encoder.encode(`event: endpoint\ndata: ${postEndpoint}\n\n`)
+        )
+
+        // Poll Redis for messages and forward to SSE stream
+        const poll = async () => {
+          while (!closed) {
+            try {
+              // Check session timeout
+              if (Date.now() - startTime > SSE_SESSION_TIMEOUT_MS) {
+                controller.close()
+                closed = true
+                return
+              }
+
+              // Poll for messages
+              const messages = await popSessionMessages(sessionId)
+              for (const msg of messages) {
+                controller.enqueue(
+                  encoder.encode(`event: message\ndata: ${msg}\n\n`)
+                )
+              }
+
+              // Wait before next poll
+              await new Promise((resolve) => setTimeout(resolve, SSE_POLL_INTERVAL_MS))
+            } catch (error) {
+              // If the stream was closed by the client, exit gracefully
+              if (closed) return
+              console.error('SSE poll error:', error)
+              // Brief pause before retry
+              await new Promise((resolve) => setTimeout(resolve, 1000))
+            }
+          }
+        }
+
+        // Start polling (don't await — runs in background)
+        poll().catch(() => {
+          if (!closed) {
+            try {
+              controller.close()
+            } catch {
+              // Already closed
+            }
+          }
+        })
+      },
+      cancel() {
+        closed = true
+      },
+    })
+
+    return new Response(stream, {
       status: 200,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
         ...corsHeaders,
       },
+    })
+  } catch (error) {
+    if (error instanceof MCPAuthError) {
+      return createAuthErrorResponse(error)
     }
-  )
+    return new Response(
+      JSON.stringify({ error: 'Internal server error' }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    )
+  }
 }
 
-/**
- * Handle OPTIONS requests for CORS preflight
- */
+// =============================================================================
+// OPTIONS Handler — CORS preflight
+// =============================================================================
+
 export async function OPTIONS(request: Request): Promise<Response> {
   return new Response(null, {
     status: 204,
@@ -241,7 +347,6 @@ async function handleMethod(
 ): Promise<Response> {
   const { id, method, params = {} } = request
 
-  // Add rate limit headers if we have a result
   const headersWithRateLimit = rateLimitResult
     ? addRateLimitHeaders(corsHeaders, rateLimitResult)
     : corsHeaders
@@ -272,9 +377,7 @@ async function handleMethod(
         const toolParams = params as unknown as CallToolParams
         const toolName = toolParams.name
 
-        // Check if tool requires streaming
         if (requiresStreaming(toolName) && handler.toolRequiresStreaming(toolName)) {
-          // Use streaming response
           const generator = handler.callToolStreaming(toolParams)
           return handler.createStreamingHttpResponse(generator, {
             requestId: id,
@@ -282,7 +385,6 @@ async function handleMethod(
           })
         }
 
-        // Regular tool call
         const result = await handler.callTool(toolParams)
         return createSuccessResponse(id, result, headersWithRateLimit)
       }
@@ -359,7 +461,6 @@ function createErrorResponse(
     error: { code, message },
   }
 
-  // Determine HTTP status based on error code
   let status = 500
   if (code === JSONRPCErrorCodes.INVALID_REQUEST || code === JSONRPCErrorCodes.PARSE_ERROR) {
     status = 400
