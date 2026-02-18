@@ -29,6 +29,8 @@ export const generateCallSummariesJob = defineJob({
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - subpath dist not pre-built on Vercel; resolved at runtime
       const { listVoiceCalls, updateVoiceCall, getFullTranscriptText } = await import(
         '@cgk-platform/ai-agents/voice'
       )
@@ -206,6 +208,8 @@ export const syncRetellAgentsJob = defineJob({
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore - subpath dist not pre-built on Vercel; resolved at runtime
       const { getVoiceCredentials } = await import('@cgk-platform/ai-agents/voice')
 
       // Get tenant's Retell credentials
