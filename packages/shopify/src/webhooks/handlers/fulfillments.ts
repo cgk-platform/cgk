@@ -5,11 +5,8 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { createJobQueue } from '@cgk-platform/jobs'
+import { tasks } from '@trigger.dev/sdk/v3'
 import type { ShopifyFulfillmentPayload } from '../types'
-
-// Create job queue for fulfillment-related background jobs
-const fulfillmentJobQueue = createJobQueue({ name: 'fulfillment-webhooks' })
 
 /**
  * Handle fulfillments/create webhook
@@ -67,25 +64,26 @@ export async function handleFulfillmentCreate(
 
   // Trigger background jobs
   await Promise.all([
-    // Queue review request email
-    fulfillmentJobQueue.enqueue('fulfillment/review-email-queue', {
+    // Queue review request email processing
+    tasks.trigger('commerce-process-review-email-queue', {
+      tenantId,
+      limit: 50,
+      dryRun: false,
+    }),
+
+    // Handle order fulfilled for project linking and other processing
+    tasks.trigger('commerce-handle-order-fulfilled', {
       tenantId,
       orderId,
       fulfillmentId: shopifyFulfillmentId,
       trackingNumber: fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null,
-      trackingUrl: fulfillment.tracking_url || fulfillment.tracking_urls?.[0] || null,
-    }, { tenantId }),
-
-    // Link to creator project if applicable
-    fulfillmentJobQueue.enqueue('fulfillment/project-linking', {
-      tenantId,
-      orderId,
-      fulfillmentId: shopifyFulfillmentId,
-      lineItems: fulfillment.line_items,
-    }, { tenantId }),
+      carrier: fulfillment.tracking_company || null,
+    }),
   ])
 
-  console.log(`[Webhook] Fulfillment ${shopifyFulfillmentId} created for order ${orderId}, tenant ${tenantId}`)
+  console.log(
+    `[Webhook] Fulfillment ${shopifyFulfillmentId} created for order ${orderId}, tenant ${tenantId}`
+  )
 }
 
 /**
@@ -112,7 +110,8 @@ export async function handleFulfillmentUpdate(
       WHERE shopify_fulfillment_id = ${shopifyFulfillmentId}
     `
 
-    const newTrackingNumber = fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null
+    const newTrackingNumber =
+      fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null
 
     if (existing.rows.length > 0 && existing.rows[0]) {
       const oldTracking = existing.rows[0].tracking_number as string | null
@@ -151,15 +150,17 @@ export async function handleFulfillmentUpdate(
 
   // If tracking info changed, trigger notification
   if (trackingChanged) {
-    await fulfillmentJobQueue.enqueue('fulfillment/tracking-updated', {
+    await tasks.trigger('commerce-fulfillment-tracking-updated', {
       tenantId,
       orderId,
       fulfillmentId: shopifyFulfillmentId,
       trackingNumber: fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null,
       trackingUrl: fulfillment.tracking_url || fulfillment.tracking_urls?.[0] || null,
       trackingCompany: fulfillment.tracking_company || null,
-    }, { tenantId })
+    })
   }
 
-  console.log(`[Webhook] Fulfillment ${shopifyFulfillmentId} updated for order ${orderId}, tenant ${tenantId}`)
+  console.log(
+    `[Webhook] Fulfillment ${shopifyFulfillmentId} updated for order ${orderId}, tenant ${tenantId}`
+  )
 }

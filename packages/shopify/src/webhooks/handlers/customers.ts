@@ -5,11 +5,8 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { createJobQueue } from '@cgk-platform/jobs'
+import { tasks } from '@trigger.dev/sdk/v3'
 import type { ShopifyCustomerPayload } from '../types'
-
-// Create job queue for customer-related background jobs
-const customerJobQueue = createJobQueue({ name: 'customer-webhooks' })
 
 /**
  * Handle customers/create webhook
@@ -33,13 +30,13 @@ export async function handleCustomerCreate(
     }
   })
 
-  // Trigger background jobs
-  await customerJobQueue.enqueue('customer/sync', {
+  // Trigger background job for customer sync
+  await tasks.trigger('commerce-customer-sync', {
     tenantId,
     customerId: shopifyCustomerId,
-    email: customer.email,
-    isNew: true,
-  }, { tenantId })
+    shopifyCustomerId,
+    fullSync: false,
+  })
 
   console.log(`[Webhook] Customer ${shopifyCustomerId} created for tenant ${tenantId}`)
 }
@@ -66,13 +63,13 @@ export async function handleCustomerUpdate(
     }
   })
 
-  // Trigger background job for sync
-  await customerJobQueue.enqueue('customer/sync', {
+  // Trigger background job for customer sync
+  await tasks.trigger('commerce-customer-sync', {
     tenantId,
     customerId: shopifyCustomerId,
-    email: customer.email,
-    isNew: false,
-  }, { tenantId })
+    shopifyCustomerId,
+    fullSync: false,
+  })
 
   console.log(`[Webhook] Customer ${shopifyCustomerId} updated for tenant ${tenantId}`)
 }
@@ -82,7 +79,12 @@ export async function handleCustomerUpdate(
  */
 async function upsertCustomer(customer: ShopifyCustomerPayload): Promise<void> {
   const shopifyCustomerId = customer.id.toString()
-  const tags = customer.tags ? customer.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+  const tags = customer.tags
+    ? customer.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
+    : []
 
   await sql`
     INSERT INTO customers (

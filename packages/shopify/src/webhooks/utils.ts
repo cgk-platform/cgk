@@ -14,21 +14,11 @@ import type { ShopifyCredentials, WebhookEvent, WebhookEventStatus } from './typ
  * @param secret - Webhook secret from Shopify app settings
  * @returns True if signature is valid
  */
-export function verifyShopifyWebhook(
-  body: string,
-  signature: string,
-  secret: string
-): boolean {
-  const hmac = crypto
-    .createHmac('sha256', secret)
-    .update(body, 'utf8')
-    .digest('base64')
+export function verifyShopifyWebhook(body: string, signature: string, secret: string): boolean {
+  const hmac = crypto.createHmac('sha256', secret).update(body, 'utf8').digest('base64')
 
   try {
-    return crypto.timingSafeEqual(
-      Buffer.from(hmac),
-      Buffer.from(signature)
-    )
+    return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(signature))
   } catch {
     // Buffer lengths don't match
     return false
@@ -46,7 +36,7 @@ export async function getTenantForShop(shop: string): Promise<string | null> {
   const result = await sql`
     SELECT o.id as tenant_id
     FROM organizations o
-    WHERE o.shopify_domain = ${shop}
+    WHERE o.shopify_store_domain = ${shop}
     AND o.status = 'active'
     LIMIT 1
   `
@@ -70,8 +60,8 @@ export async function getShopifyCredentials(
   const result = await sql`
     SELECT
       shop,
-      access_token,
-      webhook_secret
+      access_token_encrypted,
+      webhook_secret_encrypted
     FROM shopify_connections
     WHERE shop = ${shop}
     LIMIT 1
@@ -88,17 +78,15 @@ export async function getShopifyCredentials(
 
   return {
     shop: row.shop as string,
-    accessToken: row.access_token as string,
-    webhookSecret: row.webhook_secret as string | null,
+    accessToken: row.access_token_encrypted as string,
+    webhookSecret: row.webhook_secret_encrypted as string | null,
   }
 }
 
 /**
  * Check for duplicate webhook by idempotency key
  */
-export async function checkDuplicateWebhook(
-  idempotencyKey: string
-): Promise<boolean> {
+export async function checkDuplicateWebhook(idempotencyKey: string): Promise<boolean> {
   const result = await sql`
     SELECT id FROM webhook_events
     WHERE idempotency_key = ${idempotencyKey}
@@ -288,7 +276,11 @@ export function extractResourceId(payload: unknown): string | null {
 /**
  * Generate idempotency key for webhook
  */
-export function generateIdempotencyKey(topic: string, resourceId: string | null, webhookId: string | null): string {
+export function generateIdempotencyKey(
+  topic: string,
+  resourceId: string | null,
+  webhookId: string | null
+): string {
   const id = resourceId || webhookId || Date.now().toString()
   return `${topic}:${id}`
 }

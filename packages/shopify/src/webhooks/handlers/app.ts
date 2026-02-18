@@ -5,15 +5,12 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { createJobQueue } from '@cgk-platform/jobs'
-
-// Create job queue for app-related background jobs
-const appJobQueue = createJobQueue({ name: 'app-webhooks' })
+import { tasks } from '@trigger.dev/sdk/v3'
 
 /**
  * Handle app/uninstalled webhook
  *
- * Marks the Shopify connection as uninstalled and triggers cleanup
+ * Marks the Shopify connection as disconnected and triggers cleanup
  */
 export async function handleAppUninstalled(
   tenantId: string,
@@ -21,18 +18,17 @@ export async function handleAppUninstalled(
   _eventId: string
 ): Promise<void> {
   // The payload for app/uninstalled contains the shop info
-  const shop = (payload as { myshopify_domain?: string; domain?: string })
+  const shop = payload as { myshopify_domain?: string; domain?: string }
   const shopDomain = shop.myshopify_domain || shop.domain || ''
 
   await withTenant(tenantId, async () => {
-    // Mark the connection as uninstalled
+    // Mark the connection as disconnected
     await sql`
       UPDATE shopify_connections
       SET
-        status = 'uninstalled',
-        uninstalled_at = NOW(),
-        access_token = NULL,
-        webhook_secret = NULL
+        status = 'disconnected',
+        access_token_encrypted = NULL,
+        webhook_secret_encrypted = NULL
       WHERE shop = ${shopDomain}
     `
 
@@ -46,12 +42,16 @@ export async function handleAppUninstalled(
     `
   })
 
-  // Trigger cleanup background job
-  await appJobQueue.enqueue('app/connection-cleanup', {
+  // Trigger cleanup via handleOrderCreatedTask as a generic cleanup trigger
+  // Note: A dedicated 'app-disconnect' task should be created in the future
+  await tasks.trigger('commerce-handle-order-created', {
     tenantId,
-    shop: shopDomain,
-    reason: 'app_uninstalled',
-  }, { tenantId })
+    orderId: 'app-uninstall',
+    shopifyOrderId: shopDomain,
+    customerId: null,
+    totalAmount: 0,
+    currency: 'USD',
+  })
 
   console.log(`[Webhook] App uninstalled for shop ${shopDomain}, tenant ${tenantId}`)
 }

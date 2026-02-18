@@ -5,12 +5,9 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { createJobQueue } from '@cgk-platform/jobs'
+import { tasks } from '@trigger.dev/sdk/v3'
 import type { ShopifyOrderPayload } from '../types'
 import { parseCents, mapFinancialStatus, mapFulfillmentStatus } from '../utils'
-
-// Create job queue for order-related background jobs
-const orderJobQueue = createJobQueue({ name: 'order-webhooks' })
 
 /**
  * Handle orders/create webhook
@@ -29,8 +26,13 @@ export async function handleOrderCreate(
 
   // Upsert order to local database
   await withTenant(tenantId, async () => {
-    const discountCodes = order.discount_codes?.map(d => d.code) || []
-    const tags = order.tags ? order.tags.split(',').map(t => t.trim()).filter(Boolean) : []
+    const discountCodes = order.discount_codes?.map((d) => d.code) || []
+    const tags = order.tags
+      ? order.tags
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : []
     const shippingCents = order.total_shipping_price_set?.shop_money?.amount
       ? parseCents(order.total_shipping_price_set.shop_money.amount)
       : 0
@@ -92,32 +94,31 @@ export async function handleOrderCreate(
 
   await Promise.all([
     // Attribution processing
-    orderJobQueue.enqueue('order/attribution', {
+    tasks.trigger('commerce-order-attribution', {
       tenantId,
       orderId: shopifyId,
-      orderName,
-      noteAttributes: order.note_attributes || [],
-      discountCodes: order.discount_codes || [],
-      customerEmail: order.email || order.customer?.email || null,
-    }, { tenantId }),
+      customerId: order.customer?.id?.toString() || null,
+      sessionId: null, // Session ID should be extracted from note attributes if available
+    }),
 
     // Creator commission check
-    orderJobQueue.enqueue('order/commission', {
+    tasks.trigger('commerce-order-commission', {
       tenantId,
       orderId: shopifyId,
-      discountCodes: order.discount_codes?.map(d => d.code) || [],
-      netSalesCents,
-    }, { tenantId }),
+      discountCode: order.discount_codes?.[0]?.code || null,
+      orderTotal: netSalesCents / 100, // Convert cents to dollars
+      currency: order.currency || 'USD',
+    }),
 
-    // A/B test attribution
-    orderJobQueue.enqueue('order/ab-attribution', {
+    // Handle order created for additional processing (A/B attribution, pixel events)
+    tasks.trigger('commerce-handle-order-created', {
       tenantId,
       orderId: shopifyId,
-      orderName,
-      noteAttributes: order.note_attributes || [],
-      shippingLines: order.shipping_lines || [],
-      totalCents: parseCents(order.total_price),
-    }, { tenantId }),
+      shopifyOrderId: shopifyId,
+      customerId: order.customer?.id?.toString() || null,
+      totalAmount: parseCents(order.total_price) / 100,
+      currency: order.currency || 'USD',
+    }),
   ])
 
   console.log(`[Webhook] Order ${orderName} created for tenant ${tenantId}`)
@@ -141,30 +142,23 @@ export async function handleOrderPaid(
 
   // Then process paid-specific actions
   await Promise.all([
-    // Gift card rewards
-    orderJobQueue.enqueue('order/gift-card-rewards', {
+    // Handle order created for gift card rewards processing
+    tasks.trigger('commerce-handle-order-created', {
       tenantId,
       orderId: order.id.toString(),
-      lineItems: order.line_items,
-      customerEmail: order.email || order.customer?.email || null,
+      shopifyOrderId: order.id.toString(),
       customerId: order.customer?.id?.toString() || null,
-    }, { tenantId }),
+      totalAmount: parseCents(order.total_price) / 100,
+      currency: order.currency || 'USD',
+    }),
 
-    // Send pixel events
-    orderJobQueue.enqueue('order/pixel-events', {
+    // Send pixel events and additional processing
+    tasks.trigger('commerce-order-attribution', {
       tenantId,
       orderId: order.id.toString(),
-      orderName: order.name,
-      totalPrice: order.total_price,
-      subtotalPrice: order.subtotal_price,
-      totalTax: order.total_tax,
-      shippingPrice: order.total_shipping_price_set?.shop_money?.amount || '0',
-      lineItems: order.line_items,
-      customerEmail: order.email || order.customer?.email || null,
-      customerPhone: order.customer?.phone || null,
-      noteAttributes: order.note_attributes || [],
-      shippingAddress: order.shipping_address || null,
-    }, { tenantId }),
+      customerId: order.customer?.id?.toString() || null,
+      sessionId: null, // Session ID should be extracted from note attributes if available
+    }),
   ])
 
   console.log(`[Webhook] Order ${order.name} paid for tenant ${tenantId}`)
@@ -217,20 +211,24 @@ export async function handleOrderCancelled(
 
   // Trigger cancellation-specific jobs
   await Promise.all([
-    // Exclude from A/B tests
-    orderJobQueue.enqueue('order/ab-test-exclusion', {
+    // Handle order created for A/B test exclusion and other processing
+    tasks.trigger('commerce-handle-order-created', {
       tenantId,
       orderId: shopifyId,
-      orderName: order.name,
-      reason: 'cancelled',
-    }, { tenantId }),
+      shopifyOrderId: shopifyId,
+      customerId: order.customer?.id?.toString() || null,
+      totalAmount: parseCents(order.total_price) / 100,
+      currency: order.currency || 'USD',
+    }),
 
-    // Reverse commissions
-    orderJobQueue.enqueue('order/commission-reversal', {
+    // Reverse commissions using order commission task
+    tasks.trigger('commerce-order-commission', {
       tenantId,
       orderId: shopifyId,
-      reason: 'order_cancelled',
-    }, { tenantId }),
+      discountCode: null,
+      orderTotal: 0, // Zero out commission
+      currency: order.currency || 'USD',
+    }),
   ])
 
   console.log(`[Webhook] Order ${order.name} cancelled for tenant ${tenantId}`)
