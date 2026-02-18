@@ -1,10 +1,10 @@
-import { sql } from '@cgk-platform/db'
 import {
   getAuthCookie,
   getSuperAdminUser,
   validateSuperAdminSessionById,
   verifyJWT,
 } from '@cgk-platform/auth'
+import { sql } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 

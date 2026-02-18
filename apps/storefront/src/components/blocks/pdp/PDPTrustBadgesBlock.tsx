@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * PDP Trust Badges Block Component
  *

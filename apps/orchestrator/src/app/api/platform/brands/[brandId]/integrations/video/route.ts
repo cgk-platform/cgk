@@ -1,4 +1,3 @@
-import { NextResponse } from 'next/server'
 import { sql } from '@cgk-platform/db'
 import {
   saveTenantApiCredential,
@@ -7,6 +6,7 @@ import {
   getAllTenantApiCredentials,
   type TenantApiService,
 } from '@cgk-platform/integrations'
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 

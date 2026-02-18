@@ -1,5 +1,6 @@
 'use client'
 
+import type { LaunchChecklistItem, StepData } from '@cgk-platform/onboarding'
 import {
   Alert,
   AlertDescription,
@@ -11,7 +12,6 @@ import {
   CardHeader,
   cn,
 } from '@cgk-platform/ui'
-import type { LaunchChecklistItem, StepData } from '@cgk-platform/onboarding'
 import {
   AlertCircle,
   ArrowLeft,

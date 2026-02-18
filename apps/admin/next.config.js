@@ -37,15 +37,18 @@ const nextConfig = {
     '@cgk-platform/shopify',
     '@cgk-platform/dam',
     '@cgk-platform/video',
-    '@cgk-platform/jobs',
     '@cgk-platform/slack',
   ],
 
   // Mark packages that should only run on the server
+  // @cgk-platform/jobs and @cgk-platform/admin-core use Node.js built-ins
+  // (child_process, stream/web) and must not be bundled for the client
   serverExternalPackages: [
     '@slack/web-api',
     'sharp',
     'bcryptjs',
+    '@cgk-platform/jobs',
+    '@cgk-platform/admin-core',
   ],
 
   // Configure webpack to handle node: protocol
@@ -61,7 +64,24 @@ const nextConfig = {
         stream: false,
         querystring: false,
         url: false,
+        child_process: false,
       }
+      // Server-only workspace packages must not be bundled for the client.
+      // @cgk-platform/jobs and @cgk-platform/admin-core use Node.js built-ins
+      // (child_process, stream/web) that are unavailable in the browser.
+      const serverOnlyPackages = [
+        '@cgk-platform/jobs',
+        '@cgk-platform/admin-core',
+      ]
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : config.externals ? [config.externals] : []),
+        ({ request }, callback) => {
+          if (serverOnlyPackages.some(pkg => request === pkg || request?.startsWith(pkg + '/'))) {
+            return callback(null, `commonjs ${request}`)
+          }
+          callback()
+        },
+      ]
     }
     return config
   },

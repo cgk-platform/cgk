@@ -1,5 +1,6 @@
 'use client'
 
+import type { UserInvitation } from '@cgk-platform/onboarding'
 import {
   Alert,
   AlertDescription,
@@ -18,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@cgk-platform/ui'
-import type { UserInvitation } from '@cgk-platform/onboarding'
 import {
   AlertCircle,
   ArrowLeft,

@@ -304,7 +304,7 @@ export async function getSpendSensitivity(
   // Calculate totals from real data
   let totalSpend = 0
   let totalRevenue = 0
-  let totalConversions = 0
+  let _totalConversions = 0
   let previousTotalSpend = 0
 
   const spendByChannelRaw: Array<{
@@ -325,7 +325,7 @@ export async function getSpendSensitivity(
 
     totalSpend += spend
     totalRevenue += revenue
-    totalConversions += conversions
+    _totalConversions += conversions
     previousTotalSpend += previousSpend
 
     spendByChannelRaw.push({

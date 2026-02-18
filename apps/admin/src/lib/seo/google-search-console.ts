@@ -3,6 +3,8 @@
  * OAuth and data fetching for keyword metrics
  * All operations must be called within withTenant() context
  */
+import crypto from 'crypto'
+
 import { sql } from '@cgk-platform/db'
 
 import type { GSCConnection, GSCSyncResult } from './types'
@@ -42,7 +44,6 @@ function getEncryptionKey(): Buffer {
     )
   }
   // Hash the key to ensure exactly 32 bytes for AES-256
-  const crypto = require('crypto')
   return crypto.createHash('sha256').update(key).digest()
 }
 
@@ -50,7 +51,6 @@ function getEncryptionKey(): Buffer {
  * AES-256-GCM encryption for secure token storage
  */
 function encrypt(text: string): string {
-  const crypto = require('crypto')
   const key = getEncryptionKey()
   const iv = crypto.randomBytes(16)
   const cipher = crypto.createCipheriv('aes-256-gcm', key, iv)
@@ -64,7 +64,6 @@ function encrypt(text: string): string {
 }
 
 function decrypt(encoded: string): string {
-  const crypto = require('crypto')
   const key = getEncryptionKey()
 
   const parts = encoded.split(':')

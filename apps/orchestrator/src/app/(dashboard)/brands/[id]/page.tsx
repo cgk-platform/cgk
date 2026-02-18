@@ -12,6 +12,7 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
+
 import type { BrandSummary } from '../../../../types/platform'
 
 /**
