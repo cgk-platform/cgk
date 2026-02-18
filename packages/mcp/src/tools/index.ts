@@ -7,10 +7,11 @@
  * Categories:
  * - Analytics: Attribution, metrics, A/B testing, reports (19 tools)
  * - Commerce: Orders, customers, products, inventory (15 tools)
+ * - Content: Brand documents, creative ideas (12 tools)
  * - Creators: Directory, projects, payouts, communications (18 tools)
  * - System: Health, config, notifications, users, audit, cache (20 tools)
  *
- * Total: ~72 tools
+ * Total: ~84 tools
  *
  * @ai-pattern mcp-tools
  */
@@ -71,6 +72,29 @@ export {
   getInventoryTool,
   updateInventoryTool,
 } from './commerce'
+
+// =============================================================================
+// Content Tools
+// =============================================================================
+
+export {
+  // Tool definitions
+  contentTools,
+  // Brand Document tools
+  listBrandDocumentsTool,
+  getBrandDocumentTool,
+  searchBrandDocumentsTool,
+  createBrandDocumentTool,
+  updateBrandDocumentTool,
+  deleteBrandDocumentTool,
+  // Creative Ideas tools
+  listCreativeIdeasTool,
+  getCreativeIdeaTool,
+  searchCreativeIdeasTool,
+  createCreativeIdeaTool,
+  updateCreativeIdeaTool,
+  deleteCreativeIdeaTool,
+} from './content'
 
 // =============================================================================
 // Creator Tools
@@ -146,6 +170,7 @@ export {
 
 import { analyticsTools } from './analytics'
 import { commerceTools } from './commerce'
+import { contentTools } from './content'
 import { creatorTools } from './creators'
 import { systemTools } from './system'
 import type { ToolDefinition } from '../tools'
@@ -156,9 +181,9 @@ import type { ToolDefinition } from '../tools'
 export const toolCategories = {
   analytics: analyticsTools,
   commerce: commerceTools,
+  content: contentTools,
   creators: creatorTools,
   system: systemTools,
-  // content: [], // TODO: Future phase - Content tools
 } as const
 
 /**
@@ -382,6 +407,22 @@ export const toolAnnotations: Record<string, ToolAnnotations> = {
   // System - Cache & Data
   clear_cache: { destructiveHint: true, requiresAuth: true, requiresAdmin: true },
   get_cache_stats: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+
+  // Content - Brand Documents
+  list_brand_documents: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_brand_document: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  search_brand_documents: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  create_brand_document: { destructiveHint: false, requiresAuth: true },
+  update_brand_document: { destructiveHint: true, requiresAuth: true },
+  delete_brand_document: { destructiveHint: true, requiresAuth: true },
+
+  // Content - Creative Ideas
+  list_creative_ideas: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_creative_idea: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  search_creative_ideas: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  create_creative_idea: { destructiveHint: false, requiresAuth: true },
+  update_creative_idea: { destructiveHint: true, requiresAuth: true },
+  delete_creative_idea: { destructiveHint: true, requiresAuth: true },
 }
 
 /**
