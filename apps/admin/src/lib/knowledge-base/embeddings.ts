@@ -124,7 +124,7 @@ export async function hybridSearchArticles(
 ): Promise<Array<{ article: KBArticleWithCategory; score: number; ftsRank: number; similarity: number }>> {
   const limit = options.limit ?? 10
   const minSimilarity = options.minSimilarity ?? 0.2
-  const rffK = options.rffK ?? 60 // standard RRF constant
+  const rffK = options.rrfK ?? 60 // standard RRF constant
 
   const embedding = await generateArticleEmbedding(query, '')
   const vectorStr = `[${embedding.join(',')}]`
@@ -188,7 +188,7 @@ export async function hybridSearchArticles(
   )
 
   return result.rows.map((row: Record<string, unknown>) => ({
-    article: rowToArticleWithCategory(row as KBArticleRow),
+    article: rowToArticleWithCategory(row as unknown as KBArticleRow),
     score: Number(row.rrf_score),
     ftsRank: Number(row.fts_rank),
     similarity: Number(row.similarity),

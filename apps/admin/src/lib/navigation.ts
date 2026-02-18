@@ -28,7 +28,6 @@ import {
   FolderKanban,
   ImageIcon,
   Rss,
-  Phone,
   type LucideIcon,
 } from 'lucide-react'
 

@@ -8,7 +8,7 @@
 
 **Before starting ANY work, read the Master Execution Guide:**
 ```
-Read file_path="/Users/holdenthemic/Documents/cgk/MULTI-TENANT-PLATFORM-PLAN/MASTER-EXECUTION-GUIDE.md"
+Read file_path="/Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/MASTER-EXECUTION-GUIDE.md"
 ```
 
 This guide contains:
@@ -17,6 +17,12 @@ This guide contains:
 - Definition of Done requirements
 - Emergency procedures
 - Parallel agent coordination
+
+---
+
+## WORKSPACE ISOLATION (CRITICAL)
+
+This is a **CGK project**. Never reference, access, or discuss Rawdog, rawdog-web, or any Rawdog workspace projects.
 
 ---
 
@@ -1189,7 +1195,7 @@ export { runMigrations } from './migrations/index.js'
 
 All planning docs are in:
 ```
-/Users/holdenthemic/Documents/cgk/MULTI-TENANT-PLATFORM-PLAN/
+/Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/
 ├── PLAN.md                    # Master plan
 ├── INDEX.md                   # Navigation, dependencies
 ├── ARCHITECTURE.md            # Technical architecture

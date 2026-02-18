@@ -129,8 +129,7 @@ async function notifyTokenRefreshFailed(
     }
 
     const senderConfig = await getTenantResendSenderConfig(tenantId)
-    const fromEmail = senderConfig?.fromEmail || 'noreply@notifications.cgk.io'
-    const fromName = senderConfig?.fromName || 'CGK Platform'
+    const from = senderConfig?.from || 'CGK Platform <noreply@notifications.cgk.io>'
 
     // Get admin emails
     const adminEmails = await getTenantAdminEmails(tenantId)
@@ -143,7 +142,7 @@ async function notifyTokenRefreshFailed(
 
     // Send notification email
     await resend.emails.send({
-      from: `${fromName} <${fromEmail}>`,
+      from,
       to: adminEmails,
       subject: `Action Required: ${providerName} Integration Needs Reconnection`,
       html: `

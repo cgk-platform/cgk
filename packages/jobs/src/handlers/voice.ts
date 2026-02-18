@@ -11,6 +11,7 @@
 import { sql, withTenant } from '@cgk-platform/db'
 
 import { defineJob } from '../define.js'
+import type { JobResult } from '../types.js'
 
 /**
  * Generate AI summaries for completed calls
@@ -20,7 +21,7 @@ import { defineJob } from '../define.js'
  */
 export const generateCallSummariesJob = defineJob({
   name: 'ai-agents/generate-call-summaries',
-  handler: async (job) => {
+  handler: async (job): Promise<JobResult> => {
     const { tenantId } = job.payload as { tenantId: string }
 
     if (!tenantId) {
@@ -41,7 +42,7 @@ export const generateCallSummariesJob = defineJob({
       }
 
       // Get completed calls without summaries
-      const calls = await listVoiceCalls(tenantId, {
+      const calls = await listVoiceCalls({
         status: 'completed',
         limit: 20,
       })
@@ -57,7 +58,7 @@ export const generateCallSummariesJob = defineJob({
       for (const call of callsNeedingSummary) {
         try {
           // Get transcript
-          const transcript = await getFullTranscriptText(tenantId, call.id)
+          const transcript = await getFullTranscriptText(call.id)
 
           if (!transcript || transcript.length < 50) {
             continue // Skip calls with no/short transcripts
@@ -78,7 +79,7 @@ export const generateCallSummariesJob = defineJob({
           const summary = response.content[0]?.text?.trim()
 
           if (summary) {
-            await updateVoiceCall(tenantId, call.id, { summary })
+            await updateVoiceCall(call.id, { summary })
             summarized++
           }
         } catch (callError) {
@@ -197,7 +198,7 @@ export const cleanupOldRecordingsJob = defineJob({
  */
 export const syncRetellAgentsJob = defineJob({
   name: 'ai-agents/sync-retell-agents',
-  handler: async (job) => {
+  handler: async (job): Promise<JobResult> => {
     const { tenantId } = job.payload as { tenantId: string }
 
     if (!tenantId) {
@@ -210,7 +211,7 @@ export const syncRetellAgentsJob = defineJob({
       // Get tenant's Retell credentials
       const credentials = await getVoiceCredentials(tenantId)
 
-      if (!credentials?.retellApiKey) {
+      if (!credentials?.retellApiKeyEncrypted) {
         console.log(`[ai-agents/sync-retell-agents] Retell not configured for tenant ${tenantId}`)
         return { success: true, data: { skipped: 'Retell not configured' } }
       }

@@ -8,6 +8,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./voice": {
+      "types": "./dist/voice/index.d.ts",
+      "import": "./dist/voice/index.js"
     }
   },
   "main": "./dist/index.js",
@@ -16,8 +20,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts src/voice/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts src/voice/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

@@ -287,7 +287,9 @@ async function executeSlackNotify(
         } else if (config.mention.startsWith('@')) {
           fullMessage = `<${config.mention}> ${message}`
         }
-        blocks[0].text.text = fullMessage
+        if (blocks[0]?.text && typeof blocks[0].text === 'object') {
+          blocks[0].text.text = fullMessage
+        }
       }
 
       // Add context about the entity

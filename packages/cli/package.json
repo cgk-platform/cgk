@@ -4,9 +4,6 @@
   "description": "CLI tool for CGK platform - create, setup, and manage brand sites",
   "license": "MIT",
   "type": "module",
-  "bin": {
-    "cgk": "./dist/index.js"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

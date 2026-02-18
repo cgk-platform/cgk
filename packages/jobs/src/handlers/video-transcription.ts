@@ -11,7 +11,6 @@
  * @ai-required Always include tenantId in payloads
  */
 
-import { withTenant } from '@cgk-platform/db'
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
@@ -80,7 +79,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       const mp4Url = `https://stream.mux.com/${playbackId}/high.mp4`
 
       // Start transcription
-      const provider = getTranscriptionProvider('assemblyai')
+      const provider = getTranscriptionProvider()
       const transcriptionJob = await provider.transcribe(mp4Url, {
         speakerDiarization: true,
         autoChapters: true,
@@ -268,7 +267,13 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
 
           if (result.status === 'completed' && result.text) {
             // Save completed transcription
-            await saveTranscriptionResult(tenantId, video.id, result.text, result.words || [], [])
+            const words = (result.words || []).map((w: { text: string; start: number; end: number; confidence: number }) => ({
+              text: w.text,
+              startMs: w.start,
+              endMs: w.end,
+              confidence: w.confidence,
+            }))
+            await saveTranscriptionResult(tenantId, video.id, result.text, words, [])
             updated++
             console.log(`[video/transcription-sync] Completed transcription for videoId=${video.id}`)
           } else if (result.status === 'error') {

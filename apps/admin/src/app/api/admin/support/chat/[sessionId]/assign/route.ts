@@ -64,9 +64,9 @@ export async function POST(
 
     // If already assigned, this is a transfer
     if (session.assignedAgentId) {
-      await transferChatSession(tenantId, sessionId, body.agentId)
+      await transferChatSession(tenantId, sessionId, agentId)
     } else {
-      await assignChatSession(tenantId, sessionId, body.agentId)
+      await assignChatSession(tenantId, sessionId, agentId)
     }
 
     // Get updated session

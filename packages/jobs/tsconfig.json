@@ -2,7 +2,11 @@
   "extends": "@cgk-platform/typescript-config/library.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "paths": {
+      "@cgk-platform/admin-core": ["../admin-core/dist/index.d.ts"],
+      "@cgk-platform/admin-core/*": ["../admin-core/dist/*/index.d.ts"]
+    }
   },
   "include": [
     "src",

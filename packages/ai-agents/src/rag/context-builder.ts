@@ -37,6 +37,9 @@ const MEMORY_TYPE_LABELS: Record<MemoryType, string> = {
   creator: 'Creator Information',
   project_pattern: 'Patterns & Examples',
   fact: 'General Knowledge',
+  design_pattern: 'Design Patterns',
+  brand_rule: 'Brand Rules',
+  ad_analysis: 'Ad Analysis',
 }
 
 /**
@@ -220,9 +223,7 @@ export async function buildMemoryContext(options: RAGContextOptions): Promise<RA
  */
 function formatMemoryForContext(memory: MemorySearchResult): string {
   const confidencePercent = Math.round(memory.confidence * 100)
-  const subjectInfo = memory.subjectType
-    ? ` [${memory.subjectType}: ${memory.subjectId}]`
-    : ''
+  const subjectInfo = memory.subjectType ? ` [${memory.subjectType}: ${memory.subjectId}]` : ''
 
   return `- **${memory.title}** (confidence: ${confidencePercent}%)${subjectInfo}\n  ${memory.content}`
 }
@@ -238,8 +239,7 @@ function formatFailureLearnings(
   }>
 ): string {
   const items = learnings.map(
-    (l) =>
-      `- **Avoid**: ${l.whatWentWrong}\n  **Instead**: ${l.correctApproach}`
+    (l) => `- **Avoid**: ${l.whatWentWrong}\n  **Instead**: ${l.correctApproach}`
   )
 
   return `### Lessons Learned\n${items.join('\n')}`
