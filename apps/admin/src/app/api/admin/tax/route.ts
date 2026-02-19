@@ -1,7 +1,10 @@
 export const dynamic = 'force-dynamic'
 
+import { put } from '@vercel/blob'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+
+import { generate1099NECPacketPdf } from '@cgk-platform/tax'
 
 import { parseTaxFilters } from '@/lib/search-params'
 import { getCreatorTaxInfo, getTaxYearSummary, updateW9Status, generate1099, mark1099Sent } from '@/lib/tax/db'
@@ -78,11 +81,53 @@ export async function POST(request: Request) {
 
     case 'generate_1099': {
       const taxYear = body.taxYear || new Date().getFullYear()
+
+      // Generate PDF using the creator's tax info
+      let pdfUrl: string | null = null
+      try {
+        const { rows } = await getCreatorTaxInfo(tenantSlug, {
+          page: 1, limit: 1, offset: 0,
+          w9_status: '', form_1099_status: '', tax_year: taxYear, requires_1099: '',
+        })
+        const creator = rows.find((r) => r.creator_id === body.creatorId)
+        if (creator) {
+          const pdfBytes = await generate1099NECPacketPdf({
+            taxYear,
+            payer: {
+              name: process.env.TAX_PAYER_NAME || 'Platform LLC',
+              streetAddress: process.env.TAX_PAYER_ADDRESS_LINE1 || '',
+              city: process.env.TAX_PAYER_CITY || '',
+              state: process.env.TAX_PAYER_STATE || '',
+              zip: process.env.TAX_PAYER_ZIP || '',
+              ein: process.env.TAX_PAYER_EIN || '',
+            },
+            recipient: {
+              name: creator.business_name || creator.creator_name,
+              streetAddress: '',
+              city: '',
+              state: '',
+              zip: '',
+              tin: creator.tin_last_four ? `****${creator.tin_last_four}` : null,
+            },
+            nonemployeeCompensationCents: creator.total_earnings_ytd_cents,
+          })
+          const blob = await put(
+            `tax/${tenantSlug}/${taxYear}/1099-nec-${body.creatorId}.pdf`,
+            Buffer.from(pdfBytes),
+            { access: 'public', addRandomSuffix: false, contentType: 'application/pdf' }
+          )
+          pdfUrl = blob.url
+        }
+      } catch (pdfErr) {
+        console.error('[tax] PDF generation failed:', pdfErr)
+        // Continue to mark as generated even if PDF fails
+      }
+
       const success = await generate1099(tenantSlug, body.creatorId, taxYear)
       if (!success) {
         return NextResponse.json({ error: 'Failed to generate 1099' }, { status: 500 })
       }
-      return NextResponse.json({ success: true, status: 'generated' })
+      return NextResponse.json({ success: true, status: 'generated', pdfUrl })
     }
 
     case 'mark_1099_sent': {

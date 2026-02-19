@@ -112,3 +112,12 @@ export {
   queueForMail,
   updateMailStatus,
 } from './delivery.js'
+
+// PDF generation
+export {
+  generate1099NECPdf,
+  generate1099NECPacketPdf,
+  type Form1099NECData,
+  type PayerInfo1099,
+  type RecipientInfo1099,
+} from './pdf-generation.js'
