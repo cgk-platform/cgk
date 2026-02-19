@@ -79,7 +79,7 @@ export async function POST(req: Request): Promise<Response> {
         COALESCE(SUM(CASE WHEN type = 'bonus' AND amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as bonuses,
         COALESCE(SUM(CASE WHEN type = 'adjustment' AND amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as adjustments,
         COALESCE(SUM(CASE WHEN amount_cents < 0 THEN ABS(amount_cents) ELSE 0 END), 0) as withdrawals
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${yearStart.toISOString()}
         AND created_at <= ${yearEnd.toISOString()}
@@ -94,7 +94,7 @@ export async function POST(req: Request): Promise<Response> {
         SUM(CASE WHEN type = 'commission' AND amount_cents > 0 THEN amount_cents ELSE 0 END) as commissions,
         SUM(CASE WHEN type = 'project' AND amount_cents > 0 THEN amount_cents ELSE 0 END) as projects,
         SUM(CASE WHEN type = 'bonus' AND amount_cents > 0 THEN amount_cents ELSE 0 END) as bonuses
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${yearStart.toISOString()}
         AND created_at <= ${yearEnd.toISOString()}
