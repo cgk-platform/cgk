@@ -20,6 +20,11 @@ export type WebhookTopic =
   // Customer webhooks
   | 'customers/create'
   | 'customers/update'
+  | 'customers/delete'
+  // GDPR mandatory webhooks (defined in Partner Dashboard, not REST-registered)
+  | 'customers/redact'
+  | 'customers/data_request'
+  | 'shop/redact'
   // App webhooks
   | 'app/uninstalled'
   // Optional webhooks (feature-gated)

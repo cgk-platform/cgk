@@ -10,22 +10,47 @@ import { handleFulfillmentCreate, handleFulfillmentUpdate } from './handlers/ful
 import { handleRefundCreate } from './handlers/refunds'
 import { handleCustomerCreate, handleCustomerUpdate } from './handlers/customers'
 import { handleAppUninstalled } from './handlers/app'
+import { handleProductCreate, handleProductUpdate, handleProductDelete } from './handlers/products'
+import {
+  handleCustomerDelete,
+  handleCustomerRedact,
+  handleShopRedact,
+  handleCustomerDataRequest,
+} from './handlers/gdpr'
 
 /**
  * Registry of webhook handlers by topic
  */
 const HANDLERS: Partial<Record<WebhookTopic, WebhookHandler>> = {
+  // Orders
   'orders/create': handleOrderCreate,
   'orders/updated': handleOrderUpdate,
   'orders/paid': handleOrderPaid,
   'orders/cancelled': handleOrderCancelled,
   'orders/fulfilled': handleOrderUpdate,
+  // Refunds & fulfillments
   'refunds/create': handleRefundCreate,
   'fulfillments/create': handleFulfillmentCreate,
   'fulfillments/update': handleFulfillmentUpdate,
+  // Customers
   'customers/create': handleCustomerCreate,
   'customers/update': handleCustomerUpdate,
+  'customers/delete': handleCustomerDelete,
+  // Products
+  'products/create': handleProductCreate,
+  'products/update': handleProductUpdate,
+  'products/delete': handleProductDelete,
+  // Inventory (no-op stub — handled by product-sync job)
+  'inventory_levels/update': async (_tenantId, _payload, _eventId) => {
+    // Inventory updates are processed by the product sync job triggered from products/update
+    // This stub prevents "no handler registered" log noise
+  },
+  // App lifecycle
   'app/uninstalled': handleAppUninstalled,
+  // GDPR mandatory (registered via Partner Dashboard, not REST API)
+  'customers/redact': handleCustomerRedact,
+  'shop/redact': handleShopRedact,
+  'customers/data_request': handleCustomerDataRequest,
 }
 
 /**
