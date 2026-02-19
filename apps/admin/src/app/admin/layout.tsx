@@ -25,6 +25,7 @@ const DEFAULT_TENANT: TenantConfig = {
     abTesting: false,
     attribution: false,
     scheduling: true,
+    aiAgents: false,
   },
   shopifyDomain: null,
   status: 'active',
