@@ -41,4 +41,24 @@ const nextConfig = {
   },
 }
 
+
+  // @cgk-platform/jobs uses dynamic imports not resolvable by webpack
+  serverExternalPackages: ['@cgk-platform/jobs', '@cgk-platform/admin-core'],
+
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      const serverOnlyPackages = ['@cgk-platform/jobs', '@cgk-platform/admin-core']
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : config.externals ? [config.externals] : []),
+        ({ request }, callback) => {
+          if (serverOnlyPackages.some(pkg => request === pkg || request?.startsWith(pkg + '/'))) {
+            return callback(null, `commonjs ${request}`)
+          }
+          callback()
+        },
+      ]
+    }
+    return config
+  },
+
 module.exports = nextConfig
