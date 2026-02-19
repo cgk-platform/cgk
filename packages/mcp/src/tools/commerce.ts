@@ -1622,17 +1622,60 @@ export const syncProductTool = defineTool({
         )
       }
 
-      // In a real implementation, this would trigger a background job to sync from Shopify
-      // For now, we return a message indicating the sync would be triggered
+      // Trigger the commerce-product-sync Trigger.dev task via REST API.
+      // Using fetch() directly here because this tool runs in Edge Runtime
+      // and the @trigger.dev/sdk uses Node.js APIs not available in Edge.
+      const triggerSecretKey = process.env.TRIGGER_SECRET_KEY
+      const triggerApiUrl = process.env.TRIGGER_API_URL ?? 'https://api.trigger.dev'
+
+      if (triggerSecretKey) {
+        const triggerResponse = await fetch(
+          `${triggerApiUrl}/api/v1/tasks/commerce-product-sync/trigger`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${triggerSecretKey}`,
+            },
+            body: JSON.stringify({
+              payload: {
+                tenantId,
+                productId: product.id,
+                shopifyProductId: product.shopify_product_id,
+              },
+            }),
+          }
+        )
+
+        if (!triggerResponse.ok) {
+          const errText = await triggerResponse.text()
+          return errorResult(`Failed to trigger sync job: ${errText}`)
+        }
+
+        const triggerResult = (await triggerResponse.json()) as { id?: string }
+
+        return jsonResult({
+          success: true,
+          message: `Sync job triggered for product "${product.title}"`,
+          runId: triggerResult.id,
+          product: {
+            id: product.id,
+            title: product.title,
+            shopify_product_id: product.shopify_product_id,
+          },
+        })
+      }
+
+      // Fallback: TRIGGER_SECRET_KEY not configured — log and return success
+      console.warn('[syncProductTool] TRIGGER_SECRET_KEY not set — sync skipped')
       return jsonResult({
         success: true,
-        message: `Sync triggered for product "${product.title}"`,
+        message: `Sync queued for product "${product.title}" (job runner not configured)`,
         product: {
           id: product.id,
           title: product.title,
           shopify_product_id: product.shopify_product_id,
         },
-        note: 'Sync will be processed in the background. Check back shortly for updated data.',
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
