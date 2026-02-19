@@ -18,7 +18,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -186,12 +185,17 @@ export default function ContentClustersPage() {
               </TableHeader>
               <TableBody>
                 {clusters.length === 0 ? (
-                  <TableEmpty
-                    icon={FolderOpen}
-                    title="No clusters yet"
-                    description="Create your first content cluster to get started."
-                    colSpan={7}
-                  />
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <FolderOpen className="mb-4 h-8 w-8 text-muted-foreground" />
+                        <h3 className="text-lg font-semibold">No clusters yet</h3>
+                        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                          Create your first content cluster to get started.
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   clusters.map((cluster) => (
                     <TableRow key={cluster.id}>
