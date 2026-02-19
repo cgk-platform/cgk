@@ -20,6 +20,7 @@ import {
   createTheme,
 } from '@/lib/theme'
 import { StorefrontHeader } from '@/components/layout/StorefrontHeader'
+import { AnalyticsHead } from '@/components/analytics/AnalyticsHead'
 
 import './globals.css'
 
@@ -70,6 +71,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeHead theme={theme} />
+        {tenantSlug && <AnalyticsHead tenantSlug={tenantSlug} />}
       </head>
       <body className="min-h-screen bg-[hsl(var(--portal-background))] font-[var(--portal-font-family)] text-[hsl(var(--portal-foreground))] antialiased">
         <ThemeProvider theme={theme}>

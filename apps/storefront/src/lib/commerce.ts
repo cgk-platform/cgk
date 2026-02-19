@@ -7,6 +7,7 @@
 
 import { createCommerceProvider } from '@cgk-platform/commerce'
 import type { CommerceProvider, ListParams, PaginatedResult, Product } from '@cgk-platform/commerce'
+import { sendJob } from '@cgk-platform/jobs'
 import { cache } from 'react'
 
 import { getProductByHandleFromLocalDB, getProductsFromLocalDB, searchProductsInLocalDB } from './products-db'
@@ -169,11 +170,9 @@ function createLocalDBProductOperations(
 }
 
 /**
- * Trigger async product sync to local DB
- * This is fire-and-forget - we don't wait for it
+ * Trigger async product sync to local DB via background job.
+ * This is fire-and-forget — dispatches product.sync event and returns immediately.
  */
-async function triggerProductSync(tenantSlug: string, handle: string): Promise<void> {
-  // In production, this would dispatch a background job
-  // For now, we log the intent
-  console.log(`[Product Sync] Would sync product ${handle} for tenant ${tenantSlug}`)
+async function triggerProductSync(tenantSlug: string, _handle: string): Promise<void> {
+  await sendJob('product.sync', { tenantId: tenantSlug })
 }

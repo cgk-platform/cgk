@@ -14,6 +14,8 @@ import type {
   UpdateWorkflowInput,
   CreateWorkflowExecutionInput,
 } from '../types.js'
+import { createDocument } from './documents.js'
+import { getTemplate } from './templates.js'
 
 // ============================================================================
 // WORKFLOW CRUD OPERATIONS
@@ -453,6 +455,40 @@ export async function advanceToNextStep(
     current_step: nextStepOrder,
     status: 'in_progress',
   })
+
+  // Create the document for this step if a template is configured
+  if (nextStep.template_id) {
+    try {
+      const template = await getTemplate(tenantSlug, nextStep.template_id)
+      if (template) {
+        const creatorId = execution.context.creator_id as string | undefined
+        const triggeredBy = execution.triggered_by
+
+        const newDoc = await createDocument(tenantSlug, {
+          template_id: template.id,
+          creator_id: creatorId,
+          name: `${template.name} — Step ${nextStepOrder}: ${nextStep.name}`,
+          file_url: template.file_url,
+          expires_at: workflow.default_expires_days
+            ? new Date(Date.now() + workflow.default_expires_days * 86400 * 1000)
+            : undefined,
+          reminder_enabled: workflow.reminder_enabled,
+          reminder_days: workflow.reminder_days,
+          message: workflow.default_message ?? undefined,
+          created_by: triggeredBy,
+        })
+
+        // Track the new document ID in the execution
+        const updatedDocIds = [...execution.document_ids, newDoc.id]
+        await updateWorkflowExecution(tenantSlug, executionId, {
+          document_ids: updatedDocIds,
+        })
+      }
+    } catch (docError) {
+      console.error('[esign-workflow] Failed to create document for step:', nextStepOrder, docError)
+      // Don't fail the step advance — document creation failure is non-blocking
+    }
+  }
 
   return { advanced: true, completed: false, nextStep }
 }
