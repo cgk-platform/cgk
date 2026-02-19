@@ -45,17 +45,27 @@ const nextConfig = {
   serverExternalPackages: ['@cgk-platform/jobs', '@cgk-platform/admin-core'],
 
   webpack: (config, { isServer }) => {
+    // Mark @cgk-platform/jobs and @cgk-platform/admin-core as external for ALL builds.
+    // workspace symlinks bypass serverExternalPackages name-matching, so we must
+    // use the externals function for both server and client compilations to prevent
+    // webpack from tracing into jobs/dist and failing to resolve admin-core subpaths.
+    const serverOnlyPackages = ['@cgk-platform/jobs', '@cgk-platform/admin-core']
+    config.externals = [
+      ...(Array.isArray(config.externals) ? config.externals : config.externals ? [config.externals] : []),
+      ({ request }, callback) => {
+        if (serverOnlyPackages.some(pkg => request === pkg || request?.startsWith(pkg + '/'))) {
+          return callback(null, `commonjs ${request}`)
+        }
+        callback()
+      },
+    ]
     if (!isServer) {
-      const serverOnlyPackages = ['@cgk-platform/jobs', '@cgk-platform/admin-core']
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : config.externals ? [config.externals] : []),
-        ({ request }, callback) => {
-          if (serverOnlyPackages.some(pkg => request === pkg || request?.startsWith(pkg + '/'))) {
-            return callback(null, `commonjs ${request}`)
-          }
-          callback()
-        },
-      ]
+      // Don't resolve node: modules on the client
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false, path: false, os: false, crypto: false,
+        stream: false, querystring: false, url: false, child_process: false,
+      }
     }
     return config
   },
