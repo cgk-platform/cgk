@@ -1,0 +1,207 @@
+{
+  "startedAt": "2026-02-19T00:00:00-08:00",
+  "targetDeadline": "2026-02-19T09:00:00-08:00",
+  "outputDir": "/Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/gap-remediation-audit-2026-02-19",
+  "agents": [
+    {
+      "id": "01",
+      "label": "cgk-audit-01-foundation",
+      "area": "Foundation & Portability",
+      "outputFile": "AGENT-01-FOUNDATION.md",
+      "phaseDocs": ["PHASE-0-PORTABILITY", "PHASE-0B-DATABASE-SETUP-UX", "PHASE-1A-MONOREPO", "PHASE-1B-DATABASE", "PHASE-1C-AUTH", "PHASE-1D-PACKAGES"],
+      "codePaths": ["packages/core/src", "packages/db/src", "packages/auth/src", "tooling/migrations"],
+      "status": "running",
+      "pass": 1
+    },
+    {
+      "id": "02",
+      "label": "cgk-audit-02-super-admin",
+      "area": "Super Admin",
+      "outputFile": "AGENT-02-SUPER-ADMIN.md",
+      "phaseDocs": ["PHASE-2SA-ACCESS", "PHASE-2SA-ADVANCED", "PHASE-2SA-DASHBOARD", "PHASE-2SA-USERS"],
+      "codePaths": ["apps/admin/src/app/(super-admin)", "packages/auth/src"],
+      "status": "running",
+      "pass": 1
+    },
+    {
+      "id": "03",
+      "label": "cgk-audit-03-admin-shell-ai",
+      "area": "Admin Shell & AI",
+      "outputFile": "AGENT-03-ADMIN-SHELL-AI.md",
+      "phaseDocs": ["PHASE-2A-ADMIN-SHELL", "PHASE-2AI-ADMIN", "PHASE-2AI-CORE", "PHASE-2AI-INTEGRATIONS", "PHASE-2AI-MEMORY", "PHASE-2AI-TEAMS", "PHASE-2AI-VOICE"],
+      "codePaths": ["apps/admin/src", "packages/ai-agents/src", "apps/orchestrator/src"],
+      "status": "running",
+      "pass": 1
+    },
+    {
+      "id": "04",
+      "label": "cgk-audit-04-commerce-finance",
+      "area": "Admin Commerce & Finance",
+      "outputFile": "AGENT-04-ADMIN-COMMERCE-FINANCE.md",
+      "phaseDocs": ["PHASE-2B-ADMIN-COMMERCE", "PHASE-2D-ADMIN-FINANCE", "PHASE-2D-PL-CONFIGURATION"],
+      "codePaths": ["packages/commerce/src", "packages/payments/src", "apps/admin/src"],
+      "status": "running",
+      "pass": 1
+    },
+    {
+      "id": "05",
+      "label": "cgk-audit-05-content-seo",
+      "area": "Admin Content & SEO",
+      "outputFile": "AGENT-05-CONTENT-SEO.md",
+      "phaseDocs": ["PHASE-2C-ADMIN-CONTENT", "PHASE-2I-CONTENT-BLOG-ADVANCED", "PHASE-2I-CONTENT-SEO", "PHASE-2I-CONTENT-UGC"],
+      "codePaths": ["packages/dam/src", "apps/admin/src", "apps/storefront/src"],
+      "status": "running",
+      "pass": 1
+    },
+    {
+      "id": "06",
+      "label": "cgk-audit-06-team-rbac",
+      "area": "Team, RBAC & Context Switching",
+      "outputFile": "AGENT-06-TEAM-RBAC.md",
+      "phaseDocs": ["PHASE-2E-TEAM-MANAGEMENT", "PHASE-2F-RBAC", "PHASE-2G-CONTEXT-SWITCHING"],
+      "codePaths": ["packages/auth/src", "apps/admin/src", "packages/core/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "07",
+      "label": "cgk-audit-07-communications",
+      "area": "Communications & Email",
+      "outputFile": "AGENT-07-COMMUNICATIONS.md",
+      "phaseDocs": ["PHASE-2CM-EMAIL-QUEUE", "PHASE-2CM-INBOUND-EMAIL", "PHASE-2CM-RESEND-ONBOARDING", "PHASE-2CM-SENDER-DNS", "PHASE-2CM-SLACK-INTEGRATION", "PHASE-2CM-SMS", "PHASE-2CM-TEMPLATE-LIBRARY", "PHASE-2CM-TEMPLATES"],
+      "codePaths": ["packages/communications/src", "packages/slack/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "08",
+      "label": "cgk-audit-08-platform-ops",
+      "area": "Platform Ops",
+      "outputFile": "AGENT-08-PLATFORM-OPS.md",
+      "phaseDocs": ["PHASE-2PO-FLAGS", "PHASE-2PO-HEALTH", "PHASE-2PO-LOGGING", "PHASE-2PO-OAUTH-INTEGRATIONS", "PHASE-2PO-ONBOARDING"],
+      "codePaths": ["packages/feature-flags/src", "packages/health/src", "packages/logging/src", "packages/onboarding/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "09",
+      "label": "cgk-audit-09-ab-testing",
+      "area": "A/B Testing",
+      "outputFile": "AGENT-09-AB-TESTING.md",
+      "phaseDocs": ["PHASE-2AT-ABTESTING-ADMIN", "PHASE-2AT-ABTESTING-CORE", "PHASE-2AT-ABTESTING-SHIPPING", "PHASE-2AT-ABTESTING-STATS"],
+      "codePaths": ["packages/ab-testing/src", "apps/shopify-app/extensions", "shopify-app/extensions/shipping-ab-test"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "10",
+      "label": "cgk-audit-10-attribution",
+      "area": "Attribution & Analytics",
+      "outputFile": "AGENT-10-ATTRIBUTION-ANALYTICS.md",
+      "phaseDocs": ["PHASE-2AT-ATTRIBUTION-CORE", "PHASE-2AT-ATTRIBUTION-ADVANCED", "PHASE-2AT-ATTRIBUTION-ANALYTICS", "PHASE-2AT-ATTRIBUTION-INTEGRATIONS"],
+      "codePaths": ["packages/analytics/src", "apps/admin/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "11",
+      "label": "cgk-audit-11-tenant-settings",
+      "area": "Tenant Settings & Integrations",
+      "outputFile": "AGENT-11-TENANT-SETTINGS-INTEGRATIONS.md",
+      "phaseDocs": ["PHASE-2TS-TENANT-SETTINGS", "PHASE-2P-INTEGRATIONS-ADMIN", "PHASE-2SV-SURVEYS", "PHASE-2O-COMMERCE-SURVEYS"],
+      "codePaths": ["packages/integrations/src", "apps/admin/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "12",
+      "label": "cgk-audit-12-commerce-ops-workflows",
+      "area": "Commerce Ops & Workflows",
+      "outputFile": "AGENT-12-COMMERCE-OPS-WORKFLOWS.md",
+      "phaseDocs": ["PHASE-2O-COMMERCE-ANALYTICS", "PHASE-2O-COMMERCE-GOOGLE-FEED", "PHASE-2O-COMMERCE-REVIEWS", "PHASE-2O-COMMERCE-SUBSCRIPTIONS", "PHASE-2H-FINANCIAL-EXPENSES", "PHASE-2H-FINANCIAL-TREASURY", "PHASE-2H-PRODUCTIVITY", "PHASE-2H-WORKFLOWS"],
+      "codePaths": ["packages/commerce/src", "packages/analytics/src", "packages/payments/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "13",
+      "label": "cgk-audit-13-storefront",
+      "area": "Storefront",
+      "outputFile": "AGENT-13-STOREFRONT.md",
+      "phaseDocs": ["PHASE-3A-STOREFRONT-FOUNDATION", "PHASE-3B-STOREFRONT-CART", "PHASE-3C-STOREFRONT-FEATURES", "PHASE-3D-STOREFRONT-THEMING"],
+      "codePaths": ["apps/storefront/src", "packages/commerce-primitives/src", "packages/commerce-hooks/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "14",
+      "label": "cgk-audit-14-customer-portal",
+      "area": "Customer Portal",
+      "outputFile": "AGENT-14-CUSTOMER-PORTAL.md",
+      "phaseDocs": ["PHASE-3CP-PORTAL-ADMIN", "PHASE-3CP-PORTAL-PAGES", "PHASE-3CP-PORTAL-SUBSCRIPTIONS", "PHASE-3CP-PORTAL-THEMING"],
+      "codePaths": ["packages/portal/src", "apps/admin/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "15",
+      "label": "cgk-audit-15-video-dam-ecommerce",
+      "area": "Video, DAM & eCommerce",
+      "outputFile": "AGENT-15-VIDEO-DAM-ECOMMERCE.md",
+      "phaseDocs": ["PHASE-3E-VIDEO-CORE", "PHASE-3E-VIDEO-CREATOR-TOOLS", "PHASE-3E-VIDEO-TRANSCRIPTION", "PHASE-3E-ECOMMERCE-RECOVERY", "PHASE-3F-DAM-CORE", "PHASE-3F-DAM-WORKFLOWS", "PHASE-3F-ECOMMERCE-PROMOS", "PHASE-3G-ECOMMERCE-SEGMENTS", "PHASE-3G-GIFT-CARDS"],
+      "codePaths": ["packages/video/src", "packages/dam/src", "packages/commerce/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "16",
+      "label": "cgk-audit-16-creator-portal",
+      "area": "Creator Portal & Payments",
+      "outputFile": "AGENT-16-CREATOR-PORTAL.md",
+      "phaseDocs": ["PHASE-4A-CREATOR-PORTAL", "PHASE-4A-CREATOR-ANALYTICS", "PHASE-4A-CREATOR-BRAND-PREFERENCES", "PHASE-4A-CREATOR-ONBOARDING-FLOW", "PHASE-4B-CREATOR-PAYMENTS", "PHASE-4G-CREATOR-ADMIN-ANALYTICS"],
+      "codePaths": ["apps/creator-portal/src", "packages/payments/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "17",
+      "label": "cgk-audit-17-creator-admin",
+      "area": "Creator Admin",
+      "outputFile": "AGENT-17-CREATOR-ADMIN.md",
+      "phaseDocs": ["PHASE-2U-ADMIN-UTILITY-PAGES", "PHASE-2U-CREATORS-ADMIN-COMMUNICATIONS", "PHASE-2U-CREATORS-ADMIN-DIRECTORY", "PHASE-2U-CREATORS-ADMIN-ESIGN", "PHASE-2U-CREATORS-ADMIN-OPS", "PHASE-2U-CREATORS-ADMIN-PIPELINE", "PHASE-2U-CREATORS-LIFECYCLE-AUTOMATION", "PHASE-4C-CREATOR-PROJECTS"],
+      "codePaths": ["apps/admin/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "18",
+      "label": "cgk-audit-18-esign-tax-vendor",
+      "area": "eSign, Tax & Vendor",
+      "outputFile": "AGENT-18-ESIGN-TAX-VENDOR.md",
+      "phaseDocs": ["PHASE-4C-ESIGN-CORE", "PHASE-4C-ESIGN-OPERATIONS", "PHASE-4C-ESIGN-PDF", "PHASE-4C-ESIGN-WORKFLOWS", "PHASE-4D-CREATOR-TAX", "PHASE-4E-VENDOR-MANAGEMENT"],
+      "codePaths": ["packages/esign/src", "packages/tax/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "19",
+      "label": "cgk-audit-19-contractor-support",
+      "area": "Contractor Portal & Support",
+      "outputFile": "AGENT-19-CONTRACTOR-SUPPORT.md",
+      "phaseDocs": ["PHASE-4F-CONTRACTOR-ADMIN", "PHASE-4F-CONTRACTOR-PAYMENTS", "PHASE-4F-CONTRACTOR-PORTAL-CORE", "PHASE-2SP-SUPPORT-CHANNELS", "PHASE-2SP-SUPPORT-KB", "PHASE-2SP-SUPPORT-TICKETS"],
+      "codePaths": ["apps/contractor-portal/src", "packages/support/src"],
+      "status": "queued",
+      "pass": 1
+    },
+    {
+      "id": "20",
+      "label": "cgk-audit-20-shopify-mcp-jobs-infra",
+      "area": "Shopify, MCP, Jobs, Scheduling & Infra",
+      "outputFile": "AGENT-20-SHOPIFY-MCP-JOBS-INFRA.md",
+      "phaseDocs": ["PHASE-2SH-SHOPIFY-APP-CORE", "PHASE-2SH-SHOPIFY-DEPLOYMENT", "PHASE-2SH-SHOPIFY-EXTENSIONS", "PHASE-2SH-SHOPIFY-WEBHOOKS", "PHASE-6A-MCP-TRANSPORT", "PHASE-6B-MCP-TOOLS", "PHASE-5A-JOBS-SETUP", "PHASE-5B-JOBS-COMMERCE", "PHASE-5C-JOBS-CREATORS", "PHASE-5D-JOBS-ANALYTICS", "PHASE-5E-JOBS-SCHEDULED", "PHASE-5F-JOBS-TRIGGER-DEV-TASKS", "PHASE-5G-TENANT-INTEGRATIONS", "PHASE-2SC-SCHEDULING-CORE", "PHASE-2SC-SCHEDULING-TEAM", "PHASE-7A-MIGRATION-DATA", "PHASE-7B-MIGRATION-TESTING", "PHASE-7C-MIGRATION-CUTOVER", "PHASE-8-AUDIT", "PHASE-9A-PRODUCTION-CREDENTIALS", "PHASE-9B-DNS-DOMAINS", "PHASE-9C-DATABASE-MIGRATIONS", "PHASE-9D-SETUP-WIZARD", "PHASE-9E-NPM-DEPLOYMENT"],
+      "codePaths": ["apps/shopify-app/src", "packages/shopify/src", "apps/mcp-server/src", "packages/mcp/src", "packages/jobs/src", "packages/scheduling/src"],
+      "status": "queued",
+      "pass": 1
+    }
+  ]
+}

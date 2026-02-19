@@ -1,0 +1,168 @@
+You are conducting the final synthesis and Pass 2 of the CGK platform gap audit. ONLY work within /Users/novarussell/Documents/cgk-platform/. Never access any other directory.
+
+## Step 1: Check Status
+Run: ls /Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/gap-remediation-audit-2026-02-19/
+Note which AGENT-*.md files exist. There should be up to 27 total (20 domain agents + 7 app agents).
+
+## Step 2: Read ALL Completed Reports
+Read EVERY AGENT-*.md file in that directory. Read them fully — do not skim. For each report extract:
+- ALL gaps at every priority level (P0 critical, P1 high, P2 medium, P3 low)
+- EVERY ❌ NOT DONE and ⚠️ PARTIAL item
+- EVERY TODO task bullet, verbatim — do not collapse or summarize
+- Which phase doc each task came from
+- Cross-cutting architectural issues
+- Auth/permissions/tenant isolation gaps (especially from the APP-* agents)
+
+## Step 3: Write MASTER-SYNTHESIS.md
+Save to: /Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/gap-remediation-audit-2026-02-19/MASTER-SYNTHESIS.md
+
+```markdown
+# CGK Platform Gap Audit — Master Synthesis
+**Date:** 2026-02-19 | **Model:** Gemini 3 Pro | **Reports read:** [N]/27
+
+## Overall Health Score
+[Honest % complete across all domains. Break down by: Foundation, Auth/Security, Admin, Commerce, Creator, Shopify, MCP, Infra]
+
+## Critical Security & Isolation Gaps (P0 — Fix Immediately)
+[Tenant isolation breaches, unprotected routes, OAuth gaps, cross-tenant data risks]
+
+## Critical Functionality Gaps (P0 — Blocks Other Features)
+[Top items that block other work if not fixed first]
+
+## Major Gaps by Domain
+[For each of 27 agents: 1-2 sentence summary + count of ❌ NOT DONE and ⚠️ PARTIAL]
+
+## Cross-Cutting Architectural Issues
+[Issues spanning multiple apps/domains — wiring, missing connections, inconsistent patterns]
+
+## Recommended Execution Order
+[Dependency-ordered list: what to build first and why]
+
+## Pass 2 Needed?
+[Any gaps not caught by individual agents? New cross-agent issues found during synthesis?]
+```
+
+## Step 4: Write MASTER-TASK-LIST.md (THE CRITICAL OUTPUT — be exhaustive)
+Save to: /Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/gap-remediation-audit-2026-02-19/MASTER-TASK-LIST.md
+
+This is the definitive execution checklist. EVERY single task from EVERY agent report MUST be here. Zero omissions. An executing agent must be able to work from this list alone without re-reading any individual report.
+
+```markdown
+# CGK Platform — Master Task List
+**Generated:** 2026-02-19 by Gemini 3 Pro synthesis
+**Purpose:** Complete gap remediation — no gaps, no bugs, everything wired up
+**Total tasks:** [N] across [N] domains
+
+---
+
+## How to Use
+- Work top-to-bottom within each priority tier
+- Check off: change `- [ ]` to `- [x]`
+- Each task tagged with source phase + agent for full traceability
+- 🔗 = dependency, 🚨 = security/isolation risk
+
+---
+
+## 🚨 P0 — Security & Isolation (Fix First — These Are Data Risks)
+*Unprotected routes, tenant bleed, missing auth guards, OAuth vulnerabilities*
+
+### [App/Domain] — [Feature/Issue]
+**Source Phase:** PHASE-XXX | **Agent:** APP-ADMIN / 06 / etc | **Status:** ❌/⚠️
+**Risk:** [one sentence on what could go wrong]
+- [ ] Specific actionable task
+- [ ] Specific actionable task
+⚠️ **Security note:** [if applicable]
+🔗 **Blocks:** [if applicable]
+
+---
+
+## 🛑 P0 — Critical Functionality (Blocks Other Work)
+*Things other features depend on — must be done before those features*
+
+### [Domain] — [Feature]
+**Source Phase:** PHASE-XXX | **Agent:** NN | **Status:** ❌/⚠️
+**Why P0:** [one sentence]
+- [ ] Task
+- [ ] Task
+🔗 **Depends on:** [if any]
+🔗 **Blocks:** [if any]
+
+---
+
+## 🔶 P1 — High Priority (Core Functionality Gaps)
+*Platform is meaningfully incomplete without these*
+
+### [Domain] — [Feature]
+**Source Phase:** PHASE-XXX | **Agent:** NN | **Status:** ❌/⚠️
+- [ ] Task
+
+---
+
+## 🔷 P2 — Medium Priority (Important, Not Blocking)
+*Planned features not yet built*
+
+### [Domain] — [Feature]
+**Source Phase:** PHASE-XXX | **Agent:** NN
+- [ ] Task
+
+---
+
+## ⚪ P3 — Low Priority (Polish & Completeness)
+*Finishes the vision, not urgent*
+
+### [Domain] — [Feature]
+**Source Phase:** PHASE-XXX | **Agent:** NN
+- [ ] Task
+
+---
+
+## 🔌 Wiring & Integration Checklist
+*End-to-end connections: API routes ↔ UI, packages ↔ apps, webhooks ↔ handlers, events ↔ consumers*
+*These are often the last things implemented but the first things that break*
+
+- [ ] [Package/Service A] → [App/Component B]: [what needs connecting] | Source: AGENT-NN
+- [ ] [Webhook] → [Handler]: [what's missing] | Source: AGENT-NN
+
+---
+
+## 🗄️ DB Schema & Tenant Isolation Checklist
+*Tables, joins, and queries that need review for correctness and tenant scoping*
+
+- [ ] [Table/query]: [what's wrong or missing] | Source: AGENT-NN
+
+---
+
+## 📊 Summary Stats
+| Priority | Tasks | Domains/Apps |
+|----------|-------|------|
+| P0 Security | X | X |
+| P0 Functional | X | X |
+| P1 High | X | X |
+| P2 Medium | X | X |
+| P3 Low | X | X |
+| Wiring | X | X |
+| DB/Schema | X | X |
+| **Total** | **X** | **27** |
+```
+
+IMPORTANT RULES FOR MASTER-TASK-LIST.md:
+- Do NOT collapse multiple tasks into one. If agent listed 15 tasks, all 15 go in.
+- Do NOT omit any task because it seems obvious or small.
+- Every task must have Source Phase and Source Agent tagged.
+- Security/isolation issues get their own P0-Security section at the top.
+- Wiring issues go in the dedicated Wiring section, not just wherever.
+
+## Step 5: Pass 2
+If synthesis reveals gaps not covered by individual agents OR any AGENT-*.md file is missing from the 27, document what needs follow-up.
+
+Save to: /Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/gap-remediation-audit-2026-02-19/PASS-2-NEEDED.md
+
+Format:
+```markdown
+# Pass 2 — Areas Needing Follow-up
+**Generated:** 2026-02-19
+
+[List any gaps not caught by individual agents, missing agent files, or cross-agent issues discovered during synthesis that need a dedicated follow-up audit. For each: describe the gap, which agents/phases it spans, and what the follow-up agent should look for.]
+```
+
+If no Pass 2 is needed, write: "# Pass 2 — No Follow-up Needed\nAll 27 agents complete. No significant cross-agent gaps identified."
