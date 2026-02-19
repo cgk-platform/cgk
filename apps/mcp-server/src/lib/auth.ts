@@ -24,6 +24,8 @@ export interface AuthResult {
   userId: string
   email: string
   sessionId?: string
+  /** True if the authenticated user has admin-level access (super_admin, owner, or admin role) */
+  isAdmin: boolean
 }
 
 /**
@@ -118,6 +120,7 @@ async function authenticateJWT(token: string): Promise<AuthResult> {
       userId: payload.sub,
       email: payload.email,
       sessionId: payload.sid,
+      isAdmin: payload.role === 'super_admin' || payload.role === 'owner' || payload.role === 'admin',
     }
   } catch (error) {
     if (error instanceof MCPAuthError) {
@@ -272,10 +275,12 @@ async function authenticateAPIKey(apiKey: string): Promise<AuthResult> {
 
   // Return auth result with tenant context
   // API keys are organization-scoped, so we use a synthetic user ID based on the key
+  // API keys are non-admin by default — admin operations require a JWT with admin role
   return {
     tenantId: keyRecord.tenant_slug,
     userId: `api_key:${keyRecord.id}`,
     email: `api-key-${keyRecord.name.toLowerCase().replace(/\s+/g, '-')}@${keyRecord.tenant_slug}.cgk.local`,
+    isAdmin: false,
   }
 }
 

@@ -20,7 +20,8 @@ import {
   defineResource,
   definePrompt,
   requiresStreaming,
-  commerceTools,
+  getAllTools,
+  toolAnnotations,
   checkRateLimit,
   RateLimitError,
   createRateLimitResponse,
@@ -183,12 +184,12 @@ export async function POST(request: Request): Promise<Response> {
       logUsage: true,
     })
 
-    handler.registerTools(commerceTools)
+    handler.registerTools(getAllTools())
     handler.registerResources(exampleResources)
     handler.registerPrompts(examplePrompts)
 
     // Process the request
-    const response = await handleMethod(handler, jsonrpcRequest, corsHeaders, rateLimitResult)
+    const response = await handleMethod(handler, jsonrpcRequest, corsHeaders, auth, rateLimitResult)
 
     // Check if this is an SSE session POST (has sessionId query param)
     const url = new URL(request.url)
