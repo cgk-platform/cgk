@@ -28,24 +28,35 @@ export function verifyShopifyWebhook(body: string, signature: string, secret: st
 /**
  * Get tenant ID for a Shopify shop domain
  *
- * Looks up the shop in the shopify_connections table to find the tenant
+ * Queries shopify_connections first (written by OAuth callback),
+ * then falls back to organizations table for legacy/manual setups.
  */
 export async function getTenantForShop(shop: string): Promise<string | null> {
-  // The shopify_connections table is in the tenant schema, so we need to check
-  // the public organizations table which maps shops to tenants
-  const result = await sql`
-    SELECT o.id as tenant_id
-    FROM organizations o
-    WHERE o.shopify_store_domain = ${shop}
-    AND o.status = 'active'
+  // First: query shopify_connections — this is the authoritative source
+  // written by the OAuth callback flow
+  const shopifyResult = await sql`
+    SELECT tenant_id
+    FROM shopify_connections
+    WHERE shop = ${shop}
+    AND status = 'active'
     LIMIT 1
   `
 
-  if (result.rows.length === 0) {
-    return null
+  if (shopifyResult.rows.length > 0) {
+    const row = shopifyResult.rows[0]
+    return row ? (row.tenant_id as string) : null
   }
 
-  const row = result.rows[0]
+  // Fallback: query organizations table (legacy/manual shop setup)
+  const orgResult = await sql`
+    SELECT id as tenant_id
+    FROM organizations
+    WHERE shopify_store_domain = ${shop}
+    AND status = 'active'
+    LIMIT 1
+  `
+
+  const row = orgResult.rows[0]
   return row ? (row.tenant_id as string) : null
 }
 
