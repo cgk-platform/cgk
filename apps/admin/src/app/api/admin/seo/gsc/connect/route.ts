@@ -4,6 +4,7 @@ import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+import { createOAuthState } from '@/lib/oauth-state'
 import {
   getOAuthAuthorizationUrl,
   getGSCConnection,
@@ -40,13 +41,8 @@ export async function POST() {
     )
   }
 
-  // Generate state token for OAuth flow (includes tenant for verification)
-  const state = Buffer.from(
-    JSON.stringify({
-      tenantSlug,
-      timestamp: Date.now(),
-    })
-  ).toString('base64')
+  // Generate HMAC-signed state token for CSRF protection
+  const state = await createOAuthState({ tenantSlug })
 
   // Generate authorization URL
   const authUrl = getOAuthAuthorizationUrl(state)

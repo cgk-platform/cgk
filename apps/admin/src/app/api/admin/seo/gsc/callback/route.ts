@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { withTenant } from '@cgk-platform/db'
 import { redirect } from 'next/navigation'
 
+import { validateOAuthState } from '@/lib/oauth-state'
 import {
   exchangeCodeForTokens,
   storeGSCCredentials,
@@ -25,18 +26,12 @@ export async function GET(request: Request) {
     return redirect('/admin/seo?error=Missing+authorization+code')
   }
 
-  // Decode and validate state
+  // Validate HMAC-signed state (prevents CSRF; checks signature + 1hr expiry)
   let stateData: { tenantSlug: string; timestamp: number }
   try {
-    stateData = JSON.parse(Buffer.from(state, 'base64').toString())
+    stateData = await validateOAuthState<{ tenantSlug: string }>(state)
   } catch {
-    return redirect('/admin/seo?error=Invalid+state+token')
-  }
-
-  // Check state timestamp (valid for 1 hour)
-  const maxAge = 60 * 60 * 1000 // 1 hour
-  if (Date.now() - stateData.timestamp > maxAge) {
-    return redirect('/admin/seo?error=Authorization+expired')
+    return redirect('/admin/seo?error=Invalid+or+expired+state+token')
   }
 
   const { tenantSlug } = stateData
