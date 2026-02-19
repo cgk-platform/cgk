@@ -5,12 +5,11 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { tasks } from '@trigger.dev/sdk/v3'
 
 /**
  * Handle app/uninstalled webhook
  *
- * Marks the Shopify connection as disconnected and triggers cleanup
+ * Marks the Shopify connection as disconnected and clears tokens
  */
 export async function handleAppUninstalled(
   tenantId: string,
@@ -42,16 +41,7 @@ export async function handleAppUninstalled(
     `
   })
 
-  // Trigger cleanup via handleOrderCreatedTask as a generic cleanup trigger
-  // Note: A dedicated 'app-disconnect' task should be created in the future
-  await tasks.trigger('commerce-handle-order-created', {
-    tenantId,
-    orderId: 'app-uninstall',
-    shopifyOrderId: shopDomain,
-    customerId: null,
-    totalAmount: 0,
-    currency: 'USD',
-  })
+  // TODO: Trigger dedicated app-disconnect cleanup job once created
 
   console.log(`[Webhook] App uninstalled for shop ${shopDomain}, tenant ${tenantId}`)
 }

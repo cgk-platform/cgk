@@ -2,13 +2,11 @@
  * Failed Webhook Retry Job
  *
  * Periodically retries failed webhook events.
- *
- * NOTE: This job requires the @cgk-platform/shopify/webhooks module to be built and available.
- * Currently stubbed to allow build to pass.
  */
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
+import { withTenant, sql } from '@cgk-platform/db'
 
 /**
  * Configuration for retry job
@@ -37,19 +35,55 @@ export const retryFailedWebhooksJob = defineJob<{ tenantId: string; config?: Par
     const { tenantId, config = {} } = job.payload
     const { maxRetries, hoursAgo, batchSize } = { ...DEFAULT_CONFIG, ...config }
 
-    // @cgk-platform/shopify/webhooks module needs to be built first
     console.log(`[webhooks/retry-failed] tenantId=${tenantId} maxRetries=${maxRetries} hoursAgo=${hoursAgo} batchSize=${batchSize}`)
 
+    const result = await withTenant(tenantId, async () => {
+      // Query failed webhook events eligible for retry
+      const failedEvents = await sql`
+        SELECT id, topic, payload, retry_count
+        FROM webhook_events
+        WHERE status = 'failed'
+          AND retry_count < ${maxRetries}
+          AND created_at > NOW() - INTERVAL '1 hour' * ${hoursAgo}
+        ORDER BY created_at ASC
+        LIMIT ${batchSize}
+      `
+
+      let successCount = 0
+      let failCount = 0
+
+      for (const row of failedEvents.rows) {
+        try {
+          // Reset status to pending so the next scheduled processing picks it up
+          await sql`
+            UPDATE webhook_events
+            SET status = 'pending',
+                error_message = NULL
+            WHERE id = ${row.id}
+          `
+          successCount++
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Unknown error'
+          console.error(`[webhooks/retry-failed] Failed to reset event ${row.id}: ${msg}`)
+          failCount++
+        }
+      }
+
+      return {
+        total: failedEvents.rows.length,
+        reset: successCount,
+        failed: failCount,
+      }
+    })
+
+    console.log(`[webhooks/retry-failed] Processed: ${result.total} events, reset: ${result.reset}, failed: ${result.failed}`)
+
     return {
-      success: false,
-      error: {
-        message: '@cgk-platform/shopify/webhooks module must be built before this job can run',
-        retryable: false,
-      },
+      success: true,
       data: {
-        processed: 0,
-        success: 0,
-        failed: 0,
+        processed: result.total,
+        success: result.reset,
+        failed: result.failed,
       },
     }
   },

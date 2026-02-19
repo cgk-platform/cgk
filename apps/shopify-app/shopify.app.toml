@@ -52,6 +52,11 @@ uri = "/api/webhooks/shopify/fulfillments"
 topics = ["refunds/create"]
 uri = "/api/webhooks/shopify/orders"
 
+# Product webhooks - for product catalog sync
+[[webhooks.subscriptions]]
+topics = ["products/create", "products/update", "products/delete"]
+uri = "/api/webhooks/shopify"
+
 # App lifecycle webhooks - for uninstall handling
 [[webhooks.subscriptions]]
 topics = ["app/uninstalled"]

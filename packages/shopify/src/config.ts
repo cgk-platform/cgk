@@ -21,7 +21,7 @@ export interface AdminConfig {
   apiVersion?: string
 }
 
-export const DEFAULT_API_VERSION = '2024-01'
+export const DEFAULT_API_VERSION = '2026-01'
 
 export function normalizeStoreDomain(domain: string): string {
   // Remove protocol if present

@@ -141,9 +141,10 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
     })
 
     console.error(`[Webhook] ${topic} failed for ${shop}:`, error)
+    console.log(`[Webhook] Event ${eventId} marked as failed — scheduled retry job will pick it up`)
 
     // Return 200 anyway to prevent infinite retries from Shopify
-    // We'll handle retries ourselves via background jobs
+    // The webhooks/retry-failed scheduled job picks up failed events and resets them for reprocessing
     return new Response('Processing error', { status: 200 })
   }
 }
