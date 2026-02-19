@@ -10,6 +10,7 @@
  * @ai-critical All database operations must use withTenant()
  */
 
+import { withTenant, sql } from '@cgk-platform/db'
 import { defineJob } from '../../define'
 import type { JobResult } from '../../types'
 import type {
@@ -26,7 +27,6 @@ import type {
   AttributionModel,
   AttributionResult,
   Touchpoint,
-  Conversion,
 } from './types'
 
 // ============================================================
@@ -226,58 +226,111 @@ export const processAttributionJob = defineJob<ProcessAttributionPayload>({
       `[Analytics] Processing attribution for order ${orderId} in tenant ${tenantId}`
     )
 
-    // Step 1: Get conversion details
-    // In real implementation: await withTenant(tenantId, () => getOrder(orderId))
-    const conversion: Conversion = {
-      orderId,
-      visitorId: job.payload.visitorId || 'visitor_unknown',
-      revenue: 0, // Would be loaded from DB
-      currency: 'USD',
-      timestamp: new Date(),
-    }
+    const result = await withTenant(tenantId, async () => {
+      // Step 1: Get order details from DB
+      const orderRes = await sql`
+        SELECT id, total_price, currency, customer_id, created_at
+        FROM orders
+        WHERE id = ${orderId}
+        LIMIT 1
+      `
+      const order = orderRes.rows[0] as {
+        id: string
+        total_price: string
+        currency: string
+        customer_id: string | null
+        created_at: string
+      } | undefined
 
-    // Step 2: Find touchpoints for visitor
-    // In real implementation: await withTenant(tenantId, () => getTouchpoints(visitorId))
-    const touchpoints: Touchpoint[] = []
+      if (!order) {
+        return { touchpointsProcessed: 0, modelsCalculated: 0 }
+      }
 
-    // Step 3: Calculate all attribution models
-    const attributionResults: Record<AttributionModel, AttributionResult[]> = {
-      first_touch: [],
-      last_touch: [],
-      linear: [],
-      time_decay: [],
-      position_based: [],
-    }
+      const revenue = Math.round(parseFloat(order.total_price) * 100) // to cents
+      const conversionTime = new Date(order.created_at)
+      const visitorId = job.payload.visitorId || order.customer_id || orderId
 
-    const firstTouch = calculateFirstTouch(touchpoints, conversion.revenue)
-    if (firstTouch) {
-      attributionResults.first_touch = [firstTouch]
-    }
+      // Step 2: Upsert into attribution_conversions
+      await sql`
+        INSERT INTO attribution_conversions (order_id, revenue, converted_at, created_at)
+        VALUES (${orderId}, ${revenue}, ${conversionTime.toISOString()}, NOW())
+        ON CONFLICT (order_id) DO UPDATE
+          SET revenue = EXCLUDED.revenue, converted_at = EXCLUDED.converted_at
+      `
 
-    const lastTouch = calculateLastTouch(touchpoints, conversion.revenue)
-    if (lastTouch) {
-      attributionResults.last_touch = [lastTouch]
-    }
+      const conversionRes = await sql`
+        SELECT id FROM attribution_conversions WHERE order_id = ${orderId} LIMIT 1
+      `
+      const conversionId = (conversionRes.rows[0] as { id: string } | undefined)?.id
+      if (!conversionId) {
+        return { touchpointsProcessed: 0, modelsCalculated: 0 }
+      }
 
-    attributionResults.linear = calculateLinear(touchpoints, conversion.revenue)
-    attributionResults.time_decay = calculateTimeDecay(
-      touchpoints,
-      conversion.revenue,
-      conversion.timestamp
-    )
-    attributionResults.position_based = calculatePositionBased(
-      touchpoints,
-      conversion.revenue
-    )
+      // Step 3: Find touchpoints for visitor in 30-day window before conversion
+      const windowStart = new Date(conversionTime.getTime() - 30 * 86400000)
+      const touchpointsRes = await sql`
+        SELECT id, visitor_id, channel, source, medium, occurred_at
+        FROM attribution_touchpoints
+        WHERE visitor_id = ${visitorId}
+          AND occurred_at >= ${windowStart.toISOString()}
+          AND occurred_at <= ${conversionTime.toISOString()}
+        ORDER BY occurred_at ASC
+        LIMIT 50
+      `
 
-    // Step 4: Store results
-    // In real implementation: await withTenant(tenantId, () => storeAttributionResults(...))
-    console.log(
-      `[Analytics] Calculated attribution for ${touchpoints.length} touchpoints`
-    )
+      const touchpoints: Touchpoint[] = (touchpointsRes.rows as Array<{
+        id: string
+        visitor_id: string
+        channel: string
+        source: string
+        medium: string | null
+        occurred_at: string
+      }>).map(r => ({
+        id: r.id,
+        visitorId: r.visitor_id,
+        source: r.source,
+        medium: r.medium ?? undefined,
+        timestamp: new Date(r.occurred_at),
+      }))
 
-    // Step 5 & 6: Send to GA4 and Meta CAPI
-    // These would trigger separate jobs in production
+      // Step 4: Calculate all attribution models
+      const models: AttributionModel[] = ['first_touch', 'last_touch', 'linear', 'time_decay', 'position_based']
+      let modelsCalculated = 0
+
+      for (const model of models) {
+        let modelResults: AttributionResult[] = []
+
+        if (model === 'first_touch') {
+          const r = calculateFirstTouch(touchpoints, revenue)
+          if (r) modelResults = [r]
+        } else if (model === 'last_touch') {
+          const r = calculateLastTouch(touchpoints, revenue)
+          if (r) modelResults = [r]
+        } else if (model === 'linear') {
+          modelResults = calculateLinear(touchpoints, revenue)
+        } else if (model === 'time_decay') {
+          modelResults = calculateTimeDecay(touchpoints, revenue, conversionTime)
+        } else if (model === 'position_based') {
+          modelResults = calculatePositionBased(touchpoints, revenue)
+        }
+
+        // Step 5: Upsert attribution results
+        for (const r of modelResults) {
+          await sql`
+            INSERT INTO attribution_results
+              (conversion_id, touchpoint_id, model, attribution_window, credit, attributed_revenue, created_at)
+            VALUES
+              (${conversionId}, ${r.touchpointId}, ${r.model}, ${'30d'}, ${r.credit}, ${r.value}, NOW())
+            ON CONFLICT (conversion_id, touchpoint_id, model, attribution_window)
+              DO UPDATE SET credit = EXCLUDED.credit, attributed_revenue = EXCLUDED.attributed_revenue
+          `
+        }
+        modelsCalculated++
+      }
+
+      return { touchpointsProcessed: touchpoints.length, modelsCalculated }
+    })
+
     if (!skipGA4) {
       console.log(`[Analytics] Queuing GA4 purchase event for order ${orderId}`)
     }
@@ -289,8 +342,8 @@ export const processAttributionJob = defineJob<ProcessAttributionPayload>({
       success: true,
       data: {
         orderId,
-        touchpointsProcessed: touchpoints.length,
-        modelsCalculated: Object.keys(attributionResults).length,
+        touchpointsProcessed: result.touchpointsProcessed,
+        modelsCalculated: result.modelsCalculated,
       },
     }
   },
@@ -323,11 +376,65 @@ export const attributionDailyMetricsJob = defineJob<AttributionDailyMetricsPaylo
       `[Analytics] Aggregating daily metrics for ${targetDate} in tenant ${tenantId}`
     )
 
-    // Implementation would:
-    // 1. Query all conversions for the date
-    // 2. Aggregate by source/medium/campaign
-    // 3. Calculate totals per attribution model
-    // 4. Store in daily_attribution_metrics table
+    const result = await withTenant(tenantId, async () => {
+      const dayStart = `${targetDate}T00:00:00.000Z`
+      const dayEnd = `${targetDate}T23:59:59.999Z`
+
+      // Optionally clear existing rows for this date if force recalculating
+      if (forceRecalculate) {
+        await sql`
+          DELETE FROM attribution_channel_summary
+          WHERE date = ${targetDate}
+        `
+      }
+
+      // Aggregate attribution results joined with touchpoints for channel/platform grouping
+      const aggRes = await sql`
+        SELECT
+          ar.model,
+          ar.attribution_window,
+          COALESCE(tp.channel, 'direct') as channel,
+          COALESCE(tp.source, 'direct') as platform,
+          COUNT(DISTINCT ar.conversion_id) as conversions,
+          COUNT(ar.touchpoint_id) as touchpoints,
+          SUM(ar.attributed_revenue) as revenue
+        FROM attribution_results ar
+        JOIN attribution_conversions ac ON ac.id = ar.conversion_id
+        LEFT JOIN attribution_touchpoints tp ON tp.id = ar.touchpoint_id
+        WHERE ac.converted_at >= ${dayStart}
+          AND ac.converted_at <= ${dayEnd}
+        GROUP BY ar.model, ar.attribution_window, COALESCE(tp.channel, 'direct'), COALESCE(tp.source, 'direct')
+      `
+
+      const rows = aggRes.rows as Array<{
+        model: string
+        attribution_window: string
+        channel: string
+        platform: string
+        conversions: string
+        touchpoints: string
+        revenue: string
+      }>
+
+      // Upsert each row into attribution_channel_summary
+      for (const row of rows) {
+        await sql`
+          INSERT INTO attribution_channel_summary
+            (date, model, attribution_window, channel, platform, touchpoints, conversions, revenue, created_at)
+          VALUES
+            (${targetDate}, ${row.model}, ${row.attribution_window}, ${row.channel}, ${row.platform},
+             ${parseInt(row.touchpoints, 10)}, ${parseInt(row.conversions, 10)},
+             ${parseInt(row.revenue || '0', 10)}, NOW())
+          ON CONFLICT (date, model, attribution_window, channel, platform)
+            DO UPDATE SET
+              touchpoints = EXCLUDED.touchpoints,
+              conversions = EXCLUDED.conversions,
+              revenue = EXCLUDED.revenue
+        `
+      }
+
+      return { conversionsProcessed: rows.length }
+    })
 
     return {
       success: true,
@@ -335,7 +442,7 @@ export const attributionDailyMetricsJob = defineJob<AttributionDailyMetricsPaylo
         date: targetDate,
         tenantId,
         forceRecalculate,
-        conversionsProcessed: 0,
+        conversionsProcessed: result.conversionsProcessed,
       },
     }
   },

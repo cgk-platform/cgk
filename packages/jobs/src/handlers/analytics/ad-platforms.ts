@@ -16,6 +16,7 @@
  * @ai-critical Event deduplication uses orderId as dedup key
  */
 
+import { withTenant, sql } from '@cgk-platform/db'
 import { defineJob } from '../../define'
 import type { JobResult } from '../../types'
 import type {
@@ -32,14 +33,15 @@ import type {
 
 /**
  * SHA256 hash for PII (email, phone) - required by Meta and TikTok
+ * Uses Web Crypto API for Edge Runtime compatibility.
  */
 async function hashPII(value: string): Promise<string> {
-  // In Node.js, use crypto module
-  // In browser, use SubtleCrypto API
-  // Placeholder implementation - actual would use:
-  // const crypto = require('crypto')
-  // return crypto.createHash('sha256').update(value.toLowerCase().trim()).digest('hex')
-  return `sha256_${value.toLowerCase().trim()}`
+  const normalized = value.toLowerCase().trim()
+  const encoder = new TextEncoder()
+  const data = encoder.encode(normalized)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
 /**
@@ -93,15 +95,27 @@ export const sendGA4PurchaseJob = defineJob<SendGA4PurchasePayload>({
       `[Analytics] Sending GA4 purchase event for order ${orderId} in tenant ${tenantId}`
     )
 
-    // Get tenant's GA4 credentials
-    // Implementation would:
-    // const config = await withTenant(tenantId, async () => {
-    //   return sql`SELECT ga4_measurement_id, ga4_api_secret FROM tenant_settings`
-    // })
+    // Get tenant's GA4 credentials from tenant_api_credentials table
+    const config = await withTenant(tenantId, async () => {
+      const res = await sql`
+        SELECT credentials
+        FROM tenant_api_credentials
+        WHERE service = 'ga4'
+        LIMIT 1
+      `
+      return res.rows[0] as { credentials: { measurement_id?: string; api_secret?: string } } | undefined
+    })
 
-    // Would come from tenant config - used in actual API call implementation
-    void 'G-XXXXXXXX' // measurementId
-    void 'secret' // apiSecret
+    const measurementId = config?.credentials?.measurement_id
+    const apiSecret = config?.credentials?.api_secret
+
+    if (!measurementId || !apiSecret) {
+      console.log(`[Analytics] GA4 not configured for tenant ${tenantId}, skipping`)
+      return {
+        success: true,
+        data: { tenantId, orderId, platform: 'ga4', skipped: true, reason: 'not_configured' },
+      }
+    }
 
     // Build GA4 Measurement Protocol payload
     const eventPayload = {
@@ -127,17 +141,26 @@ export const sendGA4PurchaseJob = defineJob<SendGA4PurchasePayload>({
     }
 
     // Send to GA4 Measurement Protocol
-    // const response = await fetch(
-    //   `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`,
-    //   {
-    //     method: 'POST',
-    //     body: JSON.stringify(eventPayload),
-    //   }
-    // )
-
-    console.log(
-      `[Analytics] GA4 purchase event sent for order ${orderId}: ${JSON.stringify(eventPayload)}`
+    const response = await fetch(
+      `https://www.google-analytics.com/mp/collect?measurement_id=${measurementId}&api_secret=${apiSecret}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventPayload),
+      }
     )
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: {
+          message: `GA4 API returned ${response.status}`,
+          retryable: response.status >= 500,
+        },
+      }
+    }
+
+    console.log(`[Analytics] GA4 purchase event sent for order ${orderId} (status ${response.status})`)
 
     return {
       success: true,
@@ -194,28 +217,40 @@ export const sendMetaPurchaseJob = defineJob<SendMetaPurchasePayload>({
       `[Analytics] Sending Meta CAPI purchase event for order ${orderId} in tenant ${tenantId}`
     )
 
-    // Get tenant's Meta pixel credentials
-    // Implementation would:
-    // const config = await withTenant(tenantId, async () => {
-    //   return sql`SELECT meta_pixel_id, meta_access_token FROM tenant_settings`
-    // })
+    // Get tenant's Meta pixel credentials from tenant_api_credentials table
+    const config = await withTenant(tenantId, async () => {
+      const res = await sql`
+        SELECT credentials
+        FROM tenant_api_credentials
+        WHERE service = 'meta'
+        LIMIT 1
+      `
+      return res.rows[0] as { credentials: { pixel_id?: string; access_token?: string } } | undefined
+    })
 
-    // Would come from tenant config - used in actual API call implementation
-    void 'XXXXXXXX' // pixelId
-    void 'token' // accessToken
+    const pixelId = config?.credentials?.pixel_id
+    const accessToken = config?.credentials?.access_token
+
+    if (!pixelId || !accessToken) {
+      console.log(`[Analytics] Meta CAPI not configured for tenant ${tenantId}, skipping`)
+      return {
+        success: true,
+        data: { tenantId, orderId, platform: 'meta', skipped: true, reason: 'not_configured' },
+      }
+    }
 
     // Hash PII for Meta CAPI
     const hashedEmail = email ? await hashPII(email) : undefined
     const hashedPhone = phone ? await hashPII(phone) : undefined
 
     // Build Meta CAPI payload
+    const resolvedEventId = eventId || generateEventId(tenantId, orderId, 'meta')
     const eventPayload = {
       data: [
         {
           event_name: 'Purchase',
           event_time: Math.floor(Date.now() / 1000),
-          event_id: eventId || generateEventId(tenantId, orderId, 'meta'),
-          event_source_url: `https://shop.example.com/orders/${orderId}`,
+          event_id: resolvedEventId,
           action_source: 'website',
           user_data: {
             em: hashedEmail ? [hashedEmail] : undefined,
@@ -242,25 +277,35 @@ export const sendMetaPurchaseJob = defineJob<SendMetaPurchasePayload>({
     }
 
     // Send to Meta Conversions API
-    // const response = await fetch(
-    //   `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`,
-    //   {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(eventPayload),
-    //   }
-    // )
-
-    console.log(
-      `[Analytics] Meta CAPI purchase event sent for order ${orderId}: ${JSON.stringify(eventPayload)}`
+    const response = await fetch(
+      `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventPayload),
+      }
     )
+
+    if (!response.ok) {
+      const body = await response.text().catch(() => '')
+      console.error(`[Analytics] Meta CAPI error for order ${orderId}: ${response.status} ${body}`)
+      return {
+        success: false,
+        error: {
+          message: `Meta CAPI returned ${response.status}`,
+          retryable: response.status >= 500,
+        },
+      }
+    }
+
+    console.log(`[Analytics] Meta CAPI purchase event sent for order ${orderId} (status ${response.status})`)
 
     return {
       success: true,
       data: {
         tenantId,
         orderId,
-        eventId: eventId || generateEventId(tenantId, orderId, 'meta'),
+        eventId: resolvedEventId,
         platform: 'meta',
         hashedPII: {
           email: !!hashedEmail,
