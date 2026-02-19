@@ -5,7 +5,11 @@
  */
 
 import { sql } from '@cgk-platform/db'
-import { completeStripeOAuth, createStripeConnectProvider } from '@cgk-platform/payments'
+import {
+  completeStripeOAuth,
+  createStripeConnectProvider,
+  validateStripeOAuthState,
+} from '@cgk-platform/payments'
 import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
@@ -37,14 +41,12 @@ export async function GET(req: Request): Promise<Response> {
   }
 
   try {
-    // Decode state
-    const stateData = JSON.parse(
-      Buffer.from(state, 'base64url').toString('utf-8')
-    ) as {
+    // Validate HMAC-signed state (verifies signature + expiry)
+    const stateData = await validateStripeOAuthState<{
       creatorId: string
       methodId: string
       country: string
-    }
+    }>(state)
 
     // Exchange code for account ID
     const oauthResult = await completeStripeOAuth(STRIPE_SECRET_KEY, code)

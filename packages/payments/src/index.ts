@@ -268,6 +268,8 @@ export {
   syncStripeAccountStatus,
   getOnboardingProgress,
   getAvailableCountries,
+  createStripeOAuthState,
+  validateStripeOAuthState,
   StripeConnectError,
 } from './contractor'
 

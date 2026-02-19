@@ -4,7 +4,11 @@
  * GET /api/contractor/payments/connect/oauth/callback - Handle OAuth callback
  */
 
-import { handleStripeOAuthCallback, StripeConnectError } from '@cgk-platform/payments'
+import {
+  handleStripeOAuthCallback,
+  StripeConnectError,
+  validateStripeOAuthState,
+} from '@cgk-platform/payments'
 
 import { getContractorAuthContext } from '@/lib/auth/middleware'
 
@@ -30,20 +34,31 @@ export async function GET(req: Request) {
     return Response.redirect(redirectUrl.toString())
   }
 
-  // Get auth context - may not be available if session expired (not used but available for future logging)
-  await getContractorAuthContext(req)
-
-  // Decode state to get tenant slug
-  let stateData: { payeeId: string; tenantSlug: string }
-  try {
-    stateData = JSON.parse(Buffer.from(state, 'base64').toString())
-  } catch {
-    const redirectUrl = new URL('/settings/payout-methods', url.origin)
-    redirectUrl.searchParams.set('error', 'Invalid state parameter')
+  // Verify contractor is authenticated — reject if session is invalid
+  const authContext = await getContractorAuthContext(req)
+  if (!authContext) {
+    const redirectUrl = new URL('/login', url.origin)
+    redirectUrl.searchParams.set('error', 'Session expired. Please log in and try again.')
     return Response.redirect(redirectUrl.toString())
   }
 
-  // Use tenant from state since session might be different
+  // Validate HMAC-signed state (verifies signature + expiry)
+  let stateData: { payeeId: string; tenantSlug: string; timestamp: number }
+  try {
+    stateData = await validateStripeOAuthState<{ payeeId: string; tenantSlug: string }>(state)
+  } catch {
+    const redirectUrl = new URL('/settings/payout-methods', url.origin)
+    redirectUrl.searchParams.set('error', 'Invalid or expired state parameter')
+    return Response.redirect(redirectUrl.toString())
+  }
+
+  // Verify the payeeId from state matches the authenticated contractor
+  if (stateData.payeeId !== authContext.contractorId) {
+    const redirectUrl = new URL('/settings/payout-methods', url.origin)
+    redirectUrl.searchParams.set('error', 'Session mismatch — OAuth was initiated by a different user')
+    return Response.redirect(redirectUrl.toString())
+  }
+
   const tenantSlug = stateData.tenantSlug
 
   try {

@@ -34,6 +34,89 @@ function getStripe(): Stripe {
 }
 
 /**
+ * Get HMAC secret for Stripe Connect OAuth state signing.
+ */
+function getStripeOAuthSecret(): string {
+  const secret =
+    process.env.STRIPE_OAUTH_SECRET ||
+    process.env.OAUTH_STATE_SECRET ||
+    process.env.SESSION_SECRET
+  if (!secret) {
+    throw new Error(
+      'Stripe OAuth state secret not configured. Set STRIPE_OAUTH_SECRET, OAUTH_STATE_SECRET, or SESSION_SECRET.'
+    )
+  }
+  return secret
+}
+
+/**
+ * Compute HMAC-SHA256 using Web Crypto API (Edge-compatible).
+ */
+async function hmacSha256(secret: string, data: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  )
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(data))
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+/**
+ * Create HMAC-signed state for Stripe OAuth.
+ */
+export async function createStripeOAuthState(data: Record<string, unknown>): Promise<string> {
+  const payload = JSON.stringify({ ...data, timestamp: Date.now() })
+  const encoded = Buffer.from(payload).toString('base64url')
+  const hmac = await hmacSha256(getStripeOAuthSecret(), encoded)
+  return `${encoded}.${hmac}`
+}
+
+/**
+ * Validate and decode HMAC-signed Stripe OAuth state.
+ */
+export async function validateStripeOAuthState<T extends Record<string, unknown>>(
+  state: string,
+  maxAgeMs: number = 60 * 60 * 1000
+): Promise<T & { timestamp: number }> {
+  const dotIndex = state.lastIndexOf('.')
+  if (dotIndex === -1) {
+    throw new StripeConnectError('Invalid state format', 'INVALID_STATE')
+  }
+
+  const encoded = state.substring(0, dotIndex)
+  const providedHmac = state.substring(dotIndex + 1)
+  const expectedHmac = await hmacSha256(getStripeOAuthSecret(), encoded)
+
+  // Constant-time comparison
+  if (providedHmac.length !== expectedHmac.length) {
+    throw new StripeConnectError('Invalid state signature', 'INVALID_STATE')
+  }
+  const a = new TextEncoder().encode(providedHmac)
+  const b = new TextEncoder().encode(expectedHmac)
+  let mismatch = 0
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= (a[i] ?? 0) ^ (b[i] ?? 0)
+  }
+  if (mismatch !== 0) {
+    throw new StripeConnectError('Invalid state signature', 'INVALID_STATE')
+  }
+
+  const payload = JSON.parse(Buffer.from(encoded, 'base64url').toString()) as T & { timestamp: number }
+
+  if (Date.now() - payload.timestamp > maxAgeMs) {
+    throw new StripeConnectError('State token expired', 'STATE_EXPIRED')
+  }
+
+  return payload
+}
+
+/**
  * Get Stripe Connect OAuth URL
  *
  * @param payeeId - Contractor or creator ID
@@ -45,9 +128,7 @@ export async function getStripeOAuthUrl(
   tenantSlug: string,
   redirectUrl: string
 ): Promise<string> {
-  const state = Buffer.from(
-    JSON.stringify({ payeeId, tenantSlug, timestamp: Date.now() })
-  ).toString('base64')
+  const state = await createStripeOAuthState({ payeeId, tenantSlug })
 
   const params = new URLSearchParams({
     response_type: 'code',
@@ -74,13 +155,8 @@ export async function handleStripeOAuthCallback(
   state: string,
   tenantSlug: string
 ): Promise<{ payeeId: string; stripeAccountId: string }> {
-  // Decode state
-  let stateData: { payeeId: string; tenantSlug: string }
-  try {
-    stateData = JSON.parse(Buffer.from(state, 'base64').toString())
-  } catch {
-    throw new StripeConnectError('Invalid state parameter', 'INVALID_STATE')
-  }
+  // Validate HMAC-signed state (verifies signature + 1hr expiry)
+  const stateData = await validateStripeOAuthState<{ payeeId: string; tenantSlug: string }>(state)
 
   if (stateData.tenantSlug !== tenantSlug) {
     throw new StripeConnectError('Tenant mismatch', 'TENANT_MISMATCH')
