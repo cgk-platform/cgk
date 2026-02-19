@@ -251,3 +251,20 @@ export {
   getInventoryTool,
   updateInventoryTool,
 } from './tools/commerce'
+
+// =============================================================================
+// All Tools Registry
+// =============================================================================
+
+export {
+  getAllTools,
+  getToolsByCategory,
+  getToolByName,
+  getToolsForTenant,
+  isToolEnabledForTenant,
+  toolAnnotations,
+  getToolAnnotations,
+  toolCategories,
+  type TenantToolConfig,
+  type ToolAnnotations,
+} from './tools/index'
