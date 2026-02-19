@@ -24,3 +24,16 @@ export {
 } from './customers'
 
 export { handleAppUninstalled } from './app'
+
+export {
+  handleProductCreate,
+  handleProductUpdate,
+  handleProductDelete,
+} from './products'
+
+export {
+  handleCustomerDelete,
+  handleCustomerRedact,
+  handleShopRedact,
+  handleCustomerDataRequest,
+} from './gdpr'
