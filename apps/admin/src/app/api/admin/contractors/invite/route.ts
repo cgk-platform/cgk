@@ -1,6 +1,11 @@
 import { headers } from 'next/headers'
 import { type NextRequest, NextResponse } from 'next/server'
 
+import {
+  getTenantResendClient,
+  getTenantResendSenderConfig,
+} from '@cgk-platform/integrations'
+
 import { createContractorInvitation, createProject } from '@/lib/contractors/db'
 import type { ContractorInvitation } from '@/lib/contractors/types'
 
@@ -44,7 +49,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Create contractor and invitation
-  const { contractorId } = await createContractorInvitation(
+  const { contractorId, inviteToken } = await createContractorInvitation(
     tenantSlug,
     tenantId,
     body.email,
@@ -64,22 +69,60 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Queue invitation email
-  // In production, this would trigger a background job to send the email
-  // await jobs.send('contractor/invitation', {
-  //   tenantId,
-  //   contractorId,
-  //   email: body.email,
-  //   name: body.name,
-  //   message: body.message,
-  //   inviteToken,
-  // })
+  // Send invitation email
+  let emailSent = false
+  const portalUrl =
+    process.env.NEXT_PUBLIC_CONTRACTOR_PORTAL_URL ||
+    process.env.CONTRACTOR_PORTAL_URL ||
+    'https://contractors.cgk.com'
+  const inviteUrl = `${portalUrl}/api/auth/invite?token=${encodeURIComponent(inviteToken)}&tenant=${encodeURIComponent(tenantSlug)}`
+
+  try {
+    const resend = await getTenantResendClient(tenantSlug)
+    if (resend) {
+      const senderConfig = await getTenantResendSenderConfig(tenantSlug)
+      const fromEmail = senderConfig?.from || `noreply@${tenantSlug}.com`
+
+      await resend.emails.send({
+        from: fromEmail,
+        to: body.email,
+        replyTo: senderConfig?.replyTo,
+        subject: `You've been invited to join as a contractor`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>You're invited!</h2>
+            <p>Hi${body.name ? ` ${body.name}` : ''},</p>
+            <p>${body.message || 'You have been invited to join as a contractor.'}</p>
+            <p style="margin: 24px 0;">
+              <a href="${inviteUrl}"
+                 style="background-color: #2D2D2D; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: 600;">
+                Accept Invitation
+              </a>
+            </p>
+            <p style="color: #666; font-size: 14px;">
+              This invitation expires in 72 hours.
+            </p>
+          </div>
+        `,
+      })
+      emailSent = true
+    } else {
+      // Dev mode: log the invite link
+      console.log(`[DEV] Contractor invite for ${body.email}: ${inviteUrl}`)
+      emailSent = true
+    }
+  } catch (emailError) {
+    console.error('Failed to send contractor invitation email:', emailError)
+  }
 
   return NextResponse.json(
     {
       success: true,
       contractorId,
-      message: `Invitation sent to ${body.email}`,
+      emailSent,
+      message: emailSent
+        ? `Invitation sent to ${body.email}`
+        : `Contractor created but email failed. Invite link: ${inviteUrl}`,
     },
     { status: 201 },
   )
