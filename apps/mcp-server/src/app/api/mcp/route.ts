@@ -38,6 +38,7 @@ import {
   createAuthErrorResponse,
   createCORSHeaders,
   MCPAuthError,
+  type AuthResult,
 } from '@/lib/auth'
 import {
   generateSessionId,
@@ -371,6 +372,7 @@ async function handleMethod(
   handler: MCPHandler,
   request: JSONRPCRequest,
   corsHeaders: Record<string, string>,
+  auth: AuthResult,
   rateLimitResult?: RateLimitResult | null
 ): Promise<Response> {
   const { id, method, params = {} } = request
@@ -404,6 +406,17 @@ async function handleMethod(
       case 'tools/call': {
         const toolParams = params as unknown as CallToolParams
         const toolName = toolParams.name
+
+        // Admin enforcement: check requiresAdmin annotation before executing
+        const annotation = toolAnnotations[toolName]
+        if (annotation?.requiresAdmin && !auth.isAdmin) {
+          return createErrorResponse(
+            id,
+            JSONRPCErrorCodes.AUTHORIZATION_FAILED,
+            `Tool '${toolName}' requires admin access`,
+            headersWithRateLimit
+          )
+        }
 
         if (requiresStreaming(toolName) && handler.toolRequiresStreaming(toolName)) {
           const generator = handler.callToolStreaming(toolParams)
