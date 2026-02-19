@@ -67,7 +67,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
         cm.coordinator_id as "coordinatorId",
         cm.payment_terms as "paymentTerms",
         cm.sample_product_entitlement as "sampleProductEntitlement"
-      FROM creator_memberships cm
+      FROM creator_brand_memberships cm
       JOIN organizations o ON o.id = cm.organization_id
       WHERE cm.creator_id = ${context.creatorId}
         AND o.slug = ${brandSlug}

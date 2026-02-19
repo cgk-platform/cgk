@@ -40,7 +40,7 @@ const DEFAULT_NOTIFICATION_OVERRIDES: BrandNotificationOverrides = {
 async function validateBrandAccess(creatorId: string, brandSlug: string): Promise<string | null> {
   const result = await sql`
     SELECT cm.organization_id
-    FROM creator_memberships cm
+    FROM creator_brand_memberships cm
     JOIN organizations o ON o.id = cm.organization_id
     WHERE cm.creator_id = ${creatorId}
       AND o.slug = ${brandSlug}

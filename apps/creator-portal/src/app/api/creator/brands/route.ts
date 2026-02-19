@@ -50,7 +50,7 @@ export async function GET(req: Request): Promise<Response> {
         cm.last_project_at as "lastProjectAt",
         cm.last_payout_at as "lastPayoutAt",
         cm.joined_at as "joinedAt"
-      FROM creator_memberships cm
+      FROM creator_brand_memberships cm
       JOIN organizations o ON o.id = cm.organization_id
       WHERE cm.creator_id = ${context.creatorId}
         AND cm.status IN ('active', 'paused', 'pending')
