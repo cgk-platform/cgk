@@ -16,6 +16,20 @@ const PUBLIC_PATHS = [
   '/join',
   '/auth/verify',
   '/api/auth',
+  // Webhook endpoints (external services call these without user auth)
+  '/api/webhooks',
+  '/api/v1/webhooks',
+  '/api/shopify/webhooks',
+  '/api/ai-agents/voice/webhooks',
+  // Public-facing API endpoints
+  '/api/public',
+  '/api/sign',
+  '/api/feeds',
+  '/api/surveys/submit',
+  '/api/ab-tests/shipping-config',
+  // Shopify OAuth (Shopify redirects merchants here; app verifies HMAC internally)
+  '/api/admin/shopify-app/auth',
+  '/api/admin/shopify-app/callback',
 ]
 
 const STATIC_PATHS = [
