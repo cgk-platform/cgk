@@ -54,9 +54,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
     try {
       // Dynamic imports to avoid bundling issues
       // @ts-ignore — TS2307: @cgk-platform/video not in jobs deps (Turbo cycle prevention)
-      const { getTranscriptionProvider, startTranscription, getVideoTranscription } = await import(
-        '@cgk-platform/video/transcription'
-      )
+      const { getTranscriptionProvider, startTranscription, getVideoTranscription } = await import('@cgk-platform/video/transcription') // eslint-disable-line
       const { getTenantAssemblyAIClient } = await import('@cgk-platform/integrations')
 
       // Check if AssemblyAI is configured for tenant
@@ -240,9 +238,7 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
 
     try {
       // @ts-ignore — TS2307: @cgk-platform/video not in jobs deps (Turbo cycle prevention)
-      const { getVideosPendingTranscription, saveTranscriptionResult, failTranscription } = await import(
-        '@cgk-platform/video/transcription'
-      )
+      const { getVideosPendingTranscription, saveTranscriptionResult, failTranscription } = await import('@cgk-platform/video/transcription') // eslint-disable-line
       const { getTenantAssemblyAIClient } = await import('@cgk-platform/integrations')
 
       // Check if AssemblyAI is configured for tenant
