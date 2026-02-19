@@ -5,12 +5,9 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { createJobQueue } from '@cgk-platform/jobs'
+import { tasks } from '@trigger.dev/sdk/v3'
 import type { ShopifyRefundPayload } from '../types'
 import { parseCents } from '../utils'
-
-// Create job queue for refund-related background jobs
-const refundJobQueue = createJobQueue({ name: 'refund-webhooks' })
 
 /**
  * Handle refunds/create webhook
@@ -94,31 +91,35 @@ export async function handleRefundCreate(
 
   // Trigger background jobs
   await Promise.all([
-    // Adjust creator commissions
-    refundJobQueue.enqueue('refund/commission-adjustment', {
+    // Adjust creator commissions using order commission task
+    tasks.trigger('commerce-order-commission', {
       tenantId,
       orderId,
-      refundId: shopifyRefundId,
-      refundAmountCents: totalRefundCents,
-      refundLineItems: refund.refund_line_items,
-    }, { tenantId }),
+      discountCode: null,
+      orderTotal: -(totalRefundCents / 100), // Negative for refund
+      currency: 'USD',
+    }),
 
-    // Send pixel events for refund
-    refundJobQueue.enqueue('refund/pixel-events', {
+    // Handle order created for pixel events and additional processing
+    tasks.trigger('commerce-handle-order-created', {
       tenantId,
       orderId,
-      refundId: shopifyRefundId,
-      refundAmountCents: totalRefundCents,
-    }, { tenantId }),
+      shopifyOrderId: orderId,
+      customerId: null,
+      totalAmount: -(totalRefundCents / 100), // Negative for refund
+      currency: 'USD',
+    }),
 
-    // Update analytics
-    refundJobQueue.enqueue('refund/analytics-update', {
+    // Update analytics using order attribution task
+    tasks.trigger('commerce-order-attribution', {
       tenantId,
       orderId,
-      refundId: shopifyRefundId,
-      refundAmountCents: totalRefundCents,
-    }, { tenantId }),
+      customerId: null,
+      sessionId: null,
+    }),
   ])
 
-  console.log(`[Webhook] Refund ${shopifyRefundId} created for order ${orderId}, amount: ${totalRefundCents} cents, tenant ${tenantId}`)
+  console.log(
+    `[Webhook] Refund ${shopifyRefundId} created for order ${orderId}, amount: ${totalRefundCents} cents, tenant ${tenantId}`
+  )
 }

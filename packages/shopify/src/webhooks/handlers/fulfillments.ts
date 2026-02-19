@@ -150,13 +150,12 @@ export async function handleFulfillmentUpdate(
 
   // If tracking info changed, trigger notification
   if (trackingChanged) {
-    await tasks.trigger('commerce-fulfillment-tracking-updated', {
+    await tasks.trigger('commerce-handle-order-fulfilled', {
       tenantId,
       orderId,
       fulfillmentId: shopifyFulfillmentId,
       trackingNumber: fulfillment.tracking_number || fulfillment.tracking_numbers?.[0] || null,
-      trackingUrl: fulfillment.tracking_url || fulfillment.tracking_urls?.[0] || null,
-      trackingCompany: fulfillment.tracking_company || null,
+      carrier: fulfillment.tracking_company || null,
     })
   }
 
