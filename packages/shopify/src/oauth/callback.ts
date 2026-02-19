@@ -174,6 +174,9 @@ export async function handleOAuthCallback(
   // Encrypt the access token
   const accessTokenEncrypted = encryptToken(tokenResponse.access_token)
 
+  // Encrypt the webhook secret (Shopify signs webhook payloads with the app's client secret)
+  const webhookSecretEncrypted = encryptToken(clientSecret)
+
   // Parse scopes from response
   const scopes = tokenResponse.scope.split(',').filter(Boolean)
 
@@ -189,6 +192,7 @@ export async function handleOAuthCallback(
         tenant_id,
         shop,
         access_token_encrypted,
+        webhook_secret_encrypted,
         scopes,
         api_version,
         status,
@@ -199,6 +203,7 @@ export async function handleOAuthCallback(
         ${tenantId},
         ${shop},
         ${accessTokenEncrypted},
+        ${webhookSecretEncrypted},
         ${scopesArrayLiteral}::TEXT[],
         ${apiVersion},
         'active',
@@ -207,6 +212,7 @@ export async function handleOAuthCallback(
       )
       ON CONFLICT (tenant_id, shop) DO UPDATE SET
         access_token_encrypted = EXCLUDED.access_token_encrypted,
+        webhook_secret_encrypted = EXCLUDED.webhook_secret_encrypted,
         scopes = EXCLUDED.scopes,
         api_version = EXCLUDED.api_version,
         status = 'active',

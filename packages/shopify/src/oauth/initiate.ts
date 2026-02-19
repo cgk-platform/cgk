@@ -43,7 +43,8 @@ function buildShopifyAuthUrl(params: {
   url.searchParams.set('scope', scopes)
   url.searchParams.set('redirect_uri', redirectUri)
   url.searchParams.set('state', state)
-  url.searchParams.set('grant_options[]', 'per-user')
+  // Omit grant_options[]=per-user to request offline (app-level) tokens
+  // Per-user (online) tokens expire when the user logs out of Shopify
 
   return url.toString()
 }
