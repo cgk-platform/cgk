@@ -59,6 +59,8 @@ export const navigation: NavSection[] = [
       { label: 'New Post', href: '/admin/blog/new' },
       { label: 'Categories', href: '/admin/blog/categories' },
       { label: 'Authors', href: '/admin/blog/authors' },
+      { label: 'Content Clusters', href: '/admin/content/clusters' },
+      { label: 'Link Health', href: '/admin/content/link-health' },
     ],
   },
   {
