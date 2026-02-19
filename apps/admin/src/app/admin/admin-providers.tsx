@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 
-import { TenantProvider, type TenantInfo } from '@cgk-platform/ui'
+import { PermissionProvider, TenantProvider, type TenantInfo } from '@cgk-platform/ui'
 
 interface AdminProvidersProps {
   initialTenant: TenantInfo | null
@@ -13,7 +13,8 @@ interface AdminProvidersProps {
 /**
  * Client-side providers for the admin shell
  *
- * Includes TenantProvider for context switching functionality.
+ * Includes TenantProvider for context switching and PermissionProvider
+ * for RBAC permission checks throughout the admin.
  */
 export function AdminProviders({
   initialTenant,
@@ -28,7 +29,9 @@ export function AdminProviders({
       switchUrl="/api/auth/context/switch"
       defaultUrl="/api/auth/context/default"
     >
-      {children}
+      <PermissionProvider fetchUrl="/api/auth/permissions">
+        {children}
+      </PermissionProvider>
     </TenantProvider>
   )
 }
