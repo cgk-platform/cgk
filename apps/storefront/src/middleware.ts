@@ -160,16 +160,15 @@ async function lookupTenantFromCustomDomain(hostname: string): Promise<string | 
 export async function middleware(request: NextRequest) {
   const { pathname, hostname } = request.nextUrl
 
-  // Skip middleware for static assets and API routes
+  // Skip middleware entirely for static assets only
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('.') // Static files
+    pathname.includes('.') // Static files (favicon.ico, images, etc.)
   ) {
     return NextResponse.next()
   }
 
-  // Check for existing x-tenant-id header (for testing)
+  // Check for existing x-tenant-slug header (for testing)
   let tenantSlug = request.headers.get('x-tenant-slug')
 
   // Try to extract tenant from subdomain

@@ -94,11 +94,10 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
       settings: org.settings ?? {},
     }
 
-    // Add Shopify config if available
+    // Add Shopify config if available — tenant MUST have its own token
+    // SECURITY: Never fall back to a global env var; that would leak cross-tenant data
     if (org.shopify_store_domain) {
-      const storefrontToken =
-        org.shopify_config?.storefrontAccessToken ??
-        process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN
+      const storefrontToken = org.shopify_config?.storefrontAccessToken
 
       if (storefrontToken) {
         config.shopify = {

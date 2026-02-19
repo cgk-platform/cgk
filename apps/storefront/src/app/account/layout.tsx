@@ -3,9 +3,12 @@
  *
  * Layout for the customer portal / account section.
  * Provides sidebar navigation and consistent styling.
+ * Server-side auth guard redirects unauthenticated visitors.
  */
 
 import type { ReactNode } from 'react'
+import { redirect } from 'next/navigation'
+import { getCustomerSession } from '@/lib/customer-session'
 
 interface AccountLayoutProps {
   children: ReactNode
@@ -83,7 +86,13 @@ function NavIcon({ name, className = '' }: { name: string; className?: string })
   }
 }
 
-export default function AccountLayout({ children }: AccountLayoutProps): React.ReactElement {
+export default async function AccountLayout({ children }: AccountLayoutProps): Promise<React.ReactElement> {
+  // Server-side auth guard: redirect unauthenticated visitors to login
+  const session = await getCustomerSession()
+  if (!session) {
+    redirect('/login')
+  }
+
   return (
     <div className="container mx-auto px-4 py-8" style={{ maxWidth: 'var(--portal-max-width)' }}>
       <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
