@@ -53,6 +53,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
 
     try {
       // Dynamic imports to avoid bundling issues
+      // @ts-ignore — TS2307: @cgk-platform/video not in jobs deps (Turbo cycle prevention)
       const { getTranscriptionProvider, startTranscription, getVideoTranscription } = await import(
         '@cgk-platform/video/transcription'
       )
@@ -127,9 +128,8 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
     }
 
     try {
-      // Cast to any: subpath not pre-built on Vercel; resolved at runtime
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { saveAIContent } = (await import('@cgk-platform/video/transcription')) as any
+      // @ts-ignore — TS2307: @cgk-platform/video not in jobs deps (Turbo cycle prevention)
+      const { saveAIContent } = await import('@cgk-platform/video/transcription')
       const { getTenantAnthropicClient } = await import('@cgk-platform/integrations')
 
       // Check if Anthropic is configured for tenant
@@ -239,6 +239,7 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
     }
 
     try {
+      // @ts-ignore — TS2307: @cgk-platform/video not in jobs deps (Turbo cycle prevention)
       const { getVideosPendingTranscription, saveTranscriptionResult, failTranscription } = await import(
         '@cgk-platform/video/transcription'
       )
