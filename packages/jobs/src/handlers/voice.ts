@@ -29,8 +29,7 @@ export const generateCallSummariesJob = defineJob({
     }
 
     try {
-      // @ts-ignore — TS2307: @cgk-platform/ai-agents not in jobs deps; resolved at runtime
-      const { listVoiceCalls, updateVoiceCall, getFullTranscriptText } = await import('@cgk-platform/ai-agents/voice') // eslint-disable-line
+      const { listVoiceCalls, updateVoiceCall, getFullTranscriptText } = await import('@cgk-platform/ai-agents/voice')
       const { getTenantAnthropicClient } = await import('@cgk-platform/integrations')
 
       // Check if Anthropic is configured
@@ -205,8 +204,7 @@ export const syncRetellAgentsJob = defineJob({
     }
 
     try {
-      // @ts-ignore — TS2307: @cgk-platform/ai-agents not in jobs deps; resolved at runtime
-      const { getVoiceCredentials } = await import('@cgk-platform/ai-agents/voice') // eslint-disable-line
+      const { getVoiceCredentials } = await import('@cgk-platform/ai-agents/voice')
 
       // Get tenant's Retell credentials
       const credentials = await getVoiceCredentials(tenantId)

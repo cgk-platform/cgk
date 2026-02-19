@@ -343,7 +343,7 @@ export const processReviewEmailQueueScheduledTask = schedules.task({
 
     const tenants = await getActiveTenants()
 
-    const results = []
+    const results: Array<{ tenantId: string; success: boolean }> = []
     for (const tenantId of tenants) {
       try {
         const result = await processReviewEmailQueueTask.triggerAndWait({
@@ -379,7 +379,7 @@ export const retryFailedReviewEmailsScheduledTask = schedules.task({
 
     const tenants = await getActiveTenants()
 
-    const results = []
+    const results: Array<{ tenantId: string; success: boolean }> = []
     for (const tenantId of tenants) {
       try {
         const result = await retryFailedReviewEmailsTask.triggerAndWait({
@@ -415,7 +415,7 @@ export const reviewEmailAwaitingDeliveryScheduledTask = schedules.task({
 
     const tenants = await getActiveTenants()
 
-    const results = []
+    const results: Array<{ tenantId: string; success: boolean }> = []
     for (const tenantId of tenants) {
       try {
         const result = await reviewEmailAwaitingDeliveryTask.triggerAndWait({

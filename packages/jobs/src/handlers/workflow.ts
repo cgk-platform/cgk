@@ -14,20 +14,12 @@ import { sql, withTenant } from '@cgk-platform/db'
 import { defineJob } from '../define'
 import type { Job } from '../types'
 
-// Import workflow engine and inbox utilities dynamically to avoid circular deps.
-// admin-core → jobs (dep) and jobs → admin-core (runtime-only) creates a cycle.
-// We break it by keeping admin-core out of jobs' package.json and suppressing
-// the TS module-not-found error here. The import resolves correctly at runtime.
 async function getWorkflowEngine(tenantId: string) {
-  // @ts-ignore — TS2307: admin-core excluded from jobs deps to break Turbo
-  // cycle; import resolves correctly at runtime (see commit c696a1a)
   const { WorkflowEngine } = await import('@cgk-platform/admin-core/workflow')
   return WorkflowEngine.getInstance(tenantId)
 }
 
 async function unsnoozeThreads(tenantId: string) {
-  // @ts-ignore — TS2307: admin-core excluded from jobs deps to break Turbo
-  // cycle; import resolves correctly at runtime (see commit c696a1a)
   const { unsnoozeThreads } = await import('@cgk-platform/admin-core/inbox')
   return unsnoozeThreads(tenantId)
 }

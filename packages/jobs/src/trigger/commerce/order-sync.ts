@@ -359,7 +359,7 @@ export const orderReconciliationScheduledTask = schedules.task({
     // Get all active tenants and process each
     const tenants = await getActiveTenants()
 
-    const results = []
+    const results: Array<{ tenantId: string; success: boolean; data?: unknown; error?: string }> = []
     for (const tenantId of tenants) {
       try {
         const result = await orderReconciliationTask.triggerAndWait({
