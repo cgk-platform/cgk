@@ -31,7 +31,7 @@ import type {
  * Base URL for subscription API endpoints.
  * Tenant context is resolved server-side via cookies/headers.
  */
-const API_BASE_URL = '/api/subscriptions'
+const API_BASE_URL = '/api/account/subscriptions'
 
 async function fetchWithTenant<T>(
   path: string,
