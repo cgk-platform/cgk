@@ -306,21 +306,33 @@ function extractAuthCookie(cookieHeader: string): string | null {
 /**
  * Validate tenant access for a user
  *
- * Ensures the authenticated user has access to the specified tenant.
- * This is called after authentication to verify cross-tenant access.
+ * Ensures the authenticated user has access to the specified tenant
+ * by checking the user_organizations table for an active membership.
+ * API key users (prefixed "api_key:") are pre-validated during key auth.
  */
 export async function validateTenantAccess(
-  _userId: string,
-  _tenantId: string
+  userId: string,
+  tenantId: string
 ): Promise<boolean> {
-  // In a full implementation, this would:
-  // 1. Check user_organizations table for membership
-  // 2. Verify the user's role allows MCP access
-  // 3. Check any IP restrictions or time-based access rules
-  //
-  // For now, we trust the JWT claims which include org membership
-  // Parameters intentionally unused - will be implemented in future phase
-  return true
+  // API key users are already verified against their organization during key auth
+  if (userId.startsWith('api_key:')) {
+    return true
+  }
+
+  // Query user_organizations for active membership
+  // tenantId here is the org slug (from JWT orgId claim or domain resolution)
+  const result = await sql`
+    SELECT EXISTS(
+      SELECT 1
+      FROM public.user_organizations uo
+      JOIN public.organizations o ON o.id = uo.organization_id
+      WHERE uo.user_id = ${userId}::uuid
+        AND o.slug = ${tenantId}
+        AND o.status = 'active'
+    ) AS has_access
+  `
+
+  return result.rows[0]?.has_access === true
 }
 
 /**
