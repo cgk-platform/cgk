@@ -202,12 +202,40 @@ export async function updateMemberRole(
 
   const oldRole = currentRow.role as string
 
-  // Update role
+  // Update legacy role column
   await sql`
     UPDATE user_organizations
     SET role = ${newRole}::user_role, updated_at = NOW()
     WHERE organization_id = ${tenantId} AND user_id = ${userId}
   `
+
+  // Also update RBAC role_id by matching the role name in the roles table.
+  // Predefined roles use names like 'Tenant Admin', 'Manager', 'Viewer', etc.
+  // We do a case-insensitive match on common mappings.
+  const roleNameMap: Record<string, string[]> = {
+    owner: ['owner', 'tenant admin', 'admin'],
+    admin: ['admin', 'manager'],
+    member: ['member', 'viewer'],
+  }
+  const candidateNames = roleNameMap[newRole] ?? [newRole]
+  for (const candidateName of candidateNames) {
+    const roleResult = await sql`
+      SELECT id FROM roles
+      WHERE (tenant_id IS NULL OR tenant_id = ${tenantId})
+        AND LOWER(name) = ${candidateName}
+      ORDER BY is_predefined DESC
+      LIMIT 1
+    `
+    const roleRow = roleResult.rows[0]
+    if (roleRow) {
+      await sql`
+        UPDATE user_organizations
+        SET role_id = ${roleRow.id as string}, updated_at = NOW()
+        WHERE organization_id = ${tenantId} AND user_id = ${userId}
+      `
+      break
+    }
+  }
 
   // Log the action
   await logTeamAction(tenantId, actorId, 'role.changed', {
