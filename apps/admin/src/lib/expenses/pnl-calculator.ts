@@ -54,7 +54,7 @@ export async function calculatePLStatement(
     const grossProfitCents = netRevenueCents - productCostCents
     const grossMarginPercent = netRevenueCents > 0 ? (grossProfitCents / netRevenueCents) * 100 : 0
 
-    // Get variable costs config
+    // Get variable costs config (tenant_id filter for defense-in-depth)
     const variableConfigResult = await sql`
       SELECT
         payment_percentage_rate,
@@ -62,6 +62,7 @@ export async function calculatePLStatement(
         pick_pack_fee_cents,
         packaging_cost_cents
       FROM variable_cost_config
+      WHERE tenant_id = ${tenantSlug}
       LIMIT 1
     `
 
