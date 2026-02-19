@@ -61,11 +61,12 @@ export async function POST(request: Request): Promise<Response> {
     )
   }
 
-  // Get creatorId from authenticated session header
-  const creatorId = request.headers.get('x-creator-id') || wizardData.creatorId
+  // Get creatorId ONLY from authenticated session header (set by middleware)
+  // NEVER trust creatorId from the request body — that enables account takeover
+  const creatorId = request.headers.get('x-creator-id')
   if (!creatorId) {
     return Response.json(
-      { error: 'Authentication required - missing creator ID' },
+      { error: 'Authentication required - missing creator session' },
       { status: 401 }
     )
   }

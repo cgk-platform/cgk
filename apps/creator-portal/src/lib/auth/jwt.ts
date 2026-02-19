@@ -9,9 +9,15 @@ import * as jose from 'jose'
 
 import type { BrandMembership, CreatorJWTPayload, MembershipStatus } from '../types'
 
-// Use separate secret for creator tokens
+// Use separate secret for creator tokens — NO dev fallback (security requirement)
+const _creatorJwtSecretStr = process.env.CREATOR_JWT_SECRET || process.env.JWT_SECRET
+if (!_creatorJwtSecretStr && process.env.NODE_ENV === 'production') {
+  throw new Error(
+    'CREATOR_JWT_SECRET (or JWT_SECRET) must be set. Creator portal cannot start without a signing secret.'
+  )
+}
 const CREATOR_JWT_SECRET = new TextEncoder().encode(
-  process.env.CREATOR_JWT_SECRET || process.env.JWT_SECRET || 'creator-development-secret'
+  _creatorJwtSecretStr || 'creator-development-secret-DO-NOT-USE-IN-PRODUCTION'
 )
 
 export const CREATOR_JWT_EXPIRATION = '7d'
