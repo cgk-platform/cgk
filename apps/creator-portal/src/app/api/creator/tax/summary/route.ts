@@ -80,7 +80,7 @@ export async function GET(req: Request): Promise<Response> {
 
       const yearResult = await sql`
         SELECT COALESCE(SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as total
-        FROM balance_transactions
+        FROM public.creator_balance_transactions
         WHERE creator_id = ${context.creatorId}
           AND created_at >= ${yStart.toISOString()}
           AND created_at <= ${yEnd.toISOString()}
@@ -130,7 +130,7 @@ export async function GET(req: Request): Promise<Response> {
     for (const quarter of quarters) {
       const qResult = await sql`
         SELECT COALESCE(SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as total
-        FROM balance_transactions
+        FROM public.creator_balance_transactions
         WHERE creator_id = ${context.creatorId}
           AND created_at >= ${quarter.start.toISOString()}
           AND created_at <= ${quarter.end.toISOString()}

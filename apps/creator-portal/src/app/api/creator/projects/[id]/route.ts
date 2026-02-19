@@ -30,15 +30,19 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
   try {
     const { id: projectId } = await params
 
-    // Get active brand membership
-    const activeMembership = context.memberships.find((m) => m.status === 'active')
-    if (!activeMembership) {
+    // Search all active brand memberships to find the project's actual brand.
+    // A creator may belong to multiple brands; the project lives in exactly one
+    // tenant schema, so we iterate until we find it.
+    const activeMemberships = context.memberships.filter((m) => m.status === 'active')
+    if (activeMemberships.length === 0) {
       return Response.json({ error: 'No active brand membership' }, { status: 403 })
     }
 
-    const tenantSlug = activeMembership.brandSlug
-
-    const project = await getProject(tenantSlug, projectId, context.creatorId)
+    let project = null
+    for (const membership of activeMemberships) {
+      project = await getProject(membership.brandSlug, projectId, context.creatorId)
+      if (project) break
+    }
 
     if (!project) {
       return Response.json({ error: 'Project not found' }, { status: 404 })
@@ -71,13 +75,25 @@ export async function PATCH(req: Request, { params }: RouteParams): Promise<Resp
     const { id: projectId } = await params
     const body = (await req.json()) as UpdateProjectInput
 
-    // Get active brand membership
-    const activeMembership = context.memberships.find((m) => m.status === 'active')
-    if (!activeMembership) {
+    // Search all active brand memberships to find the project's brand.
+    const activeMemberships = context.memberships.filter((m) => m.status === 'active')
+    if (activeMemberships.length === 0) {
       return Response.json({ error: 'No active brand membership' }, { status: 403 })
     }
 
-    const tenantSlug = activeMembership.brandSlug
+    // Find which brand this project belongs to
+    let tenantSlug: string | null = null
+    for (const membership of activeMemberships) {
+      const existing = await getProject(membership.brandSlug, projectId, context.creatorId)
+      if (existing) {
+        tenantSlug = membership.brandSlug
+        break
+      }
+    }
+
+    if (!tenantSlug) {
+      return Response.json({ error: 'Project not found' }, { status: 404 })
+    }
 
     // Parse due date if provided
     const input: UpdateProjectInput = { ...body }
