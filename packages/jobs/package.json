@@ -28,8 +28,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts src/providers/index.ts src/events.ts src/middleware.ts --format esm --dts --external @cgk-platform/admin-core",
-    "dev": "tsup src/index.ts src/providers/index.ts src/events.ts src/middleware.ts --format esm --dts --external @cgk-platform/admin-core --watch",
+    "build": "tsup src/index.ts src/providers/index.ts src/events.ts src/middleware.ts --format esm --dts --external @cgk-platform/admin-core --external @cgk-platform/ai-agents --external @cgk-platform/video --external @cgk-platform/integrations",
+    "dev": "tsup src/index.ts src/providers/index.ts src/events.ts src/middleware.ts --format esm --dts --watch --external @cgk-platform/admin-core --external @cgk-platform/ai-agents --external @cgk-platform/video --external @cgk-platform/integrations",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "clean": "rm -rf dist"

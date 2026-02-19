@@ -127,7 +127,9 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
     }
 
     try {
-      const { saveAIContent } = await import('@cgk-platform/video/transcription')
+      // Cast to any: subpath not pre-built on Vercel; resolved at runtime
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { saveAIContent } = (await import('@cgk-platform/video/transcription')) as any
       const { getTenantAnthropicClient } = await import('@cgk-platform/integrations')
 
       // Check if Anthropic is configured for tenant
