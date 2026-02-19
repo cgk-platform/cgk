@@ -29,10 +29,8 @@ export const generateCallSummariesJob = defineJob({
     }
 
     try {
-      // Cast to any: subpath dist not pre-built on Vercel, resolved at runtime
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { listVoiceCalls, updateVoiceCall, getFullTranscriptText } =
-        (await import('@cgk-platform/ai-agents/voice')) as any
+      // @ts-ignore — TS2307: @cgk-platform/ai-agents not in jobs deps; resolved at runtime
+      const { listVoiceCalls, updateVoiceCall, getFullTranscriptText } = await import('@cgk-platform/ai-agents/voice') // eslint-disable-line
       const { getTenantAnthropicClient } = await import('@cgk-platform/integrations')
 
       // Check if Anthropic is configured
@@ -207,10 +205,8 @@ export const syncRetellAgentsJob = defineJob({
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // Cast to any: subpath dist not pre-built on Vercel, resolved at runtime
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { getVoiceCredentials } = (await import('@cgk-platform/ai-agents/voice')) as any
+      // @ts-ignore — TS2307: @cgk-platform/ai-agents not in jobs deps; resolved at runtime
+      const { getVoiceCredentials } = await import('@cgk-platform/ai-agents/voice') // eslint-disable-line
 
       // Get tenant's Retell credentials
       const credentials = await getVoiceCredentials(tenantId)
