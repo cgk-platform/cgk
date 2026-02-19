@@ -337,6 +337,7 @@ export const navigation: NavSection[] = [
       { label: 'Slack Users', href: '/admin/bri/slack-users' },
       { label: 'Notifications', href: '/admin/bri/notifications' },
       { label: 'Follow-ups', href: '/admin/bri/followups' },
+      { label: 'AI Agents', href: '/admin/ai/agents' },
     ],
   },
   {
