@@ -21,7 +21,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -63,12 +62,6 @@ const MOCK_AGENTS: AiAgent[] = [
     lastActiveAt: '2026-02-10T12:00:00Z',
     createdAt: '2026-01-10',
   },
-]
-
-const MODEL_OPTIONS: SelectOption[] = [
-  { value: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6' },
-  { value: 'claude-opus-4-6', label: 'Claude Opus 4.6' },
-  { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
 ]
 
 interface AgentForm {
@@ -174,10 +167,13 @@ export default function AiAgentsPage() {
                 <Label htmlFor="agent-model">Model</Label>
                 <Select
                   id="agent-model"
-                  options={MODEL_OPTIONS}
                   value={form.model}
                   onChange={(e) => setForm((f) => ({ ...f, model: e.target.value }))}
-                />
+                >
+                  <SelectOption value="claude-sonnet-4-6">Claude Sonnet 4.6</SelectOption>
+                  <SelectOption value="claude-opus-4-6">Claude Opus 4.6</SelectOption>
+                  <SelectOption value="claude-haiku-4-5-20251001">Claude Haiku 4.5</SelectOption>
+                </Select>
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="agent-prompt">System Prompt</Label>
@@ -217,6 +213,14 @@ export default function AiAgentsPage() {
             <div className="flex items-center justify-center py-16">
               <Spinner className="h-6 w-6 text-muted-foreground" />
             </div>
+          ) : agents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Bot className="mb-4 h-8 w-8 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">No agents configured</h3>
+              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                Create your first AI agent to get started.
+              </p>
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -230,67 +234,58 @@ export default function AiAgentsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {agents.length === 0 ? (
-                  <TableEmpty
-                    icon={Bot}
-                    title="No agents configured"
-                    description="Create your first AI agent to get started."
-                    colSpan={6}
-                  />
-                ) : (
-                  agents.map((agent) => (
-                    <TableRow key={agent.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Bot className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{agent.name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {agent.model}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {agent.tools.map((tool) => (
-                            <Badge key={tool} variant="outline" className="text-xs">
-                              {tool}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={agent.status} showDot />
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">
-                        {agent.lastActiveAt
-                          ? new Date(agent.lastActiveAt).toLocaleDateString()
-                          : 'Never'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => void toggleStatus(agent.id)}
-                            className="h-7 text-xs"
-                          >
-                            {agent.status === 'active' ? 'Pause' : 'Activate'}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(agent.id)}
-                            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
+                {agents.map((agent) => (
+                  <TableRow key={agent.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Bot className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{agent.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {agent.model}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {agent.tools.map((tool) => (
+                          <Badge key={tool} variant="outline" className="text-xs">
+                            {tool}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={agent.status} showDot />
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {agent.lastActiveAt
+                        ? new Date(agent.lastActiveAt).toLocaleDateString()
+                        : 'Never'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => void toggleStatus(agent.id)}
+                          className="h-7 text-xs"
+                        >
+                          {agent.status === 'active' ? 'Pause' : 'Activate'}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(agent.id)}
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
               </TableBody>
             </Table>
           )}

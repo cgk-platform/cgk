@@ -10,7 +10,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -166,12 +165,17 @@ export default function LinkHealthPage() {
               </TableHeader>
               <TableBody>
                 {entries.length === 0 ? (
-                  <TableEmpty
-                    icon={Link}
-                    title="No posts scanned yet"
-                    description="Click &quot;Scan All Posts&quot; to check link health across your blog."
-                    colSpan={5}
-                  />
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <Link className="mb-4 h-8 w-8 text-muted-foreground" />
+                        <h3 className="text-lg font-semibold">No posts scanned yet</h3>
+                        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+                          Click &quot;Scan All Posts&quot; to check link health across your blog.
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ) : (
                   entries.map((entry) => (
                     <TableRow key={entry.id}>
