@@ -108,6 +108,7 @@ export const navigation: NavSection[] = [
       { label: 'Promo Codes', href: '/admin/commerce/promo-codes' },
       { label: 'Abandoned Checkouts', href: '/admin/commerce/abandoned-checkouts' },
       { label: 'Samples Orders', href: '/admin/commerce/samples-orders' },
+      { label: 'Product Costs', href: '/admin/products/costs' },
     ],
   },
   {
@@ -419,6 +420,8 @@ export const navigation: NavSection[] = [
       { label: 'Payments', href: '/admin/settings/payments' },
       { label: 'Payouts', href: '/admin/settings/payouts' },
       { label: 'Costs', href: '/admin/settings/costs' },
+      { label: 'COGS', href: '/admin/settings/cogs' },
+      { label: 'P&L Formula', href: '/admin/settings/pnl' },
       { label: 'Portal', href: '/admin/settings/portal' },
       { label: 'AI', href: '/admin/settings/ai' },
       { label: 'Email', href: '/admin/settings/email' },
