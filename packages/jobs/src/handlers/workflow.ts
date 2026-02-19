@@ -19,16 +19,16 @@ import type { Job } from '../types'
 // We break it by keeping admin-core out of jobs' package.json and suppressing
 // the TS module-not-found error here. The import resolves correctly at runtime.
 async function getWorkflowEngine(tenantId: string) {
-  // Cast to any: admin-core dist not pre-built on Vercel; resolved at runtime
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { WorkflowEngine } = (await import('@cgk-platform/admin-core/workflow')) as any
+  // @ts-ignore — TS2307: admin-core excluded from jobs deps to break Turbo
+  // cycle; import resolves correctly at runtime (see commit c696a1a)
+  const { WorkflowEngine } = await import('@cgk-platform/admin-core/workflow')
   return WorkflowEngine.getInstance(tenantId)
 }
 
 async function unsnoozeThreads(tenantId: string) {
-  // Cast to any: admin-core dist not pre-built on Vercel; resolved at runtime
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { unsnoozeThreads } = (await import('@cgk-platform/admin-core/inbox')) as any
+  // @ts-ignore — TS2307: admin-core excluded from jobs deps to break Turbo
+  // cycle; import resolves correctly at runtime (see commit c696a1a)
+  const { unsnoozeThreads } = await import('@cgk-platform/admin-core/inbox')
   return unsnoozeThreads(tenantId)
 }
 
