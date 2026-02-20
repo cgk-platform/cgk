@@ -28,7 +28,7 @@ async function main() {
 
     // 2. Run Tenant Migrations for each organization
     console.log('\n--- Tenant Schemas ---');
-    const orgs = await sql`SELECT slug FROM organizations`;
+    const orgs = await sql`SELECT slug FROM public.organizations`;
     
     for (const org of orgs.rows) {
       const slug = org.slug as string;

@@ -70,7 +70,7 @@ export async function needsSeeding(): Promise<boolean> {
 
   // Check count of existing platform flags
   const result = await sql`
-    SELECT COUNT(*) as count FROM feature_flags
+    SELECT COUNT(*) as count FROM public.feature_flags
     WHERE key LIKE 'platform.%'
        OR key LIKE 'checkout.%'
        OR key LIKE 'payments.%'

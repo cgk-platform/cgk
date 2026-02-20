@@ -702,7 +702,7 @@ export const getFeatureFlagsTool: ToolDefinition = defineTool({
       if (flagName) {
         const result = await sql`
           SELECT name, enabled, rollout_percentage, allowed_tenants, description
-          FROM feature_flags
+          FROM public.feature_flags
           WHERE name = ${flagName}
             AND (allowed_tenants IS NULL OR ${tenantId} = ANY(allowed_tenants))
         `
@@ -723,7 +723,7 @@ export const getFeatureFlagsTool: ToolDefinition = defineTool({
       } else {
         const result = await sql`
           SELECT name, enabled, rollout_percentage, allowed_tenants, description
-          FROM feature_flags
+          FROM public.feature_flags
           WHERE allowed_tenants IS NULL OR ${tenantId} = ANY(allowed_tenants)
           ORDER BY name
         `

@@ -41,7 +41,7 @@ async function validateBrandAccess(creatorId: string, brandSlug: string): Promis
   const result = await sql`
     SELECT cm.organization_id
     FROM creator_brand_memberships cm
-    JOIN organizations o ON o.id = cm.organization_id
+    JOIN public.organizations o ON o.id = cm.organization_id
     WHERE cm.creator_id = ${creatorId}
       AND o.slug = ${brandSlug}
       AND cm.status IN ('active', 'paused', 'pending')

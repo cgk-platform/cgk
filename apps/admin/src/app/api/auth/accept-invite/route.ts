@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
     // Get tenant info for JWT
     const tenantResult = await sql`
-      SELECT slug FROM organizations WHERE id = ${tenantId}
+      SELECT slug FROM public.organizations WHERE id = ${tenantId}
     `
     const tenantSlug = tenantResult.rows[0]?.slug as string
 
@@ -116,9 +116,9 @@ async function notifyInviterOfAcceptance(
       u.email as inviter_email,
       u.name as inviter_name,
       o.name as tenant_name
-    FROM team_invitations ti
-    JOIN users u ON u.id = ti.invited_by
-    JOIN organizations o ON o.id = ti.tenant_id
+    FROM public.team_invitations ti
+    JOIN public.users u ON u.id = ti.invited_by
+    JOIN public.organizations o ON o.id = ti.tenant_id
     WHERE ti.tenant_id = ${tenantId}
       AND ti.email = ${acceptedEmail.toLowerCase()}
       AND ti.status = 'accepted'

@@ -259,7 +259,7 @@ export async function getOrgChartWithDetails(): Promise<
       END as avatar_url
     FROM org_chart oc
     LEFT JOIN ai_agents a ON oc.employee_type = 'ai' AND oc.employee_id = a.id::text
-    LEFT JOIN team_members tm ON oc.employee_type = 'human' AND oc.employee_id = tm.user_id
+    LEFT JOIN public.team_members tm ON oc.employee_type = 'human' AND oc.employee_id = tm.user_id
     ORDER BY oc.level ASC, oc.display_order ASC
   `
 

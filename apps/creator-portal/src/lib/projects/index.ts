@@ -121,7 +121,7 @@ export async function getProjects(
             o.slug as brand_slug,
             (SELECT COUNT(*) FROM project_files pf WHERE pf.project_id = cp.id) as file_count
           FROM creator_projects cp
-          LEFT JOIN organizations o ON o.id = cp.brand_id
+          LEFT JOIN public.organizations o ON o.id = cp.brand_id
           WHERE cp.creator_id = ${creatorId}
             AND cp.status = ${status}
             AND cp.brand_id = ${brandId}
@@ -137,7 +137,7 @@ export async function getProjects(
             o.slug as brand_slug,
             (SELECT COUNT(*) FROM project_files pf WHERE pf.project_id = cp.id) as file_count
           FROM creator_projects cp
-          LEFT JOIN organizations o ON o.id = cp.brand_id
+          LEFT JOIN public.organizations o ON o.id = cp.brand_id
           WHERE cp.creator_id = ${creatorId}
             AND cp.status = ${status}
           ORDER BY cp.created_at DESC
@@ -154,7 +154,7 @@ export async function getProjects(
           o.slug as brand_slug,
           (SELECT COUNT(*) FROM project_files pf WHERE pf.project_id = cp.id) as file_count
         FROM creator_projects cp
-        LEFT JOIN organizations o ON o.id = cp.brand_id
+        LEFT JOIN public.organizations o ON o.id = cp.brand_id
         WHERE cp.creator_id = ${creatorId}
           AND cp.brand_id = ${brandId}
         ORDER BY cp.created_at DESC
@@ -170,7 +170,7 @@ export async function getProjects(
           o.slug as brand_slug,
           (SELECT COUNT(*) FROM project_files pf WHERE pf.project_id = cp.id) as file_count
         FROM creator_projects cp
-        LEFT JOIN organizations o ON o.id = cp.brand_id
+        LEFT JOIN public.organizations o ON o.id = cp.brand_id
         WHERE cp.creator_id = ${creatorId}
         ORDER BY cp.created_at DESC
         LIMIT ${limit}
@@ -223,7 +223,7 @@ export async function getProject(
         o.name as brand_name,
         o.slug as brand_slug
       FROM creator_projects cp
-      LEFT JOIN organizations o ON o.id = cp.brand_id
+      LEFT JOIN public.organizations o ON o.id = cp.brand_id
       WHERE cp.id = ${projectId} AND cp.creator_id = ${creatorId}
     `
 

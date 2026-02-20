@@ -220,7 +220,7 @@ export async function getTenantBySlug(
   slug: string
 ): Promise<{ id: string; name: string; slug: string } | null> {
   const result = await sql`
-    SELECT id, name, slug FROM organizations
+    SELECT id, name, slug FROM public.organizations
     WHERE slug = ${slug}
   `
 

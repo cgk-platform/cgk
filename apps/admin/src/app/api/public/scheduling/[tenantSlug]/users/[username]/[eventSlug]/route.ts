@@ -16,7 +16,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
 
   // Get tenant by slug
   const tenantResult = await sql`
-    SELECT id, name FROM organizations WHERE slug = ${tenantSlug}
+    SELECT id, name FROM public.organizations WHERE slug = ${tenantSlug}
   `
   const tenant = tenantResult.rows[0]
 

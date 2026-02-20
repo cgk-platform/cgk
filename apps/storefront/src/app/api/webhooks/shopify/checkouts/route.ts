@@ -106,7 +106,7 @@ function verifyWebhookSignature(
 async function getTenantFromShopDomain(shopDomain: string): Promise<{ slug: string } | null> {
   // Query public schema for tenant by shop domain
   const result = await sql`
-    SELECT slug FROM organizations
+    SELECT slug FROM public.organizations
     WHERE shopify_store_domain = ${shopDomain}
     LIMIT 1
   `

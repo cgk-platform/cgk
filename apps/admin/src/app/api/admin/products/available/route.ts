@@ -65,7 +65,7 @@ async function getTenantShopifyConfig(tenantSlug: string): Promise<{
 } | null> {
   const result = await sql`
     SELECT shopify_store_domain, settings
-    FROM organizations
+    FROM public.organizations
     WHERE slug = ${tenantSlug}
   `
 

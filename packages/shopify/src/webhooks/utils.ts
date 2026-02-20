@@ -50,7 +50,7 @@ export async function getTenantForShop(shop: string): Promise<string | null> {
   // Fallback: query organizations table (legacy/manual shop setup)
   const orgResult = await sql`
     SELECT id as tenant_id
-    FROM organizations
+    FROM public.organizations
     WHERE shopify_store_domain = ${shop}
     AND status = 'active'
     LIMIT 1

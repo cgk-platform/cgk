@@ -26,7 +26,7 @@ async function TeamDataLoader() {
   const { sql } = await import('@cgk-platform/db')
   const rateLimitResult = await sql`
     SELECT COUNT(*) as count
-    FROM team_invitations
+    FROM public.team_invitations
     WHERE tenant_id = ${tenantId}
       AND created_at >= CURRENT_DATE
   `

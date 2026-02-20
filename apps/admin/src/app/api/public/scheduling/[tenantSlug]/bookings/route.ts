@@ -39,7 +39,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
   // Get tenant by slug
   const tenantResult = await sql`
-    SELECT id FROM organizations WHERE slug = ${tenantSlug}
+    SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
   `
   const tenant = tenantResult.rows[0]
 

@@ -50,7 +50,7 @@ export async function createCreatorMagicLink(email: string): Promise<string> {
   // Store in a creator-specific magic links table
   // We'll use the existing magic_links table but add purpose filtering
   await sql`
-    INSERT INTO magic_links (email, token_hash, purpose, expires_at)
+    INSERT INTO public.magic_links (email, token_hash, purpose, expires_at)
     VALUES (${normalizedEmail}, ${tokenHash}, 'creator_login', ${expiresAt.toISOString()})
   `
 
@@ -74,7 +74,7 @@ export async function verifyCreatorMagicLink(
 
   // Find and validate the magic link
   const linkResult = await sql`
-    SELECT * FROM magic_links
+    SELECT * FROM public.magic_links
     WHERE email = ${normalizedEmail}
       AND token_hash = ${tokenHash}
       AND purpose = 'creator_login'
@@ -89,7 +89,7 @@ export async function verifyCreatorMagicLink(
 
   // Mark as used
   await sql`
-    UPDATE magic_links
+    UPDATE public.magic_links
     SET used_at = NOW()
     WHERE id = ${link.id}
   `

@@ -153,7 +153,7 @@ export async function isFeatureEnabled(flagKey: string): Promise<boolean> {
         COALESCE(
           (
             SELECT value::boolean
-            FROM feature_flag_overrides
+            FROM public.feature_flag_overrides
             WHERE flag_key = ${flagKey}
               AND tenant_id = ${config.slug}
               AND (expires_at IS NULL OR expires_at > NOW())
@@ -161,7 +161,7 @@ export async function isFeatureEnabled(flagKey: string): Promise<boolean> {
           ),
           (
             SELECT (default_value)::boolean
-            FROM feature_flags
+            FROM public.feature_flags
             WHERE key = ${flagKey}
               AND status = 'active'
             LIMIT 1

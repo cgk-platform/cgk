@@ -82,7 +82,7 @@ export async function isSlugAvailable(slug: string): Promise<boolean> {
   }
 
   const result = await sql`
-    SELECT id FROM organizations
+    SELECT id FROM public.organizations
     WHERE slug = ${slug}
   `
 
@@ -111,7 +111,7 @@ export async function createOrganization(data: BasicInfoData): Promise<{
 
   // Create organization record
   const result = await sql`
-    INSERT INTO organizations (
+    INSERT INTO public.organizations (
       name, slug, status, primary_color, logo_url, custom_domain, settings
     )
     VALUES (
@@ -163,7 +163,7 @@ export async function updateOrganization(
 
   // Build update query dynamically based on provided fields
   await sql`
-    UPDATE organizations
+    UPDATE public.organizations
     SET
       name = COALESCE(${updates.name || null}, name),
       primary_color = COALESCE(${updates.primaryColor || null}, primary_color),
@@ -197,8 +197,8 @@ export async function getOrganization(organizationId: string): Promise<Organizat
       o.shopify_store_domain,
       o.custom_domain,
       o.enabled_features,
-      (SELECT COUNT(*) FROM user_organizations WHERE organization_id = o.id) as user_count
-    FROM organizations o
+      (SELECT COUNT(*) FROM public.user_organizations WHERE organization_id = o.id) as user_count
+    FROM public.organizations o
     WHERE o.id = ${organizationId}
   `
 
@@ -226,7 +226,7 @@ export async function getOrganization(organizationId: string): Promise<Organizat
  */
 export async function getOrganizationBySlug(slug: string): Promise<OrganizationSummary | null> {
   const result = await sql`
-    SELECT id FROM organizations WHERE slug = ${slug}
+    SELECT id FROM public.organizations WHERE slug = ${slug}
   `
 
   if (result.rows.length === 0) {
@@ -243,7 +243,7 @@ export async function launchOrganization(organizationId: string): Promise<void> 
   logger.info('Launching organization', { organizationId })
 
   await sql`
-    UPDATE organizations
+    UPDATE public.organizations
     SET
       status = 'active',
       onboarding_status = 'completed',
@@ -262,7 +262,7 @@ export async function addUserToOrganization(
   role: 'owner' | 'admin' | 'member'
 ): Promise<void> {
   await sql`
-    INSERT INTO user_organizations (user_id, organization_id, role)
+    INSERT INTO public.user_organizations (user_id, organization_id, role)
     VALUES (${userId}, ${organizationId}, ${role})
     ON CONFLICT (user_id, organization_id) DO UPDATE
     SET role = ${role}

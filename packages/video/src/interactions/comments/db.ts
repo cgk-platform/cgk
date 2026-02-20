@@ -92,7 +92,7 @@ export async function createComment(
     let resolvedUserName = userName
     if (!resolvedUserName) {
       const userResult = await sql`
-        SELECT name FROM users WHERE id = ${userId}
+        SELECT name FROM public.users WHERE id = ${userId}
       `
       resolvedUserName = (userResult.rows[0]?.name as string) || 'Anonymous'
     }

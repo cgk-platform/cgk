@@ -102,7 +102,7 @@ export async function listAgentRelationshipsWithDetails(
       tm.email as person_email,
       tm.avatar_url as person_avatar_url
     FROM agent_relationships r
-    LEFT JOIN team_members tm ON r.person_type = 'team_member' AND r.person_id = tm.user_id
+    LEFT JOIN public.team_members tm ON r.person_type = 'team_member' AND r.person_id = tm.user_id
     WHERE r.agent_id = ${agentId} AND r.person_type = 'team_member'
   `
 

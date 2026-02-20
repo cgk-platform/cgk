@@ -176,7 +176,7 @@ export async function getTemplateLibrary(
         t.last_edited_by,
         u.name as last_edited_by_name
       FROM email_templates t
-      LEFT JOIN users u ON t.last_edited_by = u.id
+      LEFT JOIN public.users u ON t.last_edited_by = u.id
       ORDER BY t.notification_type, t.template_key
     `
     return result.rows

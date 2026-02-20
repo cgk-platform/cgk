@@ -53,7 +53,7 @@ export async function getPayeeBalance(
 
   // Get tenant ID from organizations table
   const tenantResult = await sql`
-    SELECT id FROM organizations WHERE slug = ${tenantSlug}
+    SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
   `
   const tenantId = tenantResult.rows[0]?.id as string || tenantSlug
 

@@ -128,7 +128,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       let orgSlug = payload.org
       if (payload.orgId && !orgSlug) {
         const orgResult = await sql`
-          SELECT slug FROM organizations WHERE id = ${payload.orgId}
+          SELECT slug FROM public.organizations WHERE id = ${payload.orgId}
         `
         const orgRow = orgResult.rows[0]
         if (orgRow) {
@@ -171,7 +171,7 @@ async function resolveTenantFromHost(
 
   // Check for custom domain match
   const domainResult = await sql`
-    SELECT id, slug FROM organizations
+    SELECT id, slug FROM public.organizations
     WHERE settings->>'customDomain' = ${hostname}
     AND status = 'active'
     LIMIT 1
@@ -188,7 +188,7 @@ async function resolveTenantFromHost(
   if (parts.length >= 3) {
     const subdomain = parts[0]!
     const subResult = await sql`
-      SELECT id, slug FROM organizations
+      SELECT id, slug FROM public.organizations
       WHERE slug = ${subdomain}
       AND status = 'active'
       LIMIT 1

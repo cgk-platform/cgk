@@ -180,7 +180,7 @@ export async function handleStripeOAuthCallback(
 
   // Get tenant ID
   const tenantResult = await sql`
-    SELECT id FROM organizations WHERE slug = ${tenantSlug}
+    SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
   `
   const tenantId = tenantResult.rows[0]?.id as string
 
@@ -449,7 +449,7 @@ export async function updateStripeAccountStep4(
 
   // Get tenant ID
   const tenantResult = await sql`
-    SELECT id FROM organizations WHERE slug = ${tenantSlug}
+    SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
   `
   const tenantId = tenantResult.rows[0]?.id as string
 
@@ -503,7 +503,7 @@ export async function syncStripeAccountStatus(
 
   // Get tenant ID
   const tenantResult = await sql`
-    SELECT id FROM organizations WHERE slug = ${tenantSlug}
+    SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
   `
   const tenantId = tenantResult.rows[0]?.id as string
 

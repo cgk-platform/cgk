@@ -134,7 +134,7 @@ function rowToAudit(row: AuditRow): FlagAuditEntry {
  */
 export async function getAllFlags(): Promise<FeatureFlag[]> {
   const result = await sql`
-    SELECT * FROM feature_flags
+    SELECT * FROM public.feature_flags
     WHERE status != 'archived'
     ORDER BY category, key
   `
@@ -185,13 +185,13 @@ export async function getFlags(
   const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
   // Get total count
-  const countResult = await sql.query(`SELECT COUNT(*) as count FROM feature_flags ${whereClause}`, values)
+  const countResult = await sql.query(`SELECT COUNT(*) as count FROM public.feature_flags ${whereClause}`, values)
   const total = parseInt(countResult.rows[0].count as string, 10)
 
   // Get paginated results
   const queryValues = [...values, limit, offset]
   const result = await sql.query(
-    `SELECT * FROM feature_flags ${whereClause} ORDER BY category, key LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
+    `SELECT * FROM public.feature_flags ${whereClause} ORDER BY category, key LIMIT $${paramIndex++} OFFSET $${paramIndex}`,
     queryValues
   )
 
@@ -209,7 +209,7 @@ export async function getFlags(
  */
 export async function getFlagByKey(key: string): Promise<FeatureFlag | null> {
   const result = await sql`
-    SELECT * FROM feature_flags WHERE key = ${key}
+    SELECT * FROM public.feature_flags WHERE key = ${key}
   `
 
   if (result.rows.length === 0) {
@@ -224,7 +224,7 @@ export async function getFlagByKey(key: string): Promise<FeatureFlag | null> {
  */
 export async function getFlagById(id: string): Promise<FeatureFlag | null> {
   const result = await sql`
-    SELECT * FROM feature_flags WHERE id = ${id}::uuid
+    SELECT * FROM public.feature_flags WHERE id = ${id}::uuid
   `
 
   if (result.rows.length === 0) {
@@ -245,7 +245,7 @@ export async function createFlag(
   const targeting = input.targeting || {}
 
   const result = await sql`
-    INSERT INTO feature_flags (
+    INSERT INTO public.feature_flags (
       key, name, description, type, default_value, targeting, salt, category, metadata, created_by
     )
     VALUES (
@@ -335,7 +335,7 @@ export async function updateFlag(
 
   values.push(key)
   const result = await sql.query(
-    `UPDATE feature_flags SET ${updates.join(', ')} WHERE key = $${paramIndex} RETURNING *`,
+    `UPDATE public.feature_flags SET ${updates.join(', ')} WHERE key = $${paramIndex} RETURNING *`,
     values
   )
 
@@ -368,7 +368,7 @@ export async function deleteFlag(key: string, userId?: string, reason?: string):
     return false
   }
 
-  await sql`DELETE FROM feature_flags WHERE key = ${key}`
+  await sql`DELETE FROM public.feature_flags WHERE key = ${key}`
 
   await createAuditEntry({
     flagId: flag.id,
@@ -397,7 +397,7 @@ export async function killFlag(
   }
 
   const result = await sql`
-    UPDATE feature_flags
+    UPDATE public.feature_flags
     SET status = 'disabled', updated_at = NOW()
     WHERE key = ${key}
     RETURNING *
@@ -411,7 +411,7 @@ export async function killFlag(
 
   // Create audit entry for kill switch
   await sql`
-    INSERT INTO feature_flag_audit (
+    INSERT INTO public.feature_flag_audit (
       flag_id, flag_key, action, previous_value, new_value, user_id, reason, ip_address
     )
     VALUES (
@@ -434,7 +434,7 @@ export async function killFlag(
  */
 export async function getOverridesForFlag(flagKey: string): Promise<FlagOverride[]> {
   const result = await sql`
-    SELECT * FROM feature_flag_overrides
+    SELECT * FROM public.feature_flag_overrides
     WHERE flag_key = ${flagKey}
     AND (expires_at IS NULL OR expires_at > NOW())
     ORDER BY created_at DESC
@@ -452,7 +452,7 @@ export async function getOverridesForContext(
   userId?: string
 ): Promise<FlagOverride[]> {
   const result = await sql`
-    SELECT * FROM feature_flag_overrides
+    SELECT * FROM public.feature_flag_overrides
     WHERE flag_key = ${flagKey}
     AND (expires_at IS NULL OR expires_at > NOW())
     AND (
@@ -483,7 +483,7 @@ export async function createOverride(
   const expiresAtIso = input.expiresAt ? input.expiresAt.toISOString() : null
 
   const result = await sql`
-    INSERT INTO feature_flag_overrides (
+    INSERT INTO public.feature_flag_overrides (
       flag_id, flag_key, tenant_id, user_id, value, expires_at, reason, created_by
     )
     VALUES (
@@ -522,7 +522,7 @@ export async function deleteOverride(
   reason?: string
 ): Promise<boolean> {
   const result = await sql`
-    DELETE FROM feature_flag_overrides
+    DELETE FROM public.feature_flag_overrides
     WHERE id = ${overrideId}::uuid
     RETURNING *
   `
@@ -554,7 +554,7 @@ export async function getAuditLog(
   offset: number = 0
 ): Promise<FlagAuditEntry[]> {
   const result = await sql`
-    SELECT * FROM feature_flag_audit
+    SELECT * FROM public.feature_flag_audit
     WHERE flag_key = ${flagKey}
     ORDER BY created_at DESC
     LIMIT ${limit}
@@ -576,13 +576,13 @@ export async function getAllAuditEntries(
   // Separate query branches for with/without action filter
   if (action) {
     const countResult = await sql`
-      SELECT COUNT(*) as count FROM feature_flag_audit
+      SELECT COUNT(*) as count FROM public.feature_flag_audit
       WHERE action = ${action}
     `
     const total = parseInt(countResult.rows[0]?.count as string ?? '0', 10)
 
     const result = await sql`
-      SELECT * FROM feature_flag_audit
+      SELECT * FROM public.feature_flag_audit
       WHERE action = ${action}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
@@ -596,12 +596,12 @@ export async function getAllAuditEntries(
 
   // No action filter - query all entries
   const countResult = await sql`
-    SELECT COUNT(*) as count FROM feature_flag_audit
+    SELECT COUNT(*) as count FROM public.feature_flag_audit
   `
   const total = parseInt(countResult.rows[0]?.count as string ?? '0', 10)
 
   const result = await sql`
-    SELECT * FROM feature_flag_audit
+    SELECT * FROM public.feature_flag_audit
     ORDER BY created_at DESC
     LIMIT ${limit} OFFSET ${offset}
   `
@@ -627,7 +627,7 @@ async function createAuditEntry(params: {
   reason?: string
 }): Promise<void> {
   await sql`
-    INSERT INTO feature_flag_audit (
+    INSERT INTO public.feature_flag_audit (
       flag_id, flag_key, action, previous_value, new_value, user_id, user_email, ip_address, reason
     )
     VALUES (
@@ -685,7 +685,7 @@ export async function seedFlags(
  */
 export async function getCategories(): Promise<string[]> {
   const result = await sql`
-    SELECT DISTINCT category FROM feature_flags
+    SELECT DISTINCT category FROM public.feature_flags
     WHERE category IS NOT NULL
     ORDER BY category
   `

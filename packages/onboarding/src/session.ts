@@ -345,8 +345,8 @@ export async function getInProgressSessions(options?: {
     sql`
       SELECT os.*, u.email as user_email, o.name as org_name
       FROM onboarding_sessions os
-      LEFT JOIN users u ON u.id = os.created_by
-      LEFT JOIN organizations o ON o.id = os.organization_id
+      LEFT JOIN public.users u ON u.id = os.created_by
+      LEFT JOIN public.organizations o ON o.id = os.organization_id
       WHERE os.status = 'in_progress'
       ORDER BY os.last_activity_at DESC
       LIMIT ${limit} OFFSET ${offset}

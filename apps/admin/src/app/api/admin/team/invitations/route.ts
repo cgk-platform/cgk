@@ -147,7 +147,7 @@ export async function POST(request: Request) {
 
     // Get tenant name for email
     const tenantResult = await sql`
-      SELECT name FROM organizations WHERE id = ${tenantId}
+      SELECT name FROM public.organizations WHERE id = ${tenantId}
     `
     const tenantName = (tenantResult.rows[0]?.name as string) || tenantSlug
 

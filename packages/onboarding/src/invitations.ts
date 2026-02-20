@@ -177,7 +177,7 @@ export async function acceptInvitation(token: string, userId: string): Promise<I
 
   // Add user to organization
   await sql`
-    INSERT INTO user_organizations (user_id, organization_id, role)
+    INSERT INTO public.user_organizations (user_id, organization_id, role)
     VALUES (${userId}, ${invitation.organizationId}, ${invitation.role})
     ON CONFLICT (user_id, organization_id) DO UPDATE
     SET role = ${invitation.role}

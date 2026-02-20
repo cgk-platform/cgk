@@ -51,7 +51,7 @@ export async function getTenantConfig(tenantSlug: string): Promise<TenantConfig 
 
   const result = await sql`
     SELECT id, name, slug, settings, shopify_store_domain, status
-    FROM organizations
+    FROM public.organizations
     WHERE slug = ${tenantSlug}
   `
 

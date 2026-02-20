@@ -40,7 +40,7 @@ export async function GET(req: Request): Promise<Response> {
           c.*,
           o.name as brand_name
         FROM creator_conversations c
-        LEFT JOIN organizations o ON o.id = c.brand_id
+        LEFT JOIN public.organizations o ON o.id = c.brand_id
         WHERE c.creator_id = ${context.creatorId}
           AND c.brand_id = ${brandId}
           AND c.status != 'archived'
@@ -52,7 +52,7 @@ export async function GET(req: Request): Promise<Response> {
           c.*,
           o.name as brand_name
         FROM creator_conversations c
-        LEFT JOIN organizations o ON o.id = c.brand_id
+        LEFT JOIN public.organizations o ON o.id = c.brand_id
         WHERE c.creator_id = ${context.creatorId}
           AND c.status != 'archived'
         ORDER BY c.last_message_at DESC NULLS LAST, c.created_at DESC

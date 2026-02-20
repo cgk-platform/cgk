@@ -139,7 +139,7 @@ export async function loadBrandMemberships(creatorId: string): Promise<BrandMemb
       o.slug as org_slug,
       o.logo_url as org_logo
     FROM creator_brand_memberships cbm
-    INNER JOIN organizations o ON o.id = cbm.organization_id
+    INNER JOIN public.organizations o ON o.id = cbm.organization_id
     WHERE cbm.creator_id = ${creatorId}
     ORDER BY cbm.balance_cents DESC, o.name ASC
   `

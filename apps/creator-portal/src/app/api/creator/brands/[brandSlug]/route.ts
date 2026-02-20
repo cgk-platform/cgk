@@ -68,7 +68,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
         cm.payment_terms as "paymentTerms",
         cm.sample_product_entitlement as "sampleProductEntitlement"
       FROM creator_brand_memberships cm
-      JOIN organizations o ON o.id = cm.organization_id
+      JOIN public.organizations o ON o.id = cm.organization_id
       WHERE cm.creator_id = ${context.creatorId}
         AND o.slug = ${brandSlug}
     `
@@ -89,7 +89,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
     if (membership.coordinatorId) {
       const coordinatorResult = await sql`
         SELECT name, email
-        FROM users
+        FROM public.users
         WHERE id = ${membership.coordinatorId}
       `
       if (coordinatorResult.rows.length > 0) {

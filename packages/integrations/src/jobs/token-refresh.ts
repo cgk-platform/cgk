@@ -87,8 +87,8 @@ const PROVIDER_NAMES: Record<RefreshableProvider, string> = {
 async function getTenantAdminEmails(tenantId: string): Promise<string[]> {
   const result = await sql`
     SELECT u.email
-    FROM users u
-    JOIN user_organizations uo ON u.id = uo.user_id
+    FROM public.users u
+    JOIN public.user_organizations uo ON u.id = uo.user_id
     WHERE uo.organization_id = ${tenantId}
       AND uo.role IN ('owner', 'admin')
       AND u.email IS NOT NULL

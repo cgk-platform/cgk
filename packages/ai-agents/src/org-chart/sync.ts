@@ -24,7 +24,7 @@ export async function syncOrgChart(): Promise<{
   // Sync human employees from team_members
   const humans = await sql`
     SELECT user_id, name, title, manager_id, department
-    FROM team_members
+    FROM public.team_members
     WHERE status != 'inactive'
   `
 
