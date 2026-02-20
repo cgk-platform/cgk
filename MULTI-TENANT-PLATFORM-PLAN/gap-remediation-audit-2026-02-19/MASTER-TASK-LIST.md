@@ -34,7 +34,7 @@ _Unprotected routes, tenant bleed, missing auth guards, OAuth vulnerabilities_
 **Source Phase:** PHASE-2H-FINANCIAL-EXPENSES | **Agent:** 04 | **Status:** ⚠️
 **Risk:** P&L data leakage between tenants.
 
-- [ ] Fix `pnl-calculator.ts`: Add `WHERE tenant_id = ${tenantId}` to `variable_cost_config` query (remove `LIMIT 1`)
+- [x] Fix `pnl-calculator.ts`: Add `WHERE tenant_id = ${tenantId}` to `variable_cost_config` query (remove `LIMIT 1`)
 - [ ] Audit all raw SQL in `pnl-calculator.ts` for missing tenant filters
 
 ### Storefront — Auth & Isolation
@@ -170,8 +170,8 @@ _Platform is meaningfully incomplete without these_
 
 **Source Phase:** PHASE-2CM | **Agent:** 07 | **Status:** ⚠️
 
-- [ ] Create Queue UI pages: Review, Subscription, E-Sign, Treasury queues
-- [ ] Create Inbound Email list page & Receipt Queue page
+- [x] Create Queue UI pages: Review, Subscription, E-Sign, Treasury queues
+- [x] Create Inbound Email list page & Receipt Queue page
 - [ ] Create Slack scheduled reports UI page
 
 ### Admin — Finance
@@ -216,14 +216,14 @@ _Replace stub implementations with real logic_
 
 - [ ] Wire PDF finalization to signing completion (currently uses placeholder URL)
 - [ ] Implement workflow step document creation (advance step logic)
-- [ ] Create 1099 PDF renderer (`pdf-generation.ts`)
+- [x] Create 1099 PDF renderer (`pdf-generation.ts`)
 
 ### MCP Server
 
 **Source Phase:** PHASE-6B | **Agent:** 20 | **Status:** ⚠️
 
 - [ ] Enforce `requiresAdmin` check in tool dispatch
-- [ ] Register all 84 tools in route handler (currently only commerce)
+- [x] Register all 84 tools in route handler (currently only commerce)
 - [ ] Wire `syncProductTool` to Inngest (currently stub)
 
 ---
