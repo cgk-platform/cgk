@@ -164,78 +164,39 @@ export const abHourlyMetricsAggregationJob = defineJob<TenantEvent<ABHourlyMetri
       jobId: job.id,
     })
 
-    const result = await withTenant(tenantId, async () => {
-      // Get events in the target hour, filtered by testId if provided
-      const eventsQuery = testId
-        ? await sql`
-            SELECT test_id, variant_id, event_type,
-                   COUNT(*) as event_count,
-                   COALESCE(SUM(revenue_cents), 0) as revenue_cents
-            FROM ab_events
-            WHERE created_at >= ${hourStart}
-              AND created_at < ${hourEnd}
-              AND test_id = ${testId}
-            GROUP BY test_id, variant_id, event_type
-          `
-        : await sql`
-            SELECT test_id, variant_id, event_type,
-                   COUNT(*) as event_count,
-                   COALESCE(SUM(revenue_cents), 0) as revenue_cents
-            FROM ab_events
-            WHERE created_at >= ${hourStart}
-              AND created_at < ${hourEnd}
-            GROUP BY test_id, variant_id, event_type
-          `
+    const aggregated = await withTenant(tenantId, async () => {
+      // Window: the target hour (1 hour duration)
+      const hourStart = new Date(targetHour)
+      const hourEnd = new Date(hourStart.getTime() + 3600000)
 
-      const conversionsQuery = testId
-        ? await sql`
-            SELECT test_id, variant_id,
-                   COUNT(*) as conversion_count,
-                   COALESCE(SUM(value_cents), 0) as revenue_cents
-            FROM ab_test_conversions
-            WHERE converted_at >= ${hourStart}
-              AND converted_at < ${hourEnd}
-              AND test_id = ${testId}
-            GROUP BY test_id, variant_id
-          `
-        : await sql`
-            SELECT test_id, variant_id,
-                   COUNT(*) as conversion_count,
-                   COALESCE(SUM(value_cents), 0) as revenue_cents
-            FROM ab_test_conversions
-            WHERE converted_at >= ${hourStart}
-              AND converted_at < ${hourEnd}
-            GROUP BY test_id, variant_id
-          `
+      // Get event counts grouped by test/variant/event_type for the hour
+      const eventsRes = await sql`
+        SELECT test_id, variant_id, event_type,
+               COUNT(*) as event_count,
+               COALESCE(SUM(revenue_cents), 0) as revenue_cents
+        FROM ab_events
+        WHERE occurred_at >= ${hourStart.toISOString()}
+          AND occurred_at < ${hourEnd.toISOString()}
+        GROUP BY test_id, variant_id, event_type
+      `
 
-      // Build aggregation map: testId -> variantId -> metrics
-      const metrics = new Map<string, { views: number; clicks: number; conversions: number; revenueCents: number }>()
-      const makeKey = (testId: string, variantId: string) => `${testId}::${variantId}`
+      const rows = eventsRes.rows as Array<{
+        test_id: string
+        variant_id: string
+        event_type: string
+        event_count: string
+        revenue_cents: string
+      }>
 
-      for (const row of eventsQuery.rows as Array<{ test_id: string; variant_id: string; event_type: string; event_count: string; revenue_cents: string }>) {
-        const key = makeKey(row.test_id, row.variant_id)
-        if (!metrics.has(key)) metrics.set(key, { views: 0, clicks: 0, conversions: 0, revenueCents: 0 })
-        const m = metrics.get(key)!
-        const count = parseInt(row.event_count, 10)
-        if (row.event_type === 'view') m.views += count
-        else if (row.event_type === 'click') m.clicks += count
-        else if (row.event_type === 'purchase') { m.conversions += count; m.revenueCents += parseInt(row.revenue_cents, 10) }
-      }
+      // Filter by testId if specified
+      const filtered = testId ? rows.filter(r => r.test_id === testId) : rows
 
-      for (const row of conversionsQuery.rows as Array<{ test_id: string; variant_id: string; conversion_count: string; revenue_cents: string }>) {
-        const key = makeKey(row.test_id, row.variant_id)
-        if (!metrics.has(key)) metrics.set(key, { views: 0, clicks: 0, conversions: 0, revenueCents: 0 })
-        const m = metrics.get(key)!
-        m.conversions += parseInt(row.conversion_count, 10)
-        m.revenueCents += parseInt(row.revenue_cents, 10)
-      }
+      const testIds = [...new Set(filtered.map(r => r.test_id))]
+      const variantsAggregated = new Set(filtered.map(r => `${r.test_id}:${r.variant_id}`)).size
 
-      // Log aggregated hourly metrics (no separate daily metrics table per schema)
-      // Updates are applied directly against the source ab_events / ab_test_conversions
-      const variantsAggregated = metrics.size
-      console.log(`[ab.hourlyMetricsAggregation] Aggregated ${variantsAggregated} variant-hour combos for ${hourStart}`)
+      console.log(`[ab.hourlyMetricsAggregation] Aggregated ${filtered.length} event buckets across ${testIds.length} tests`)
 
-      return { testsProcessed: new Set([...metrics.keys()].map(k => k.split('::')[0])).size, variantsAggregated }
+      return { testsProcessed: testIds.length, variantsAggregated }
     })
 
     return {
@@ -243,8 +204,8 @@ export const abHourlyMetricsAggregationJob = defineJob<TenantEvent<ABHourlyMetri
       data: {
         tenantId,
         hour: targetHour,
-        testsProcessed: result.testsProcessed,
-        variantsAggregated: result.variantsAggregated,
+        testsProcessed: aggregated.testsProcessed,
+        variantsAggregated: aggregated.variantsAggregated,
         aggregatedAt: new Date().toISOString(),
       },
     }
@@ -545,96 +506,85 @@ export const abOptimizationJob = defineJob<TenantEvent<ABOptimizationPayload>>({
       jobId: job.id,
     })
 
-    const weightChanges: Array<{ testId: string; variantId: string; oldWeight: number; newWeight: number }> = []
-
-    await withTenant(tenantId, async () => {
-      // Get running tests that have MAB optimization enabled (settings.optimization = 'mab' or 'thompson')
-      const testsQuery = testId
+    const optimizationResult = await withTenant(tenantId, async () => {
+      // Get running tests with optimization settings (mab or thompson)
+      const testsRes = testId
         ? await sql`
-            SELECT t.id, t.name, t.settings,
-                   v.id as variant_id, v.weight,
-                   COUNT(DISTINCT e.visitor_id) as visitors,
-                   COUNT(c.id) as conversions
-            FROM ab_tests t
-            JOIN ab_variants v ON v.test_id = t.id
-            LEFT JOIN ab_events e ON e.test_id = t.id AND e.variant_id = v.id AND e.event_type = 'view'
-            LEFT JOIN ab_test_conversions c ON c.variant_id = v.id
-            WHERE t.status = 'running' AND t.id = ${testId}
-            GROUP BY t.id, t.name, t.settings, v.id, v.weight
+            SELECT id, settings FROM ab_tests
+            WHERE id = ${testId} AND status = 'running'
           `
         : await sql`
-            SELECT t.id, t.name, t.settings,
-                   v.id as variant_id, v.weight,
-                   COUNT(DISTINCT e.visitor_id) as visitors,
-                   COUNT(c.id) as conversions
-            FROM ab_tests t
-            JOIN ab_variants v ON v.test_id = t.id
-            LEFT JOIN ab_events e ON e.test_id = t.id AND e.variant_id = v.id AND e.event_type = 'view'
-            LEFT JOIN ab_test_conversions c ON c.variant_id = v.id
-            WHERE t.status = 'running'
-              AND (t.settings->>'optimization' = 'mab' OR t.settings->>'optimization' = 'thompson')
-            GROUP BY t.id, t.name, t.settings, v.id, v.weight
+            SELECT id, settings FROM ab_tests
+            WHERE status = 'running'
+              AND (settings->>'optimization' = 'mab' OR settings->>'optimization' = 'thompson')
           `
 
-      // Group by test
-      const testMap = new Map<string, Array<{ variantId: string; oldWeight: number; visitors: number; conversions: number }>>()
-      for (const row of testsQuery.rows as Array<{ id: string; variant_id: string; weight: number; visitors: string; conversions: string }>) {
-        if (!testMap.has(row.id)) testMap.set(row.id, [])
-        testMap.get(row.id)!.push({
-          variantId: row.variant_id,
-          oldWeight: row.weight,
-          visitors: parseInt(row.visitors, 10),
-          conversions: parseInt(row.conversions, 10),
-        })
-      }
+      const tests = testsRes.rows as Array<{ id: string; settings: Record<string, unknown> | null }>
+      const weightChanges: Array<{ testId: string; variantId: string; oldWeight: number; newWeight: number }> = []
 
-      for (const [tId, variants] of testMap) {
+      for (const test of tests) {
+        // Get variants with their conversion metrics
+        const variantsRes = await sql`
+          SELECT v.id, v.weight, v.is_control,
+                 COUNT(DISTINCT CASE WHEN e.event_type = 'view' THEN e.id END) as views,
+                 COUNT(DISTINCT CASE WHEN e.event_type = 'purchase' THEN e.id END) as conversions
+          FROM ab_variants v
+          LEFT JOIN ab_events e ON e.variant_id = v.id AND e.test_id = ${test.id}
+          WHERE v.test_id = ${test.id}
+          GROUP BY v.id, v.weight, v.is_control
+        `
+
+        const variants = variantsRes.rows as Array<{
+          id: string
+          weight: number
+          is_control: boolean
+          views: string
+          conversions: string
+        }>
+
         if (variants.length < 2) continue
 
-        let newWeights: number[]
+        // Thompson sampling: score = alpha / (alpha + beta) where
+        // alpha = conversions + 1, beta = (views - conversions) + 1
+        const scores = variants.map(v => {
+          const conversions = parseInt(v.conversions, 10) || 0
+          const views = parseInt(v.views, 10) || 0
+          const alpha = conversions + 1
+          const beta = Math.max(views - conversions, 0) + 1
+          return { id: v.id, oldWeight: v.weight, score: alpha / (alpha + beta) }
+        })
 
-        if (algorithm === 'thompson') {
-          // Thompson Sampling: sample from Beta(α, β) where α = conversions+1, β = failures+1
-          // Use expected value of Beta distribution: α/(α+β) as proxy for deterministic weight
-          const scores = variants.map(v => {
-            const alpha = v.conversions + 1
-            const beta = Math.max(v.visitors - v.conversions, 0) + 1
-            return alpha / (alpha + beta)
-          })
-          const totalScore = scores.reduce((a, b) => a + b, 0)
-          newWeights = scores.map(s => Math.round((s / totalScore) * 100))
-        } else if (algorithm === 'epsilon_greedy') {
-          // Epsilon-greedy: best variant gets (1-epsilon) + epsilon/n, others get epsilon/n
-          const rates = variants.map(v => v.visitors > 0 ? v.conversions / v.visitors : 0)
-          const bestIdx = rates.indexOf(Math.max(...rates))
-          const exploitShare = Math.round((1 - (epsilon ?? 0.1)) * 100)
-          const exploreShare = Math.round(((epsilon ?? 0.1) / variants.length) * 100)
-          newWeights = variants.map((_, i) => (i === bestIdx ? exploitShare : 0) + exploreShare)
-        } else {
-          // MAB: weighted by conversion rate, minimum 5% floor per variant
-          const rates = variants.map(v => v.visitors > 0 ? v.conversions / v.visitors + 0.001 : 0.001)
-          const totalRate = rates.reduce((a, b) => a + b, 0)
-          newWeights = rates.map(r => Math.max(5, Math.round((r / totalRate) * 100)))
+        // Normalize scores to weights summing to 100
+        const totalScore = scores.reduce((sum, s) => sum + s.score, 0)
+        const newWeights = scores.map(s => ({
+          ...s,
+          newWeight: Math.round((s.score / totalScore) * 100),
+        }))
+
+        // Fix rounding to ensure weights sum to exactly 100
+        const weightSum = newWeights.reduce((sum, s) => sum + s.newWeight, 0)
+        if (weightSum !== 100 && newWeights.length > 0) {
+          newWeights[0]!.newWeight += 100 - weightSum
         }
 
-        // Normalize weights to sum to 100
-        const totalWeight = newWeights.reduce((a, b) => a + b, 0)
-        const normalizedWeights = newWeights.map(w => Math.round((w / totalWeight) * 100))
-
-        // Update variant weights in DB
-        for (let i = 0; i < variants.length; i++) {
-          const variant = variants[i]!
-          const newWeight = normalizedWeights[i] ?? variant.oldWeight
-          if (newWeight !== variant.oldWeight) {
+        // Update variant weights if they changed
+        for (const v of newWeights) {
+          if (v.newWeight !== v.oldWeight) {
             await sql`
-              UPDATE ab_variants
-              SET weight = ${newWeight}, updated_at = NOW()
-              WHERE id = ${variant.variantId}
+              UPDATE ab_variants SET weight = ${v.newWeight}, updated_at = NOW()
+              WHERE id = ${v.id}
             `
-            weightChanges.push({ testId: tId, variantId: variant.variantId, oldWeight: variant.oldWeight, newWeight })
+            weightChanges.push({
+              testId: test.id,
+              variantId: v.id,
+              oldWeight: v.oldWeight,
+              newWeight: v.newWeight,
+            })
           }
         }
       }
+
+      return { testsOptimized: tests.length, weightChanges }
     })
 
     return {
@@ -642,8 +592,8 @@ export const abOptimizationJob = defineJob<TenantEvent<ABOptimizationPayload>>({
       data: {
         tenantId,
         algorithm,
-        testsOptimized: new Set(weightChanges.map(w => w.testId)).size,
-        weightChanges,
+        testsOptimized: optimizationResult.testsOptimized,
+        weightChanges: optimizationResult.weightChanges,
         optimizedAt: new Date().toISOString(),
       },
     }
@@ -945,97 +895,95 @@ export const abTestSchedulerJob = defineJob<TenantEvent<ABTestSchedulerPayload>>
       jobId: job.id,
     })
 
-    const now = new Date().toISOString()
-
-    const result = await withTenant(tenantId, async () => {
+    const schedulerResult = await withTenant(tenantId, async () => {
       // 1. Start scheduled tests whose start_date has arrived
-      const startedResult = await sql`
+      const startedRes = await sql`
         UPDATE ab_tests
         SET status = 'running', updated_at = NOW()
         WHERE status = 'draft'
           AND start_date IS NOT NULL
-          AND start_date <= ${now}
-        RETURNING id, name
+          AND start_date <= NOW()
+        RETURNING id
       `
+      const testsStarted = startedRes.rowCount ?? 0
 
-      // 2. Complete running tests whose end_date has passed
-      const endedResult = await sql`
+      // 2. Complete tests whose end_date has passed
+      const endedRes = await sql`
         UPDATE ab_tests
         SET status = 'completed', updated_at = NOW()
         WHERE status = 'running'
           AND end_date IS NOT NULL
-          AND end_date <= ${now}
-        RETURNING id, name
+          AND end_date <= NOW()
+        RETURNING id
       `
+      const testsEnded = endedRes.rowCount ?? 0
 
-      // 3. Check active tests for statistical significance via conversion counts
-      const activeTests = await sql`
-        SELECT t.id, t.name, t.settings,
-               v.id as variant_id, v.is_control,
-               COUNT(c.id) as conversions,
-               COUNT(DISTINCT e.visitor_id) as visitors
+      // 3. Check running tests for statistical significance winner
+      const runningRes = await sql`
+        SELECT t.id, t.winning_variant_id,
+               v.id as control_id,
+               (SELECT COUNT(*) FROM ab_events e
+                WHERE e.test_id = t.id AND e.event_type = 'view' AND e.variant_id = v.id) as control_views,
+               (SELECT COUNT(*) FROM ab_events e
+                WHERE e.test_id = t.id AND e.event_type = 'purchase' AND e.variant_id = v.id) as control_conversions
         FROM ab_tests t
-        JOIN ab_variants v ON v.test_id = t.id
-        LEFT JOIN ab_test_conversions c ON c.variant_id = v.id
-        LEFT JOIN ab_events e ON e.test_id = t.id AND e.variant_id = v.id AND e.event_type = 'view'
+        JOIN ab_variants v ON v.test_id = t.id AND v.is_control = true
         WHERE t.status = 'running'
-        GROUP BY t.id, t.name, t.settings, v.id, v.is_control
-        ORDER BY t.id, v.is_control DESC
+          AND t.winning_variant_id IS NULL
+        LIMIT 50
       `
 
-      // Group by test and check if any non-control variant has >=200 visitors and
-      // a conversion rate meaningfully higher than control (simple chi-squared proxy)
-      const testMap = new Map<string, { name: string; variants: Array<{ variantId: string; isControl: boolean; conversions: number; visitors: number }> }>()
-      for (const row of activeTests.rows as Array<{ id: string; name: string; variant_id: string; is_control: boolean; conversions: string; visitors: string }>) {
-        if (!testMap.has(row.id)) {
-          testMap.set(row.id, { name: row.name, variants: [] })
-        }
-        testMap.get(row.id)!.variants.push({
-          variantId: row.variant_id,
-          isControl: row.is_control,
-          conversions: parseInt(row.conversions, 10),
-          visitors: parseInt(row.visitors, 10),
-        })
-      }
+      let winnersDetected = 0
+      for (const test of runningRes.rows as Array<{
+        id: string; control_id: string; control_views: string; control_conversions: string; winning_variant_id: string | null
+      }>) {
+        const controlViews = parseInt(test.control_views, 10) || 0
+        const controlConversions = parseInt(test.control_conversions, 10) || 0
+        const controlRate = controlViews > 0 ? controlConversions / controlViews : 0
 
-      const autoCompleted: string[] = []
-      for (const [testId, test] of testMap) {
-        const control = test.variants.find(v => v.isControl)
-        const challengers = test.variants.filter(v => !v.isControl)
-        if (!control || control.visitors < 100) continue
+        // Find challengers with significantly better performance
+        const challRes = await sql`
+          SELECT v.id,
+                 COUNT(DISTINCT CASE WHEN e.event_type = 'view' THEN e.id END) as views,
+                 COUNT(DISTINCT CASE WHEN e.event_type = 'purchase' THEN e.id END) as conversions
+          FROM ab_variants v
+          LEFT JOIN ab_events e ON e.variant_id = v.id AND e.test_id = ${test.id}
+          WHERE v.test_id = ${test.id} AND v.is_control = false
+          GROUP BY v.id
+          HAVING COUNT(DISTINCT CASE WHEN e.event_type = 'view' THEN e.id END) >= 100
+        `
 
-        const controlRate = control.visitors > 0 ? control.conversions / control.visitors : 0
+        for (const challenger of challRes.rows as Array<{ id: string; views: string; conversions: string }>) {
+          const challViews = parseInt(challenger.views, 10) || 0
+          const challConversions = parseInt(challenger.conversions, 10) || 0
+          const challRate = challViews > 0 ? challConversions / challViews : 0
 
-        for (const challenger of challengers) {
-          if (challenger.visitors < 100) continue
-          const challengerRate = challenger.visitors > 0 ? challenger.conversions / challenger.visitors : 0
-          // Simple significance: challenger rate is >20% lift and both have >100 visitors
-          if (challengerRate > controlRate * 1.2 && challenger.conversions >= 10) {
+          // Declare winner if challenger rate > 120% of control and at least 10 conversions
+          if (challRate > controlRate * 1.2 && challConversions >= 10) {
             await sql`
               UPDATE ab_tests
-              SET status = 'completed',
-                  winning_variant_id = ${challenger.variantId},
-                  updated_at = NOW()
-              WHERE id = ${testId} AND status = 'running'
+              SET winning_variant_id = ${challenger.id}, updated_at = NOW()
+              WHERE id = ${test.id}
             `
-            autoCompleted.push(testId)
+            winnersDetected++
             break
           }
         }
       }
 
-      return {
-        testsStarted: startedResult.rowCount ?? 0,
-        testsEnded: (endedResult.rowCount ?? 0) + autoCompleted.length,
-      }
+      if (testsStarted > 0) console.log(`[ab.testScheduler] Started ${testsStarted} tests`)
+      if (testsEnded > 0) console.log(`[ab.testScheduler] Completed ${testsEnded} tests`)
+      if (winnersDetected > 0) console.log(`[ab.testScheduler] Detected ${winnersDetected} winners`)
+
+      return { testsStarted, testsEnded }
     })
 
     return {
       success: true,
       data: {
         tenantId,
-        testsStarted: result.testsStarted,
-        testsEnded: result.testsEnded,
+        testsStarted: schedulerResult.testsStarted,
+        testsEnded: schedulerResult.testsEnded,
         testsPaused: 0,
         testsNeedingAttention: 0,
         schedulerRunAt: new Date().toISOString(),

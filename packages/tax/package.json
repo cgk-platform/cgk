@@ -26,7 +26,8 @@
   },
   "dependencies": {
     "@cgk-platform/core": "workspace:*",
-    "@cgk-platform/db": "workspace:*"
+    "@cgk-platform/db": "workspace:*",
+    "pdf-lib": "^1.17.1"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",

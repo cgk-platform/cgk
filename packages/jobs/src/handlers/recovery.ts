@@ -96,7 +96,7 @@ export const processRecoveryEmailJob = defineJob({
         return { sent: false, reason: 'no_customer_email' }
       }
 
-      // 4. Get recovery settings for template/subject
+      // 4. Get recovery settings for sequence enablement
       const settingsRes = await sql`
         SELECT sequence_1_enabled, sequence_2_enabled, sequence_3_enabled,
                sequence_1_incentive_code, sequence_2_incentive_code, sequence_3_incentive_code
@@ -135,7 +135,6 @@ export const processRecoveryEmailJob = defineJob({
       `
 
       // 6. Log the send (actual email delivery via Resend handled by communications package)
-      // If Resend is not configured, we log intent and mark sent
       console.log(`[Recovery] Sending sequence ${record.sequence_number} email to ${record.customer_email}`, {
         checkoutId: record.abandoned_checkout_id,
         cartTotal: record.cart_total_cents,

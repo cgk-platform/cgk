@@ -1,17 +1,17 @@
 import { Card, CardContent } from '@cgk-platform/ui'
-import { AlertCircle, CheckCircle2, Clock, Mail, Send, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Clock, Mail, XCircle } from 'lucide-react'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
-import { Pagination } from '@/components/commerce/pagination'
-import {
-  getEmailQueueEntries,
-  getEmailQueueStats,
-  mapRowToQueueEntry,
-} from '@/lib/email-queues/db'
-import type { QueueStatus } from '@/lib/email-queues/db'
+import { getEmailQueueStats, getEmailQueueEntries, mapRowToQueueEntry } from '@/lib/email-queues/db'
+import type { EmailQueueType } from '@/lib/email-queues/db'
 import { QueueTable, QueueTableSkeleton } from '../_components/queue-table'
+
+const QUEUE_TYPE: EmailQueueType = 'review'
+const BASE_PATH = '/admin/communications/queues/review'
+const PAGE_TITLE = 'Review Email Queue'
+const PAGE_DESC = 'Monitor post-purchase review request emails'
 
 interface PageProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>
@@ -19,36 +19,31 @@ interface PageProps {
 
 export default async function ReviewQueuePage({ searchParams }: PageProps) {
   const params = await searchParams
-  const status = params.status as QueueStatus | undefined
+  const status = (params.status as string) || undefined
   const page = parseInt((params.page as string) || '1', 10)
-  const limit = 25
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Review Request Queue</h1>
-          <p className="text-sm text-muted-foreground">
-            Monitor review request and reminder emails
-          </p>
+      <div>
+        <div className="flex items-center gap-2">
+          <Link href="/admin/communications" className="text-sm text-muted-foreground hover:text-foreground">
+            Communications
+          </Link>
+          <span className="text-muted-foreground">/</span>
+          <span className="text-sm font-medium">{PAGE_TITLE}</span>
         </div>
-        <Link
-          href="/admin/communications/queues/review?status=failed"
-          className="inline-flex items-center gap-1.5 rounded-md border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted"
-        >
-          <AlertCircle className="h-4 w-4" />
-          View Failed
-        </Link>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{PAGE_TITLE}</h1>
+        <p className="text-sm text-muted-foreground">{PAGE_DESC}</p>
       </div>
 
       <Suspense fallback={<StatsSkeleton />}>
         <StatsCards />
       </Suspense>
 
-      <FiltersBar status={status} basePath="/admin/communications/queues/review" />
+      <FiltersBar status={status} />
 
       <Suspense fallback={<QueueTableSkeleton />}>
-        <QueueLoader status={status} page={page} limit={limit} />
+        <EntriesLoader status={status} page={page} />
       </Suspense>
     </div>
   )
@@ -59,33 +54,27 @@ async function StatsCards() {
   const tenantSlug = headerList.get('x-tenant-slug')
   if (!tenantSlug) return null
 
-  const stats = await getEmailQueueStats(tenantSlug, 'review')
+  let stats = { pending: 0, scheduled: 0, sentToday: 0, failedToday: 0, failed: 0, total: 0 }
+  try { stats = await getEmailQueueStats(tenantSlug, QUEUE_TYPE) } catch {}
 
   const cards = [
-    { title: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-600', bgColor: 'bg-amber-50' },
-    { title: 'Sent Today', value: stats.sentToday, icon: CheckCircle2, color: 'text-emerald-600', bgColor: 'bg-emerald-50' },
-    {
-      title: 'Failed',
-      value: stats.failed,
-      icon: XCircle,
-      color: stats.failed > 0 ? 'text-rose-600' : 'text-muted-foreground',
-      bgColor: stats.failed > 0 ? 'bg-rose-50' : 'bg-muted',
-    },
-    { title: 'Scheduled', value: stats.scheduled, icon: Mail, color: 'text-blue-600', bgColor: 'bg-blue-50' },
-    { title: 'Total', value: stats.total, icon: Send, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+    { label: 'Pending', value: stats.pending, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50' },
+    { label: 'Scheduled', value: stats.scheduled, icon: Mail, color: 'text-blue-600', bg: 'bg-blue-50' },
+    { label: 'Sent Today', value: stats.sentToday, icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+    { label: 'Failed Today', value: stats.failed, icon: XCircle, color: stats.failed > 0 ? 'text-rose-600' : 'text-muted-foreground', bg: stats.failed > 0 ? 'bg-rose-50' : 'bg-muted' },
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => (
-        <Card key={card.title}>
+        <Card key={card.label}>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className={`rounded-lg p-2 ${card.bgColor}`}>
+              <div className={`rounded-lg p-2 ${card.bg}`}>
                 <card.icon className={`h-5 w-5 ${card.color}`} />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">{card.title}</p>
+                <p className="text-sm text-muted-foreground">{card.label}</p>
                 <p className="text-2xl font-semibold">{card.value}</p>
               </div>
             </div>
@@ -96,106 +85,75 @@ async function StatsCards() {
   )
 }
 
-function FiltersBar({ status, basePath }: { status: QueueStatus | undefined; basePath: string }) {
-  const statuses: Array<{ value: QueueStatus | undefined; label: string }> = [
-    { value: undefined, label: 'All' },
-    { value: 'pending', label: 'Pending' },
-    { value: 'scheduled', label: 'Scheduled' },
-    { value: 'sent', label: 'Sent' },
-    { value: 'failed', label: 'Failed' },
+function FiltersBar({ status }: { status?: string }) {
+  const statuses = [
+    { value: undefined, label: 'All', href: BASE_PATH },
+    { value: 'pending', label: 'Pending', href: `${BASE_PATH}?status=pending` },
+    { value: 'scheduled', label: 'Scheduled', href: `${BASE_PATH}?status=scheduled` },
+    { value: 'sent', label: 'Sent', href: `${BASE_PATH}?status=sent` },
+    { value: 'failed', label: 'Failed', href: `${BASE_PATH}?status=failed` },
   ]
 
   return (
-    <div className="flex w-fit items-center rounded-lg border bg-card p-1">
-      {statuses.map((s) => {
-        const isActive = status === s.value
-        const href = s.value ? `${basePath}?status=${s.value}` : basePath
-        return (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center rounded-lg border bg-card p-1">
+        {statuses.map((s) => (
           <Link
             key={s.label}
-            href={href}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-            }`}
+            href={s.href}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${status === s.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
           >
             {s.label}
           </Link>
-        )
-      })}
+        ))}
+      </div>
+      <Link href={`${BASE_PATH}?status=failed`} className="ml-auto flex items-center gap-1.5 text-sm text-rose-600 hover:underline">
+        <AlertCircle className="h-3.5 w-3.5" />
+        View Failed
+      </Link>
     </div>
   )
 }
 
-async function QueueLoader({
-  status,
-  page,
-  limit,
-}: {
-  status: QueueStatus | undefined
-  page: number
-  limit: number
-}) {
+async function EntriesLoader({ status, page }: { status?: string; page: number }) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
-  if (!tenantSlug) return <p className="text-muted-foreground">No tenant configured.</p>
+  if (!tenantSlug) return <p className="text-sm text-muted-foreground">No tenant configured.</p>
 
-  const { rows, totalCount } = await getEmailQueueEntries(tenantSlug, 'review', {
-    status,
-    page,
-    limit,
-  })
+  const limit = 50
+  let entries: ReturnType<typeof mapRowToQueueEntry>[] = []
+  let totalCount = 0
+
+  try {
+    const result = await getEmailQueueEntries(tenantSlug, QUEUE_TYPE, { status: status as never, page, limit })
+    entries = result.rows.map(mapRowToQueueEntry)
+    totalCount = result.totalCount
+  } catch {}
 
   const totalPages = Math.ceil(totalCount / limit)
-  const entries = rows.map(mapRowToQueueEntry)
-
-  if (entries.length === 0) {
-    return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <div className="rounded-full bg-muted p-4">
-            <Mail className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="mt-4 text-lg font-medium">No emails in queue</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {status ? `No ${status} emails found.` : 'Review email queue entries will appear here.'}
-          </p>
-        </CardContent>
-      </Card>
-    )
-  }
 
   return (
     <div className="space-y-4">
-      <QueueTable entries={entries} queueType="review" />
-      <Pagination
-        page={page}
-        totalPages={totalPages}
-        totalCount={totalCount}
-        limit={limit}
-        basePath="/admin/communications/queues/review"
-        currentFilters={{ status: status as string | undefined }}
-      />
+      <p className="text-sm text-muted-foreground">{totalCount} {totalCount === 1 ? 'entry' : 'entries'}</p>
+      <QueueTable entries={entries} queueType={QUEUE_TYPE} />
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Page {page} of {totalPages}</p>
+          <div className="flex gap-2">
+            {page > 1 && <Link href={`${BASE_PATH}?page=${page - 1}${status ? `&status=${status}` : ''}`} className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted">Previous</Link>}
+            {page < totalPages && <Link href={`${BASE_PATH}?page=${page + 1}${status ? `&status=${status}` : ''}`} className="rounded-md border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted">Next</Link>}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 function StatsSkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Card key={i}>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="h-9 w-9 animate-pulse rounded-lg bg-muted" />
-              <div className="space-y-2">
-                <div className="h-4 w-16 animate-pulse rounded bg-muted" />
-                <div className="h-6 w-12 animate-pulse rounded bg-muted" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i}><CardContent className="p-4"><div className="flex items-center gap-3"><div className="h-9 w-9 animate-pulse rounded-lg bg-muted" /><div className="space-y-2"><div className="h-4 w-16 animate-pulse rounded bg-muted" /><div className="h-6 w-12 animate-pulse rounded bg-muted" /></div></div></CardContent></Card>
       ))}
     </div>
   )

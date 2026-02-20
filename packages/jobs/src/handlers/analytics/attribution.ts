@@ -227,94 +227,108 @@ export const processAttributionJob = defineJob<ProcessAttributionPayload>({
     )
 
     const result = await withTenant(tenantId, async () => {
-      // Step 1: Get or create conversion record
-      const orderRow = await sql`
-        SELECT id, customer_id, total_price, currency, created_at
-        FROM orders WHERE id = ${orderId}
+      // Step 1: Get order details from DB
+      const orderRes = await sql`
+        SELECT id, total_price, currency, customer_id, created_at
+        FROM orders
+        WHERE id = ${orderId}
+        LIMIT 1
       `
-      const order = orderRow.rows[0] as { id: string; customer_id: string; total_price: string; currency: string; created_at: string } | undefined
+      const order = orderRes.rows[0] as {
+        id: string
+        total_price: string
+        currency: string
+        customer_id: string | null
+        created_at: string
+      } | undefined
+
       if (!order) {
-        return { touchpointsProcessed: 0, modelsCalculated: 0, skipped: true }
+        return { touchpointsProcessed: 0, modelsCalculated: 0 }
       }
 
-      const revenueCents = Math.round(parseFloat(order.total_price) * 100)
+      const revenue = Math.round(parseFloat(order.total_price) * 100) // to cents
       const conversionTime = new Date(order.created_at)
-      const visitorId = job.payload.visitorId || order.customer_id || 'unknown'
+      const visitorId = job.payload.visitorId || order.customer_id || orderId
 
-      // Upsert conversion record
-      const convRow = await sql`
-        INSERT INTO attribution_conversions
-          (id, tenant_id, order_id, customer_id, revenue, currency, converted_at, created_at)
-        VALUES
-          (gen_random_uuid()::text, ${tenantId}, ${orderId}, ${order.customer_id ?? null},
-           ${parseFloat(order.total_price)}, ${order.currency || 'USD'}, ${order.created_at}, NOW())
-        ON CONFLICT (order_id) DO UPDATE SET updated_at = NOW()
-        RETURNING id
+      // Step 2: Upsert into attribution_conversions
+      await sql`
+        INSERT INTO attribution_conversions (order_id, revenue, converted_at, created_at)
+        VALUES (${orderId}, ${revenue}, ${conversionTime.toISOString()}, NOW())
+        ON CONFLICT (order_id) DO UPDATE
+          SET revenue = EXCLUDED.revenue, converted_at = EXCLUDED.converted_at
       `
-      const conversionId = (convRow.rows[0] as { id: string } | undefined)?.id
-      if (!conversionId) return { touchpointsProcessed: 0, modelsCalculated: 0, skipped: false }
 
-      // Step 2: Find touchpoints for this visitor (30-day lookback window)
-      const lookbackStart = new Date(conversionTime.getTime() - 30 * 24 * 3600000).toISOString()
-      const tpRows = await sql`
-        SELECT id, source, medium, channel, occurred_at
+      const conversionRes = await sql`
+        SELECT id FROM attribution_conversions WHERE order_id = ${orderId} LIMIT 1
+      `
+      const conversionId = (conversionRes.rows[0] as { id: string } | undefined)?.id
+      if (!conversionId) {
+        return { touchpointsProcessed: 0, modelsCalculated: 0 }
+      }
+
+      // Step 3: Find touchpoints for visitor in 30-day window before conversion
+      const windowStart = new Date(conversionTime.getTime() - 30 * 86400000)
+      const touchpointsRes = await sql`
+        SELECT id, visitor_id, channel, source, medium, occurred_at
         FROM attribution_touchpoints
         WHERE visitor_id = ${visitorId}
-          AND occurred_at >= ${lookbackStart}
+          AND occurred_at >= ${windowStart.toISOString()}
           AND occurred_at <= ${conversionTime.toISOString()}
         ORDER BY occurred_at ASC
+        LIMIT 50
       `
 
-      const touchpoints: Touchpoint[] = (tpRows.rows as Array<{
-        id: string; source: string | null; medium: string | null; channel: string; occurred_at: string
+      const touchpoints: Touchpoint[] = (touchpointsRes.rows as Array<{
+        id: string
+        visitor_id: string
+        channel: string
+        source: string
+        medium: string | null
+        occurred_at: string
       }>).map(r => ({
         id: r.id,
-        visitorId,
-        source: r.source || 'direct',
+        visitorId: r.visitor_id,
+        source: r.source,
         medium: r.medium ?? undefined,
-        campaign: undefined,
         timestamp: new Date(r.occurred_at),
       }))
 
-      const revenueDollars = revenueCents / 100
+      // Step 4: Calculate all attribution models
+      const models: AttributionModel[] = ['first_touch', 'last_touch', 'linear', 'time_decay', 'position_based']
+      let modelsCalculated = 0
 
-      // Step 3: Calculate attribution models
-      const attributionResults: Record<AttributionModel, AttributionResult[]> = {
-        first_touch: [],
-        last_touch: [],
-        linear: [],
-        time_decay: [],
-        position_based: [],
-      }
+      for (const model of models) {
+        let modelResults: AttributionResult[] = []
 
-      const firstTouch = calculateFirstTouch(touchpoints, revenueDollars)
-      if (firstTouch) attributionResults.first_touch = [firstTouch]
-      const lastTouch = calculateLastTouch(touchpoints, revenueDollars)
-      if (lastTouch) attributionResults.last_touch = [lastTouch]
-      attributionResults.linear = calculateLinear(touchpoints, revenueDollars)
-      attributionResults.time_decay = calculateTimeDecay(touchpoints, revenueDollars, conversionTime)
-      attributionResults.position_based = calculatePositionBased(touchpoints, revenueDollars)
+        if (model === 'first_touch') {
+          const r = calculateFirstTouch(touchpoints, revenue)
+          if (r) modelResults = [r]
+        } else if (model === 'last_touch') {
+          const r = calculateLastTouch(touchpoints, revenue)
+          if (r) modelResults = [r]
+        } else if (model === 'linear') {
+          modelResults = calculateLinear(touchpoints, revenue)
+        } else if (model === 'time_decay') {
+          modelResults = calculateTimeDecay(touchpoints, revenue, conversionTime)
+        } else if (model === 'position_based') {
+          modelResults = calculatePositionBased(touchpoints, revenue)
+        }
 
-      // Step 4: Store results
-      let position = 0
-      const totalTp = touchpoints.length
-      for (const [model, results] of Object.entries(attributionResults) as Array<[AttributionModel, AttributionResult[]]>) {
-        for (const res of results) {
+        // Step 5: Upsert attribution results
+        for (const r of modelResults) {
           await sql`
             INSERT INTO attribution_results
-              (id, tenant_id, conversion_id, touchpoint_id, model, attribution_window,
-               credit, attributed_revenue, touchpoint_position, total_touchpoints, calculated_at)
+              (conversion_id, touchpoint_id, model, attribution_window, credit, attributed_revenue, created_at)
             VALUES
-              (gen_random_uuid()::text, ${tenantId}, ${conversionId}, ${res.touchpointId},
-               ${model}, '30d', ${res.credit}, ${res.value / 100}, ${position}, ${totalTp}, NOW())
+              (${conversionId}, ${r.touchpointId}, ${r.model}, ${'30d'}, ${r.credit}, ${r.value}, NOW())
             ON CONFLICT (conversion_id, touchpoint_id, model, attribution_window)
-            DO UPDATE SET credit = EXCLUDED.credit, attributed_revenue = EXCLUDED.attributed_revenue, calculated_at = NOW()
+              DO UPDATE SET credit = EXCLUDED.credit, attributed_revenue = EXCLUDED.attributed_revenue
           `
-          position++
         }
+        modelsCalculated++
       }
 
-      return { touchpointsProcessed: touchpoints.length, modelsCalculated: Object.keys(attributionResults).length, skipped: false }
+      return { touchpointsProcessed: touchpoints.length, modelsCalculated }
     })
 
     if (!skipGA4) {
@@ -363,10 +377,10 @@ export const attributionDailyMetricsJob = defineJob<AttributionDailyMetricsPaylo
     )
 
     const result = await withTenant(tenantId, async () => {
-      const dateStart = `${targetDate}T00:00:00Z`
-      const dateEnd = `${targetDate}T23:59:59Z`
+      const dayStart = `${targetDate}T00:00:00.000Z`
+      const dayEnd = `${targetDate}T23:59:59.999Z`
 
-      // If force-recalculate, delete existing channel summary rows for the date
+      // Optionally clear existing rows for this date if force recalculating
       if (forceRecalculate) {
         await sql`
           DELETE FROM attribution_channel_summary
@@ -374,59 +388,52 @@ export const attributionDailyMetricsJob = defineJob<AttributionDailyMetricsPaylo
         `
       }
 
-      // Aggregate attribution results joined with touchpoints for the day
-      // Group by channel, model, and attribution window
-      const rows = await sql`
+      // Aggregate attribution results joined with touchpoints for channel/platform grouping
+      const aggRes = await sql`
         SELECT
           ar.model,
           ar.attribution_window,
-          COALESCE(atp.channel, 'direct') as channel,
-          atp.platform,
-          COUNT(DISTINCT ar.touchpoint_id) as touchpoints,
+          COALESCE(tp.channel, 'direct') as channel,
+          COALESCE(tp.source, 'direct') as platform,
           COUNT(DISTINCT ar.conversion_id) as conversions,
+          COUNT(ar.touchpoint_id) as touchpoints,
           SUM(ar.attributed_revenue) as revenue
         FROM attribution_results ar
         JOIN attribution_conversions ac ON ac.id = ar.conversion_id
-        LEFT JOIN attribution_touchpoints atp ON atp.id = ar.touchpoint_id
-        WHERE ac.converted_at >= ${dateStart}
-          AND ac.converted_at <= ${dateEnd}
-        GROUP BY ar.model, ar.attribution_window, COALESCE(atp.channel, 'direct'), atp.platform
+        LEFT JOIN attribution_touchpoints tp ON tp.id = ar.touchpoint_id
+        WHERE ac.converted_at >= ${dayStart}
+          AND ac.converted_at <= ${dayEnd}
+        GROUP BY ar.model, ar.attribution_window, COALESCE(tp.channel, 'direct'), COALESCE(tp.source, 'direct')
       `
 
-      let conversionsProcessed = 0
-
-      for (const row of rows.rows as Array<{
+      const rows = aggRes.rows as Array<{
         model: string
         attribution_window: string
         channel: string
-        platform: string | null
-        touchpoints: string
+        platform: string
         conversions: string
+        touchpoints: string
         revenue: string
-      }>) {
-        const revenue = parseFloat(row.revenue || '0')
-        const conversions = parseInt(row.conversions, 10)
-        conversionsProcessed += conversions
+      }>
 
+      // Upsert each row into attribution_channel_summary
+      for (const row of rows) {
         await sql`
           INSERT INTO attribution_channel_summary
-            (id, tenant_id, date, model, attribution_window, channel, platform,
-             touchpoints, conversions, revenue, created_at, updated_at)
+            (date, model, attribution_window, channel, platform, touchpoints, conversions, revenue, created_at)
           VALUES
-            (gen_random_uuid()::text, ${tenantId}, ${targetDate}, ${row.model},
-             ${row.attribution_window}, ${row.channel}, ${row.platform ?? null},
-             ${parseInt(row.touchpoints, 10)}, ${conversions}, ${revenue},
-             NOW(), NOW())
-          ON CONFLICT (tenant_id, date, model, attribution_window, channel, platform)
-          DO UPDATE SET
-            touchpoints = EXCLUDED.touchpoints,
-            conversions = EXCLUDED.conversions,
-            revenue = EXCLUDED.revenue,
-            updated_at = NOW()
+            (${targetDate}, ${row.model}, ${row.attribution_window}, ${row.channel}, ${row.platform},
+             ${parseInt(row.touchpoints, 10)}, ${parseInt(row.conversions, 10)},
+             ${parseInt(row.revenue || '0', 10)}, NOW())
+          ON CONFLICT (date, model, attribution_window, channel, platform)
+            DO UPDATE SET
+              touchpoints = EXCLUDED.touchpoints,
+              conversions = EXCLUDED.conversions,
+              revenue = EXCLUDED.revenue
         `
       }
 
-      return { conversionsProcessed }
+      return { conversionsProcessed: rows.length }
     })
 
     return {

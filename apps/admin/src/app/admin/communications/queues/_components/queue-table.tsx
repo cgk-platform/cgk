@@ -1,9 +1,9 @@
 'use client'
 
-import { Button, Checkbox, cn } from '@cgk-platform/ui'
-import { AlertCircle, Check, Clock, Eye, MoreHorizontal, RefreshCcw, X } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
+import { Button } from '@cgk-platform/ui'
+import { AlertCircle, Check, Clock, MoreHorizontal, RefreshCcw, X } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export type QueueStatus =
   | 'pending'
@@ -25,7 +25,6 @@ export interface QueueEntry {
   sentAt?: string | null
   attempts?: number
   errorMessage?: string | null
-  metadata?: Record<string, unknown>
   createdAt: string
 }
 
@@ -60,7 +59,6 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
 
   const handleBulkAction = async (action: 'skip' | 'retry') => {
     if (selectedIds.size === 0) return
-
     setIsProcessing(true)
     try {
       const response = await fetch(`/api/admin/email-queues/${queueType}/bulk`, {
@@ -68,12 +66,9 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, ids: Array.from(selectedIds) }),
       })
-
       if (response.ok) {
         setSelectedIds(new Set())
-        startTransition(() => {
-          router.refresh()
-        })
+        startTransition(() => { router.refresh() })
       }
     } finally {
       setIsProcessing(false)
@@ -82,8 +77,7 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '-'
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       hour: 'numeric',
@@ -91,28 +85,31 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
     })
   }
 
-  const getStatusBadge = (status: QueueStatus) => {
-    const variants: Record<QueueStatus, { color: string; icon: React.ReactNode }> = {
-      pending: { color: 'bg-slate-100 text-slate-700', icon: <Clock className="h-3 w-3" /> },
-      awaiting_delivery: { color: 'bg-blue-100 text-blue-700', icon: <Clock className="h-3 w-3" /> },
-      scheduled: { color: 'bg-indigo-100 text-indigo-700', icon: <Clock className="h-3 w-3" /> },
-      processing: { color: 'bg-amber-100 text-amber-700', icon: <RefreshCcw className="h-3 w-3 animate-spin" /> },
-      sent: { color: 'bg-emerald-100 text-emerald-700', icon: <Check className="h-3 w-3" /> },
-      skipped: { color: 'bg-slate-100 text-slate-500', icon: <X className="h-3 w-3" /> },
-      failed: { color: 'bg-rose-100 text-rose-700', icon: <AlertCircle className="h-3 w-3" /> },
-    }
+  const STATUS_STYLES: Record<string, string> = {
+    pending: 'bg-slate-100 text-slate-700',
+    awaiting_delivery: 'bg-blue-100 text-blue-700',
+    scheduled: 'bg-indigo-100 text-indigo-700',
+    processing: 'bg-amber-100 text-amber-700',
+    sent: 'bg-emerald-100 text-emerald-700',
+    skipped: 'bg-slate-100 text-slate-500',
+    failed: 'bg-rose-100 text-rose-700',
+  }
 
-    const variant = variants[status]
+  const STATUS_ICONS: Record<string, React.ReactNode> = {
+    pending: <Clock className="h-3 w-3" />,
+    awaiting_delivery: <Clock className="h-3 w-3" />,
+    scheduled: <Clock className="h-3 w-3" />,
+    processing: <RefreshCcw className="h-3 w-3 animate-spin" />,
+    sent: <Check className="h-3 w-3" />,
+    skipped: <X className="h-3 w-3" />,
+    failed: <AlertCircle className="h-3 w-3" />,
+  }
+
+  if (entries.length === 0) {
     return (
-      <span
-        className={cn(
-          'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium capitalize',
-          variant.color,
-        )}
-      >
-        {variant.icon}
-        {status.replace('_', ' ')}
-      </span>
+      <div className="rounded-lg border bg-card py-16 text-center">
+        <p className="text-sm text-muted-foreground">No entries found.</p>
+      </div>
     )
   }
 
@@ -122,21 +119,11 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
         <div className="flex items-center justify-between border-b bg-muted/50 px-4 py-2">
           <span className="text-sm font-medium">{selectedIds.size} selected</span>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleBulkAction('retry')}
-              disabled={isProcessing}
-            >
+            <Button variant="outline" size="sm" onClick={() => handleBulkAction('retry')} disabled={isProcessing}>
               <RefreshCcw className="mr-1.5 h-3.5 w-3.5" />
               Retry Selected
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleBulkAction('skip')}
-              disabled={isProcessing}
-            >
+            <Button variant="outline" size="sm" onClick={() => handleBulkAction('skip')} disabled={isProcessing}>
               <X className="mr-1.5 h-3.5 w-3.5" />
               Skip Selected
             </Button>
@@ -146,9 +133,11 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
 
       <div className="grid grid-cols-[40px,1fr,1fr,130px,150px,80px,40px] items-center gap-4 border-b bg-muted/30 px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
         <div>
-          <Checkbox
+          <input
+            type="checkbox"
             checked={selectedIds.size === entries.length && entries.length > 0}
-            onCheckedChange={toggleSelectAll}
+            onChange={toggleSelectAll}
+            className="h-3.5 w-3.5 rounded border-input"
           />
         </div>
         <div>Recipient</div>
@@ -163,15 +152,14 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
         {entries.map((entry) => (
           <div
             key={entry.id}
-            className={cn(
-              'grid grid-cols-[40px,1fr,1fr,130px,150px,80px,40px] items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/30',
-              selectedIds.has(entry.id) && 'bg-primary/5',
-            )}
+            className={`grid grid-cols-[40px,1fr,1fr,130px,150px,80px,40px] items-center gap-4 px-4 py-3 transition-colors hover:bg-muted/30 ${selectedIds.has(entry.id) ? 'bg-primary/5' : ''}`}
           >
             <div>
-              <Checkbox
+              <input
+                type="checkbox"
                 checked={selectedIds.has(entry.id)}
-                onCheckedChange={() => toggleSelect(entry.id)}
+                onChange={() => toggleSelect(entry.id)}
+                className="h-3.5 w-3.5 rounded border-input"
               />
             </div>
 
@@ -189,7 +177,14 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
               )}
             </div>
 
-            <div>{getStatusBadge(entry.status)}</div>
+            <div>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium capitalize ${STATUS_STYLES[entry.status] ?? 'bg-muted text-muted-foreground'}`}
+              >
+                {STATUS_ICONS[entry.status]}
+                {entry.status.replace('_', ' ')}
+              </span>
+            </div>
 
             <div className="text-sm text-muted-foreground">
               {formatDate(entry.scheduledAt || entry.sentAt || entry.createdAt)}
@@ -200,9 +195,7 @@ export function QueueTable({ entries, queueType }: QueueTableProps) {
                 <span className={entry.attempts > 2 ? 'text-amber-600' : undefined}>
                   {entry.attempts}
                 </span>
-              ) : (
-                '-'
-              )}
+              ) : '-'}
             </div>
 
             <div>
