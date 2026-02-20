@@ -114,7 +114,7 @@ async function getAuthContextFromHeaders(req: Request): Promise<AuthContext> {
 
   // Fetch user and orgs from database
   const userResult = await sql`
-    SELECT id, email, role FROM users WHERE id = ${userId}
+    SELECT id, email, role FROM public.users WHERE id = ${userId}
   `
 
   if (userResult.rows.length === 0) {
@@ -126,8 +126,8 @@ async function getAuthContextFromHeaders(req: Request): Promise<AuthContext> {
   // Get user's organizations
   const orgsResult = await sql`
     SELECT uo.role, o.id, o.slug
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
   `
 
@@ -177,7 +177,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
       last_login_at as "lastLoginAt",
       created_at as "createdAt",
       updated_at as "updatedAt"
-    FROM users
+    FROM public.users
     WHERE email = ${email.toLowerCase()}
   `
 
@@ -200,7 +200,7 @@ export async function getUserById(userId: string): Promise<User | null> {
       last_login_at as "lastLoginAt",
       created_at as "createdAt",
       updated_at as "updatedAt"
-    FROM users
+    FROM public.users
     WHERE id = ${userId}
   `
 
@@ -217,8 +217,8 @@ export async function getUserById(userId: string): Promise<User | null> {
 export async function getUserOrganizations(userId: string): Promise<OrgContext[]> {
   const result = await sql`
     SELECT uo.role, o.id, o.slug
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
   `
 
@@ -239,7 +239,7 @@ export async function createUser(data: {
   passwordHash?: string
 }): Promise<User> {
   const result = await sql`
-    INSERT INTO users (email, name, role, password_hash)
+    INSERT INTO public.users (email, name, role, password_hash)
     VALUES (
       ${data.email.toLowerCase()},
       ${data.name || null},
@@ -271,7 +271,7 @@ export async function addUserToOrganization(
   role: UserRole = 'member'
 ): Promise<void> {
   await sql`
-    INSERT INTO user_organizations (user_id, organization_id, role)
+    INSERT INTO public.user_organizations (user_id, organization_id, role)
     VALUES (${userId}, ${organizationId}, ${role})
     ON CONFLICT (user_id, organization_id) DO UPDATE
     SET role = ${role}
@@ -283,7 +283,7 @@ export async function addUserToOrganization(
  */
 export async function updateUserLastLogin(userId: string): Promise<void> {
   await sql`
-    UPDATE users
+    UPDATE public.users
     SET last_login_at = NOW(), email_verified = TRUE
     WHERE id = ${userId}
   `

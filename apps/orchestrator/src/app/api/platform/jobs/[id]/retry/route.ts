@@ -46,7 +46,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Get current job state
     const currentResult = await sql`
-      SELECT * FROM platform_jobs WHERE id = ${jobId}
+      SELECT * FROM public.platform_jobs WHERE id = ${jobId}
     `
 
     if (currentResult.rows.length === 0) {
@@ -65,7 +65,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if ((job.attempts as number) >= (job.max_attempts as number)) {
       // Increase max attempts to allow retry
       await sql`
-        UPDATE platform_jobs
+        UPDATE public.platform_jobs
         SET max_attempts = max_attempts + 1
         WHERE id = ${jobId}
       `
@@ -73,7 +73,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Reset job to pending for retry
     await sql`
-      UPDATE platform_jobs
+      UPDATE public.platform_jobs
       SET status = 'pending',
           error_message = NULL,
           error_stack = NULL,

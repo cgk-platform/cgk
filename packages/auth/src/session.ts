@@ -50,7 +50,7 @@ export async function createSession(
   const userAgent = req?.headers.get('user-agent') || null
 
   const result = await sql`
-    INSERT INTO sessions (user_id, organization_id, token_hash, expires_at, ip_address, user_agent)
+    INSERT INTO public.sessions (user_id, organization_id, token_hash, expires_at, ip_address, user_agent)
     VALUES (${userId}, ${orgId}, ${tokenHash}, ${expiresAt.toISOString()}, ${ipAddress}, ${userAgent})
     RETURNING *
   `
@@ -74,7 +74,7 @@ export async function validateSession(token: string): Promise<Session | null> {
   const tokenHash = await sha256(token)
 
   const result = await sql`
-    SELECT * FROM sessions
+    SELECT * FROM public.sessions
     WHERE token_hash = ${tokenHash}
       AND expires_at > NOW()
       AND revoked_at IS NULL
@@ -96,7 +96,7 @@ export async function validateSession(token: string): Promise<Session | null> {
  */
 export async function validateSessionById(sessionId: string): Promise<Session | null> {
   const result = await sql`
-    SELECT * FROM sessions
+    SELECT * FROM public.sessions
     WHERE id = ${sessionId}
       AND expires_at > NOW()
       AND revoked_at IS NULL
@@ -117,7 +117,7 @@ export async function validateSessionById(sessionId: string): Promise<Session | 
  */
 export async function revokeSession(sessionId: string): Promise<void> {
   await sql`
-    UPDATE sessions
+    UPDATE public.sessions
     SET revoked_at = NOW()
     WHERE id = ${sessionId}
   `
@@ -130,7 +130,7 @@ export async function revokeSession(sessionId: string): Promise<void> {
  */
 export async function revokeAllSessions(userId: string): Promise<void> {
   await sql`
-    UPDATE sessions
+    UPDATE public.sessions
     SET revoked_at = NOW()
     WHERE user_id = ${userId}
       AND revoked_at IS NULL
@@ -145,7 +145,7 @@ export async function revokeAllSessions(userId: string): Promise<void> {
  */
 export async function getUserSessions(userId: string): Promise<Session[]> {
   const result = await sql`
-    SELECT * FROM sessions
+    SELECT * FROM public.sessions
     WHERE user_id = ${userId}
       AND expires_at > NOW()
       AND revoked_at IS NULL
@@ -166,7 +166,7 @@ export async function updateSessionOrganization(
   orgId: string | null
 ): Promise<void> {
   await sql`
-    UPDATE sessions
+    UPDATE public.sessions
     SET organization_id = ${orgId}
     WHERE id = ${sessionId}
   `

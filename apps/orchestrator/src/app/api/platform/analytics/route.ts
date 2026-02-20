@@ -173,7 +173,7 @@ async function aggregatePlatformAnalytics(
 ): Promise<PlatformAnalytics> {
   // Get all active tenants
   const tenantsResult = await sql`
-    SELECT slug, name FROM organizations WHERE status = 'active' ORDER BY name
+    SELECT slug, name FROM public.organizations WHERE status = 'active' ORDER BY name
   `
 
   const tenants = tenantsResult.rows.map((row) => ({

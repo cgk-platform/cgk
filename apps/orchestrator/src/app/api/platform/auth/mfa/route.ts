@@ -258,7 +258,7 @@ export async function POST(request: Request) {
 
     // Get MFA secret from database
     const secretResult = await sql`
-      SELECT mfa_secret_encrypted FROM super_admin_users
+      SELECT mfa_secret_encrypted FROM public.super_admin_users
       WHERE user_id = ${payload.sub}
     `
 
@@ -297,7 +297,7 @@ export async function POST(request: Request) {
 
     // Update MFA verified timestamp on super admin user
     await sql`
-      UPDATE super_admin_users
+      UPDATE public.super_admin_users
       SET mfa_verified_at = NOW()
       WHERE user_id = ${payload.sub}
     `
@@ -347,7 +347,7 @@ async function handleMfaSetup(userId: string, request: Request): Promise<Respons
 
     // Get user email for QR code
     const userResult = await sql`
-      SELECT email FROM users WHERE id = ${userId}
+      SELECT email FROM public.users WHERE id = ${userId}
     `
     const userRow = userResult.rows[0] as Record<string, unknown> | undefined
     if (!userRow) {
@@ -364,7 +364,7 @@ async function handleMfaSetup(userId: string, request: Request): Promise<Respons
 
     // Store the secret (in production, encrypt this)
     await sql`
-      UPDATE super_admin_users
+      UPDATE public.super_admin_users
       SET mfa_secret_encrypted = ${secret}, mfa_enabled = TRUE
       WHERE user_id = ${userId}
     `

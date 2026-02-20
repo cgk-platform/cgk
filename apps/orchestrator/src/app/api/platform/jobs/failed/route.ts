@@ -54,8 +54,8 @@ export async function GET(request: Request) {
           pj.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_jobs pj
-        LEFT JOIN organizations o ON o.id = pj.tenant_id
+        FROM public.platform_jobs pj
+        LEFT JOIN public.organizations o ON o.id = pj.tenant_id
         WHERE pj.status = 'failed'
           AND pj.tenant_id = ${tenantId}
           AND pj.created_at >= ${since}
@@ -68,8 +68,8 @@ export async function GET(request: Request) {
           pj.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_jobs pj
-        LEFT JOIN organizations o ON o.id = pj.tenant_id
+        FROM public.platform_jobs pj
+        LEFT JOIN public.organizations o ON o.id = pj.tenant_id
         WHERE pj.status = 'failed'
           AND pj.created_at >= ${since}
         ORDER BY pj.created_at DESC
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       SELECT
         job_type,
         COUNT(*) as count
-      FROM platform_jobs
+      FROM public.platform_jobs
       WHERE status = 'failed'
         AND created_at >= ${since}
       GROUP BY job_type
@@ -96,8 +96,8 @@ export async function GET(request: Request) {
         pj.tenant_id,
         o.name as tenant_name,
         COUNT(*) as count
-      FROM platform_jobs pj
-      LEFT JOIN organizations o ON o.id = pj.tenant_id
+      FROM public.platform_jobs pj
+      LEFT JOIN public.organizations o ON o.id = pj.tenant_id
       WHERE pj.status = 'failed'
         AND pj.created_at >= ${since}
       GROUP BY pj.tenant_id, o.name

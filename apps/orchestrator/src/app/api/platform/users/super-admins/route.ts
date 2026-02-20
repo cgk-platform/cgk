@@ -77,9 +77,9 @@ export async function GET(request: Request) {
         u.email,
         u.name,
         granter.email as granted_by_email
-      FROM super_admin_users sau
-      JOIN users u ON u.id = sau.user_id
-      LEFT JOIN users granter ON granter.id = sau.granted_by
+      FROM public.super_admin_users sau
+      JOIN public.users u ON u.id = sau.user_id
+      LEFT JOIN public.users granter ON granter.id = sau.granted_by
       ORDER BY sau.granted_at DESC
     `
 
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
 
     // Create super admin record
     const result = await sql`
-      INSERT INTO super_admin_users (
+      INSERT INTO public.super_admin_users (
         user_id,
         granted_by,
         notes,
@@ -341,7 +341,7 @@ export async function PATCH(request: Request) {
 
     // Get current state for audit log
     const currentResult = await sql`
-      SELECT * FROM super_admin_users WHERE user_id = ${body.userId}
+      SELECT * FROM public.super_admin_users WHERE user_id = ${body.userId}
     `
 
     if (currentResult.rows.length === 0) {
@@ -387,7 +387,7 @@ export async function PATCH(request: Request) {
     if (body.isActive === false) {
       // Deactivation - also set deactivated_at and deactivated_by
       result = await sql`
-        UPDATE super_admin_users
+        UPDATE public.super_admin_users
         SET
           notes = ${notes},
           can_access_all_tenants = ${canAccessAllTenants},
@@ -402,7 +402,7 @@ export async function PATCH(request: Request) {
       `
     } else {
       result = await sql`
-        UPDATE super_admin_users
+        UPDATE public.super_admin_users
         SET
           notes = ${notes},
           can_access_all_tenants = ${canAccessAllTenants},

@@ -80,7 +80,7 @@ export async function getRolesForTenant(tenantId: string): Promise<Role[]> {
       parent_role_id,
       created_at,
       updated_at
-    FROM roles
+    FROM public.roles
     WHERE tenant_id IS NULL OR tenant_id = ${tenantId}
     ORDER BY is_predefined DESC, name ASC
   `
@@ -104,7 +104,7 @@ export async function getPredefinedRoles(): Promise<Role[]> {
       parent_role_id,
       created_at,
       updated_at
-    FROM roles
+    FROM public.roles
     WHERE is_predefined = TRUE
     ORDER BY name ASC
   `
@@ -128,7 +128,7 @@ export async function getRoleById(roleId: string): Promise<Role | null> {
       parent_role_id,
       created_at,
       updated_at
-    FROM roles
+    FROM public.roles
     WHERE id = ${roleId}
   `
 
@@ -187,7 +187,7 @@ export async function createCustomRole(
   }
 
   const result = await sql`
-    INSERT INTO roles (
+    INSERT INTO public.roles (
       tenant_id,
       name,
       description,
@@ -271,7 +271,7 @@ export async function updateRole(
   }
 
   const result = await sql`
-    UPDATE roles
+    UPDATE public.roles
     SET
       name = COALESCE(${data.name ?? null}, name),
       description = COALESCE(${data.description ?? null}, description),
@@ -323,7 +323,7 @@ export async function deleteRole(roleId: string, tenantId: string): Promise<void
   // Check if any users are assigned this role
   const usersWithRole = await sql`
     SELECT COUNT(*) as count
-    FROM user_organizations
+    FROM public.user_organizations
     WHERE role_id = ${roleId}
   `
 
@@ -334,7 +334,7 @@ export async function deleteRole(roleId: string, tenantId: string): Promise<void
   // Check if any other roles inherit from this role
   const childRoles = await sql`
     SELECT COUNT(*) as count
-    FROM roles
+    FROM public.roles
     WHERE parent_role_id = ${roleId}
   `
 
@@ -342,7 +342,7 @@ export async function deleteRole(roleId: string, tenantId: string): Promise<void
     throw new Error('Cannot delete role while other roles inherit from it')
   }
 
-  await sql`DELETE FROM roles WHERE id = ${roleId}`
+  await sql`DELETE FROM public.roles WHERE id = ${roleId}`
 }
 
 /**
@@ -363,7 +363,7 @@ export async function assignRoleToUser(
   }
 
   await sql`
-    UPDATE user_organizations
+    UPDATE public.user_organizations
     SET role_id = ${roleId}, updated_at = NOW()
     WHERE user_id = ${userId} AND organization_id = ${tenantId}
   `
@@ -378,8 +378,8 @@ export async function getUserRole(
 ): Promise<Role | null> {
   const result = await sql`
     SELECT r.*
-    FROM user_organizations uo
-    JOIN roles r ON r.id = uo.role_id
+    FROM public.user_organizations uo
+    JOIN public.roles r ON r.id = uo.role_id
     WHERE uo.user_id = ${userId} AND uo.organization_id = ${tenantId}
   `
 

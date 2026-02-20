@@ -178,7 +178,7 @@ async function getLevelStats(
   if (filters.tenantId && filters.startTime && filters.endTime) {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE tenant_id = ${filters.tenantId}
         AND timestamp >= ${filters.startTime.toISOString()}
         AND timestamp <= ${filters.endTime.toISOString()}
@@ -187,14 +187,14 @@ async function getLevelStats(
   } else if (filters.tenantId) {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE tenant_id = ${filters.tenantId}
       GROUP BY level
     `
   } else if (filters.startTime && filters.endTime) {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE timestamp >= ${filters.startTime.toISOString()}
         AND timestamp <= ${filters.endTime.toISOString()}
       GROUP BY level
@@ -202,7 +202,7 @@ async function getLevelStats(
   } else {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       GROUP BY level
     `
   }

@@ -30,7 +30,7 @@ export async function createMagicLink(
   expiresAt.setHours(expiresAt.getHours() + MAGIC_LINK_EXPIRATION_HOURS)
 
   await sql`
-    INSERT INTO magic_links (email, token_hash, purpose, organization_id, invite_role, expires_at)
+    INSERT INTO public.magic_links (email, token_hash, purpose, organization_id, invite_role, expires_at)
     VALUES (
       ${email.toLowerCase()},
       ${tokenHash},
@@ -61,7 +61,7 @@ export async function verifyMagicLink(
 
   // Find and validate the magic link
   const linkResult = await sql`
-    SELECT * FROM magic_links
+    SELECT * FROM public.magic_links
     WHERE email = ${normalizedEmail}
       AND token_hash = ${tokenHash}
       AND expires_at > NOW()
@@ -75,14 +75,14 @@ export async function verifyMagicLink(
 
   // Mark as used
   await sql`
-    UPDATE magic_links
+    UPDATE public.magic_links
     SET used_at = NOW()
     WHERE id = ${link.id}
   `
 
   // Check if user exists
   const userResult = await sql`
-    SELECT id FROM users
+    SELECT id FROM public.users
     WHERE email = ${normalizedEmail}
   `
 
@@ -206,7 +206,7 @@ function getMagicLinkEmailHtml(url: string, purpose: MagicLinkPurpose): string {
  */
 export async function cleanupExpiredMagicLinks(): Promise<number> {
   const result = await sql`
-    DELETE FROM magic_links
+    DELETE FROM public.magic_links
     WHERE expires_at < NOW() - INTERVAL '7 days'
   `
   return result.rowCount ?? 0

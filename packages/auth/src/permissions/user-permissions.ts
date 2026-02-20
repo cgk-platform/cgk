@@ -32,9 +32,9 @@ export async function getUserPermissions(
       r.permissions as role_permissions,
       r.parent_role_id,
       pr.permissions as parent_permissions
-    FROM user_organizations uo
-    LEFT JOIN roles r ON r.id = uo.role_id
-    LEFT JOIN roles pr ON pr.id = r.parent_role_id
+    FROM public.user_organizations uo
+    LEFT JOIN public.roles r ON r.id = uo.role_id
+    LEFT JOIN public.roles pr ON pr.id = r.parent_role_id
     WHERE uo.user_id = ${userId} AND uo.organization_id = ${tenantId}
   `
 
@@ -145,9 +145,9 @@ export async function getUsersWithPermission(
       r.permissions as role_permissions,
       r.parent_role_id,
       pr.permissions as parent_permissions
-    FROM user_organizations uo
-    LEFT JOIN roles r ON r.id = uo.role_id
-    LEFT JOIN roles pr ON pr.id = r.parent_role_id
+    FROM public.user_organizations uo
+    LEFT JOIN public.roles r ON r.id = uo.role_id
+    LEFT JOIN public.roles pr ON pr.id = r.parent_role_id
     WHERE uo.organization_id = ${tenantId}
   `
 

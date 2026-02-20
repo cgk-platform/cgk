@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS mcp_api_keys (
 CREATE INDEX IF NOT EXISTS idx_mcp_api_keys_hash ON mcp_api_keys(key_hash);
 CREATE INDEX IF NOT EXISTS idx_mcp_api_keys_prefix ON mcp_api_keys(key_prefix);
 CREATE INDEX IF NOT EXISTS idx_mcp_api_keys_active ON mcp_api_keys(key_hash)
-  WHERE revoked_at IS NULL AND (expires_at IS NULL OR expires_at > NOW());
+  WHERE revoked_at IS NULL;
 
 COMMENT ON TABLE mcp_api_keys IS 'API keys for authenticating MCP server requests';
 COMMENT ON COLUMN mcp_api_keys.key_hash IS 'SHA-256 hash of the API key (never store raw key)';

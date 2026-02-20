@@ -58,7 +58,7 @@ async function logAudit(
   const metadataJson = metadata ? JSON.stringify(metadata) : null
 
   await sql`
-    INSERT INTO super_admin_audit_log (
+    INSERT INTO public.super_admin_audit_log (
       user_id,
       action,
       resource_type,
@@ -101,7 +101,7 @@ export async function PATCH(
 
     // Check if the entry exists
     const existingResult = await sql`
-      SELECT id, ip_address, is_active FROM super_admin_ip_allowlist
+      SELECT id, ip_address, is_active FROM public.super_admin_ip_allowlist
       WHERE id = ${id}::uuid
     `
 
@@ -121,7 +121,7 @@ export async function PATCH(
     // Update the entry
     if (body.isActive !== undefined) {
       await sql`
-        UPDATE super_admin_ip_allowlist
+        UPDATE public.super_admin_ip_allowlist
         SET is_active = ${body.isActive}, updated_at = NOW()
         WHERE id = ${id}::uuid
       `
@@ -138,7 +138,7 @@ export async function PATCH(
 
     if (body.description !== undefined) {
       await sql`
-        UPDATE super_admin_ip_allowlist
+        UPDATE public.super_admin_ip_allowlist
         SET description = ${body.description}, updated_at = NOW()
         WHERE id = ${id}::uuid
       `
@@ -173,7 +173,7 @@ export async function DELETE(
 
     // Check if the entry exists
     const existingResult = await sql`
-      SELECT id, ip_address FROM super_admin_ip_allowlist
+      SELECT id, ip_address FROM public.super_admin_ip_allowlist
       WHERE id = ${id}::uuid
     `
 
@@ -191,7 +191,7 @@ export async function DELETE(
 
     // Delete the entry
     await sql`
-      DELETE FROM super_admin_ip_allowlist
+      DELETE FROM public.super_admin_ip_allowlist
       WHERE id = ${id}::uuid
     `
 

@@ -43,8 +43,8 @@ export async function GET(request: Request, { params }: RouteParams) {
         pj.*,
         o.name as tenant_name,
         o.slug as tenant_slug
-      FROM platform_jobs pj
-      LEFT JOIN organizations o ON o.id = pj.tenant_id
+      FROM public.platform_jobs pj
+      LEFT JOIN public.organizations o ON o.id = pj.tenant_id
       WHERE pj.id = ${jobId}
     `
 
@@ -111,7 +111,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // Build update based on provided fields
     if (status === 'running') {
       await sql`
-        UPDATE platform_jobs
+        UPDATE public.platform_jobs
         SET status = 'running',
             started_at = ${startedAt || new Date().toISOString()},
             attempts = attempts + 1,
@@ -120,7 +120,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       `
     } else if (status === 'completed') {
       await sql`
-        UPDATE platform_jobs
+        UPDATE public.platform_jobs
         SET status = 'completed',
             result = ${result ? JSON.stringify(result) : null}::jsonb,
             completed_at = ${completedAt || new Date().toISOString()},
@@ -129,7 +129,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       `
     } else if (status === 'failed') {
       await sql`
-        UPDATE platform_jobs
+        UPDATE public.platform_jobs
         SET status = 'failed',
             error_message = ${errorMessage || null},
             error_stack = ${errorStack || null},
@@ -139,14 +139,14 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       `
     } else if (status === 'cancelled') {
       await sql`
-        UPDATE platform_jobs
+        UPDATE public.platform_jobs
         SET status = 'cancelled',
             updated_at = NOW()
         WHERE id = ${jobId}
       `
     } else if (status === 'pending') {
       await sql`
-        UPDATE platform_jobs
+        UPDATE public.platform_jobs
         SET status = 'pending',
             updated_at = NOW()
         WHERE id = ${jobId}

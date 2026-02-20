@@ -212,9 +212,9 @@ export async function getAllUsers(options: UserQueryOptions = {}): Promise<Pagin
   const countResult = await sql.query(
     `
     SELECT COUNT(DISTINCT u.id) as total
-    FROM users u
-    LEFT JOIN super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
-    LEFT JOIN user_organizations uo ON uo.user_id = u.id
+    FROM public.users u
+    LEFT JOIN public.super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
+    LEFT JOIN public.user_organizations uo ON uo.user_id = u.id
     ${whereClause}
   `,
     params
@@ -229,11 +229,11 @@ export async function getAllUsers(options: UserQueryOptions = {}): Promise<Pagin
       u.id, u.email, u.name, u.avatar_url, u.status, u.role,
       u.email_verified, u.last_login_at, u.created_at, u.updated_at,
       u.disabled_at, u.disabled_by, u.disabled_reason,
-      (SELECT COUNT(*) FROM user_organizations WHERE user_id = u.id) as tenant_count,
+      (SELECT COUNT(*) FROM public.user_organizations WHERE user_id = u.id) as tenant_count,
       CASE WHEN sau.user_id IS NOT NULL THEN TRUE ELSE FALSE END as is_super_admin
-    FROM users u
-    LEFT JOIN super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
-    LEFT JOIN user_organizations uo ON uo.user_id = u.id
+    FROM public.users u
+    LEFT JOIN public.super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
+    LEFT JOIN public.user_organizations uo ON uo.user_id = u.id
     ${whereClause}
     GROUP BY u.id, sau.user_id
     ORDER BY ${sortColumn} ${sortDir} NULLS LAST
@@ -271,10 +271,10 @@ export async function searchUsers(
       u.id, u.email, u.name, u.avatar_url, u.status, u.role,
       u.email_verified, u.last_login_at, u.created_at, u.updated_at,
       u.disabled_at, u.disabled_by, u.disabled_reason,
-      (SELECT COUNT(*) FROM user_organizations WHERE user_id = u.id) as tenant_count,
+      (SELECT COUNT(*) FROM public.user_organizations WHERE user_id = u.id) as tenant_count,
       CASE WHEN sau.user_id IS NOT NULL THEN TRUE ELSE FALSE END as is_super_admin
-    FROM users u
-    LEFT JOIN super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
+    FROM public.users u
+    LEFT JOIN public.super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
     WHERE u.search_vector @@ plainto_tsquery('english', ${query})
     ORDER BY ts_rank(u.search_vector, plainto_tsquery('english', ${query})) DESC
     LIMIT ${limit}
@@ -296,12 +296,12 @@ export async function getUserWithMemberships(userId: string): Promise<UserWithMe
       u.id, u.email, u.name, u.avatar_url, u.status, u.role,
       u.email_verified, u.last_login_at, u.created_at, u.updated_at,
       u.disabled_at, u.disabled_by, u.disabled_reason,
-      (SELECT COUNT(*) FROM user_organizations WHERE user_id = u.id) as tenant_count,
+      (SELECT COUNT(*) FROM public.user_organizations WHERE user_id = u.id) as tenant_count,
       CASE WHEN sau.user_id IS NOT NULL THEN TRUE ELSE FALSE END as is_super_admin,
       sau.granted_by as super_admin_granted_by,
       sau.granted_at as super_admin_granted_at
-    FROM users u
-    LEFT JOIN super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
+    FROM public.users u
+    LEFT JOIN public.super_admin_users sau ON sau.user_id = u.id AND sau.is_active = TRUE
     WHERE u.id = ${userId}
   `
 
@@ -322,8 +322,8 @@ export async function getUserWithMemberships(userId: string): Promise<UserWithMe
       uo.role,
       uo.created_at as joined_at,
       o.is_active
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
     ORDER BY uo.created_at DESC
   `
@@ -371,8 +371,8 @@ export async function getUserActivityLog(
       o.name as tenant_name,
       ual.action, ual.resource_type, ual.resource_id,
       ual.metadata, ual.ip_address, ual.created_at
-    FROM user_activity_log ual
-    LEFT JOIN organizations o ON o.id = ual.tenant_id
+    FROM public.user_activity_log ual
+    LEFT JOIN public.organizations o ON o.id = ual.tenant_id
     WHERE ual.user_id = ${userId}
     ORDER BY ual.created_at DESC
     LIMIT ${limit} OFFSET ${offset}
@@ -411,7 +411,7 @@ export async function logUserActivity(entry: {
   userAgent?: string | null
 }): Promise<void> {
   await sql`
-    INSERT INTO user_activity_log (
+    INSERT INTO public.user_activity_log (
       user_id, tenant_id, action, resource_type, resource_id,
       metadata, ip_address, user_agent
     )
@@ -444,12 +444,12 @@ export async function disableUser(
 ): Promise<void> {
   // Check if user is the last super admin
   const superAdminCount = await sql`
-    SELECT COUNT(*) as count FROM super_admin_users WHERE is_active = TRUE
+    SELECT COUNT(*) as count FROM public.super_admin_users WHERE is_active = TRUE
   `
   const count = Number((superAdminCount.rows[0] as Record<string, unknown>).count || 0)
 
   const isSuperAdminResult = await sql`
-    SELECT user_id FROM super_admin_users
+    SELECT user_id FROM public.super_admin_users
     WHERE user_id = ${userId} AND is_active = TRUE
   `
 
@@ -459,7 +459,7 @@ export async function disableUser(
 
   // Update user status
   await sql`
-    UPDATE users
+    UPDATE public.users
     SET
       status = 'disabled',
       disabled_at = NOW(),
@@ -501,7 +501,7 @@ export async function disableUser(
  */
 export async function enableUser(userId: string, enabledBy: string): Promise<void> {
   await sql`
-    UPDATE users
+    UPDATE public.users
     SET
       status = 'active',
       disabled_at = NULL,
@@ -541,7 +541,7 @@ export async function grantSuperAdmin(
 ): Promise<void> {
   // Verify the granting user has permission to manage super admins
   const granterResult = await sql`
-    SELECT can_manage_super_admins FROM super_admin_users
+    SELECT can_manage_super_admins FROM public.super_admin_users
     WHERE user_id = ${grantedBy} AND is_active = TRUE
   `
 
@@ -556,7 +556,7 @@ export async function grantSuperAdmin(
 
   // Check if user already has super admin access
   const existingResult = await sql`
-    SELECT user_id, is_active FROM super_admin_users WHERE user_id = ${userId}
+    SELECT user_id, is_active FROM public.super_admin_users WHERE user_id = ${userId}
   `
 
   if (existingResult.rows.length > 0) {
@@ -567,7 +567,7 @@ export async function grantSuperAdmin(
 
     // Reactivate existing super admin
     await sql`
-      UPDATE super_admin_users
+      UPDATE public.super_admin_users
       SET
         is_active = TRUE,
         granted_at = NOW(),
@@ -580,14 +580,14 @@ export async function grantSuperAdmin(
   } else {
     // Create new super admin record
     await sql`
-      INSERT INTO super_admin_users (user_id, granted_by, notes)
+      INSERT INTO public.super_admin_users (user_id, granted_by, notes)
       VALUES (${userId}, ${grantedBy}, ${notes || null})
     `
   }
 
   // Update user role
   await sql`
-    UPDATE users SET role = 'super_admin' WHERE id = ${userId}
+    UPDATE public.users SET role = 'super_admin' WHERE id = ${userId}
   `
 
   // Log the action
@@ -620,7 +620,7 @@ export async function revokeSuperAdmin(userId: string, revokedBy: string): Promi
 
   // Check if this is the last super admin
   const superAdminCount = await sql`
-    SELECT COUNT(*) as count FROM super_admin_users WHERE is_active = TRUE
+    SELECT COUNT(*) as count FROM public.super_admin_users WHERE is_active = TRUE
   `
   const count = Number((superAdminCount.rows[0] as Record<string, unknown>).count || 0)
 
@@ -630,7 +630,7 @@ export async function revokeSuperAdmin(userId: string, revokedBy: string): Promi
 
   // Verify the revoking user has permission
   const revokerResult = await sql`
-    SELECT can_manage_super_admins FROM super_admin_users
+    SELECT can_manage_super_admins FROM public.super_admin_users
     WHERE user_id = ${revokedBy} AND is_active = TRUE
   `
 
@@ -645,7 +645,7 @@ export async function revokeSuperAdmin(userId: string, revokedBy: string): Promi
 
   // Deactivate super admin access
   await sql`
-    UPDATE super_admin_users
+    UPDATE public.super_admin_users
     SET
       is_active = FALSE,
       deactivated_at = NOW(),
@@ -658,7 +658,7 @@ export async function revokeSuperAdmin(userId: string, revokedBy: string): Promi
 
   // Update user role back to member (they may still have org-level roles)
   await sql`
-    UPDATE users SET role = 'member' WHERE id = ${userId}
+    UPDATE public.users SET role = 'member' WHERE id = ${userId}
   `
 
   // Log the action
@@ -711,9 +711,9 @@ export async function getSuperAdminRegistry(): Promise<
       sau.can_manage_super_admins,
       sau.mfa_enabled,
       sau.last_access_at
-    FROM super_admin_users sau
-    JOIN users u ON u.id = sau.user_id
-    LEFT JOIN users granter ON granter.id = sau.granted_by
+    FROM public.super_admin_users sau
+    JOIN public.users u ON u.id = sau.user_id
+    LEFT JOIN public.users granter ON granter.id = sau.granted_by
     WHERE sau.is_active = TRUE
     ORDER BY sau.granted_at DESC
   `

@@ -57,8 +57,8 @@ export async function GET(request: Request) {
           pj.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_jobs pj
-        LEFT JOIN organizations o ON o.id = pj.tenant_id
+        FROM public.platform_jobs pj
+        LEFT JOIN public.organizations o ON o.id = pj.tenant_id
         WHERE pj.tenant_id = ${tenantId}
           AND pj.status = ${status}
         ORDER BY pj.created_at DESC
@@ -70,8 +70,8 @@ export async function GET(request: Request) {
           pj.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_jobs pj
-        LEFT JOIN organizations o ON o.id = pj.tenant_id
+        FROM public.platform_jobs pj
+        LEFT JOIN public.organizations o ON o.id = pj.tenant_id
         WHERE pj.tenant_id = ${tenantId}
         ORDER BY pj.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -82,8 +82,8 @@ export async function GET(request: Request) {
           pj.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_jobs pj
-        LEFT JOIN organizations o ON o.id = pj.tenant_id
+        FROM public.platform_jobs pj
+        LEFT JOIN public.organizations o ON o.id = pj.tenant_id
         WHERE pj.status = ${status}
         ORDER BY pj.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -94,8 +94,8 @@ export async function GET(request: Request) {
           pj.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_jobs pj
-        LEFT JOIN organizations o ON o.id = pj.tenant_id
+        FROM public.platform_jobs pj
+        LEFT JOIN public.organizations o ON o.id = pj.tenant_id
         WHERE pj.job_type = ${jobType}
         ORDER BY pj.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -106,8 +106,8 @@ export async function GET(request: Request) {
           pj.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_jobs pj
-        LEFT JOIN organizations o ON o.id = pj.tenant_id
+        FROM public.platform_jobs pj
+        LEFT JOIN public.organizations o ON o.id = pj.tenant_id
         ORDER BY pj.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `
@@ -122,7 +122,7 @@ export async function GET(request: Request) {
         COUNT(*) FILTER (WHERE status = 'failed') as failed_count,
         COUNT(*) FILTER (WHERE status = 'cancelled') as cancelled_count,
         COUNT(*) FILTER (WHERE status = 'failed' AND created_at >= NOW() - INTERVAL '24 hours') as failed_24h
-      FROM platform_jobs
+      FROM public.platform_jobs
     `
 
     const stats = statsResult.rows[0] as Record<string, unknown>
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
     }
 
     await sql`
-      INSERT INTO platform_jobs (
+      INSERT INTO public.platform_jobs (
         id, tenant_id, job_type, status, payload, max_attempts, scheduled_at
       )
       VALUES (

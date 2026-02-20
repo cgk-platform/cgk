@@ -58,7 +58,7 @@ async function logAudit(
   const metadataJson = metadata ? JSON.stringify(metadata) : null
 
   await sql`
-    INSERT INTO super_admin_audit_log (
+    INSERT INTO public.super_admin_audit_log (
       user_id,
       action,
       resource_type,
@@ -145,7 +145,7 @@ export async function POST(request: Request) {
 
     // Check for duplicates
     const existingResult = await sql`
-      SELECT id FROM super_admin_ip_allowlist
+      SELECT id FROM public.super_admin_ip_allowlist
       WHERE ip_address = ${body.ipAddress}::inet
     `
 
@@ -158,7 +158,7 @@ export async function POST(request: Request) {
 
     // Insert the new IP
     const result = await sql`
-      INSERT INTO super_admin_ip_allowlist (
+      INSERT INTO public.super_admin_ip_allowlist (
         ip_address,
         description,
         added_by,
@@ -183,7 +183,7 @@ export async function POST(request: Request) {
 
     // Get the user's email for the response
     const userResult = await sql`
-      SELECT email FROM users WHERE id = ${userId}::uuid
+      SELECT email FROM public.users WHERE id = ${userId}::uuid
     `
     const addedByEmail = userResult.rows[0]
       ? (userResult.rows[0] as { email: string }).email

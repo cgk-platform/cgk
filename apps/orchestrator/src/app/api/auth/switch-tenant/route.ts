@@ -87,7 +87,7 @@ export async function POST(request: Request) {
 
     // Get organization slug
     const orgResult = await sql`
-      SELECT slug FROM organizations WHERE id = ${organizationId}
+      SELECT slug FROM public.organizations WHERE id = ${organizationId}
     `
     const orgRow = orgResult.rows[0]
     if (!orgRow) {

@@ -152,7 +152,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     sendImpersonationNotice({
       targetEmail: result.targetUser.email,
       targetName: result.targetUser.name ?? result.targetUser.email,
-      actorName: superAdmin.name ?? superAdmin.email ?? `User ${userId}`,
+      actorName: `User ${userId}`,
       tenantId,
       reason,
       startedAt: new Date(),
@@ -161,7 +161,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Get tenant info for response
     const tenantResult = await sql`
-      SELECT name, slug FROM organizations WHERE id = ${tenantId}
+      SELECT name, slug FROM public.organizations WHERE id = ${tenantId}
     `
     const tenant = tenantResult.rows[0] as Record<string, unknown> | undefined
 
@@ -220,10 +220,10 @@ export async function GET(request: Request, _params: RouteParams) {
     const enrichedSessions = await Promise.all(
       sessions.map(async (session) => {
         const userResult = await sql`
-          SELECT id, email, name FROM users WHERE id = ${session.targetUserId}
+          SELECT id, email, name FROM public.users WHERE id = ${session.targetUserId}
         `
         const tenantResult = await sql`
-          SELECT id, name, slug FROM organizations WHERE id = ${session.targetTenantId}
+          SELECT id, name, slug FROM public.organizations WHERE id = ${session.targetTenantId}
         `
 
         return {

@@ -19,8 +19,7 @@ CREATE INDEX IF NOT EXISTS idx_portal_sessions_customer ON portal_sessions(custo
 CREATE INDEX IF NOT EXISTS idx_portal_sessions_expires ON portal_sessions(expires_at);
 
 -- Partial index for active sessions
-CREATE INDEX IF NOT EXISTS idx_portal_sessions_active ON portal_sessions(customer_id, expires_at)
-  WHERE expires_at > NOW();
+CREATE INDEX IF NOT EXISTS idx_portal_sessions_active ON portal_sessions(customer_id, expires_at);
 
 -- Function to clean up expired portal sessions
 CREATE OR REPLACE FUNCTION cleanup_expired_portal_sessions()

@@ -59,8 +59,8 @@ export async function switchTenantContext(
       o.name,
       o.logo_url,
       o.status
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
       AND o.slug = ${targetTenantSlug}
   `
@@ -78,7 +78,7 @@ export async function switchTenantContext(
 
   // Get user email for JWT
   const userResult = await sql`
-    SELECT email FROM users WHERE id = ${userId}
+    SELECT email FROM public.users WHERE id = ${userId}
   `
 
   if (userResult.rows.length === 0) {
@@ -90,8 +90,8 @@ export async function switchTenantContext(
   // Get all user's organizations for JWT
   const orgsResult = await sql`
     SELECT uo.role, o.id, o.slug
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
       AND o.status = 'active'
   `
@@ -110,7 +110,7 @@ export async function switchTenantContext(
 
   // Update last_active_at for membership
   await sql`
-    UPDATE user_organizations
+    UPDATE public.user_organizations
     SET last_active_at = NOW()
     WHERE user_id = ${userId}
       AND organization_id = ${tenantId}
@@ -165,8 +165,8 @@ export async function getUserTenants(userId: string): Promise<TenantContext[]> {
       uo.role,
       uo.is_default,
       uo.last_active_at
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
       AND o.status = 'active'
     ORDER BY
@@ -198,7 +198,7 @@ export async function getUserTenants(userId: string): Promise<TenantContext[]> {
 export async function setDefaultTenant(userId: string, tenantId: string): Promise<void> {
   // Verify user has access to this tenant
   const membershipResult = await sql`
-    SELECT 1 FROM user_organizations
+    SELECT 1 FROM public.user_organizations
     WHERE user_id = ${userId} AND organization_id = ${tenantId}
   `
 
@@ -208,14 +208,14 @@ export async function setDefaultTenant(userId: string, tenantId: string): Promis
 
   // Clear any existing default
   await sql`
-    UPDATE user_organizations
+    UPDATE public.user_organizations
     SET is_default = FALSE
     WHERE user_id = ${userId} AND is_default = TRUE
   `
 
   // Set new default
   await sql`
-    UPDATE user_organizations
+    UPDATE public.user_organizations
     SET is_default = TRUE
     WHERE user_id = ${userId} AND organization_id = ${tenantId}
   `
@@ -237,8 +237,8 @@ export async function getDefaultTenant(userId: string): Promise<TenantContext | 
       uo.role,
       uo.is_default,
       uo.last_active_at
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
       AND uo.is_default = TRUE
       AND o.status = 'active'
@@ -273,7 +273,7 @@ export async function updateMembershipActivity(
   tenantId: string
 ): Promise<void> {
   await sql`
-    UPDATE user_organizations
+    UPDATE public.user_organizations
     SET last_active_at = NOW()
     WHERE user_id = ${userId} AND organization_id = ${tenantId}
   `
@@ -290,8 +290,8 @@ export async function shouldShowWelcomeModal(userId: string): Promise<boolean> {
     SELECT
       COUNT(*) as tenant_count,
       SUM(CASE WHEN is_default = TRUE THEN 1 ELSE 0 END) as default_count
-    FROM user_organizations uo
-    JOIN organizations o ON o.id = uo.organization_id
+    FROM public.user_organizations uo
+    JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
       AND o.status = 'active'
   `

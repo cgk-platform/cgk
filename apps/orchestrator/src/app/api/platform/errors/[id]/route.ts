@@ -46,10 +46,10 @@ export async function GET(request: Request, { params }: RouteParams) {
         o.slug as tenant_slug,
         u_ack.email as acknowledged_by_email,
         u_res.email as resolved_by_email
-      FROM platform_errors pe
-      LEFT JOIN organizations o ON o.id = pe.tenant_id
-      LEFT JOIN users u_ack ON u_ack.id = pe.acknowledged_by
-      LEFT JOIN users u_res ON u_res.id = pe.resolved_by
+      FROM public.platform_errors pe
+      LEFT JOIN public.organizations o ON o.id = pe.tenant_id
+      LEFT JOIN public.users u_ack ON u_ack.id = pe.acknowledged_by
+      LEFT JOIN public.users u_res ON u_res.id = pe.resolved_by
       WHERE pe.id = ${errorId}
     `
 
@@ -64,7 +64,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     const relatedResult = patternHash
       ? await sql`
           SELECT id, occurred_at, tenant_id
-          FROM platform_errors
+          FROM public.platform_errors
           WHERE pattern_hash = ${patternHash}
             AND id != ${errorId}
           ORDER BY occurred_at DESC
@@ -142,7 +142,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     // Get current error state for audit
     const currentResult = await sql`
-      SELECT status, tenant_id FROM platform_errors WHERE id = ${errorId}
+      SELECT status, tenant_id FROM public.platform_errors WHERE id = ${errorId}
     `
 
     if (currentResult.rows.length === 0) {
@@ -154,7 +154,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     // Update based on new status
     if (status === 'acknowledged') {
       await sql`
-        UPDATE platform_errors
+        UPDATE public.platform_errors
         SET status = 'acknowledged',
             acknowledged_at = NOW(),
             acknowledged_by = ${userId}
@@ -162,7 +162,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       `
     } else if (status === 'resolved') {
       await sql`
-        UPDATE platform_errors
+        UPDATE public.platform_errors
         SET status = 'resolved',
             resolved_at = NOW(),
             resolved_by = ${userId}
@@ -171,7 +171,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     } else {
       // Re-open
       await sql`
-        UPDATE platform_errors
+        UPDATE public.platform_errors
         SET status = 'open',
             acknowledged_at = NULL,
             acknowledged_by = NULL,

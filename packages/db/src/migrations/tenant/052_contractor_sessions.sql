@@ -19,8 +19,7 @@ CREATE INDEX IF NOT EXISTS idx_contractor_sessions_contractor ON contractor_sess
 CREATE INDEX IF NOT EXISTS idx_contractor_sessions_expires ON contractor_sessions(expires_at);
 
 -- Partial index for active sessions
-CREATE INDEX IF NOT EXISTS idx_contractor_sessions_active ON contractor_sessions(contractor_id, expires_at)
-  WHERE expires_at > NOW();
+CREATE INDEX IF NOT EXISTS idx_contractor_sessions_active ON contractor_sessions(contractor_id, expires_at);
 
 -- Function to clean up expired sessions (can be called by cron job)
 CREATE OR REPLACE FUNCTION cleanup_expired_contractor_sessions()

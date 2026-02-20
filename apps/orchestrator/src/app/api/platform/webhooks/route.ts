@@ -57,8 +57,8 @@ export async function GET(request: Request) {
           pw.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_webhooks pw
-        LEFT JOIN organizations o ON o.id = pw.tenant_id
+        FROM public.platform_webhooks pw
+        LEFT JOIN public.organizations o ON o.id = pw.tenant_id
         WHERE pw.tenant_id = ${tenantId}
           AND pw.status = ${status}
         ORDER BY pw.created_at DESC
@@ -70,8 +70,8 @@ export async function GET(request: Request) {
           pw.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_webhooks pw
-        LEFT JOIN organizations o ON o.id = pw.tenant_id
+        FROM public.platform_webhooks pw
+        LEFT JOIN public.organizations o ON o.id = pw.tenant_id
         WHERE pw.tenant_id = ${tenantId}
         ORDER BY pw.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -82,8 +82,8 @@ export async function GET(request: Request) {
           pw.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_webhooks pw
-        LEFT JOIN organizations o ON o.id = pw.tenant_id
+        FROM public.platform_webhooks pw
+        LEFT JOIN public.organizations o ON o.id = pw.tenant_id
         WHERE pw.status = ${status}
         ORDER BY pw.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -94,8 +94,8 @@ export async function GET(request: Request) {
           pw.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_webhooks pw
-        LEFT JOIN organizations o ON o.id = pw.tenant_id
+        FROM public.platform_webhooks pw
+        LEFT JOIN public.organizations o ON o.id = pw.tenant_id
         WHERE pw.event_type = ${eventType}
         ORDER BY pw.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -106,8 +106,8 @@ export async function GET(request: Request) {
           pw.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_webhooks pw
-        LEFT JOIN organizations o ON o.id = pw.tenant_id
+        FROM public.platform_webhooks pw
+        LEFT JOIN public.organizations o ON o.id = pw.tenant_id
         ORDER BY pw.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `
@@ -121,7 +121,7 @@ export async function GET(request: Request) {
         COUNT(*) FILTER (WHERE status = 'failed') as failed_count,
         COUNT(*) FILTER (WHERE status = 'retrying') as retrying_count,
         COUNT(*) FILTER (WHERE status = 'failed' AND created_at >= NOW() - INTERVAL '24 hours') as failed_24h
-      FROM platform_webhooks
+      FROM public.platform_webhooks
     `
 
     const stats = statsResult.rows[0] as Record<string, unknown>

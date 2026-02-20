@@ -204,7 +204,7 @@ async function getVolumeByLevel(
   if (tenantId && service) {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE tenant_id = ${tenantId}
         AND service = ${service}
         AND timestamp >= ${startTime.toISOString()}
@@ -215,7 +215,7 @@ async function getVolumeByLevel(
   } else if (tenantId) {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE tenant_id = ${tenantId}
         AND timestamp >= ${startTime.toISOString()}
         AND timestamp <= ${endTime.toISOString()}
@@ -225,7 +225,7 @@ async function getVolumeByLevel(
   } else if (service) {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE service = ${service}
         AND timestamp >= ${startTime.toISOString()}
         AND timestamp <= ${endTime.toISOString()}
@@ -235,7 +235,7 @@ async function getVolumeByLevel(
   } else {
     result = await sql`
       SELECT level, COUNT(*)::int as count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE timestamp >= ${startTime.toISOString()}
         AND timestamp <= ${endTime.toISOString()}
       GROUP BY level
@@ -272,7 +272,7 @@ async function getVolumeByTenant(
         tenant_slug,
         COUNT(*)::int as count,
         COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as error_count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE service = ${service}
         AND timestamp >= ${startTime.toISOString()}
         AND timestamp <= ${endTime.toISOString()}
@@ -287,7 +287,7 @@ async function getVolumeByTenant(
         tenant_slug,
         COUNT(*)::int as count,
         COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as error_count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE timestamp >= ${startTime.toISOString()}
         AND timestamp <= ${endTime.toISOString()}
       GROUP BY tenant_id, tenant_slug
@@ -326,7 +326,7 @@ async function getVolumeByService(
         service,
         COUNT(*)::int as count,
         COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as error_count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE tenant_id = ${tenantId}
         AND timestamp >= ${startTime.toISOString()}
         AND timestamp <= ${endTime.toISOString()}
@@ -339,7 +339,7 @@ async function getVolumeByService(
         service,
         COUNT(*)::int as count,
         COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as error_count
-      FROM platform_logs
+      FROM public.platform_logs
       WHERE timestamp >= ${startTime.toISOString()}
         AND timestamp <= ${endTime.toISOString()}
       GROUP BY service
@@ -393,7 +393,7 @@ async function getTimeSeries(
                 INTERVAL '5 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 5) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -404,7 +404,7 @@ async function getTimeSeries(
                 INTERVAL '15 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 15) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -415,7 +415,7 @@ async function getTimeSeries(
                 INTERVAL '6 hours' * FLOOR(EXTRACT(HOUR FROM timestamp) / 6) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -425,7 +425,7 @@ async function getTimeSeries(
               date_trunc('day', timestamp) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -435,7 +435,7 @@ async function getTimeSeries(
               date_trunc('hour', timestamp) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -452,7 +452,7 @@ async function getTimeSeries(
                 INTERVAL '5 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 5) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE tenant_id = ${tid} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -463,7 +463,7 @@ async function getTimeSeries(
                 INTERVAL '15 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 15) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE tenant_id = ${tid} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -474,7 +474,7 @@ async function getTimeSeries(
                 INTERVAL '6 hours' * FLOOR(EXTRACT(HOUR FROM timestamp) / 6) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE tenant_id = ${tid} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -484,7 +484,7 @@ async function getTimeSeries(
               date_trunc('day', timestamp) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE tenant_id = ${tid} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -494,7 +494,7 @@ async function getTimeSeries(
               date_trunc('hour', timestamp) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE tenant_id = ${tid} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -511,7 +511,7 @@ async function getTimeSeries(
                 INTERVAL '5 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 5) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -522,7 +522,7 @@ async function getTimeSeries(
                 INTERVAL '15 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 15) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -533,7 +533,7 @@ async function getTimeSeries(
                 INTERVAL '6 hours' * FLOOR(EXTRACT(HOUR FROM timestamp) / 6) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -543,7 +543,7 @@ async function getTimeSeries(
               date_trunc('day', timestamp) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -553,7 +553,7 @@ async function getTimeSeries(
               date_trunc('hour', timestamp) as bucket,
               COUNT(*)::int as total,
               COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-            FROM platform_logs
+            FROM public.platform_logs
             WHERE service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
             GROUP BY bucket ORDER BY bucket ASC
           `
@@ -569,7 +569,7 @@ async function getTimeSeries(
               INTERVAL '5 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 5) as bucket,
             COUNT(*)::int as total,
             COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-          FROM platform_logs
+          FROM public.platform_logs
           WHERE tenant_id = ${tid} AND service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
           GROUP BY bucket ORDER BY bucket ASC
         `
@@ -580,7 +580,7 @@ async function getTimeSeries(
               INTERVAL '15 minutes' * FLOOR(EXTRACT(MINUTE FROM timestamp) / 15) as bucket,
             COUNT(*)::int as total,
             COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-          FROM platform_logs
+          FROM public.platform_logs
           WHERE tenant_id = ${tid} AND service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
           GROUP BY bucket ORDER BY bucket ASC
         `
@@ -591,7 +591,7 @@ async function getTimeSeries(
               INTERVAL '6 hours' * FLOOR(EXTRACT(HOUR FROM timestamp) / 6) as bucket,
             COUNT(*)::int as total,
             COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-          FROM platform_logs
+          FROM public.platform_logs
           WHERE tenant_id = ${tid} AND service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
           GROUP BY bucket ORDER BY bucket ASC
         `
@@ -601,7 +601,7 @@ async function getTimeSeries(
             date_trunc('day', timestamp) as bucket,
             COUNT(*)::int as total,
             COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-          FROM platform_logs
+          FROM public.platform_logs
           WHERE tenant_id = ${tid} AND service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
           GROUP BY bucket ORDER BY bucket ASC
         `
@@ -611,7 +611,7 @@ async function getTimeSeries(
             date_trunc('hour', timestamp) as bucket,
             COUNT(*)::int as total,
             COUNT(*) FILTER (WHERE level IN ('error', 'fatal'))::int as errors
-          FROM platform_logs
+          FROM public.platform_logs
           WHERE tenant_id = ${tid} AND service = ${svc} AND timestamp >= ${start} AND timestamp <= ${end}
           GROUP BY bucket ORDER BY bucket ASC
         `

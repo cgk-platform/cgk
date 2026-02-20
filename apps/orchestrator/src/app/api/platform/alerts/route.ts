@@ -75,7 +75,7 @@ export async function POST(request: Request): Promise<Response> {
 
     // Log alert as an audit entry
     const result = await sql`
-      INSERT INTO super_admin_audit_log (
+      INSERT INTO public.super_admin_audit_log (
         user_id, action, resource_type, tenant_id, metadata
       )
       VALUES (
@@ -124,8 +124,8 @@ async function getAlertsFromAuditLog(
       sal.metadata,
       sal.created_at,
       o.name as brand_name
-    FROM super_admin_audit_log sal
-    LEFT JOIN organizations o ON o.id = sal.tenant_id
+    FROM public.super_admin_audit_log sal
+    LEFT JOIN public.organizations o ON o.id = sal.tenant_id
     WHERE sal.action IN ('alert_created', 'error_logged', 'api_request')
       AND (sal.metadata->>'error')::boolean = true
          OR sal.action = 'alert_created'

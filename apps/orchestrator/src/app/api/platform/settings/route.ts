@@ -175,9 +175,9 @@ export async function GET(request: Request) {
       return authResult
     }
 
-    // Fetch all settings from platform_config
+    // Fetch all settings from public.platform_config
     const configResult = await sql`
-      SELECT key, value FROM platform_config
+      SELECT key, value FROM public.platform_config
       WHERE key IN ('security', 'platform', 'rateLimits', 'notifications')
     `
 
@@ -212,8 +212,8 @@ export async function GET(request: Request) {
         u.email as added_by_email,
         ial.is_active,
         ial.created_at
-      FROM super_admin_ip_allowlist ial
-      LEFT JOIN users u ON ial.added_by = u.id
+      FROM public.super_admin_ip_allowlist ial
+      LEFT JOIN public.users u ON ial.added_by = u.id
       ORDER BY ial.created_at DESC
     `
 
@@ -304,7 +304,7 @@ async function upsertConfig(key: string, value: unknown) {
   const jsonValue = JSON.stringify(value)
 
   await sql`
-    INSERT INTO platform_config (key, value)
+    INSERT INTO public.platform_config (key, value)
     VALUES (${key}, ${jsonValue}::jsonb)
     ON CONFLICT (key) DO UPDATE
     SET value = ${jsonValue}::jsonb, updated_at = NOW()
@@ -324,7 +324,7 @@ async function logAudit(
   const userAgent = request.headers.get('user-agent') || 'unknown'
 
   await sql`
-    INSERT INTO super_admin_audit_log (
+    INSERT INTO public.super_admin_audit_log (
       user_id,
       action,
       resource_type,

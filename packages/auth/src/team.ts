@@ -75,7 +75,7 @@ export async function getTeamMembers(
 
   const countResult = await sql`
     SELECT COUNT(*) as total
-    FROM user_organizations uo
+    FROM public.user_organizations uo
     WHERE uo.organization_id = ${tenantId}
   `
   const total = parseInt(String(countResult.rows[0]?.total ?? 0), 10)
@@ -95,9 +95,9 @@ export async function getTeamMembers(
       inviter.id as inviter_id,
       inviter.name as inviter_name,
       inviter.email as inviter_email
-    FROM user_organizations uo
-    JOIN users u ON u.id = uo.user_id
-    LEFT JOIN users inviter ON inviter.id = uo.invited_by
+    FROM public.user_organizations uo
+    JOIN public.users u ON u.id = uo.user_id
+    LEFT JOIN public.users inviter ON inviter.id = uo.invited_by
     WHERE uo.organization_id = ${tenantId}
     ORDER BY uo.created_at DESC
     LIMIT ${limit} OFFSET ${offset}
@@ -147,9 +147,9 @@ export async function getTeamMember(
       inviter.id as inviter_id,
       inviter.name as inviter_name,
       inviter.email as inviter_email
-    FROM user_organizations uo
-    JOIN users u ON u.id = uo.user_id
-    LEFT JOIN users inviter ON inviter.id = uo.invited_by
+    FROM public.user_organizations uo
+    JOIN public.users u ON u.id = uo.user_id
+    LEFT JOIN public.users inviter ON inviter.id = uo.invited_by
     WHERE uo.organization_id = ${tenantId}
       AND uo.user_id = ${userId}
   `
@@ -191,7 +191,7 @@ export async function updateMemberRole(
 ): Promise<void> {
   // Get current role for audit
   const currentResult = await sql`
-    SELECT role FROM user_organizations
+    SELECT role FROM public.user_organizations
     WHERE organization_id = ${tenantId} AND user_id = ${userId}
   `
 
@@ -204,7 +204,7 @@ export async function updateMemberRole(
 
   // Update legacy role column
   await sql`
-    UPDATE user_organizations
+    UPDATE public.user_organizations
     SET role = ${newRole}::user_role, updated_at = NOW()
     WHERE organization_id = ${tenantId} AND user_id = ${userId}
   `
@@ -220,7 +220,7 @@ export async function updateMemberRole(
   const candidateNames = roleNameMap[newRole] ?? [newRole]
   for (const candidateName of candidateNames) {
     const roleResult = await sql`
-      SELECT id FROM roles
+      SELECT id FROM public.roles
       WHERE (tenant_id IS NULL OR tenant_id = ${tenantId})
         AND LOWER(name) = ${candidateName}
       ORDER BY is_predefined DESC
@@ -229,7 +229,7 @@ export async function updateMemberRole(
     const roleRow = roleResult.rows[0]
     if (roleRow) {
       await sql`
-        UPDATE user_organizations
+        UPDATE public.user_organizations
         SET role_id = ${roleRow.id as string}, updated_at = NOW()
         WHERE organization_id = ${tenantId} AND user_id = ${userId}
       `
@@ -259,8 +259,8 @@ export async function removeMember(
   // Get member info for audit
   const memberResult = await sql`
     SELECT u.email, uo.role
-    FROM user_organizations uo
-    JOIN users u ON u.id = uo.user_id
+    FROM public.user_organizations uo
+    JOIN public.users u ON u.id = uo.user_id
     WHERE uo.organization_id = ${tenantId} AND uo.user_id = ${userId}
   `
 
@@ -271,7 +271,7 @@ export async function removeMember(
 
   // Remove from organization
   await sql`
-    DELETE FROM user_organizations
+    DELETE FROM public.user_organizations
     WHERE organization_id = ${tenantId} AND user_id = ${userId}
   `
 
@@ -300,8 +300,8 @@ export async function createInvitation(
   // Check if user is already a member
   const existingMemberResult = await sql`
     SELECT uo.id
-    FROM user_organizations uo
-    JOIN users u ON u.id = uo.user_id
+    FROM public.user_organizations uo
+    JOIN public.users u ON u.id = uo.user_id
     WHERE uo.organization_id = ${tenantId}
       AND u.email = ${normalizedEmail}
   `
@@ -312,7 +312,7 @@ export async function createInvitation(
 
   // Check for existing pending invitation
   const existingInviteResult = await sql`
-    SELECT id FROM team_invitations
+    SELECT id FROM public.team_invitations
     WHERE tenant_id = ${tenantId}
       AND email = ${normalizedEmail}
       AND status = 'pending'
@@ -333,7 +333,7 @@ export async function createInvitation(
 
   // Create invitation
   const result = await sql`
-    INSERT INTO team_invitations (
+    INSERT INTO public.team_invitations (
       tenant_id, email, role, invited_by, token_hash, expires_at, message
     )
     VALUES (
@@ -379,12 +379,12 @@ export async function getInvitations(
   const countQuery = statusFilter
     ? sql`
         SELECT COUNT(*) as total
-        FROM team_invitations
+        FROM public.team_invitations
         WHERE tenant_id = ${tenantId} AND status = ${statusFilter}::invitation_status
       `
     : sql`
         SELECT COUNT(*) as total
-        FROM team_invitations
+        FROM public.team_invitations
         WHERE tenant_id = ${tenantId}
       `
 
@@ -405,8 +405,8 @@ export async function getInvitations(
           u.id as inviter_id,
           u.name as inviter_name,
           u.email as inviter_email
-        FROM team_invitations ti
-        JOIN users u ON u.id = ti.invited_by
+        FROM public.team_invitations ti
+        JOIN public.users u ON u.id = ti.invited_by
         WHERE ti.tenant_id = ${tenantId} AND ti.status = ${statusFilter}::invitation_status
         ORDER BY ti.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -424,8 +424,8 @@ export async function getInvitations(
           u.id as inviter_id,
           u.name as inviter_name,
           u.email as inviter_email
-        FROM team_invitations ti
-        JOIN users u ON u.id = ti.invited_by
+        FROM public.team_invitations ti
+        JOIN public.users u ON u.id = ti.invited_by
         WHERE ti.tenant_id = ${tenantId}
         ORDER BY ti.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -473,9 +473,9 @@ export async function getInvitation(
       u.name as inviter_name,
       u.email as inviter_email,
       o.name as tenant_name
-    FROM team_invitations ti
-    JOIN users u ON u.id = ti.invited_by
-    JOIN organizations o ON o.id = ti.tenant_id
+    FROM public.team_invitations ti
+    JOIN public.users u ON u.id = ti.invited_by
+    JOIN public.organizations o ON o.id = ti.tenant_id
     WHERE ti.id = ${invitationId}
   `
 
@@ -517,7 +517,7 @@ export async function acceptInvitation(
   // Find the invitation
   const inviteResult = await sql`
     SELECT id, tenant_id, role, invited_by, status, expires_at
-    FROM team_invitations
+    FROM public.team_invitations
     WHERE email = ${normalizedEmail}
       AND token_hash = ${tokenHash}
   `
@@ -536,7 +536,7 @@ export async function acceptInvitation(
   if (new Date(invite.expires_at as string) < new Date()) {
     // Mark as expired
     await sql`
-      UPDATE team_invitations
+      UPDATE public.team_invitations
       SET status = 'expired'::invitation_status
       WHERE id = ${invite.id}
     `
@@ -550,7 +550,7 @@ export async function acceptInvitation(
 
   // Add user to organization
   await sql`
-    INSERT INTO user_organizations (user_id, organization_id, role, invited_by, invitation_id)
+    INSERT INTO public.user_organizations (user_id, organization_id, role, invited_by, invitation_id)
     VALUES (${userId}, ${tenantId}, ${role}::user_role, ${invitedBy}, ${invitationId})
     ON CONFLICT (user_id, organization_id) DO UPDATE
     SET role = ${role}::user_role, invited_by = ${invitedBy}, invitation_id = ${invitationId}
@@ -558,14 +558,14 @@ export async function acceptInvitation(
 
   // Update user status to active if invited
   await sql`
-    UPDATE users
+    UPDATE public.users
     SET status = 'active'::user_status, email_verified = TRUE
     WHERE id = ${userId} AND status = 'invited'::user_status
   `
 
   // Mark invitation as accepted
   await sql`
-    UPDATE team_invitations
+    UPDATE public.team_invitations
     SET status = 'accepted'::invitation_status, accepted_at = NOW()
     WHERE id = ${invitationId}
   `
@@ -590,7 +590,7 @@ export async function revokeInvitation(
   // Get invitation info
   const inviteResult = await sql`
     SELECT tenant_id, email, role, status
-    FROM team_invitations
+    FROM public.team_invitations
     WHERE id = ${invitationId}
   `
 
@@ -605,7 +605,7 @@ export async function revokeInvitation(
 
   // Revoke the invitation
   await sql`
-    UPDATE team_invitations
+    UPDATE public.team_invitations
     SET status = 'revoked'::invitation_status, revoked_at = NOW()
     WHERE id = ${invitationId}
   `
@@ -629,7 +629,7 @@ export async function resendInvitation(
   // Get invitation info
   const inviteResult = await sql`
     SELECT tenant_id, email, status
-    FROM team_invitations
+    FROM public.team_invitations
     WHERE id = ${invitationId}
   `
 
@@ -652,7 +652,7 @@ export async function resendInvitation(
 
   // Update invitation
   await sql`
-    UPDATE team_invitations
+    UPDATE public.team_invitations
     SET token_hash = ${tokenHash}, expires_at = ${expiresAt.toISOString()}
     WHERE id = ${invitationId}
   `
@@ -680,13 +680,13 @@ export async function getTeamAuditLog(
   const countQuery = options.userId
     ? sql`
         SELECT COUNT(*) as total
-        FROM team_audit_log
+        FROM public.team_audit_log
         WHERE tenant_id = ${tenantId}
           AND (target_user_id = ${options.userId} OR actor_id = ${options.userId})
       `
     : sql`
         SELECT COUNT(*) as total
-        FROM team_audit_log
+        FROM public.team_audit_log
         WHERE tenant_id = ${tenantId}
       `
 
@@ -706,8 +706,8 @@ export async function getTeamAuditLog(
           tal.old_value,
           tal.new_value,
           tal.created_at
-        FROM team_audit_log tal
-        JOIN users u ON u.id = tal.actor_id
+        FROM public.team_audit_log tal
+        JOIN public.users u ON u.id = tal.actor_id
         WHERE tal.tenant_id = ${tenantId}
           AND (tal.target_user_id = ${options.userId} OR tal.actor_id = ${options.userId})
         ORDER BY tal.created_at DESC
@@ -725,8 +725,8 @@ export async function getTeamAuditLog(
           tal.old_value,
           tal.new_value,
           tal.created_at
-        FROM team_audit_log tal
-        JOIN users u ON u.id = tal.actor_id
+        FROM public.team_audit_log tal
+        JOIN public.users u ON u.id = tal.actor_id
         WHERE tal.tenant_id = ${tenantId}
         ORDER BY tal.created_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -767,7 +767,7 @@ async function logTeamAction(
   }
 ): Promise<void> {
   await sql`
-    INSERT INTO team_audit_log (
+    INSERT INTO public.team_audit_log (
       tenant_id, actor_id, action, target_user_id, target_email,
       old_value, new_value, ip_address, user_agent
     )
@@ -791,7 +791,7 @@ async function logTeamAction(
 export async function getInvitationCountToday(tenantId: string): Promise<number> {
   const result = await sql`
     SELECT COUNT(*) as count
-    FROM team_invitations
+    FROM public.team_invitations
     WHERE tenant_id = ${tenantId}
       AND created_at >= CURRENT_DATE
   `
@@ -804,7 +804,7 @@ export async function getInvitationCountToday(tenantId: string): Promise<number>
 export async function getTeamMemberCount(tenantId: string): Promise<number> {
   const result = await sql`
     SELECT COUNT(*) as count
-    FROM user_organizations
+    FROM public.user_organizations
     WHERE organization_id = ${tenantId}
   `
   return parseInt(String(result.rows[0]?.count ?? 0), 10)
@@ -819,7 +819,7 @@ export async function canUserLeaveOrganization(
 ): Promise<{ canLeave: boolean; reason?: string }> {
   // Check if user is an owner
   const memberResult = await sql`
-    SELECT role FROM user_organizations
+    SELECT role FROM public.user_organizations
     WHERE organization_id = ${tenantId} AND user_id = ${userId}
   `
 
@@ -838,7 +838,7 @@ export async function canUserLeaveOrganization(
   // Check if there are other owners
   const otherOwnersResult = await sql`
     SELECT COUNT(*) as count
-    FROM user_organizations
+    FROM public.user_organizations
     WHERE organization_id = ${tenantId}
       AND user_id != ${userId}
       AND role = 'owner'
@@ -873,8 +873,8 @@ export async function leaveOrganization(
   // Get member info for audit
   const memberResult = await sql`
     SELECT u.email, uo.role
-    FROM user_organizations uo
-    JOIN users u ON u.id = uo.user_id
+    FROM public.user_organizations uo
+    JOIN public.users u ON u.id = uo.user_id
     WHERE uo.organization_id = ${tenantId} AND uo.user_id = ${userId}
   `
 
@@ -885,7 +885,7 @@ export async function leaveOrganization(
 
   // Remove from organization
   await sql`
-    DELETE FROM user_organizations
+    DELETE FROM public.user_organizations
     WHERE organization_id = ${tenantId} AND user_id = ${userId}
   `
 

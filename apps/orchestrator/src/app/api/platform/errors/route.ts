@@ -57,8 +57,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         WHERE pe.tenant_id = ${tenantId}
           AND pe.severity = ${severity}
           AND pe.status = ${status}
@@ -71,8 +71,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         WHERE pe.tenant_id = ${tenantId}
           AND pe.severity = ${severity}
         ORDER BY pe.occurred_at DESC
@@ -84,8 +84,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         WHERE pe.tenant_id = ${tenantId}
           AND pe.status = ${status}
         ORDER BY pe.occurred_at DESC
@@ -97,8 +97,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         WHERE pe.severity = ${severity}
           AND pe.status = ${status}
         ORDER BY pe.occurred_at DESC
@@ -110,8 +110,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         WHERE pe.tenant_id = ${tenantId}
         ORDER BY pe.occurred_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -122,8 +122,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         WHERE pe.severity = ${severity}
         ORDER BY pe.occurred_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -134,8 +134,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         WHERE pe.status = ${status}
         ORDER BY pe.occurred_at DESC
         LIMIT ${limit} OFFSET ${offset}
@@ -146,8 +146,8 @@ export async function GET(request: Request) {
           pe.*,
           o.name as tenant_name,
           o.slug as tenant_slug
-        FROM platform_errors pe
-        LEFT JOIN organizations o ON o.id = pe.tenant_id
+        FROM public.platform_errors pe
+        LEFT JOIN public.organizations o ON o.id = pe.tenant_id
         ORDER BY pe.occurred_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `
@@ -155,7 +155,7 @@ export async function GET(request: Request) {
 
     // Get total count
     const countResult = await sql`
-      SELECT COUNT(*) as total FROM platform_errors
+      SELECT COUNT(*) as total FROM public.platform_errors
     `
     const total = parseInt((countResult.rows[0] as Record<string, unknown>).total as string, 10)
 
@@ -168,7 +168,7 @@ export async function GET(request: Request) {
         COUNT(*) FILTER (WHERE severity = 'p1' AND status != 'resolved') as p1_active,
         COUNT(*) FILTER (WHERE severity = 'p2' AND status != 'resolved') as p2_active,
         COUNT(*) FILTER (WHERE severity = 'p3' AND status != 'resolved') as p3_active
-      FROM platform_errors
+      FROM public.platform_errors
     `
 
     const stats = statsResult.rows[0] as Record<string, unknown>
@@ -255,7 +255,7 @@ export async function POST(request: Request) {
       .slice(0, 32)
 
     const result = await sql`
-      INSERT INTO platform_errors (
+      INSERT INTO public.platform_errors (
         tenant_id, tenant_name, severity, error_type, message, stack, metadata, pattern_hash
       )
       VALUES (

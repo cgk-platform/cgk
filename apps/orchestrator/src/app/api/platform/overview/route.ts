@@ -68,7 +68,7 @@ async function aggregatePlatformKPIs(): Promise<PlatformKPIs> {
       SELECT
         COUNT(*) as total,
         COUNT(*) FILTER (WHERE status = 'active') as active
-      FROM organizations
+      FROM public.organizations
     `,
     // Get open alerts by priority
     sql`
@@ -76,7 +76,7 @@ async function aggregatePlatformKPIs(): Promise<PlatformKPIs> {
         COUNT(*) FILTER (WHERE action LIKE '%p1%' OR metadata->>'priority' = 'p1') as p1,
         COUNT(*) FILTER (WHERE action LIKE '%p2%' OR metadata->>'priority' = 'p2') as p2,
         COUNT(*) FILTER (WHERE action LIKE '%p3%' OR metadata->>'priority' = 'p3') as p3
-      FROM super_admin_audit_log
+      FROM public.super_admin_audit_log
       WHERE created_at > NOW() - INTERVAL '24 hours'
         AND action IN ('alert_created', 'error_logged')
     `,
@@ -85,7 +85,7 @@ async function aggregatePlatformKPIs(): Promise<PlatformKPIs> {
       SELECT
         COUNT(*) FILTER (WHERE action = 'api_request') as total_requests,
         COUNT(*) FILTER (WHERE action = 'api_request' AND (metadata->>'error')::boolean = true) as error_requests
-      FROM super_admin_audit_log
+      FROM public.super_admin_audit_log
       WHERE created_at > NOW() - INTERVAL '24 hours'
     `,
   ])
@@ -119,15 +119,15 @@ async function aggregatePlatformKPIs(): Promise<PlatformKPIs> {
         COALESCE(AVG(latency_ms), 150) as avg_latency,
         COUNT(*) FILTER (WHERE status = 'healthy') as healthy_checks,
         COUNT(*) as total_checks
-      FROM health_check_history
+      FROM public.health_check_history
       WHERE checked_at > NOW() - INTERVAL '24 hours'
     `,
-    // Get pending and failed jobs from platform_jobs
+    // Get pending and failed jobs from public.platform_jobs
     sql`
       SELECT
         COUNT(*) FILTER (WHERE status = 'pending') as pending_jobs,
         COUNT(*) FILTER (WHERE status = 'failed' AND created_at > NOW() - INTERVAL '24 hours') as failed_jobs_24h
-      FROM platform_jobs
+      FROM public.platform_jobs
     `,
   ])
 
@@ -158,7 +158,7 @@ async function aggregatePlatformKPIs(): Promise<PlatformKPIs> {
 
   // Get ALL active tenant slugs
   const allTenantsResult = await sql`
-    SELECT slug FROM organizations WHERE status = 'active' ORDER BY slug
+    SELECT slug FROM public.organizations WHERE status = 'active' ORDER BY slug
   `
 
   const tenantSlugs = allTenantsResult.rows.map((row) => row.slug as string)

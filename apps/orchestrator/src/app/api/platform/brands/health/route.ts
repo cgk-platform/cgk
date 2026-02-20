@@ -73,7 +73,7 @@ export async function GET(request: Request) {
     // Get all active tenants
     const tenantsResult = await sql`
       SELECT id, name, slug, status
-      FROM organizations
+      FROM public.organizations
       WHERE status = 'active'
       ORDER BY name
     `
@@ -96,7 +96,7 @@ export async function GET(request: Request) {
         response_time_ms,
         last_error,
         checked_at
-      FROM platform_health_matrix
+      FROM public.platform_health_matrix
     `
 
     // Filter to only relevant tenants

@@ -58,7 +58,7 @@ export async function GET(request: Request): Promise<Response> {
     if (status && search) {
       const countResult = await sql`
         SELECT COUNT(*) as count
-        FROM organizations
+        FROM public.organizations
         WHERE status = ${status}::organization_status
           AND (name ILIKE ${`%${search}%`} OR slug ILIKE ${`%${search}%`})
       `
@@ -72,7 +72,7 @@ export async function GET(request: Request): Promise<Response> {
           shopify_store_domain,
           stripe_account_id,
           created_at
-        FROM organizations
+        FROM public.organizations
         WHERE status = ${status}::organization_status
           AND (name ILIKE ${`%${search}%`} OR slug ILIKE ${`%${search}%`})
         ORDER BY created_at DESC
@@ -82,7 +82,7 @@ export async function GET(request: Request): Promise<Response> {
     } else if (status) {
       const countResult = await sql`
         SELECT COUNT(*) as count
-        FROM organizations
+        FROM public.organizations
         WHERE status = ${status}::organization_status
       `
       totalCount = Number(countResult.rows[0]?.count || 0)
@@ -95,7 +95,7 @@ export async function GET(request: Request): Promise<Response> {
           shopify_store_domain,
           stripe_account_id,
           created_at
-        FROM organizations
+        FROM public.organizations
         WHERE status = ${status}::organization_status
         ORDER BY created_at DESC
         LIMIT ${pageSize} OFFSET ${offset}
@@ -104,7 +104,7 @@ export async function GET(request: Request): Promise<Response> {
     } else if (search) {
       const countResult = await sql`
         SELECT COUNT(*) as count
-        FROM organizations
+        FROM public.organizations
         WHERE name ILIKE ${`%${search}%`} OR slug ILIKE ${`%${search}%`}
       `
       totalCount = Number(countResult.rows[0]?.count || 0)
@@ -117,7 +117,7 @@ export async function GET(request: Request): Promise<Response> {
           shopify_store_domain,
           stripe_account_id,
           created_at
-        FROM organizations
+        FROM public.organizations
         WHERE name ILIKE ${`%${search}%`} OR slug ILIKE ${`%${search}%`}
         ORDER BY created_at DESC
         LIMIT ${pageSize} OFFSET ${offset}
@@ -125,7 +125,7 @@ export async function GET(request: Request): Promise<Response> {
       brands = await mapBrandRows(brandsResult.rows)
     } else {
       const countResult = await sql`
-        SELECT COUNT(*) as count FROM organizations
+        SELECT COUNT(*) as count FROM public.organizations
       `
       totalCount = Number(countResult.rows[0]?.count || 0)
 
@@ -137,7 +137,7 @@ export async function GET(request: Request): Promise<Response> {
           shopify_store_domain,
           stripe_account_id,
           created_at
-        FROM organizations
+        FROM public.organizations
         ORDER BY created_at DESC
         LIMIT ${pageSize} OFFSET ${offset}
       `
@@ -203,7 +203,7 @@ async function mapBrandRows(rows: Record<string, unknown>[]): Promise<BrandSumma
     try {
       const errorResult = await sql`
         SELECT COUNT(*) as error_count
-        FROM super_admin_audit_log
+        FROM public.super_admin_audit_log
         WHERE tenant_id = ${row.id as string}
           AND action = 'api_request'
           AND (metadata->>'error')::boolean = true

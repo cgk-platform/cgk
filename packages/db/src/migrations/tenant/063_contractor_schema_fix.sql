@@ -45,67 +45,93 @@ ALTER TABLE contractor_projects ADD CONSTRAINT contractor_projects_status_check
   ));
 
 -- ============================================================
--- 3. CREATE TABLE contractor_magic_links
+-- 3. contractor_magic_links — Create if missing, then add
+--    columns that earlier migration 050 didn't include
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS contractor_magic_links (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  email TEXT NOT NULL,
-  token_hash TEXT NOT NULL,
+  contractor_id TEXT,
+  email TEXT,
+  token TEXT,
+  token_hash TEXT,
   purpose TEXT NOT NULL DEFAULT 'login',
   expires_at TIMESTAMPTZ NOT NULL,
-  used_at TIMESTAMPTZ
+  used_at TIMESTAMPTZ,
+  user_agent TEXT,
+  ip_address TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_contractor_magic_links_email ON contractor_magic_links(email);
-CREATE INDEX IF NOT EXISTS idx_contractor_magic_links_token ON contractor_magic_links(token_hash);
-CREATE INDEX IF NOT EXISTS idx_contractor_magic_links_expires ON contractor_magic_links(expires_at);
-
-COMMENT ON TABLE contractor_magic_links IS 'Passwordless login tokens for contractor portal';
+-- If the table already existed from 050, these columns are missing
+ALTER TABLE contractor_magic_links ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE contractor_magic_links ADD COLUMN IF NOT EXISTS token_hash TEXT;
+ALTER TABLE contractor_magic_links ADD COLUMN IF NOT EXISTS purpose TEXT DEFAULT 'login';
 
 -- ============================================================
--- 4. CREATE TABLE contractor_password_reset_tokens
+-- 4. contractor_password_reset_tokens — Create if missing, then
+--    add columns that earlier migration 051 didn't include
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS contractor_password_reset_tokens (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   contractor_id TEXT NOT NULL,
-  email TEXT NOT NULL,
-  token_hash TEXT NOT NULL,
+  email TEXT,
+  token TEXT,
+  token_hash TEXT,
   expires_at TIMESTAMPTZ NOT NULL,
   used_at TIMESTAMPTZ,
   ip_address TEXT,
+  user_agent TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_contractor_pw_reset_email ON contractor_password_reset_tokens(email);
-CREATE INDEX IF NOT EXISTS idx_contractor_pw_reset_token ON contractor_password_reset_tokens(token_hash);
+-- If the table already existed from 051, these columns are missing
+ALTER TABLE contractor_password_reset_tokens ADD COLUMN IF NOT EXISTS email TEXT;
+ALTER TABLE contractor_password_reset_tokens ADD COLUMN IF NOT EXISTS token_hash TEXT;
+ALTER TABLE contractor_password_reset_tokens ADD COLUMN IF NOT EXISTS user_agent TEXT;
 
-COMMENT ON TABLE contractor_password_reset_tokens IS 'Password reset tokens for contractor portal';
 
 -- ============================================================
--- 5. CREATE TABLE payment_requests
+-- 5. payment_requests — Create if missing, then add columns
+--    that may be absent if table pre-exists with minimal schema
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS payment_requests (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  payee_id TEXT NOT NULL,
-  tenant_id TEXT NOT NULL,
-  amount_cents INTEGER NOT NULL,
-  description TEXT NOT NULL,
-  work_type TEXT NOT NULL,
+  payee_id TEXT,
+  tenant_id TEXT,
+  amount_cents INTEGER,
+  description TEXT,
+  work_type TEXT,
   project_id TEXT,
   attachments JSONB DEFAULT '[]',
-  status TEXT NOT NULL DEFAULT 'pending'
-    CHECK (status IN ('pending', 'approved', 'rejected', 'paid')),
+  status TEXT DEFAULT 'pending',
   admin_notes TEXT,
   approved_amount_cents INTEGER,
   approved_by TEXT,
   rejection_reason TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
   reviewed_at TIMESTAMPTZ,
   paid_at TIMESTAMPTZ
 );
+
+-- If table pre-existed with fewer columns, add them now
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS payee_id TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS tenant_id TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS amount_cents INTEGER;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS work_type TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS project_id TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS attachments JSONB DEFAULT '[]';
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS admin_notes TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS approved_amount_cents INTEGER;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS approved_by TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
 
 CREATE INDEX IF NOT EXISTS idx_payment_requests_payee ON payment_requests(payee_id);
 CREATE INDEX IF NOT EXISTS idx_payment_requests_tenant ON payment_requests(tenant_id);

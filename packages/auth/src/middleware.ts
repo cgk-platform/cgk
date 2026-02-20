@@ -71,7 +71,7 @@ export async function authMiddleware(
     let orgSlug = payload.org
     if (payload.orgId && !orgSlug) {
       const orgResult = await sql`
-        SELECT slug FROM organizations WHERE id = ${payload.orgId}
+        SELECT slug FROM public.organizations WHERE id = ${payload.orgId}
       `
       const orgRow = orgResult.rows[0]
       if (orgRow) {

@@ -46,7 +46,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Get current webhook state
     const currentResult = await sql`
-      SELECT * FROM platform_webhooks WHERE id = ${webhookId}
+      SELECT * FROM public.platform_webhooks WHERE id = ${webhookId}
     `
 
     if (currentResult.rows.length === 0) {
@@ -64,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Reset webhook for redelivery
     await sql`
-      UPDATE platform_webhooks
+      UPDATE public.platform_webhooks
       SET status = 'pending',
           attempts = 0,
           last_error = NULL,

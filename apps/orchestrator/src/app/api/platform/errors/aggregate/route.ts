@@ -62,7 +62,7 @@ export async function GET(request: Request) {
           MAX(occurred_at) as last_occurrence,
           COUNT(*) FILTER (WHERE status = 'open') as open_count,
           COUNT(*) FILTER (WHERE status = 'resolved') as resolved_count
-        FROM platform_errors
+        FROM public.platform_errors
         WHERE occurred_at >= ${since}
           AND tenant_id = ${tenantId}
           AND severity = ${severity}
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
           MAX(occurred_at) as last_occurrence,
           COUNT(*) FILTER (WHERE status = 'open') as open_count,
           COUNT(*) FILTER (WHERE status = 'resolved') as resolved_count
-        FROM platform_errors
+        FROM public.platform_errors
         WHERE occurred_at >= ${since}
           AND tenant_id = ${tenantId}
         GROUP BY pattern_hash, error_type, message, severity
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
           MAX(occurred_at) as last_occurrence,
           COUNT(*) FILTER (WHERE status = 'open') as open_count,
           COUNT(*) FILTER (WHERE status = 'resolved') as resolved_count
-        FROM platform_errors
+        FROM public.platform_errors
         WHERE occurred_at >= ${since}
           AND severity = ${severity}
         GROUP BY pattern_hash, error_type, message, severity
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
           MAX(occurred_at) as last_occurrence,
           COUNT(*) FILTER (WHERE status = 'open') as open_count,
           COUNT(*) FILTER (WHERE status = 'resolved') as resolved_count
-        FROM platform_errors
+        FROM public.platform_errors
         WHERE occurred_at >= ${since}
         GROUP BY pattern_hash, error_type, message, severity
         ORDER BY occurrence_count DESC
@@ -156,7 +156,7 @@ export async function GET(request: Request) {
         COUNT(*) FILTER (WHERE severity = 'p1') as p1_count,
         COUNT(*) FILTER (WHERE severity = 'p2') as p2_count,
         COUNT(*) FILTER (WHERE severity = 'p3') as p3_count
-      FROM platform_errors
+      FROM public.platform_errors
       WHERE occurred_at >= ${since}
     `
 

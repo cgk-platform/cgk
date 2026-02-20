@@ -66,7 +66,7 @@ export async function GET(request: Request) {
       const tenantIdSet = new Set(tenantIdsParam.split(',').map((id) => id.trim()))
       const allResult = await sql`
         SELECT id, name, slug, status
-        FROM organizations
+        FROM public.organizations
         WHERE status = 'active'
         ORDER BY name
       `
@@ -78,7 +78,7 @@ export async function GET(request: Request) {
     } else {
       tenantsResult = await sql`
         SELECT id, name, slug, status
-        FROM organizations
+        FROM public.organizations
         WHERE status = 'active'
         ORDER BY name
         LIMIT 50
@@ -103,7 +103,7 @@ export async function GET(request: Request) {
         response_time_ms,
         last_error,
         checked_at
-      FROM platform_health_matrix
+      FROM public.platform_health_matrix
     `
 
     const tenantIdSet = new Set(tenantIds)
@@ -223,7 +223,7 @@ export async function POST(request: Request) {
 
     // Upsert health status
     await sql`
-      INSERT INTO platform_health_matrix (
+      INSERT INTO public.platform_health_matrix (
         tenant_id, service_name, status, response_time_ms, last_error, metadata, checked_at
       )
       VALUES (

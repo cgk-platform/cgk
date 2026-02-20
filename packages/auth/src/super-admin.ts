@@ -190,7 +190,7 @@ function mapRowToSuperAdminSession(row: Record<string, unknown>): SuperAdminSess
  */
 export async function isSuperAdmin(userId: string): Promise<boolean> {
   const result = await sql`
-    SELECT user_id FROM super_admin_users
+    SELECT user_id FROM public.super_admin_users
     WHERE user_id = ${userId}
       AND is_active = TRUE
   `
@@ -206,7 +206,7 @@ export async function isSuperAdmin(userId: string): Promise<boolean> {
  */
 export async function getSuperAdminUser(userId: string): Promise<SuperAdminUser | null> {
   const result = await sql`
-    SELECT * FROM super_admin_users
+    SELECT * FROM public.super_admin_users
     WHERE user_id = ${userId}
       AND is_active = TRUE
   `
@@ -230,14 +230,14 @@ export async function getAllSuperAdmins(
   const result = includeInactive
     ? await sql`
         SELECT sau.*, u.email, u.name
-        FROM super_admin_users sau
-        JOIN users u ON u.id = sau.user_id
+        FROM public.super_admin_users sau
+        JOIN public.users u ON u.id = sau.user_id
         ORDER BY sau.granted_at DESC
       `
     : await sql`
         SELECT sau.*, u.email, u.name
-        FROM super_admin_users sau
-        JOIN users u ON u.id = sau.user_id
+        FROM public.super_admin_users sau
+        JOIN public.users u ON u.id = sau.user_id
         WHERE sau.is_active = TRUE
         ORDER BY sau.granted_at DESC
       `
@@ -266,7 +266,7 @@ export async function createSuperAdminSession(
 
   // Revoke all existing sessions for this user (single session enforcement)
   await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET revoked_at = NOW(), revoke_reason = 'new_session_created'
     WHERE user_id = ${userId}
       AND revoked_at IS NULL
@@ -288,7 +288,7 @@ export async function createSuperAdminSession(
 
   // Create session
   const result = await sql`
-    INSERT INTO super_admin_sessions (
+    INSERT INTO public.super_admin_sessions (
       user_id, token_hash, expires_at, ip_address, user_agent, inactivity_timeout_minutes
     )
     VALUES (
@@ -301,7 +301,7 @@ export async function createSuperAdminSession(
 
   // Update last access on super admin user
   await sql`
-    UPDATE super_admin_users
+    UPDATE public.super_admin_users
     SET last_access_at = NOW(), last_access_ip = ${ipAddress}
     WHERE user_id = ${userId}
   `
@@ -321,7 +321,7 @@ export async function validateSuperAdminSession(token: string): Promise<SuperAdm
   const tokenHash = await sha256(token)
 
   const result = await sql`
-    SELECT * FROM super_admin_sessions
+    SELECT * FROM public.super_admin_sessions
     WHERE token_hash = ${tokenHash}
       AND expires_at > NOW()
       AND revoked_at IS NULL
@@ -340,7 +340,7 @@ export async function validateSuperAdminSession(token: string): Promise<SuperAdm
   if (session.lastActivityAt < inactivityLimit) {
     // Session expired due to inactivity
     await sql`
-      UPDATE super_admin_sessions
+      UPDATE public.super_admin_sessions
       SET revoked_at = NOW(), revoke_reason = 'inactivity_timeout'
       WHERE id = ${session.id}
     `
@@ -349,7 +349,7 @@ export async function validateSuperAdminSession(token: string): Promise<SuperAdm
 
   // Update last activity time
   await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET last_activity_at = NOW()
     WHERE id = ${session.id}
   `
@@ -367,7 +367,7 @@ export async function validateSuperAdminSessionById(
   sessionId: string
 ): Promise<SuperAdminSession | null> {
   const result = await sql`
-    SELECT * FROM super_admin_sessions
+    SELECT * FROM public.super_admin_sessions
     WHERE id = ${sessionId}
       AND expires_at > NOW()
       AND revoked_at IS NULL
@@ -385,7 +385,7 @@ export async function validateSuperAdminSessionById(
 
   if (session.lastActivityAt < inactivityLimit) {
     await sql`
-      UPDATE super_admin_sessions
+      UPDATE public.super_admin_sessions
       SET revoked_at = NOW(), revoke_reason = 'inactivity_timeout'
       WHERE id = ${session.id}
     `
@@ -394,7 +394,7 @@ export async function validateSuperAdminSessionById(
 
   // Update last activity time
   await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET last_activity_at = NOW()
     WHERE id = ${session.id}
   `
@@ -413,7 +413,7 @@ export async function revokeSuperAdminSession(
   reason: string = 'manual_logout'
 ): Promise<void> {
   await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET revoked_at = NOW(), revoke_reason = ${reason}
     WHERE id = ${sessionId}
   `
@@ -430,7 +430,7 @@ export async function revokeAllSuperAdminSessions(
   reason: string = 'logout_all'
 ): Promise<void> {
   await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET revoked_at = NOW(), revoke_reason = ${reason}
     WHERE user_id = ${userId}
       AND revoked_at IS NULL
@@ -444,7 +444,7 @@ export async function revokeAllSuperAdminSessions(
  */
 export async function markMfaVerified(sessionId: string): Promise<void> {
   await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET mfa_verified = TRUE, mfa_verified_at = NOW()
     WHERE id = ${sessionId}
   `
@@ -464,7 +464,7 @@ export async function setMfaChallengeExpiration(
   expiresAt.setMinutes(expiresAt.getMinutes() + expiresInMinutes)
 
   await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET mfa_challenge_expires_at = ${expiresAt.toISOString()}
     WHERE id = ${sessionId}
   `
@@ -490,7 +490,7 @@ export async function logAuditAction(entry: {
   metadata?: Record<string, unknown> | null
 }): Promise<AuditLogEntry> {
   const result = await sql`
-    INSERT INTO super_admin_audit_log (
+    INSERT INTO public.super_admin_audit_log (
       user_id, action, resource_type, resource_id, tenant_id,
       old_value, new_value, ip_address, user_agent, request_id, metadata
     )
@@ -549,7 +549,7 @@ export async function getAuditLog(options: {
 
   if (options.userId && options.tenantId) {
     result = await sql`
-      SELECT * FROM super_admin_audit_log
+      SELECT * FROM public.super_admin_audit_log
       WHERE user_id = ${options.userId}
         AND tenant_id = ${options.tenantId}
       ORDER BY created_at DESC
@@ -557,28 +557,28 @@ export async function getAuditLog(options: {
     `
   } else if (options.userId) {
     result = await sql`
-      SELECT * FROM super_admin_audit_log
+      SELECT * FROM public.super_admin_audit_log
       WHERE user_id = ${options.userId}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
   } else if (options.tenantId) {
     result = await sql`
-      SELECT * FROM super_admin_audit_log
+      SELECT * FROM public.super_admin_audit_log
       WHERE tenant_id = ${options.tenantId}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
   } else if (options.action) {
     result = await sql`
-      SELECT * FROM super_admin_audit_log
+      SELECT * FROM public.super_admin_audit_log
       WHERE action = ${options.action}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
   } else {
     result = await sql`
-      SELECT * FROM super_admin_audit_log
+      SELECT * FROM public.super_admin_audit_log
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
@@ -622,7 +622,7 @@ export async function checkRateLimit(
   // Get current rate limit record
   const result = await sql`
     SELECT request_count, window_start, window_seconds
-    FROM super_admin_rate_limits
+    FROM public.super_admin_rate_limits
     WHERE user_id = ${userId} AND bucket = ${bucket}
   `
 
@@ -631,7 +631,7 @@ export async function checkRateLimit(
   if (result.rows.length === 0) {
     // No record, create one
     await sql`
-      INSERT INTO super_admin_rate_limits (user_id, bucket, request_count, window_start, window_seconds)
+      INSERT INTO public.super_admin_rate_limits (user_id, bucket, request_count, window_start, window_seconds)
       VALUES (${userId}, ${bucket}, 1, ${now.toISOString()}, ${windowSeconds})
     `
     return true
@@ -647,7 +647,7 @@ export async function checkRateLimit(
   if (now > windowEnd) {
     // Reset window
     await sql`
-      UPDATE super_admin_rate_limits
+      UPDATE public.super_admin_rate_limits
       SET request_count = 1, window_start = ${now.toISOString()}, window_seconds = ${windowSeconds}
       WHERE user_id = ${userId} AND bucket = ${bucket}
     `
@@ -658,7 +658,7 @@ export async function checkRateLimit(
   if (requestCount < limit) {
     // Increment counter
     await sql`
-      UPDATE super_admin_rate_limits
+      UPDATE public.super_admin_rate_limits
       SET request_count = request_count + 1
       WHERE user_id = ${userId} AND bucket = ${bucket}
     `
@@ -681,7 +681,7 @@ export async function checkRateLimit(
 export async function checkIpAllowlist(ipAddress: string): Promise<boolean> {
   // Check if allowlist has any entries
   const countResult = await sql`
-    SELECT COUNT(*) as count FROM super_admin_ip_allowlist WHERE is_active = TRUE
+    SELECT COUNT(*) as count FROM public.super_admin_ip_allowlist WHERE is_active = TRUE
   `
 
   // COUNT(*) returns bigint which becomes string in JS - convert to number
@@ -695,7 +695,7 @@ export async function checkIpAllowlist(ipAddress: string): Promise<boolean> {
 
   // Check if IP is in allowlist
   const result = await sql`
-    SELECT id FROM super_admin_ip_allowlist
+    SELECT id FROM public.super_admin_ip_allowlist
     WHERE ip_address = ${ipAddress}::inet
       AND is_active = TRUE
   `
@@ -712,7 +712,7 @@ export async function checkIpAllowlist(ipAddress: string): Promise<boolean> {
  */
 export async function cleanupExpiredSessions(): Promise<number> {
   const result = await sql`
-    UPDATE super_admin_sessions
+    UPDATE public.super_admin_sessions
     SET revoked_at = NOW(), revoke_reason = 'expired'
     WHERE revoked_at IS NULL
       AND (

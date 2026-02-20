@@ -166,14 +166,14 @@ export async function startImpersonation(
 
   // Get super admin email for JWT
   const superAdminUserResult = await sql`
-    SELECT email FROM users WHERE id = ${superAdminId}
+    SELECT email FROM public.users WHERE id = ${superAdminId}
   `
   const superAdminEmail = (superAdminUserResult.rows[0]?.email as string) || ''
 
   // Verify target user exists and get their details
   const targetUserResult = await sql`
     SELECT u.id, u.email, u.name
-    FROM users u
+    FROM public.users u
     WHERE u.id = ${targetUserId}
   `
 
@@ -195,8 +195,8 @@ export async function startImpersonation(
   // Verify target user has access to the specified tenant
   const membershipResult = await sql`
     SELECT om.role, o.slug, o.name
-    FROM organization_members om
-    JOIN organizations o ON o.id = om.organization_id
+    FROM public.organization_members om
+    JOIN public.organizations o ON o.id = om.organization_id
     WHERE om.user_id = ${targetUserId}
       AND om.organization_id = ${targetTenantId}
       AND o.status = 'active'
@@ -216,8 +216,8 @@ export async function startImpersonation(
   // Get all orgs the target user has access to
   const allOrgsResult = await sql`
     SELECT o.id, o.slug, om.role
-    FROM organization_members om
-    JOIN organizations o ON o.id = om.organization_id
+    FROM public.organization_members om
+    JOIN public.organizations o ON o.id = om.organization_id
     WHERE om.user_id = ${targetUserId}
       AND o.status = 'active'
   `
@@ -230,7 +230,7 @@ export async function startImpersonation(
 
   // End any existing impersonation sessions for this super admin
   await sql`
-    UPDATE impersonation_sessions
+    UPDATE public.impersonation_sessions
     SET ended_at = NOW(), end_reason = 'new_session_started'
     WHERE super_admin_id = ${superAdminId}
       AND ended_at IS NULL
@@ -250,7 +250,7 @@ export async function startImpersonation(
   // Create impersonation session
   const sessionId = generateToken(16)
   const result = await sql`
-    INSERT INTO impersonation_sessions (
+    INSERT INTO public.impersonation_sessions (
       id, super_admin_id, target_user_id, target_tenant_id,
       reason, expires_at, ip_address, user_agent
     )
@@ -332,7 +332,7 @@ export async function endImpersonation(
   superAdminId?: string
 ): Promise<void> {
   const result = await sql`
-    UPDATE impersonation_sessions
+    UPDATE public.impersonation_sessions
     SET ended_at = NOW(), end_reason = ${endReason}
     WHERE id = ${sessionId}
       AND ended_at IS NULL
@@ -365,7 +365,7 @@ export async function validateImpersonationSession(
   sessionId: string
 ): Promise<ImpersonationSession | null> {
   const result = await sql`
-    SELECT * FROM impersonation_sessions
+    SELECT * FROM public.impersonation_sessions
     WHERE id = ${sessionId}
       AND expires_at > NOW()
       AND ended_at IS NULL
@@ -388,7 +388,7 @@ export async function getImpersonationSession(
   sessionId: string
 ): Promise<ImpersonationSession | null> {
   const result = await sql`
-    SELECT * FROM impersonation_sessions
+    SELECT * FROM public.impersonation_sessions
     WHERE id = ${sessionId}
   `
 
@@ -409,7 +409,7 @@ export async function getActiveImpersonationSessions(
   superAdminId: string
 ): Promise<ImpersonationSession[]> {
   const result = await sql`
-    SELECT * FROM impersonation_sessions
+    SELECT * FROM public.impersonation_sessions
     WHERE super_admin_id = ${superAdminId}
       AND expires_at > NOW()
       AND ended_at IS NULL
@@ -441,28 +441,28 @@ export async function getImpersonationHistory(options: {
 
   if (options.superAdminId) {
     result = await sql`
-      SELECT * FROM impersonation_sessions
+      SELECT * FROM public.impersonation_sessions
       WHERE super_admin_id = ${options.superAdminId}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
   } else if (options.targetUserId) {
     result = await sql`
-      SELECT * FROM impersonation_sessions
+      SELECT * FROM public.impersonation_sessions
       WHERE target_user_id = ${options.targetUserId}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
   } else if (options.targetTenantId) {
     result = await sql`
-      SELECT * FROM impersonation_sessions
+      SELECT * FROM public.impersonation_sessions
       WHERE target_tenant_id = ${options.targetTenantId}
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
   } else {
     result = await sql`
-      SELECT * FROM impersonation_sessions
+      SELECT * FROM public.impersonation_sessions
       ORDER BY created_at DESC
       LIMIT ${limit} OFFSET ${offset}
     `
@@ -482,7 +482,7 @@ export async function getImpersonationHistory(options: {
  */
 export async function cleanupExpiredImpersonationSessions(): Promise<number> {
   const result = await sql`
-    UPDATE impersonation_sessions
+    UPDATE public.impersonation_sessions
     SET ended_at = NOW(), end_reason = 'expired'
     WHERE ended_at IS NULL
       AND expires_at <= NOW()
