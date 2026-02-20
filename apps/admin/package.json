@@ -24,6 +24,7 @@
     "@cgk-platform/integrations": "workspace:*",
     "@cgk-platform/jobs": "workspace:*",
     "@cgk-platform/logging": "workspace:*",
+    "@cgk-platform/onboarding": "workspace:*",
     "@cgk-platform/scheduling": "workspace:*",
     "@cgk-platform/shopify": "workspace:*",
     "@cgk-platform/slack": "workspace:*",
