@@ -123,7 +123,7 @@ export async function GET(req: Request): Promise<Response> {
         SUM(CASE WHEN type = 'project' AND amount_cents > 0 THEN amount_cents ELSE 0 END) as projects,
         SUM(CASE WHEN type = 'bonus' AND amount_cents > 0 THEN amount_cents ELSE 0 END) as bonuses,
         COUNT(*) FILTER (WHERE amount_cents > 0) as transaction_count
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${start.toISOString()}
         AND created_at <= ${end.toISOString()}
@@ -151,7 +151,7 @@ export async function GET(req: Request): Promise<Response> {
     const prevResult = await sql`
       SELECT
         COALESCE(SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as earnings
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${prevStart.toISOString()}
         AND created_at < ${prevEnd.toISOString()}

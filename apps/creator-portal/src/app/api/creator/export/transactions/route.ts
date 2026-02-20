@@ -94,7 +94,7 @@ export async function POST(req: Request): Promise<Response> {
         balance_after_cents,
         order_id,
         payout_id
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${start.toISOString()}
         AND created_at <= ${end.toISOString()}

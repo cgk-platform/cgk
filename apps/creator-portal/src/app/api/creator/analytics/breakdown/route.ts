@@ -84,7 +84,7 @@ export async function GET(req: Request): Promise<Response> {
         type,
         SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END) as total_cents,
         COUNT(*) FILTER (WHERE amount_cents > 0) as transaction_count
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${start.toISOString()}
         AND created_at <= ${end.toISOString()}
@@ -98,7 +98,7 @@ export async function GET(req: Request): Promise<Response> {
         date_trunc('month', created_at) as month,
         SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END) as earnings,
         SUM(CASE WHEN amount_cents < 0 THEN ABS(amount_cents) ELSE 0 END) as withdrawals
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${start.toISOString()}
         AND created_at <= ${end.toISOString()}

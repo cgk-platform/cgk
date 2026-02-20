@@ -109,7 +109,7 @@ export async function GET(req: Request): Promise<Response> {
           COALESCE(SUM(CASE WHEN type = 'bonus' THEN amount_cents ELSE 0 END), 0) as bonus_earnings,
           COALESCE(SUM(CASE WHEN type = 'adjustment' THEN amount_cents ELSE 0 END), 0) as adjustment_earnings,
           COUNT(*) as transaction_count
-        FROM balance_transactions
+        FROM public.creator_balance_transactions
         WHERE creator_id = ${context.creatorId}
           AND brand_id = ${effectiveBrandId}
           AND created_at >= ${start.toISOString()}
@@ -126,7 +126,7 @@ export async function GET(req: Request): Promise<Response> {
           COALESCE(SUM(CASE WHEN type = 'bonus' THEN amount_cents ELSE 0 END), 0) as bonus_earnings,
           COALESCE(SUM(CASE WHEN type = 'adjustment' THEN amount_cents ELSE 0 END), 0) as adjustment_earnings,
           COUNT(*) as transaction_count
-        FROM balance_transactions
+        FROM public.creator_balance_transactions
         WHERE creator_id = ${context.creatorId}
           AND created_at >= ${start.toISOString()}
           AND created_at <= ${end.toISOString()}
@@ -179,7 +179,7 @@ export async function GET(req: Request): Promise<Response> {
         SELECT
           date_trunc('month', created_at) as month,
           SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END) as total
-        FROM balance_transactions
+        FROM public.creator_balance_transactions
         WHERE creator_id = ${context.creatorId}
           AND brand_id = ${effectiveBrandId}
           AND amount_cents > 0
@@ -193,7 +193,7 @@ export async function GET(req: Request): Promise<Response> {
         SELECT
           date_trunc('month', created_at) as month,
           SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END) as total
-        FROM balance_transactions
+        FROM public.creator_balance_transactions
         WHERE creator_id = ${context.creatorId}
           AND amount_cents > 0
         GROUP BY date_trunc('month', created_at)

@@ -9,6 +9,72 @@ import { sql } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 
+interface ImpersonationNoticeParams {
+  targetEmail: string
+  targetName: string
+  actorName: string
+  tenantId: string
+  reason: string
+  startedAt: Date
+  sessionId: string
+}
+
+/**
+ * Send a security notice email to the user whose account is being accessed.
+ * Uses the platform Resend API key (not a per-tenant credential).
+ * Fire-and-forget — caller must .catch() any errors.
+ */
+async function sendImpersonationNotice(params: ImpersonationNoticeParams): Promise<void> {
+  const resendApiKey = process.env.RESEND_API_KEY
+  const emailFrom = process.env.EMAIL_FROM || process.env.ALERT_EMAIL_FROM
+  if (!resendApiKey || !emailFrom) {
+    console.warn('[Impersonation] Email not configured (RESEND_API_KEY or EMAIL_FROM missing)')
+    return
+  }
+
+  const { targetEmail, targetName, actorName, reason, startedAt, sessionId } = params
+  const formattedDate = startedAt.toUTCString()
+
+  const html = `
+    <p>Hello ${targetName ?? 'there'},</p>
+    <p>
+      This is an automated security notice. A support agent accessed your account
+      on the CGK platform.
+    </p>
+    <table cellpadding="8" style="border-collapse:collapse;font-family:monospace;font-size:13px">
+      <tr><td><strong>Agent</strong></td><td>${actorName}</td></tr>
+      <tr><td><strong>Reason</strong></td><td>${reason}</td></tr>
+      <tr><td><strong>Time</strong></td><td>${formattedDate}</td></tr>
+      <tr><td><strong>Session ID</strong></td><td>${sessionId}</td></tr>
+    </table>
+    <p>
+      If you did not authorise this access or have concerns, please contact
+      platform support immediately.
+    </p>
+    <p>— CGK Platform Security</p>
+  `
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${resendApiKey}`,
+    },
+    body: JSON.stringify({
+      from: emailFrom,
+      to: targetEmail,
+      subject: 'Security Notice: Your account was accessed by support',
+      html,
+    }),
+  })
+
+  if (!res.ok) {
+    throw new Error(`Resend API error ${res.status}: ${await res.text()}`)
+  }
+
+  console.log(`[Impersonation] Security notice sent to ${targetEmail} (session ${sessionId})`)
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>
 }
@@ -81,6 +147,17 @@ export async function POST(request: Request, { params }: RouteParams) {
       reason,
       request
     )
+
+    // Send security notice to the impersonated account owner (fire-and-forget)
+    sendImpersonationNotice({
+      targetEmail: result.targetUser.email,
+      targetName: result.targetUser.name ?? result.targetUser.email,
+      actorName: superAdmin.name ?? superAdmin.email ?? `User ${userId}`,
+      tenantId,
+      reason,
+      startedAt: new Date(),
+      sessionId: result.session.id,
+    }).catch((err) => console.error('[Impersonation] Security notice failed:', err))
 
     // Get tenant info for response
     const tenantResult = await sql`
