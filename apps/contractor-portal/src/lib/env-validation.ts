@@ -12,6 +12,11 @@
 
 import { validateRequiredEnv, validateEnv, isEnvSet } from '@cgk-platform/core'
 
+// Vercel/Neon sets POSTGRES_URL; map it to DATABASE_URL if needed
+if (!process.env.DATABASE_URL && process.env.POSTGRES_URL) {
+  process.env.DATABASE_URL = process.env.POSTGRES_URL
+}
+
 // Required environment variables - app will not start without these
 const REQUIRED_ENV_VARS = ['DATABASE_URL'] as const
 
