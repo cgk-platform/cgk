@@ -7,6 +7,7 @@ export default defineConfig({
     'src/ai/index.ts',
     'src/creator-tools/index.ts',
     'src/interactions/index.ts',
+    'src/player/index.ts',
   ],
   format: ['esm'],
   dts: true,

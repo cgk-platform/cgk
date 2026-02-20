@@ -5,16 +5,19 @@
  * in all event payloads for proper tenant isolation.
  */
 
-import { defineJob, type Job } from '@cgk-platform/jobs'
+// import { defineJob, type Job } from '@cgk-platform/jobs'
+/*
 import { withTenant, sql } from '@cgk-platform/db'
 import {
   getTenantResendClient,
   getTenantResendSenderConfig,
 } from '@cgk-platform/integrations'
+*/
 
-import type { SampleStatus } from './types'
+// import type { SampleStatus } from './types'
 
 // Job payload types
+/*
 interface TenantJobPayload {
   tenantId: string
 }
@@ -31,6 +34,7 @@ interface SampleRequestRow {
   tracking_url: string | null
   status: SampleStatus
 }
+*/
 
 // ============================================================================
 // Commission Sync Job
@@ -42,6 +46,7 @@ interface SampleRequestRow {
  *
  * Runs hourly via cron.
  */
+/*
 export const syncOrderCommissionsJob = defineJob({
   name: 'sync-order-commissions',
   handler: async (job: Job<TenantJobPayload>) => {
@@ -137,6 +142,7 @@ export const syncOrderCommissionsJob = defineJob({
     initialDelay: 5000,
   },
 })
+*/
 
 // ============================================================================
 // Onboarding Reminders Job
@@ -147,6 +153,7 @@ export const syncOrderCommissionsJob = defineJob({
  *
  * Runs daily at 10 AM via cron.
  */
+/*
 export const sendOnboardingRemindersJob = defineJob({
   name: 'send-onboarding-reminders',
   handler: async (job: Job<TenantJobPayload>) => {
@@ -288,6 +295,7 @@ export const sendOnboardingRemindersJob = defineJob({
     initialDelay: 10000,
   },
 })
+*/
 
 // ============================================================================
 // Sample Delivery Check Job
@@ -298,6 +306,7 @@ export const sendOnboardingRemindersJob = defineJob({
  *
  * Runs every 4 hours via cron.
  */
+/*
 export const checkSampleDeliveriesJob = defineJob({
   name: 'check-sample-deliveries',
   handler: async (job: Job<TenantJobPayload>) => {
@@ -367,6 +376,7 @@ export const checkSampleDeliveriesJob = defineJob({
     initialDelay: 5000,
   },
 })
+*/
 
 // Helper function to check tracking status
 // In a real implementation, this would call carrier APIs
@@ -376,6 +386,7 @@ export const checkSampleDeliveriesJob = defineJob({
  * Uses tenant's EasyPost API credentials to get real tracking data.
  * Falls back to unknown status if EasyPost is not configured.
  */
+/*
 async function checkTrackingStatus(
   tenantId: string,
   carrier: string,
@@ -408,6 +419,7 @@ async function checkTrackingStatus(
     return { delivered: false, inTransit: false }
   }
 }
+*/
 
 // ============================================================================
 // Retroactive Commission Application Job
@@ -419,6 +431,7 @@ async function checkTrackingStatus(
  *
  * Can be triggered manually or on a schedule.
  */
+/*
 export const applyRetroactiveCommissionsJob = defineJob({
   name: 'apply-retroactive-commissions',
   handler: async (job: Job<RetroactiveJobPayload>) => {
@@ -521,11 +534,13 @@ export const applyRetroactiveCommissionsJob = defineJob({
     initialDelay: 5000,
   },
 })
+*/
 
 // Export all jobs
 export const creatorAdminOpsJobs = {
-  syncOrderCommissions: syncOrderCommissionsJob,
-  sendOnboardingReminders: sendOnboardingRemindersJob,
-  checkSampleDeliveries: checkSampleDeliveriesJob,
-  applyRetroactiveCommissions: applyRetroactiveCommissionsJob,
+  // syncOrderCommissions: syncOrderCommissionsJob,
+  // sendOnboardingReminders: sendOnboardingRemindersJob,
+  // checkSampleDeliveries: checkSampleDeliveriesJob,
+  // applyRetroactiveCommissions: applyRetroactiveCommissionsJob,
 }
+

@@ -132,7 +132,7 @@ async function InboundLoader({ status, page }: { status?: string; page: number }
                   <Mail className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                   <p className="truncate text-sm font-medium">{String(email.from_address || '')}</p>
                 </div>
-                {email.subject && <p className="truncate text-xs text-muted-foreground">{String(email.subject)}</p>}
+                {email.subject ? <p className="truncate text-xs text-muted-foreground">{String(email.subject)}</p> : null}
               </div>
               <div className="text-xs text-muted-foreground">{String(email.email_type || '—')}</div>
               <div>

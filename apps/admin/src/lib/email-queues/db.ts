@@ -43,6 +43,7 @@ export interface EmailQueueRow {
 export interface QueuePageStats {
   pending: number
   sentToday: number
+  failedToday: number
   failed: number
   scheduled: number
   total: number
@@ -66,12 +67,13 @@ export async function getEmailQueueStats(
     return {
       pending: stats.pending,
       sentToday: stats.sentToday,
+      failedToday: stats.failedToday ?? 0,
       failed: stats.failed,
       scheduled: stats.scheduled,
       total: stats.total,
     }
   } catch {
-    return { pending: 0, sentToday: 0, failed: 0, scheduled: 0, total: 0 }
+    return { pending: 0, sentToday: 0, failedToday: 0, failed: 0, scheduled: 0, total: 0 }
   }
 }
 

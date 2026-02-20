@@ -3,7 +3,7 @@ import { BookOpen, CheckCircle2, Clock, Eye, FileText, Plus } from 'lucide-react
 import Link from 'next/link'
 import { Suspense } from 'react'
 
-import { getArticles, getCategories } from '@/lib/knowledge-base/db'
+import { getArticles, getCategories, rowToArticleWithCategory } from '@/lib/knowledge-base/db'
 import type { KBArticleWithCategory } from '@/lib/knowledge-base/types'
 
 interface PageProps {
@@ -72,13 +72,13 @@ async function StatsCards() {
       getArticles({ page: 1, limit: 1, offset: 0, search: '', categoryId: '', sort: 'created_at', dir: 'desc' }),
       getCategories(),
     ])
-    totalArticles = allArticles.total
+    totalArticles = allArticles.totalCount
     categoryCount = categories.length
 
     const published = await getArticles({
       page: 1, limit: 1, offset: 0, search: '', categoryId: '', sort: 'created_at', dir: 'desc', isPublished: true,
     })
-    publishedCount = published.total
+    publishedCount = published.totalCount
     draftCount = totalArticles - publishedCount
   } catch {
     // DB may not exist yet
@@ -212,8 +212,8 @@ async function ArticlesLoader({
       sort: 'updated_at',
       dir: 'desc',
     })
-    articles = result.articles
-    total = result.total
+    articles = result.rows.map(rowToArticleWithCategory)
+    total = result.totalCount
   } catch {
     // DB may not exist yet
   }
@@ -279,7 +279,7 @@ async function ArticlesLoader({
                 </div>
               )}
             </div>
-            <div className="text-sm text-muted-foreground">{article.categoryName || '—'}</div>
+            <div className="text-sm text-muted-foreground">{article.category?.name || '—'}</div>
             <div>
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${

@@ -144,7 +144,7 @@ function rowToArticle(row: KBArticleRow): KBArticle {
   }
 }
 
-function rowToArticleWithCategory(row: KBArticleRow): KBArticleWithCategory {
+export function rowToArticleWithCategory(row: KBArticleRow): KBArticleWithCategory {
   const article = rowToArticle(row)
   return {
     ...article,

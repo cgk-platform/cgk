@@ -154,8 +154,8 @@ export const abHourlyMetricsAggregationJob = defineJob<TenantEvent<ABHourlyMetri
 
     const targetHour = hour || new Date(Date.now() - 3600000).toISOString().slice(0, 13) + ':00:00Z'
     // Window: [targetHour, targetHour + 1h)
-    const hourStart = new Date(targetHour).toISOString()
-    const hourEnd = new Date(new Date(targetHour).getTime() + 3600000).toISOString()
+    // const hourStart = new Date(targetHour).toISOString()
+    // const hourEnd = new Date(new Date(targetHour).getTime() + 3600000).toISOString()
 
     console.log(`[ab.hourlyMetricsAggregation] Aggregating metrics`, {
       tenantId,

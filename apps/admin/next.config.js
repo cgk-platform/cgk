@@ -35,16 +35,35 @@ const nextConfig = {
     '@cgk-platform/auth',
     '@cgk-platform/commerce',
     '@cgk-platform/shopify',
-    '@cgk-platform/dam',
     '@cgk-platform/video',
     '@cgk-platform/slack',
   ],
 
   serverExternalPackages: [
+    '@cgk-platform/dam',
     '@slack/web-api',
     'sharp',
     'bcryptjs',
+    'mux-node',
+    '@mux/mux-node',
   ],
+
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Prevent Node.js-only modules from being bundled into client code
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        'fs/promises': false,
+        child_process: false,
+        'stream/web': false,
+        net: false,
+        tls: false,
+        dns: false,
+      }
+    }
+    return config
+  },
 
   async headers() {
     return [

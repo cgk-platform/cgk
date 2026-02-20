@@ -24,6 +24,10 @@
     "./interactions": {
       "types": "./dist/interactions/index.d.ts",
       "import": "./dist/interactions/index.js"
+    },
+    "./player": {
+      "types": "./dist/player/index.d.ts",
+      "import": "./dist/player/index.js"
     }
   },
   "main": "./dist/index.js",

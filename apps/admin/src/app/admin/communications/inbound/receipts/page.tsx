@@ -131,7 +131,7 @@ async function ReceiptsLoader({ status, page }: { status?: string; page: number 
               <div key={String(receipt.id)} className="grid grid-cols-[1fr,120px,140px,120px,120px] items-center gap-4 px-4 py-3 hover:bg-muted/20">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{String(receipt.vendor_name || receipt.from_address || '—')}</p>
-                  {receipt.subject && <p className="truncate text-xs text-muted-foreground">{String(receipt.subject)}</p>}
+                  {receipt.subject ? <p className="truncate text-xs text-muted-foreground">{String(receipt.subject)}</p> : null}
                 </div>
                 <div className="text-sm font-medium">{amount}</div>
                 <div className="text-xs text-muted-foreground">
