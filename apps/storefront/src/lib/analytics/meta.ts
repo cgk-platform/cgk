@@ -9,16 +9,28 @@ import type { EcommerceItem, PurchaseEventData, ViewItemListData } from './types
 
 // Debug mode from env
 const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true'
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
+
+type CgkAnalyticsWindow = typeof window & { __CGK_ANALYTICS__?: { fbPixelId?: string } }
+
+/**
+ * Get Meta pixel ID — prefers per-tenant runtime config over build-time env var.
+ * The runtime config is injected by AnalyticsHead from the tenant's site_config table.
+ */
+function getMetaPixelId(): string | undefined {
+  if (typeof window !== 'undefined' && (window as CgkAnalyticsWindow).__CGK_ANALYTICS__?.fbPixelId) {
+    return (window as CgkAnalyticsWindow).__CGK_ANALYTICS__!.fbPixelId!
+  }
+  return process.env.NEXT_PUBLIC_META_PIXEL_ID || undefined
+}
 
 /**
  * Check if Meta Pixel is available
  */
 function isMetaPixelAvailable(): boolean {
   if (typeof window === 'undefined') return false
-  if (!META_PIXEL_ID) {
+  if (!getMetaPixelId()) {
     if (DEBUG_MODE) {
-      console.log('[Meta Pixel] Not configured - NEXT_PUBLIC_META_PIXEL_ID not set')
+      console.log('[Meta Pixel] Not configured - no Meta pixel ID found')
     }
     return false
   }
@@ -49,8 +61,8 @@ function sendMetaEvent(
 
   try {
     // Use trackSingle if event ID provided for deduplication
-    if (eventId && META_PIXEL_ID) {
-      window.fbq('trackSingle', META_PIXEL_ID, eventName, params, { eventID: eventId })
+    if (eventId && getMetaPixelId()) {
+      window.fbq('trackSingle', getMetaPixelId()!, eventName, params, { eventID: eventId })
     } else {
       window.fbq('track', eventName, params)
     }

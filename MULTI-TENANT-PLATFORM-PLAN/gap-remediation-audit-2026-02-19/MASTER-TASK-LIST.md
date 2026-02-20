@@ -21,13 +21,13 @@ _Unprotected routes, tenant bleed, missing auth guards, OAuth vulnerabilities_
 
 ### Admin App — Security
 
-**Source Phase:** PHASE-2SH-SHOPIFY-APP-CORE | **Agent:** APP-ADMIN / 20 | **Status:** ❌
+**Source Phase:** PHASE-2SH-SHOPIFY-APP-CORE | **Agent:** APP-ADMIN / 20 | **Status:** ✅ Done (remediation/security)
 **Risk:** External webhooks (Shopify, Stripe, etc.) blocked by auth middleware or open to public.
 
-- [ ] Add all webhook paths to `PUBLIC_PATHS` in `middleware.ts`: `/api/webhooks`, `/api/v1/webhooks`, `/api/shopify/webhooks`, `/api/ai-agents/voice/webhooks`
-- [ ] Add all public API paths to `PUBLIC_PATHS`: `/api/public`, `/api/sign`, `/api/feeds`, `/api/surveys/submit`, `/api/ab-tests/shipping-config`
-- [ ] Fix GSC OAuth state: replace `base64(JSON)` with `createOAuthState()` (HMAC) in `/api/admin/seo/gsc/connect`
-- [ ] Implement `validateTenantAccess()` in MCP auth (currently returns true); query DB to verify user membership
+- [x] Add all webhook paths to `PUBLIC_PATHS` in `middleware.ts`: `/api/webhooks`, `/api/v1/webhooks`, `/api/shopify/webhooks`, `/api/ai-agents/voice/webhooks`
+- [x] Add all public API paths to `PUBLIC_PATHS`: `/api/public`, `/api/sign`, `/api/feeds`, `/api/surveys/submit`, `/api/ab-tests/shipping-config`
+- [x] Fix GSC OAuth state: replace `base64(JSON)` with `createOAuthState()` (HMAC) in `/api/admin/seo/gsc/connect`
+- [x] Implement `validateTenantAccess()` in MCP auth (currently returns true); query DB to verify user membership
 
 ### Admin Commerce — Isolation
 
@@ -39,41 +39,41 @@ _Unprotected routes, tenant bleed, missing auth guards, OAuth vulnerabilities_
 
 ### Storefront — Auth & Isolation
 
-**Source Phase:** PHASE-3A | **Agent:** APP-STOREFRONT | **Status:** ⛔
+**Source Phase:** PHASE-3A | **Agent:** APP-STOREFRONT | **Status:** ✅ Done (remediation/security — task 7)
 **Risk:** Unauthenticated access to account data; cross-tenant data exposure via token fallback.
 
-- [ ] Fix middleware to inject `x-tenant-slug` header for `/api` routes (currently skipped)
-- [ ] Add auth guard to `account/layout.tsx` — server-side check/redirect
-- [ ] Remove Shopify Storefront Access Token fallback to global env var in `tenant.ts`
-- [ ] Create `/account/login` and `/account/register` pages (currently missing)
+- [x] Fix middleware to inject `x-tenant-slug` header for `/api` routes (currently skipped)
+- [x] Add auth guard to `account/layout.tsx` — server-side check/redirect
+- [x] Remove Shopify Storefront Access Token fallback to global env var in `tenant.ts`
+- [x] Create `/account/login` and `/account/register` pages (currently missing)
 
 ### Creator Portal — Auth & Isolation
 
-**Source Phase:** PHASE-4A | **Agent:** APP-CREATOR-PORTAL | **Status:** ⛔
+**Source Phase:** PHASE-4A | **Agent:** APP-CREATOR-PORTAL | **Status:** ✅ Done (remediation/security)
 **Risk:** Unauthorized access, privilege escalation.
 
-- [ ] Add Next.js `middleware.ts` to protect `(portal)` routes server-side
-- [ ] Fix `onboarding-wizard/complete`: validate `creatorId` from session, not request body
-- [ ] Fix `GET /api/creator/projects/[id]`: use project's brand ID, not first active membership
-- [ ] Enforce `CREATOR_JWT_SECRET` as required env var (remove dev fallback)
+- [x] Add Next.js `middleware.ts` to protect `(portal)` routes server-side
+- [x] Fix `onboarding-wizard/complete`: validate `creatorId` from session, not request body
+- [x] Fix `GET /api/creator/projects/[id]`: use project's brand ID, not first active membership
+- [x] Enforce `CREATOR_JWT_SECRET` as required env var (remove dev fallback)
 
 ### Contractor Portal — Auth & Security
 
-**Source Phase:** PHASE-4F | **Agent:** APP-CONTRACTOR-PORTAL | **Status:** ⛔
+**Source Phase:** PHASE-4F | **Agent:** APP-CONTRACTOR-PORTAL | **Status:** ✅ Done (remediation/security)
 **Risk:** Account takeover, CSRF.
 
-- [ ] Sign Stripe Connect OAuth state with HMAC (currently base64 JSON)
-- [ ] Validate auth session in Stripe OAuth callback (currently discarded)
-- [ ] Create `/api/auth/signin` route (currently missing, login broken)
+- [x] Sign Stripe Connect OAuth state with HMAC (currently base64 JSON)
+- [x] Validate auth session in Stripe OAuth callback (currently discarded)
+- [x] Create `/api/auth/signin` route (currently missing, login broken)
 
 ### Shopify App — Credentials
 
-**Source Phase:** PHASE-2SH-SHOPIFY-APP-CORE | **Agent:** APP-SHOPIFY / 20 | **Status:** ❌
+**Source Phase:** PHASE-2SH-SHOPIFY-APP-CORE | **Agent:** APP-SHOPIFY / 20 | **Status:** ✅ Done (remediation/security)
 **Risk:** Webhook auth failure, shared secret exposure.
 
-- [ ] Remove `grant_options[]=per-user` from OAuth URL (request offline tokens)
-- [ ] Sync `shopify_connections` to `organizations.shopify_store_domain` or migrate `getTenantForShop` to use new table
-- [ ] Populate `webhook_secret_encrypted` in `shopify_connections` during OAuth callback
+- [x] Remove `grant_options[]=per-user` from OAuth URL (request offline tokens)
+- [x] Sync `shopify_connections` to `organizations.shopify_store_domain` or migrate `getTenantForShop` to use new table
+- [x] Populate `webhook_secret_encrypted` in `shopify_connections` during OAuth callback
 
 ### Database — Core
 
@@ -94,13 +94,13 @@ _Things other features depend on — must be done before those features_
 **Source Phase:** VARIOUS | **Agent:** 05, 09, 10, 18, 19, 20 | **Status:** ❌
 **Why P0:** Application code queries tables/columns that do not exist. Runtime crash guaranteed.
 
-- [ ] **A/B Testing:** Create migration `060_ab_tests_schema_fix.sql` (add 18 cols to `ab_tests`, add `ab_daily_metrics`, `ab_targeting_rules`, `ab_exclusion_groups`)
-- [ ] **Attribution:** Create migration `060_attribution_integrations.sql` (create `attribution_platform_connections`, `pixel_event_log`, `mmm_models` fixes)
-- [ ] **Blog:** Create migration `060_blog_schema_v2.sql` (align `blog_posts` with code: add `content`, `author_id`, `meta_title`)
-- [ ] **Contractor:** Rewrite `contractor_sessions` and `contractor_projects` migrations to match code schema
-- [ ] **Contractor:** Create missing tables: `payment_requests`, `withdrawal_requests`, `payout_methods`
-- [ ] **Creator:** Add `first_login_at` to `creators`; create `creator_onboarding_wizard_progress` table
-- [ ] **MCP:** Create `mcp_usage` table (missing migration)
+- [x] **A/B Testing:** Create migration `060_ab_tests_schema_fix.sql` (add 18 cols to `ab_tests`, add `ab_daily_metrics`, `ab_targeting_rules`, `ab_exclusion_groups`) — opus-schema ✅
+- [x] **Attribution:** Create migration `061_attribution_integrations.sql` (create `attribution_platform_connections`, `pixel_event_log`, `mmm_models` fixes) — opus-schema ✅
+- [x] **Blog:** Create migration `062_blog_schema_v2.sql` (align `blog_posts` with code: add `content`, `author_id`, `meta_title`) — remediation/security ✅
+- [x] **Contractor:** Rewrite `contractor_sessions` and `contractor_projects` migrations to match code schema — migration 063 (remediation/security) ✅
+- [x] **Contractor:** Create missing tables: `payment_requests`, `withdrawal_requests`, `payout_methods` — migration 063 ✅
+- [x] **Creator:** Add `first_login_at` to `creators`; create `creator_onboarding_wizard_progress` table — migration 064 (remediation/security) ✅
+- [x] **MCP:** Create `mcp_usage` table (missing migration) — migration 065 (remediation/security) ✅
 
 ### Platform Ops — Onboarding
 
@@ -121,20 +121,20 @@ _Things other features depend on — must be done before those features_
 
 ### Creator Portal — Provisioning
 
-**Source Phase:** PHASE-4A | **Agent:** APP-CREATOR-PORTAL | **Status:** ❌
+**Source Phase:** PHASE-4A | **Agent:** APP-CREATOR-PORTAL | **Status:** ✅ Done (remediation/security)
 **Why P0:** Approved creators cannot log in.
 
-- [ ] Fix admin approval route: insert into `creator_brand_memberships`
-- [ ] Implement account setup flow (magic link or password set) in approval email
-- [ ] Fix `creator_memberships` vs `creator_brand_memberships` table name mismatch in API
+- [x] Fix admin approval route: insert into `creator_brand_memberships`
+- [x] Implement account setup flow (magic link or password set) in approval email
+- [x] Fix `creator_memberships` vs `creator_brand_memberships` table name mismatch in API
 
 ### Contractor Portal — Provisioning
 
-**Source Phase:** PHASE-4F | **Agent:** APP-CONTRACTOR-PORTAL | **Status:** ❌
+**Source Phase:** PHASE-4F | **Agent:** APP-CONTRACTOR-PORTAL | **Status:** ✅ Done (remediation/security)
 **Why P0:** Contractors cannot accept invites.
 
-- [ ] Create invitation redemption flow (`GET /api/auth/invite`)
-- [ ] Uncomment invitation email sending in admin route
+- [x] Create invitation redemption flow (`GET /api/auth/invite`)
+- [x] Uncomment invitation email sending in admin route
 
 ### Storefront — API
 
@@ -160,11 +160,11 @@ _Platform is meaningfully incomplete without these_
 
 ### Admin — Content & SEO
 
-**Source Phase:** PHASE-2I-A | **Agent:** 05 | **Status:** ❌
+**Source Phase:** PHASE-2I-A | **Agent:** 05 | **Status:** ✅ Done (remediation/admin-ui)
 
-- [ ] Create API routes: `/api/admin/blog/link-health`, `/api/admin/blog/quality`
-- [ ] Create Admin UI pages: `blog/clusters`, `blog/link-health`
-- [ ] Create UI components: `QualityScoreBadge`, `AIContentTracker`, `LinkSuggestions`
+- [x] Create API routes: `/api/admin/blog/link-health`, `/api/admin/blog/quality`
+- [x] Create Admin UI pages: `blog/clusters`, `blog/link-health`
+- [x] Create UI components: `QualityScoreBadge`, `AIContentTracker`, `LinkSuggestions`
 
 ### Admin — Communications
 
@@ -184,11 +184,11 @@ _Platform is meaningfully incomplete without these_
 
 ### Admin — AI
 
-**Source Phase:** PHASE-2AI | **Agent:** 03 | **Status:** ❌
+**Source Phase:** PHASE-2AI | **Agent:** 03 | **Status:** ✅ Done (remediation/admin-ui)
 
-- [ ] Add `aiAgents` to `TenantFeatures` type (currently bugged/hidden)
-- [ ] Create Multi-agent list/management UI
-- [ ] Create Org Chart visualization UI
+- [x] Add `aiAgents` to `TenantFeatures` type (currently bugged/hidden)
+- [x] Create Multi-agent list/management UI
+- [ ] Create Org Chart visualization UI — deferred, not confirmed in session output
 
 ### Storefront — Core
 
@@ -272,7 +272,7 @@ _Finishes the vision, not urgent_
 
 _End-to-end connections: API routes ↔ UI, packages ↔ apps, webhooks ↔ handlers_
 
-- [ ] **Shopify Webhooks:** Register `products/*` and `orders/paid` topics (Agent 20)
+- [x] **Shopify Webhooks:** Register `products/*` and `orders/paid` topics (Agent 20) — remediation/security ✅
 - [ ] **Shopify Webhooks:** Wire `orders/create` to attribution job with session ID (Agent 10)
 - [ ] **Email:** Connect `contractor/invitation` job to communications package (Agent 19)
 - [ ] **Email:** Connect `sendCreatorSlackNotificationJob` to Slack API (Agent 17)
@@ -286,13 +286,13 @@ _End-to-end connections: API routes ↔ UI, packages ↔ apps, webhooks ↔ hand
 
 _Tables, joins, and queries that need review for correctness and tenant scoping_
 
-- [ ] **Fix:** `creator_brand_memberships` table name in API queries (Agent 16)
+- [x] **Fix:** `creator_brand_memberships` table name in API queries (Agent 16) — remediation/security ✅
 - [ ] **Fix:** `creator_balance_transactions` brand_id type (TEXT -> UUID) (Agent 16)
 - [ ] **Fix:** `webhook_events` tenant_id nullability (Agent 20)
-- [ ] **Create:** `mcp_usage` table (Agent 20)
-- [ ] **Create:** `ab_daily_metrics`, `ab_targeting_rules` (Agent 09)
-- [ ] **Create:** `pixel_event_log` (Agent 10)
-- [ ] **Create:** `payment_requests`, `withdrawal_requests` (Agent 19)
+- [x] **Create:** `mcp_usage` table (Agent 20) — migration 065, remediation/security ✅
+- [x] **Create:** `ab_daily_metrics`, `ab_targeting_rules` (Agent 09) — migration 060, opus-schema ✅
+- [x] **Create:** `pixel_event_log` (Agent 10) — migration 061, opus-schema ✅
+- [x] **Create:** `payment_requests`, `withdrawal_requests` (Agent 19) — migration 063, remediation/security ✅
 
 ---
 

@@ -9,16 +9,28 @@ import type { EcommerceItem, PurchaseEventData, ViewItemListData } from './types
 
 // Debug mode from env
 const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true'
-const TIKTOK_PIXEL_ID = process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID
+
+type CgkAnalyticsWindow = typeof window & { __CGK_ANALYTICS__?: { tiktokPixelId?: string } }
+
+/**
+ * Get TikTok pixel ID — prefers per-tenant runtime config over build-time env var.
+ * The runtime config is injected by AnalyticsHead from the tenant's site_config table.
+ */
+function getTikTokPixelId(): string | undefined {
+  if (typeof window !== 'undefined' && (window as CgkAnalyticsWindow).__CGK_ANALYTICS__?.tiktokPixelId) {
+    return (window as CgkAnalyticsWindow).__CGK_ANALYTICS__!.tiktokPixelId!
+  }
+  return process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID || undefined
+}
 
 /**
  * Check if TikTok Pixel is available
  */
 function isTikTokPixelAvailable(): boolean {
   if (typeof window === 'undefined') return false
-  if (!TIKTOK_PIXEL_ID) {
+  if (!getTikTokPixelId()) {
     if (DEBUG_MODE) {
-      console.log('[TikTok Pixel] Not configured - NEXT_PUBLIC_TIKTOK_PIXEL_ID not set')
+      console.log('[TikTok Pixel] Not configured - no TikTok pixel ID found')
     }
     return false
   }

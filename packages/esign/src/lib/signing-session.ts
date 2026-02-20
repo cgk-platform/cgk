@@ -14,10 +14,12 @@ import type {
 } from '../types.js'
 import { getDocument, markDocumentInProgress, markDocumentCompleted, checkAllSignersSigned } from './documents.js'
 import { getSigner, getSignerByToken, markSignerViewed, markSignerSigned } from './signers.js'
-import { getSignerFields, setFieldValue, areRequiredFieldsFilled } from './fields.js'
+import { getDocumentFields, getSignerFields, setFieldValue, areRequiredFieldsFilled } from './fields.js'
+import { getDocumentSigners } from './signers.js'
 import { getTemplate } from './templates.js'
 import { createSignature, validateSignatureImage, svgToDataUrl, generateTypedSignatureSvg, getSignatureFont } from './signatures.js'
 import { logDocumentViewed, logDocumentSigned, logFieldFilled } from './audit.js'
+import { finalizeSignedDocument } from './storage.js'
 import { ERROR_MESSAGES } from '../constants.js'
 
 // ============================================================================
@@ -299,9 +301,27 @@ export async function completeSignerSigning(
   let nextSigners: EsignSigner[] = []
 
   if (allSigned) {
-    // Document is complete - would trigger PDF finalization here
-    // For now, mark as completed with placeholder URL
-    await markDocumentCompleted(tenantSlug, document.id, document.file_url)
+    // Document is complete — generate the final signed PDF
+    let signedFileUrl = document.file_url // Fallback to original if finalization fails
+
+    try {
+      const [allFields, allSigners] = await Promise.all([
+        getDocumentFields(tenantSlug, document.id),
+        getDocumentSigners(tenantSlug, document.id),
+      ])
+
+      signedFileUrl = await finalizeSignedDocument({
+        tenantId: tenantSlug,
+        documentId: document.id,
+        originalPdfUrl: document.file_url,
+        fields: allFields,
+        signers: allSigners,
+      })
+    } catch (finalizationError) {
+      console.error('[esign] PDF finalization failed, using original:', finalizationError)
+    }
+
+    await markDocumentCompleted(tenantSlug, document.id, signedFileUrl)
   } else {
     // Get next signers to notify
     nextSigners = await getNextSigners(tenantSlug, document.id)

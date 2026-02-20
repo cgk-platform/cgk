@@ -9,16 +9,26 @@ import type { EcommerceItem, PurchaseEventData, ViewItemListData } from './types
 
 // Debug mode from env
 const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true'
-const GA4_ID = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID
+
+/**
+ * Get GA4 measurement ID — prefers per-tenant runtime config over build-time env var.
+ * The runtime config is injected by AnalyticsHead from the tenant's site_config table.
+ */
+function getGA4Id(): string | undefined {
+  if (typeof window !== 'undefined' && (window as typeof window & { __CGK_ANALYTICS__?: { ga4MeasurementId?: string } }).__CGK_ANALYTICS__?.ga4MeasurementId) {
+    return (window as typeof window & { __CGK_ANALYTICS__?: { ga4MeasurementId?: string } }).__CGK_ANALYTICS__!.ga4MeasurementId!
+  }
+  return process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID || undefined
+}
 
 /**
  * Check if GA4 is available
  */
 function isGA4Available(): boolean {
   if (typeof window === 'undefined') return false
-  if (!GA4_ID) {
+  if (!getGA4Id()) {
     if (DEBUG_MODE) {
-      console.log('[GA4] Not configured - NEXT_PUBLIC_GA4_MEASUREMENT_ID not set')
+      console.log('[GA4] Not configured - no GA4 measurement ID found')
     }
     return false
   }
