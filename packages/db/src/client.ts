@@ -33,6 +33,37 @@ function getNeonSql(): NeonQueryFunction<false, true> {
 }
 
 /**
+ * Convert a parameterized query string ("SELECT $1, $2") + params array
+ * into a TemplateStringsArray + ordered values for tagged-template usage.
+ *
+ * This allows sql.query("SELECT $1", [val]) calls to be converted to
+ * the tagged-template form required by neon()'s transaction txn function.
+ */
+function queryToTemplateArgs(
+  query: string,
+  params: unknown[],
+): [TemplateStringsArray, ...unknown[]] {
+  const parts: string[] = []
+  const orderedValues: unknown[] = []
+  let lastIndex = 0
+  const regex = /\$(\d+)/g
+  let match
+
+  while ((match = regex.exec(query)) !== null) {
+    parts.push(query.slice(lastIndex, match.index))
+    const paramIndex = parseInt(match[1]!, 10) - 1
+    orderedValues.push(params[paramIndex])
+    lastIndex = match.index + match[0].length
+  }
+  parts.push(query.slice(lastIndex))
+
+  const strings = Object.assign([...parts], {
+    raw: [...parts],
+  }) as unknown as TemplateStringsArray
+  return [strings, ...orderedValues]
+}
+
+/**
  * SQL template tag for parameterized queries
  *
  * When called inside withTenant(), uses a Neon HTTP transaction
@@ -72,19 +103,25 @@ export const sql: typeof vercelSql = new Proxy(vercelSql, {
   get(target, prop, receiver) {
     if (prop === 'query') {
       const originalQuery = target.query.bind(target) as VercelPool['query']
-      return (queryOrConfig: string | object) => {
+      return (queryOrConfig: string | object, values?: unknown[]) => {
         const schema = tenantSchemaStore.getStore()
         if (schema && typeof queryOrConfig === 'string') {
           const neonSql = getNeonSql()
-          return (neonSql.transaction as Function)(
-            (txn: Function) => [
+          // Convert "SELECT $1, $2" + [v1, v2] to tagged-template form
+          // because neon()'s transaction txn only supports tagged templates
+          const [tsa, ...tValues] = queryToTemplateArgs(
+            queryOrConfig,
+            values || [],
+          )
+          return neonSql.transaction(
+            (txn) => [
               txn`SELECT set_config('search_path', ${`${schema},public`}, true)`,
-              txn(queryOrConfig, []),
+              txn(tsa, ...(tValues as [])),
             ],
             { fullResults: true },
-          ).then((results: unknown[]) => results[1])
+          ).then((results) => results[1])
         }
-        return originalQuery(queryOrConfig as never)
+        return originalQuery(queryOrConfig as never, values as never)
       }
     }
     return Reflect.get(target, prop, receiver)
