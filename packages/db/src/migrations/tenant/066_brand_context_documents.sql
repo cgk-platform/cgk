@@ -42,3 +42,17 @@ COMMENT ON COLUMN brand_context_documents.slug IS 'URL-friendly unique identifie
 COMMENT ON COLUMN brand_context_documents.category IS 'Document category: brand_voice, product_info, faq, policies, guidelines, templates';
 COMMENT ON COLUMN brand_context_documents.tags IS 'JSON array of string tags for filtering';
 COMMENT ON COLUMN brand_context_documents.version IS 'Document version, incremented on updates';
+
+-- Version history for brand context documents
+CREATE TABLE IF NOT EXISTS brand_context_versions (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  document_id TEXT NOT NULL REFERENCES brand_context_documents(id) ON DELETE CASCADE,
+  version INTEGER NOT NULL,
+  content TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_brand_context_versions_doc ON brand_context_versions(document_id);
+CREATE INDEX IF NOT EXISTS idx_brand_context_versions_doc_ver ON brand_context_versions(document_id, version);
+
+COMMENT ON TABLE brand_context_versions IS 'Version history for brand context documents';
