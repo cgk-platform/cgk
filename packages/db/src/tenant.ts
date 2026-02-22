@@ -1,4 +1,4 @@
-import { sql } from './client.js'
+import { sql, tenantSchemaStore } from './client.js'
 
 /** Regex for validating tenant slugs: alphanumeric + underscore only */
 const TENANT_SLUG_REGEX = /^[a-z0-9_]+$/
@@ -33,6 +33,11 @@ export function getTenantSchemaName(tenantSlug: string): string {
 /**
  * Execute a function within a tenant's database schema
  *
+ * Uses AsyncLocalStorage to track the current tenant schema. All sql
+ * calls made within the operation callback automatically prepend
+ * SET search_path, ensuring correct tenant isolation even with Neon's
+ * HTTP driver where each sql call is a separate HTTP request.
+ *
  * @ai-pattern tenant-isolation
  * @ai-required Always wrap database operations in this
  * @ai-gotcha Schema is set via search_path, not connection switching
@@ -49,17 +54,8 @@ export async function withTenant<T>(
   operation: () => Promise<T>
 ): Promise<T> {
   validateTenantSlug(tenantSlug)
-
-  // Set search_path to tenant schema, then public for shared tables
   const schemaName = `tenant_${tenantSlug}`
-  await sql`SELECT set_config('search_path', ${`${schemaName}, public`}, true)`
-
-  try {
-    return await operation()
-  } finally {
-    // Reset to public schema
-    await sql`SELECT set_config('search_path', 'public', true)`
-  }
+  return tenantSchemaStore.run(schemaName, operation)
 }
 
 /**
