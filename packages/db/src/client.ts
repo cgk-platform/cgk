@@ -1,36 +1,43 @@
 import { sql as vercelSql, type VercelPool } from '@vercel/postgres'
+import { neon, type NeonQueryFunction } from '@neondatabase/serverless'
 import { AsyncLocalStorage } from 'node:async_hooks'
 
 /**
  * Async-local store for the current tenant schema name.
  * When set (inside withTenant), all sql calls automatically
- * prepend SET search_path for Neon serverless compatibility.
+ * use a Neon HTTP transaction to SET LOCAL search_path before
+ * the actual query, ensuring correct tenant isolation.
  *
  * Neon's HTTP driver (used by @vercel/postgres in Edge Runtime) sends
  * each sql call as a separate HTTP request with no shared session state.
- * Without this, SET search_path in one call is lost before the next query.
+ * Multi-statement queries are rejected ("cannot insert multiple commands
+ * into a prepared statement"). The transaction approach bundles
+ * SET LOCAL search_path + query in a single HTTP request.
  */
 export const tenantSchemaStore = new AsyncLocalStorage<string>()
 
 /**
- * Prepend SET search_path to a template tag call's first string.
+ * Cached neon() function for tenant queries.
+ * Uses the same connection URL as @vercel/postgres but with
+ * fullResults: true for QueryResult-compatible return shape.
  */
-function prependSearchPath(
-  schema: string,
-  strings: TemplateStringsArray,
-): TemplateStringsArray {
-  const prefix = `SET search_path TO ${schema}, public;\n`
-  const modified = [prefix + strings[0], ...Array.from(strings).slice(1)]
-  const rawModified = [prefix + strings.raw[0], ...strings.raw.slice(1)]
-  Object.defineProperty(modified, 'raw', { value: rawModified })
-  return modified as unknown as TemplateStringsArray
+let _neonSql: NeonQueryFunction<false, true> | null = null
+
+function getNeonSql(): NeonQueryFunction<false, true> {
+  if (!_neonSql) {
+    const url = process.env.POSTGRES_URL || process.env.DATABASE_URL
+    if (!url) throw new Error('POSTGRES_URL or DATABASE_URL is required')
+    _neonSql = neon(url, { fullResults: true })
+  }
+  return _neonSql
 }
 
 /**
  * SQL template tag for parameterized queries
  *
- * When called inside withTenant(), automatically prepends
- * SET search_path to ensure the correct tenant schema is used.
+ * When called inside withTenant(), uses a Neon HTTP transaction
+ * to SET LOCAL search_path before the actual query, ensuring
+ * the correct tenant schema is used even with stateless HTTP.
  *
  * @ai-pattern sql-template
  * @ai-required Use this instead of string concatenation
@@ -45,12 +52,19 @@ export const sql: typeof vercelSql = new Proxy(vercelSql, {
   apply(_target, _thisArg, args: unknown[]) {
     const schema = tenantSchemaStore.getStore()
     if (schema) {
+      const neonSql = getNeonSql()
       const strings = args[0] as TemplateStringsArray
       const values = args.slice(1) as unknown[]
-      const modified = prependSearchPath(schema, strings)
-      return vercelSql(modified, ...(values as []))
+      // Bundle SET LOCAL search_path + query in a single HTTP transaction
+      return neonSql.transaction(
+        (txn) => [
+          txn`SELECT set_config('search_path', ${`${schema},public`}, true)`,
+          txn(strings, ...(values as [])),
+        ],
+        { fullResults: true },
+      ).then((results) => results[1])
     }
-    // Forward without modification: call vercelSql with original args
+    // No tenant context — use vercelSql directly for public schema
     const strings = args[0] as TemplateStringsArray
     const values = args.slice(1) as unknown[]
     return vercelSql(strings, ...(values as []))
@@ -61,9 +75,14 @@ export const sql: typeof vercelSql = new Proxy(vercelSql, {
       return (queryOrConfig: string | object) => {
         const schema = tenantSchemaStore.getStore()
         if (schema && typeof queryOrConfig === 'string') {
-          return originalQuery(
-            `SET search_path TO ${schema}, public;\n${queryOrConfig}` as never
-          )
+          const neonSql = getNeonSql()
+          return (neonSql.transaction as Function)(
+            (txn: Function) => [
+              txn`SELECT set_config('search_path', ${`${schema},public`}, true)`,
+              txn(queryOrConfig, []),
+            ],
+            { fullResults: true },
+          ).then((results: unknown[]) => results[1])
         }
         return originalQuery(queryOrConfig as never)
       }
