@@ -101,6 +101,40 @@ declare module '@cgk-platform/video/transcription' {
   export function getVideosPendingTranscription(tenantId: string): Promise<VideoWithTranscription[]>
 }
 
+declare module '@cgk-platform/shopify' {
+  export interface ShopifyCredentials {
+    shop: string
+    accessToken: string
+    webhookSecret: string | null
+    scopes: string[]
+    apiVersion: string
+  }
+
+  export function getShopifyCredentials(tenantId: string): Promise<ShopifyCredentials>
+}
+
+declare module '@cgk-platform/shopify/webhooks' {
+  export interface WebhookSyncResult {
+    added: string[]
+    removed: string[]
+    unchanged: string[]
+    errors: Array<{ topic: string; error: string }>
+  }
+
+  export interface ShopifyCredentials {
+    shop: string
+    accessToken: string
+    webhookSecret: string | null
+  }
+
+  export function syncWebhookRegistrations(
+    tenantId: string,
+    shop: string,
+    credentials: ShopifyCredentials,
+    webhookUrl: string
+  ): Promise<WebhookSyncResult>
+}
+
 declare module '@cgk-platform/integrations' {
   import type Stripe from 'stripe'
 

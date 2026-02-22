@@ -244,13 +244,15 @@ CREATE TRIGGER update_payout_methods_updated_at
 COMMENT ON TABLE payout_methods IS 'Contractor payout methods (Stripe Connect, PayPal, Venmo, check)';
 
 -- ============================================================
--- 9. CREATE TABLE balance_transactions
+-- 9. balance_transactions — Ensure contractor columns exist
+--    Table may already exist from treasury migration (015)
+--    with creator_id. Add payee_id + missing columns.
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS balance_transactions (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  payee_id TEXT NOT NULL,
-  tenant_id TEXT NOT NULL,
+  payee_id TEXT,
+  tenant_id TEXT,
   type TEXT NOT NULL,
   amount_cents INTEGER NOT NULL,
   balance_after_cents INTEGER NOT NULL,
@@ -261,12 +263,18 @@ CREATE TABLE IF NOT EXISTS balance_transactions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- If table pre-existed from treasury migration, add missing columns
+ALTER TABLE balance_transactions ADD COLUMN IF NOT EXISTS payee_id TEXT;
+ALTER TABLE balance_transactions ADD COLUMN IF NOT EXISTS tenant_id TEXT;
+ALTER TABLE balance_transactions ADD COLUMN IF NOT EXISTS reference_type TEXT;
+ALTER TABLE balance_transactions ADD COLUMN IF NOT EXISTS reference_id TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_balance_tx_payee ON balance_transactions(payee_id);
 CREATE INDEX IF NOT EXISTS idx_balance_tx_tenant ON balance_transactions(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_balance_tx_type ON balance_transactions(type);
 CREATE INDEX IF NOT EXISTS idx_balance_tx_created ON balance_transactions(created_at);
 
-COMMENT ON TABLE balance_transactions IS 'Contractor balance ledger transactions';
+COMMENT ON TABLE balance_transactions IS 'Balance ledger transactions (creators and contractors)';
 
 -- ============================================================
 -- 10. CREATE TABLE payee_tax_info
