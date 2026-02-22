@@ -13,6 +13,20 @@ import { AsyncLocalStorage } from 'node:async_hooks'
 export const tenantSchemaStore = new AsyncLocalStorage<string>()
 
 /**
+ * Prepend SET search_path to a template tag call's first string.
+ */
+function prependSearchPath(
+  schema: string,
+  strings: TemplateStringsArray,
+): TemplateStringsArray {
+  const prefix = `SET search_path TO ${schema}, public;\n`
+  const modified = [prefix + strings[0], ...Array.from(strings).slice(1)]
+  const rawModified = [prefix + strings.raw[0], ...strings.raw.slice(1)]
+  Object.defineProperty(modified, 'raw', { value: rawModified })
+  return modified as unknown as TemplateStringsArray
+}
+
+/**
  * SQL template tag for parameterized queries
  *
  * When called inside withTenant(), automatically prepends
@@ -33,13 +47,13 @@ export const sql: typeof vercelSql = new Proxy(vercelSql, {
     if (schema) {
       const strings = args[0] as TemplateStringsArray
       const values = args.slice(1) as unknown[]
-      const prefix = `SET search_path TO ${schema}, public;\n`
-      const modified = [prefix + strings[0], ...Array.from(strings).slice(1)]
-      const rawModified = [prefix + strings.raw[0], ...strings.raw.slice(1)]
-      Object.defineProperty(modified, 'raw', { value: rawModified })
-      return vercelSql(modified as unknown as TemplateStringsArray, ...(values as []))
+      const modified = prependSearchPath(schema, strings)
+      return vercelSql(modified, ...(values as []))
     }
-    return (vercelSql as Function).apply(null, args)
+    // Forward without modification: call vercelSql with original args
+    const strings = args[0] as TemplateStringsArray
+    const values = args.slice(1) as unknown[]
+    return vercelSql(strings, ...(values as []))
   },
   get(target, prop, receiver) {
     if (prop === 'query') {
