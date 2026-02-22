@@ -3,11 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
-    "skipLibCheck": true,
-    "paths": {
-      "@cgk-platform/video/*": ["../video/dist/*"],
-      "@cgk-platform/integrations": ["../integrations/dist/index.d.ts"]
-    }
+    "skipLibCheck": true
   },
   "include": [
     "src",
