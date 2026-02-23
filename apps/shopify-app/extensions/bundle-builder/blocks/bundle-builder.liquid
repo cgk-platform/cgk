@@ -1,6 +1,7 @@
 {{ 'bundle-builder.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
+  assign bundle_name = block.settings.bundle_name | default: 'Custom Bundle'
   assign headline = block.settings.headline
   assign subheadline = block.settings.subheadline
   assign discount_type = block.settings.discount_type
@@ -25,22 +26,22 @@
   {%- assign tier_count = 0 -%}
   {%- if block.settings.discount_2_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":2,"discount":{{ block.settings.discount_2_items }}}
+    {"count":2,"discount":{{ block.settings.discount_2_items }},"label":"{{ block.settings.tier_2_label | default: 'Starter Bundle' | escape }}"}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_3_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":3,"discount":{{ block.settings.discount_3_items }}}
+    {"count":3,"discount":{{ block.settings.discount_3_items }},"label":"{{ block.settings.tier_3_label | default: 'Value Bundle' | escape }}"}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_4_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":4,"discount":{{ block.settings.discount_4_items }}}
+    {"count":4,"discount":{{ block.settings.discount_4_items }},"label":"{{ block.settings.tier_4_label | default: 'Best Value' | escape }}"}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_5_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":5,"discount":{{ block.settings.discount_5_items }}}
+    {"count":5,"discount":{{ block.settings.discount_5_items }},"label":"{{ block.settings.tier_5_label | default: 'Ultimate Bundle' | escape }}"}
   {%- endif -%}
 ]
 {%- endcapture -%}
@@ -75,6 +76,7 @@
   data-max-items="{{ max_items }}"
   data-show-savings="{{ show_savings }}"
   data-show-tier-progress="{{ show_tier_progress }}"
+  data-bundle-name="{{ bundle_name | escape }}"
   data-cta-text="{{ cta_text | escape }}"
   data-tiers="{{ tiers_json | strip_newlines | escape }}"
   style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }}; --bb-padding-top: {{ padding_top }}px; --bb-padding-bottom: {{ padding_bottom }}px;"
@@ -155,6 +157,13 @@
   "name": "Bundle Builder",
   "target": "section",
   "settings": [
+    {
+      "type": "text",
+      "id": "bundle_name",
+      "label": "Bundle name",
+      "default": "Custom Bundle",
+      "info": "Internal name for this bundle (shown in order line item properties)"
+    },
     {
       "type": "text",
       "id": "headline",
@@ -238,6 +247,13 @@
       "info": "Set to 0 to disable this tier"
     },
     {
+      "type": "text",
+      "id": "tier_2_label",
+      "label": "Tier 2 label",
+      "default": "Starter Bundle",
+      "info": "Shown in the progress bar when this tier is active"
+    },
+    {
       "type": "range",
       "id": "discount_3_items",
       "label": "Discount for 3 items",
@@ -246,6 +262,12 @@
       "step": 1,
       "default": 15,
       "unit": "%"
+    },
+    {
+      "type": "text",
+      "id": "tier_3_label",
+      "label": "Tier 3 label",
+      "default": "Value Bundle"
     },
     {
       "type": "range",
@@ -258,6 +280,12 @@
       "unit": "%"
     },
     {
+      "type": "text",
+      "id": "tier_4_label",
+      "label": "Tier 4 label",
+      "default": "Best Value"
+    },
+    {
       "type": "range",
       "id": "discount_5_items",
       "label": "Discount for 5+ items",
@@ -266,6 +294,12 @@
       "step": 1,
       "default": 25,
       "unit": "%"
+    },
+    {
+      "type": "text",
+      "id": "tier_5_label",
+      "label": "Tier 5+ label",
+      "default": "Ultimate Bundle"
     },
     {
       "type": "header",

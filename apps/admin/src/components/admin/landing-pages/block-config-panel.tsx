@@ -247,6 +247,40 @@ function getConfigFields(type: BlockType): ConfigFieldDef[] {
       { key: 'button_text', label: 'Button Text', type: 'text', placeholder: 'Subscribe' },
       { key: 'success_message', label: 'Success Message', type: 'text' },
     ],
+    'bundle-builder': [
+      { key: 'headline', label: 'Headline', type: 'text', placeholder: 'Build Your Bundle & Save' },
+      { key: 'description', label: 'Description', type: 'textarea', placeholder: 'Mix & match your favorites' },
+      { key: 'layout', label: 'Layout', type: 'select', options: [
+        { value: 'grid', label: 'Grid' },
+        { value: 'list', label: 'List' },
+      ]},
+      { key: 'columns', label: 'Grid Columns (Desktop)', type: 'number', placeholder: '3' },
+      { key: 'image_ratio', label: 'Image Ratio', type: 'select', options: [
+        { value: 'square', label: 'Square (1:1)' },
+        { value: 'portrait', label: 'Portrait (3:4)' },
+        { value: 'landscape', label: 'Landscape (4:3)' },
+      ]},
+      { key: 'discount_type', label: 'Discount Type', type: 'select', options: [
+        { value: 'percentage', label: 'Percentage off' },
+        { value: 'fixed', label: 'Fixed amount off (cents)' },
+      ]},
+      { key: 'discount_2_items', label: 'Discount for 2 Items', type: 'number', placeholder: '10' },
+      { key: 'discount_3_items', label: 'Discount for 3 Items', type: 'number', placeholder: '15' },
+      { key: 'discount_4_items', label: 'Discount for 4 Items', type: 'number', placeholder: '20' },
+      { key: 'discount_5_items', label: 'Discount for 5+ Items', type: 'number', placeholder: '25' },
+      { key: 'min_items', label: 'Minimum Items', type: 'number', placeholder: '2' },
+      { key: 'max_items', label: 'Maximum Items', type: 'number', placeholder: '8' },
+      { key: 'cta_text', label: 'CTA Button Text', type: 'text', placeholder: 'Add Bundle to Cart' },
+      { key: 'show_savings', label: 'Show Savings Callout', type: 'boolean' },
+      { key: 'show_tier_progress', label: 'Show Tier Progress Bar', type: 'boolean' },
+      { key: 'enable_quantity', label: 'Enable Quantity Controls', type: 'boolean' },
+      { key: 'background_color', label: 'Background Color', type: 'color' },
+      { key: 'text_color', label: 'Text Color', type: 'color' },
+      { key: 'accent_color', label: 'Accent Color', type: 'color' },
+      { key: 'currency_symbol', label: 'Currency Symbol', type: 'text', placeholder: '$' },
+      { key: 'items_json', label: 'Products (JSON)', type: 'textarea', placeholder: '[{"id":"1","name":"Product","price":2999,"image":{"src":"/img.jpg"}}]' },
+      { key: 'tiers_json', label: 'Reward Tiers (JSON)', type: 'textarea', placeholder: '[{"minItems":2,"discountPercent":10,"label":"Starter Bundle"}]' },
+    ],
   }
 
   return [...(typeFields[type] || []), ...commonFields]

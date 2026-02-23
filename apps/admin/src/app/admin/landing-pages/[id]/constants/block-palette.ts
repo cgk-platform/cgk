@@ -33,7 +33,7 @@ export const BLOCK_DEFINITIONS: BlockDefinition[] = [
   { type: 'pdp-subscription-options', label: 'Subscription Options', description: 'Subscribe and save', icon: 'repeat', category: 'pdp', defaultConfig: {} },
 
   // Promo Blocks (10)
-  { type: 'bundle-builder', label: 'Bundle Builder', description: 'Create custom bundles', icon: 'package', category: 'promo', defaultConfig: {} },
+  { type: 'bundle-builder', label: 'Bundle Builder', description: 'Create custom bundles with tiered discounts', icon: 'package', category: 'promo', defaultConfig: { headline: 'Build Your Bundle & Save', description: 'Mix & match your favorites — the more you add, the more you save.', layout: 'grid', columns: 3, image_ratio: 'square', discount_type: 'percentage', discount_2_items: 10, discount_3_items: 15, discount_4_items: 20, discount_5_items: 25, min_items: 2, max_items: 8, cta_text: 'Add Bundle to Cart', show_savings: true, show_tier_progress: true, enable_quantity: true, currency_symbol: '$', items_json: '[]', tiers_json: '[{"minItems":2,"discountPercent":10,"label":"Starter Bundle"},{"minItems":3,"discountPercent":15,"label":"Value Bundle"},{"minItems":4,"discountPercent":20,"label":"Best Value"},{"minItems":5,"discountPercent":25,"label":"Ultimate Bundle"}]' } },
   { type: 'promo-hero', label: 'Promo Hero', description: 'Promotional hero banner', icon: 'sparkles', category: 'promo', defaultConfig: {} },
   { type: 'feature-cards', label: 'Feature Cards', description: 'Feature highlight cards', icon: 'grid', category: 'promo', defaultConfig: {} },
   { type: 'text-banner', label: 'Text Banner', description: 'Announcement banner', icon: 'megaphone', category: 'promo', defaultConfig: {} },

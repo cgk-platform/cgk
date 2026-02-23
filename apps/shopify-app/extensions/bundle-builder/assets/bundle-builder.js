@@ -15,6 +15,7 @@
       this.discountType = section.dataset.discountType || 'percentage';
       this.showSavings = section.dataset.showSavings === 'true';
       this.showTierProgress = section.dataset.showTierProgress === 'true';
+      this.bundleName = section.dataset.bundleName || 'Bundle';
       this.bundleId = section.dataset.sectionId || 'bundle';
       this.isLoading = false;
 
@@ -270,26 +271,29 @@
         }
         this.els.tierFill.style.width = Math.min(100, Math.max(0, progress)) + '%';
 
-        var discountLabel = this.discountType === 'percentage'
+        var nextDiscountLabel = this.discountType === 'percentage'
           ? nextTier.discount + '% off'
           : this.formatMoney(nextTier.discount) + ' off';
-        this.els.tierLabel.textContent = 'Add ' + needed + ' more for ' + discountLabel + '!';
+        var nextName = nextTier.label ? nextTier.label + ' — ' + nextDiscountLabel : nextDiscountLabel;
+        this.els.tierLabel.textContent = 'Add ' + needed + ' more for ' + nextName + '!';
 
         if (this.els.tierHint && activeTier) {
-          var currentLabel = this.discountType === 'percentage'
+          var currentDiscountLabel = this.discountType === 'percentage'
             ? activeTier.discount + '% off'
             : this.formatMoney(activeTier.discount) + ' off';
-          this.els.tierHint.textContent = 'Current: ' + currentLabel;
+          var currentName = activeTier.label || currentDiscountLabel;
+          this.els.tierHint.textContent = 'Current: ' + currentName;
           this.els.tierHint.style.display = '';
         } else if (this.els.tierHint) {
           this.els.tierHint.style.display = 'none';
         }
       } else if (activeTier) {
         this.els.tierFill.style.width = '100%';
-        var maxLabel = this.discountType === 'percentage'
+        var maxDiscountLabel = this.discountType === 'percentage'
           ? activeTier.discount + '% off'
           : this.formatMoney(activeTier.discount) + ' off';
-        this.els.tierLabel.textContent = 'Max discount unlocked: ' + maxLabel;
+        var maxName = activeTier.label ? activeTier.label + ' unlocked!' : 'Max discount unlocked: ' + maxDiscountLabel;
+        this.els.tierLabel.textContent = maxName;
         if (this.els.tierHint) {
           this.els.tierHint.style.display = 'none';
         }
@@ -330,6 +334,8 @@
 
       var items = [];
       var bundleId = this.bundleId;
+      var bundleName = this.bundleName;
+      var tierLabel = activeTier && activeTier.label ? activeTier.label : '';
       var totalItems = this.getTotalItems();
 
       this.selectedProducts.forEach(function (item) {
@@ -338,11 +344,15 @@
           quantity: item.quantity,
           properties: {
             '_bundle_id': bundleId,
+            '_bundle_name': bundleName,
             '_bundle_size': String(totalItems),
           },
         };
         if (discountLabel) {
           lineItem.properties['_bundle_discount'] = discountLabel;
+        }
+        if (tierLabel) {
+          lineItem.properties['_bundle_tier'] = tierLabel;
         }
         items.push(lineItem);
       });
