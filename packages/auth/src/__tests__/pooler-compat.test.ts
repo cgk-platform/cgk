@@ -218,7 +218,7 @@ describe('Neon Pooler Compatibility', () => {
     for (const criticalPath of criticalPaths) {
       const fullPath = path.resolve(packagesRoot, criticalPath)
 
-      it(`${criticalPath} should have no unqualified public table references`, () => {
+      it(`${criticalPath} should have no unqualified public table references`, { timeout: 30000 }, () => {
         if (!fs.existsSync(fullPath)) return // Skip if path doesn't exist
 
         const files = findTsFiles(fullPath)

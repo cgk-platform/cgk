@@ -48,6 +48,7 @@ export interface HealthCheckSummary {
  * Services to monitor for each tenant
  * Must match the services defined in the health matrix API
  */
+const MONITORED_SERVICES = ['database', 'redis', 'shopify', 'stripe', 'inngest', 'vercel', 'email'] as const
 
 type MonitoredService = (typeof MONITORED_SERVICES)[number]
 
