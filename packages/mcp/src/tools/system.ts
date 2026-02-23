@@ -77,11 +77,13 @@ interface TenantConfig {
 
 /** Feature flag */
 interface FeatureFlag {
+  key: string
   name: string
-  enabled: boolean
-  rolloutPercentage?: number
-  allowedTenants?: string[]
   description?: string
+  type: string
+  status: string
+  defaultValue: unknown
+  category?: string
 }
 
 /** Notification */
@@ -236,7 +238,8 @@ export const getServiceStatusTool: ToolDefinition = defineTool({
     required: ['service'],
   },
   async handler(args) {
-    const service = args.service as string
+    const service = args.service as string | undefined
+    if (!service) return errorResult('Service name is required')
 
     const startTime = Date.now()
     let status: ServiceStatus
@@ -696,43 +699,48 @@ export const getFeatureFlagsTool: ToolDefinition = defineTool({
         return jsonResult(flagName ? { flag: cached } : { flags: cached })
       }
 
-      // Fetch from database
+      // Fetch from database (public.feature_flags uses key/status/default_value, not name/enabled)
       let flags: FeatureFlag[]
 
       if (flagName) {
         const result = await sql`
-          SELECT name, enabled, rollout_percentage, allowed_tenants, description
+          SELECT id, key, name, description, type, status, default_value, category,
+                 created_at, updated_at
           FROM public.feature_flags
-          WHERE name = ${flagName}
-            AND (allowed_tenants IS NULL OR ${tenantId} = ANY(allowed_tenants))
+          WHERE key = ${flagName} AND status = 'active'
         `
         flags = result.rows.map(row => ({
+          key: String(row.key),
           name: String(row.name),
-          enabled: Boolean(row.enabled),
-          rolloutPercentage: row.rollout_percentage ? Number(row.rollout_percentage) : undefined,
-          allowedTenants: row.allowed_tenants as string[] | undefined,
           description: row.description ? String(row.description) : undefined,
+          type: String(row.type),
+          status: String(row.status),
+          defaultValue: row.default_value,
+          category: row.category ? String(row.category) : undefined,
         }))
 
         if (flags.length === 0) {
           return jsonResult({ flag: null, message: `Feature flag not found: ${flagName}` })
         }
 
-        await cache.set(cacheKey, flags[0], { ttl: 300 }) // Cache for 5 minutes
+        await cache.set(cacheKey, flags[0], { ttl: 300 })
         return jsonResult({ flag: flags[0] })
       } else {
         const result = await sql`
-          SELECT name, enabled, rollout_percentage, allowed_tenants, description
+          SELECT id, key, name, description, type, status, default_value, category,
+                 created_at, updated_at
           FROM public.feature_flags
-          WHERE allowed_tenants IS NULL OR ${tenantId} = ANY(allowed_tenants)
-          ORDER BY name
+          WHERE status = 'active'
+          ORDER BY key
         `
         flags = result.rows.map(row => ({
+          key: String(row.key),
           name: String(row.name),
-          enabled: Boolean(row.enabled),
-          rolloutPercentage: row.rollout_percentage ? Number(row.rollout_percentage) : undefined,
-          allowedTenants: row.allowed_tenants as string[] | undefined,
           description: row.description ? String(row.description) : undefined,
+          type: String(row.type),
+          status: String(row.status),
+          defaultValue: row.default_value,
+          category: row.category ? String(row.category) : undefined,
         }))
 
         await cache.set(cacheKey, flags, { ttl: 300 })

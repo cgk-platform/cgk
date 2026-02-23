@@ -18,13 +18,10 @@ import type { ContentBlock, ToolResult, TextContent } from './types'
  * Tools that require streaming responses due to potentially long execution times
  */
 export const STREAMING_TOOLS = [
-  'search_orders',      // Can return many results
-  'export_analytics',   // Large data export
-  'bulk_update',        // Batch operations
-  'generate_report',    // Report generation
-  'sync_inventory',     // Inventory sync
-  'import_data',        // Data import
-  'analyze_trends',     // Analytics computation
+  'export_audit_log',   // Audit log export (streaming)
+  'bulk_update',        // Batch operations (future)
+  'sync_inventory',     // Inventory sync (future)
+  'import_data',        // Data import (future)
 ] as const
 
 /**

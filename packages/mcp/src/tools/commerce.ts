@@ -7,13 +7,6 @@
 
 import { withTenant, sql } from '@cgk-platform/db'
 import { defineTool, jsonResult, errorResult } from '../tools'
-import {
-  progressChunk,
-  partialChunk,
-  completeChunk,
-  errorChunk,
-  type StreamingChunk,
-} from '../streaming'
 import type { ToolDefinition } from '../tools'
 import type { ToolResult } from '../types'
 
@@ -395,7 +388,7 @@ export const getOrderTool = defineTool({
 export const searchOrdersTool = defineTool({
   name: 'search_orders',
   description:
-    'Search orders by customer email, order number, or content. Supports streaming for large result sets.',
+    'Search orders by customer email, order number, or content.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -414,24 +407,15 @@ export const searchOrdersTool = defineTool({
     },
     required: ['query'],
   },
-  streaming: true,
-  async *handler(args): AsyncGenerator<StreamingChunk, void, unknown> {
+  async handler(args): Promise<ToolResult> {
     const tenantId = (args._tenantId as string) || ''
     const query = args.query as string
     const limit = Math.min(Math.max((args.limit as number) || 100, 1), 500)
 
-    if (!tenantId) {
-      yield errorChunk(-32602, 'Tenant ID is required')
-      return
-    }
-    if (!query) {
-      yield errorChunk(-32602, 'Search query is required')
-      return
-    }
+    if (!tenantId) return errorResult('Tenant ID is required')
+    if (!query) return errorResult('Search query is required')
 
     try {
-      yield progressChunk(0, 'Starting order search...')
-
       const searchPattern = `%${query}%`
 
       const orders = await withTenant(tenantId, async () => {
@@ -445,64 +429,23 @@ export const searchOrdersTool = defineTool({
         `
       })
 
-      yield progressChunk(50, `Found ${orders.rows.length} orders, formatting results...`)
+      const results = orders.rows.map((order) => ({
+        id: order.id,
+        order_number: order.order_number,
+        customer_email: order.customer_email,
+        status: order.status,
+        total: formatCents(order.total_cents, order.currency),
+        created_at: formatDate(order.created_at),
+      }))
 
-      // Stream results in batches
-      const batchSize = 20
-      const results: Array<{
-        id: string
-        order_number: string
-        customer_email: string | null
-        status: string
-        total: string
-        created_at: string
-      }> = []
-
-      for (let i = 0; i < orders.rows.length; i += batchSize) {
-        const batch = orders.rows.slice(i, i + batchSize)
-        const formattedBatch = batch.map((order) => ({
-          id: order.id,
-          order_number: order.order_number,
-          customer_email: order.customer_email,
-          status: order.status,
-          total: formatCents(order.total_cents, order.currency),
-          created_at: formatDate(order.created_at),
-        }))
-
-        results.push(...formattedBatch)
-
-        const progress = Math.round(50 + ((i + batch.length) / orders.rows.length) * 50)
-        yield progressChunk(
-          progress,
-          `Processed ${Math.min(i + batchSize, orders.rows.length)} of ${orders.rows.length} orders`
-        )
-
-        yield partialChunk(
-          [{ type: 'text', text: JSON.stringify(formattedBatch, null, 2) }],
-          Math.floor(i / batchSize)
-        )
-      }
-
-      yield completeChunk({
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              {
-                search_query: query,
-                total_results: orders.rows.length,
-                orders: results,
-              },
-              null,
-              2
-            ),
-          },
-        ],
-        isError: false,
+      return jsonResult({
+        search_query: query,
+        total_results: results.length,
+        orders: results,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      yield errorChunk(-32603, `Search failed: ${message}`)
+      return errorResult(`Search failed: ${message}`)
     }
   },
 })

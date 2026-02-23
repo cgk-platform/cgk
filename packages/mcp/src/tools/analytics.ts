@@ -16,13 +16,6 @@ import {
   type ToolDefinition,
 } from '../tools'
 import type { ToolResult } from '../types'
-import {
-  progressChunk,
-  partialChunk,
-  completeChunk,
-  errorChunk,
-  type StreamingChunk,
-} from '../streaming'
 
 // =============================================================================
 // Types
@@ -423,7 +416,7 @@ export const recalculateAttributionTool = defineTool({
 export const exportAttributionDataTool = defineTool({
   name: 'export_attribution_data',
   description:
-    'Export attribution data for a date range. Returns data in batches for large exports.',
+    'Export attribution data for a date range.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -454,13 +447,9 @@ export const exportAttributionDataTool = defineTool({
     },
     required: ['startDate', 'endDate'],
   },
-  streaming: true,
-  async *handler(args): AsyncGenerator<StreamingChunk, void, unknown> {
+  async handler(args): Promise<ToolResult> {
     const tenantId = (args._tenantId as string) || ''
-    if (!tenantId) {
-      yield errorChunk(-32602, 'Tenant ID is required')
-      return
-    }
+    if (!tenantId) return errorResult('Tenant ID is required')
 
     let start: Date
     let end: Date
@@ -470,88 +459,53 @@ export const exportAttributionDataTool = defineTool({
       end = parsed.end
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      yield errorChunk(-32602, message)
-      return
+      return errorResult(message)
     }
 
     const model = (args.model as AttributionModel) || 'time_decay'
     const format = (args.format as string) || 'json'
 
-    yield progressChunk(0, 'Starting attribution data export...')
-
     try {
-      const batchSize = 100
-      let offset = 0
-      let totalExported = 0
-      let hasMore = true
+      const result = await withTenant(tenantId, async () => {
+        return sql`
+          SELECT
+            c.order_id,
+            c.order_number,
+            c.revenue,
+            c.converted_at,
+            t.channel,
+            t.source,
+            t.medium,
+            t.campaign,
+            t.platform,
+            ar.credit,
+            ar.attributed_revenue
+          FROM attribution_results ar
+          INNER JOIN attribution_conversions c ON c.id = ar.conversion_id
+          INNER JOIN attribution_touchpoints t ON t.id = ar.touchpoint_id
+          WHERE c.converted_at >= ${start.toISOString()}::timestamptz
+            AND c.converted_at <= ${end.toISOString()}::timestamptz
+            AND ar.model = ${model}
+          ORDER BY c.converted_at DESC
+          LIMIT 1000
+        `
+      })
 
-      while (hasMore) {
-        const batch = await withTenant(tenantId, async () => {
-          return sql`
-            SELECT
-              c.order_id,
-              c.order_number,
-              c.revenue,
-              c.converted_at,
-              t.channel,
-              t.source,
-              t.medium,
-              t.campaign,
-              t.platform,
-              ar.credit,
-              ar.attributed_revenue
-            FROM attribution_results ar
-            INNER JOIN attribution_conversions c ON c.id = ar.conversion_id
-            INNER JOIN attribution_touchpoints t ON t.id = ar.touchpoint_id
-            WHERE c.converted_at >= ${start.toISOString()}::timestamptz
-              AND c.converted_at <= ${end.toISOString()}::timestamptz
-              AND ar.model = ${model}
-            ORDER BY c.converted_at DESC
-            OFFSET ${offset}
-            LIMIT ${batchSize}
-          `
-        })
+      const records = result.rows.map((row) => ({
+        orderId: row.order_id,
+        orderNumber: row.order_number,
+        revenue: Number(row.revenue),
+        convertedAt: (row.converted_at as Date).toISOString(),
+        channel: row.channel,
+        source: row.source,
+        medium: row.medium,
+        campaign: row.campaign,
+        platform: row.platform,
+        credit: Number(row.credit),
+        attributedRevenue: Number(row.attributed_revenue),
+      }))
 
-        if (batch.rows.length === 0) {
-          hasMore = false
-        } else {
-          totalExported += batch.rows.length
-
-          yield progressChunk(
-            Math.min(95, Math.round((totalExported / (totalExported + batchSize)) * 100)),
-            `Exported ${totalExported} records...`
-          )
-
-          yield partialChunk(
-            [
-              {
-                type: 'text',
-                text: JSON.stringify(
-                  batch.rows.map((row) => ({
-                    orderId: row.order_id,
-                    orderNumber: row.order_number,
-                    revenue: Number(row.revenue),
-                    convertedAt: (row.converted_at as Date).toISOString(),
-                    channel: row.channel,
-                    source: row.source,
-                    medium: row.medium,
-                    campaign: row.campaign,
-                    platform: row.platform,
-                    credit: Number(row.credit),
-                    attributedRevenue: Number(row.attributed_revenue),
-                  }))
-                ),
-              },
-            ],
-            Math.floor(offset / batchSize)
-          )
-
-          offset += batchSize
-          hasMore = batch.rows.length === batchSize
-        }
-      }
-
-      const finalContent = JSON.stringify({
+      return jsonResult({
         exportedAt: new Date().toISOString(),
         model,
         format,
@@ -559,16 +513,12 @@ export const exportAttributionDataTool = defineTool({
           start: start.toISOString().split('T')[0],
           end: end.toISOString().split('T')[0],
         },
-        totalRecords: totalExported,
-      })
-
-      yield completeChunk({
-        content: [{ type: 'text', text: finalContent }],
-        isError: false,
+        totalRecords: records.length,
+        records,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      yield errorChunk(-32603, `Export failed: ${message}`)
+      return errorResult(`Export failed: ${message}`)
     }
   },
 })
@@ -2334,7 +2284,7 @@ export const generateReportTool = defineTool({
 export const exportAnalyticsTool = defineTool({
   name: 'export_analytics',
   description:
-    'Export analytics data for a date range. Supports large exports with streaming.',
+    'Export analytics data for a date range.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -2359,13 +2309,9 @@ export const exportAnalyticsTool = defineTool({
     },
     required: ['startDate', 'endDate', 'dataType'],
   },
-  streaming: true,
-  async *handler(args): AsyncGenerator<StreamingChunk, void, unknown> {
+  async handler(args): Promise<ToolResult> {
     const tenantId = (args._tenantId as string) || ''
-    if (!tenantId) {
-      yield errorChunk(-32602, 'Tenant ID is required')
-      return
-    }
+    if (!tenantId) return errorResult('Tenant ID is required')
 
     let start: Date
     let end: Date
@@ -2375,79 +2321,50 @@ export const exportAnalyticsTool = defineTool({
       end = parsed.end
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      yield errorChunk(-32602, message)
-      return
+      return errorResult(message)
     }
 
     const dataType = args.dataType as string
     const format = (args.format as string) || 'json'
 
-    yield progressChunk(0, `Starting ${dataType} export...`)
-
     try {
-      const batchSize = 100
-      let offset = 0
-      let totalExported = 0
-      let hasMore = true
-
-      while (hasMore) {
-        const batch = await withTenant(tenantId, async () => {
-          if (dataType === 'daily_metrics') {
-            return sql`
-              SELECT * FROM analytics_daily_metrics
-              WHERE date >= ${start.toISOString()}::date
-                AND date <= ${end.toISOString()}::date
-              ORDER BY date ASC
-              OFFSET ${offset} LIMIT ${batchSize}
-            `
-          } else if (dataType === 'channel_summary') {
-            return sql`
-              SELECT * FROM attribution_channel_summary
-              WHERE date >= ${start.toISOString()}::date
-                AND date <= ${end.toISOString()}::date
-              ORDER BY date ASC, channel ASC
-              OFFSET ${offset} LIMIT ${batchSize}
-            `
-          } else if (dataType === 'geo_metrics') {
-            return sql`
-              SELECT * FROM analytics_geo_metrics
-              WHERE date >= ${start.toISOString()}::date
-                AND date <= ${end.toISOString()}::date
-              ORDER BY date ASC, country ASC
-              OFFSET ${offset} LIMIT ${batchSize}
-            `
-          } else {
-            return sql`
-              SELECT * FROM attribution_conversions
-              WHERE converted_at >= ${start.toISOString()}::timestamptz
-                AND converted_at <= ${end.toISOString()}::timestamptz
-              ORDER BY converted_at ASC
-              OFFSET ${offset} LIMIT ${batchSize}
-            `
-          }
-        })
-
-        if (batch.rows.length === 0) {
-          hasMore = false
+      const result = await withTenant(tenantId, async () => {
+        if (dataType === 'daily_metrics') {
+          return sql`
+            SELECT * FROM analytics_daily_metrics
+            WHERE date >= ${start.toISOString()}::date
+              AND date <= ${end.toISOString()}::date
+            ORDER BY date ASC
+            LIMIT 1000
+          `
+        } else if (dataType === 'channel_summary') {
+          return sql`
+            SELECT * FROM attribution_channel_summary
+            WHERE date >= ${start.toISOString()}::date
+              AND date <= ${end.toISOString()}::date
+            ORDER BY date ASC, channel ASC
+            LIMIT 1000
+          `
+        } else if (dataType === 'geo_metrics') {
+          return sql`
+            SELECT * FROM analytics_geo_metrics
+            WHERE date >= ${start.toISOString()}::date
+              AND date <= ${end.toISOString()}::date
+            ORDER BY date ASC, country ASC
+            LIMIT 1000
+          `
         } else {
-          totalExported += batch.rows.length
-
-          yield progressChunk(
-            Math.min(95, Math.round((totalExported / (totalExported + batchSize)) * 100)),
-            `Exported ${totalExported} records...`
-          )
-
-          yield partialChunk(
-            [{ type: 'text', text: JSON.stringify(batch.rows) }],
-            Math.floor(offset / batchSize)
-          )
-
-          offset += batchSize
-          hasMore = batch.rows.length === batchSize
+          return sql`
+            SELECT * FROM attribution_conversions
+            WHERE converted_at >= ${start.toISOString()}::timestamptz
+              AND converted_at <= ${end.toISOString()}::timestamptz
+            ORDER BY converted_at ASC
+            LIMIT 1000
+          `
         }
-      }
+      })
 
-      const finalContent = JSON.stringify({
+      return jsonResult({
         exportedAt: new Date().toISOString(),
         dataType,
         format,
@@ -2455,16 +2372,12 @@ export const exportAnalyticsTool = defineTool({
           start: start.toISOString().split('T')[0],
           end: end.toISOString().split('T')[0],
         },
-        totalRecords: totalExported,
-      })
-
-      yield completeChunk({
-        content: [{ type: 'text', text: finalContent }],
-        isError: false,
+        totalRecords: result.rows.length,
+        records: result.rows,
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
-      yield errorChunk(-32603, `Export failed: ${message}`)
+      return errorResult(`Export failed: ${message}`)
     }
   },
 })

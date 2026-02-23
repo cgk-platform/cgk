@@ -19,6 +19,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 import { defineTool, jsonResult, errorResult } from '../tools'
 import type { ToolDefinition } from '../tools'
 import type { ToolResult } from '../types'
+import { generateEmbedding } from './embeddings'
 
 // =============================================================================
 // Helper: PostgreSQL array literal
@@ -187,9 +188,46 @@ export const searchBrandDocumentsTool = defineTool({
     const query = args.query as string
     const category = args.category as string | undefined
     const limit = Math.min(Number(args.limit) || 20, 100)
-    const pattern = `%${query}%`
 
     try {
+      // Try vector search first
+      const embedding = await generateEmbedding(query)
+      if (embedding.length > 0) {
+        const embeddingStr = `[${embedding.join(',')}]`
+        const vectorResult = await withTenant(tenantId, async () => {
+          if (category) {
+            return sql`
+              SELECT id, slug, title, category, tags, version, is_active,
+                     created_at, updated_at,
+                     1 - (embedding <=> ${embeddingStr}::public.vector) as similarity
+              FROM brand_context_documents
+              WHERE is_active = true
+                AND category = ${category}::document_category
+                AND embedding IS NOT NULL
+              ORDER BY embedding <=> ${embeddingStr}::public.vector
+              LIMIT ${limit}
+            `
+          }
+          return sql`
+            SELECT id, slug, title, category, tags, version, is_active,
+                   created_at, updated_at,
+                   1 - (embedding <=> ${embeddingStr}::public.vector) as similarity
+            FROM brand_context_documents
+            WHERE is_active = true
+              AND embedding IS NOT NULL
+            ORDER BY embedding <=> ${embeddingStr}::public.vector
+            LIMIT ${limit}
+          `
+        })
+
+        const docs = vectorResult.rows.filter(r => Number(r.similarity) >= 0.3)
+        if (docs.length > 0) {
+          return jsonResult({ documents: docs, count: docs.length, searchType: 'semantic' })
+        }
+      }
+
+      // Fallback to ILIKE text search
+      const pattern = `%${query}%`
       const result = await withTenant(tenantId, async () => {
         if (category) {
           return sql`
@@ -213,7 +251,7 @@ export const searchBrandDocumentsTool = defineTool({
           LIMIT ${limit}
         `
       })
-      return jsonResult({ documents: result.rows, count: result.rows.length })
+      return jsonResult({ documents: result.rows, count: result.rows.length, searchType: 'text' })
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       return errorResult(`Failed to search brand documents: ${message}`)
@@ -273,6 +311,17 @@ export const createBrandDocumentTool = defineTool({
 
       const doc = result.rows[0]
       if (!doc) return errorResult('Failed to create document')
+
+      // Generate embedding asynchronously (non-blocking, don't fail if it errors)
+      generateEmbedding(`${title} ${content}`).then(async (embedding) => {
+        if (embedding.length > 0) {
+          const embeddingStr = `[${embedding.join(',')}]`
+          await withTenant(tenantId, async () => {
+            await sql`UPDATE brand_context_documents SET embedding = ${embeddingStr}::public.vector WHERE id = ${doc.id}`
+          })
+        }
+      }).catch(() => { /* embedding generation is optional */ })
+
       return jsonResult(doc)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
@@ -360,6 +409,21 @@ export const updateBrandDocumentTool = defineTool({
       })
 
       if (!result) return errorResult('Document not found')
+
+      // Regenerate embedding if content or title changed
+      if (newContent || args.title) {
+        const docTitle = (args.title as string) ?? (result.title as string)
+        const docContent = newContent ?? ''
+        generateEmbedding(`${docTitle} ${docContent}`).then(async (embedding) => {
+          if (embedding.length > 0) {
+            const embeddingStr = `[${embedding.join(',')}]`
+            await withTenant(tenantId, async () => {
+              await sql`UPDATE brand_context_documents SET embedding = ${embeddingStr}::public.vector WHERE id = ${id}`
+            })
+          }
+        }).catch(() => { /* embedding generation is optional */ })
+      }
+
       return jsonResult(result)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)

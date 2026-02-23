@@ -56,3 +56,12 @@ CREATE INDEX IF NOT EXISTS idx_brand_context_versions_doc ON brand_context_versi
 CREATE INDEX IF NOT EXISTS idx_brand_context_versions_doc_ver ON brand_context_versions(document_id, version);
 
 COMMENT ON TABLE brand_context_versions IS 'Version history for brand context documents';
+
+-- Vector embedding for semantic search (pgvector pre-installed on Neon)
+ALTER TABLE brand_context_documents
+  ADD COLUMN IF NOT EXISTS embedding public.vector(1536);
+
+CREATE INDEX IF NOT EXISTS idx_brand_docs_embedding
+  ON brand_context_documents
+  USING hnsw (embedding public.vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
