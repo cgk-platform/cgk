@@ -3,13 +3,13 @@
  * Complete audit trail of all agent actions
  */
 
+import { checkAutonomy } from '../autonomy/check.js'
 import {
   getActionLog,
   listActionLogs,
   logAction as dbLogAction,
   updateActionApproval,
 } from '../db/queries.js'
-import { checkAutonomy } from '../autonomy/check.js'
 import type {
   ActionCategory,
   ActionLogFilters,

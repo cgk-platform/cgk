@@ -5,9 +5,9 @@
  * self-hosted onboarding, and account management.
  */
 
+import { sql, withTenant } from '@cgk-platform/db'
 import Stripe from 'stripe'
 
-import { sql, withTenant } from '@cgk-platform/db'
 
 import { upsertStripeConnectMethod } from './payout-methods'
 import type {

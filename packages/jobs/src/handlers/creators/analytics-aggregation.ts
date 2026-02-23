@@ -16,8 +16,8 @@
  */
 
 import { defineJob } from '../../define'
-import type { Job, JobResult } from '../../types'
 import type { TenantEvent } from '../../events'
+import type { Job, JobResult } from '../../types'
 
 // ============================================================
 // PAYLOAD TYPES

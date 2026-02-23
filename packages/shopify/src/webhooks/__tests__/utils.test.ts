@@ -2,7 +2,10 @@
  * Webhook Utility Tests
  */
 
+import crypto from 'crypto'
+
 import { describe, it, expect } from 'vitest'
+
 import {
   verifyShopifyWebhook,
   parseCents,
@@ -19,7 +22,6 @@ describe('verifyShopifyWebhook', () => {
 
   it('should verify valid HMAC signature', () => {
     // Generate a valid signature
-    const crypto = require('crypto')
     const validSignature = crypto
       .createHmac('sha256', secret)
       .update(body, 'utf8')
@@ -33,7 +35,6 @@ describe('verifyShopifyWebhook', () => {
   })
 
   it('should reject signature with wrong secret', () => {
-    const crypto = require('crypto')
     const signature = crypto
       .createHmac('sha256', 'wrong-secret')
       .update(body, 'utf8')
@@ -43,7 +44,6 @@ describe('verifyShopifyWebhook', () => {
   })
 
   it('should handle empty body', () => {
-    const crypto = require('crypto')
     const emptySignature = crypto
       .createHmac('sha256', secret)
       .update('', 'utf8')

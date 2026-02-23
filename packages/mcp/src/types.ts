@@ -120,6 +120,7 @@ export interface MCPNotification extends JSONRPCNotification {
 /**
  * MCP response message (JSON-RPC 2.0 wrapper)
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface MCPResponse<T = unknown> extends JSONRPCResponse<T> {}
 
 /**
@@ -275,6 +276,7 @@ export interface ToolResult {
 /**
  * Tool call response
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CallToolResult extends ToolResult {}
 
 // =============================================================================

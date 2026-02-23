@@ -223,7 +223,7 @@ export const setupDatabaseCommand = new Command('setup:database')
       } else {
         console.log(chalk.green('  ✓ All required tables present'))
       }
-    } catch (error) {
+    } catch {
       spinner.fail('Verification failed')
     }
 

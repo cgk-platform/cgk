@@ -6,7 +6,6 @@
  */
 
 import { createStripeConnectProvider } from './stripe-connect'
-import { createWiseBusinessProvider } from './wise-business'
 import type {
   PayoutProvider,
   PayoutRequest,
@@ -14,6 +13,7 @@ import type {
   PayoutProviderName,
 } from './types'
 import { isWiseSupportedCountry } from './types'
+import { createWiseBusinessProvider } from './wise-business'
 
 // Re-export types
 export type {

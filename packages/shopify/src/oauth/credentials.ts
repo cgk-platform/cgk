@@ -5,14 +5,15 @@
  */
 
 import { sql, withTenant, createTenantCache } from '@cgk-platform/db'
+
 import { decryptToken } from './encryption.js'
 import { ShopifyError } from './errors.js'
+import { validateScopes } from './scopes.js'
 import type {
   ShopifyCredentials,
   ShopifyConnection,
   ConnectionHealthCheck,
 } from './types.js'
-import { validateScopes } from './scopes.js'
 
 /** Credential cache TTL in seconds */
 const CREDENTIAL_CACHE_TTL = 60

@@ -8,6 +8,7 @@
  * @ai-critical Each tenant uses their own Twilio credentials
  */
 
+import { getTwilioCredentials, getSmsSettings } from './settings.js'
 import type {
   SmsSendRequest,
   SmsSendResult,
@@ -16,7 +17,6 @@ import type {
   TwilioMessageStatus,
   TwilioVerificationResult,
 } from './types.js'
-import { getTwilioCredentials, getSmsSettings } from './settings.js'
 
 // ============================================================================
 // Twilio Client Interface

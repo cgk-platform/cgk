@@ -7,7 +7,6 @@
 import { createHmac, timingSafeEqual } from 'crypto'
 
 import { getMuxWebhookSecret } from './client.js'
-
 import type { MuxWebhookEventType, MuxWebhookPayload } from '../types.js'
 
 /**

@@ -5,6 +5,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import { cosineSimilarity } from './embeddings.js'
 import { createMemory, getMemory } from './storage.js'
 import type { AgentMemory, ConsolidationResult, MemoryType } from './types.js'

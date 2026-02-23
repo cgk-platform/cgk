@@ -3,6 +3,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import { getShopifyCredentials, updateLastWebhookAt } from './credentials.js'
 import { ShopifyError } from './errors.js'
 import { verifyWebhookHmac } from './validation.js'

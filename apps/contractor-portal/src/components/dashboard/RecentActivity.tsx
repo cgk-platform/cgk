@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { Card, CardHeader, CardTitle, CardContent, StatusBadge } from '@cgk-platform/ui'
 import { Clock, FolderKanban, DollarSign, Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 
 import type { ContractorProject } from '@/lib/types'
 import { getStatusLabel } from '@/lib/types'

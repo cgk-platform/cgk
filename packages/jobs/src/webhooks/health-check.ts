@@ -7,6 +7,7 @@
 import { withTenant, sql } from '@cgk-platform/db'
 import { getShopifyCredentials } from '@cgk-platform/shopify'
 import { syncWebhookRegistrations } from '@cgk-platform/shopify/webhooks'
+
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
 

@@ -10,8 +10,8 @@
  * based on tenant configuration or feature flags.
  */
 
-import type { PaymentIntent, PaymentResult, RefundResult } from './types.js'
 import { createStripeProvider, type StripeProviderConfig } from './providers/stripe.js'
+import type { PaymentIntent, PaymentResult, RefundResult } from './types.js'
 
 export interface PaymentProvider {
   readonly provider: 'stripe' | 'wise'

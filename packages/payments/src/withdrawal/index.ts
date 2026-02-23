@@ -13,7 +13,6 @@ import {
   calculateStoreCreditBonus,
   recordBalanceTransaction,
 } from '../balance'
-
 import type {
   WithdrawalRequest,
   WithdrawalStatus,

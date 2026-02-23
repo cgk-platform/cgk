@@ -6,6 +6,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import type {
   AgentVoiceConfig,
   CreateTranscriptInput,

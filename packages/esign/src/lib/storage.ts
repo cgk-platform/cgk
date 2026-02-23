@@ -9,9 +9,10 @@
  */
 
 import { put, del } from '@vercel/blob'
+
 import { embedFieldsInPDF, forceFlattenPdf, verifyPdfFlattened } from './pdf.js'
-import type { EsignField, EsignSigner } from '../types.js'
 import { STORAGE_PATHS } from '../constants.js'
+import type { EsignField, EsignSigner } from '../types.js'
 
 // ============================================================================
 // TYPES

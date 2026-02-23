@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import {
   interpolateTemplate,
   escapeHtml,
@@ -253,7 +254,9 @@ describe('escapeHtml', () => {
     const input = '<div class="test" onclick="alert(\'xss\')">Content & More</div>'
     const escaped = escapeHtml(input)
     expect(escaped).not.toContain('<div')
-    expect(escaped).not.toContain('onclick')
+    // Note: escapeHtml encodes HTML entities but preserves attribute name text like 'onclick'
+    // The important thing is that the tags are neutralized so it can't execute
+    expect(escaped).not.toContain('<')
     expect(escaped).toContain('&amp;')
     expect(escaped).toContain('&lt;')
     expect(escaped).toContain('&gt;')

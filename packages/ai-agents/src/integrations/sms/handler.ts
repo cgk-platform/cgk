@@ -3,6 +3,8 @@
  */
 
 import * as crypto from 'node:crypto'
+
+import { logAction } from '../../actions/logger.js'
 import {
   getSMSConfig,
   upsertSMSConfig,
@@ -14,8 +16,6 @@ import {
   updateSMSConversationOptOut,
   checkAndIncrementRateLimit,
 } from '../db/queries.js'
-import { decrypt as _decrypt, safeDecrypt, encrypt } from '../utils/encryption.js'
-import { logAction } from '../../actions/logger.js'
 import type {
   TenantSMSConfig,
   AgentSMSConversation as _AgentSMSConversation,
@@ -25,6 +25,7 @@ import type {
   TwilioWebhookPayload,
   SMSPhoneNumber,
 } from '../types.js'
+import { decrypt as _decrypt, safeDecrypt, encrypt } from '../utils/encryption.js'
 
 const TWILIO_API_BASE = 'https://api.twilio.com/2010-04-01'
 

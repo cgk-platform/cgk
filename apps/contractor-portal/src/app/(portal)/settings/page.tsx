@@ -6,7 +6,6 @@
  * Links to profile, notifications, and security settings.
  */
 
-import Link from 'next/link'
 import { Card, CardContent, CardHeader, cn } from '@cgk-platform/ui'
 import {
   User,
@@ -17,6 +16,7 @@ import {
   CreditCard,
   Receipt,
 } from 'lucide-react'
+import Link from 'next/link'
 
 const settingsSections = [
   {

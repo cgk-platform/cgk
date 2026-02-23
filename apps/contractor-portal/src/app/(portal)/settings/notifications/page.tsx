@@ -6,8 +6,6 @@
  * Manage email and push notification preferences.
  */
 
-import { useState } from 'react'
-import Link from 'next/link'
 import {
   Card,
   CardContent,
@@ -22,6 +20,8 @@ import {
   Loader2,
   Check,
 } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
 
 interface NotificationSettings {
   email: {

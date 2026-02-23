@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/order
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock dependencies before importing
@@ -17,6 +18,7 @@ vi.mock('../user-admin', () => ({
   logUserActivity: vi.fn().mockResolvedValue(undefined),
 }))
 
+// eslint-disable-next-line import/order
 import { sql } from '@cgk-platform/db'
 
 import {

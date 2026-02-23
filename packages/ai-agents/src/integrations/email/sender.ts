@@ -3,6 +3,8 @@
  * Uses tenant's Resend configuration for sending
  */
 
+import { logAction } from '../../actions/logger.js'
+import { getAgent } from '../../agents/registry.js'
 import {
   getAgentEmailConfig,
   getAgentByInboundEmail,
@@ -12,8 +14,6 @@ import {
   updateEmailConversation,
   checkAndIncrementRateLimit,
 } from '../db/queries.js'
-import { logAction } from '../../actions/logger.js'
-import { getAgent } from '../../agents/registry.js'
 import type {
   AgentEmailConfig,
   SendAgentEmailParams,

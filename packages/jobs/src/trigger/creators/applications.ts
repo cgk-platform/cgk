@@ -12,7 +12,13 @@
  */
 
 import { task, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent } from '../../events'
+import type {
+  CreatorAppliedPayload,
+  CreatorApprovedPayload,
+  CreatorRejectedPayload,
+} from '../../events'
 import type {
   ProcessApplicationPayload,
   NotifyAdminNewApplicationPayload,
@@ -23,11 +29,6 @@ import type {
   SendApprovalEmailPayload,
   SendRejectionEmailPayload,
 } from '../../handlers/creators/application-processing'
-import type {
-  CreatorAppliedPayload,
-  CreatorApprovedPayload,
-  CreatorRejectedPayload,
-} from '../../events'
 import { createJobFromPayload } from '../utils'
 
 // ============================================================

@@ -7,8 +7,8 @@
 
 import { sql } from '@cgk-platform/db'
 
-import { logAuditAction, revokeAllSuperAdminSessions } from './super-admin'
 import { revokeAllSessions } from './session'
+import { logAuditAction, revokeAllSuperAdminSessions } from './super-admin'
 
 /**
  * User status values

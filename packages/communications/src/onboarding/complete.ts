@@ -9,8 +9,6 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 
-import { listDomains } from '../sender/domains.js'
-import { listSenderAddresses } from '../sender/addresses.js'
 import type {
   CompleteEmailSetupInput,
   CompleteEmailSetupResult,
@@ -18,6 +16,8 @@ import type {
   EmailOnboardingSubStep,
   EmailSetupStatus,
 } from './types.js'
+import { listSenderAddresses } from '../sender/addresses.js'
+import { listDomains } from '../sender/domains.js'
 
 /**
  * Get the current email setup status for a tenant

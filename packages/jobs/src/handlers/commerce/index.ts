@@ -156,10 +156,14 @@ export {
 // Combined Commerce Jobs
 // ---------------------------------------------------------------------------
 
-import { orderSyncJobs } from './order-sync'
-import { reviewEmailJobs } from './review-email'
 import { abTestingJobs } from './ab-testing'
+import { AB_TESTING_SCHEDULES } from './ab-testing'
+import { orderSyncJobs } from './order-sync'
+import { ORDER_SYNC_SCHEDULES } from './order-sync'
 import { productCustomerSyncJobs } from './product-customer-sync'
+import { PRODUCT_CUSTOMER_SCHEDULES } from './product-customer-sync'
+import { reviewEmailJobs } from './review-email'
+import { REVIEW_EMAIL_SCHEDULES } from './review-email'
 
 /**
  * All commerce job handlers
@@ -181,11 +185,6 @@ export const COMMERCE_JOB_COUNT = commerceJobs.length
 // ---------------------------------------------------------------------------
 // Combined Schedules
 // ---------------------------------------------------------------------------
-
-import { ORDER_SYNC_SCHEDULES } from './order-sync'
-import { REVIEW_EMAIL_SCHEDULES } from './review-email'
-import { AB_TESTING_SCHEDULES } from './ab-testing'
-import { PRODUCT_CUSTOMER_SCHEDULES } from './product-customer-sync'
 
 /**
  * All commerce job schedules

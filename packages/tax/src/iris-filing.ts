@@ -8,9 +8,9 @@
  */
 
 import { getApprovedForms, getTaxPayee, logTaxAction, updateTaxFormStatus } from './db.js'
-import { getDecryptedTIN } from './w9.js'
 import type { FormType, PayeeType, ValidationResult } from './types.js'
 import { THRESHOLD_CENTS } from './types.js'
+import { getDecryptedTIN } from './w9.js'
 
 /**
  * Validate forms before filing with IRS

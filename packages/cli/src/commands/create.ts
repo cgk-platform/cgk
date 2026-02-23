@@ -92,7 +92,7 @@ export const createCommand = new Command('create')
         try {
           await execAsync('pnpm install', { cwd: targetDir })
           spinner.succeed('Dependencies installed')
-        } catch (err) {
+        } catch {
           spinner.warn('Failed to install dependencies')
           console.log(chalk.yellow('  Run `pnpm install` manually in the project directory'))
         }

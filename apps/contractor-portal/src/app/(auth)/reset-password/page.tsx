@@ -4,11 +4,11 @@
  * Reset Password Page
  */
 
-import { useState, useEffect, Suspense } from 'react'
+import { Button, Input, Label } from '@cgk-platform/ui'
+import { Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
-import { Button, Input, Label } from '@cgk-platform/ui'
+import { useState, useEffect, Suspense } from 'react'
 
 function ResetPasswordForm() {
   const router = useRouter()

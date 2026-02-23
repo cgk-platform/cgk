@@ -8,9 +8,11 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-// Mock the database module
-const mockSql = vi.fn()
-const mockWithTenant = vi.fn()
+// Mock the database module — use vi.hoisted() so variables are available in vi.mock factory
+const { mockSql, mockWithTenant } = vi.hoisted(() => ({
+  mockSql: vi.fn(),
+  mockWithTenant: vi.fn(),
+}))
 
 vi.mock('@cgk-platform/db', () => ({
   sql: mockSql,
@@ -149,29 +151,61 @@ describe('Tenant Isolation', () => {
 
   describe('Manual trigger isolation', () => {
     it('should require tenant context for manual triggers', async () => {
-      mockSql
-        .mockResolvedValueOnce({
-          rows: [
-            {
-              id: 'rule-manual',
-              name: 'Manual Rule',
-              is_active: true,
-              priority: 10,
-              trigger_type: 'manual',
-              trigger_config: {},
-              conditions: [],
-              actions: [{ type: 'slack_notify', config: { channel: '#test', message: 'Test' } }],
-              cooldown_hours: null,
-              max_executions: null,
-              requires_approval: false,
-              approver_role: null,
-            },
-          ],
-        })
-        .mockResolvedValue({ rows: [] })
+      // Set up loadRules mock separately so it's consumed first
+      mockSql.mockResolvedValueOnce({
+        rows: [
+          {
+            id: 'rule-manual',
+            name: 'Manual Rule',
+            is_active: true,
+            priority: 10,
+            trigger_type: 'manual',
+            trigger_config: {},
+            conditions: [],
+            actions: [{ type: 'slack_notify', config: { channel: '#test', message: 'Test' } }],
+            cooldown_hours: null,
+            max_executions: null,
+            requires_approval: false,
+            approver_role: null,
+          },
+        ],
+      })
 
       const engine = WorkflowEngine.getInstance('tenant-manual')
       await engine.loadRules()
+
+      // After loadRules consumed its mock, set up mocks for triggerManually:
+      // 1. getEntityState (checkExecutionLimits) → no prior state
+      // 2. getEntityState (compute remindersSent) → no prior state
+      // 3. createExecution INSERT RETURNING → must return a valid execution row
+      // 4+ everything else (updateExecution, updateEntityState, action sql) → empty
+      mockSql
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({
+          rows: [{
+            id: 'exec-1',
+            rule_id: 'rule-manual',
+            rule_name: 'Manual Rule',
+            entity_type: 'project',
+            entity_id: 'project-456',
+            trigger_data: { type: 'manual' },
+            conditions_evaluated: [],
+            conditions_passed: true,
+            actions_taken: [],
+            result: 'pending_approval',
+            error_message: null,
+            requires_approval: false,
+            approved_by: null,
+            approved_at: null,
+            rejected_by: null,
+            rejected_at: null,
+            rejection_reason: null,
+            started_at: new Date().toISOString(),
+            completed_at: null,
+          }],
+        })
+        .mockResolvedValue({ rows: [] })
 
       await engine.triggerManually({
         ruleId: 'rule-manual',
@@ -203,15 +237,56 @@ describe('Tenant Isolation', () => {
     })
 
     it('should execute approval within tenant context', async () => {
-      mockSql
-        .mockResolvedValueOnce({ rows: [] }) // loadRules
-        .mockResolvedValueOnce({
-          rows: [{ id: 'exec-1', rule_id: 'rule-1', actions: [], conditions_passed: true }],
-        })
-        .mockResolvedValue({ rows: [] })
+      // loadRules needs a rule matching the execution's rule_id
+      mockSql.mockResolvedValueOnce({
+        rows: [{
+          id: 'rule-1',
+          name: 'Approval Rule',
+          is_active: true,
+          priority: 10,
+          trigger_type: 'manual',
+          trigger_config: {},
+          conditions: [],
+          actions: [],
+          cooldown_hours: null,
+          max_executions: null,
+          requires_approval: true,
+          approver_role: null,
+        }],
+      })
 
       const engine = WorkflowEngine.getInstance('tenant-approve')
       await engine.loadRules()
+
+      // After loadRules, set up mocks for approveExecution:
+      // 1. getExecution → returns execution with result='pending_approval'
+      // 2+ UPDATE, fetchEntity, updateExecution, updateEntityState → empty rows
+      mockSql
+        .mockResolvedValueOnce({
+          rows: [{
+            id: 'exec-1',
+            rule_id: 'rule-1',
+            rule_name: 'Approval Rule',
+            entity_type: 'project',
+            entity_id: '123',
+            trigger_data: {},
+            conditions_evaluated: [],
+            conditions_passed: true,
+            actions_taken: [],
+            result: 'pending_approval',
+            error_message: null,
+            requires_approval: true,
+            approved_by: null,
+            approved_at: null,
+            rejected_by: null,
+            rejected_at: null,
+            rejection_reason: null,
+            started_at: new Date().toISOString(),
+            completed_at: null,
+          }],
+        })
+        .mockResolvedValue({ rows: [] })
+
       await engine.approveExecution('exec-1', 'user-123')
 
       mockWithTenant.mock.calls.forEach((call) => {

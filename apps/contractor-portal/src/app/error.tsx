@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
 import { Button } from '@cgk-platform/ui'
+import { useEffect } from 'react'
 
 export default function Error({
   error,

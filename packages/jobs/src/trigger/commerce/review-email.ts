@@ -13,6 +13,7 @@
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent, ReviewEmailQueuedPayload, ReviewEmailSentPayload } from '../../events'
 import type {
   ProcessReviewEmailQueuePayload,

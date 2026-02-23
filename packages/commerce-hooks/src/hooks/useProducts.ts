@@ -15,8 +15,9 @@
  * ```
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react'
 import type { Product } from '@cgk-platform/commerce'
+import { useState, useCallback, useEffect, useRef } from 'react'
+
 import type {
   UseProductsOptions,
   UseProductsReturn,

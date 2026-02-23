@@ -224,10 +224,12 @@ export interface CreatorShipmentSyncPayload {
   fullSync?: boolean
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CreatorApprovalRemindersPayload {
   // Empty - cron job that processes all tenants
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CreatorWelcomeCallRemindersPayload {
   // Empty - cron job that processes all tenants
 }
@@ -596,6 +598,7 @@ export interface RecoveryEmailSentPayload {
   checkoutId: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface RecoveryCheckAbandonedPayload {
   // Empty - scheduled job
 }

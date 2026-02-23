@@ -2,7 +2,8 @@
  * Accept/Decline Handoffs - Handle handoff responses
  */
 
-import { getAgentById } from '../db/queries.js'
+import { buildHandoffContext } from './context.js'
+import { logAction } from '../actions/logger.js'
 import {
   acceptHandoff as dbAcceptHandoff,
   completeHandoff as dbCompleteHandoff,
@@ -11,8 +12,7 @@ import {
   getHandoffWithAgents,
   markHandoffMessageAccepted,
 } from '../db/handoffs-queries.js'
-import { logAction } from '../actions/logger.js'
-import { buildHandoffContext } from './context.js'
+import { getAgentById } from '../db/queries.js'
 import type { AgentHandoff, HandoffContext } from '../types/teams.js'
 
 /**

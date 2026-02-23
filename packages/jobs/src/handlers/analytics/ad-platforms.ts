@@ -17,8 +17,7 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { defineJob } from '../../define'
-import type { JobResult } from '../../types'
+
 import type {
   SendGA4PurchasePayload,
   SendMetaPurchasePayload,
@@ -26,6 +25,8 @@ import type {
   SyncGoogleAdsSpendPayload,
   SyncMetaAdsSpendPayload,
 } from './types'
+import { defineJob } from '../../define'
+import type { JobResult } from '../../types'
 
 // ============================================================
 // HELPER FUNCTIONS

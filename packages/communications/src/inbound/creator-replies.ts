@@ -10,16 +10,16 @@
 
 import { sql } from '@cgk-platform/db'
 
-import type {
-  InboundEmail,
-  ThreadMessage,
-} from './types.js'
 import {
   addInboundToThread,
   createThread,
   findCreatorByEmail,
   findOpenThreadForContact,
 } from './thread-matcher.js'
+import type {
+  InboundEmail,
+  ThreadMessage,
+} from './types.js'
 
 // ============================================================================
 // Creator-Specific Thread Matching

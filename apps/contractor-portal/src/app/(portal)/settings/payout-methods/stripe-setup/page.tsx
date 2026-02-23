@@ -1,8 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-
 import {
   Alert,
   AlertDescription,
@@ -17,6 +14,9 @@ import {
   Progress,
   Spinner,
 } from '@cgk-platform/ui'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
 
 interface Country {
   code: string

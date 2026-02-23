@@ -6,6 +6,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import { generateMemoryEmbedding } from './embeddings.js'
 import { SOURCE_WEIGHTS } from './types.js'
 import type {

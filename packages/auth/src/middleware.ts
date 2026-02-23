@@ -18,6 +18,7 @@ interface NextRequest extends Request {
 /**
  * Response with Next.js NextResponse compatible interface
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface NextResponse extends Response {
   // Using intersection to add static methods
 }

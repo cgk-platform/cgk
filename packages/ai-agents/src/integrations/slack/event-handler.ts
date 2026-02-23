@@ -2,6 +2,9 @@
  * Slack event handler for AI Agent integrations
  */
 
+import { SlackClient, formatAgentResponse } from './client.js'
+import { logAction } from '../../actions/logger.js'
+import { getAgent } from '../../agents/registry.js'
 import {
   getSlackConfig,
   getOrCreateSlackConversation,
@@ -10,9 +13,6 @@ import {
   queueIntegrationEvent,
   checkAndIncrementRateLimit,
 } from '../db/queries.js'
-import { SlackClient, formatAgentResponse } from './client.js'
-import { logAction } from '../../actions/logger.js'
-import { getAgent } from '../../agents/registry.js'
 import type {
   SlackEvent,
   SlackMessageEvent,

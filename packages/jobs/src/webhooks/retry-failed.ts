@@ -4,9 +4,10 @@
  * Periodically retries failed webhook events.
  */
 
+import { withTenant, sql } from '@cgk-platform/db'
+
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
-import { withTenant, sql } from '@cgk-platform/db'
 
 /**
  * Configuration for retry job

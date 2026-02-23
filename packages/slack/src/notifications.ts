@@ -6,6 +6,7 @@
  */
 
 import { withTenant, sql, createTenantCache } from '@cgk-platform/db'
+
 import { SlackClient } from './client'
 import { buildMessage, getSampleData, type TemplateVariables } from './templates'
 import type {

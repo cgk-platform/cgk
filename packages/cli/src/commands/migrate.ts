@@ -1,9 +1,10 @@
+import path from 'path'
+
 import chalk from 'chalk'
 import { Command } from 'commander'
-import ora from 'ora'
-import inquirer from 'inquirer'
-import path from 'path'
 import fs from 'fs-extra'
+import inquirer from 'inquirer'
+import ora from 'ora'
 
 export const migrateCommand = new Command('migrate')
   .description('Run database migrations')

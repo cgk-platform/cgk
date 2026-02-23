@@ -16,6 +16,7 @@
  */
 
 import type { CSSProperties } from 'react'
+
 import { FIELD_CONFIG } from '../constants.js'
 import type { FieldType } from '../types.js'
 

@@ -4,6 +4,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import type {
   AgentCalendarEvent,
   AgentEmailConfig,

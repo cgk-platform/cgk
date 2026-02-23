@@ -6,8 +6,9 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { extractSuffix, parseShippingPrice } from './config.js'
+
 import { extractABDataFromAttributes } from './cart-bridge.js'
+import { extractSuffix, parseShippingPrice } from './config.js'
 import type {
   ShippingAttribution,
   ShopifyOrder,

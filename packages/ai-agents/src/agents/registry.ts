@@ -13,6 +13,7 @@ import {
   retireAgent as dbRetireAgent,
   updateAgent as dbUpdateAgent,
 } from '../db/queries.js'
+import { setActionAutonomy } from '../db/queries.js'
 import { DEFAULT_ACTION_AUTONOMY } from '../types.js'
 import type {
   AIAgent,
@@ -20,7 +21,6 @@ import type {
   CreateAgentInput,
   UpdateAgentInput,
 } from '../types.js'
-import { setActionAutonomy } from '../db/queries.js'
 
 /**
  * Create a new AI agent with default personality and autonomy settings

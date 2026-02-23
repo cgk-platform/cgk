@@ -8,8 +8,8 @@
  * @ai-required Prefer tenant credentials when tenantId is available
  */
 
-import Mux from '@mux/mux-node'
 import { getTenantMuxClient as getTenantMuxClientFromIntegrations } from '@cgk-platform/integrations'
+import Mux from '@mux/mux-node'
 
 // Platform-level client cache
 let platformClient: Mux | null = null

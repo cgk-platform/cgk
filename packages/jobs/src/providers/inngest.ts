@@ -14,6 +14,7 @@
  * @see https://www.inngest.com/docs
  */
 
+import type { JobEvents } from '../events'
 import type {
   JobProvider,
   JobHandler,
@@ -22,7 +23,6 @@ import type {
   BatchSendResult,
   WaitResult,
 } from '../provider'
-import type { JobEvents } from '../events'
 import { createJobId } from '../utils'
 
 interface InngestConfig {
@@ -198,7 +198,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
             id: result.ids[index] ?? createJobId(),
           })),
         }
-      } catch (error) {
+      } catch {
         // Fallback to individual sends
         const results: BatchSendResult['results'] = []
         let queued = 0

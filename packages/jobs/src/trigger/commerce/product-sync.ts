@@ -12,6 +12,7 @@
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent, CustomerCreatedPayload, CustomerUpdatedPayload, ProductSyncPayload, InventorySyncPayload } from '../../events'
 import type {
   ProductSyncFromShopifyPayload,

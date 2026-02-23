@@ -7,13 +7,13 @@
  * @ai-critical All functions require tenantId for database operations
  */
 
+import { listSenderAddresses } from '../sender/addresses.js'
 import {
   getAllNotificationRoutingStatus,
   listNotificationRouting,
   seedDefaultNotificationRouting,
   upsertNotificationRouting,
 } from '../sender/routing.js'
-import { listSenderAddresses } from '../sender/addresses.js'
 import {
   DEFAULT_NOTIFICATION_ROUTING,
   NOTIFICATION_TYPES,

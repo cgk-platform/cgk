@@ -113,9 +113,9 @@ export { ANALYTICS_SCHEDULES } from './types'
 // ALL ANALYTICS JOBS
 // ============================================================
 
+import { adPlatformJobs } from './ad-platforms'
 import { attributionJobs } from './attribution'
 import { metricsJobs } from './metrics'
-import { adPlatformJobs } from './ad-platforms'
 import { mlTrainingJobs } from './ml-training'
 
 /**

@@ -15,8 +15,9 @@
  * ```
  */
 
-import { useState, useCallback } from 'react'
 import type { Discount } from '@cgk-platform/commerce'
+import { useState, useCallback } from 'react'
+
 import { useCart } from './useCart'
 import type { UseDiscountCodeReturn, DiscountActions } from '../context/types'
 

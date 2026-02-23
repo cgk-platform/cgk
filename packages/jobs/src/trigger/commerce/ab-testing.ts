@@ -15,6 +15,7 @@
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent, ABTestCreatedPayload, ABTestStartedPayload, ABTestEndedPayload } from '../../events'
 import type {
   ABHourlyMetricsAggregationPayload,

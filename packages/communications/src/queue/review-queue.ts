@@ -7,8 +7,8 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 
-import type { CreateQueueEntryInput, ReviewQueueEntry, TriggerEvent } from './types.js'
 import { generateSequenceId } from './sequence.js'
+import type { CreateQueueEntryInput, ReviewQueueEntry, TriggerEvent } from './types.js'
 
 /**
  * Create a new review email queue entry

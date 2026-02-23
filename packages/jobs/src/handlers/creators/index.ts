@@ -140,10 +140,10 @@ export {
 // COMBINED EXPORTS
 // ============================================================
 
-import { payoutProcessingJobs } from './payout-processing'
-import { creatorCommunicationJobs } from './communications'
-import { applicationProcessingJobs } from './application-processing'
 import { analyticsAggregationJobs } from './analytics-aggregation'
+import { applicationProcessingJobs } from './application-processing'
+import { creatorCommunicationJobs } from './communications'
+import { payoutProcessingJobs } from './payout-processing'
 
 /**
  * All creator job handlers

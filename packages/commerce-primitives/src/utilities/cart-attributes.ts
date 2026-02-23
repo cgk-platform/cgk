@@ -6,6 +6,7 @@
  */
 
 import type { CartAttribute } from '@cgk-platform/commerce'
+
 import type { PlatformCartAttributes } from '../types/attributes'
 
 /**

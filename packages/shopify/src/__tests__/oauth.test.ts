@@ -1,11 +1,18 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createHmac } from 'crypto'
+
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 import {
   encryptToken,
   decryptToken,
   generateSecureToken,
 } from '../oauth/encryption'
+import { ShopifyError } from '../oauth/errors'
+import {
+  PLATFORM_SCOPES,
+  getScopesString,
+  validateScopes,
+} from '../oauth/scopes'
 import {
   isValidShopDomain,
   normalizeShopDomain,
@@ -13,12 +20,6 @@ import {
   verifyWebhookHmac,
   isValidOAuthTimestamp,
 } from '../oauth/validation'
-import {
-  PLATFORM_SCOPES,
-  getScopesString,
-  validateScopes,
-} from '../oauth/scopes'
-import { ShopifyError } from '../oauth/errors'
 
 // Mock environment variable for encryption tests
 beforeEach(() => {

@@ -10,13 +10,13 @@
  * @ai-critical All database operations must use withTenant()
  */
 
-import { defineJob } from '../../define'
-import type { JobResult } from '../../types'
 import type {
   AggregateDailyMetricsPayload,
   HourlyMetricsRollupPayload,
   WeeklyMetricsSummaryPayload,
 } from './types'
+import { defineJob } from '../../define'
+import type { JobResult } from '../../types'
 
 // ============================================================
 // HELPER TYPES

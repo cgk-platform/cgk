@@ -15,7 +15,6 @@
  */
 
 import { defineJob } from '../../define'
-import type { Job, JobResult } from '../../types'
 import type {
   TenantEvent,
   PaymentAvailablePayload,
@@ -24,6 +23,7 @@ import type {
   ExpenseSyncPayload,
   CommissionMaturedPayload,
 } from '../../events'
+import type { Job, JobResult } from '../../types'
 
 // Note: PayoutRequestedPayload is available from events.ts but we use
 // InternationalPayoutPayload and DomesticPayoutPayload with more specific fields
@@ -48,6 +48,7 @@ export interface MonthlyPaymentSummaryPayload {
   creatorId?: string // If provided, process single creator; otherwise all
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CheckPaymentsAvailablePayload {
   // Empty - processes all creators with pending available payments
 }

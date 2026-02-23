@@ -15,8 +15,9 @@
  * ```
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react'
 import type { Order } from '@cgk-platform/commerce'
+import { useState, useCallback, useEffect, useRef } from 'react'
+
 import type { UseOrdersOptions, UseOrdersReturn, OrderActions } from '../context/types'
 
 /**

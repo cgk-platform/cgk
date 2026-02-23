@@ -9,11 +9,11 @@ import type {
   EsignField,
   TemplateWithFields,
 } from '../types.js'
-import { createDocument, getDocument, markDocumentPending } from './documents.js'
-import { createSigner, getDocumentSigners, markSignerSent } from './signers.js'
-import { copyFieldsFromTemplate } from './fields.js'
-import { getTemplateWithFields } from './templates.js'
 import { logDocumentCreated, logDocumentSent } from './audit.js'
+import { createDocument, getDocument, markDocumentPending } from './documents.js'
+import { copyFieldsFromTemplate } from './fields.js'
+import { createSigner, getDocumentSigners, markSignerSent } from './signers.js'
+import { getTemplateWithFields } from './templates.js'
 import { replaceVariables, type VariableContext } from './variables.js'
 import { DOCUMENT_DEFAULTS } from '../constants.js'
 

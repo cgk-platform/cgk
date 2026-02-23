@@ -7,8 +7,6 @@
  * profile photo, and professional details.
  */
 
-import { useState } from 'react'
-import Link from 'next/link'
 import {
   Card,
   CardContent,
@@ -28,6 +26,8 @@ import {
   Camera,
   Check,
 } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
 
 interface ProfileFormData {
   firstName: string

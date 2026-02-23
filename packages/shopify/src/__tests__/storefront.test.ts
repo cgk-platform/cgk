@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { createStorefrontClient } from '../storefront'
 
 // Mock global fetch
@@ -17,7 +18,7 @@ describe('createStorefrontClient', () => {
     })
 
     expect(client.storeDomain).toBe('test-store.myshopify.com')
-    expect(client.apiVersion).toBe('2024-01')
+    expect(client.apiVersion).toBe('2026-01')
   })
 
   it('normalizes store domain', () => {
@@ -53,7 +54,7 @@ describe('createStorefrontClient', () => {
     await client.query('query { products(first: 10) { edges { node { id } } } }')
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://test-store.myshopify.com/api/2024-01/graphql.json',
+      'https://test-store.myshopify.com/api/2026-01/graphql.json',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({

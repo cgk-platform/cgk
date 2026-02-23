@@ -6,9 +6,8 @@
  * and integrates with session management and token usage tracking.
  */
 
-import type { ToolDefinition } from './tools'
-import type { ResourceDefinition } from './resources'
 import type { PromptDefinition } from './prompts'
+import type { ResourceDefinition } from './resources'
 import {
   createMCPSession,
   getSession,
@@ -25,6 +24,7 @@ import {
   type StreamingChunk,
   type StreamingResponseOptions,
 } from './streaming'
+import type { ToolDefinition } from './tools'
 import {
   SUPPORTED_PROTOCOL_VERSIONS,
   JSONRPCErrorCodes,

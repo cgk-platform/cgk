@@ -3,6 +3,7 @@
  */
 
 import { createHmac, timingSafeEqual } from 'crypto'
+
 import { ShopifyError } from './errors.js'
 
 /**

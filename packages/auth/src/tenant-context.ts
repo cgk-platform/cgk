@@ -9,8 +9,8 @@ import { sql } from '@cgk-platform/db'
 
 import { signJWT } from './jwt'
 import { updateSessionOrganization } from './session'
-import { logUserActivity } from './user-admin'
 import type { OrgContext, UserRole } from './types'
+import { logUserActivity } from './user-admin'
 
 /**
  * Tenant context for UI display

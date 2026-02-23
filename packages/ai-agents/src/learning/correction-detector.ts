@@ -5,6 +5,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import { createMemory } from '../memory/storage.js'
 import type { CreateFailureLearningInput, FailureLearning, FailureType } from '../memory/types.js'
 

@@ -9,6 +9,7 @@
  */
 
 import { sql, withTenant } from '@cgk-platform/db'
+import type { SlackBlock } from '@cgk-platform/slack'
 
 import type {
   Action,
@@ -306,7 +307,7 @@ async function executeSlackNotify(
       // Send the message
       const response = await client.postMessage(
         channel,
-        blocks as import('@cgk-platform/slack').SlackBlock[],
+        blocks as SlackBlock[],
         fullMessage
       )
 

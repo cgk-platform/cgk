@@ -1,7 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
 import {
   Alert,
   AlertDescription,
@@ -18,6 +16,8 @@ import {
   Label,
   Spinner,
 } from '@cgk-platform/ui'
+import { useEffect, useState } from 'react'
+
 
 interface W9Info {
   taxIdType: 'ssn' | 'ein'

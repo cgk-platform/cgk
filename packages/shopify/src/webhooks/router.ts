@@ -4,19 +4,19 @@
  * Routes webhook events to topic-specific handlers
  */
 
-import type { WebhookHandler, WebhookTopic } from './types'
-import { handleOrderCreate, handleOrderUpdate, handleOrderPaid, handleOrderCancelled } from './handlers/orders'
-import { handleFulfillmentCreate, handleFulfillmentUpdate } from './handlers/fulfillments'
-import { handleRefundCreate } from './handlers/refunds'
-import { handleCustomerCreate, handleCustomerUpdate } from './handlers/customers'
 import { handleAppUninstalled } from './handlers/app'
-import { handleProductCreate, handleProductUpdate, handleProductDelete } from './handlers/products'
+import { handleCustomerCreate, handleCustomerUpdate } from './handlers/customers'
+import { handleFulfillmentCreate, handleFulfillmentUpdate } from './handlers/fulfillments'
 import {
   handleCustomerDelete,
   handleCustomerRedact,
   handleShopRedact,
   handleCustomerDataRequest,
 } from './handlers/gdpr'
+import { handleOrderCreate, handleOrderUpdate, handleOrderPaid, handleOrderCancelled } from './handlers/orders'
+import { handleProductCreate, handleProductUpdate, handleProductDelete } from './handlers/products'
+import { handleRefundCreate } from './handlers/refunds'
+import type { WebhookHandler, WebhookTopic } from './types'
 
 /**
  * Registry of webhook handlers by topic

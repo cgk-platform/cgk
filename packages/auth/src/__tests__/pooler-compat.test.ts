@@ -10,9 +10,10 @@
  * pooled connections.
  */
 
-import { describe, expect, it } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
+
+import { describe, expect, it } from 'vitest'
 
 /**
  * Known public schema tables that MUST be qualified with `public.` in all SQL queries.

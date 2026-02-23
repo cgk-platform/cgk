@@ -4,7 +4,8 @@
  * Tests for TTS, STT, and voice call functionality
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
+
 import {
   validateVoiceConfig,
   estimateMonthlyVoiceCost,

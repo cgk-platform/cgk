@@ -12,13 +12,8 @@
  * - Recording management
  */
 
-import type {
-  AgentVoiceConfig,
-  CreateVoiceCallInput,
-  RetellWebhookEvent,
-  VoiceCall,
-  VoiceCallProvider,
-} from '../types.js'
+import crypto from 'node:crypto'
+
 import {
   createTranscript,
   createVoiceCall,
@@ -27,6 +22,13 @@ import {
   updateVoiceCallBySid,
   updateVoiceConfig,
 } from '../db/voice-queries.js'
+import type {
+  AgentVoiceConfig,
+  CreateVoiceCallInput,
+  RetellWebhookEvent,
+  VoiceCall,
+  VoiceCallProvider,
+} from '../types.js'
 
 const RETELL_API_BASE = 'https://api.retellai.com'
 
@@ -412,8 +414,6 @@ export function verifyRetellSignature(body: string, signature: string | null): b
     return false // Reject if secret not configured
   }
 
-  // Use crypto to verify HMAC
-  const crypto = require('crypto')
   const expectedSignature = crypto
     .createHmac('sha256', webhookSecret)
     .update(body)

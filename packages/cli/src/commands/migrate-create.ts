@@ -1,6 +1,7 @@
-import { Command } from 'commander'
-import chalk from 'chalk'
 import path from 'path'
+
+import chalk from 'chalk'
+import { Command } from 'commander'
 import fs from 'fs-extra'
 
 export const migrateCreateCommand = new Command('migrate:create')

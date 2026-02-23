@@ -13,7 +13,15 @@
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent } from '../../events'
+import type {
+  PaymentAvailablePayload,
+  PayoutCompletedPayload,
+  PayoutFailedPayload,
+  ExpenseSyncPayload,
+  CommissionMaturedPayload,
+} from '../../events'
 import type {
   PayoutInitiatedPayload,
   MonthlyPaymentSummaryPayload,
@@ -24,19 +32,12 @@ import type {
   TopupSucceededPayload,
   MonthlyPLSnapshotPayload,
 } from '../../handlers/creators/payout-processing'
-import type {
-  PaymentAvailablePayload,
-  PayoutCompletedPayload,
-  PayoutFailedPayload,
-  ExpenseSyncPayload,
-  CommissionMaturedPayload,
-} from '../../events'
-import { createJobFromPayload, getActiveTenants } from '../utils'
 import {
   createPermanentError,
   handleJobResult,
   generateIdempotencyKey,
 } from '../errors'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION

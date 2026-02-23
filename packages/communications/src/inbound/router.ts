@@ -9,15 +9,6 @@
 
 import { sql } from '@cgk-platform/db'
 
-import type {
-  ApprovalParseResult,
-  CreateTreasuryCommunicationInput,
-  InboundAddressPurpose,
-  InboundEmail,
-  InboundEmailType,
-  TreasuryCommunication,
-  TreasuryReceipt,
-} from './types.js'
 import { handleCreatorReply } from './creator-replies.js'
 import {
   defaultUploadToBlob,
@@ -29,6 +20,15 @@ import {
   extractTreasuryRequestId,
   parseTreasuryApproval,
 } from './treasury-parser.js'
+import type {
+  ApprovalParseResult,
+  CreateTreasuryCommunicationInput,
+  InboundAddressPurpose,
+  InboundEmail,
+  InboundEmailType,
+  TreasuryCommunication,
+  TreasuryReceipt,
+} from './types.js'
 import { updateInboundLogStatus } from './webhook-handler.js'
 
 // ============================================================================

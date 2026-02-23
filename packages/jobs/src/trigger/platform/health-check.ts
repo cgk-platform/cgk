@@ -11,8 +11,9 @@
  * @ai-critical Must complete within 30 seconds
  */
 
-import { task, schedules, logger } from '@trigger.dev/sdk/v3'
 import { sql } from '@cgk-platform/db'
+import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import { criticalAlertTask, systemErrorAlertTask } from '../scheduled/alerts'
 
 // ============================================================
@@ -47,15 +48,6 @@ export interface HealthCheckSummary {
  * Services to monitor for each tenant
  * Must match the services defined in the health matrix API
  */
-const MONITORED_SERVICES = [
-  'database',
-  'redis',
-  'shopify',
-  'stripe',
-  'inngest',
-  'vercel',
-  'email',
-] as const
 
 type MonitoredService = (typeof MONITORED_SERVICES)[number]
 

@@ -4,10 +4,11 @@
  */
 
 import { sql, withTenant } from '@cgk-platform/db'
+
 import type { EsignDocument } from '../types.js'
+import { logReminderSent, logDocumentExpired } from './audit.js'
 import { getDocumentsNeedingReminders, getExpiredDocuments, expireDocument, updateLastReminder } from './documents.js'
 import { getDocumentSigners } from './signers.js'
-import { logReminderSent, logDocumentExpired } from './audit.js'
 import { DOCUMENT_DEFAULTS } from '../constants.js'
 
 // ============================================================================

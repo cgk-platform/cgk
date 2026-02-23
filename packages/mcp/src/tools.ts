@@ -2,8 +2,8 @@
  * MCP Tool definition utilities
  */
 
-import type { JSONSchema, ToolResult } from './types'
 import type { StreamingChunk } from './streaming'
+import type { JSONSchema, ToolResult } from './types'
 
 /**
  * Tool handler function type

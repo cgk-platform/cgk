@@ -7,12 +7,13 @@
  * @ai-pattern cli-setup
  */
 
+import * as path from 'path'
+
 import chalk from 'chalk'
 import { Command } from 'commander'
+import * as fs from 'fs-extra'
 import inquirer from 'inquirer'
 import ora from 'ora'
-import * as fs from 'fs-extra'
-import * as path from 'path'
 
 interface ProviderChoice {
   name: string

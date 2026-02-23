@@ -12,9 +12,9 @@
  * - Cannot impersonate another super admin
  */
 
+import { sql } from '@cgk-platform/db'
 import * as jose from 'jose'
 
-import { sql } from '@cgk-platform/db'
 
 import { generateSecureToken } from './crypto'
 import { logAuditAction, getSuperAdminUser, isSuperAdmin } from './super-admin'

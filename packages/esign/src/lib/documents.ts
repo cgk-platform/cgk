@@ -5,6 +5,8 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 import { nanoid } from 'nanoid'
+
+import { DOCUMENT_DEFAULTS } from '../constants.js'
 import type {
   EsignDocument,
   EsignTemplate,
@@ -18,7 +20,6 @@ import type {
   FieldValidation,
   FieldOption,
 } from '../types.js'
-import { DOCUMENT_DEFAULTS } from '../constants.js'
 
 // ============================================================================
 // HELPER: Parse field decimals

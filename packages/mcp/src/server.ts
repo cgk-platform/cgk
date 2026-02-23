@@ -8,6 +8,7 @@
 
 import type { PromptDefinition, PromptHandlerMessage } from './prompts'
 import type { ResourceDefinition } from './resources'
+import type { StreamingChunk } from './streaming'
 import type { ToolDefinition } from './tools'
 import type {
   Tool,
@@ -17,7 +18,6 @@ import type {
   ResourceContents,
   TextContent,
 } from './types'
-import type { StreamingChunk } from './streaming'
 
 /**
  * MCP server configuration

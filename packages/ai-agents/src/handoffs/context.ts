@@ -3,8 +3,9 @@
  */
 
 import { sql } from '@cgk-platform/db'
-import { getAgentById } from '../db/queries.js'
+
 import { getHandoffById } from '../db/handoffs-queries.js'
+import { getAgentById } from '../db/queries.js'
 import type { AgentHandoff, HandoffContext } from '../types/teams.js'
 
 /**

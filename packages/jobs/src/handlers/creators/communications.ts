@@ -15,11 +15,11 @@
  */
 
 import { defineJob } from '../../define'
-import type { Job, JobResult } from '../../types'
 import type {
   TenantEvent,
   CreatorSetupCompletePayload,
 } from '../../events'
+import type { Job, JobResult } from '../../types'
 
 // Note: CreatorEmailQueuedPayload and CreatorReminderPayload are available
 // from events.ts but we use custom payloads with more specific fields
@@ -101,6 +101,7 @@ export interface SendCreatorReminderPayload {
   message?: string
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface ApprovalRemindersPayload {
   // Empty - processes all approved creators who need reminders
 }

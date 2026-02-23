@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { routeToHandler, hasHandler, getRegisteredTopics, registerHandler } from '../router'
 
 // Mock the handlers
@@ -46,7 +47,7 @@ describe('Webhook Router', () => {
 
     it('should return false for unregistered topics', () => {
       expect(hasHandler('unknown/topic')).toBe(false)
-      expect(hasHandler('products/create')).toBe(false)
+      expect(hasHandler('collections/create')).toBe(false)
     })
   })
 

@@ -4,10 +4,11 @@
  */
 
 import { withTenant } from '@cgk-platform/db'
+
 import type { EsignDocument, EsignSigner } from '../types.js'
+import { logDocumentDeclined, logDocumentVoided } from './audit.js'
 import { getDocument, markDocumentDeclined, updateDocument } from './documents.js'
 import { getSigner, markSignerDeclined, getDocumentSigners } from './signers.js'
-import { logDocumentDeclined, logDocumentVoided } from './audit.js'
 import { ERROR_MESSAGES } from '../constants.js'
 
 // ============================================================================

@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/order
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
 // Mock @cgk-platform/db
@@ -8,7 +9,9 @@ vi.mock('@cgk-platform/db', () => ({
 // Mock fetch for Resend API
 global.fetch = vi.fn()
 
+// eslint-disable-next-line import/order
 import { sql } from '@cgk-platform/db'
+
 import {
   createMagicLink,
   verifyMagicLink,
@@ -235,6 +238,9 @@ describe('magic link system', () => {
 
   describe('sendMagicLinkEmail', () => {
     it('should log to console in dev mode (no RESEND_API_KEY)', async () => {
+      const originalAppUrl = process.env.APP_URL
+      process.env.APP_URL = 'https://test.example.com'
+
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
 
       await sendMagicLinkEmail('test@example.com', 'token123', 'login')
@@ -244,12 +250,15 @@ describe('magic link system', () => {
       )
 
       consoleSpy.mockRestore()
+      process.env.APP_URL = originalAppUrl
     })
 
     it('should call Resend API when configured', async () => {
-      // Set Resend API key
-      const originalEnv = process.env.RESEND_API_KEY
+      // Set Resend API key and APP_URL
+      const originalResendKey = process.env.RESEND_API_KEY
+      const originalAppUrl = process.env.APP_URL
       process.env.RESEND_API_KEY = 're_test_key'
+      process.env.APP_URL = 'https://test.example.com'
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -269,12 +278,15 @@ describe('magic link system', () => {
       )
 
       // Restore env
-      process.env.RESEND_API_KEY = originalEnv
+      process.env.RESEND_API_KEY = originalResendKey
+      process.env.APP_URL = originalAppUrl
     })
 
     it('should throw on Resend API error', async () => {
-      const originalEnv = process.env.RESEND_API_KEY
+      const originalResendKey = process.env.RESEND_API_KEY
+      const originalAppUrl = process.env.APP_URL
       process.env.RESEND_API_KEY = 're_test_key'
+      process.env.APP_URL = 'https://test.example.com'
 
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -285,7 +297,8 @@ describe('magic link system', () => {
         sendMagicLinkEmail('test@example.com', 'token123', 'login')
       ).rejects.toThrow('Failed to send magic link email')
 
-      process.env.RESEND_API_KEY = originalEnv
+      process.env.RESEND_API_KEY = originalResendKey
+      process.env.APP_URL = originalAppUrl
     })
   })
 })

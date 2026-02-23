@@ -10,10 +10,10 @@ import {
   getSlackConfig,
   getSMSConfig,
 } from './db/queries.js'
-import { handleSlackEvent } from './slack/event-handler.js'
-import { handleSlackInteraction } from './slack/interactions.js'
 import { handleAgentInboundEmail } from './email/sender.js'
 import { handleCalendarWebhook } from './google/calendar.js'
+import { handleSlackEvent } from './slack/event-handler.js'
+import { handleSlackInteraction } from './slack/interactions.js'
 import type {
   IntegrationChannel,
   IntegrationEvent,

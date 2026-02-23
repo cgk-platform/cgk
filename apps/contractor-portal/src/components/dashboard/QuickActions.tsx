@@ -1,12 +1,12 @@
 'use client'
 
-import Link from 'next/link'
 import {
   FolderKanban,
   FileText,
   CreditCard,
   Settings,
 } from 'lucide-react'
+import Link from 'next/link'
 
 interface QuickAction {
   id: string

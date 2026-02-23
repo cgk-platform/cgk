@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/order
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
 // Mock @cgk-platform/db
@@ -5,7 +6,9 @@ vi.mock('@cgk-platform/db', () => ({
   sql: vi.fn(),
 }))
 
+// eslint-disable-next-line import/order
 import { sql } from '@cgk-platform/db'
+
 import {
   createSession,
   validateSession,

@@ -2,6 +2,7 @@
  * Google Calendar integration for AI Agents
  */
 
+import { logAction } from '../../actions/logger.js'
 import {
   getAgentGoogleOAuth,
   upsertAgentGoogleOAuth,
@@ -11,8 +12,6 @@ import {
   deleteCalendarEvent,
   getGoogleOAuthByChannelId,
 } from '../db/queries.js'
-import { encrypt, safeDecrypt } from '../utils/encryption.js'
-import { logAction } from '../../actions/logger.js'
 import type {
   AgentGoogleOAuth,
   AgentCalendarEvent,
@@ -20,6 +19,7 @@ import type {
   CreateCalendarEventParams,
   CalendarEventResult,
 } from '../types.js'
+import { encrypt, safeDecrypt } from '../utils/encryption.js'
 
 const GOOGLE_OAUTH_URL = 'https://oauth2.googleapis.com/token'
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -217,8 +217,8 @@ export class GoogleCalendarClient {
     return {
       id: response.id!,
       summary: response.summary || null,
-      startTime: new Date(response.start?.dateTime || response.start?.date!),
-      endTime: new Date(response.end?.dateTime || response.end?.date!),
+      startTime: new Date(response.start?.dateTime ?? response.start?.date ?? ''),
+      endTime: new Date(response.end?.dateTime ?? response.end?.date ?? ''),
       meetLink: response.hangoutLink || null,
       htmlLink: response.htmlLink,
     }
@@ -262,8 +262,8 @@ export class GoogleCalendarClient {
     return {
       id: response.id!,
       summary: response.summary || null,
-      startTime: new Date(response.start?.dateTime || response.start?.date!),
-      endTime: new Date(response.end?.dateTime || response.end?.date!),
+      startTime: new Date(response.start?.dateTime ?? response.start?.date ?? ''),
+      endTime: new Date(response.end?.dateTime ?? response.end?.date ?? ''),
       meetLink: response.hangoutLink || null,
       htmlLink: response.htmlLink,
     }

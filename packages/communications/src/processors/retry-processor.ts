@@ -5,9 +5,9 @@
  * @ai-note Handles exponential backoff retries across all queue types
  */
 
-import type { QueueEntry, QueueType } from '../queue/types.js'
-import { getRetryableEntries, scheduleRetry } from '../queue/retry.js'
 import { resetStaleProcessingEntries } from '../queue/claim.js'
+import { getRetryableEntries, scheduleRetry } from '../queue/retry.js'
+import type { QueueEntry, QueueType } from '../queue/types.js'
 
 /**
  * Retry processor configuration

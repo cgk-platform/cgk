@@ -10,9 +10,9 @@
 
 import {
   PDFDocument,
-  PDFFont,
-  PDFImage,
-  PDFPage,
+  type PDFFont,
+  type PDFImage,
+  type PDFPage,
   PDFName,
   PDFDict,
   PDFArray,
@@ -20,6 +20,7 @@ import {
   StandardFonts,
   degrees,
 } from 'pdf-lib'
+
 import { toPdfCoordinates, fromPdfCoordinates, type PdfCoordinates } from './coordinates.js'
 import type { EsignField, EsignSigner, FieldType } from '../types.js'
 

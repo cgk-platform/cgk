@@ -16,7 +16,6 @@ import type {
   AssignmentResult,
 } from '../types.js'
 import { assignVariant } from './allocate.js'
-import { evaluateTargeting } from '../targeting/evaluate.js'
 import {
   parseABCookie,
   getOrCreateVisitorId,
@@ -25,6 +24,7 @@ import {
   serializeABCookie,
   type ABCookie,
 } from './cookies.js'
+import { evaluateTargeting } from '../targeting/evaluate.js'
 
 /**
  * Assignment options

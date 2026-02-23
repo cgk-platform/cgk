@@ -4,11 +4,11 @@
  * GET /api/contractor/projects - Get all projects for the contractor
  */
 
-import { getContractorProjects, getProjectsByKanbanColumn, getContractorDashboardStats } from '@/lib/projects'
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { getContractorProjects, getProjectsByKanbanColumn, getContractorDashboardStats } from '@/lib/projects'
 
 export const dynamic = 'force-dynamic'
 

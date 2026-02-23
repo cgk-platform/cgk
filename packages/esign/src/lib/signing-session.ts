@@ -4,6 +4,7 @@
  */
 
 import { sql, withTenant } from '@cgk-platform/db'
+
 import type {
   EsignDocument,
   EsignSigner,
@@ -12,14 +13,14 @@ import type {
   SignatureData,
   CompleteSigningResult,
 } from '../types.js'
-import { getDocument, markDocumentInProgress, markDocumentCompleted, checkAllSignersSigned } from './documents.js'
-import { getSigner, getSignerByToken, markSignerViewed, markSignerSigned } from './signers.js'
-import { getDocumentFields, getSignerFields, setFieldValue, areRequiredFieldsFilled } from './fields.js'
-import { getDocumentSigners } from './signers.js'
-import { getTemplate } from './templates.js'
-import { createSignature, validateSignatureImage, svgToDataUrl, generateTypedSignatureSvg, getSignatureFont } from './signatures.js'
 import { logDocumentViewed, logDocumentSigned, logFieldFilled } from './audit.js'
+import { getDocument, markDocumentInProgress, markDocumentCompleted, checkAllSignersSigned } from './documents.js'
+import { getDocumentFields, getSignerFields, setFieldValue, areRequiredFieldsFilled } from './fields.js'
+import { createSignature, validateSignatureImage, svgToDataUrl, generateTypedSignatureSvg, getSignatureFont } from './signatures.js'
+import { getSigner, getSignerByToken, markSignerViewed, markSignerSigned } from './signers.js'
+import { getDocumentSigners } from './signers.js'
 import { finalizeSignedDocument } from './storage.js'
+import { getTemplate } from './templates.js'
 import { ERROR_MESSAGES } from '../constants.js'
 
 // ============================================================================

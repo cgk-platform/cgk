@@ -1,6 +1,8 @@
-import { describe, it, expect } from 'vitest'
-import { verifyWebhook, parseWebhook } from '../webhooks'
 import { createHmac } from 'crypto'
+
+import { describe, it, expect } from 'vitest'
+
+import { verifyWebhook, parseWebhook } from '../webhooks'
 
 describe('verifyWebhook', () => {
   const secret = 'test-webhook-secret'

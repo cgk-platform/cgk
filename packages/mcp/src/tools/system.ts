@@ -15,9 +15,10 @@
  * @ai-required All tools must use withTenant() for tenant-scoped data
  */
 
+import { withTenant, sql, createTenantCache, createGlobalCache } from '@cgk-platform/db'
+
 import { defineTool, jsonResult, errorResult } from '../tools'
 import type { ToolDefinition } from '../tools'
-import { withTenant, sql, createTenantCache, createGlobalCache } from '@cgk-platform/db'
 
 // =============================================================================
 // Types

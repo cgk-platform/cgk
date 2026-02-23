@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+
 import { createAdminClient } from '../admin'
 
 const mockFetch = vi.fn()
@@ -16,7 +17,7 @@ describe('createAdminClient', () => {
     })
 
     expect(client.storeDomain).toBe('test-store.myshopify.com')
-    expect(client.apiVersion).toBe('2024-01')
+    expect(client.apiVersion).toBe('2026-01')
   })
 
   it('makes requests to admin API endpoint', async () => {
@@ -33,7 +34,7 @@ describe('createAdminClient', () => {
     await client.query('query { orders(first: 10) { edges { node { id } } } }')
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'https://test-store.myshopify.com/admin/api/2024-01/graphql.json',
+      'https://test-store.myshopify.com/admin/api/2026-01/graphql.json',
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({

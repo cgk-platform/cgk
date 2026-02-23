@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useState } from 'react'
+
 import { useCart } from './useCart'
 import type { UseCheckoutReturn } from '../context/types'
 

@@ -2,15 +2,15 @@
  * Initiate Handoff - Start a conversation handoff between agents
  */
 
-import { getAgentById } from '../db/queries.js'
+import { extractKeyPoints } from './context.js'
+import { logAction } from '../actions/logger.js'
 import {
   createHandoff,
   createAgentMessage,
   getHandoffByConversation,
   listPendingHandoffs,
 } from '../db/handoffs-queries.js'
-import { logAction } from '../actions/logger.js'
-import { extractKeyPoints } from './context.js'
+import { getAgentById } from '../db/queries.js'
 import type {
   AgentHandoff,
   AgentHandoffWithAgents,

@@ -24,12 +24,12 @@ export * from './additional'
 // COMBINED EXPORTS
 // ============================================================
 
-import { healthCheckTasks } from './health-checks'
-import { digestTasks } from './digests'
-import { alertTasks } from './alerts'
-import { subscriptionTasks } from './subscriptions'
-import { mediaProcessingTasks } from './media-processing'
 import { additionalTasks } from './additional'
+import { alertTasks } from './alerts'
+import { digestTasks } from './digests'
+import { healthCheckTasks } from './health-checks'
+import { mediaProcessingTasks } from './media-processing'
+import { subscriptionTasks } from './subscriptions'
 
 /**
  * All scheduled tasks combined

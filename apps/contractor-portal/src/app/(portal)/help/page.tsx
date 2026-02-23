@@ -6,7 +6,6 @@
  * FAQ, contact support, and helpful resources.
  */
 
-import { useState } from 'react'
 import { Card, CardContent, CardHeader, Button, Input, cn } from '@cgk-platform/ui'
 import {
   Search,
@@ -21,6 +20,7 @@ import {
   Briefcase,
   Shield,
 } from 'lucide-react'
+import { useState } from 'react'
 
 interface FAQItem {
   question: string

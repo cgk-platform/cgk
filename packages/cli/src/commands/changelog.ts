@@ -1,6 +1,7 @@
+import path from 'path'
+
 import chalk from 'chalk'
 import { Command } from 'commander'
-import path from 'path'
 import fs from 'fs-extra'
 
 /**

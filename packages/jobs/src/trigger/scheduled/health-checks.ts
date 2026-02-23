@@ -10,6 +10,7 @@
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent } from '../../events'
 import type { HealthCheckCriticalPayload, HealthCheckFullPayload } from '../../handlers/scheduled/health-checks'
 import { createJobFromPayload } from '../utils'

@@ -5,11 +5,11 @@
  * Analyzes cohort performance at 30/60/90 days post-conversion.
  */
 
-import { mean } from '../statistics/core.js'
 import {
   bootstrapDifference,
   bootstrapConfidenceInterval,
 } from '../statistics/bootstrap.js'
+import { mean } from '../statistics/core.js'
 
 /**
  * LTV analysis result for a variant

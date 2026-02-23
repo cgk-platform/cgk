@@ -4,11 +4,11 @@
  * GET /api/contractor/dashboard - Get dashboard stats for the authenticated contractor
  */
 
-import { getContractorDashboardStats } from '@/lib/projects'
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { getContractorDashboardStats } from '@/lib/projects'
 
 export const dynamic = 'force-dynamic'
 

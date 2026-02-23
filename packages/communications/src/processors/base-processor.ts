@@ -5,11 +5,6 @@
  * @ai-note Abstract base for all queue processors
  */
 
-import type {
-  QueueEntry,
-  QueueType,
-  SendResult,
-} from '../queue/types.js'
 import {
   claimScheduledEntries,
   markAsFailed,
@@ -18,6 +13,11 @@ import {
   resetStaleProcessingEntries,
 } from '../queue/claim.js'
 import { getRetryableEntries, scheduleRetry } from '../queue/retry.js'
+import type {
+  QueueEntry,
+  QueueType,
+  SendResult,
+} from '../queue/types.js'
 
 /**
  * Processor configuration

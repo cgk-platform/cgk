@@ -6,8 +6,6 @@
  * Password change, session management, and 2FA settings.
  */
 
-import { useState } from 'react'
-import Link from 'next/link'
 import {
   Card,
   CardContent,
@@ -29,6 +27,8 @@ import {
   Check,
   AlertCircle,
 } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
 
 interface Session {
   id: string

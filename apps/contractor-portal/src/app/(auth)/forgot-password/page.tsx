@@ -4,10 +4,10 @@
  * Forgot Password Page
  */
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { Mail, Loader2, ArrowLeft, CheckCircle } from 'lucide-react'
 import { Button, Input, Label } from '@cgk-platform/ui'
+import { Mail, Loader2, ArrowLeft, CheckCircle } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')

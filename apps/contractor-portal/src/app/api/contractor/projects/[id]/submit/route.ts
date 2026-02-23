@@ -4,11 +4,11 @@
  * POST /api/contractor/projects/[id]/submit - Submit work for a project
  */
 
-import { submitProjectWork } from '@/lib/projects'
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { submitProjectWork } from '@/lib/projects'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,10 +1,12 @@
+import { exec } from 'child_process'
+import path from 'path'
+import { promisify } from 'util'
+
 import chalk from 'chalk'
 import { Command } from 'commander'
-import ora from 'ora'
-import path from 'path'
 import fs from 'fs-extra'
-import { exec } from 'child_process'
-import { promisify } from 'util'
+import ora from 'ora'
+
 
 const execAsync = promisify(exec)
 
@@ -181,7 +183,7 @@ export const tenantExportCommand = new Command('tenant:export')
         console.log('To import this export to another tenant:')
         console.log(chalk.cyan(`  npx @cgk-platform/cli tenant:import ${output} --target <new_slug>`))
         console.log('')
-      } catch (pgError) {
+      } catch {
         // pg_dump might not be available, fall back to SQL export
         spinner.warn('pg_dump not available, falling back to SQL query export')
 

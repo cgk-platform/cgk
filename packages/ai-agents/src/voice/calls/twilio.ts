@@ -8,15 +8,17 @@
  * Best for custom scenarios where Retell doesn't fit.
  */
 
+import crypto from 'node:crypto'
+
+import {
+  createVoiceCall,
+  updateVoiceCallBySid,
+} from '../db/voice-queries.js'
 import type {
   CreateVoiceCallInput,
   VoiceCall,
   VoiceCallProvider,
 } from '../types.js'
-import {
-  createVoiceCall,
-  updateVoiceCallBySid,
-} from '../db/voice-queries.js'
 
 const TWILIO_API_BASE = 'https://api.twilio.com/2010-04-01'
 
@@ -310,8 +312,6 @@ export function verifyTwilioSignature(
     .map((key) => key + params[key])
     .join('')
 
-  // Compute the signature
-  const crypto = require('crypto')
   const data = url + sortedParams
   const expectedSignature = crypto
     .createHmac('sha1', authToken)

@@ -54,11 +54,11 @@ export * from './errors'
 // COMBINED EXPORTS
 // ============================================================
 
+import { allAnalyticsTasks } from './analytics'
 import { allCommerceTasks } from './commerce'
 import { allCreatorTasks } from './creators'
-import { allAnalyticsTasks } from './analytics'
-import { allScheduledTasks } from './scheduled'
 import { allPlatformTasks } from './platform'
+import { allScheduledTasks } from './scheduled'
 
 /**
  * All Trigger.dev tasks combined

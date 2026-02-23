@@ -5,6 +5,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import { createFailureLearning } from './correction-detector.js'
 import type { AgentFeedback, CreateFeedbackInput, FeedbackType } from '../memory/types.js'
 

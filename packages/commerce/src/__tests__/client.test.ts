@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { createCommerceProvider } from '../client'
 import type { CommerceConfig } from '../types'
 

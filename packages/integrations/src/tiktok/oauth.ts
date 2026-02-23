@@ -11,7 +11,6 @@ import { sql, withTenant } from '@cgk-platform/db'
 import { encryptToken } from '../encryption.js'
 import { storeSimpleOAuthState, validateSimpleOAuthState } from '../oauth-state.js'
 import type { OAuthStartResult, TikTokAdConnection, TikTokOAuthCompleteResult } from '../types.js'
-
 import {
   getTikTokAppId,
   getTikTokAppSecret,

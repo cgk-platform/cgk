@@ -9,6 +9,7 @@
  * @ai-pattern job-provider-local
  */
 
+import type { JobEvents } from '../events'
 import type {
   JobProvider,
   JobHandler,
@@ -18,7 +19,6 @@ import type {
   BatchSendResult,
   WaitResult,
 } from '../provider'
-import type { JobEvents } from '../events'
 import { createJobId } from '../utils'
 
 interface LocalProviderConfig {

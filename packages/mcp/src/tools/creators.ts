@@ -8,8 +8,9 @@
  * @ai-required All tools use withTenant() for data isolation
  */
 
-import { defineTool, jsonResult, errorResult } from '../tools.js'
 import { withTenant, sql } from '@cgk-platform/db'
+
+import { defineTool, jsonResult, errorResult } from '../tools.js'
 import type { ToolDefinition } from '../tools.js'
 
 // =============================================================================

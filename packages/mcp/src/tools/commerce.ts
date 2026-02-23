@@ -6,6 +6,7 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
+
 import { defineTool, jsonResult, errorResult } from '../tools'
 import type { ToolDefinition } from '../tools'
 import type { ToolResult } from '../types'

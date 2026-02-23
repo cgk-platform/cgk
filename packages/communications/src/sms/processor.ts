@@ -8,6 +8,7 @@
  * @ai-critical Respect rate limits and quiet hours
  */
 
+import { isQuietHours, performComplianceChecks } from './compliance.js'
 import { isOptedOut } from './opt-out.js'
 import {
   sendSms,
@@ -21,7 +22,6 @@ import {
   resetStaleSmSProcessingEntries,
 } from './queue.js'
 import { getSmsSettings, getSmsEnabledTenants } from './settings.js'
-import { isQuietHours, performComplianceChecks } from './compliance.js'
 
 // ============================================================================
 // Processor Types

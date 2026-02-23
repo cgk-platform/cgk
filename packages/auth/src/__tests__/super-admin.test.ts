@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/order
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock the database module
@@ -5,7 +6,9 @@ vi.mock('@cgk-platform/db', () => ({
   sql: vi.fn(),
 }))
 
+// eslint-disable-next-line import/order
 import { sql } from '@cgk-platform/db'
+
 import {
   isSuperAdmin,
   getSuperAdminUser,

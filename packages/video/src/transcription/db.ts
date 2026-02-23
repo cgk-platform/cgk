@@ -8,6 +8,7 @@
  */
 
 import { sql, withTenant } from '@cgk-platform/db'
+
 import type {
   TranscriptionStatus,
   TranscriptionWord,

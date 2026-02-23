@@ -9,8 +9,8 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
+
 import { defineJob } from '../define'
-import type { Job, JobResult } from '../types'
 import type {
   CreatorApprovalRemindersPayload,
   CreatorShipmentSyncPayload,
@@ -18,6 +18,7 @@ import type {
   CreatorWelcomeCallRemindersPayload,
   TenantEvent,
 } from '../events'
+import type { Job, JobResult } from '../types'
 
 // ============================================================
 // APPROVAL REMINDERS (Daily 9 AM UTC)

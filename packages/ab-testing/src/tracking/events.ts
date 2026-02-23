@@ -5,8 +5,8 @@
  * Supports real-time and batched event insertion.
  */
 
-import type { EventType, TrackEventInput } from '../types.js'
 import { EVENT_CONFIG } from '../config.js'
+import type { EventType, TrackEventInput } from '../types.js'
 
 /**
  * Event to be queued for batch insertion

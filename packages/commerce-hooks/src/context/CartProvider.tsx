@@ -19,6 +19,7 @@
  * ```
  */
 
+import type { Cart } from '@cgk-platform/commerce'
 import {
   useState,
   useCallback,
@@ -26,7 +27,7 @@ import {
   useTransition,
   type ReactNode,
 } from 'react'
-import type { Cart } from '@cgk-platform/commerce'
+
 import { CartContext } from './CartContext'
 import type { CartContextValue, AddToCartInput, CartActions } from './types'
 

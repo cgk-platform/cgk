@@ -7,9 +7,9 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 
-import type { BulkAction, BulkActionResult, QueueType } from './types.js'
 import { markAsSkipped } from './claim.js'
 import { scheduleRetry } from './retry.js'
+import type { BulkAction, BulkActionResult, QueueType } from './types.js'
 
 /**
  * Perform a bulk action on multiple queue entries

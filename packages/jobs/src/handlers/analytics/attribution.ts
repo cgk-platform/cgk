@@ -11,8 +11,7 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
-import { defineJob } from '../../define'
-import type { JobResult } from '../../types'
+
 import type {
   ProcessAttributionPayload,
   AttributionDailyMetricsPayload,
@@ -28,6 +27,8 @@ import type {
   AttributionResult,
   Touchpoint,
 } from './types'
+import { defineJob } from '../../define'
+import type { JobResult } from '../../types'
 
 // ============================================================
 // ATTRIBUTION MODEL CALCULATIONS

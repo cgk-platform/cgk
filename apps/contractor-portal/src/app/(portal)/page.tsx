@@ -6,13 +6,13 @@
  * Displays stats, quick actions, and recent activity for contractors.
  */
 
-import { useEffect, useState } from 'react'
 import { Spinner } from '@cgk-platform/ui'
+import { useEffect, useState } from 'react'
 
-import type { ContractorDashboardStats } from '@/lib/types'
 import { DashboardStats } from '@/components/dashboard/DashboardStats'
 import { QuickActions } from '@/components/dashboard/QuickActions'
 import { RecentActivity } from '@/components/dashboard/RecentActivity'
+import type { ContractorDashboardStats } from '@/lib/types'
 
 interface DashboardData {
   contractor: {

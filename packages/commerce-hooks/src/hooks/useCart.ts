@@ -19,6 +19,7 @@
  */
 
 import { useContext } from 'react'
+
 import { CartContext } from '../context/CartContext'
 import type { CartContextValue } from '../context/types'
 

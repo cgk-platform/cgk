@@ -8,8 +8,9 @@
  * @ai-note All operations are tenant-isolated
  */
 
-import { sql } from '@cgk-platform/db'
 import crypto from 'crypto'
+
+import { sql } from '@cgk-platform/db'
 
 import type {
   InboundAddressInfo,

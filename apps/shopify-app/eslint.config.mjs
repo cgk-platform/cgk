@@ -1,4 +1,4 @@
-import baseConfig from '@cgk-platform/eslint-config/library.js'
+import baseConfig from '@cgk-platform/eslint-config/library'
 
 export default [
   ...baseConfig,

@@ -9,7 +9,6 @@ import { sql, withTenant } from '@cgk-platform/db'
 
 import { encryptToken, decryptToken } from '../encryption.js'
 import type { KlaviyoConnectResult, KlaviyoConnection, KlaviyoList } from '../types.js'
-
 import { getIntegrationEncryptionKey, isValidKlaviyoApiKey, KLAVIYO_CONFIG } from './config.js'
 
 /**

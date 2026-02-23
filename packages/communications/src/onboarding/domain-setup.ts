@@ -7,22 +7,22 @@
  * @ai-critical All functions require tenantId for database operations
  */
 
+import type { AddDomainInput, DomainConfigStatus, RecommendedSubdomain } from './types.js'
+import { RECOMMENDED_SUBDOMAINS } from './types.js'
+import { generateDNSInstructions } from '../sender/dns-instructions.js'
+import type { DNSInstructions } from '../sender/dns-instructions.js'
 import {
   createDomain,
   getDomainById,
   listDomains,
 } from '../sender/domains.js'
-import { generateDNSInstructions } from '../sender/dns-instructions.js'
 import {
   canVerifyDomain,
   getNextCheckAllowedAt,
   registerDomainWithResend,
   verifyDomainWithResend,
 } from '../sender/verification.js'
-import type { DNSInstructions } from '../sender/dns-instructions.js'
 import type { EmailDomain } from '../types.js'
-import type { AddDomainInput, DomainConfigStatus, RecommendedSubdomain } from './types.js'
-import { RECOMMENDED_SUBDOMAINS } from './types.js'
 
 /**
  * Resend API configuration for domain operations

@@ -5,10 +5,11 @@
  */
 
 import { sql } from '@cgk-platform/db'
-import { recordMemoryAccess as _recordMemoryAccess } from '../memory/storage.js'
-import { estimateTokens } from '../memory/embeddings.js'
-import { searchMemories } from './search.js'
+
 import { rankMemories, diversifyMemories, groupByType, sortGroupsByPriority } from './ranking.js'
+import { searchMemories } from './search.js'
+import { estimateTokens } from '../memory/embeddings.js'
+import { recordMemoryAccess as _recordMemoryAccess } from '../memory/storage.js'
 import type {
   MemorySearchResult,
   MemoryType,

@@ -7,8 +7,8 @@
  * @ai-critical Always wrap handlers with withTenantContext for database operations
  */
 
-import type { JobContext, JobHandler } from './provider'
 import type { TenantEvent } from './events'
+import type { JobContext, JobHandler } from './provider'
 
 /**
  * Error classification for retry decisions
@@ -92,7 +92,7 @@ export function withTenantContext<T extends TenantEvent<unknown>, R = void>(
       return withTenant(tenantId, async () => {
         return handler(ctx)
       })
-    } catch (importError) {
+    } catch {
       // If @cgk-platform/db is not available, proceed without tenant context
       // This allows the jobs package to be used standalone for testing
       console.warn(

@@ -5,8 +5,9 @@
  */
 
 import type { Cart, CartLine, Money } from '@cgk-platform/commerce'
-import type { CartTotals } from '../types/cart'
+
 import { formatMoney, addMoney, zeroMoney, type FormatMoneyOptions } from './money'
+import type { CartTotals } from '../types/cart'
 
 /**
  * Formatted cart with display helpers

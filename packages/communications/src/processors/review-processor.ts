@@ -5,10 +5,10 @@
  * @ai-note Processes review request and reminder emails
  */
 
-import type { ReviewQueueEntry, SendResult } from '../queue/types.js'
 import { BaseEmailProcessor, type ProcessorConfig, type ProcessorResult } from './base-processor.js'
 import { hasReviewBeenSubmitted } from '../queue/review-queue.js'
 import { createReviewFollowUp, skipPendingEntriesForOrder } from '../queue/sequence.js'
+import type { ReviewQueueEntry, SendResult } from '../queue/types.js'
 
 /**
  * Review processor configuration

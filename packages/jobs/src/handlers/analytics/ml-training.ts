@@ -10,9 +10,9 @@
  * @ai-note Configured for 30 minute timeout (1800 seconds)
  */
 
+import type { AttributionMLTrainingPayload } from './types'
 import { defineJob } from '../../define'
 import type { JobResult } from '../../types'
-import type { AttributionMLTrainingPayload } from './types'
 
 // ============================================================
 // ML TRAINING TYPES

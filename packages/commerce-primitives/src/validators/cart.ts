@@ -5,8 +5,9 @@
  */
 
 import type { Cart, CartLine, ProductVariant } from '@cgk-platform/commerce'
-import type { CartValidationResult, CartValidationError } from '../types/cart'
+
 import { MAX_LINE_QUANTITY, MIN_LINE_QUANTITY, MAX_CART_LINES } from '../constants/cart'
+import type { CartValidationResult, CartValidationError } from '../types/cart'
 
 /**
  * Validate quantity for cart operations

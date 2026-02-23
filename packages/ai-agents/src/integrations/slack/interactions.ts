@@ -3,10 +3,10 @@
  * Handles button clicks, modal submissions, shortcuts, etc.
  */
 
-import { getSlackConfig } from '../db/queries.js'
 import { SlackClient } from './client.js'
-import { logAction } from '../../actions/logger.js'
 import { approve, reject, getRequest } from '../../actions/approval.js'
+import { logAction } from '../../actions/logger.js'
+import { getSlackConfig } from '../db/queries.js'
 import type {
   SlackInteractionPayload,
   SlackInteractionResponse,

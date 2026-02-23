@@ -5,6 +5,14 @@
  * including provider setup and credential management.
  */
 
+import {
+  createVoiceConfig as dbCreateVoiceConfig,
+  getVoiceConfig as dbGetVoiceConfig,
+  getVoiceCredentials,
+  updateVoiceConfig as dbUpdateVoiceConfig,
+} from './db/voice-queries.js'
+import { createSTTProvider } from './stt/provider.js'
+import { createTTSProvider } from './tts/provider.js'
 import type {
   AgentVoiceConfig,
   CreateVoiceConfigInput,
@@ -15,14 +23,6 @@ import type {
   UpdateVoiceConfigInput,
   Voice,
 } from './types.js'
-import {
-  createVoiceConfig as dbCreateVoiceConfig,
-  getVoiceConfig as dbGetVoiceConfig,
-  getVoiceCredentials,
-  updateVoiceConfig as dbUpdateVoiceConfig,
-} from './db/voice-queries.js'
-import { createTTSProvider } from './tts/provider.js'
-import { createSTTProvider } from './stt/provider.js'
 
 /**
  * Get voice configuration for an agent

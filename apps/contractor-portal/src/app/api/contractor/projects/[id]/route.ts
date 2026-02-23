@@ -5,12 +5,12 @@
  * PATCH /api/contractor/projects/[id] - Update project status
  */
 
-import { getProjectById, updateProjectStatus } from '@/lib/projects'
-import type { ProjectStatus } from '@/lib/types'
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { getProjectById, updateProjectStatus } from '@/lib/projects'
+import type { ProjectStatus } from '@/lib/types'
 
 export const dynamic = 'force-dynamic'
 

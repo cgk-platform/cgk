@@ -3,8 +3,8 @@
  */
 
 import { upsertSlackConfig, getSlackConfig } from '../db/queries.js'
-import { encrypt } from '../utils/encryption.js'
 import type { TenantSlackConfig } from '../types.js'
+import { encrypt } from '../utils/encryption.js'
 
 const SLACK_OAUTH_URL = 'https://slack.com/api/oauth.v2.access'
 const SLACK_AUTH_URL = 'https://slack.com/oauth/v2/authorize'

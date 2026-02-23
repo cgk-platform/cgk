@@ -244,14 +244,21 @@ export {
 // ALL SCHEDULED JOBS
 // ============================================================
 
-import { healthCheckJobs } from './health-checks'
-import { digestJobs } from './digests'
-import { alertJobs } from './alerts'
-import { subscriptionJobs } from './subscriptions'
-import { mediaProcessingJobs } from './media-processing'
-import { webhookQueueJobs } from './webhook-queue'
-import { smsQueueJobs } from './sms-queue'
 import { additionalJobs } from './additional-tasks'
+import { ADDITIONAL_TASK_SCHEDULES } from './additional-tasks'
+import { alertJobs } from './alerts'
+import { digestJobs } from './digests'
+import { DIGEST_SCHEDULES } from './digests'
+import { healthCheckJobs } from './health-checks'
+import { HEALTH_CHECK_SCHEDULES } from './health-checks'
+import { mediaProcessingJobs } from './media-processing'
+import { MEDIA_PROCESSING_SCHEDULES } from './media-processing'
+import { smsQueueJobs } from './sms-queue'
+import { SMS_QUEUE_SCHEDULES } from './sms-queue'
+import { subscriptionJobs } from './subscriptions'
+import { SUBSCRIPTION_SCHEDULES } from './subscriptions'
+import { webhookQueueJobs } from './webhook-queue'
+import { WEBHOOK_QUEUE_SCHEDULES } from './webhook-queue'
 
 /**
  * All scheduled jobs combined
@@ -276,13 +283,6 @@ export const SCHEDULED_JOB_COUNT = allScheduledJobs.length
 // ALL SCHEDULES
 // ============================================================
 
-import { HEALTH_CHECK_SCHEDULES } from './health-checks'
-import { DIGEST_SCHEDULES } from './digests'
-import { SUBSCRIPTION_SCHEDULES } from './subscriptions'
-import { MEDIA_PROCESSING_SCHEDULES } from './media-processing'
-import { WEBHOOK_QUEUE_SCHEDULES } from './webhook-queue'
-import { SMS_QUEUE_SCHEDULES } from './sms-queue'
-import { ADDITIONAL_TASK_SCHEDULES } from './additional-tasks'
 
 /**
  * All cron schedules combined

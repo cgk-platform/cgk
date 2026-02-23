@@ -1,9 +1,10 @@
+import path from 'path'
+
 import chalk from 'chalk'
 import { Command } from 'commander'
-import ora from 'ora'
-import path from 'path'
 import fs from 'fs-extra'
 import inquirer from 'inquirer'
+import ora from 'ora'
 
 /**
  * Validate tenant slug format

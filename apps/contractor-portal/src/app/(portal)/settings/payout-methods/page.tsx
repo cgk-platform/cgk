@@ -1,9 +1,5 @@
 'use client'
 
-import { Suspense, useEffect, useState } from 'react'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-
 import {
   Alert,
   AlertDescription,
@@ -19,6 +15,9 @@ import {
   Label,
   Spinner,
 } from '@cgk-platform/ui'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { Suspense, useEffect, useState } from 'react'
 
 interface PayoutMethod {
   id: string

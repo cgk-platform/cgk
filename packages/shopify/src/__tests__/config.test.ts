@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+
 import { normalizeStoreDomain, DEFAULT_API_VERSION } from '../config'
 
 describe('normalizeStoreDomain', () => {

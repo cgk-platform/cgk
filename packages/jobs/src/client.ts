@@ -8,6 +8,7 @@
  * @ai-critical All job sends require tenantId in payload
  */
 
+import type { JobEvents } from './events'
 import type {
   JobProvider,
   ProviderConfig,
@@ -17,10 +18,9 @@ import type {
   WaitResult,
 } from './provider'
 import { validateTenantId } from './provider'
-import type { JobEvents } from './events'
+import { createInngestProvider } from './providers/inngest'
 import { createLocalProvider } from './providers/local'
 import { createTriggerDevProvider } from './providers/trigger-dev'
-import { createInngestProvider } from './providers/inngest'
 
 /**
  * Job client configuration

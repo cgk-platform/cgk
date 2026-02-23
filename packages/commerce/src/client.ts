@@ -5,8 +5,8 @@
  * Currently supports Shopify; Custom+Stripe provider is planned.
  */
 
-import type { CommerceConfig, CommerceProvider } from './types'
 import { createShopifyProvider } from './providers/shopify'
+import type { CommerceConfig, CommerceProvider } from './types'
 
 /**
  * Create a commerce provider for the configured backend

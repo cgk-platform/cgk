@@ -1,7 +1,7 @@
 'use client'
 
-import { Sidebar } from '@/components/nav/Sidebar'
 import { MobileNav } from '@/components/nav/MobileNav'
+import { Sidebar } from '@/components/nav/Sidebar'
 
 /**
  * Portal layout with sidebar navigation for authenticated contractor pages

@@ -5,6 +5,7 @@
  */
 
 import { withTenant } from '@cgk-platform/db'
+
 import { routeToHandler } from './router'
 import type { WebhookTopic } from './types'
 import {

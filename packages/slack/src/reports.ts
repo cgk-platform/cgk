@@ -6,6 +6,7 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
+
 import { SlackClient } from './client'
 import { getTenantWorkspace } from './notifications'
 import type {

@@ -6,6 +6,7 @@
  */
 
 import { Resend } from 'resend'
+
 import { getTenantResendApiKey, getTenantResendConfig } from '../storage.js'
 
 // Resend client cache

@@ -3,13 +3,14 @@
  */
 
 import * as crypto from 'node:crypto'
-import { safeDecrypt } from '../utils/encryption.js'
+
 import type {
   SlackBlock,
   SlackMessage,
   TenantSlackConfig,
   AgentSlackApp,
 } from '../types.js'
+import { safeDecrypt } from '../utils/encryption.js'
 
 const SLACK_API_BASE = 'https://slack.com/api'
 

@@ -106,10 +106,10 @@ export {
 // COMBINED EXPORTS
 // ============================================================
 
-import { payoutProcessingTasks } from './payout-processing'
-import { communicationsTasks } from './communications'
-import { applicationTasks } from './applications'
 import { creatorAnalyticsTasks } from './analytics'
+import { applicationTasks } from './applications'
+import { communicationsTasks } from './communications'
+import { payoutProcessingTasks } from './payout-processing'
 
 /**
  * All creator tasks combined

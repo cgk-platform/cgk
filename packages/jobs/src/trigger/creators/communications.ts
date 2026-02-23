@@ -12,7 +12,9 @@
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent } from '../../events'
+import type { CreatorSetupCompletePayload } from '../../events'
 import type {
   ProcessCreatorEmailQueuePayload,
   ScheduleWelcomeSequencePayload,
@@ -28,7 +30,6 @@ import type {
   SendCreatorReminderPayload,
   ApprovalRemindersPayload,
 } from '../../handlers/creators/communications'
-import type { CreatorSetupCompletePayload } from '../../events'
 import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================

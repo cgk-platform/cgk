@@ -16,7 +16,6 @@ import type {
   MetaOAuthCompleteResult,
   OAuthStartResult,
 } from '../types.js'
-
 import {
   getMetaAppId,
   getMetaAppSecret,

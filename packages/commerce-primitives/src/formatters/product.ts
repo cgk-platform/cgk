@@ -5,6 +5,7 @@
  */
 
 import type { Product, ProductVariant, PriceRange, Money, SelectedOption } from '@cgk-platform/commerce'
+
 import { formatMoney, type FormatMoneyOptions } from './money'
 
 /**

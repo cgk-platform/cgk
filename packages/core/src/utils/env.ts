@@ -25,6 +25,11 @@ export interface EnvValidationResult {
  * ```
  */
 export function validateRequiredEnv(vars: readonly string[]): void {
+  // Skip validation during CI builds (compilation-only, no runtime)
+  if (process.env.SKIP_ENV_VALIDATION === '1') {
+    return
+  }
+
   const missing = vars.filter((v) => !process.env[v])
 
   if (missing.length > 0) {

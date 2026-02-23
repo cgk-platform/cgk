@@ -7,13 +7,13 @@
 
 import { createTenantCache } from '@cgk-platform/db'
 
-import { calculateAvailableSlots } from '../slots.js'
 import {
   getAvailability,
   getBlockedDates,
   getBookingsForHost,
   getSchedulingUser,
 } from '../db.js'
+import { calculateAvailableSlots } from '../slots.js'
 import {
   getTeamEventType,
   getRoundRobinCounter,

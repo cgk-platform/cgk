@@ -5,6 +5,7 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 import { nanoid } from 'nanoid'
+
 import type { EsignSignature, CreateSignatureInput } from '../types.js'
 
 // ============================================================================

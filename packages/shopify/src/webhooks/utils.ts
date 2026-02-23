@@ -3,7 +3,9 @@
  */
 
 import crypto from 'crypto'
+
 import { sql } from '@cgk-platform/db'
+
 import type { ShopifyCredentials, WebhookEvent, WebhookEventStatus } from './types'
 
 /**

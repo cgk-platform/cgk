@@ -5,8 +5,9 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 import { nanoid } from 'nanoid'
-import type { EsignSigner, CreateSignerInput, UpdateSignerInput, SignerStatus } from '../types.js'
+
 import { DOCUMENT_DEFAULTS } from '../constants.js'
+import type { EsignSigner, CreateSignerInput, UpdateSignerInput, SignerStatus } from '../types.js'
 
 // ============================================================================
 // SIGNER CRUD OPERATIONS

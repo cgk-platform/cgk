@@ -16,6 +16,7 @@
  */
 
 import { task, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent } from '../../events'
 import type {
   CriticalAlertPayload,

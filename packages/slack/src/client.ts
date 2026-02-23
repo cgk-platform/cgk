@@ -6,8 +6,9 @@
  */
 
 import { WebClient, type ChatPostMessageResponse, type ConversationsListResponse, type KnownBlock } from '@slack/web-api'
-import type { SlackBlock, SlackChannel } from './types'
+
 import { decryptToken } from './encryption'
+import type { SlackBlock, SlackChannel } from './types'
 
 // Helper to cast our SlackBlock type to Slack API's expected type
 function toApiBlocks(blocks: SlackBlock[]): KnownBlock[] {

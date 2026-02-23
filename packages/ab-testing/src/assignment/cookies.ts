@@ -5,8 +5,8 @@
  * Cookie is base64-encoded JSON for compact storage.
  */
 
-import type { ABCookie } from '../types.js'
 import { AB_COOKIE_NAME, AB_COOKIE_MAX_AGE, VISITOR_ID_LENGTH } from '../config.js'
+import type { ABCookie } from '../types.js'
 
 // Re-export ABCookie type for convenience
 export type { ABCookie } from '../types.js'

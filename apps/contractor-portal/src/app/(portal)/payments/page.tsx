@@ -1,8 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-
 import {
   Alert,
   AlertDescription,
@@ -15,6 +12,9 @@ import {
   CardTitle,
   Spinner,
 } from '@cgk-platform/ui'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+
 
 interface Balance {
   pendingCents: number

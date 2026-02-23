@@ -25,8 +25,9 @@
  * ```
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react'
 import type { Cart } from '@cgk-platform/commerce'
+import { createContext, useContext, useMemo, type ReactNode } from 'react'
+
 import { CartProvider } from '../context/CartProvider'
 import type { CommerceActions, ProductActions, OrderActions, DiscountActions } from '../context/types'
 

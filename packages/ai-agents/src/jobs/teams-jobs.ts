@@ -4,9 +4,10 @@
  */
 
 import { withTenant } from '@cgk-platform/db'
+
+import { archiveOldHandoffs, getHandoffStats } from '../db/handoffs-queries.js'
 import { syncOrgChart, validateOrgChart } from '../org-chart/sync.js'
 import { applyFamiliarityDecay } from '../relationships/familiarity.js'
-import { archiveOldHandoffs, getHandoffStats } from '../db/handoffs-queries.js'
 
 /**
  * Job: Sync org chart with team changes

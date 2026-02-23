@@ -15,10 +15,10 @@ export * from './review-email'
 export * from './ab-testing'
 export * from './product-sync'
 
-import { orderSyncTasks } from './order-sync'
-import { reviewEmailTasks } from './review-email'
 import { abTestingTasks } from './ab-testing'
+import { orderSyncTasks } from './order-sync'
 import { productCustomerSyncTasks } from './product-sync'
+import { reviewEmailTasks } from './review-email'
 
 /**
  * All commerce tasks combined

@@ -27,9 +27,8 @@ vi.mock('../session', () => ({
   revokeAllSessions: vi.fn().mockResolvedValue(undefined),
 }))
 
-import { logAuditAction, revokeAllSuperAdminSessions } from '../super-admin'
 import { revokeAllSessions } from '../session'
-
+import { logAuditAction, revokeAllSuperAdminSessions } from '../super-admin'
 import {
   getAllUsers,
   searchUsers,

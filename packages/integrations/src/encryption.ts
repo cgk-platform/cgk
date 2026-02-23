@@ -139,7 +139,7 @@ export async function decryptToken(
   try {
     const decrypted = Buffer.concat([decipher.update(data), decipher.final()])
     return decrypted.toString('utf8')
-  } catch (error) {
+  } catch {
     throw new Error('Decryption failed - invalid key or corrupted data')
   }
 }

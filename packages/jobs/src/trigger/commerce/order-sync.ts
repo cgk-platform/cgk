@@ -14,7 +14,9 @@
  */
 
 import { task, schedules, logger } from '@trigger.dev/sdk/v3'
+
 import type { TenantEvent } from '../../events'
+import type { OrderCreatedPayload, OrderFulfilledPayload } from '../../events'
 import type {
   SyncOrderPayload,
   SyncOrderBatchPayload,
@@ -23,13 +25,12 @@ import type {
   OrderCommissionPayload,
   OrderReviewEmailPayload,
 } from '../../handlers/commerce/order-sync'
-import type { OrderCreatedPayload, OrderFulfilledPayload } from '../../events'
-import { createJobFromPayload, getActiveTenants } from '../utils'
 import {
   createPermanentError,
   handleJobResult,
   generateIdempotencyKey,
 } from '../errors'
+import { createJobFromPayload, getActiveTenants } from '../utils'
 
 // ============================================================
 // RETRY CONFIGURATION

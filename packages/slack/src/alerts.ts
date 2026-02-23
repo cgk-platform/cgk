@@ -6,6 +6,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+
 import { SlackClient } from './client'
 import type {
   PlatformSlackWorkspace,

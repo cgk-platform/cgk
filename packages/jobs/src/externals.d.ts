@@ -143,7 +143,9 @@ declare module '@cgk-platform/integrations' {
   export function requireTenantStripeClient(tenantId: string): Promise<Stripe>
   export function hasTenantStripeConfig(tenantId: string): Promise<boolean>
 
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   export function getTenantResendClient(tenantId: string): Promise<import('resend').Resend | null>
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
   export function requireTenantResendClient(tenantId: string): Promise<import('resend').Resend>
   export function hasTenantResendConfig(tenantId: string): Promise<boolean>
 

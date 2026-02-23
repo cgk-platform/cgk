@@ -14,13 +14,13 @@
  */
 
 import { defineJob } from '../../define'
-import type { Job, JobResult } from '../../types'
 import type {
   TenantEvent,
   CreatorAppliedPayload,
   CreatorApprovedPayload,
   CreatorRejectedPayload,
 } from '../../events'
+import type { Job, JobResult } from '../../types'
 
 // ============================================================
 // PAYLOAD TYPES

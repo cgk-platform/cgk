@@ -6,8 +6,6 @@
  * Shows project details, deliverables, and allows work submission.
  */
 
-import { use, useState, useEffect } from 'react'
-import Link from 'next/link'
 import {
   Card,
   CardContent,
@@ -27,6 +25,8 @@ import {
   AlertCircle,
   ExternalLink,
 } from 'lucide-react'
+import Link from 'next/link'
+import { use, useState, useEffect } from 'react'
 
 import type { ContractorProject } from '@/lib/types'
 import { getStatusLabel, getStatusColor, canTransitionTo } from '@/lib/types'
