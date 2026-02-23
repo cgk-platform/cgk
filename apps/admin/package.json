@@ -29,6 +29,7 @@
     "@cgk-platform/shopify": "workspace:*",
     "@cgk-platform/slack": "workspace:*",
     "@cgk-platform/support": "workspace:*",
+    "@cgk-platform/tax": "workspace:*",
     "@cgk-platform/ui": "workspace:*",
     "@cgk-platform/video": "workspace:*",
     "@dnd-kit/core": "^6.3.1",
