@@ -274,6 +274,7 @@ function getConfigFields(type: BlockType): ConfigFieldDef[] {
       { key: 'show_savings', label: 'Show Savings Callout', type: 'boolean' },
       { key: 'show_tier_progress', label: 'Show Tier Progress Bar', type: 'boolean' },
       { key: 'enable_quantity', label: 'Enable Quantity Controls', type: 'boolean' },
+      { key: 'cart_redirect', label: 'Redirect to Cart After Adding', type: 'boolean' },
       { key: 'background_color', label: 'Background Color', type: 'color' },
       { key: 'text_color', label: 'Text Color', type: 'color' },
       { key: 'accent_color', label: 'Accent Color', type: 'color' },

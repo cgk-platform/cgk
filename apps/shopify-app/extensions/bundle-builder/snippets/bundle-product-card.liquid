@@ -6,18 +6,24 @@
 {%- if product != blank -%}
   {%- assign first_variant = product.selected_or_first_available_variant -%}
   {%- assign card_aspect = aspect_css | default: '1' -%}
+  {%- assign is_sold_out = false -%}
+  {%- unless first_variant.available -%}
+    {%- assign is_sold_out = true -%}
+  {%- endunless -%}
   <div
-    class="bb-card"
+    class="bb-card{% if is_sold_out %} bb-card--sold-out{% endif %}"
     data-product-id="{{ product.id }}"
     data-variant-id="{{ first_variant.id }}"
     data-price="{{ first_variant.price }}"
     data-compare-price="{{ first_variant.compare_at_price | default: first_variant.price }}"
     data-title="{{ product.title | escape }}"
     data-index="{{ index }}"
+    data-available="{{ first_variant.available }}"
     role="button"
-    tabindex="0"
+    tabindex="{% if is_sold_out %}-1{% else %}0{% endif %}"
     aria-pressed="false"
-    aria-label="Add {{ product.title }} to bundle"
+    aria-label="{% if is_sold_out %}{{ product.title }} — Sold out{% else %}Add {{ product.title }} to bundle{% endif %}"
+    {% if is_sold_out %}aria-disabled="true"{% endif %}
   >
     <div class="bb-card__image-wrap" style="aspect-ratio: {{ card_aspect }};">
       {%- if product.featured_image -%}
@@ -38,6 +44,9 @@
           </svg>
         </div>
       {%- endif -%}
+      {%- if is_sold_out -%}
+        <div class="bb-card__badge bb-card__badge--sold-out">Sold Out</div>
+      {%- endif -%}
       <div class="bb-card__check">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="20 6 9 17 4 12"/>
@@ -55,7 +64,7 @@
       </div>
     </div>
 
-    <div class="bb-card__quantity" style="display: none;">
+    <div class="bb-card__quantity">
       <button type="button" class="bb-qty-btn bb-qty-btn--minus" aria-label="Decrease quantity" data-action="decrease">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>

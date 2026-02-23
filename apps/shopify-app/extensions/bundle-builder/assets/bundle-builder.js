@@ -17,7 +17,10 @@
       this.showTierProgress = section.dataset.showTierProgress === 'true';
       this.bundleName = section.dataset.bundleName || 'Bundle';
       this.bundleId = section.dataset.sectionId || 'bundle';
+      this.ctaText = section.dataset.ctaText || 'Add Bundle to Cart';
+      this.cartRedirect = section.dataset.cartRedirect === 'true';
       this.isLoading = false;
+      this.previousTierIndex = -1; // Track tier unlocks for notifications
 
       this.els = {
         cards: section.querySelectorAll('.bb-card'),
@@ -31,6 +34,8 @@
         savings: section.querySelector('.bb-savings'),
         cta: section.querySelector('.bb-cta'),
         itemCount: section.querySelector('[data-summary="count"]'),
+        tierBadge: section.querySelector('[data-summary="tier"]'),
+        notification: section.querySelector('.bb-notification'),
       };
 
       this.bindEvents();
@@ -52,6 +57,9 @@
       var self = this;
 
       this.els.cards.forEach(function (card) {
+        // Skip sold-out products
+        if (card.dataset.available === 'false') return;
+
         card.addEventListener('click', function (e) {
           if (e.target.closest('.bb-qty-btn')) return;
           self.toggleProduct(card);
@@ -93,6 +101,7 @@
 
     toggleProduct(card) {
       var variantId = card.dataset.variantId;
+      if (card.dataset.available === 'false') return;
 
       if (this.selectedProducts.has(variantId)) {
         this.selectedProducts.delete(variantId);
@@ -112,7 +121,6 @@
         card.classList.add('bb-card--selected');
         card.setAttribute('aria-pressed', 'true');
 
-        // Reset quantity display to 1 (in case of reselect after deselect)
         var qtyDisplay = card.querySelector('.bb-qty-value');
         if (qtyDisplay) {
           qtyDisplay.textContent = '1';
@@ -178,6 +186,16 @@
       return activeTier;
     }
 
+    getActiveTierIndex() {
+      var totalItems = this.getTotalItems();
+      for (var i = this.tiers.length - 1; i >= 0; i--) {
+        if (totalItems >= this.tiers[i].count) {
+          return i;
+        }
+      }
+      return -1;
+    }
+
     getNextTier() {
       var totalItems = this.getTotalItems();
       for (var i = 0; i < this.tiers.length; i++) {
@@ -201,10 +219,12 @@
       var totalItems = this.getTotalItems();
       var subtotal = this.getSubtotal();
       var activeTier = this.getActiveTier();
+      var activeTierIndex = this.getActiveTierIndex();
       var nextTier = this.getNextTier();
       var discountAmount = this.calculateDiscount(subtotal, activeTier);
       var total = Math.max(0, subtotal - discountAmount);
 
+      // Update summary
       if (this.els.subtotal) {
         this.els.subtotal.textContent = this.formatMoney(subtotal);
       }
@@ -222,6 +242,22 @@
         this.els.itemCount.textContent = totalItems;
       }
 
+      // Update active tier badge in summary
+      if (this.els.tierBadge) {
+        if (activeTier) {
+          var discountLabel = this.discountType === 'percentage'
+            ? activeTier.discount + '% off'
+            : this.formatMoney(activeTier.discount) + ' off';
+          var badgeText = activeTier.label ? activeTier.label + ' — ' + discountLabel : discountLabel;
+          this.els.tierBadge.textContent = badgeText;
+          this.els.tierBadge.style.display = '';
+        } else {
+          this.els.tierBadge.textContent = '';
+          this.els.tierBadge.style.display = 'none';
+        }
+      }
+
+      // Savings callout
       if (this.els.savings) {
         if (this.showSavings && discountAmount > 0) {
           this.els.savings.removeAttribute('hidden');
@@ -231,16 +267,32 @@
         }
       }
 
+      // Tier progress
       if (this.showTierProgress && this.els.tierSection) {
         this.updateTierProgress(totalItems, activeTier, nextTier);
       }
 
+      // Tier unlock notification
+      if (activeTierIndex > this.previousTierIndex && this.previousTierIndex >= 0) {
+        this.showTierNotification(activeTier);
+      }
+      this.previousTierIndex = activeTierIndex;
+
+      // CTA button — show price in text
       if (this.els.cta) {
         var canAdd = totalItems >= this.minItems && totalItems > 0;
         this.els.cta.disabled = !canAdd || this.isLoading;
+
+        if (!this.isLoading) {
+          if (canAdd && total > 0) {
+            this.els.cta.textContent = this.ctaText + ' — ' + this.formatMoney(total);
+          } else {
+            this.els.cta.textContent = this.ctaText;
+          }
+        }
       }
 
-      // Update quantity button states
+      // Update quantity button states and sold-out cards
       var self = this;
       this.els.cards.forEach(function (card) {
         var minusBtn = card.querySelector('[data-action="decrease"]');
@@ -308,6 +360,25 @@
       }
     }
 
+    showTierNotification(tier) {
+      if (!tier || !this.els.notification) return;
+
+      var discountLabel = this.discountType === 'percentage'
+        ? tier.discount + '% off'
+        : this.formatMoney(tier.discount) + ' off';
+      var message = tier.label
+        ? tier.label + ' unlocked! ' + discountLabel
+        : 'Discount unlocked: ' + discountLabel;
+
+      this.els.notification.textContent = message;
+      this.els.notification.classList.add('bb-notification--visible');
+
+      var self = this;
+      setTimeout(function () {
+        self.els.notification.classList.remove('bb-notification--visible');
+      }, 3000);
+    }
+
     formatMoney(cents) {
       if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
         return Shopify.formatMoney(cents);
@@ -369,27 +440,37 @@
           throw new Error(errorData.description || 'Failed to add to cart');
         }
 
-        // Dispatch custom event for theme integration
+        // Dispatch custom event for theme integration (cart drawer, header count, etc.)
         document.dispatchEvent(new CustomEvent('cart:updated'));
 
+        // Also try theme-specific events for popular themes
+        document.dispatchEvent(new CustomEvent('cart:refresh'));
+        document.dispatchEvent(new CustomEvent('ajaxProduct:added'));
+
+        // Redirect to cart page if setting enabled
+        if (this.cartRedirect) {
+          window.location.href = '/cart';
+          return;
+        }
+
         // Visual feedback
-        var originalText = this.els.cta.textContent;
         this.els.cta.textContent = 'Added to Cart!';
         this.els.cta.classList.remove('bb-cta--loading');
+        this.els.cta.classList.add('bb-cta--success');
 
         var self = this;
         setTimeout(function () {
-          self.els.cta.textContent = originalText;
+          self.els.cta.classList.remove('bb-cta--success');
+          self.recalculate(); // Restores button text with price
         }, 2000);
       } catch (err) {
         console.error('[BundleBuilder] Cart error:', err);
         this.els.cta.textContent = 'Error — Try Again';
         this.els.cta.classList.remove('bb-cta--loading');
 
-        var ctaDefault = this.section.dataset.ctaText || 'Add Bundle to Cart';
         var self2 = this;
         setTimeout(function () {
-          self2.els.cta.textContent = ctaDefault;
+          self2.recalculate(); // Restores button text
         }, 3000);
       } finally {
         this.isLoading = false;

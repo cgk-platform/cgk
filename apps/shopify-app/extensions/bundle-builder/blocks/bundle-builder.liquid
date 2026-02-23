@@ -10,6 +10,7 @@
   assign cta_text = block.settings.cta_text | default: 'Add Bundle to Cart'
   assign show_savings = block.settings.show_savings
   assign show_tier_progress = block.settings.show_tier_progress
+  assign cart_redirect = block.settings.cart_redirect
   assign layout = block.settings.layout | default: 'grid'
   assign columns_desktop = block.settings.columns_desktop | default: 3
   assign bg_color = block.settings.bg_color | default: '#ffffff'
@@ -78,6 +79,7 @@
   data-show-tier-progress="{{ show_tier_progress }}"
   data-bundle-name="{{ bundle_name | escape }}"
   data-cta-text="{{ cta_text | escape }}"
+  data-cart-redirect="{{ cart_redirect }}"
   data-tiers="{{ tiers_json | strip_newlines | escape }}"
   style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }}; --bb-padding-top: {{ padding_top }}px; --bb-padding-bottom: {{ padding_bottom }}px;"
 >
@@ -114,6 +116,9 @@
     </div>
   {%- endif -%}
 
+  {%- comment -%} Tier unlock notification (hidden by default, shown by JS) {%- endcomment -%}
+  <div class="bb-notification" aria-live="polite" role="status"></div>
+
   {%- if show_tier_progress -%}
     <div class="bb-tier">
       <p class="bb-tier__label">Select items to unlock discounts</p>
@@ -130,6 +135,10 @@
     <div class="bb-summary__row">
       <span>Items selected</span>
       <span data-summary="count">0</span>
+    </div>
+    <div class="bb-summary__row bb-summary__row--tier" style="display: none;">
+      <span>Active tier</span>
+      <span data-summary="tier" class="bb-tier-badge"></span>
     </div>
     <div class="bb-summary__row">
       <span>Subtotal</span>
@@ -251,7 +260,7 @@
       "id": "tier_2_label",
       "label": "Tier 2 label",
       "default": "Starter Bundle",
-      "info": "Shown in the progress bar when this tier is active"
+      "info": "Shown in the progress bar and summary when this tier is active"
     },
     {
       "type": "range",
@@ -359,7 +368,7 @@
     },
     {
       "type": "header",
-      "content": "Button & Labels"
+      "content": "Button & Behavior"
     },
     {
       "type": "text",
@@ -378,6 +387,13 @@
       "id": "show_tier_progress",
       "label": "Show tier progress bar",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "cart_redirect",
+      "label": "Redirect to cart after adding",
+      "default": false,
+      "info": "When enabled, the customer is sent to /cart after adding the bundle. Otherwise stays on the page with a success message."
     },
     {
       "type": "header",
