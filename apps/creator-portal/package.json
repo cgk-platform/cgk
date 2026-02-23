@@ -10,11 +10,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cgk-platform/admin-core": "workspace:*",
+    "@cgk-platform/ai-agents": "workspace:*",
     "@cgk-platform/auth": "workspace:*",
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/integrations": "workspace:*",
     "@cgk-platform/jobs": "workspace:*",
     "@cgk-platform/payments": "workspace:*",
+    "@cgk-platform/shopify": "workspace:*",
     "@cgk-platform/tax": "workspace:*",
     "@cgk-platform/ui": "workspace:*",
     "@cgk-platform/video": "workspace:*",

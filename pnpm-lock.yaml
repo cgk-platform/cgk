@@ -256,6 +256,12 @@ importers:
 
   apps/creator-portal:
     dependencies:
+      '@cgk-platform/admin-core':
+        specifier: workspace:*
+        version: link:../../packages/admin-core
+      '@cgk-platform/ai-agents':
+        specifier: workspace:*
+        version: link:../../packages/ai-agents
       '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -265,12 +271,18 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@cgk-platform/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
       '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
       '@cgk-platform/payments':
         specifier: workspace:*
         version: link:../../packages/payments
+      '@cgk-platform/shopify':
+        specifier: workspace:*
+        version: link:../../packages/shopify
       '@cgk-platform/tax':
         specifier: workspace:*
         version: link:../../packages/tax
@@ -396,6 +408,12 @@ importers:
 
   apps/orchestrator:
     dependencies:
+      '@cgk-platform/admin-core':
+        specifier: workspace:*
+        version: link:../../packages/admin-core
+      '@cgk-platform/ai-agents':
+        specifier: workspace:*
+        version: link:../../packages/ai-agents
       '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -414,18 +432,27 @@ importers:
       '@cgk-platform/integrations':
         specifier: workspace:*
         version: link:../../packages/integrations
+      '@cgk-platform/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       '@cgk-platform/logging':
         specifier: workspace:*
         version: link:../../packages/logging
       '@cgk-platform/onboarding':
         specifier: workspace:*
         version: link:../../packages/onboarding
+      '@cgk-platform/shopify':
+        specifier: workspace:*
+        version: link:../../packages/shopify
       '@cgk-platform/slack':
         specifier: workspace:*
         version: link:../../packages/slack
       '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@cgk-platform/video':
+        specifier: workspace:*
+        version: link:../../packages/video
       lucide-react:
         specifier: ^0.468.0
         version: 0.468.0(react@19.2.4)
@@ -518,6 +545,12 @@ importers:
 
   apps/storefront:
     dependencies:
+      '@cgk-platform/admin-core':
+        specifier: workspace:*
+        version: link:../../packages/admin-core
+      '@cgk-platform/ai-agents':
+        specifier: workspace:*
+        version: link:../../packages/ai-agents
       '@cgk-platform/analytics':
         specifier: workspace:*
         version: link:../../packages/analytics
@@ -548,6 +581,9 @@ importers:
       '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@cgk-platform/video':
+        specifier: workspace:*
+        version: link:../../packages/video
       '@stripe/react-stripe-js':
         specifier: ^5.6.0
         version: 5.6.0(@stripe/stripe-js@8.7.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1242,15 +1278,6 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
-      '@cgk-platform/integrations':
-        specifier: workspace:*
-        version: link:../integrations
-      '@cgk-platform/shopify':
-        specifier: workspace:*
-        version: link:../shopify
-      '@cgk-platform/video':
-        specifier: workspace:*
-        version: link:../video
       '@trigger.dev/sdk':
         specifier: ^3.0.0 || ^4.0.0
         version: 4.3.3(bufferutil@4.1.0)(typescript@5.9.3)(zod@3.25.76)

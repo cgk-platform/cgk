@@ -10,13 +10,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cgk-platform/admin-core": "workspace:*",
+    "@cgk-platform/ai-agents": "workspace:*",
     "@cgk-platform/auth": "workspace:*",
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
     "@cgk-platform/feature-flags": "workspace:*",
     "@cgk-platform/health": "workspace:*",
     "@cgk-platform/integrations": "workspace:*",
+    "@cgk-platform/jobs": "workspace:*",
     "@cgk-platform/logging": "workspace:*",
+    "@cgk-platform/shopify": "workspace:*",
+    "@cgk-platform/video": "workspace:*",
     "@cgk-platform/onboarding": "workspace:*",
     "@cgk-platform/slack": "workspace:*",
     "@cgk-platform/ui": "workspace:*",
