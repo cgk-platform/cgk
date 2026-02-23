@@ -1,8 +1,8 @@
 'use client'
 
+import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react'
 import * as React from 'react'
 import { Toaster as Sonner, toast as sonnerToast } from 'sonner'
-import { CheckCircle2, XCircle, AlertTriangle, Info, X } from 'lucide-react'
 
 import { cn } from '../utils/cn'
 

@@ -1,10 +1,10 @@
 'use client'
 
-import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
-import { cn } from '../utils/cn'
 import { useTenant, type TenantInfo } from '../context/tenant-context'
+import { cn } from '../utils/cn'
 
 /**
  * Role badge color map

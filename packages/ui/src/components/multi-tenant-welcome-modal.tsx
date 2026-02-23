@@ -2,9 +2,9 @@
 
 import * as React from 'react'
 
-import { cn } from '../utils/cn'
-import { useTenant, type TenantInfo } from '../context/tenant-context'
 import { TenantLogo, RoleBadge } from './tenant-switcher'
+import { useTenant, type TenantInfo } from '../context/tenant-context'
+import { cn } from '../utils/cn'
 
 export interface MultiTenantWelcomeModalProps {
   /** User's display name */

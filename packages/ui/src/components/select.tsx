@@ -1,5 +1,5 @@
-import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
 
 import { cn } from '../utils/cn'
 
@@ -35,7 +35,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 )
 Select.displayName = 'Select'
 
-export interface SelectOptionProps extends React.OptionHTMLAttributes<HTMLOptionElement> {}
+export type SelectOptionProps = React.OptionHTMLAttributes<HTMLOptionElement>
 
 const SelectOption = React.forwardRef<HTMLOptionElement, SelectOptionProps>(
   ({ ...props }, ref) => <option ref={ref} {...props} />
