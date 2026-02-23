@@ -5,6 +5,7 @@ import {
   Truck,
   BarChart3,
   MessageSquare,
+  Package,
   RefreshCw,
   ExternalLink,
   Settings,
@@ -23,7 +24,7 @@ import Link from 'next/link'
 interface ExtensionStatus {
   handle: string
   name: string
-  type: 'function' | 'web_pixel_extension' | 'checkout_ui_extension'
+  type: 'function' | 'web_pixel_extension' | 'checkout_ui_extension' | 'theme'
   status: 'active' | 'inactive' | 'error' | 'pending'
   lastDeployed?: string
   version?: string
@@ -48,9 +49,10 @@ interface ExtensionConfig {
   name: string
   description: string
   icon: React.ReactNode
-  type: 'function' | 'web_pixel_extension' | 'checkout_ui_extension'
+  type: 'function' | 'web_pixel_extension' | 'checkout_ui_extension' | 'theme'
   configurable: boolean
   docsUrl?: string
+  configNote?: string
 }
 
 const EXTENSION_CONFIGS: ExtensionConfig[] = [
@@ -80,6 +82,15 @@ const EXTENSION_CONFIGS: ExtensionConfig[] = [
     type: 'checkout_ui_extension',
     configurable: true,
     docsUrl: '/docs/extensions/post-purchase-survey',
+  },
+  {
+    handle: 'bundle-builder',
+    name: 'Bundle Builder',
+    description: 'Drag-and-drop bundle section for Shopify themes. Merchants pick up to 8 products, set tiered discounts, and customize layout and colors via the theme editor.',
+    icon: <Package className="h-5 w-5" />,
+    type: 'theme',
+    configurable: false,
+    configNote: 'Configured in Online Store > Themes > Customize. Add the "Bundle Builder" section to any page.',
   },
 ]
 
@@ -272,6 +283,8 @@ function ExtensionCard({ config, status }: ExtensionCardProps) {
         return 'Web Pixel Extension'
       case 'checkout_ui_extension':
         return 'Checkout UI Extension'
+      case 'theme':
+        return 'Theme App Extension (Liquid)'
       default:
         return 'Extension'
     }
@@ -329,6 +342,15 @@ function ExtensionCard({ config, status }: ExtensionCardProps) {
                   <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                   <p className="text-xs text-amber-700">
                     This extension requires configuration in the Shopify admin.
+                  </p>
+                </div>
+              )}
+
+              {config.configNote && status?.status === 'active' && (
+                <div className="mt-3 flex items-start gap-2 rounded-lg border border-blue-500/30 bg-blue-500/5 p-2">
+                  <Settings className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-700">
+                    {config.configNote}
                   </p>
                 </div>
               )}

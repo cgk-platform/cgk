@@ -21,7 +21,7 @@ export const revalidate = 0
 interface ExtensionStatus {
   handle: string
   name: string
-  type: 'function' | 'web_pixel_extension' | 'checkout_ui_extension'
+  type: 'function' | 'web_pixel_extension' | 'checkout_ui_extension' | 'theme'
   status: 'active' | 'inactive' | 'error' | 'pending'
   lastDeployed?: string
   version?: string
@@ -60,6 +60,12 @@ const PLATFORM_EXTENSIONS: Omit<ExtensionStatus, 'status' | 'configured'>[] = [
     handle: 'post-purchase-survey',
     name: 'Post-Purchase Survey',
     type: 'checkout_ui_extension',
+    version: '1.0.0',
+  },
+  {
+    handle: 'bundle-builder',
+    name: 'Bundle Builder',
+    type: 'theme',
     version: '1.0.0',
   },
 ]
@@ -182,6 +188,10 @@ export async function GET(request: Request): Promise<NextResponse<ExtensionsResp
           // Survey needs explicit configuration
           configured = !!analyticsConfig?.postPurchaseSurveyEnabled
           if (!configured) status = 'pending'
+          break
+        case 'bundle-builder':
+          // Theme extension — configured once deployed, settings managed in Shopify theme editor
+          configured = true
           break
       }
 

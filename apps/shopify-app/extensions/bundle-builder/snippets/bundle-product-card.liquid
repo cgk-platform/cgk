@@ -1,10 +1,11 @@
 {%- comment -%}
   Bundle product card snippet.
-  Accepts: product (product object), index (number), section_id (string)
+  Accepts: product (product object), index (number), section_id (string), aspect_css (string)
 {%- endcomment -%}
 
 {%- if product != blank -%}
   {%- assign first_variant = product.selected_or_first_available_variant -%}
+  {%- assign card_aspect = aspect_css | default: '1' -%}
   <div
     class="bb-card"
     data-product-id="{{ product.id }}"
@@ -18,7 +19,7 @@
     aria-pressed="false"
     aria-label="Add {{ product.title }} to bundle"
   >
-    <div class="bb-card__image-wrap">
+    <div class="bb-card__image-wrap" style="aspect-ratio: {{ card_aspect }};">
       {%- if product.featured_image -%}
         <img
           src="{{ product.featured_image | image_url: width: 400 }}"

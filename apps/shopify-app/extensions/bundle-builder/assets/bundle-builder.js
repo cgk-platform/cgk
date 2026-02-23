@@ -15,6 +15,7 @@
       this.discountType = section.dataset.discountType || 'percentage';
       this.showSavings = section.dataset.showSavings === 'true';
       this.showTierProgress = section.dataset.showTierProgress === 'true';
+      this.bundleId = section.dataset.sectionId || 'bundle';
       this.isLoading = false;
 
       this.els = {
@@ -28,7 +29,6 @@
         total: section.querySelector('[data-summary="total"]'),
         savings: section.querySelector('.bb-savings'),
         cta: section.querySelector('.bb-cta'),
-        ctaText: section.querySelector('.bb-cta'),
         itemCount: section.querySelector('[data-summary="count"]'),
       };
 
@@ -52,7 +52,6 @@
 
       this.els.cards.forEach(function (card) {
         card.addEventListener('click', function (e) {
-          // Don't toggle selection when clicking quantity buttons
           if (e.target.closest('.bb-qty-btn')) return;
           self.toggleProduct(card);
         });
@@ -111,6 +110,12 @@
         });
         card.classList.add('bb-card--selected');
         card.setAttribute('aria-pressed', 'true');
+
+        // Reset quantity display to 1 (in case of reselect after deselect)
+        var qtyDisplay = card.querySelector('.bb-qty-value');
+        if (qtyDisplay) {
+          qtyDisplay.textContent = '1';
+        }
       }
 
       this.recalculate();
@@ -125,7 +130,6 @@
       var totalOther = this.getTotalItems() - item.quantity;
 
       if (newQty < 1) {
-        // Deselect if going below 1
         this.selectedProducts.delete(variantId);
         card.classList.remove('bb-card--selected');
         card.setAttribute('aria-pressed', 'false');
@@ -135,7 +139,6 @@
         item.quantity = newQty;
       }
 
-      // Update quantity display
       var qtyDisplay = card.querySelector('.bb-qty-value');
       if (qtyDisplay && this.selectedProducts.has(variantId)) {
         qtyDisplay.textContent = this.selectedProducts.get(variantId).quantity;
@@ -201,7 +204,6 @@
       var discountAmount = this.calculateDiscount(subtotal, activeTier);
       var total = Math.max(0, subtotal - discountAmount);
 
-      // Update summary
       if (this.els.subtotal) {
         this.els.subtotal.textContent = this.formatMoney(subtotal);
       }
@@ -219,7 +221,6 @@
         this.els.itemCount.textContent = totalItems;
       }
 
-      // Update savings callout
       if (this.els.savings) {
         if (this.showSavings && discountAmount > 0) {
           this.els.savings.removeAttribute('hidden');
@@ -229,28 +230,31 @@
         }
       }
 
-      // Update tier progress
       if (this.showTierProgress && this.els.tierSection) {
         this.updateTierProgress(totalItems, activeTier, nextTier);
       }
 
-      // Update CTA state
       if (this.els.cta) {
         var canAdd = totalItems >= this.minItems && totalItems > 0;
         this.els.cta.disabled = !canAdd || this.isLoading;
       }
 
       // Update quantity button states
+      var self = this;
       this.els.cards.forEach(function (card) {
         var minusBtn = card.querySelector('[data-action="decrease"]');
+        var plusBtn = card.querySelector('[data-action="increase"]');
+        var variantId = card.dataset.variantId;
+        var item = self.selectedProducts.get(variantId);
+
         if (minusBtn) {
-          var variantId = card.dataset.variantId;
-          var item = this.selectedProducts.get(variantId);
-          if (minusBtn) {
-            minusBtn.disabled = !item || item.quantity <= 1;
-          }
+          minusBtn.disabled = !item || item.quantity <= 1;
         }
-      }.bind(this));
+        if (plusBtn) {
+          var totalOther = self.getTotalItems() - (item ? item.quantity : 0);
+          plusBtn.disabled = !item || (totalOther + item.quantity >= self.maxItems);
+        }
+      });
     }
 
     updateTierProgress(totalItems, activeTier, nextTier) {
@@ -301,7 +305,6 @@
     }
 
     formatMoney(cents) {
-      // Use Shopify's money format if available, otherwise default
       if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
         return Shopify.formatMoney(cents);
       }
@@ -317,12 +320,31 @@
       this.els.cta.disabled = true;
       this.els.cta.classList.add('bb-cta--loading');
 
+      var activeTier = this.getActiveTier();
+      var discountLabel = '';
+      if (activeTier) {
+        discountLabel = this.discountType === 'percentage'
+          ? activeTier.discount + '% off'
+          : this.formatMoney(activeTier.discount) + ' off';
+      }
+
       var items = [];
+      var bundleId = this.bundleId;
+      var totalItems = this.getTotalItems();
+
       this.selectedProducts.forEach(function (item) {
-        items.push({
+        var lineItem = {
           id: parseInt(item.variantId, 10),
           quantity: item.quantity,
-        });
+          properties: {
+            '_bundle_id': bundleId,
+            '_bundle_size': String(totalItems),
+          },
+        };
+        if (discountLabel) {
+          lineItem.properties['_bundle_discount'] = discountLabel;
+        }
+        items.push(lineItem);
       });
 
       try {
@@ -340,7 +362,7 @@
         // Dispatch custom event for theme integration
         document.dispatchEvent(new CustomEvent('cart:updated'));
 
-        // Visual feedback — briefly change CTA text
+        // Visual feedback
         var originalText = this.els.cta.textContent;
         this.els.cta.textContent = 'Added to Cart!';
         this.els.cta.classList.remove('bb-cta--loading');
@@ -354,9 +376,10 @@
         this.els.cta.textContent = 'Error — Try Again';
         this.els.cta.classList.remove('bb-cta--loading');
 
+        var ctaDefault = this.section.dataset.ctaText || 'Add Bundle to Cart';
         var self2 = this;
         setTimeout(function () {
-          self2.els.cta.textContent = self2.section.dataset.ctaText || 'Add Bundle to Cart';
+          self2.els.cta.textContent = ctaDefault;
         }, 3000);
       } finally {
         this.isLoading = false;
@@ -367,7 +390,9 @@
 
   function init() {
     document.querySelectorAll('[data-bundle-builder]').forEach(function (el) {
-      new BundleBuilder(el);
+      if (!el._bbInstance) {
+        el._bbInstance = new BundleBuilder(el);
+      }
     });
   }
 
