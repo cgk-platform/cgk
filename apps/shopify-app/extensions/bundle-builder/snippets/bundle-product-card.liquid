@@ -1,0 +1,67 @@
+{%- comment -%}
+  Bundle product card snippet.
+  Accepts: product (product object), index (number), section_id (string)
+{%- endcomment -%}
+
+{%- if product != blank -%}
+  {%- assign first_variant = product.selected_or_first_available_variant -%}
+  <div
+    class="bb-card"
+    data-product-id="{{ product.id }}"
+    data-variant-id="{{ first_variant.id }}"
+    data-price="{{ first_variant.price }}"
+    data-compare-price="{{ first_variant.compare_at_price | default: first_variant.price }}"
+    data-title="{{ product.title | escape }}"
+    data-index="{{ index }}"
+    role="button"
+    tabindex="0"
+    aria-pressed="false"
+    aria-label="Add {{ product.title }} to bundle"
+  >
+    <div class="bb-card__image-wrap">
+      {%- if product.featured_image -%}
+        <img
+          src="{{ product.featured_image | image_url: width: 400 }}"
+          alt="{{ product.featured_image.alt | default: product.title | escape }}"
+          class="bb-card__image"
+          width="400"
+          height="400"
+          loading="lazy"
+        >
+      {%- else -%}
+        <div class="bb-card__image-placeholder">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="bb-card__placeholder-icon">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="m21 15-5-5L5 21"/>
+          </svg>
+        </div>
+      {%- endif -%}
+      <div class="bb-card__check">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="bb-card__info">
+      <h3 class="bb-card__title">{{ product.title }}</h3>
+      <div class="bb-card__pricing">
+        {%- if first_variant.compare_at_price > first_variant.price -%}
+          <span class="bb-card__compare-price">{{ first_variant.compare_at_price | money }}</span>
+        {%- endif -%}
+        <span class="bb-card__price">{{ first_variant.price | money }}</span>
+      </div>
+    </div>
+
+    <div class="bb-card__quantity" style="display: none;">
+      <button type="button" class="bb-qty-btn bb-qty-btn--minus" aria-label="Decrease quantity" data-action="decrease">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+      <span class="bb-qty-value" aria-live="polite">1</span>
+      <button type="button" class="bb-qty-btn bb-qty-btn--plus" aria-label="Increase quantity" data-action="increase">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+  </div>
+{%- endif -%}

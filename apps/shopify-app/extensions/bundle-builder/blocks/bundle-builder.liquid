@@ -1,0 +1,344 @@
+{{ 'bundle-builder.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign headline = block.settings.headline
+  assign subheadline = block.settings.subheadline
+  assign discount_type = block.settings.discount_type
+  assign min_items = block.settings.min_items
+  assign max_items = block.settings.max_items
+  assign cta_text = block.settings.cta_text | default: 'Add Bundle to Cart'
+  assign show_savings = block.settings.show_savings
+  assign show_tier_progress = block.settings.show_tier_progress
+  assign layout = block.settings.layout | default: 'grid'
+  assign columns_desktop = block.settings.columns_desktop | default: 3
+  assign bg_color = block.settings.bg_color | default: '#ffffff'
+  assign text_color = block.settings.text_color | default: '#1a1a2e'
+  assign accent_color = block.settings.accent_color | default: '#2563eb'
+-%}
+
+{%- comment -%} Build tiers JSON from settings {%- endcomment -%}
+{%- capture tiers_json -%}
+[
+  {%- assign tier_count = 0 -%}
+  {%- if block.settings.discount_2_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":2,"discount":{{ block.settings.discount_2_items }}}
+    {%- assign tier_count = tier_count | plus: 1 -%}
+  {%- endif -%}
+  {%- if block.settings.discount_3_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":3,"discount":{{ block.settings.discount_3_items }}}
+    {%- assign tier_count = tier_count | plus: 1 -%}
+  {%- endif -%}
+  {%- if block.settings.discount_4_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":4,"discount":{{ block.settings.discount_4_items }}}
+    {%- assign tier_count = tier_count | plus: 1 -%}
+  {%- endif -%}
+  {%- if block.settings.discount_5_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":5,"discount":{{ block.settings.discount_5_items }}}
+  {%- endif -%}
+]
+{%- endcapture -%}
+
+{%- comment -%} Collect products from settings {%- endcomment -%}
+{%- assign products_list = '' -%}
+{%- assign product_count = 0 -%}
+{%- for i in (1..8) -%}
+  {%- assign product_setting = 'product_' | append: i -%}
+  {%- assign p = block.settings[product_setting] -%}
+  {%- if p != blank -%}
+    {%- assign product_count = product_count | plus: 1 -%}
+  {%- endif -%}
+{%- endfor -%}
+
+<div
+  class="bb-container"
+  data-bundle-builder
+  data-section-id="{{ section.id }}"
+  data-block-id="{{ block.id }}"
+  data-discount-type="{{ discount_type }}"
+  data-min-items="{{ min_items }}"
+  data-max-items="{{ max_items }}"
+  data-show-savings="{{ show_savings }}"
+  data-show-tier-progress="{{ show_tier_progress }}"
+  data-cta-text="{{ cta_text | escape }}"
+  data-tiers="{{ tiers_json | strip_newlines | escape }}"
+  style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }};"
+>
+  {%- if headline != blank or subheadline != blank -%}
+    <div class="bb-header">
+      {%- if headline != blank -%}
+        <h2 class="bb-headline">{{ headline }}</h2>
+      {%- endif -%}
+      {%- if subheadline != blank -%}
+        <p class="bb-subheadline">{{ subheadline }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if product_count > 0 -%}
+    {%- if layout == 'grid' -%}
+      <div class="bb-grid bb-grid--{{ columns_desktop }}col">
+    {%- else -%}
+      <div class="bb-list">
+    {%- endif -%}
+
+    {%- for i in (1..8) -%}
+      {%- assign product_setting = 'product_' | append: i -%}
+      {%- assign product = block.settings[product_setting] -%}
+      {%- if product != blank -%}
+        {%- render 'bundle-product-card', product: product, index: i, section_id: section.id -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    </div>
+  {%- else -%}
+    <div class="bb-empty">
+      <p>Select products in the theme editor to build your bundle.</p>
+    </div>
+  {%- endif -%}
+
+  {%- if show_tier_progress -%}
+    <div class="bb-tier">
+      <p class="bb-tier__label">Select items to unlock discounts</p>
+      <div class="bb-tier__bar">
+        <div class="bb-tier__fill"></div>
+      </div>
+      <p class="bb-tier__hint" style="display: none;"></p>
+    </div>
+  {%- endif -%}
+
+  <div class="bb-savings" hidden>You save $0.00!</div>
+
+  <div class="bb-summary">
+    <div class="bb-summary__row">
+      <span>Items selected</span>
+      <span data-summary="count">0</span>
+    </div>
+    <div class="bb-summary__row">
+      <span>Subtotal</span>
+      <span data-summary="subtotal">{{ 0 | money }}</span>
+    </div>
+    <div class="bb-summary__row bb-summary__row--discount" style="display: none;">
+      <span>Bundle discount</span>
+      <span data-summary="discount">-{{ 0 | money }}</span>
+    </div>
+    <div class="bb-summary__row bb-summary__row--total">
+      <span>Total</span>
+      <span data-summary="total">{{ 0 | money }}</span>
+    </div>
+  </div>
+
+  <button type="button" class="bb-cta" disabled>
+    {{ cta_text }}
+  </button>
+</div>
+
+{{ 'bundle-builder.js' | asset_url | script_tag }}
+
+{% schema %}
+{
+  "name": "Bundle Builder",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Build Your Bundle & Save"
+    },
+    {
+      "type": "text",
+      "id": "subheadline",
+      "label": "Subheadline",
+      "default": "Mix & match your favorites — the more you add, the more you save."
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "product",
+      "id": "product_1",
+      "label": "Product 1"
+    },
+    {
+      "type": "product",
+      "id": "product_2",
+      "label": "Product 2"
+    },
+    {
+      "type": "product",
+      "id": "product_3",
+      "label": "Product 3"
+    },
+    {
+      "type": "product",
+      "id": "product_4",
+      "label": "Product 4"
+    },
+    {
+      "type": "product",
+      "id": "product_5",
+      "label": "Product 5"
+    },
+    {
+      "type": "product",
+      "id": "product_6",
+      "label": "Product 6"
+    },
+    {
+      "type": "product",
+      "id": "product_7",
+      "label": "Product 7"
+    },
+    {
+      "type": "product",
+      "id": "product_8",
+      "label": "Product 8"
+    },
+    {
+      "type": "header",
+      "content": "Discount Tiers"
+    },
+    {
+      "type": "select",
+      "id": "discount_type",
+      "label": "Discount type",
+      "options": [
+        { "value": "percentage", "label": "Percentage off" },
+        { "value": "fixed", "label": "Fixed amount off (cents)" }
+      ],
+      "default": "percentage"
+    },
+    {
+      "type": "range",
+      "id": "discount_2_items",
+      "label": "Discount for 2 items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "discount_3_items",
+      "label": "Discount for 3 items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 15,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "discount_4_items",
+      "label": "Discount for 4 items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 20,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "discount_5_items",
+      "label": "Discount for 5+ items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 25,
+      "unit": "%"
+    },
+    {
+      "type": "header",
+      "content": "Bundle Limits"
+    },
+    {
+      "type": "range",
+      "id": "min_items",
+      "label": "Minimum items",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "max_items",
+      "label": "Maximum items",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Add Bundle to Cart"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_savings",
+      "label": "Show savings callout",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tier_progress",
+      "label": "Show tier progress bar",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Product layout",
+      "options": [
+        { "value": "grid", "label": "Grid" },
+        { "value": "list", "label": "List" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Grid columns (desktop)",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1a1a2e"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#2563eb"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundle Builder"
+    }
+  ]
+}
+{% endschema %}

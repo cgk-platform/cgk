@@ -69,7 +69,6 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Users',
     href: '/users',
     icon: 'Users',
-    requiresMfa: true,
     children: [
       { label: 'All Users', href: '/users', icon: 'Users' },
       { label: 'Super Admins', href: '/users/super-admins', icon: 'ShieldCheck' },
@@ -84,7 +83,6 @@ const NAV_ITEMS: NavItem[] = [
     label: 'Settings',
     href: '/settings',
     icon: 'Settings',
-    requiresMfa: true,
   },
 ]
 
