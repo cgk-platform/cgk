@@ -283,8 +283,9 @@ export async function generateDraft(
 
     try {
       // Dynamic import to avoid circular dependency: admin-core → integrations → jobs → admin-core
-      // Cast to any so tsc DTS generation doesn't need to resolve @cgk-platform/integrations types
-      const { getTenantAnthropicClient, getTenantOpenAIClient } = await (import('@cgk-platform/integrations') as Promise<any>)
+      // Use a variable so tsc can't statically resolve the module specifier during DTS generation
+      const integrationsModule = '@cgk-platform/integrations'
+      const { getTenantAnthropicClient, getTenantOpenAIClient } = await import(integrationsModule)
 
       // Try Anthropic first, then OpenAI
       const anthropic = await getTenantAnthropicClient(tenantId)
