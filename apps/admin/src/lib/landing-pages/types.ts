@@ -17,6 +17,7 @@ export interface LandingPage {
   meta_description: string | null
   og_image_url: string | null
   canonical_url: string | null
+  no_index: boolean
   structured_data: Record<string, unknown> | null
   created_at: string
   updated_at: string
@@ -247,6 +248,7 @@ export interface CreatePageInput {
   meta_description?: string
   og_image_url?: string
   canonical_url?: string
+  no_index?: boolean
   structured_data?: Record<string, unknown>
 }
 

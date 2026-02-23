@@ -50,19 +50,20 @@ export async function POST(request: Request) {
         return { error: 'Checkout is not in abandoned status', status: 400 }
       }
 
-      // Get tenant's Shopify credentials
-      const tenantSettings = await sql`
-        SELECT shopify_store_domain, shopify_admin_access_token
-        FROM tenant_settings
+      // Get tenant's Shopify credentials from shopify_connections
+      const shopifyResult = await sql`
+        SELECT shop as shop_domain, access_token_encrypted
+        FROM shopify_connections
+        WHERE status = 'active'
         LIMIT 1
       `
 
-      const settings = tenantSettings.rows[0] as {
-        shopify_store_domain?: string
-        shopify_admin_access_token?: string
+      const shopifyConn = shopifyResult.rows[0] as {
+        shop_domain?: string
+        access_token_encrypted?: string
       } | undefined
 
-      if (!settings?.shopify_store_domain || !settings?.shopify_admin_access_token) {
+      if (!shopifyConn?.shop_domain || !shopifyConn?.access_token_encrypted) {
         return { error: 'Shopify credentials not configured', status: 400 }
       }
 

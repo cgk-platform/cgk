@@ -35,7 +35,7 @@ export async function getPages(filters: PageFilters): Promise<{ rows: LandingPag
   }
   if (filters.status) {
     paramIndex++
-    conditions.push(`status = $${paramIndex}::page_status`)
+    conditions.push(`status = $${paramIndex}`)
     values.push(filters.status)
   }
 
@@ -76,7 +76,7 @@ export async function getPageById(id: string): Promise<LandingPage | null> {
   const result = await sql<LandingPage>`
     SELECT id, slug, title, description, status, published_at, scheduled_at,
            blocks, meta_title, meta_description, og_image_url, canonical_url,
-           structured_data, created_at, updated_at
+           no_index, structured_data, created_at, updated_at
     FROM landing_pages
     WHERE id = ${id}
   `
@@ -99,7 +99,7 @@ export async function getPageBySlug(slug: string): Promise<LandingPage | null> {
   const result = await sql<LandingPage>`
     SELECT id, slug, title, description, status, published_at, scheduled_at,
            blocks, meta_title, meta_description, og_image_url, canonical_url,
-           structured_data, created_at, updated_at
+           no_index, structured_data, created_at, updated_at
     FROM landing_pages
     WHERE slug = ${slug}
   `
@@ -125,18 +125,20 @@ export async function createPage(input: CreatePageInput): Promise<LandingPage> {
   const result = await sql<LandingPage>`
     INSERT INTO landing_pages (
       slug, title, description, status, published_at, scheduled_at,
-      blocks, meta_title, meta_description, og_image_url, canonical_url, structured_data
+      blocks, meta_title, meta_description, og_image_url, canonical_url,
+      no_index, structured_data
     ) VALUES (
       ${input.slug}, ${input.title}, ${input.description || null},
-      ${input.status}::page_status, ${publishedAt}::timestamptz,
+      ${input.status}, ${publishedAt}::timestamptz,
       ${input.scheduled_at || null}::timestamptz,
       ${JSON.stringify(blocks)}::jsonb, ${input.meta_title || null},
       ${input.meta_description || null}, ${input.og_image_url || null},
-      ${input.canonical_url || null}, ${structuredData ? JSON.stringify(structuredData) : null}::jsonb
+      ${input.canonical_url || null}, ${input.no_index ?? false},
+      ${structuredData ? JSON.stringify(structuredData) : null}::jsonb
     )
     RETURNING id, slug, title, description, status, published_at, scheduled_at,
               blocks, meta_title, meta_description, og_image_url, canonical_url,
-              structured_data, created_at, updated_at
+              no_index, structured_data, created_at, updated_at
   `
 
   const page = result.rows[0]
@@ -162,6 +164,7 @@ export async function updatePage(input: UpdatePageInput): Promise<LandingPage | 
   const metaDescription = input.meta_description !== undefined ? input.meta_description : current.meta_description
   const ogImageUrl = input.og_image_url !== undefined ? input.og_image_url : current.og_image_url
   const canonicalUrl = input.canonical_url !== undefined ? input.canonical_url : current.canonical_url
+  const noIndex = input.no_index !== undefined ? input.no_index : current.no_index
   const structuredData = input.structured_data !== undefined ? input.structured_data : current.structured_data
 
   // Update published_at if transitioning to published
@@ -173,16 +176,17 @@ export async function updatePage(input: UpdatePageInput): Promise<LandingPage | 
   const result = await sql<LandingPage>`
     UPDATE landing_pages SET
       slug = ${slug}, title = ${title}, description = ${description},
-      status = ${status}::page_status, published_at = ${publishedAt}::timestamptz,
+      status = ${status}, published_at = ${publishedAt}::timestamptz,
       scheduled_at = ${scheduledAt}::timestamptz, blocks = ${JSON.stringify(blocks)}::jsonb,
       meta_title = ${metaTitle}, meta_description = ${metaDescription},
       og_image_url = ${ogImageUrl}, canonical_url = ${canonicalUrl},
+      no_index = ${noIndex},
       structured_data = ${structuredData ? JSON.stringify(structuredData) : null}::jsonb,
       updated_at = NOW()
     WHERE id = ${input.id}
     RETURNING id, slug, title, description, status, published_at, scheduled_at,
               blocks, meta_title, meta_description, og_image_url, canonical_url,
-              structured_data, created_at, updated_at
+              no_index, structured_data, created_at, updated_at
   `
 
   if (!result.rows[0]) return null
@@ -195,9 +199,47 @@ export async function updatePage(input: UpdatePageInput): Promise<LandingPage | 
   return page
 }
 
+export async function duplicatePage(id: string): Promise<LandingPage | null> {
+  const source = await getPageById(id)
+  if (!source) return null
+
+  const timestamp = Date.now()
+  const newSlug = `${source.slug}-copy-${timestamp}`
+  const newTitle = `${source.title} (Copy)`
+
+  return createPage({
+    slug: newSlug,
+    title: newTitle,
+    description: source.description ?? undefined,
+    status: 'draft',
+    blocks: source.blocks,
+    meta_title: source.meta_title ?? undefined,
+    meta_description: source.meta_description ?? undefined,
+    og_image_url: source.og_image_url ?? undefined,
+    canonical_url: undefined,
+    no_index: source.no_index,
+    structured_data: source.structured_data ?? undefined,
+  })
+}
+
 export async function deletePage(id: string): Promise<boolean> {
   const result = await sql`DELETE FROM landing_pages WHERE id = ${id}`
   return (result.rowCount ?? 0) > 0
+}
+
+// Scheduled publishing
+
+export async function publishScheduledPages(): Promise<number> {
+  const result = await sql`
+    UPDATE landing_pages
+    SET status = 'published',
+        published_at = NOW(),
+        updated_at = NOW()
+    WHERE status = 'scheduled'
+      AND scheduled_at IS NOT NULL
+      AND scheduled_at <= NOW()
+  `
+  return result.rowCount ?? 0
 }
 
 // Block operations
@@ -210,7 +252,7 @@ export async function updatePageBlocks(pageId: string, blocks: Block[]): Promise
     WHERE id = ${pageId}
     RETURNING id, slug, title, description, status, published_at, scheduled_at,
               blocks, meta_title, meta_description, og_image_url, canonical_url,
-              structured_data, created_at, updated_at
+              no_index, structured_data, created_at, updated_at
   `
 
   if (!result.rows[0]) return null

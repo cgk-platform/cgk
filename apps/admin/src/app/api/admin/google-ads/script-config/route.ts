@@ -28,24 +28,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Customer ID required' }, { status: 400 })
   }
 
+  // Table created by migration 072_integration_commerce.sql
   await withTenant(tenantSlug, async () => {
-    // Ensure integration_credentials table exists
-    await sql`
-      CREATE TABLE IF NOT EXISTS integration_credentials (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        integration_type VARCHAR(50) NOT NULL,
-        credentials JSONB NOT NULL,
-        status VARCHAR(20) DEFAULT 'active',
-        connected_at TIMESTAMPTZ DEFAULT NOW(),
-        expires_at TIMESTAMPTZ,
-        last_synced_at TIMESTAMPTZ,
-        metadata JSONB DEFAULT '{}',
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW(),
-        UNIQUE(integration_type)
-      )
-    `
-
     // Upsert Google Ads credentials
     await sql`
       INSERT INTO integration_credentials (

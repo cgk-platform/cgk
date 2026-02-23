@@ -146,26 +146,10 @@ export async function GET(req: Request): Promise<Response> {
       }
     }
 
-    // Get pending earnings - filter by brand if selected
-    let pendingCents = 0
-    if (effectiveBrandId) {
-      const pendingResult = await sql`
-        SELECT COALESCE(SUM(commission_cents), 0) as pending_commissions
-        FROM commissions
-        WHERE creator_id = ${context.creatorId}
-          AND brand_id = ${effectiveBrandId}
-          AND status = 'pending'
-      `
-      pendingCents = parseInt(String(pendingResult.rows[0]?.pending_commissions || '0'), 10)
-    } else {
-      const pendingResult = await sql`
-        SELECT COALESCE(SUM(commission_cents), 0) as pending_commissions
-        FROM commissions
-        WHERE creator_id = ${context.creatorId}
-          AND status = 'pending'
-      `
-      pendingCents = parseInt(String(pendingResult.rows[0]?.pending_commissions || '0'), 10)
-    }
+    // Get pending earnings from memberships (already loaded, avoids cross-tenant query)
+    const pendingCents = effectiveBrandId
+      ? (memberships.find(m => m.brandId === effectiveBrandId)?.pendingCents ?? 0)
+      : memberships.reduce((sum, m) => sum + m.pendingCents, 0)
 
     // Calculate totals across filtered memberships
     const totalBalanceCents = memberships.reduce((sum, m) => sum + m.balanceCents, 0)

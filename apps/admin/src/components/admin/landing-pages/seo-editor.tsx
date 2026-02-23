@@ -75,6 +75,19 @@ export function SEOEditor({ page, onUpdate }: SEOEditorProps) {
         </p>
       </div>
 
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="no-index"
+          checked={page.no_index ?? false}
+          onChange={(e) => onUpdate({ no_index: e.target.checked })}
+          className="h-4 w-4 rounded border-gray-300"
+        />
+        <Label htmlFor="no-index">
+          Hide from search engines (noindex)
+        </Label>
+      </div>
+
       {/* Search Preview */}
       <Card>
         <CardContent className="pt-4">

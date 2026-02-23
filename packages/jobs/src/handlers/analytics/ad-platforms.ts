@@ -358,7 +358,7 @@ export const sendTikTokEventJob = defineJob<SendTikTokEventPayload>({
     // Get tenant's TikTok credentials
     // Implementation would:
     // const config = await withTenant(tenantId, async () => {
-    //   return sql`SELECT tiktok_pixel_id, tiktok_events_api_token FROM tenant_settings`
+    //   return sql`SELECT tiktok_pixel_id, tiktok_events_api_token FROM tenant_config`
     // })
 
     const tiktokPixelId = 'XXXXXXXX' // Would come from tenant config

@@ -33,13 +33,16 @@ interface RouteParams {
 
 /**
  * Find which tenant a signer token belongs to
+ *
+ * TODO: This is an O(N) cross-tenant scan — it iterates all tenants sequentially
+ * to find which one owns the signing token. At scale, encode the tenant_slug in
+ * the token itself or add a public lookup table (e.g., public.esign_token_lookup)
+ * to avoid the iteration. Acceptable with a small number of tenants.
  */
 async function findTenantForToken(token: string): Promise<string | null> {
-  // Query public schema to find the tenant
-  // This is a cross-tenant lookup, which is okay for signing URLs
   const result = await sql`
     SELECT t.slug
-    FROM public.tenants t
+    FROM public.organizations t
     WHERE EXISTS (
       SELECT 1 FROM pg_catalog.pg_tables
       WHERE schemaname = 'tenant_' || t.slug
@@ -47,11 +50,18 @@ async function findTenantForToken(token: string): Promise<string | null> {
     )
   `
 
-  for (const row of result.rows) {
+  // Query all tenants in parallel to reduce latency
+  const lookups = result.rows.map(async (row) => {
     const tenantSlug = row.slug as string
     const signer = await getSignerByToken(tenantSlug, token)
-    if (signer) {
-      return tenantSlug
+    return signer ? tenantSlug : null
+  })
+
+  const results = await Promise.allSettled(lookups)
+
+  for (const r of results) {
+    if (r.status === 'fulfilled' && r.value) {
+      return r.value
     }
   }
 

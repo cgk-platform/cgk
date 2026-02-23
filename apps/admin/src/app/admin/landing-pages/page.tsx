@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 
 import { DataTable, type Column } from '@/components/commerce/data-table'
+import { DuplicatePageButton } from '@/components/admin/landing-pages/duplicate-page-button'
 import { EmptyState } from '@/components/commerce/empty-state'
 import { Pagination } from '@/components/commerce/pagination'
 import { SearchInput } from '@/components/commerce/search-input'
@@ -151,6 +152,11 @@ async function PagesLoader({ filters }: { filters: ReturnType<typeof parsePageFi
       header: 'Updated',
       sortable: true,
       render: (row) => formatDateTime(row.updated_at),
+    },
+    {
+      key: 'actions',
+      header: '',
+      render: (row) => <DuplicatePageButton pageId={row.id} />,
     },
   ]
 

@@ -25,10 +25,7 @@
   },
   "dependencies": {
     "@cgk-platform/shopify": "workspace:*",
-    "@shopify/shopify-app-remix": "^3.4.0",
-    "@shopify/shopify-api": "^12.3.0",
-    "@shopify/admin-api-client": "^1.0.0",
-    "@shopify/storefront-api-client": "^1.0.0"
+    "@shopify/shopify-app-remix": "^3.4.0"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",

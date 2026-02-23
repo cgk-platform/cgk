@@ -140,13 +140,13 @@ export async function POST(request: Request) {
     )
   }
 
-  // Get webhook secret for this tenant
+  // Get webhook secret for this tenant (tenant_config is key/value store)
   const webhookSecret = await withTenant(tenant.slug, async () => {
     const settings = await sql`
-      SELECT shopify_webhook_secret FROM tenant_settings LIMIT 1
+      SELECT value FROM tenant_config WHERE key = 'shopify_webhook_secret' LIMIT 1
     `
-    const row = settings.rows[0] as { shopify_webhook_secret?: string } | undefined
-  return row?.shopify_webhook_secret
+    const row = settings.rows[0] as { value?: string } | undefined
+    return row?.value
   })
 
   // Verify HMAC signature - MANDATORY

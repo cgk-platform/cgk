@@ -50,14 +50,14 @@ export async function GET(
       return NextResponse.json({ error: 'Brand not found' }, { status: 404 })
     }
 
-    // Get GA4 settings from tenant settings
+    // Get GA4 settings from tenant config (key/value store)
     const ga4Settings = await withTenant(tenantSlug, async () => {
       const result = await sql`
-        SELECT settings->'analytics' as analytics
-        FROM tenant_settings
-        LIMIT 1
+        SELECT value FROM tenant_config WHERE key = 'analytics' LIMIT 1
       `
-      return (result.rows[0] as Record<string, unknown> | undefined)?.analytics as Record<string, unknown> | null
+      const raw = result.rows[0]?.value as Record<string, unknown> | string | undefined
+      if (!raw) return null
+      return (typeof raw === 'string' ? JSON.parse(raw) : raw) as Record<string, unknown>
     })
 
     return NextResponse.json({
@@ -107,10 +107,10 @@ export async function POST(
     }
 
     if (service === 'ga4') {
-      // GA4 configuration goes in tenant_settings
+      // GA4 configuration goes in tenant_config
       await withTenant(tenantSlug, async () => {
         await sql`
-          UPDATE tenant_settings
+          UPDATE tenant_config
           SET settings = jsonb_set(
             COALESCE(settings, '{}'),
             '{analytics}',
@@ -200,7 +200,7 @@ export async function DELETE(
       // Clear GA4 from tenant settings
       await withTenant(tenantSlug, async () => {
         await sql`
-          UPDATE tenant_settings
+          UPDATE tenant_config
           SET settings = settings - 'analytics',
               updated_at = NOW()
         `

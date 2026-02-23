@@ -111,153 +111,47 @@ CREATE INDEX IF NOT EXISTS idx_pipeline_stage_history_changed_by
 -- ============================================================================
 -- These are user-referencing FK columns that should have indexes for
 -- CASCADE/SET NULL performance and JOIN optimization.
+-- Each wrapped in DO block because referenced tables may not exist yet
+-- depending on which earlier migrations were applied.
 
--- kb_articles.author_id (012_knowledge_base.sql)
-CREATE INDEX IF NOT EXISTS idx_kb_articles_author
-  ON kb_articles(author_id)
-  WHERE author_id IS NOT NULL;
-
--- kb_articles.category_id (012_knowledge_base.sql)
-CREATE INDEX IF NOT EXISTS idx_kb_articles_category
-  ON kb_articles(category_id)
-  WHERE category_id IS NOT NULL;
-
--- kb_article_suggestions.created_by (012_knowledge_base.sql)
-CREATE INDEX IF NOT EXISTS idx_kb_article_suggestions_created_by
-  ON kb_article_suggestions(created_by)
-  WHERE created_by IS NOT NULL;
-
--- support_agents.user_id (015_support_tickets.sql)
-CREATE INDEX IF NOT EXISTS idx_support_agents_user
-  ON support_agents(user_id);
-
--- ticket_comments.author_id (015_support_tickets.sql)
-CREATE INDEX IF NOT EXISTS idx_ticket_comments_author
-  ON ticket_comments(author_id)
-  WHERE author_id IS NOT NULL;
-
--- ticket_escalations.acknowledged_by (015_support_tickets.sql)
-CREATE INDEX IF NOT EXISTS idx_ticket_escalations_acknowledged
-  ON ticket_escalations(acknowledged_by)
-  WHERE acknowledged_by IS NOT NULL;
-
--- ticket_audit_log.actor_id (015_support_tickets.sql)
-CREATE INDEX IF NOT EXISTS idx_ticket_audit_log_actor
-  ON ticket_audit_log(actor_id)
-  WHERE actor_id IS NOT NULL;
-
--- surveys.created_by (016_surveys.sql)
-CREATE INDEX IF NOT EXISTS idx_surveys_created_by
-  ON surveys(created_by)
-  WHERE created_by IS NOT NULL;
-
--- analytics_dashboards.created_by (010_analytics.sql)
-CREATE INDEX IF NOT EXISTS idx_analytics_dashboards_created_by
-  ON analytics_dashboards(created_by)
-  WHERE created_by IS NOT NULL;
-
--- projects.owner_id and coordinator_id (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_projects_owner
-  ON projects(owner_id)
-  WHERE owner_id IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_projects_coordinator
-  ON projects(coordinator_id)
-  WHERE coordinator_id IS NOT NULL;
-
--- project_phases.created_by (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_phases_created_by
-  ON project_phases(created_by)
-  WHERE created_by IS NOT NULL;
-
--- project_tasks.assigned_to (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_tasks_assigned_to
-  ON project_tasks(assigned_to)
-  WHERE assigned_to IS NOT NULL;
-
--- project_tasks.assigned_by (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_tasks_assigned_by
-  ON project_tasks(assigned_by)
-  WHERE assigned_by IS NOT NULL;
-
--- project_tasks.completed_by (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_tasks_completed_by
-  ON project_tasks(completed_by)
-  WHERE completed_by IS NOT NULL;
-
--- project_milestones.created_by (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_milestones_created_by
-  ON project_milestones(created_by)
-  WHERE created_by IS NOT NULL;
-
--- project_time_entries.user_id (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_time_entries_user
-  ON project_time_entries(user_id);
-
--- project_comments.author_id (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_comments_author
-  ON project_comments(author_id);
-
--- project_activity_log.actor_id (012_productivity.sql)
-CREATE INDEX IF NOT EXISTS idx_project_activity_log_actor
-  ON project_activity_log(actor_id);
-
--- workflows.created_by, updated_by (015_workflows.sql)
-CREATE INDEX IF NOT EXISTS idx_workflows_created_by
-  ON workflows(created_by)
-  WHERE created_by IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_workflows_updated_by
-  ON workflows(updated_by)
-  WHERE updated_by IS NOT NULL;
-
--- workflow_approvals.approved_by, rejected_by (015_workflows.sql)
-CREATE INDEX IF NOT EXISTS idx_workflow_approvals_approved_by
-  ON workflow_approvals(approved_by)
-  WHERE approved_by IS NOT NULL;
-
-CREATE INDEX IF NOT EXISTS idx_workflow_approvals_rejected_by
-  ON workflow_approvals(rejected_by)
-  WHERE rejected_by IS NOT NULL;
-
--- workflow_alerts.assigned_to (015_workflows.sql)
-CREATE INDEX IF NOT EXISTS idx_workflow_alerts_assigned_to
-  ON workflow_alerts(assigned_to)
-  WHERE assigned_to IS NOT NULL;
-
--- workflow_alerts.resolved_by (015_workflows.sql)
-CREATE INDEX IF NOT EXISTS idx_workflow_alerts_resolved_by
-  ON workflow_alerts(resolved_by)
-  WHERE resolved_by IS NOT NULL;
-
--- workflow_history.actioned_by (015_workflows.sql)
-CREATE INDEX IF NOT EXISTS idx_workflow_history_actioned_by
-  ON workflow_history(actioned_by)
-  WHERE actioned_by IS NOT NULL;
-
--- creator_conversations.assigned_to (015_creator_conversations.sql)
-CREATE INDEX IF NOT EXISTS idx_creator_conversations_assigned
-  ON creator_conversations(assigned_to)
-  WHERE assigned_to IS NOT NULL;
-
--- pipeline_saved_filters.user_id (015_pipeline_config.sql) - already has index at line 114
--- idx_pipeline_saved_filters_user
-
--- channel_feedback.processed_by (016_support_channels.sql)
-CREATE INDEX IF NOT EXISTS idx_channel_feedback_processed_by
-  ON channel_feedback(processed_by)
-  WHERE processed_by IS NOT NULL;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_kb_articles_author ON kb_articles(author_id) WHERE author_id IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_kb_articles_category ON kb_articles(category_id) WHERE category_id IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_support_agents_user ON support_agents(user_id); EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_ticket_comments_author ON ticket_comments(author_id) WHERE author_id IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_ticket_escalations_acknowledged ON ticket_escalations(acknowledged_by) WHERE acknowledged_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_ticket_audit_log_actor ON ticket_audit_log(actor_id) WHERE actor_id IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_surveys_created_by ON surveys(created_by) WHERE created_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_analytics_dashboards_created_by ON analytics_dashboards(created_by) WHERE created_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_projects_owner ON projects(owner_id) WHERE owner_id IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_projects_coordinator ON projects(coordinator_id) WHERE coordinator_id IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_phases_created_by ON project_phases(created_by) WHERE created_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_tasks_assigned_to ON project_tasks(assigned_to) WHERE assigned_to IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_tasks_assigned_by ON project_tasks(assigned_by) WHERE assigned_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_tasks_completed_by ON project_tasks(completed_by) WHERE completed_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_milestones_created_by ON project_milestones(created_by) WHERE created_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_time_entries_user ON project_time_entries(user_id); EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_comments_author ON project_comments(author_id); EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_project_activity_log_actor ON project_activity_log(actor_id); EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_workflows_created_by ON workflows(created_by) WHERE created_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_workflows_updated_by ON workflows(updated_by) WHERE updated_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_workflow_approvals_approved_by ON workflow_approvals(approved_by) WHERE approved_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_workflow_approvals_rejected_by ON workflow_approvals(rejected_by) WHERE rejected_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_workflow_alerts_assigned_to ON workflow_alerts(assigned_to) WHERE assigned_to IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_workflow_alerts_resolved_by ON workflow_alerts(resolved_by) WHERE resolved_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_workflow_history_actioned_by ON workflow_history(actioned_by) WHERE actioned_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_creator_conversations_assigned ON creator_conversations(assigned_to) WHERE assigned_to IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
+DO $$ BEGIN CREATE INDEX IF NOT EXISTS idx_channel_feedback_processed_by ON channel_feedback(processed_by) WHERE processed_by IS NOT NULL; EXCEPTION WHEN undefined_table THEN NULL; END $$;
 
 -- ============================================================================
--- COMMENTS
+-- COMMENTS (wrapped to tolerate missing indexes from skipped tables above)
 -- ============================================================================
 
-COMMENT ON INDEX idx_tenant_slack_config_default_agent IS 'FK index for default_agent_id lookup';
-COMMENT ON INDEX idx_agent_slack_apps_agent IS 'FK index for agent_id lookup';
-COMMENT ON INDEX idx_agent_google_oauth_agent IS 'FK index for agent_id lookup';
-COMMENT ON INDEX idx_agent_email_config_agent IS 'FK index for agent_id lookup';
-COMMENT ON INDEX idx_agent_email_conversations_creator IS 'FK index for creator_id lookup';
-COMMENT ON INDEX idx_agent_email_conversations_user IS 'FK index for platform_user_id lookup';
-COMMENT ON INDEX idx_tenant_sms_config_default_agent IS 'FK index for default_agent_id lookup';
-COMMENT ON INDEX idx_channel_rate_limits_agent IS 'FK index for agent_id lookup';
-COMMENT ON INDEX idx_pipeline_stage_history_changed_by IS 'FK index for changed_by user lookup';
+DO $$ BEGIN COMMENT ON INDEX idx_tenant_slack_config_default_agent IS 'FK index for default_agent_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_agent_slack_apps_agent IS 'FK index for agent_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_agent_google_oauth_agent IS 'FK index for agent_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_agent_email_config_agent IS 'FK index for agent_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_agent_email_conversations_creator IS 'FK index for creator_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_agent_email_conversations_user IS 'FK index for platform_user_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_tenant_sms_config_default_agent IS 'FK index for default_agent_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_channel_rate_limits_agent IS 'FK index for agent_id lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;
+DO $$ BEGIN COMMENT ON INDEX idx_pipeline_stage_history_changed_by IS 'FK index for changed_by user lookup'; EXCEPTION WHEN undefined_object THEN NULL; END $$;

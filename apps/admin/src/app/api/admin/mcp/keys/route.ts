@@ -28,21 +28,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Name required' }, { status: 400 })
   }
 
+  // Table created by migration 053_mcp_api_keys.sql
   const result = await withTenant(tenantSlug, async () => {
-    // Ensure mcp_api_keys table exists
-    await sql`
-      CREATE TABLE IF NOT EXISTS mcp_api_keys (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(100) NOT NULL,
-        key_hash VARCHAR(64) NOT NULL,
-        key_prefix VARCHAR(12) NOT NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        last_used_at TIMESTAMPTZ,
-        expires_at TIMESTAMPTZ,
-        revoked_at TIMESTAMPTZ
-      )
-    `
-
     // Generate a secure API key
     const keyBytes = crypto.getRandomValues(new Uint8Array(32))
     const key = `cgk_${Buffer.from(keyBytes).toString('base64url')}`

@@ -35,14 +35,14 @@ export async function GET(req: Request): Promise<Response> {
     const yearStart = new Date(year, 0, 1)
     const yearEnd = new Date(year, 11, 31, 23, 59, 59)
 
-    // Get YTD earnings (sum of positive balance transactions for the year)
+    // Get YTD earnings from public.creator_balance_transactions (cross-brand unified ledger)
     const ytdResult = await sql`
       SELECT
         COALESCE(SUM(CASE WHEN amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as total_earned,
-        COALESCE(SUM(CASE WHEN type = 'commission' AND amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as commissions,
-        COALESCE(SUM(CASE WHEN type = 'project' AND amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as projects,
+        COALESCE(SUM(CASE WHEN type IN ('commission_pending', 'commission_available') AND amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as commissions,
+        COALESCE(SUM(CASE WHEN type = 'project_payment' AND amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as projects,
         COALESCE(SUM(CASE WHEN type = 'bonus' AND amount_cents > 0 THEN amount_cents ELSE 0 END), 0) as bonuses
-      FROM balance_transactions
+      FROM public.creator_balance_transactions
       WHERE creator_id = ${context.creatorId}
         AND created_at >= ${yearStart.toISOString()}
         AND created_at <= ${yearEnd.toISOString()}
@@ -51,16 +51,12 @@ export async function GET(req: Request): Promise<Response> {
     const ytd = ytdResult.rows[0] || {}
     const ytdTotalCents = parseInt(String(ytd.total_earned || 0), 10)
 
-    // Get creator tax form status
+    // Get creator tax form status from public.creators
     const creatorResult = await sql`
       SELECT
         tax_form_status,
-        tax_classification,
-        tax_form_submitted_at,
-        tax_id_last_four,
-        legal_name,
-        legal_address
-      FROM creators
+        tax_form_submitted_at
+      FROM public.creators
       WHERE id = ${context.creatorId}
     `
     const creator = creatorResult.rows[0] || {}
@@ -164,8 +160,8 @@ export async function GET(req: Request): Promise<Response> {
         status: w9Status,
         submittedAt: creator.tax_form_submitted_at,
         needsSubmission: needsW9,
-        taxIdLastFour: creator.tax_id_last_four,
-        taxClassification: creator.tax_classification,
+        taxIdLastFour: null,
+        taxClassification: null,
       },
       annualSummaries,
       quarterlyBreakdown,

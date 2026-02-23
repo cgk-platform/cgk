@@ -127,8 +127,8 @@ async function getAlertsFromAuditLog(
     FROM public.super_admin_audit_log sal
     LEFT JOIN public.organizations o ON o.id = sal.tenant_id
     WHERE sal.action IN ('alert_created', 'error_logged', 'api_request')
-      AND (sal.metadata->>'error')::boolean = true
-         OR sal.action = 'alert_created'
+      AND ((sal.metadata->>'error')::boolean = true
+         OR sal.action = 'alert_created')
     ORDER BY sal.created_at DESC
     LIMIT ${limit}
   `

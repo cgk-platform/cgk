@@ -87,6 +87,7 @@ export function PageEditor({ page: initialPage }: PageEditorProps) {
           meta_description: page.meta_description,
           og_image_url: page.og_image_url,
           canonical_url: page.canonical_url,
+          no_index: page.no_index,
           structured_data: page.structured_data,
         }),
       })
@@ -145,7 +146,7 @@ export function PageEditor({ page: initialPage }: PageEditorProps) {
           </div>
 
           <Button variant="outline" size="sm" asChild>
-            <a href={`/${page.slug}`} target="_blank" rel="noopener noreferrer">
+            <a href={`/lp/${page.slug}`} target="_blank" rel="noopener noreferrer">
               <Eye className="mr-2 h-4 w-4" />
               Preview
             </a>

@@ -74,7 +74,7 @@ export default async function LandingPage({ params }: LandingPageProps) {
   }
 
   // Page settings
-  const { settings, blocks } = page
+  const { settings, blocks, structuredData } = page
   const showNavigation = settings.showNavigation !== false
   const showFooter = settings.showFooter !== false
 
@@ -106,6 +106,16 @@ export default async function LandingPage({ params }: LandingPageProps) {
         <style
           dangerouslySetInnerHTML={{
             __html: `main { background-color: ${settings.backgroundColor}; }`,
+          }}
+        />
+      )}
+
+      {/* JSON-LD structured data */}
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
           }}
         />
       )}

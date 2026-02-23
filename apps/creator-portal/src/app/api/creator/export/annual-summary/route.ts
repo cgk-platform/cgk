@@ -56,16 +56,12 @@ export async function POST(req: Request): Promise<Response> {
     const yearStart = new Date(targetYear, 0, 1)
     const yearEnd = new Date(targetYear, 11, 31, 23, 59, 59)
 
-    // Get creator info
+    // Get creator info from public.creators
     const creatorResult = await sql`
       SELECT
-        first_name,
-        last_name,
-        email,
-        tax_id_last_four,
-        legal_name,
-        legal_address
-      FROM creators
+        name,
+        email
+      FROM public.creators
       WHERE id = ${context.creatorId}
     `
     const creator = creatorResult.rows[0] || {}
@@ -148,13 +144,10 @@ export async function POST(req: Request): Promise<Response> {
       generatedAt,
       year: targetYear,
       creator: {
-        name:
-          creator.legal_name ||
-          `${creator.first_name || ''} ${creator.last_name || ''}`.trim() ||
-          context.name,
-        email: creator.email || context.email,
-        taxIdLastFour: creator.tax_id_last_four,
-        address: creator.legal_address,
+        name: (creator.name as string) || context.name,
+        email: (creator.email as string) || context.email,
+        taxIdLastFour: null,
+        address: null,
       },
       totals: {
         totalEarnedCents: parseInt(String(totals.total_earned || 0), 10),

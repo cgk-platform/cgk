@@ -8,6 +8,8 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+import { requireAuth } from '@cgk-platform/auth'
+import type { AuthContext } from '@cgk-platform/auth'
 import { withTenant, sql } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
@@ -69,8 +71,19 @@ const PLATFORM_EXTENSIONS: Omit<ExtensionStatus, 'status' | 'configured'>[] = [
  * Queries the shopify_connections table for connection status
  * and returns extension availability based on that.
  */
-export async function GET(): Promise<NextResponse<ExtensionsResponse>> {
+export async function GET(request: Request): Promise<NextResponse<ExtensionsResponse>> {
   try {
+    // Authenticate the user
+    let auth: AuthContext
+    try {
+      auth = await requireAuth(request)
+    } catch {
+      return NextResponse.json(
+        { connected: false, extensions: [] },
+        { status: 401 }
+      )
+    }
+
     const headerList = await headers()
     const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -79,6 +92,15 @@ export async function GET(): Promise<NextResponse<ExtensionsResponse>> {
         connected: false,
         extensions: [],
       })
+    }
+
+    // Verify the authenticated user belongs to the requested tenant
+    const userHasAccess = auth.orgs.some((org) => org.slug === tenantSlug)
+    if (!userHasAccess) {
+      return NextResponse.json(
+        { connected: false, extensions: [] },
+        { status: 403 }
+      )
     }
 
     // Query the Shopify connection for this tenant
@@ -126,13 +148,13 @@ export async function GET(): Promise<NextResponse<ExtensionsResponse>> {
 
     const analyticsConfigResult = await withTenant(tenantSlug, async () => {
       return sql`
-        SELECT config FROM tenant_settings
-        WHERE setting_key = 'analytics'
+        SELECT value FROM tenant_config
+        WHERE key = 'analytics'
         LIMIT 1
       `
     })
 
-    const analyticsConfig = analyticsConfigResult.rows[0]?.config as {
+    const analyticsConfig = analyticsConfigResult.rows[0]?.value as {
       ga4MeasurementId?: string
       metaPixelId?: string
       postPurchaseSurveyEnabled?: boolean

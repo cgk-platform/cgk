@@ -4,9 +4,9 @@
  * GET /api/creator/analytics/trends - Fetch time-series earnings data for charts
  */
 
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
-import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -131,17 +131,44 @@ export async function GET(req: Request): Promise<Response> {
       ORDER BY period ASC
     `
 
-    // Get commission stats (orders, conversion) for the period
-    const commissionStats = await sql`
-      SELECT
-        COUNT(*) as total_orders,
-        SUM(net_sales_cents) as total_sales,
-        AVG(net_sales_cents) as avg_order_value
-      FROM commissions
-      WHERE creator_id = ${context.creatorId}
-        AND order_date >= ${start.toISOString()}
-        AND order_date <= ${end.toISOString()}
-    `
+    // Get commission stats across all brands (commissions is tenant-scoped)
+    const memberships = await loadBrandMemberships(context.creatorId)
+    let aggTotalOrders = 0
+    let aggTotalSales = 0
+
+    for (const m of memberships) {
+      try {
+        const result = await withTenant(m.brandSlug, async () => {
+          return sql`
+            SELECT
+              COUNT(*) as total_orders,
+              COALESCE(SUM(net_sales_cents), 0) as total_sales,
+              AVG(net_sales_cents) as avg_order_value
+            FROM commissions
+            WHERE creator_id = ${context.creatorId}
+              AND order_date >= ${start.toISOString()}
+              AND order_date <= ${end.toISOString()}
+          `
+        })
+        const row = result.rows[0]
+        if (row) {
+          const orders = parseInt(String(row.total_orders || 0), 10)
+          aggTotalOrders += orders
+          aggTotalSales += parseInt(String(row.total_sales || 0), 10)
+          // avg computed from totals below
+        }
+      } catch {
+        // Tenant may not have commissions table yet
+      }
+    }
+
+    const commissionStats = { rows: [{
+      total_orders: aggTotalOrders,
+      total_sales: aggTotalSales,
+      avg_order_value: aggTotalOrders > 0
+        ? Math.round(aggTotalSales / aggTotalOrders)
+        : 0,
+    }] }
 
     // Get previous period comparison data
     const periodDurationMs = end.getTime() - start.getTime()
@@ -175,7 +202,7 @@ export async function GET(req: Request): Promise<Response> {
       transactionCount: parseInt(String(row.transaction_count || 0), 10),
     }))
 
-    const stats = commissionStats.rows[0] || {}
+    const stats = commissionStats.rows[0]
 
     return Response.json({
       period: {
@@ -192,9 +219,9 @@ export async function GET(req: Request): Promise<Response> {
         direction: changePercent > 0 ? 'up' : changePercent < 0 ? 'down' : 'flat',
       },
       performance: {
-        totalOrders: parseInt(String(stats.total_orders || 0), 10),
-        totalSalesCents: parseInt(String(stats.total_sales || 0), 10),
-        avgOrderValueCents: Math.round(parseFloat(String(stats.avg_order_value || 0))),
+        totalOrders: stats?.total_orders ?? 0,
+        totalSalesCents: stats?.total_sales ?? 0,
+        avgOrderValueCents: stats?.avg_order_value ?? 0,
       },
     })
   } catch (error) {

@@ -9,28 +9,33 @@ import { sql, withTenant } from '@cgk-platform/db'
 import { cache } from 'react'
 import type {
   LandingPageConfig,
-  LandingPageSEO,
-  LandingPageSettings,
   LandingPageStatus,
   BlockType,
 } from '@/lib/theme/types'
 
 /**
- * Database row type for landing pages
+ * Database row type for landing pages — matches migration 071 flat columns
  */
 interface LandingPageRow {
   id: string
   slug: string
   title: string
+  description: string | null
   status: LandingPageStatus
-  settings: LandingPageSettings | null
-  seo: LandingPageSEO | null
+  published_at: string | null
+  scheduled_at: string | null
   blocks: Array<{
     id: string
     type: string
     order: number
     config: Record<string, unknown>
   }> | null
+  meta_title: string | null
+  meta_description: string | null
+  og_image_url: string | null
+  canonical_url: string | null
+  no_index: boolean | null
+  structured_data: Record<string, unknown> | null
   created_at: Date
   updated_at: Date
 }
@@ -44,17 +49,24 @@ function transformLandingPage(row: LandingPageRow): LandingPageConfig {
     slug: row.slug,
     title: row.title,
     status: row.status,
-    settings: row.settings ?? {
+    settings: {
       showNavigation: true,
       showFooter: true,
     },
-    seo: row.seo ?? {},
+    seo: {
+      metaTitle: row.meta_title ?? undefined,
+      metaDescription: row.meta_description ?? undefined,
+      ogImage: row.og_image_url ?? undefined,
+      canonicalUrl: row.canonical_url ?? undefined,
+      noIndex: row.no_index ?? undefined,
+    },
     blocks: (row.blocks ?? []).map((block) => ({
       id: block.id,
       type: block.type as BlockType,
       order: block.order,
       config: block.config,
     })),
+    structuredData: row.structured_data ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   }
@@ -74,15 +86,9 @@ export const getLandingPage = cache(
       const result = await withTenant(tenantSlug, async () => {
         return sql<LandingPageRow>`
           SELECT
-            id,
-            slug,
-            title,
-            status,
-            settings,
-            seo,
-            blocks,
-            created_at,
-            updated_at
+            id, slug, title, description, status, published_at, scheduled_at,
+            blocks, meta_title, meta_description, og_image_url, canonical_url,
+            no_index, structured_data, created_at, updated_at
           FROM landing_pages
           WHERE slug = ${pageSlug}
             AND status = 'published'
@@ -117,15 +123,9 @@ export const getLandingPageById = cache(
       const result = await withTenant(tenantSlug, async () => {
         return sql<LandingPageRow>`
           SELECT
-            id,
-            slug,
-            title,
-            status,
-            settings,
-            seo,
-            blocks,
-            created_at,
-            updated_at
+            id, slug, title, description, status, published_at, scheduled_at,
+            blocks, meta_title, meta_description, og_image_url, canonical_url,
+            no_index, structured_data, created_at, updated_at
           FROM landing_pages
           WHERE id = ${pageId}
           LIMIT 1
@@ -157,15 +157,9 @@ export const getPublishedLandingPages = cache(
       const result = await withTenant(tenantSlug, async () => {
         return sql<LandingPageRow>`
           SELECT
-            id,
-            slug,
-            title,
-            status,
-            settings,
-            seo,
-            blocks,
-            created_at,
-            updated_at
+            id, slug, title, description, status, published_at, scheduled_at,
+            blocks, meta_title, meta_description, og_image_url, canonical_url,
+            no_index, structured_data, created_at, updated_at
           FROM landing_pages
           WHERE status = 'published'
           ORDER BY updated_at DESC

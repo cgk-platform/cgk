@@ -4,7 +4,7 @@
  * GET /api/creator/brands/[brandSlug] - Get full brand detail with earnings
  */
 
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { BrandDetail, BrandProject } from '@/lib/types'
@@ -63,10 +63,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
         cm.completed_projects_count as "completedProjectsCount",
         cm.last_project_at as "lastProjectAt",
         cm.last_payout_at as "lastPayoutAt",
-        cm.joined_at as "joinedAt",
-        cm.coordinator_id as "coordinatorId",
-        cm.payment_terms as "paymentTerms",
-        cm.sample_product_entitlement as "sampleProductEntitlement"
+        cm.joined_at as "joinedAt"
       FROM creator_brand_memberships cm
       JOIN public.organizations o ON o.id = cm.organization_id
       WHERE cm.creator_id = ${context.creatorId}
@@ -82,87 +79,86 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       return Response.json({ error: 'Brand membership not found' }, { status: 404 })
     }
 
-    // Get coordinator info if assigned
-    let coordinatorName: string | null = null
-    let coordinatorEmail: string | null = null
-
-    if (membership.coordinatorId) {
-      const coordinatorResult = await sql`
-        SELECT name, email
-        FROM public.users
-        WHERE id = ${membership.coordinatorId}
-      `
-      if (coordinatorResult.rows.length > 0) {
-        const coordinatorRow = coordinatorResult.rows[0]
-        if (coordinatorRow) {
-          coordinatorName = coordinatorRow.name as string
-          coordinatorEmail = coordinatorRow.email as string
-        }
-      }
-    }
-
-    // Get YTD earnings
+    // Get YTD earnings from commissions (tenant-scoped)
     const startOfYear = new Date()
     startOfYear.setMonth(0, 1)
     startOfYear.setHours(0, 0, 0, 0)
 
-    const ytdResult = await sql`
-      SELECT COALESCE(SUM(amount_cents), 0) as "ytdEarnings"
-      FROM creator_earnings
-      WHERE creator_id = ${context.creatorId}
-        AND organization_id = ${membership.brandId}
-        AND created_at >= ${startOfYear.toISOString()}
-        AND status = 'completed'
-    `
-
-    const ytdEarningsCents = Number(ytdResult.rows[0]?.ytdEarnings || 0)
+    let ytdEarningsCents = 0
+    try {
+      const ytdResult = await withTenant(brandSlug, async () => {
+        return sql`
+          SELECT COALESCE(SUM(commission_cents), 0) as "ytdEarnings"
+          FROM commissions
+          WHERE creator_id = ${context.creatorId}
+            AND created_at >= ${startOfYear.toISOString()}
+            AND status IN ('approved', 'paid')
+        `
+      })
+      ytdEarningsCents = Number(ytdResult.rows[0]?.ytdEarnings || 0)
+    } catch {
+      // Tenant schema may not have commissions yet
+    }
 
     // Get discount code stats
     let discountCodeUsageCount = 0
     let discountCodeRevenueAttributedCents = 0
 
     if (membership.discountCode) {
-      const discountStatsResult = await sql`
-        SELECT
-          COUNT(*) as "usageCount",
-          COALESCE(SUM(order_total_cents), 0) as "revenueAttributed"
-        FROM discount_code_usages
-        WHERE code = ${membership.discountCode}
-          AND creator_id = ${context.creatorId}
-      `
-      if (discountStatsResult.rows.length > 0) {
-        const statsRow = discountStatsResult.rows[0]
-        if (statsRow) {
-          discountCodeUsageCount = Number(statsRow.usageCount)
-          discountCodeRevenueAttributedCents = Number(statsRow.revenueAttributed)
+      try {
+        const discountStatsResult = await withTenant(brandSlug, async () => {
+          return sql`
+            SELECT
+              COUNT(*) as "usageCount",
+              COALESCE(SUM(discount_amount_cents), 0) as "revenueAttributed"
+            FROM discount_code_usages
+            WHERE code = ${membership.discountCode as string}
+              AND creator_id = ${context.creatorId}
+          `
+        })
+        if (discountStatsResult.rows.length > 0) {
+          const statsRow = discountStatsResult.rows[0]
+          if (statsRow) {
+            discountCodeUsageCount = Number(statsRow.usageCount)
+            discountCodeRevenueAttributedCents = Number(statsRow.revenueAttributed)
+          }
         }
+      } catch {
+        // Tenant schema may not have discount_code_usages yet
       }
     }
 
-    // Get recent projects (last 5)
-    const projectsResult = await sql`
-      SELECT
-        id,
-        name,
-        status,
-        earnings_cents as "earningsCents",
-        due_date as "dueDate",
-        completed_at as "completedAt"
-      FROM creator_projects
-      WHERE creator_id = ${context.creatorId}
-        AND organization_id = ${membership.brandId}
-      ORDER BY created_at DESC
-      LIMIT 5
-    `
+    // Get recent projects (last 5) from tenant-scoped creator_projects
+    let recentProjects: BrandProject[] = []
+    try {
+      const projectsResult = await withTenant(brandSlug, async () => {
+        return sql`
+          SELECT
+            id,
+            title,
+            status,
+            payment_cents as "earningsCents",
+            due_date as "dueDate",
+            completed_at as "completedAt"
+          FROM creator_projects
+          WHERE creator_id = ${context.creatorId}
+            AND brand_id = ${membership.brandId as string}
+          ORDER BY created_at DESC
+          LIMIT 5
+        `
+      })
 
-    const recentProjects: BrandProject[] = projectsResult.rows.map((row) => ({
-      id: row.id as string,
-      name: row.name as string,
-      status: row.status as BrandProject['status'],
-      earningsCents: Number(row.earningsCents),
-      dueDate: row.dueDate ? new Date(row.dueDate as string) : null,
-      completedAt: row.completedAt ? new Date(row.completedAt as string) : null,
-    }))
+      recentProjects = projectsResult.rows.map((row) => ({
+        id: row.id as string,
+        name: row.title as string,
+        status: row.status as BrandProject['status'],
+        earningsCents: Number(row.earningsCents),
+        dueDate: row.dueDate ? new Date(row.dueDate as string) : null,
+        completedAt: row.completedAt ? new Date(row.completedAt as string) : null,
+      }))
+    } catch {
+      // Tenant schema may not have creator_projects yet
+    }
 
     // Build share link for discount code
     const shareLink = membership.discountCode
@@ -192,10 +188,10 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       lastProjectAt: membership.lastProjectAt ? new Date(membership.lastProjectAt as string) : null,
       lastPayoutAt: membership.lastPayoutAt ? new Date(membership.lastPayoutAt as string) : null,
       joinedAt: new Date(membership.joinedAt as string),
-      coordinatorName,
-      coordinatorEmail,
-      paymentTerms: (membership.paymentTerms as string) || 'Net 30',
-      sampleProductEntitlement: Boolean(membership.sampleProductEntitlement),
+      coordinatorName: null,
+      coordinatorEmail: null,
+      paymentTerms: 'Net 30',
+      sampleProductEntitlement: false,
       shareLink,
       discountCodeUsageCount,
       discountCodeRevenueAttributedCents,

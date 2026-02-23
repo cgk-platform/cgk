@@ -4,7 +4,7 @@
  * GET /api/creator/analytics/breakdown - Fetch earnings breakdown by type, brand, and time
  */
 
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 
@@ -107,25 +107,56 @@ export async function GET(req: Request): Promise<Response> {
       LIMIT 12
     `
 
-    // Get top performing promo codes (commission earnings)
-    const topPromoCodesResult = await sql`
-      SELECT
-        promo_code,
-        COUNT(*) as order_count,
-        SUM(net_sales_cents) as total_sales_cents,
-        SUM(commission_cents) as total_commission_cents
-      FROM commissions
-      WHERE creator_id = ${context.creatorId}
-        AND order_date >= ${start.toISOString()}
-        AND order_date <= ${end.toISOString()}
-        AND promo_code IS NOT NULL
-      GROUP BY promo_code
-      ORDER BY total_commission_cents DESC
-      LIMIT 5
-    `
-
-    // Get brand breakdown from memberships
+    // Get brand memberships (needed for tenant-scoped queries and brand breakdown)
     const memberships = await loadBrandMemberships(context.creatorId)
+
+    // Get top performing promo codes across all brands (commissions is tenant-scoped)
+    const allPromoRows: Record<string, unknown>[] = []
+    for (const m of memberships) {
+      try {
+        const result = await withTenant(m.brandSlug, async () => {
+          return sql`
+            SELECT
+              promo_code,
+              COUNT(*) as order_count,
+              SUM(net_sales_cents) as total_sales_cents,
+              SUM(commission_cents) as total_commission_cents
+            FROM commissions
+            WHERE creator_id = ${context.creatorId}
+              AND order_date >= ${start.toISOString()}
+              AND order_date <= ${end.toISOString()}
+              AND promo_code IS NOT NULL
+            GROUP BY promo_code
+          `
+        })
+        allPromoRows.push(...result.rows)
+      } catch {
+        // Tenant may not have commissions table yet
+      }
+    }
+
+    // Aggregate promo code stats across brands and take top 5
+    const promoMap = new Map<string, { orderCount: number; salesCents: number; commissionCents: number }>()
+    for (const row of allPromoRows) {
+      const code = row.promo_code as string
+      const existing = promoMap.get(code) || { orderCount: 0, salesCents: 0, commissionCents: 0 }
+      existing.orderCount += parseInt(String(row.order_count || 0), 10)
+      existing.salesCents += parseInt(String(row.total_sales_cents || 0), 10)
+      existing.commissionCents += parseInt(String(row.total_commission_cents || 0), 10)
+      promoMap.set(code, existing)
+    }
+    const topPromoCodesResult = { rows: [...promoMap.entries()]
+      .sort((a, b) => b[1].commissionCents - a[1].commissionCents)
+      .slice(0, 5)
+      .map(([code, stats]) => ({
+        promo_code: code,
+        order_count: stats.orderCount,
+        total_sales_cents: stats.salesCents,
+        total_commission_cents: stats.commissionCents,
+      }))
+    }
+
+    // Get brand breakdown from memberships (already loaded above)
     const byBrand = memberships.map((m) => ({
       brandId: m.brandId,
       brandName: m.brandName,

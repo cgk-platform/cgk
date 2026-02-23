@@ -33,8 +33,8 @@ export async function handleRefundCreate(
   }, 0)
 
   await withTenant(tenantId, async () => {
-    // Create refund record
-    await sql`
+    // Create refund record and retrieve internal ID for line item FK
+    const refundResult = await sql`
       INSERT INTO refunds (
         shopify_refund_id,
         order_shopify_id,
@@ -54,7 +54,10 @@ export async function handleRefundCreate(
         amount_cents = EXCLUDED.amount_cents,
         reason = EXCLUDED.reason,
         processed_at = EXCLUDED.processed_at
+      RETURNING id
     `
+
+    const refundId = refundResult.rows[0]?.id as string | undefined
 
     // Update order with refund info
     await sql`
@@ -66,27 +69,26 @@ export async function handleRefundCreate(
       WHERE shopify_id = ${orderId}
     `
 
-    // Insert refund line items
-    for (const item of refund.refund_line_items) {
-      await sql`
-        INSERT INTO refund_line_items (
-          refund_shopify_id,
-          line_item_id,
-          quantity,
-          subtotal_cents,
-          total_tax_cents
-        ) VALUES (
-          ${shopifyRefundId},
-          ${item.line_item_id.toString()},
-          ${item.quantity},
-          ${parseCents(item.subtotal)},
-          ${parseCents(item.total_tax)}
-        )
-        ON CONFLICT (refund_shopify_id, line_item_id) DO UPDATE SET
-          quantity = EXCLUDED.quantity,
-          subtotal_cents = EXCLUDED.subtotal_cents,
-          total_tax_cents = EXCLUDED.total_tax_cents
-      `
+    // Insert refund line items (requires internal refund ID for FK)
+    if (refundId) {
+      // Delete existing line items for this refund to handle re-processing
+      await sql`DELETE FROM refund_line_items WHERE refund_id = ${refundId}`
+
+      for (const item of refund.refund_line_items) {
+        await sql`
+          INSERT INTO refund_line_items (
+            refund_id,
+            shopify_line_item_id,
+            quantity,
+            amount_cents
+          ) VALUES (
+            ${refundId},
+            ${item.line_item_id.toString()},
+            ${item.quantity},
+            ${parseCents(item.subtotal) + parseCents(item.total_tax)}
+          )
+        `
+      }
     }
   })
 

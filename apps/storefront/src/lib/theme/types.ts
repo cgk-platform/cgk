@@ -238,6 +238,8 @@ export interface LandingPageConfig {
   seo: LandingPageSEO
   /** Page blocks */
   blocks: LandingPageBlock[]
+  /** JSON-LD structured data */
+  structuredData?: Record<string, unknown> | null
   /** Created timestamp */
   createdAt: Date
   /** Updated timestamp */

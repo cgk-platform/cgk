@@ -366,7 +366,8 @@ export async function requestWithdrawal(
     effectivePaymentMethodId = status.defaultPaymentMethodId
   }
 
-  // Create withdrawal request
+  // Atomic insert: only succeeds if no pending/processing withdrawal exists.
+  // This prevents race conditions where two concurrent requests both pass validation.
   const result = await sql<WithdrawalRow>`
     INSERT INTO withdrawal_requests (
       creator_id,
@@ -377,7 +378,8 @@ export async function requestWithdrawal(
       payment_method_id,
       shopify_customer_id,
       status
-    ) VALUES (
+    )
+    SELECT
       ${creatorId},
       ${amountCents},
       ${currency},
@@ -386,13 +388,18 @@ export async function requestWithdrawal(
       ${effectivePaymentMethodId ?? null},
       ${shopifyCustomerId ?? null},
       'pending'
+    WHERE NOT EXISTS (
+      SELECT 1 FROM withdrawal_requests
+      WHERE creator_id = ${creatorId}
+      AND status IN ('pending', 'pending_topup', 'processing')
     )
     RETURNING *
   `
 
   const row = result.rows[0]
   if (!row) {
-    return { success: false, error: 'Failed to create withdrawal request' }
+    // Either a race condition (concurrent request won) or insert failed
+    return { success: false, error: 'A withdrawal request is already in progress, or the request could not be created.' }
   }
 
   const withdrawal = mapRowToWithdrawal(row)
@@ -484,17 +491,17 @@ export async function listWithdrawalRequests(
 
   if (status) {
     if (Array.isArray(status)) {
-      // For arrays, we need to use a different approach
-      const statusList = status.map(s => `'${s}'`).join(',')
+      // Use PostgreSQL array ANY() with parameterized query
+      const statusArray = `{${status.join(',')}}`
       countResult = await sql<{ count: string }>`
         SELECT COUNT(*) as count FROM withdrawal_requests
         WHERE creator_id = ${creatorId}
-        AND status::text IN (${statusList})
+        AND status::text = ANY(${statusArray}::text[])
       `
       withdrawalsResult = await sql<WithdrawalRow>`
         SELECT * FROM withdrawal_requests
         WHERE creator_id = ${creatorId}
-        AND status::text IN (${statusList})
+        AND status::text = ANY(${statusArray}::text[])
         ORDER BY created_at DESC
         LIMIT ${limit} OFFSET ${offset}
       `

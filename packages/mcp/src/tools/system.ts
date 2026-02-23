@@ -554,31 +554,36 @@ export const getTenantConfigTool: ToolDefinition = defineTool({
     const section = args.section as string | undefined
 
     return withTenant(tenantId, async () => {
-      // Fetch tenant configuration from database
+      // Fetch tenant configuration from key/value store
       const result = await sql`
-        SELECT
-          config,
-          shopify_enabled,
-          stripe_enabled,
-          creators_enabled,
-          reviews_enabled,
-          custom_domain
-        FROM tenant_config
-        WHERE tenant_id = ${tenantId}
+        SELECT key, value FROM tenant_config
+        WHERE key IN ('tenant_settings', 'features', 'domain')
       `
 
-      const row = result.rows[0]
-      if (!row) {
+      if (result.rows.length === 0) {
         return errorResult(`Tenant configuration not found: ${tenantId}`)
       }
 
+      // Build config from key/value rows
+      const configMap: Record<string, unknown> = {}
+      for (const row of result.rows) {
+        const key = row.key as string
+        const val = row.value
+        configMap[key] = typeof val === 'string' ? JSON.parse(val) : val
+      }
+
+      const tenantSettings = (configMap['tenant_settings'] ?? {}) as Record<string, unknown>
+      const features = (configMap['features'] ?? {}) as Record<string, unknown>
+
       const config: TenantConfig = {
-        shopifyEnabled: Boolean(row.shopify_enabled),
-        stripeEnabled: Boolean(row.stripe_enabled),
-        creatorsEnabled: Boolean(row.creators_enabled),
-        reviewsEnabled: Boolean(row.reviews_enabled),
-        customDomain: row.custom_domain ? String(row.custom_domain) : undefined,
-        settings: (row.config as Record<string, unknown>) ?? {},
+        shopifyEnabled: Boolean(features.shopify_enabled ?? tenantSettings.shopify_enabled),
+        stripeEnabled: Boolean(features.stripe_enabled ?? tenantSettings.stripe_enabled),
+        creatorsEnabled: Boolean(features.creators_enabled ?? tenantSettings.creators_enabled),
+        reviewsEnabled: Boolean(features.reviews_enabled ?? tenantSettings.reviews_enabled),
+        customDomain: (configMap['domain'] as Record<string, unknown>)?.custom_domain
+          ? String((configMap['domain'] as Record<string, unknown>).custom_domain)
+          : undefined,
+        settings: tenantSettings,
       }
 
       // Filter by section if specified
@@ -629,11 +634,14 @@ export const updateTenantConfigTool: ToolDefinition = defineTool({
     const settings = args.settings as Record<string, unknown>
 
     return withTenant(tenantId, async () => {
-      // Get existing config
+      // Get existing config from key/value store
       const existing = await sql`
-        SELECT config FROM tenant_config WHERE tenant_id = ${tenantId}
+        SELECT value FROM tenant_config WHERE key = 'tenant_settings' LIMIT 1
       `
-      const existingConfig = (existing.rows[0]?.config as Record<string, unknown>) ?? {}
+      const raw = existing.rows[0]?.value
+      const existingConfig = raw
+        ? (typeof raw === 'string' ? JSON.parse(raw) : raw) as Record<string, unknown>
+        : {}
 
       // Merge settings into section
       const updatedConfig = {
@@ -644,12 +652,13 @@ export const updateTenantConfigTool: ToolDefinition = defineTool({
         },
       }
 
-      // Update in database
+      // Upsert in key/value store
       await sql`
-        UPDATE tenant_config
-        SET config = ${JSON.stringify(updatedConfig)},
+        INSERT INTO tenant_config (key, value, updated_at)
+        VALUES ('tenant_settings', ${JSON.stringify(updatedConfig)}, NOW())
+        ON CONFLICT (key) DO UPDATE
+        SET value = ${JSON.stringify(updatedConfig)},
             updated_at = NOW()
-        WHERE tenant_id = ${tenantId}
       `
 
       // Clear cached config

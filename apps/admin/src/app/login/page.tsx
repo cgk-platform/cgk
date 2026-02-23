@@ -2,15 +2,19 @@
 
 import { useState } from 'react'
 import { Card, CardContent, Button, Input, Label } from '@cgk-platform/ui'
-import { Mail, Loader2, CheckCircle } from 'lucide-react'
+import { Mail, Loader2, CheckCircle, Lock } from 'lucide-react'
+
+type AuthMode = 'magic-link' | 'password'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
+  const [mode, setMode] = useState<AuthMode>('magic-link')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -35,6 +39,33 @@ export default function LoginPage() {
     }
   }
 
+  const handlePasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Login failed')
+      }
+
+      // Redirect on success
+      window.location.href = data.redirectTo || '/'
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (sent) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
@@ -49,7 +80,7 @@ export default function LoginPage() {
                 We sent a sign-in link to <span className="font-medium text-foreground">{email}</span>
               </p>
               <p className="mt-4 text-xs text-muted-foreground">
-                Click the link in your email to sign in. The link will expire in 15 minutes.
+                Click the link in your email to sign in. The link will expire in 24 hours.
               </p>
               <Button
                 variant="outline"
@@ -74,43 +105,102 @@ export default function LoginPage() {
         <CardContent className="p-6">
           <div className="mb-6 text-center">
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Mail className="h-6 w-6 text-primary" />
+              {mode === 'magic-link' ? (
+                <Mail className="h-6 w-6 text-primary" />
+              ) : (
+                <Lock className="h-6 w-6 text-primary" />
+              )}
             </div>
             <h1 className="text-2xl font-bold">Admin Portal</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Sign in to your account
             </p>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                required
-              />
-            </div>
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending...
-                </>
-              ) : (
-                'Send Magic Link'
+
+          {mode === 'magic-link' ? (
+            <form onSubmit={handleMagicLink} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+              </div>
+              {error && (
+                <p className="text-sm text-destructive">{error}</p>
               )}
-            </Button>
-          </form>
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            A sign-in link will be sent to your email address.
-          </p>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  'Send Magic Link'
+                )}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email-pw">Email</Label>
+                <Input
+                  id="email-pw"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                  required
+                />
+              </div>
+              {error && (
+                <p className="text-sm text-destructive">{error}</p>
+              )}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </Button>
+            </form>
+          )}
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              onClick={() => {
+                setMode(mode === 'magic-link' ? 'password' : 'magic-link')
+                setError('')
+              }}
+            >
+              {mode === 'magic-link'
+                ? 'Sign in with password instead'
+                : 'Sign in with magic link instead'}
+            </button>
+          </div>
         </CardContent>
       </Card>
     </div>

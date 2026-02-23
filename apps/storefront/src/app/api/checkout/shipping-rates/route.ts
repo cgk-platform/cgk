@@ -87,17 +87,16 @@ async function checkFreeShippingThreshold(
   subtotalCents: number
 ): Promise<{ qualifies: boolean; threshold: number | null }> {
   try {
+    // tenant_config is a key/value store with 'key' and 'value' columns
     const result = await withTenant(tenantSlug, async () => {
-      return sql<{ free_shipping_threshold_cents: number | null }>`
-        SELECT free_shipping_threshold_cents
-        FROM tenant_settings
-        WHERE id = 'default'
-        LIMIT 1
+      return sql<{ value: string | null }>`
+        SELECT value FROM tenant_config WHERE key = 'shipping_settings' LIMIT 1
       `
     })
 
-    const settings = result.rows[0]
-    const threshold = settings?.free_shipping_threshold_cents
+    const raw = result.rows[0]?.value
+    const settings = raw ? (typeof raw === 'string' ? JSON.parse(raw) : raw) as { free_shipping_threshold_cents?: number } : undefined
+    const threshold = settings?.free_shipping_threshold_cents ?? null
 
     if (threshold && subtotalCents >= threshold) {
       return { qualifies: true, threshold: threshold / 100 }

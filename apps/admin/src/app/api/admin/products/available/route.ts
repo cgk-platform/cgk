@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { createCommerceProvider, type Product } from '@cgk-platform/commerce'
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -63,30 +63,24 @@ async function getTenantShopifyConfig(tenantSlug: string): Promise<{
   storeDomain: string
   storefrontAccessToken: string
 } | null> {
-  const result = await sql`
-    SELECT shopify_store_domain, settings
-    FROM public.organizations
-    WHERE slug = ${tenantSlug}
-  `
+  // Read from shopify_connections (where the OAuth flow stores credentials)
+  const result = await withTenant(tenantSlug, async () => {
+    return sql`
+      SELECT shop, storefront_api_token_encrypted
+      FROM shopify_connections
+      WHERE status = 'active'
+      LIMIT 1
+    `
+  })
 
   const row = result.rows[0]
-  if (!row || !row.shopify_store_domain) {
-    return null
-  }
-
-  const settings = (row.settings as Record<string, unknown>) || {}
-  const shopifySettings = (settings.shopify as Record<string, unknown>) || {}
-
-  // The storefront access token should be in settings
-  const storefrontAccessToken = shopifySettings.storefrontAccessToken as string
-
-  if (!storefrontAccessToken) {
+  if (!row || !row.shop || !row.storefront_api_token_encrypted) {
     return null
   }
 
   return {
-    storeDomain: row.shopify_store_domain as string,
-    storefrontAccessToken,
+    storeDomain: row.shop as string,
+    storefrontAccessToken: row.storefront_api_token_encrypted as string,
   }
 }
 

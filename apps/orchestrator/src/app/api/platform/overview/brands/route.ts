@@ -183,7 +183,7 @@ async function mapBrandRows(rows: Record<string, unknown>[]): Promise<BrandSumma
       const metrics = await withTenant(slug, async () => {
         const metricsResult = await sql`
           SELECT
-            COALESCE(SUM(total_price), 0) as revenue,
+            COALESCE(SUM(total_cents), 0) as revenue,
             COUNT(*) as order_count
           FROM orders
           WHERE created_at > NOW() - INTERVAL '24 hours'
