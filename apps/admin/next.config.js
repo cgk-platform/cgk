@@ -50,6 +50,18 @@ const nextConfig = {
   ],
 
   webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Force-externalize Node.js-only packages from server compilation.
+      // serverExternalPackages doesn't reliably catch pnpm workspace symlinks,
+      // so we use webpack externals directly to prevent processing @slack/web-api
+      // and its transitive importers.
+      config.externals = [
+        ...(Array.isArray(config.externals) ? config.externals : []),
+        /^@slack\/web-api($|\/)/,
+        /^@cgk-platform\/slack($|\/)/,
+        /^@cgk-platform\/admin-core($|\/)/,
+      ]
+    }
     if (!isServer) {
       // Prevent Node.js-only modules from being bundled into client code
       config.resolve.fallback = {
