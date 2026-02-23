@@ -2,7 +2,7 @@
 
 import { Badge } from '@cgk-platform/ui'
 
-import type { SampleStatus } from '@/lib/creators-admin-ops'
+import type { SampleStatus } from '@/lib/creators-admin-ops/types'
 
 const statusConfig: Record<
   SampleStatus,

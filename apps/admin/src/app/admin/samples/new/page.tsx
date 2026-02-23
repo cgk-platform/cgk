@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-import type { SampleProduct, ShippingAddress } from '@/lib/creators-admin-ops'
-import { SAMPLE_PRIORITIES } from '@/lib/creators-admin-ops'
+import type { SampleProduct, ShippingAddress } from '@/lib/creators-admin-ops/types'
+import { SAMPLE_PRIORITIES } from '@/lib/creators-admin-ops/types'
 
 export default function NewSampleRequestPage() {
   const router = useRouter()

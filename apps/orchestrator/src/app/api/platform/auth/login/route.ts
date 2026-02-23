@@ -6,8 +6,8 @@ import {
   logAuditAction,
   setAuthCookie,
   signJWT,
-  verifyPassword,
 } from '@cgk-platform/auth'
+import { verifyPassword } from '@cgk-platform/auth/node'
 
 export const dynamic = 'force-dynamic'
 

@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     }
 
     // Verify password using bcrypt-compatible check
-    const { verifyPassword } = await import('@cgk-platform/auth')
+    const { verifyPassword } = await import('@cgk-platform/auth/node')
     const isValid = await verifyPassword(password, customer.password_hash as string)
     if (!isValid) {
       return Response.json({ error: 'Invalid email or password' }, { status: 401 })

@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, Button, Input, Label, Switch } from '@cg
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import type { OnboardingConfig, OnboardingStep } from '@/lib/creators-admin-ops'
-import { DEFAULT_ONBOARDING_STEPS } from '@/lib/creators-admin-ops'
+import type { OnboardingConfig, OnboardingStep } from '@/lib/creators-admin-ops/types'
+import { DEFAULT_ONBOARDING_STEPS } from '@/lib/creators-admin-ops/types'
 
 export default function OnboardingSettingsPage() {
   const [, setConfig] = useState<OnboardingConfig | null>(null)

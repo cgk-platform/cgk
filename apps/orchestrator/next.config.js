@@ -30,6 +30,8 @@ const securityHeaders = [
 const nextConfig = {
   transpilePackages: ['@cgk-platform/ui', '@cgk-platform/core', '@cgk-platform/db', '@cgk-platform/auth'],
 
+  serverExternalPackages: ['bcryptjs'],
+
   async headers() {
     return [
       {

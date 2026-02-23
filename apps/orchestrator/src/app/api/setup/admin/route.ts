@@ -1,4 +1,4 @@
-import { hashPassword } from '@cgk-platform/auth'
+import { hashPassword } from '@cgk-platform/auth/node'
 import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 

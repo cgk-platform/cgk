@@ -49,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     // Hash password
-    const { hashPassword } = await import('@cgk-platform/auth')
+    const { hashPassword } = await import('@cgk-platform/auth/node')
     const passwordHash = await hashPassword(password)
 
     // Create customer

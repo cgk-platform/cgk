@@ -1,6 +1,7 @@
-import { sql as vercelSql, type VercelPool } from '@vercel/postgres'
-import { neon, type NeonQueryFunction } from '@neondatabase/serverless'
 import { AsyncLocalStorage } from 'node:async_hooks'
+
+import { neon, type NeonQueryFunction } from '@neondatabase/serverless'
+import { sql as vercelSql, type VercelPool } from '@vercel/postgres'
 
 /**
  * Async-local store for the current tenant schema name.

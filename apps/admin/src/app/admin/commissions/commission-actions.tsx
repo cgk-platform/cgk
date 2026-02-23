@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@cgk-platform/ui'
 
-import type { Commission } from '@/lib/creators-admin-ops'
+import type { Commission } from '@/lib/creators-admin-ops/types'
 
 export function CommissionActions({ commissions }: { commissions: Commission[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())

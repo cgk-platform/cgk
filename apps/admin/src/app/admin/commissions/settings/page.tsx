@@ -5,8 +5,8 @@ import { Button, Input, Label, Switch } from '@cgk-platform/ui'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import type { CommissionConfig, TierRate } from '@/lib/creators-admin-ops'
-import { DEFAULT_TIER_RATES } from '@/lib/creators-admin-ops'
+import type { CommissionConfig, TierRate } from '@/lib/creators-admin-ops/types'
+import { DEFAULT_TIER_RATES } from '@/lib/creators-admin-ops/types'
 import { formatMoney } from '@/lib/format'
 
 export default function CommissionSettingsPage() {

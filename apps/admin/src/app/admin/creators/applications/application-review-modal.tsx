@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { Button, Input, Label } from '@cgk-platform/ui'
 
-import type { CreatorApplication } from '@/lib/creators-admin-ops'
-import { REJECTION_TEMPLATES } from '@/lib/creators-admin-ops'
+import type { CreatorApplication } from '@/lib/creators-admin-ops/types'
+import { REJECTION_TEMPLATES } from '@/lib/creators-admin-ops/types'
 import { formatDateTime } from '@/lib/format'
 
 interface Props {

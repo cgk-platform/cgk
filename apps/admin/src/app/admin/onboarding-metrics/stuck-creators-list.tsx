@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@cgk-platform/ui'
 
-import type { StuckCreator } from '@/lib/creators-admin-ops'
+import type { StuckCreator } from '@/lib/creators-admin-ops/types'
 
 export function StuckCreatorsList({ creators }: { creators: StuckCreator[] }) {
   const [loadingId, setLoadingId] = useState<string | null>(null)

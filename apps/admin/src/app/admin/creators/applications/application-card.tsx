@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, Badge, Button } from '@cgk-platform/ui'
 
-import type { CreatorApplication, ApplicationStatus } from '@/lib/creators-admin-ops'
+import type { CreatorApplication, ApplicationStatus } from '@/lib/creators-admin-ops/types'
 import { formatDateTime } from '@/lib/format'
 
 import { ApplicationReviewModal } from './application-review-modal'

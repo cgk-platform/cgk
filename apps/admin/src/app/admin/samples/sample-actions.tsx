@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { Button, Input, Label } from '@cgk-platform/ui'
 
-import type { SampleRequest } from '@/lib/creators-admin-ops'
-import { SAMPLE_CARRIERS } from '@/lib/creators-admin-ops'
+import type { SampleRequest } from '@/lib/creators-admin-ops/types'
+import { SAMPLE_CARRIERS } from '@/lib/creators-admin-ops/types'
 
 export function SampleActions({ samples }: { samples: SampleRequest[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())

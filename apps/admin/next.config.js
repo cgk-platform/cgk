@@ -53,6 +53,7 @@ const nextConfig = {
       // Prevent Node.js-only modules from being bundled into client code
       config.resolve.fallback = {
         ...config.resolve.fallback,
+        async_hooks: false,
         fs: false,
         'fs/promises': false,
         child_process: false,

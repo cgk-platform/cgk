@@ -5,8 +5,7 @@
  * @ai-required Use getTenantContext() at the start of every API route
  */
 
-// Password utilities
-export { hashPassword, verifyPassword } from './password'
+// Password utilities — import from '@cgk-platform/auth/node' (Node.js only, not Edge-safe)
 
 // Session management
 export {
