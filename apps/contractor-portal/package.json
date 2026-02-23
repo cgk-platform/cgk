@@ -10,11 +10,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@cgk-platform/admin-core": "workspace:*",
+    "@cgk-platform/ai-agents": "workspace:*",
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
     "@cgk-platform/auth": "workspace:*",
+    "@cgk-platform/integrations": "workspace:*",
+    "@cgk-platform/jobs": "workspace:*",
+    "@cgk-platform/shopify": "workspace:*",
     "@cgk-platform/ui": "workspace:*",
     "@cgk-platform/payments": "workspace:*",
+    "@cgk-platform/video": "workspace:*",
     "@hello-pangea/dnd": "^17.0.0",
     "@vercel/blob": "^0.27.0",
     "bcryptjs": "^3.0.3",

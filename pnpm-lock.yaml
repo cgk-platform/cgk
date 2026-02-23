@@ -161,7 +161,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@2.6.1)
+        version: 9.39.2(jiti@1.21.7)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
@@ -174,6 +174,12 @@ importers:
 
   apps/contractor-portal:
     dependencies:
+      '@cgk-platform/admin-core':
+        specifier: workspace:*
+        version: link:../../packages/admin-core
+      '@cgk-platform/ai-agents':
+        specifier: workspace:*
+        version: link:../../packages/ai-agents
       '@cgk-platform/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -183,12 +189,24 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@cgk-platform/integrations':
+        specifier: workspace:*
+        version: link:../../packages/integrations
+      '@cgk-platform/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       '@cgk-platform/payments':
         specifier: workspace:*
         version: link:../../packages/payments
+      '@cgk-platform/shopify':
+        specifier: workspace:*
+        version: link:../../packages/shopify
       '@cgk-platform/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@cgk-platform/video':
+        specifier: workspace:*
+        version: link:../../packages/video
       '@hello-pangea/dnd':
         specifier: ^17.0.0
         version: 17.0.0(@types/react@19.2.13)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -243,7 +261,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@1.21.7)
+        version: 9.39.2(jiti@2.6.1)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6

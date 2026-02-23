@@ -36,11 +36,12 @@ const nextConfig = {
     '@cgk-platform/commerce',
     '@cgk-platform/shopify',
     '@cgk-platform/video',
-    '@cgk-platform/slack',
   ],
 
   serverExternalPackages: [
+    '@cgk-platform/admin-core',
     '@cgk-platform/dam',
+    '@cgk-platform/slack',
     '@slack/web-api',
     'sharp',
     'bcryptjs',
