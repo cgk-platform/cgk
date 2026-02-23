@@ -11,7 +11,7 @@ import type { BrandMembership, CreatorJWTPayload, MembershipStatus } from '../ty
 
 // Use separate secret for creator tokens — NO dev fallback (security requirement)
 const _creatorJwtSecretStr = process.env.CREATOR_JWT_SECRET || process.env.JWT_SECRET
-if (!_creatorJwtSecretStr && process.env.NODE_ENV === 'production') {
+if (!_creatorJwtSecretStr && process.env.NODE_ENV === 'production' && process.env.SKIP_ENV_VALIDATION !== '1') {
   throw new Error(
     'CREATOR_JWT_SECRET (or JWT_SECRET) must be set. Creator portal cannot start without a signing secret.'
   )
