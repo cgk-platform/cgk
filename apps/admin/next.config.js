@@ -49,31 +49,33 @@ const nextConfig = {
     '@mux/mux-node',
   ],
 
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      // Force-externalize Node.js-only packages from server compilation.
-      // serverExternalPackages doesn't reliably catch pnpm workspace symlinks,
-      // so we use webpack externals directly to prevent processing @slack/web-api
-      // and its transitive importers.
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : []),
-        /^@slack\/web-api($|\/)/,
-        /^@cgk-platform\/slack($|\/)/,
-        /^@cgk-platform\/admin-core($|\/)/,
-      ]
-    }
+  webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
-      // Prevent Node.js-only modules from being bundled into client code
+      // Client components transitively reach @slack/web-api through the chain:
+      // video-card.tsx → @cgk-platform/video → integrations → jobs →
+      // admin-core/workflow → slack → @slack/web-api → node:fs/os/path/etc.
+      //
+      // webpack can't handle the node: URI scheme in client bundles.
+      // Strip the prefix so resolve.fallback entries (fs: false, etc.) apply.
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+          resource.request = resource.request.replace(/^node:/, '')
+        })
+      )
       config.resolve.fallback = {
         ...config.resolve.fallback,
         async_hooks: false,
+        child_process: false,
+        dns: false,
         fs: false,
         'fs/promises': false,
-        child_process: false,
-        'stream/web': false,
         net: false,
+        os: false,
+        path: false,
+        querystring: false,
+        stream: false,
+        'stream/web': false,
         tls: false,
-        dns: false,
       }
     }
     return config
