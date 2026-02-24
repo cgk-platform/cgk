@@ -112,6 +112,65 @@ export async function getShop(
   return result.shop
 }
 
+// ---------------------------------------------------------------------------
+// Shop Policy Types
+// ---------------------------------------------------------------------------
+
+export interface ShopPolicy {
+  title: string
+  body: string
+  handle: string
+}
+
+export interface ShopPolicies {
+  privacyPolicy: ShopPolicy | null
+  termsOfService: ShopPolicy | null
+  shippingPolicy: ShopPolicy | null
+  refundPolicy: ShopPolicy | null
+}
+
+interface ShopPoliciesResponse {
+  shop: ShopPolicies
+}
+
+/**
+ * Fetch shop legal policies (privacy, terms, shipping, refund)
+ */
+export async function getShopPolicies(
+  client: StorefrontClient
+): Promise<ShopPolicies> {
+  const result = await client.query<ShopPoliciesResponse>(
+    `
+    query ShopPolicies {
+      shop {
+        privacyPolicy {
+          title
+          body
+          handle
+        }
+        termsOfService {
+          title
+          body
+          handle
+        }
+        shippingPolicy {
+          title
+          body
+          handle
+        }
+        refundPolicy {
+          title
+          body
+          handle
+        }
+      }
+    }
+    `
+  )
+
+  return result.shop
+}
+
 export async function getMenu(
   client: StorefrontClient,
   handle: string

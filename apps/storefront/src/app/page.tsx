@@ -18,28 +18,54 @@ import {
   TestimonialCarousel,
   MarqueeLogos,
   PressSlider,
+  InstagramFeed,
 } from '@/components/sections'
+import { NewsletterForm } from '@/components/forms/NewsletterForm'
 import { getTenantConfig, getTenantSlug } from '@/lib/tenant'
 import { loadThemeForSSR, createTheme } from '@/lib/theme'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-// CGK testimonial data
+// Real CGK customer reviews from Dawn Shopify theme
 const TESTIMONIALS = [
-  { name: 'Sarah M.', rating: 5, text: 'These are the softest sheets I\'ve ever owned. I\'ve tried expensive brands and nothing comes close to CGK.', product: '6-Piece Sheet Set' },
-  { name: 'James K.', rating: 5, text: 'Worth every penny. The deep pockets actually fit my mattress and the sheets stay in place all night.', product: '6-Piece Sheet Set' },
-  { name: 'Lisa R.', rating: 5, text: 'I bought these as a gift and now I need a set for myself. The quality is incredible for the price.', product: '6-Piece Sheet Set' },
-  { name: 'Michael D.', rating: 5, text: 'Best purchase I\'ve made all year. These sheets are cool, comfortable, and look amazing on the bed.', product: 'Comforter Set' },
-  { name: 'Amanda P.', rating: 5, text: 'I was skeptical about buying sheets online but these exceeded my expectations. So breathable!', product: '6-Piece Sheet Set' },
-  { name: 'David W.', rating: 4, text: 'Great quality sheets. Took a few washes to get really soft but now they\'re perfect.', product: '6-Piece Sheet Set' },
-  { name: 'Jennifer L.', rating: 5, text: 'We replaced all the sheets in our house with CGK. The colors are beautiful and they wash well.', product: '6-Piece Sheet Set' },
-  { name: 'Robert T.', rating: 5, text: 'Finally found sheets that fit my extra deep mattress. The 21-inch deep pockets are a game changer.', product: '6-Piece Sheet Set' },
-  { name: 'Emily C.', rating: 5, text: 'I\'m obsessed with how soft these are. My husband even noticed the difference. Five stars!', product: 'Blanket' },
-  { name: 'Chris H.', rating: 5, text: 'Third time ordering. Once you try CGK sheets, you can\'t go back to anything else.', product: '6-Piece Sheet Set' },
+  {
+    name: 'Lauren K.',
+    rating: 5,
+    text: "I don't normally write reviews unless something is either really good or terrible. These sheets are AMAZING!! They are so soft & very comfortable. I have a mattress topper so finding Queen sheets that fit is so hard but these fit perfectly. I highly recommend them!",
+    product: '6-Piece Sheet Set',
+  },
+  {
+    name: 'Sara T.',
+    rating: 5,
+    text: 'Found these sheets while staying at a vacation rental. Never have we slept so good. Came home and ordered a set. Great price for the quality of the sheet!',
+    product: '6-Piece Sheet Set',
+  },
+  {
+    name: 'John C.',
+    rating: 5,
+    text: "My boyfriend has always preferred warm jersey or flannel sheets while I tend to sleep hot and love the feel of cooler, hotel-style bedding, but every set we tried would eventually pill and stretch out over the week. I ordered these on a whim and was immediately impressed by how soft, comfortable, and well-fitted they felt, and even after three months of regular washing and drying, they've stayed smooth with no pilling, shrinking, or signs of wear.",
+    product: '6-Piece Sheet Set',
+  },
+  {
+    name: 'Aria W.',
+    rating: 5,
+    text: 'I love these sheets! They are so soft and luxurious and wash up perfectly. They are thinner, however that is a bonus for me. We have a down comforter in the winter and in the summer they are nice and cooling.',
+    product: '6-Piece Sheet Set',
+  },
+  {
+    name: 'Gabi & Chaya',
+    rating: 5,
+    text: "These sheets are absolutely fantastic! From the moment I put them on the bed, they felt like true hotel-quality linens. The fabric is incredibly soft, breathable, and genuinely cooling — perfect for a comfortable night's sleep without overheating.",
+    product: '6-Piece Sheet Set',
+  },
 ]
 
-const COLLECTIONS = [
+/**
+ * Fallback collection data when the commerce provider is unavailable.
+ * When Shopify is connected, collections are fetched server-side with images.
+ */
+const FALLBACK_COLLECTIONS = [
   { title: '6-Piece Sheet Sets', href: '/collections/6-piece-sheet-sets' },
   { title: 'Bedding', href: '/collections/bedding' },
   { title: 'Featured', href: '/collections/featured' },
@@ -47,13 +73,44 @@ const COLLECTIONS = [
   { title: 'Comforters', href: '/collections/comforters' },
 ]
 
-const PRESS_LOGOS: { src: string; alt: string }[] = []
+/** Handles to fetch from Shopify, in display order */
+const COLLECTION_HANDLES = [
+  '6-piece-sheet-sets',
+  'bedding',
+  'featured',
+  'blankets',
+  'comforters-1',
+]
 
-const PRESS_ITEMS: { publication: string; quote: string; url?: string }[] = [
-  { publication: 'Esquire', quote: 'CGK Linens sheets deliver luxury hotel quality at a fraction of the price.' },
-  { publication: "Men's Health", quote: 'The best-selling sheets on Amazon live up to the hype.' },
-  { publication: 'Good Housekeeping', quote: 'Incredibly soft, breathable, and durable — our testers were impressed.' },
-  { publication: 'Real Simple', quote: 'A smart buy for anyone looking for high-quality sheets without the designer price tag.' },
+const PRESS_LOGOS: { src: string; alt: string; width?: number }[] = [
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector.svg', alt: 'Good Housekeeping', width: 110 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3662.svg', alt: 'New York Magazine', width: 275 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector_1.svg', alt: 'Esquire', width: 110 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group.svg', alt: 'NBC Select', width: 185 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Mens_Health.svg', alt: "Men's Health", width: 125 },
+]
+
+const PRESS_ITEMS: { publication: string; logoSrc?: string; quote: string; url?: string }[] = [
+  {
+    publication: 'Good Housekeeping',
+    logoSrc: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3686.webp',
+    quote: 'CGK Linens makes some of the most popular bedding, and this particular sheet set is the crown jewel in its lineup.',
+  },
+  {
+    publication: 'Esquire',
+    logoSrc: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Esquire_logo__1993_1.png',
+    quote: 'Top-rated for the reason that they fit around almost anything.',
+  },
+  {
+    publication: 'NBC Select',
+    logoSrc: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_1.webp',
+    quote: 'Fond of this set for its cooling effects, durability and anti-wrinkle properties.',
+  },
+  {
+    publication: 'Real Simple',
+    logoSrc: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_2.webp',
+    quote: 'If your current set feels scratchy or worn out, consider upgrading to the CGK Unlimited 4-Piece Sheet Set.',
+  },
 ]
 
 export default async function HomePage() {
@@ -85,12 +142,12 @@ export default async function HomePage() {
 
       {/* Hero Banner */}
       <HeroBanner
-        headline={`#1 Best Selling Sheets on Amazon`}
-        subheadline="Premium bedding that's soft, breathable, and built to last. Experience the difference."
-        ctaText="Shop Best Sellers"
+        headline="The #1 Best Selling Sheets on Amazon"
+        subheadline="Trusted by Over 5 Million Sleepers a Year"
+        ctaText="Shop Our Sheets"
         ctaHref="/collections/featured"
-        secondaryCtaText="Browse Collections"
-        secondaryCtaHref="/collections"
+        desktopImageUrl="https://cgk-unlimited.myshopify.com/cdn/shop/files/Frame_3297.webp"
+        mobileImageUrl="https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3714.jpg"
       />
 
       {/* Best Sellers */}
@@ -130,10 +187,10 @@ export default async function HomePage() {
       {/* Image + Text: Size Matters */}
       <ImageTextBlock
         title="Size Matters"
-        description="Our sheets feature 21-inch deep pockets that fit mattresses up to 16 inches deep. No more popping off in the middle of the night. Stretchy, snug, and stays put — even on pillow-top mattresses."
-        imageUrl="/images/deep-pocket-hero.jpg"
-        ctaText="Shop Deep Pocket Sheets"
-        ctaHref="/collections/6-piece-sheet-sets"
+        description="The deepest, best-fitting sheets on the internet — up to 21&quot; deep. Our 21&quot; deep-pocket sheets are made to fit thick mattresses, toppers, and adjustable beds. No popping corners, no constant retucking. Just a smooth, snug fit that stays put all night."
+        imageUrl="https://cgk-unlimited.myshopify.com/cdn/shop/files/Mauve_1.webp"
+        ctaText="Shop Extra Deep Sheets"
+        ctaHref="/products/21-inch-6-piece-sheet-set"
         imagePosition="left"
       />
 
@@ -151,13 +208,22 @@ export default async function HomePage() {
       )}
 
       {/* Shop By Collection */}
-      <CollectionGrid
-        title="Shop By Collection"
-        collections={COLLECTIONS}
-      />
+      <Suspense
+        fallback={
+          <CollectionGrid
+            title="Shop By Collection"
+            collections={FALLBACK_COLLECTIONS}
+          />
+        }
+      >
+        <FeaturedCollections />
+      </Suspense>
 
       {/* Testimonials */}
-      <TestimonialCarousel testimonials={TESTIMONIALS} />
+      <TestimonialCarousel
+        title="The Sheets Everyone Is Talking About"
+        testimonials={TESTIMONIALS}
+      />
 
       {/* Newsletter CTA */}
       <section className="bg-cgk-light-blue/30 py-16">
@@ -168,22 +234,22 @@ export default async function HomePage() {
           <p className="mt-2 text-gray-600">
             Get 10% off your first order when you subscribe.
           </p>
-          <form className="mt-6 flex flex-col gap-2 sm:flex-row">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 rounded-btn border border-gray-300 bg-white px-4 py-3 text-sm focus:border-cgk-navy focus:outline-none focus:ring-2 focus:ring-cgk-navy/20"
-              required
-            />
-            <button
-              type="submit"
-              className="rounded-btn bg-cgk-navy px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-cgk-navy/90"
-            >
-              Subscribe
-            </button>
-          </form>
+          <NewsletterForm variant="inline" className="mt-6" />
         </div>
       </section>
+
+      {/* Instagram Feed */}
+      <InstagramFeed
+        images={[
+          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.01.webp', alt: 'CGK Linens bedroom' },
+          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.20.webp', alt: 'CGK Linens sheets' },
+          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.28.webp', alt: 'CGK Linens bedding' },
+          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.33.webp', alt: 'CGK Linens home' },
+          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.07.webp', alt: 'CGK Linens lifestyle' },
+          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/1cbb170336db27d8920ac2ffaf6bcd9b6a518fc0.webp', alt: 'CGK Linens collection' },
+        ]}
+        handle="@CGKLINENS"
+      />
     </div>
   )
 }
@@ -225,6 +291,66 @@ async function FeaturedProducts() {
       <div className="rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
         Unable to load products. Please check your store connection.
       </div>
+    )
+  }
+}
+
+/**
+ * Fetch collections from Shopify with images for the CollectionGrid.
+ * Falls back to static collection data if the commerce provider is unavailable.
+ */
+async function FeaturedCollections() {
+  const commerce = await getCommerceProvider()
+
+  if (!commerce) {
+    return (
+      <CollectionGrid
+        title="Shop By Collection"
+        collections={FALLBACK_COLLECTIONS}
+      />
+    )
+  }
+
+  try {
+    // Fetch each collection by handle to get its image
+    const collectionResults = await Promise.all(
+      COLLECTION_HANDLES.map((handle) =>
+        commerce.collections.getByHandle(handle)
+      )
+    )
+
+    // Map fetched collections to CollectionGrid format, filtering out nulls
+    const collections = collectionResults
+      .filter((c) => c !== null)
+      .map((c) => ({
+        title: c.title,
+        href: `/collections/${c.handle}`,
+        imageUrl: c.image?.url,
+      }))
+
+    // Fall back to static data if no collections were found
+    if (collections.length === 0) {
+      return (
+        <CollectionGrid
+          title="Shop By Collection"
+          collections={FALLBACK_COLLECTIONS}
+        />
+      )
+    }
+
+    return (
+      <CollectionGrid
+        title="Shop By Collection"
+        collections={collections}
+      />
+    )
+  } catch {
+    // On error, render with static fallback data
+    return (
+      <CollectionGrid
+        title="Shop By Collection"
+        collections={FALLBACK_COLLECTIONS}
+      />
     )
   }
 }

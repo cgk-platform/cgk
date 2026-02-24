@@ -12,6 +12,40 @@ import { CartProvider, useCart } from '@/components/cart/CartProvider'
 import { CartLineItem } from '@/components/cart/CartLineItem'
 import { CartSummary } from '@/components/cart/CartSummary'
 
+function FreeShippingBar({ subtotal }: { subtotal: number }) {
+  const threshold = 50
+  const remaining = Math.max(0, threshold - subtotal)
+  const progress = Math.min(100, (subtotal / threshold) * 100)
+
+  return (
+    <div className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
+      {remaining > 0 ? (
+        <>
+          <p className="text-sm text-gray-600">
+            You&apos;re <span className="font-semibold text-cgk-navy">${remaining.toFixed(2)}</span> away from{' '}
+            <span className="font-semibold text-cgk-navy">FREE 3-Day Delivery!</span>
+          </p>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100">
+            <div
+              className="h-full rounded-full bg-cgk-navy transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="flex items-center gap-2">
+          <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <p className="text-sm font-semibold text-green-600">
+            You&apos;ve earned FREE 3-Day Delivery!
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface CartPageContentProps {
   initialCart: Cart | null
   tenantSlug: string
@@ -36,6 +70,8 @@ function CartPageInner() {
     return <EmptyCart />
   }
 
+  const subtotal = parseFloat(cart.cost.subtotalAmount.amount)
+
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
       {/* Cart Items */}
@@ -46,6 +82,8 @@ function CartPageInner() {
             {cart.totalQuantity} {cart.totalQuantity === 1 ? 'item' : 'items'}
           </span>
         </div>
+
+        <FreeShippingBar subtotal={subtotal} />
 
         <div className="divide-y rounded-xl border bg-card">
           {cart.lines.map((line) => (
@@ -75,12 +113,37 @@ function CartPageInner() {
             <CartSummary showDiscountInput />
           </div>
 
-          {/* Security Badges */}
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <SecurityBadge icon="visa" />
-            <SecurityBadge icon="mastercard" />
-            <SecurityBadge icon="amex" />
-            <SecurityBadge icon="paypal" />
+          {/* Payment Method Icons */}
+          <div className="mt-6 flex items-center justify-center gap-3">
+            {/* Visa */}
+            <svg className="h-6 text-gray-400" viewBox="0 0 48 32" fill="currentColor">
+              <rect width="48" height="32" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M19.5 21h-2.7l1.7-10.5h2.7L19.5 21zm11.2-10.2c-.5-.2-1.4-.4-2.4-.4-2.7 0-4.6 1.4-4.6 3.4 0 1.5 1.3 2.3 2.4 2.8 1 .5 1.4.8 1.4 1.3 0 .7-.8 1-1.6 1-1.1 0-1.6-.2-2.5-.5l-.3-.2-.4 2.2c.6.3 1.8.5 3 .5 2.8 0 4.7-1.4 4.7-3.5 0-1.2-.7-2-2.3-2.8-.9-.5-1.5-.8-1.5-1.3 0-.4.5-.9 1.5-.9.9 0 1.5.2 2 .4l.2.1.4-2.1zm6.8-.3h-2.1c-.6 0-1.1.2-1.4.8L30 21h2.8l.6-1.5h3.5l.3 1.5H40l-2.4-10.5h-.1zm-2.2 6.8l1.1-3 .3-.8.2.7.6 3.1h-2.2zM16 10.5l-2.6 7.2-.3-1.4c-.5-1.6-2-3.4-3.7-4.3l2.4 9h2.9l4.3-10.5H16z" />
+              <path d="M11 10.5H6.9l-.1.2c3.3.8 5.5 2.9 6.4 5.3l-.9-4.7c-.2-.6-.7-.8-1.3-.8z" />
+            </svg>
+            {/* Mastercard */}
+            <svg className="h-6 text-gray-400" viewBox="0 0 48 32" fill="currentColor">
+              <rect width="48" height="32" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="19" cy="16" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <circle cx="29" cy="16" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            </svg>
+            {/* Amex */}
+            <svg className="h-6 text-gray-400" viewBox="0 0 48 32" fill="currentColor">
+              <rect width="48" height="32" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <text x="24" y="18" textAnchor="middle" fontSize="8" fontWeight="bold" fill="currentColor" fontFamily="sans-serif">AMEX</text>
+            </svg>
+            {/* PayPal */}
+            <svg className="h-6 text-gray-400" viewBox="0 0 48 32" fill="currentColor">
+              <rect width="48" height="32" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M18.5 10h4.2c2.3 0 3.5 1.2 3.3 3-.3 2.5-2 4-4.5 4h-1.2c-.3 0-.6.3-.7.6l-.5 3.4h-2.3l1.7-11zm2.5 5h.8c1.2 0 2-.6 2.2-1.8.1-.9-.4-1.4-1.4-1.4h-.7l-.9 3.2zm8.5-1.5c.5-.3 1.2-.5 2-.5 1.8 0 2.8.9 2.6 2.6-.3 2.4-1.9 3.9-4.1 3.9-.8 0-1.4-.1-1.9-.4l.3-1.7c.4.2.9.3 1.4.3.9 0 1.7-.6 1.8-1.5.1-.6-.3-1-.9-1-.4 0-.8.1-1.1.3l.3-1.7-.4-.3z" />
+            </svg>
+            {/* Lock icon for secure checkout */}
+            <div className="flex items-center gap-1 text-xs text-gray-400">
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Secure</span>
+            </div>
           </div>
         </div>
       </div>
@@ -183,15 +246,6 @@ function CartSkeleton() {
           <div className="h-14 w-full animate-pulse rounded-xl bg-muted" />
         </div>
       </div>
-    </div>
-  )
-}
-
-// Security badge placeholder
-function SecurityBadge({ icon }: { icon: string }) {
-  return (
-    <div className="flex h-8 w-12 items-center justify-center rounded border bg-muted/50 text-xs text-muted-foreground">
-      {icon}
     </div>
   )
 }

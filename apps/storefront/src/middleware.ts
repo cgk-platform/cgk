@@ -87,11 +87,46 @@ function extractTenantFromSubdomain(hostname: string): string | null {
 }
 
 /**
- * In-memory cache for domain lookups
- * This is a simple LRU-style cache that expires entries after 5 minutes
+ * In-memory LRU cache for domain-to-tenant lookups.
+ * Entries expire after 5 minutes. Map is capped at 1000 entries;
+ * oldest entries are evicted when the cap is reached.
+ * Map insertion order is used as an LRU approximation.
  */
-const domainCache = new Map<string, { slug: string | null; timestamp: number }>()
+const CACHE_MAX_SIZE = 1000
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+const domainCache = new Map<string, { slug: string | null; timestamp: number }>()
+
+/**
+ * Get a cached domain lookup, returning undefined on miss/expiry.
+ * Promotes the entry to most-recent on hit (LRU refresh).
+ */
+function cacheGet(host: string): string | null | undefined {
+  const entry = domainCache.get(host)
+  if (!entry) return undefined
+  if (Date.now() - entry.timestamp > CACHE_TTL) {
+    domainCache.delete(host)
+    return undefined
+  }
+  // LRU refresh: delete and re-insert to move to end (most-recent)
+  domainCache.delete(host)
+  domainCache.set(host, entry)
+  return entry.slug
+}
+
+/**
+ * Store a domain lookup result. Evicts oldest entries when cache is full.
+ */
+function cacheSet(host: string, slug: string | null): void {
+  // Evict oldest entries if at capacity
+  if (domainCache.size >= CACHE_MAX_SIZE) {
+    // Map iterates in insertion order; first key is the oldest
+    const oldestKey = domainCache.keys().next().value
+    if (oldestKey !== undefined) {
+      domainCache.delete(oldestKey)
+    }
+  }
+  domainCache.set(host, { slug, timestamp: Date.now() })
+}
 
 /**
  * Look up tenant from custom domain mapping
@@ -109,10 +144,10 @@ async function lookupTenantFromCustomDomain(hostname: string): Promise<string | 
     return null
   }
 
-  // Check cache first
-  const cached = domainCache.get(host)
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.slug
+  // Check cache first (returns undefined on miss/expiry)
+  const cached = cacheGet(host)
+  if (cached !== undefined) {
+    return cached
   }
 
   // Call internal API endpoint to perform database lookup

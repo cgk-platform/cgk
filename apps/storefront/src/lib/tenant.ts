@@ -7,6 +7,7 @@
 import { sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { cache } from 'react'
+import { decryptToken, looksEncrypted } from './crypto'
 
 /**
  * Tenant configuration for storefront
@@ -97,13 +98,34 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
     // Add Shopify config if available — tenant MUST have its own token
     // SECURITY: Never fall back to a global env var; that would leak cross-tenant data
     if (org.shopify_store_domain) {
-      const storefrontToken = org.shopify_config?.storefrontAccessToken
+      const rawToken = org.shopify_config?.storefrontAccessToken
 
-      if (storefrontToken) {
-        config.shopify = {
-          storeDomain: org.shopify_store_domain,
-          storefrontAccessToken: storefrontToken,
-          checkoutDomain: org.shopify_config?.checkoutDomain,
+      if (rawToken) {
+        // Decrypt the token if an encryption key is configured and the stored
+        // value looks like an AES-256-GCM ciphertext (iv:authTag:ciphertext).
+        // Falls back to the raw value when encryption is not in use so that
+        // existing plaintext tokens continue to work without migration.
+        let storefrontToken = rawToken
+        const encryptionKey = process.env.SHOPIFY_TOKEN_ENCRYPTION_KEY
+
+        if (encryptionKey && looksEncrypted(rawToken)) {
+          try {
+            storefrontToken = await decryptToken(rawToken, encryptionKey)
+          } catch (err) {
+            console.warn(
+              `[tenant] Failed to decrypt Shopify storefront token for "${slug}" — skipping Shopify config`,
+              err,
+            )
+            storefrontToken = null as unknown as string
+          }
+        }
+
+        if (storefrontToken) {
+          config.shopify = {
+            storeDomain: org.shopify_store_domain,
+            storefrontAccessToken: storefrontToken,
+            checkoutDomain: org.shopify_config?.checkoutDomain,
+          }
         }
       }
     }

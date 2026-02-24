@@ -217,18 +217,43 @@ export default async function CollectionPage({
       </nav>
 
       {/* Collection Banner */}
-      <div className="mb-8 rounded-lg bg-cgk-light-blue/30 px-6 py-8 text-center">
-        <h1 className="text-3xl font-bold text-cgk-navy">{collectionName}</h1>
-        {collectionDescription ? (
-          <p className="mx-auto mt-2 max-w-xl text-gray-600">
-            {collectionDescription}
-          </p>
-        ) : (
-          <p className="mx-auto mt-2 max-w-xl text-gray-600">
-            Premium bedding that&apos;s soft, breathable, and built to last.
-          </p>
-        )}
-      </div>
+      {collection?.image ? (
+        <div className="relative mb-8 overflow-hidden rounded-lg">
+          <img
+            src={collection.image.url}
+            alt={collection.image.altText ?? collectionName}
+            width={collection.image.width ?? 1200}
+            height={collection.image.height ?? 400}
+            className="h-48 w-full object-cover sm:h-64 lg:h-80"
+          />
+          <div className="absolute inset-0 bg-cgk-navy/50" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
+            <h1 className="text-3xl font-bold text-white drop-shadow-lg">{collectionName}</h1>
+            {collectionDescription ? (
+              <p className="mx-auto mt-2 max-w-xl text-white/90 drop-shadow">
+                {collectionDescription}
+              </p>
+            ) : (
+              <p className="mx-auto mt-2 max-w-xl text-white/90 drop-shadow">
+                Premium bedding that&apos;s soft, breathable, and built to last.
+              </p>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="mb-8 rounded-lg bg-cgk-light-blue/30 px-6 py-8 text-center">
+          <h1 className="text-3xl font-bold text-cgk-navy">{collectionName}</h1>
+          {collectionDescription ? (
+            <p className="mx-auto mt-2 max-w-xl text-gray-600">
+              {collectionDescription}
+            </p>
+          ) : (
+            <p className="mx-auto mt-2 max-w-xl text-gray-600">
+              Premium bedding that&apos;s soft, breathable, and built to last.
+            </p>
+          )}
+        </div>
+      )}
 
       <Suspense
         fallback={

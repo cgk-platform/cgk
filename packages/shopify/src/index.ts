@@ -63,7 +63,10 @@ export {
   // Shop & Navigation
   getShop,
   getMenu,
+  getShopPolicies,
   type ShopInfo,
+  type ShopPolicy,
+  type ShopPolicies,
   type ShopifyMenu,
   type ShopifyMenuItem,
   // Metafields

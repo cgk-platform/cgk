@@ -8,7 +8,7 @@
 
 import type { Product } from '@cgk-platform/commerce'
 import { cn } from '@cgk-platform/ui'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 
 import { VariantSelector, PriceDisplay } from '@/components/products'
 import { AddToCartButton } from '@/components/cart'
@@ -89,6 +89,26 @@ function ProductInfoInner({
 
   const isAvailable = selectedVariant?.availableForSale ?? product.availableForSale
 
+  // Track visibility of the main add-to-cart button for mobile sticky bar
+  const addToCartRef = useRef<HTMLDivElement>(null)
+  const [showStickyBar, setShowStickyBar] = useState(false)
+
+  useEffect(() => {
+    const target = addToCartRef.current
+    if (!target) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show sticky bar when main button is NOT visible
+        setShowStickyBar(!entry!.isIntersecting)
+      },
+      { threshold: 0 }
+    )
+
+    observer.observe(target)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <div className="space-y-6">
       {/* Variant Selector */}
@@ -152,7 +172,7 @@ function ProductInfoInner({
       </div>
 
       {/* Add to Cart Button */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div ref={addToCartRef} className="flex flex-col gap-3 sm:flex-row">
         {selectedVariant ? (
           <AddToCartButton
             variantId={selectedVariant.id}
@@ -263,6 +283,36 @@ function ProductInfoInner({
           <span>Fast Shipping</span>
         </div>
       </div>
+
+      {/* Mobile Sticky Add-to-Cart Bar */}
+      {showStickyBar && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-white shadow-lg lg:hidden">
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="text-sm font-semibold text-cgk-navy">
+              {selectedVariant
+                ? `$${parseFloat(selectedVariant.price.amount).toFixed(2)}`
+                : `$${parseFloat(product.priceRange.minVariantPrice.amount).toFixed(2)}`}
+            </div>
+            {selectedVariant ? (
+              <AddToCartButton
+                variantId={selectedVariant.id}
+                productTitle={product.title}
+                quantity={quantity}
+                available={isAvailable}
+                className="rounded-lg px-6 py-2.5 text-sm"
+              />
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="rounded-lg bg-muted px-6 py-2.5 text-sm font-semibold text-muted-foreground"
+              >
+                Select Options
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

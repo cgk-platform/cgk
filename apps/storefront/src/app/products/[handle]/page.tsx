@@ -275,6 +275,54 @@ async function ProductContent({ handle }: ProductContentProps) {
             tenantSlug={tenant?.slug ?? 'unknown'}
           />
 
+          {/* Trust Badges */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="flex items-center gap-2 rounded-lg bg-cgk-light-blue/20 px-3 py-2.5">
+              <svg className="h-5 w-5 shrink-0 text-cgk-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+              <span className="text-xs font-medium text-cgk-charcoal">Best Seller</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg bg-cgk-light-blue/20 px-3 py-2.5">
+              <svg className="h-5 w-5 shrink-0 text-cgk-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.5 12c2-4 5-6 8.5-6s6.5 2 8.5 6c-2 4-5 6-8.5 6s-6.5-2-8.5-6z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 8c1.5-1 3-1.5 4.5-1.5M18 8c-1.5-1-3-1.5-4.5-1.5" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 16c1 .5 2 .8 3 .8s2-.3 3-.8" />
+              </svg>
+              <span className="text-xs font-medium text-cgk-charcoal">Breathable</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg bg-cgk-light-blue/20 px-3 py-2.5">
+              <svg className="h-5 w-5 shrink-0 text-cgk-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7h16M4 12h16M4 17h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 7v10M18 7v10" />
+              </svg>
+              <span className="text-xs font-medium text-cgk-charcoal">Deep Pockets</span>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg bg-cgk-light-blue/20 px-3 py-2.5">
+              <svg className="h-5 w-5 shrink-0 text-cgk-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2" strokeWidth={1.5} />
+                <circle cx="12" cy="12" r="3" strokeWidth={1.5} />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v1.5M12 13.5V15M9.5 11H9M15 11h-.5M10 10l.5.5M14 14l.5-.5M14 10l-.5.5M10 14l-.5-.5" />
+              </svg>
+              <span className="text-xs font-medium text-cgk-charcoal">Easy Care</span>
+            </div>
+          </div>
+
+          {/* Inline Testimonial */}
+          <div className="rounded-lg bg-cgk-light-blue/20 px-5 py-4">
+            <div className="mb-1 flex gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <svg key={i} className="h-4 w-4 text-cgk-gold" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
+            </div>
+            <p className="text-sm italic text-cgk-charcoal">
+              &ldquo;They&apos;re like wrapping yourself in a cloud...&rdquo;
+            </p>
+            <p className="mt-1 text-xs font-semibold text-cgk-charcoal/70">&mdash; Lauren K.</p>
+          </div>
+
           {/* Free Shipping Note */}
           <p className="text-sm font-semibold text-cgk-gold">
             FREE 3-DAY DELIVERY FOR ORDERS OVER $50

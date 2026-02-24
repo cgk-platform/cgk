@@ -30,6 +30,20 @@ const securityHeaders = [
 const nextConfig = {
   transpilePackages: ['@cgk-platform/ui', '@cgk-platform/core', '@cgk-platform/commerce', '@cgk-platform/shopify', '@cgk-platform/analytics'],
 
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.myshopify.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.shopify.com',
+      },
+    ],
+  },
+
   async headers() {
     return [
       {
