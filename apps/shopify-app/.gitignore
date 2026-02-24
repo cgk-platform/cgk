@@ -1,1 +1,19 @@
 .vercel
+node_modules
+build
+dist
+.shopify
+shopify.app.*.toml
+
+# Prisma
+prisma/dev.sqlite
+prisma/dev.sqlite-journal
+prisma/migrations
+
+# Vite
+.vite
+
+# Rust / WASM build artifacts
+target/
+extensions/*/target/
+Cargo.lock

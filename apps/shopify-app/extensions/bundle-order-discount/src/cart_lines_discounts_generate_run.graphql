@@ -1,0 +1,33 @@
+query Input {
+  cart {
+    lines {
+      id
+      quantity
+      cost {
+        amountPerQuantity {
+          amount
+        }
+        subtotalAmount {
+          amount
+        }
+      }
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          id
+        }
+      }
+      bundleId: attribute(key: "_bundle_id") {
+        value
+      }
+      isFreeGift: attribute(key: "_bundle_free_gift") {
+        value
+      }
+    }
+  }
+  discount {
+    metafield(namespace: "$app:bundle-discount", key: "config") {
+      jsonValue
+    }
+  }
+}

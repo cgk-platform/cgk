@@ -46,6 +46,9 @@ export const EXTENSIONS = {
   DELIVERY_CUSTOMIZATION: 'delivery-customization',
   SESSION_STITCHING_PIXEL: 'session-stitching-pixel',
   POST_PURCHASE_SURVEY: 'post-purchase-survey',
+  BUNDLE_ORDER_DISCOUNT: 'bundle-order-discount',
+  BUNDLE_CART_TRANSFORM: 'bundle-cart-transform',
+  BUNDLE_BUILDER: 'bundle-builder',
 } as const
 
 export type ExtensionHandle = (typeof EXTENSIONS)[keyof typeof EXTENSIONS]

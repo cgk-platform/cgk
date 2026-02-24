@@ -1,20 +1,32 @@
 /* Bundle Builder — Scoped Styles (.bb- prefix) */
 
+/* Scoped box-sizing reset */
+.bb-container,
+.bb-container *,
+.bb-container *::before,
+.bb-container *::after {
+  box-sizing: border-box;
+}
+
 .bb-container {
   --bb-bg: var(--bb-bg-color, #ffffff);
   --bb-text: var(--bb-text-color, #1a1a2e);
   --bb-accent: var(--bb-accent-color, #2563eb);
-  --bb-accent-light: rgba(37, 99, 235, 0.12);
-  --bb-accent-hover: rgba(37, 99, 235, 0.4);
-  --bb-accent-muted: rgba(37, 99, 235, 0.2);
-  --bb-text-muted: rgba(26, 26, 46, 0.65);
-  --bb-text-faded: rgba(26, 26, 46, 0.5);
-  --bb-text-hint: rgba(26, 26, 46, 0.6);
-  --bb-border: #e5e7eb;
+  --bb-btn-text: var(--bb-btn-text-color, #ffffff);
+  --bb-accent-light: color-mix(in srgb, var(--bb-accent) 12%, transparent);
+  --bb-accent-hover: color-mix(in srgb, var(--bb-accent) 40%, transparent);
+  --bb-accent-muted: color-mix(in srgb, var(--bb-accent) 20%, transparent);
+  --bb-text-muted: color-mix(in srgb, var(--bb-text) 65%, transparent);
+  --bb-text-faded: color-mix(in srgb, var(--bb-text) 50%, transparent);
+  --bb-text-hint: color-mix(in srgb, var(--bb-text) 60%, transparent);
+  --bb-border: color-mix(in srgb, var(--bb-text) 15%, transparent);
+  --bb-card-placeholder-bg: color-mix(in srgb, var(--bb-text) 5%, var(--bb-bg));
+  --bb-card-placeholder-icon: color-mix(in srgb, var(--bb-text) 25%, transparent);
+  --bb-compare-price: color-mix(in srgb, var(--bb-text) 45%, transparent);
   --bb-radius: 12px;
   --bb-card-radius: 10px;
-  --bb-success-bg: #dcfce7;
-  --bb-success-text: #15803d;
+  --bb-success-bg: color-mix(in srgb, var(--bb-accent) 12%, var(--bb-bg));
+  --bb-success-text: color-mix(in srgb, var(--bb-accent) 80%, var(--bb-text));
 
   max-width: 1200px;
   margin: 0 auto;
@@ -76,7 +88,7 @@
   border-radius: var(--bb-card-radius);
   overflow: hidden;
   cursor: pointer;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s, opacity 0.2s;
   background: var(--bb-bg);
   user-select: none;
   -webkit-user-select: none;
@@ -111,19 +123,23 @@
 .bb-card--sold-out {
   opacity: 0.5;
   cursor: not-allowed;
-  pointer-events: none;
 }
 
 .bb-card--sold-out .bb-card__image {
   filter: grayscale(0.6);
 }
 
+/* Max items reached — dim unselected available cards */
+.bb-container--max-reached .bb-card:not(.bb-card--selected):not(.bb-card--sold-out) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Card Image */
 .bb-card__image-wrap {
   position: relative;
-  aspect-ratio: 1;
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--bb-card-placeholder-bg);
 }
 
 .bb-card__image {
@@ -143,7 +159,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ccc;
+  color: var(--bb-card-placeholder-icon);
 }
 
 .bb-card__placeholder-icon {
@@ -170,6 +186,11 @@
   color: #fff;
 }
 
+.bb-card__badge--free-gift {
+  background: var(--bb-accent);
+  color: var(--bb-btn-text);
+}
+
 /* Card Check */
 .bb-card__check {
   position: absolute;
@@ -179,7 +200,7 @@
   height: 28px;
   border-radius: 50%;
   background: var(--bb-accent);
-  color: #fff;
+  color: var(--bb-btn-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,7 +245,7 @@
 
 .bb-card__compare-price {
   font-size: 0.85rem;
-  color: #999;
+  color: var(--bb-compare-price);
   text-decoration: line-through;
 }
 
@@ -244,12 +265,14 @@
   border-radius: 50%;
   border: 1px solid var(--bb-border);
   background: var(--bb-bg);
+  color: var(--bb-text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.15s, border-color 0.15s;
   padding: 0;
+  font-family: inherit;
 }
 
 .bb-qty-btn svg {
@@ -302,10 +325,10 @@
   gap: 4px;
 }
 
-/* Tier Unlock Notification */
+/* Tier Unlock Notification — positioned relative to container, not viewport */
 .bb-notification {
-  position: fixed;
-  top: 20px;
+  position: absolute;
+  top: 0;
   left: 50%;
   transform: translateX(-50%) translateY(-120%);
   background: var(--bb-success-bg);
@@ -315,7 +338,7 @@
   font-weight: 600;
   font-size: 0.95rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 9999;
+  z-index: 10;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   white-space: nowrap;
@@ -323,6 +346,13 @@
 
 .bb-notification--visible {
   transform: translateX(-50%) translateY(0);
+}
+
+.bb-notification__icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+  border-radius: 4px;
 }
 
 /* Tier Progress */
@@ -360,6 +390,7 @@
   font-size: 0.85rem;
   color: var(--bb-text-hint);
   margin: 8px 0 0;
+  display: none;
 }
 
 /* Summary */
@@ -427,7 +458,8 @@
   padding: 16px 24px;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #fff;
+  font-family: inherit;
+  color: var(--bb-btn-text);
   background: var(--bb-accent);
   border: none;
   border-radius: var(--bb-radius);
@@ -462,8 +494,8 @@
   width: 20px;
   height: 20px;
   margin: -10px 0 0 -10px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border: 2px solid color-mix(in srgb, var(--bb-btn-text) 30%, transparent);
+  border-top-color: var(--bb-btn-text);
   border-radius: 50%;
   animation: bb-spin 0.6s linear infinite;
 }

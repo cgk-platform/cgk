@@ -1,0 +1,17 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "Bundle Discount"
+handle = "bundle-order-discount"
+uid = "a9324fe1-c50d-0072-1eb3-b1ed4a5dada422519e9c"
+type = "function"
+
+  [[extensions.targeting]]
+  target = "cart.lines.discounts.generate.run"
+  input_query = "src/cart_lines_discounts_generate_run.graphql"
+  export = "cart_lines_discounts_generate_run"
+
+  [extensions.build]
+  command = "bash ../../build-wasm.sh"
+  path = "../../target/wasm32-wasip1/release/bundle_order_discount.wasm"
+  watch = ["src/**/*.rs"]

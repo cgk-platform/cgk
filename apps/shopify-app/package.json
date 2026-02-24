@@ -2,13 +2,14 @@
   "name": "@cgk-platform/shopify-app",
   "version": "0.0.0",
   "private": true,
-  "description": "CGK Platform Shopify App with Extensions - Delivery Customization, Session Stitching, and Post-Purchase Survey",
+  "description": "CGK Platform Shopify App — Bundle Builder, Delivery Customization, Session Stitching, Post-Purchase Survey",
   "license": "MIT",
   "type": "module",
   "scripts": {
+    "build": "remix vite:build",
     "dev": "shopify app dev",
-    "build": "echo 'Shopify app built via shopify:build - skipping in turbo'",
-    "shopify:build": "shopify app build",
+    "start": "remix-serve ./build/server/index.js",
+    "setup": "prisma generate && prisma migrate deploy",
     "deploy": "shopify app deploy",
     "deploy:force": "shopify app deploy --force",
     "config:link": "shopify app config link",
@@ -21,22 +22,39 @@
     "logs": "shopify app logs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "clean": "rm -rf dist .shopify"
+    "clean": "rm -rf dist build .shopify",
+    "prisma": "prisma",
+    "shopify": "shopify",
+    "graphql-codegen": "graphql-codegen",
+    "vite": "vite"
   },
   "dependencies": {
-    "@cgk-platform/shopify": "workspace:*",
-    "@shopify/shopify-app-remix": "^3.4.0"
+    "@prisma/client": "^6.2.1",
+    "@remix-run/dev": "^2.16.1",
+    "@remix-run/fs-routes": "^2.16.1",
+    "@remix-run/node": "^2.16.1",
+    "@remix-run/react": "^2.16.1",
+    "@remix-run/serve": "^2.16.1",
+    "@shopify/app-bridge-react": "^4.1.6",
+    "@shopify/polaris": "^12.0.0",
+    "@shopify/shopify-app-remix": "^4.1.0",
+    "@shopify/shopify-app-session-storage-prisma": "^8.0.0",
+    "isbot": "^5.1.0",
+    "prisma": "^6.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "vite-tsconfig-paths": "^5.0.1"
   },
   "devDependencies": {
-    "@cgk-platform/eslint-config": "workspace:*",
-    "@cgk-platform/typescript-config": "workspace:*",
-    "@shopify/cli": "^3.58.0",
-    "@shopify/app": "^3.58.0",
-    "@types/node": "^22.0.0",
-    "eslint": "^9.18.0",
-    "typescript": "^5.9.0"
+    "@remix-run/route-config": "^2.16.1",
+    "@shopify/api-codegen-preset": "^1.1.1",
+"@types/node": "^22.0.0",
+    "@types/react": "^18.2.31",
+    "@types/react-dom": "^18.2.14",
+    "typescript": "^5.9.0",
+    "vite": "^6.2.2"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.19 <22 || >=22.12"
   }
 }

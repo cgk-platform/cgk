@@ -1,7 +1,11 @@
-{%- comment -%}
+{% doc %}
   Bundle product card snippet.
-  Accepts: product (product object), index (number), section_id (string), aspect_css (string)
-{%- endcomment -%}
+
+  @param {product} product - The product to render
+  @param {number} index - Position index in the bundle grid
+  @param {string} aspect_css - CSS aspect-ratio value (e.g. '1', '3/4', '4/3')
+  @param {boolean} is_free_gift - Whether this card is a free gift (shows FREE badge)
+{% enddoc %}
 
 {%- if product != blank -%}
   {%- assign first_variant = product.selected_or_first_available_variant -%}
@@ -10,6 +14,17 @@
   {%- unless first_variant.available -%}
     {%- assign is_sold_out = true -%}
   {%- endunless -%}
+
+  {%- comment -%} Compute image height from aspect ratio for proper intrinsic sizing {%- endcomment -%}
+  {%- case card_aspect -%}
+    {%- when '3/4' -%}
+      {%- assign img_height = 533 -%}
+    {%- when '4/3' -%}
+      {%- assign img_height = 300 -%}
+    {%- else -%}
+      {%- assign img_height = 400 -%}
+  {%- endcase -%}
+
   <div
     class="bb-card{% if is_sold_out %} bb-card--sold-out{% endif %}"
     data-product-id="{{ product.id }}"
@@ -29,10 +44,15 @@
       {%- if product.featured_image -%}
         <img
           src="{{ product.featured_image | image_url: width: 400 }}"
+          srcset="{{ product.featured_image | image_url: width: 200 }} 200w,
+                  {{ product.featured_image | image_url: width: 400 }} 400w,
+                  {{ product.featured_image | image_url: width: 600 }} 600w,
+                  {{ product.featured_image | image_url: width: 800 }} 800w"
+          sizes="(max-width: 374px) 100vw, (max-width: 639px) 50vw, 33vw"
           alt="{{ product.featured_image.alt | default: product.title | escape }}"
           class="bb-card__image"
           width="400"
-          height="400"
+          height="{{ img_height }}"
           loading="lazy"
         >
       {%- else -%}
@@ -46,6 +66,9 @@
       {%- endif -%}
       {%- if is_sold_out -%}
         <div class="bb-card__badge bb-card__badge--sold-out">Sold Out</div>
+      {%- endif -%}
+      {%- if is_free_gift -%}
+        <div class="bb-card__badge bb-card__badge--free-gift">FREE</div>
       {%- endif -%}
       <div class="bb-card__check">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -65,11 +88,11 @@
     </div>
 
     <div class="bb-card__quantity">
-      <button type="button" class="bb-qty-btn bb-qty-btn--minus" aria-label="Decrease quantity" data-action="decrease">
+      <button type="button" class="bb-qty-btn bb-qty-btn--minus" aria-label="Decrease quantity for {{ product.title | escape }}" data-action="decrease">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
       <span class="bb-qty-value" aria-live="polite">1</span>
-      <button type="button" class="bb-qty-btn bb-qty-btn--plus" aria-label="Increase quantity" data-action="increase">
+      <button type="button" class="bb-qty-btn bb-qty-btn--plus" aria-label="Increase quantity for {{ product.title | escape }}" data-action="increase">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </button>
     </div>

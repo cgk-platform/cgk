@@ -1,0 +1,24 @@
+{
+  "cart": {
+    "lines": [
+      {
+        "id": "gid://shopify/CartLine/1",
+        "quantity": 1,
+        "cost": {
+          "amountPerQuantity": { "amount": "29.99", "currencyCode": "USD" }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/100"
+        },
+        "bundleId": null,
+        "bundleName": null,
+        "bundleDiscount": null,
+        "isFreeGift": null
+      }
+    ]
+  },
+  "cartTransform": {
+    "metafield": null
+  }
+}

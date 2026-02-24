@@ -5,10 +5,12 @@
 (function () {
   'use strict';
 
+  var instances = new WeakMap();
+
   class BundleBuilder {
     constructor(section) {
       this.section = section;
-      this.selectedProducts = new Map(); // variantId -> { productId, variantId, title, price, quantity }
+      this.selectedProducts = new Map();
       this.tiers = this.parseTiers();
       this.minItems = parseInt(section.dataset.minItems, 10) || 1;
       this.maxItems = parseInt(section.dataset.maxItems, 10) || 99;
@@ -16,17 +18,23 @@
       this.showSavings = section.dataset.showSavings === 'true';
       this.showTierProgress = section.dataset.showTierProgress === 'true';
       this.bundleName = section.dataset.bundleName || 'Bundle';
-      this.bundleId = section.dataset.sectionId || 'bundle';
+      this.bundleId = section.dataset.blockId || section.dataset.sectionId || 'bundle';
       this.ctaText = section.dataset.ctaText || 'Add Bundle to Cart';
       this.cartRedirect = section.dataset.cartRedirect === 'true';
+      this.moneyFormat = section.dataset.moneyFormat || '';
       this.isLoading = false;
-      this.previousTierIndex = -1; // Track tier unlocks for notifications
+      this.isRedirecting = false;
+      this.previousTierIndex = -1;
+      this.notificationTimeout = null;
+      this.activeFreeGifts = new Map(); // variantId -> cart line key
+      this.freeGiftPending = false;
 
       this.els = {
         cards: section.querySelectorAll('.bb-card'),
         tierSection: section.querySelector('.bb-tier'),
         tierLabel: section.querySelector('.bb-tier__label'),
         tierFill: section.querySelector('.bb-tier__fill'),
+        tierBar: section.querySelector('[role="progressbar"]'),
         tierHint: section.querySelector('.bb-tier__hint'),
         subtotal: section.querySelector('[data-summary="subtotal"]'),
         discount: section.querySelector('[data-summary="discount"]'),
@@ -57,7 +65,6 @@
       var self = this;
 
       this.els.cards.forEach(function (card) {
-        // Skip sold-out products
         if (card.dataset.available === 'false') return;
 
         card.addEventListener('click', function (e) {
@@ -209,10 +216,10 @@
     calculateDiscount(subtotal, tier) {
       if (!tier) return 0;
       if (this.discountType === 'percentage') {
-        return Math.round(subtotal * (tier.discount / 100));
+        var pct = Math.min(tier.discount, 100);
+        return Math.round(subtotal * (pct / 100));
       }
-      // Fixed amount discount (in cents)
-      return tier.discount;
+      return Math.min(tier.discount, subtotal);
     }
 
     recalculate() {
@@ -224,14 +231,14 @@
       var discountAmount = this.calculateDiscount(subtotal, activeTier);
       var total = Math.max(0, subtotal - discountAmount);
 
-      // Update summary
       if (this.els.subtotal) {
         this.els.subtotal.textContent = this.formatMoney(subtotal);
       }
 
       if (this.els.discount) {
         this.els.discount.textContent = discountAmount > 0 ? '-' + this.formatMoney(discountAmount) : this.formatMoney(0);
-        this.els.discount.closest('.bb-summary__row').style.display = discountAmount > 0 ? '' : 'none';
+        var discountRow = this.els.discount.closest('.bb-summary__row');
+        if (discountRow) discountRow.style.display = discountAmount > 0 ? '' : 'none';
       }
 
       if (this.els.total) {
@@ -242,22 +249,21 @@
         this.els.itemCount.textContent = totalItems;
       }
 
-      // Update active tier badge in summary
       if (this.els.tierBadge) {
+        var tierRow = this.els.tierBadge.closest('.bb-summary__row');
         if (activeTier) {
           var discountLabel = this.discountType === 'percentage'
             ? activeTier.discount + '% off'
             : this.formatMoney(activeTier.discount) + ' off';
-          var badgeText = activeTier.label ? activeTier.label + ' — ' + discountLabel : discountLabel;
+          var badgeText = activeTier.label ? activeTier.label + ' \u2014 ' + discountLabel : discountLabel;
           this.els.tierBadge.textContent = badgeText;
-          this.els.tierBadge.style.display = '';
+          if (tierRow) tierRow.style.display = '';
         } else {
           this.els.tierBadge.textContent = '';
-          this.els.tierBadge.style.display = 'none';
+          if (tierRow) tierRow.style.display = 'none';
         }
       }
 
-      // Savings callout
       if (this.els.savings) {
         if (this.showSavings && discountAmount > 0) {
           this.els.savings.removeAttribute('hidden');
@@ -267,32 +273,49 @@
         }
       }
 
-      // Tier progress
       if (this.showTierProgress && this.els.tierSection) {
         this.updateTierProgress(totalItems, activeTier, nextTier);
       }
 
-      // Tier unlock notification
       if (activeTierIndex > this.previousTierIndex && this.previousTierIndex >= 0) {
         this.showTierNotification(activeTier);
       }
+      var previousTierIndex = this.previousTierIndex;
       this.previousTierIndex = activeTierIndex;
 
-      // CTA button — show price in text
+      // Manage free gifts when tier changes
+      this.manageFreeGifts(activeTier, activeTierIndex, previousTierIndex);
+
+      // Max items reached — dim unselected available cards
+      if (totalItems >= this.maxItems) {
+        this.section.classList.add('bb-container--max-reached');
+      } else {
+        this.section.classList.remove('bb-container--max-reached');
+      }
+
+      // CTA button state
       if (this.els.cta) {
+        var availableCards = this.section.querySelectorAll('.bb-card:not(.bb-card--sold-out)');
         var canAdd = totalItems >= this.minItems && totalItems > 0;
+
         this.els.cta.disabled = !canAdd || this.isLoading;
 
         if (!this.isLoading) {
-          if (canAdd && total > 0) {
-            this.els.cta.textContent = this.ctaText + ' — ' + this.formatMoney(total);
+          if (availableCards.length === 0) {
+            this.els.cta.textContent = 'All items currently sold out';
+            this.els.cta.disabled = true;
+          } else if (availableCards.length < this.minItems) {
+            this.els.cta.textContent = 'Not enough products available';
+            this.els.cta.disabled = true;
+          } else if (canAdd && total > 0) {
+            this.els.cta.textContent = this.ctaText + ' \u2014 ' + this.formatMoney(total);
           } else {
             this.els.cta.textContent = this.ctaText;
           }
         }
       }
 
-      // Update quantity button states and sold-out cards
+      // Update quantity button states
       var self = this;
       this.els.cards.forEach(function (card) {
         var minusBtn = card.querySelector('[data-action="decrease"]');
@@ -313,20 +336,22 @@
     updateTierProgress(totalItems, activeTier, nextTier) {
       if (!this.els.tierFill || !this.els.tierLabel) return;
 
+      var progress = 0;
+
       if (nextTier) {
         var needed = nextTier.count - totalItems;
-        var progress;
         if (activeTier) {
           progress = ((totalItems - activeTier.count) / (nextTier.count - activeTier.count)) * 100;
         } else {
           progress = (totalItems / nextTier.count) * 100;
         }
-        this.els.tierFill.style.width = Math.min(100, Math.max(0, progress)) + '%';
+        progress = Math.min(100, Math.max(0, progress));
+        this.els.tierFill.style.width = progress + '%';
 
         var nextDiscountLabel = this.discountType === 'percentage'
           ? nextTier.discount + '% off'
           : this.formatMoney(nextTier.discount) + ' off';
-        var nextName = nextTier.label ? nextTier.label + ' — ' + nextDiscountLabel : nextDiscountLabel;
+        var nextName = nextTier.label ? nextTier.label + ' \u2014 ' + nextDiscountLabel : nextDiscountLabel;
         this.els.tierLabel.textContent = 'Add ' + needed + ' more for ' + nextName + '!';
 
         if (this.els.tierHint && activeTier) {
@@ -340,6 +365,7 @@
           this.els.tierHint.style.display = 'none';
         }
       } else if (activeTier) {
+        progress = 100;
         this.els.tierFill.style.width = '100%';
         var maxDiscountLabel = this.discountType === 'percentage'
           ? activeTier.discount + '% off'
@@ -358,6 +384,11 @@
           this.els.tierHint.style.display = 'none';
         }
       }
+
+      // Update ARIA progressbar
+      if (this.els.tierBar) {
+        this.els.tierBar.setAttribute('aria-valuenow', Math.round(progress));
+      }
     }
 
     showTierNotification(tier) {
@@ -370,12 +401,152 @@
         ? tier.label + ' unlocked! ' + discountLabel
         : 'Discount unlocked: ' + discountLabel;
 
-      this.els.notification.textContent = message;
+      // Clear any existing notification timeout to prevent race conditions
+      if (this.notificationTimeout) {
+        clearTimeout(this.notificationTimeout);
+      }
+
+      // Render with tier icon if present
+      if (tier.icon) {
+        this.els.notification.innerHTML = '<img src="' + tier.icon + '" alt="" class="bb-notification__icon" width="24" height="24"> ' + message;
+      } else {
+        this.els.notification.textContent = message;
+      }
       this.els.notification.classList.add('bb-notification--visible');
 
       var self = this;
-      setTimeout(function () {
+      this.notificationTimeout = setTimeout(function () {
         self.els.notification.classList.remove('bb-notification--visible');
+        self.notificationTimeout = null;
+      }, 3000);
+    }
+
+    manageFreeGifts(activeTier, activeTierIndex, previousTierIndex) {
+      if (this.freeGiftPending) return;
+      var self = this;
+
+      // Determine which free gift variant IDs should be active
+      // Each tier can have a freeGiftVariantId — use the highest qualifying tier's gift
+      var targetGiftId = null;
+      if (activeTier && activeTier.freeGiftVariantId) {
+        targetGiftId = activeTier.freeGiftVariantId;
+      } else if (activeTierIndex >= 0) {
+        // Check lower tiers for gifts
+        for (var i = activeTierIndex; i >= 0; i--) {
+          if (this.tiers[i].freeGiftVariantId) {
+            targetGiftId = this.tiers[i].freeGiftVariantId;
+            break;
+          }
+        }
+      }
+
+      // Get the currently active gift (if any)
+      var currentGiftId = this.activeFreeGifts.size > 0 ? this.activeFreeGifts.keys().next().value : null;
+
+      // If tier dropped and gift should be removed
+      if (!targetGiftId && currentGiftId) {
+        this.freeGiftPending = true;
+        this.removeFreeGift(currentGiftId).then(function () {
+          self.activeFreeGifts.delete(currentGiftId);
+          self.freeGiftPending = false;
+        }).catch(function () {
+          self.freeGiftPending = false;
+        });
+        return;
+      }
+
+      // If gift should change
+      if (targetGiftId && targetGiftId !== currentGiftId) {
+        this.freeGiftPending = true;
+
+        var addGift = function () {
+          return self.addFreeGift(targetGiftId).then(function () {
+            self.activeFreeGifts.set(targetGiftId, true);
+            self.freeGiftPending = false;
+            self.showFreeGiftNotification();
+          }).catch(function () {
+            self.freeGiftPending = false;
+          });
+        };
+
+        // Remove old gift first if present
+        if (currentGiftId) {
+          this.removeFreeGift(currentGiftId).then(function () {
+            self.activeFreeGifts.delete(currentGiftId);
+            addGift();
+          }).catch(function () {
+            self.freeGiftPending = false;
+          });
+        } else {
+          addGift();
+        }
+      }
+    }
+
+    addFreeGift(variantId) {
+      return fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: [{
+            id: parseInt(variantId, 10),
+            quantity: 1,
+            properties: {
+              '_bundle_id': this.bundleId,
+              '_bundle_name': this.bundleName,
+              '_bundle_free_gift': 'true',
+            },
+          }],
+        }),
+      }).then(function (res) {
+        if (!res.ok) throw new Error('Failed to add free gift');
+        document.dispatchEvent(new CustomEvent('cart:updated'));
+        document.dispatchEvent(new CustomEvent('cart:refresh'));
+      });
+    }
+
+    removeFreeGift(variantId) {
+      // Fetch cart to find the line with this variant + _bundle_free_gift
+      var self = this;
+      return fetch('/cart.js')
+        .then(function (res) { return res.json(); })
+        .then(function (cart) {
+          var giftItem = cart.items.find(function (item) {
+            return String(item.variant_id) === String(variantId)
+              && item.properties
+              && item.properties['_bundle_free_gift'] === 'true'
+              && item.properties['_bundle_id'] === self.bundleId;
+          });
+          if (!giftItem) return;
+          return fetch('/cart/change.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              line: cart.items.indexOf(giftItem) + 1,
+              quantity: 0,
+            }),
+          });
+        })
+        .then(function () {
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+        });
+    }
+
+    showFreeGiftNotification() {
+      if (!this.els.notification) return;
+
+      if (this.notificationTimeout) {
+        clearTimeout(this.notificationTimeout);
+      }
+
+      this.els.notification.textContent = 'Free gift added to your cart!';
+      this.els.notification.classList.add('bb-notification--visible');
+
+      var self = this;
+      this.notificationTimeout = setTimeout(function () {
+        self.els.notification.classList.remove('bb-notification--visible');
+        self.notificationTimeout = null;
       }, 3000);
     }
 
@@ -383,15 +554,30 @@
       if (typeof Shopify !== 'undefined' && Shopify.formatMoney) {
         return Shopify.formatMoney(cents);
       }
-      var amount = (cents / 100).toFixed(2);
-      return '$' + amount;
+      // Use shop money_format from Liquid if available
+      if (this.moneyFormat) {
+        var amount = (cents / 100).toFixed(2);
+        var amountNoTrailing = parseFloat(amount).toString();
+        return this.moneyFormat
+          .replace(/\{\{\s*amount\s*\}\}/, amount)
+          .replace(/\{\{\s*amount_no_decimals\s*\}\}/, Math.round(cents / 100))
+          .replace(/\{\{\s*amount_with_comma_separator\s*\}\}/, amount.replace('.', ','))
+          .replace(/\{\{\s*amount_no_decimals_with_comma_separator\s*\}\}/, Math.round(cents / 100));
+      }
+      // Final fallback
+      console.warn('[BundleBuilder] moneyFormat unavailable, falling back to $ prefix. Non-USD stores should check shop.money_format.');
+      var fallbackAmount = (cents / 100).toFixed(2);
+      return '$' + fallbackAmount;
     }
 
     async addToCart() {
       if (this.isLoading || this.selectedProducts.size === 0) return;
+      if (!this.els.cta) return;
       if (this.getTotalItems() < this.minItems) return;
 
+      var self = this;
       this.isLoading = true;
+      this.isRedirecting = false;
       this.els.cta.disabled = true;
       this.els.cta.classList.add('bb-cta--loading');
 
@@ -440,52 +626,68 @@
           throw new Error(errorData.description || 'Failed to add to cart');
         }
 
-        // Dispatch custom event for theme integration (cart drawer, header count, etc.)
         document.dispatchEvent(new CustomEvent('cart:updated'));
-
-        // Also try theme-specific events for popular themes
         document.dispatchEvent(new CustomEvent('cart:refresh'));
         document.dispatchEvent(new CustomEvent('ajaxProduct:added'));
 
-        // Redirect to cart page if setting enabled
         if (this.cartRedirect) {
+          this.isRedirecting = true;
           window.location.href = '/cart';
           return;
         }
 
-        // Visual feedback
         this.els.cta.textContent = 'Added to Cart!';
         this.els.cta.classList.remove('bb-cta--loading');
         this.els.cta.classList.add('bb-cta--success');
 
-        var self = this;
         setTimeout(function () {
           self.els.cta.classList.remove('bb-cta--success');
-          self.recalculate(); // Restores button text with price
+          self.recalculate();
         }, 2000);
       } catch (err) {
         console.error('[BundleBuilder] Cart error:', err);
-        this.els.cta.textContent = 'Error — Try Again';
-        this.els.cta.classList.remove('bb-cta--loading');
+        if (this.els.cta) {
+          this.els.cta.textContent = 'Error \u2014 Try Again';
+          this.els.cta.classList.remove('bb-cta--loading');
+        }
 
-        var self2 = this;
         setTimeout(function () {
-          self2.recalculate(); // Restores button text
+          self.recalculate();
         }, 3000);
       } finally {
-        this.isLoading = false;
-        this.els.cta.disabled = false;
+        if (!this.isRedirecting) {
+          this.isLoading = false;
+          if (this.els.cta) {
+            this.els.cta.disabled = false;
+          }
+        }
       }
     }
   }
 
   function init() {
     document.querySelectorAll('[data-bundle-builder]').forEach(function (el) {
-      if (!el._bbInstance) {
-        el._bbInstance = new BundleBuilder(el);
+      if (!instances.has(el)) {
+        instances.set(el, new BundleBuilder(el));
       }
     });
   }
+
+  // Shopify theme editor integration — re-initialize on section/block changes
+  document.addEventListener('shopify:section:load', function () {
+    init();
+  });
+
+  document.addEventListener('shopify:section:select', function () {
+    init();
+  });
+
+  document.addEventListener('shopify:block:select', function (e) {
+    var target = e.target.querySelector('[data-bundle-builder]');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

@@ -1,6 +1,7 @@
 api_version = "2026-01"
 
 [[extensions]]
+uid = "23b807f7-472d-4f93-e241-5a1e079d6b51548daaf2"
 type = "theme"
 name = "Bundle Builder"
 handle = "bundle-builder"

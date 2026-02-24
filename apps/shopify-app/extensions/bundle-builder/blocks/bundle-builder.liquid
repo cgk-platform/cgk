@@ -4,7 +4,7 @@
   assign bundle_name = block.settings.bundle_name | default: 'Custom Bundle'
   assign headline = block.settings.headline
   assign subheadline = block.settings.subheadline
-  assign discount_type = block.settings.discount_type
+  assign discount_type = 'percentage'
   assign min_items = block.settings.min_items
   assign max_items = block.settings.max_items
   assign cta_text = block.settings.cta_text | default: 'Add Bundle to Cart'
@@ -16,33 +16,34 @@
   assign bg_color = block.settings.bg_color | default: '#ffffff'
   assign text_color = block.settings.text_color | default: '#1a1a2e'
   assign accent_color = block.settings.accent_color | default: '#2563eb'
+  assign button_text_color = block.settings.button_text_color | default: '#ffffff'
   assign padding_top = block.settings.padding_top | default: 48
   assign padding_bottom = block.settings.padding_bottom | default: 48
   assign image_ratio = block.settings.image_ratio | default: 'square'
 -%}
 
-{%- comment -%} Build tiers JSON from settings {%- endcomment -%}
+{%- comment -%} Build tiers JSON from settings — includes icon URLs and free gift variant IDs {%- endcomment -%}
 {%- capture tiers_json -%}
 [
   {%- assign tier_count = 0 -%}
   {%- if block.settings.discount_2_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":2,"discount":{{ block.settings.discount_2_items }},"label":"{{ block.settings.tier_2_label | default: 'Starter Bundle' | escape }}"}
+    {"count":2,"discount":{{ block.settings.discount_2_items }},"label":{{ block.settings.tier_2_label | default: 'Starter Bundle' | json }}}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_3_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":3,"discount":{{ block.settings.discount_3_items }},"label":"{{ block.settings.tier_3_label | default: 'Value Bundle' | escape }}"}
+    {"count":3,"discount":{{ block.settings.discount_3_items }},"label":{{ block.settings.tier_3_label | default: 'Value Bundle' | json }}}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_4_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":4,"discount":{{ block.settings.discount_4_items }},"label":"{{ block.settings.tier_4_label | default: 'Best Value' | escape }}"}
+    {"count":4,"discount":{{ block.settings.discount_4_items }},"label":{{ block.settings.tier_4_label | default: 'Best Value' | json }}}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_5_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":5,"discount":{{ block.settings.discount_5_items }},"label":"{{ block.settings.tier_5_label | default: 'Ultimate Bundle' | escape }}"}
+    {"count":5,"discount":{{ block.settings.discount_5_items }},"label":{{ block.settings.tier_5_label | default: 'Ultimate Bundle' | json }}}
   {%- endif -%}
 ]
 {%- endcapture -%}
@@ -57,15 +58,9 @@
     {%- assign aspect_css = '1' -%}
 {%- endcase -%}
 
-{%- comment -%} Collect products from settings {%- endcomment -%}
-{%- assign product_count = 0 -%}
-{%- for i in (1..8) -%}
-  {%- assign product_setting = 'product_' | append: i -%}
-  {%- assign p = block.settings[product_setting] -%}
-  {%- if p != blank -%}
-    {%- assign product_count = product_count | plus: 1 -%}
-  {%- endif -%}
-{%- endfor -%}
+{%- comment -%} Collect products from product_list setting {%- endcomment -%}
+{%- assign products = block.settings.products -%}
+{%- assign product_count = products | size -%}
 
 <div
   class="bb-container"
@@ -81,7 +76,10 @@
   data-cta-text="{{ cta_text | escape }}"
   data-cart-redirect="{{ cart_redirect }}"
   data-tiers="{{ tiers_json | strip_newlines | escape }}"
-  style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }}; --bb-padding-top: {{ padding_top }}px; --bb-padding-bottom: {{ padding_bottom }}px;"
+  data-money-format="{{ shop.money_format | escape }}"
+  role="region"
+  aria-label="{{ bundle_name | escape }}"
+  style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }}; --bb-btn-text-color: {{ button_text_color }}; --bb-padding-top: {{ padding_top }}px; --bb-padding-bottom: {{ padding_bottom }}px;"
 >
   {%- if headline != blank or subheadline != blank -%}
     <div class="bb-header">
@@ -101,15 +99,15 @@
       <div class="bb-list">
     {%- endif -%}
 
-    {%- for i in (1..8) -%}
-      {%- assign product_setting = 'product_' | append: i -%}
-      {%- assign product = block.settings[product_setting] -%}
-      {%- if product != blank -%}
-        {%- render 'bundle-product-card', product: product, index: i, section_id: section.id, aspect_css: aspect_css -%}
-      {%- endif -%}
+    {%- for product in products -%}
+      {%- render 'bundle-product-card', product: product, index: forloop.index, aspect_css: aspect_css, is_free_gift: false -%}
     {%- endfor -%}
 
-    </div>
+    {%- if layout == 'grid' -%}
+      </div>
+    {%- else -%}
+      </div>
+    {%- endif -%}
   {%- else -%}
     <div class="bb-empty">
       <p>Select products in the theme editor to build your bundle.</p>
@@ -122,16 +120,16 @@
   {%- if show_tier_progress -%}
     <div class="bb-tier">
       <p class="bb-tier__label">Select items to unlock discounts</p>
-      <div class="bb-tier__bar">
+      <div class="bb-tier__bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Discount tier progress">
         <div class="bb-tier__fill"></div>
       </div>
-      <p class="bb-tier__hint" style="display: none;"></p>
+      <p class="bb-tier__hint" aria-hidden="true"></p>
     </div>
   {%- endif -%}
 
   <div class="bb-savings" hidden>You save $0.00!</div>
 
-  <div class="bb-summary">
+  <div class="bb-summary" aria-live="polite">
     <div class="bb-summary__row">
       <span>Items selected</span>
       <span data-summary="count">0</span>
@@ -159,7 +157,7 @@
   </button>
 </div>
 
-{{ 'bundle-builder.js' | asset_url | script_tag }}
+<script src="{{ 'bundle-builder.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
@@ -190,70 +188,24 @@
       "content": "Products"
     },
     {
-      "type": "product",
-      "id": "product_1",
-      "label": "Product 1"
-    },
-    {
-      "type": "product",
-      "id": "product_2",
-      "label": "Product 2"
-    },
-    {
-      "type": "product",
-      "id": "product_3",
-      "label": "Product 3"
-    },
-    {
-      "type": "product",
-      "id": "product_4",
-      "label": "Product 4"
-    },
-    {
-      "type": "product",
-      "id": "product_5",
-      "label": "Product 5"
-    },
-    {
-      "type": "product",
-      "id": "product_6",
-      "label": "Product 6"
-    },
-    {
-      "type": "product",
-      "id": "product_7",
-      "label": "Product 7"
-    },
-    {
-      "type": "product",
-      "id": "product_8",
-      "label": "Product 8"
+      "type": "product_list",
+      "id": "products",
+      "label": "Bundle products",
+      "limit": 12
     },
     {
       "type": "header",
       "content": "Discount Tiers"
     },
     {
-      "type": "select",
-      "id": "discount_type",
-      "label": "Discount type",
-      "options": [
-        { "value": "percentage", "label": "Percentage off" },
-        { "value": "fixed", "label": "Fixed amount off (cents)" }
-      ],
-      "default": "percentage",
-      "info": "For fixed amounts, the slider value is in cents (e.g. 500 = $5.00)"
-    },
-    {
       "type": "range",
       "id": "discount_2_items",
-      "label": "Discount for 2 items",
+      "label": "Discount for 2 items (%)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 10,
-      "unit": "%",
-      "info": "Set to 0 to disable this tier"
+      "info": "Percentage off. Set to 0 to disable this tier."
     },
     {
       "type": "text",
@@ -265,12 +217,12 @@
     {
       "type": "range",
       "id": "discount_3_items",
-      "label": "Discount for 3 items",
+      "label": "Discount for 3 items (%)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 15,
-      "unit": "%"
+      "info": "Percentage off. Set to 0 to disable."
     },
     {
       "type": "text",
@@ -281,12 +233,12 @@
     {
       "type": "range",
       "id": "discount_4_items",
-      "label": "Discount for 4 items",
+      "label": "Discount for 4 items (%)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 20,
-      "unit": "%"
+      "info": "Percentage off. Set to 0 to disable."
     },
     {
       "type": "text",
@@ -297,12 +249,12 @@
     {
       "type": "range",
       "id": "discount_5_items",
-      "label": "Discount for 5+ items",
+      "label": "Discount for 5+ items (%)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 25,
-      "unit": "%"
+      "info": "Percentage off. Set to 0 to disable."
     },
     {
       "type": "text",
@@ -397,7 +349,7 @@
     },
     {
       "type": "header",
-      "content": "Colors"
+      "content": "Colors & Spacing"
     },
     {
       "type": "color",
@@ -418,8 +370,11 @@
       "default": "#2563eb"
     },
     {
-      "type": "header",
-      "content": "Spacing"
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff",
+      "info": "Text color for the Add to Cart button. Use white for dark accent colors, dark for light accents."
     },
     {
       "type": "range",
@@ -440,11 +395,6 @@
       "step": 4,
       "default": 48,
       "unit": "px"
-    }
-  ],
-  "presets": [
-    {
-      "name": "Bundle Builder"
     }
   ]
 }

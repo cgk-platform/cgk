@@ -1,0 +1,14 @@
+{
+  "bundle_builder": {
+    "add_to_bundle": "Add to bundle",
+    "remove": "Remove",
+    "added": "Added",
+    "sold_out": "Sold out",
+    "free": "FREE",
+    "items_selected": "{{ count }} items selected",
+    "tier_reached": "You unlocked {{ discount }}!",
+    "free_gift_added": "Free gift added to your cart!",
+    "add_bundle_to_cart": "Add bundle to cart",
+    "adding": "Adding..."
+  }
+}

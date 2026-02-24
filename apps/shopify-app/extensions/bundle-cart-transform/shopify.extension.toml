@@ -1,0 +1,17 @@
+api_version = "2026-01"
+
+[[extensions]]
+name = "Bundle Cart Transform"
+handle = "bundle-cart-transform"
+uid = "5aba5aca-3794-6182-792a-573aa0da0363f772ce4c"
+type = "function"
+
+  [[extensions.targeting]]
+  target = "purchase.cart-transform.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.build]
+  command = "bash ../../build-wasm.sh"
+  path = "../../target/wasm32-wasip1/release/bundle_cart_transform.wasm"
+  watch = ["src/**/*.rs"]

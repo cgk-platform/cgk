@@ -1,5 +1,5 @@
 [package]
-name = "delivery_customization"
+name = "bundle_order_discount"
 version = "0.1.0"
 edition = "2021"
 
