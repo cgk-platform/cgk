@@ -139,7 +139,7 @@ fn cart_lines_discounts_generate_run(
             } else {
                 // Fixed amount discount — distributed per unit
                 let line_subtotal = line.cost().subtotal_amount().amount().as_f64();
-                let fixed_discount = active_tier.discount / 100.0; // stored in cents
+                let fixed_discount = active_tier.discount;
                 let capped = if fixed_discount > line_subtotal {
                     line_subtotal
                 } else {

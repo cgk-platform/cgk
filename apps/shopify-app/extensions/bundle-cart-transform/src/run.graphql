@@ -24,6 +24,9 @@ query Input {
       bundleDiscount: attribute(key: "_bundle_discount") {
         value
       }
+      bundleDiscountType: attribute(key: "_bundle_discount_type") {
+        value
+      }
       isFreeGift: attribute(key: "_bundle_free_gift") {
         value
       }

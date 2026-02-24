@@ -11,17 +11,22 @@
     constructor(section) {
       this.section = section;
       this.selectedProducts = new Map();
-      this.tiers = this.parseTiers();
+
+      // Parse metafield config if available (Pattern E: metafield-driven business data)
+      var metafieldConfig = this.parseMetafieldConfig();
+
+      this.tiers = metafieldConfig ? metafieldConfig.tiers : this.parseTiers();
       this.minItems = parseInt(section.dataset.minItems, 10) || 1;
       this.maxItems = parseInt(section.dataset.maxItems, 10) || 99;
-      this.discountType = section.dataset.discountType || 'percentage';
+      this.discountType = metafieldConfig ? metafieldConfig.discountType : (section.dataset.discountType || 'percentage');
       this.showSavings = section.dataset.showSavings === 'true';
       this.showTierProgress = section.dataset.showTierProgress === 'true';
       this.bundleName = section.dataset.bundleName || 'Bundle';
-      this.bundleId = section.dataset.blockId || section.dataset.sectionId || 'bundle';
+      this.bundleId = metafieldConfig ? metafieldConfig.bundleId : (section.dataset.bundleId || section.dataset.blockId || section.dataset.sectionId || 'bundle');
       this.ctaText = section.dataset.ctaText || 'Add Bundle to Cart';
       this.cartRedirect = section.dataset.cartRedirect === 'true';
       this.moneyFormat = section.dataset.moneyFormat || '';
+      this.freeGiftVariantIds = metafieldConfig ? metafieldConfig.freeGiftVariantIds : [];
       this.isLoading = false;
       this.isRedirecting = false;
       this.previousTierIndex = -1;
@@ -50,6 +55,25 @@
       this.recalculate();
     }
 
+    parseMetafieldConfig() {
+      var raw = this.section.dataset.metafieldConfig;
+      if (!raw) return null;
+      try {
+        var config = JSON.parse(raw);
+        var bundle = config.bundles && config.bundles[0];
+        if (!bundle) return null;
+        var tiers = (bundle.tiers || []).sort(function (a, b) { return a.count - b.count; });
+        return {
+          bundleId: bundle.bundleId || '',
+          discountType: bundle.discountType || 'percentage',
+          tiers: tiers,
+          freeGiftVariantIds: bundle.freeGiftVariantIds || [],
+        };
+      } catch (_e) {
+        return null;
+      }
+    }
+
     parseTiers() {
       var tiersData = this.section.dataset.tiers;
       if (!tiersData) return [];
@@ -68,18 +92,26 @@
         if (card.dataset.available === 'false') return;
 
         card.addEventListener('click', function (e) {
-          if (e.target.closest('.bb-qty-btn')) return;
+          if (e.target.closest('.bb-qty-btn') || e.target.closest('.bb-variant-picker')) return;
           self.toggleProduct(card);
         });
 
         card.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            if (!e.target.closest('.bb-qty-btn')) {
+            if (!e.target.closest('.bb-qty-btn') && !e.target.closest('.bb-variant-picker')) {
               self.toggleProduct(card);
             }
           }
         });
+
+        var variantPicker = card.querySelector('[data-action="variant-change"]');
+        if (variantPicker) {
+          variantPicker.addEventListener('change', function (e) {
+            e.stopPropagation();
+            self.handleVariantChange(card, e.target);
+          });
+        }
 
         var minusBtn = card.querySelector('[data-action="decrease"]');
         var plusBtn = card.querySelector('[data-action="increase"]');
@@ -161,6 +193,58 @@
       }
 
       this.recalculate();
+    }
+
+    handleVariantChange(card, select) {
+      var selectedOption = select.options[select.selectedIndex];
+      var newVariantId = selectedOption.value;
+      var newPrice = parseInt(selectedOption.dataset.price, 10);
+      var newAvailable = selectedOption.dataset.available === 'true';
+      var oldVariantId = card.dataset.variantId;
+
+      // Update card data attributes
+      card.dataset.variantId = newVariantId;
+      card.dataset.price = newPrice;
+      card.dataset.available = String(newAvailable);
+
+      // Update price display
+      var priceEl = card.querySelector('.bb-card__price');
+      if (priceEl) {
+        priceEl.textContent = this.formatMoney(newPrice);
+      }
+
+      // Update sold-out state
+      if (newAvailable) {
+        card.classList.remove('bb-card--sold-out');
+        card.tabIndex = 0;
+        card.removeAttribute('aria-disabled');
+      } else {
+        card.classList.add('bb-card--sold-out');
+        card.tabIndex = -1;
+        card.setAttribute('aria-disabled', 'true');
+      }
+
+      // If the product is already selected, update the entry in selectedProducts
+      if (this.selectedProducts.has(oldVariantId)) {
+        var item = this.selectedProducts.get(oldVariantId);
+        this.selectedProducts.delete(oldVariantId);
+
+        if (newAvailable) {
+          this.selectedProducts.set(newVariantId, {
+            productId: card.dataset.productId,
+            variantId: newVariantId,
+            title: item.title,
+            price: newPrice,
+            quantity: item.quantity,
+          });
+        } else {
+          // Variant is sold out — deselect
+          card.classList.remove('bb-card--selected');
+          card.setAttribute('aria-pressed', 'false');
+        }
+
+        this.recalculate();
+      }
     }
 
     getTotalItems() {
@@ -484,25 +568,51 @@
     }
 
     addFreeGift(variantId) {
-      return fetch('/cart/add.js', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: [{
-            id: parseInt(variantId, 10),
-            quantity: 1,
-            properties: {
-              '_bundle_id': this.bundleId,
-              '_bundle_name': this.bundleName,
-              '_bundle_free_gift': 'true',
-            },
-          }],
-        }),
-      }).then(function (res) {
-        if (!res.ok) throw new Error('Failed to add free gift');
-        document.dispatchEvent(new CustomEvent('cart:updated'));
-        document.dispatchEvent(new CustomEvent('cart:refresh'));
-      });
+      var self = this;
+      var numericId = parseInt(variantId, 10);
+
+      // Check variant availability before adding
+      return fetch('/variants/' + numericId + '.js')
+        .then(function (res) {
+          if (!res.ok) throw new Error('Variant not found');
+          return res.json();
+        })
+        .then(function (variant) {
+          if (!variant.available) {
+            // Show unavailable notification instead of adding
+            if (self.els.notification) {
+              self.els.notification.textContent = 'Free gift is currently unavailable';
+              self.els.notification.classList.add('bb-notification--visible');
+              if (self.notificationTimeout) clearTimeout(self.notificationTimeout);
+              self.notificationTimeout = setTimeout(function () {
+                self.els.notification.classList.remove('bb-notification--visible');
+                self.notificationTimeout = null;
+              }, 3000);
+            }
+            throw new Error('Gift unavailable');
+          }
+
+          return fetch('/cart/add.js', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              items: [{
+                id: numericId,
+                quantity: 1,
+                properties: {
+                  '_bundle_id': self.bundleId,
+                  '_bundle_name': self.bundleName,
+                  '_bundle_free_gift': 'true',
+                },
+              }],
+            }),
+          });
+        })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Failed to add free gift');
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+          document.dispatchEvent(new CustomEvent('cart:refresh'));
+        });
     }
 
     removeFreeGift(variantId) {
@@ -582,16 +692,11 @@
       this.els.cta.classList.add('bb-cta--loading');
 
       var activeTier = this.getActiveTier();
-      var discountLabel = '';
-      if (activeTier) {
-        discountLabel = this.discountType === 'percentage'
-          ? activeTier.discount + '% off'
-          : this.formatMoney(activeTier.discount) + ' off';
-      }
 
       var items = [];
       var bundleId = this.bundleId;
       var bundleName = this.bundleName;
+      var discountType = this.discountType;
       var tierLabel = activeTier && activeTier.label ? activeTier.label : '';
       var totalItems = this.getTotalItems();
 
@@ -605,8 +710,9 @@
             '_bundle_size': String(totalItems),
           },
         };
-        if (discountLabel) {
-          lineItem.properties['_bundle_discount'] = discountLabel;
+        if (activeTier) {
+          lineItem.properties['_bundle_discount'] = String(activeTier.discount);
+          lineItem.properties['_bundle_discount_type'] = discountType;
         }
         if (tierLabel) {
           lineItem.properties['_bundle_tier'] = tierLabel;

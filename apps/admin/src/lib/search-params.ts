@@ -77,6 +77,25 @@ export function parseReviewFilters(params: RawParams): ReviewFilters {
   }
 }
 
+export interface BundleFilters extends PaginationParams {
+  search: string
+  status: string
+  sort: string
+  dir: 'asc' | 'desc'
+}
+
+export function parseBundleFilters(params: RawParams): BundleFilters {
+  const p = pagination(params)
+  const dir = str(params.dir) === 'asc' ? 'asc' as const : 'desc' as const
+  return {
+    ...p,
+    search: str(params.search),
+    status: str(params.status),
+    sort: str(params.sort) || 'created_at',
+    dir,
+  }
+}
+
 export interface BlogFilters extends PaginationParams {
   search: string
   status: string

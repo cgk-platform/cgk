@@ -1,12 +1,15 @@
 {{ 'bundle-builder.css' | asset_url | stylesheet_tag }}
 
+{%- comment -%} Read bundle config from app metafield (source of truth from Shopify embedded app) {%- endcomment -%}
+{%- assign metafield_config_raw = app.metafields["bundle-discount"]["config"].value -%}
+{%- assign has_metafield_config = false -%}
+{%- if metafield_config_raw != blank -%}
+  {%- assign has_metafield_config = true -%}
+{%- endif -%}
+
 {%- liquid
-  assign bundle_name = block.settings.bundle_name | default: 'Custom Bundle'
   assign headline = block.settings.headline
   assign subheadline = block.settings.subheadline
-  assign discount_type = 'percentage'
-  assign min_items = block.settings.min_items
-  assign max_items = block.settings.max_items
   assign cta_text = block.settings.cta_text | default: 'Add Bundle to Cart'
   assign show_savings = block.settings.show_savings
   assign show_tier_progress = block.settings.show_tier_progress
@@ -20,33 +23,87 @@
   assign padding_top = block.settings.padding_top | default: 48
   assign padding_bottom = block.settings.padding_bottom | default: 48
   assign image_ratio = block.settings.image_ratio | default: 'square'
+  assign bundle_name = block.settings.bundle_name | default: 'Custom Bundle'
+  assign min_items = block.settings.min_items
+  assign max_items = block.settings.max_items
 -%}
 
-{%- comment -%} Build tiers JSON from settings — includes icon URLs and free gift variant IDs {%- endcomment -%}
-{%- capture tiers_json -%}
+{%- comment -%}
+  Metafield-driven config (Pattern E hybrid):
+  Business data (tiers, discount type, bundle ID, free gifts) comes from the
+  $app:bundle-discount/config metafield written by the Shopify embedded app.
+  Visual settings (colors, layout, columns, spacing) stay in block schema.
+  Falls back to block schema settings if metafield is empty (first install).
+{%- endcomment -%}
+
+{%- if has_metafield_config -%}
+  {%- comment -%}
+    Metafield config is a JSON string like:
+    {"bundles":[{"bundleId":"...","discountType":"percentage","tiers":[...],"freeGiftVariantIds":[...]}]}
+    We pass the raw JSON string to JS for parsing — Liquid can't natively parse nested JSON.
+    JS will extract: discountType, tiers, bundleId, freeGiftVariantIds.
+  {%- endcomment -%}
+  {%- assign tiers_json = '[]' -%}
+  {%- assign discount_type = 'percentage' -%}
+  {%- assign bundle_id_attr = '' -%}
+  {%- assign free_gift_variant_ids = '' -%}
+{%- else -%}
+  {%- comment -%} Fallback: read from block schema settings (backward compat for first install) {%- endcomment -%}
+  {%- assign discount_type = block.settings.discount_type | default: 'percentage' -%}
+  {%- assign bundle_id_attr = block.id -%}
+
+  {%- capture tiers_json -%}
 [
   {%- assign tier_count = 0 -%}
+  {%- assign t2_gift = block.settings.tier_2_free_gift_variant_id -%}
+  {%- assign t2_icon = block.settings.tier_2_icon -%}
+  {%- assign t3_gift = block.settings.tier_3_free_gift_variant_id -%}
+  {%- assign t3_icon = block.settings.tier_3_icon -%}
+  {%- assign t4_gift = block.settings.tier_4_free_gift_variant_id -%}
+  {%- assign t4_icon = block.settings.tier_4_icon -%}
+  {%- assign t5_gift = block.settings.tier_5_free_gift_variant_id -%}
+  {%- assign t5_icon = block.settings.tier_5_icon -%}
   {%- if block.settings.discount_2_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":2,"discount":{{ block.settings.discount_2_items }},"label":{{ block.settings.tier_2_label | default: 'Starter Bundle' | json }}}
+    {"count":2,"discount":{{ block.settings.discount_2_items }},"label":{{ block.settings.tier_2_label | default: 'Starter Bundle' | json }}
+    {%- if t2_gift != blank -%},"freeGiftVariantId":"{{ t2_gift }}"{%- endif -%}
+    {%- if t2_icon -%},"icon":"{{ t2_icon | image_url: width: 48 }}"{%- endif -%}
+    }
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_3_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":3,"discount":{{ block.settings.discount_3_items }},"label":{{ block.settings.tier_3_label | default: 'Value Bundle' | json }}}
+    {"count":3,"discount":{{ block.settings.discount_3_items }},"label":{{ block.settings.tier_3_label | default: 'Value Bundle' | json }}
+    {%- if t3_gift != blank -%},"freeGiftVariantId":"{{ t3_gift }}"{%- endif -%}
+    {%- if t3_icon -%},"icon":"{{ t3_icon | image_url: width: 48 }}"{%- endif -%}
+    }
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_4_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":4,"discount":{{ block.settings.discount_4_items }},"label":{{ block.settings.tier_4_label | default: 'Best Value' | json }}}
+    {"count":4,"discount":{{ block.settings.discount_4_items }},"label":{{ block.settings.tier_4_label | default: 'Best Value' | json }}
+    {%- if t4_gift != blank -%},"freeGiftVariantId":"{{ t4_gift }}"{%- endif -%}
+    {%- if t4_icon -%},"icon":"{{ t4_icon | image_url: width: 48 }}"{%- endif -%}
+    }
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_5_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":5,"discount":{{ block.settings.discount_5_items }},"label":{{ block.settings.tier_5_label | default: 'Ultimate Bundle' | json }}}
+    {"count":5,"discount":{{ block.settings.discount_5_items }},"label":{{ block.settings.tier_5_label | default: 'Ultimate Bundle' | json }}
+    {%- if t5_gift != blank -%},"freeGiftVariantId":"{{ t5_gift }}"{%- endif -%}
+    {%- if t5_icon -%},"icon":"{{ t5_icon | image_url: width: 48 }}"{%- endif -%}
+    }
   {%- endif -%}
 ]
-{%- endcapture -%}
+  {%- endcapture -%}
+
+  {%- capture free_gift_variant_ids -%}
+    {%- if block.settings.tier_2_free_gift_variant_id != blank -%},{{ block.settings.tier_2_free_gift_variant_id }},{%- endif -%}
+    {%- if block.settings.tier_3_free_gift_variant_id != blank -%},{{ block.settings.tier_3_free_gift_variant_id }},{%- endif -%}
+    {%- if block.settings.tier_4_free_gift_variant_id != blank -%},{{ block.settings.tier_4_free_gift_variant_id }},{%- endif -%}
+    {%- if block.settings.tier_5_free_gift_variant_id != blank -%},{{ block.settings.tier_5_free_gift_variant_id }},{%- endif -%}
+  {%- endcapture -%}
+{%- endif -%}
 
 {%- comment -%} Map image ratio to CSS aspect-ratio {%- endcomment -%}
 {%- case image_ratio -%}
@@ -77,6 +134,12 @@
   data-cart-redirect="{{ cart_redirect }}"
   data-tiers="{{ tiers_json | strip_newlines | escape }}"
   data-money-format="{{ shop.money_format | escape }}"
+  {%- if has_metafield_config %}
+  data-metafield-config="{{ metafield_config_raw | escape }}"
+  {%- endif -%}
+  {%- if bundle_id_attr != blank %}
+  data-bundle-id="{{ bundle_id_attr }}"
+  {%- endif -%}
   role="region"
   aria-label="{{ bundle_name | escape }}"
   style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }}; --bb-btn-text-color: {{ button_text_color }}; --bb-padding-top: {{ padding_top }}px; --bb-padding-bottom: {{ padding_bottom }}px;"
@@ -100,7 +163,10 @@
     {%- endif -%}
 
     {%- for product in products -%}
-      {%- render 'bundle-product-card', product: product, index: forloop.index, aspect_css: aspect_css, is_free_gift: false -%}
+      {%- assign variant_check = product.selected_or_first_available_variant.id | prepend: ',' | append: ',' -%}
+      {%- assign is_gift = false -%}
+      {%- if free_gift_variant_ids contains variant_check -%}{%- assign is_gift = true -%}{%- endif -%}
+      {%- render 'bundle-product-card', product: product, index: forloop.index, aspect_css: aspect_css, is_free_gift: is_gift -%}
     {%- endfor -%}
 
     {%- if layout == 'grid' -%}
@@ -163,6 +229,11 @@
 {
   "name": "Bundle Builder",
   "target": "section",
+  "presets": [
+    {
+      "name": "Bundle Builder"
+    }
+  ],
   "settings": [
     {
       "type": "text",
@@ -198,14 +269,25 @@
       "content": "Discount Tiers"
     },
     {
+      "type": "select",
+      "id": "discount_type",
+      "label": "Discount type (fallback)",
+      "options": [
+        { "value": "percentage", "label": "Percentage off" },
+        { "value": "fixed", "label": "Fixed amount off" }
+      ],
+      "default": "percentage",
+      "info": "Overridden by the Bundle Builder app config when a bundle discount is configured. Only used as a fallback if no app config exists."
+    },
+    {
       "type": "range",
       "id": "discount_2_items",
-      "label": "Discount for 2 items (%)",
+      "label": "Discount for 2 items (fallback)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 10,
-      "info": "Percentage off. Set to 0 to disable this tier."
+      "info": "Fallback only — tier discounts are managed in the Bundle Builder app. Set to 0 to disable."
     },
     {
       "type": "text",
@@ -215,14 +297,26 @@
       "info": "Shown in the progress bar and summary when this tier is active"
     },
     {
+      "type": "text",
+      "id": "tier_2_free_gift_variant_id",
+      "label": "Tier 2 free gift variant ID",
+      "info": "Fallback only — free gifts are managed in the Bundle Builder app."
+    },
+    {
+      "type": "image_picker",
+      "id": "tier_2_icon",
+      "label": "Tier 2 icon",
+      "info": "Small icon for tier unlock notification (recommended: 48x48px)"
+    },
+    {
       "type": "range",
       "id": "discount_3_items",
-      "label": "Discount for 3 items (%)",
+      "label": "Discount for 3 items (fallback)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 15,
-      "info": "Percentage off. Set to 0 to disable."
+      "info": "Fallback only — managed in the Bundle Builder app."
     },
     {
       "type": "text",
@@ -231,14 +325,26 @@
       "default": "Value Bundle"
     },
     {
+      "type": "text",
+      "id": "tier_3_free_gift_variant_id",
+      "label": "Tier 3 free gift variant ID",
+      "info": "Fallback only — free gifts are managed in the Bundle Builder app."
+    },
+    {
+      "type": "image_picker",
+      "id": "tier_3_icon",
+      "label": "Tier 3 icon",
+      "info": "Small icon for tier unlock notification (recommended: 48x48px)"
+    },
+    {
       "type": "range",
       "id": "discount_4_items",
-      "label": "Discount for 4 items (%)",
+      "label": "Discount for 4 items (fallback)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 20,
-      "info": "Percentage off. Set to 0 to disable."
+      "info": "Fallback only — managed in the Bundle Builder app."
     },
     {
       "type": "text",
@@ -247,20 +353,44 @@
       "default": "Best Value"
     },
     {
+      "type": "text",
+      "id": "tier_4_free_gift_variant_id",
+      "label": "Tier 4 free gift variant ID",
+      "info": "Fallback only — free gifts are managed in the Bundle Builder app."
+    },
+    {
+      "type": "image_picker",
+      "id": "tier_4_icon",
+      "label": "Tier 4 icon",
+      "info": "Small icon for tier unlock notification (recommended: 48x48px)"
+    },
+    {
       "type": "range",
       "id": "discount_5_items",
-      "label": "Discount for 5+ items (%)",
+      "label": "Discount for 5+ items (fallback)",
       "min": 0,
       "max": 100,
       "step": 1,
       "default": 25,
-      "info": "Percentage off. Set to 0 to disable."
+      "info": "Fallback only — managed in the Bundle Builder app."
     },
     {
       "type": "text",
       "id": "tier_5_label",
       "label": "Tier 5+ label",
       "default": "Ultimate Bundle"
+    },
+    {
+      "type": "text",
+      "id": "tier_5_free_gift_variant_id",
+      "label": "Tier 5 free gift variant ID",
+      "info": "Fallback only — free gifts are managed in the Bundle Builder app."
+    },
+    {
+      "type": "image_picker",
+      "id": "tier_5_icon",
+      "label": "Tier 5 icon",
+      "info": "Small icon for tier unlock notification (recommended: 48x48px)"
     },
     {
       "type": "header",

@@ -231,6 +231,27 @@
   overflow: hidden;
 }
 
+.bb-card__variant-select {
+  margin: 4px 0;
+}
+
+.bb-variant-picker {
+  width: 100%;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border: 1px solid var(--bb-border);
+  border-radius: 4px;
+  background: var(--bb-bg);
+  color: var(--bb-text);
+  cursor: pointer;
+  appearance: auto;
+}
+
+.bb-variant-picker:focus {
+  outline: 2px solid var(--bb-accent);
+  outline-offset: 1px;
+}
+
 .bb-card__pricing {
   display: flex;
   align-items: center;

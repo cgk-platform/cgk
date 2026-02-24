@@ -64,17 +64,19 @@ fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
             None => continue,
         };
 
-        // Parse discount percentage from the _bundle_discount attribute (e.g. "15")
-        let discount_pct = lines
+        // Parse discount value from the _bundle_discount attribute (numeric only, e.g. "15")
+        let discount_value = lines
             .first()
             .and_then(|l| l.bundle_discount())
             .and_then(|a| a.value())
-            .and_then(|v| {
-                // Try parsing as plain number first, then "15% off" format
-                v.parse::<f64>()
-                    .ok()
-                    .or_else(|| v.trim_end_matches("% off").trim().parse::<f64>().ok())
-            });
+            .and_then(|v| v.parse::<f64>().ok());
+
+        // Read discount type from _bundle_discount_type attribute ("percentage" or "fixed")
+        let discount_type = lines
+            .first()
+            .and_then(|l| l.bundle_discount_type())
+            .and_then(|a| a.value().map(|v| v.to_string()))
+            .unwrap_or_else(|| "percentage".to_string());
 
         // Build cart line refs for the merge (quantity is required)
         let cart_lines: Vec<schema::CartLineInput> = lines
@@ -90,11 +92,17 @@ fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
         let title = format!("{} ({} items)", bundle_name, total_items);
 
         // Build price adjustment if discount exists
-        let price = discount_pct.map(|pct| schema::PriceAdjustment {
-            percentage_decrease: Some(schema::PriceAdjustmentValue {
-                value: Decimal(pct),
-            }),
-        });
+        let price = if discount_type == "fixed" {
+            // Fixed-amount discounts are handled by the order discount function,
+            // not the cart transform. Only apply percentage adjustments here.
+            None
+        } else {
+            discount_value.map(|pct| schema::PriceAdjustment {
+                percentage_decrease: Some(schema::PriceAdjustmentValue {
+                    value: Decimal(pct),
+                }),
+            })
+        };
 
         operations.push(schema::CartOperation::Merge(schema::MergeOperation {
             cart_lines,
@@ -102,7 +110,7 @@ fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
             title: Some(title),
             price,
             image: None,
-            attributes: Some(vec![]),
+            attributes: None,
         }));
     }
 

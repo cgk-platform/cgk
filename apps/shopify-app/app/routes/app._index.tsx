@@ -6,7 +6,7 @@
  */
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { json } from '@remix-run/node'
-import { useLoaderData, useSubmit, useNavigation } from '@remix-run/react'
+import { useLoaderData, useSubmit, useNavigation, useActionData } from '@remix-run/react'
 import {
   Page,
   Layout,
@@ -19,6 +19,7 @@ import {
   BlockStack,
   InlineStack,
   Text,
+  Spinner,
 } from '@shopify/polaris'
 import { authenticate } from '../shopify.server'
 import {
@@ -30,21 +31,29 @@ import {
 export async function loader({ request }: LoaderFunctionArgs) {
   const { admin } = await authenticate.admin(request)
 
-  const nodes = await listBundleDiscounts(admin)
+  try {
+    const nodes = await listBundleDiscounts(admin)
 
-  const discounts = nodes.map((node: any) => {
-    const discount = node.automaticDiscount
-    const config = parseBundleConfig(node.metafield?.value)
-    return {
-      id: node.id,
-      title: discount?.title ?? 'Untitled',
-      status: discount?.status ?? 'UNKNOWN',
-      bundleCount: config.bundles.length,
-      config,
-    }
-  })
+    const discounts = nodes.map((node: any) => {
+      const discount = node.automaticDiscount
+      const config = parseBundleConfig(node.metafield?.value)
+      return {
+        id: node.id,
+        title: discount?.title ?? 'Untitled',
+        status: discount?.status ?? 'UNKNOWN',
+        bundleCount: config.bundles.length,
+        config,
+      }
+    })
 
-  return json({ discounts })
+    return json({ discounts, error: null })
+  } catch (err) {
+    console.error('[BundleBuilder] Failed to load discounts:', err)
+    return json({
+      discounts: [],
+      error: 'Failed to load bundle discounts. Please try refreshing the page.',
+    })
+  }
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -55,7 +64,14 @@ export async function action({ request }: ActionFunctionArgs) {
   if (intent === 'delete') {
     const discountId = formData.get('discountId') as string
     if (discountId) {
-      await deleteBundleDiscount(admin, discountId)
+      const result = await deleteBundleDiscount(admin, discountId)
+      if (!result.success) {
+        return json({
+          ok: false,
+          error: result.userErrors.map((e) => e.message).join(', '),
+        })
+      }
+      return json({ ok: true, deleted: true })
     }
   }
 
@@ -63,15 +79,35 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function BundlesIndex() {
-  const { discounts } = useLoaderData<typeof loader>()
+  const { discounts, error: loaderError } = useLoaderData<typeof loader>()
+  const actionData = useActionData<{ ok?: boolean; deleted?: boolean; error?: string }>()
   const submit = useSubmit()
   const navigation = useNavigation()
   const isLoading = navigation.state !== 'idle'
+
+  if (loaderError) {
+    return (
+      <Page title="Bundle Builder">
+        <Layout>
+          <Layout.Section>
+            <Banner tone="critical">{loaderError}</Banner>
+          </Layout.Section>
+        </Layout>
+      </Page>
+    )
+  }
 
   if (discounts.length === 0) {
     return (
       <Page title="Bundle Builder">
         <Layout>
+          {actionData?.deleted && (
+            <Layout.Section>
+              <Banner tone="success" onDismiss={() => {}}>
+                Bundle discount deleted successfully.
+              </Banner>
+            </Layout.Section>
+          )}
           <Layout.Section>
             <Card>
               <EmptyState
@@ -157,8 +193,21 @@ export default function BundlesIndex() {
         content: 'Create bundle discount',
         url: '/app/bundles/new',
       }}
+      secondaryActions={[]}
     >
       <Layout>
+        {actionData?.error && (
+          <Layout.Section>
+            <Banner tone="critical">{actionData.error}</Banner>
+          </Layout.Section>
+        )}
+        {actionData?.deleted && (
+          <Layout.Section>
+            <Banner tone="success" onDismiss={() => {}}>
+              Bundle discount deleted successfully.
+            </Banner>
+          </Layout.Section>
+        )}
         <Layout.Section>
           <Banner tone="info">
             Bundle discounts are enforced server-side by a Shopify Function.

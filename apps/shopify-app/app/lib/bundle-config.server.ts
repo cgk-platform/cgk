@@ -21,20 +21,27 @@ export interface BundleDiscountConfig {
   bundles: BundleConfig[]
 }
 
+interface MutationResult {
+  success: boolean
+  discountId?: string
+  userErrors: Array<{ field: string[]; message: string }>
+}
+
+type AdminGraphQL = {
+  graphql: (query: string, options?: { variables?: Record<string, unknown> }) => Promise<Response>
+}
+
 const DISCOUNT_METAFIELD_NAMESPACE = '$app:bundle-discount'
 const DISCOUNT_METAFIELD_KEY = 'config'
-const TRANSFORM_METAFIELD_NAMESPACE = '$app:bundle-transform'
-const TRANSFORM_METAFIELD_KEY = 'config'
 
 /**
  * Fetches all automatic app discounts that use our bundle discount function.
  */
-export async function listBundleDiscounts(admin: {
-  graphql: (query: string) => Promise<Response>
-}) {
-  const response = await admin.graphql(`
-    query {
-      discountAutomaticNodes(first: 50, query: "type:app") {
+export async function listBundleDiscounts(admin: AdminGraphQL) {
+  const response = await admin.graphql(
+    `#graphql
+    query ListBundleDiscounts($namespace: String!, $key: String!) {
+      automaticDiscountNodes(first: 50, query: "type:app") {
         nodes {
           id
           automaticDiscount {
@@ -49,24 +56,30 @@ export async function listBundleDiscounts(admin: {
               discountId
             }
           }
-          metafield(namespace: "${DISCOUNT_METAFIELD_NAMESPACE}", key: "${DISCOUNT_METAFIELD_KEY}") {
+          metafield(namespace: $namespace, key: $key) {
             id
             value
           }
         }
       }
+    }`,
+    {
+      variables: {
+        namespace: DISCOUNT_METAFIELD_NAMESPACE,
+        key: DISCOUNT_METAFIELD_KEY,
+      },
     }
-  `)
+  )
 
   const data = await response.json()
-  return data.data?.discountAutomaticNodes?.nodes ?? []
+  return data.data?.automaticDiscountNodes?.nodes ?? []
 }
 
 /**
  * Creates an automatic discount with our bundle discount function.
  */
 export async function createBundleDiscount(
-  admin: { graphql: (query: string) => Promise<Response> },
+  admin: AdminGraphQL,
   opts: {
     title: string
     functionId: string
@@ -77,33 +90,17 @@ export async function createBundleDiscount(
       shippingDiscounts?: boolean
     }
   }
-) {
-  const configValue = JSON.stringify(opts.config)
+): Promise<MutationResult> {
   const combinesWith = opts.combinesWith ?? {
     orderDiscounts: true,
     productDiscounts: false,
     shippingDiscounts: true,
   }
 
-  const response = await admin.graphql(`
-    mutation {
-      discountAutomaticAppCreate(
-        automaticAppDiscount: {
-          title: ${JSON.stringify(opts.title)}
-          functionId: ${JSON.stringify(opts.functionId)}
-          combinesWith: {
-            orderDiscounts: ${combinesWith.orderDiscounts}
-            productDiscounts: ${combinesWith.productDiscounts}
-            shippingDiscounts: ${combinesWith.shippingDiscounts}
-          }
-          metafields: [{
-            namespace: "${DISCOUNT_METAFIELD_NAMESPACE}"
-            key: "${DISCOUNT_METAFIELD_KEY}"
-            type: "json"
-            value: ${JSON.stringify(configValue)}
-          }]
-        }
-      ) {
+  const response = await admin.graphql(
+    `#graphql
+    mutation CreateBundleDiscount($discount: DiscountAutomaticAppInput!) {
+      discountAutomaticAppCreate(automaticAppDiscount: $discount) {
         automaticAppDiscount {
           discountId
         }
@@ -112,43 +109,65 @@ export async function createBundleDiscount(
           message
         }
       }
+    }`,
+    {
+      variables: {
+        discount: {
+          title: opts.title,
+          functionId: opts.functionId,
+          combinesWith,
+          metafields: [
+            {
+              namespace: DISCOUNT_METAFIELD_NAMESPACE,
+              key: DISCOUNT_METAFIELD_KEY,
+              type: 'json',
+              value: JSON.stringify(opts.config),
+            },
+          ],
+        },
+      },
     }
-  `)
+  )
 
-  return response.json()
+  const data = await response.json()
+  const result = data.data?.discountAutomaticAppCreate
+  return {
+    success: (result?.userErrors?.length ?? 0) === 0,
+    discountId: result?.automaticAppDiscount?.discountId,
+    userErrors: result?.userErrors ?? [],
+  }
 }
 
 /**
  * Updates the bundle discount metafield on an existing automatic discount.
  */
 export async function updateBundleDiscountConfig(
-  admin: { graphql: (query: string) => Promise<Response> },
+  admin: AdminGraphQL,
   opts: {
     discountId: string
     title?: string
     config: BundleDiscountConfig
   }
-) {
-  const configValue = JSON.stringify(opts.config)
+): Promise<MutationResult> {
+  const discountInput: Record<string, unknown> = {
+    metafields: [
+      {
+        namespace: DISCOUNT_METAFIELD_NAMESPACE,
+        key: DISCOUNT_METAFIELD_KEY,
+        type: 'json',
+        value: JSON.stringify(opts.config),
+      },
+    ],
+  }
 
-  const titleMutation = opts.title
-    ? `title: ${JSON.stringify(opts.title)}`
-    : ''
+  if (opts.title) {
+    discountInput.title = opts.title
+  }
 
-  const response = await admin.graphql(`
-    mutation {
-      discountAutomaticAppUpdate(
-        id: ${JSON.stringify(opts.discountId)}
-        automaticAppDiscount: {
-          ${titleMutation}
-          metafields: [{
-            namespace: "${DISCOUNT_METAFIELD_NAMESPACE}"
-            key: "${DISCOUNT_METAFIELD_KEY}"
-            type: "json"
-            value: ${JSON.stringify(configValue)}
-          }]
-        }
-      ) {
+  const response = await admin.graphql(
+    `#graphql
+    mutation UpdateBundleDiscount($id: ID!, $discount: DiscountAutomaticAppInput!) {
+      discountAutomaticAppUpdate(id: $id, automaticAppDiscount: $discount) {
         automaticAppDiscount {
           discountId
         }
@@ -157,32 +176,155 @@ export async function updateBundleDiscountConfig(
           message
         }
       }
+    }`,
+    {
+      variables: {
+        id: opts.discountId,
+        discount: discountInput,
+      },
     }
-  `)
+  )
 
-  return response.json()
+  const data = await response.json()
+  const result = data.data?.discountAutomaticAppUpdate
+  return {
+    success: (result?.userErrors?.length ?? 0) === 0,
+    discountId: result?.automaticAppDiscount?.discountId,
+    userErrors: result?.userErrors ?? [],
+  }
 }
 
 /**
  * Deletes an automatic bundle discount.
  */
 export async function deleteBundleDiscount(
-  admin: { graphql: (query: string) => Promise<Response> },
+  admin: AdminGraphQL,
   discountId: string
-) {
-  const response = await admin.graphql(`
-    mutation {
-      discountAutomaticDelete(id: ${JSON.stringify(discountId)}) {
+): Promise<MutationResult> {
+  const response = await admin.graphql(
+    `#graphql
+    mutation DeleteBundleDiscount($id: ID!) {
+      discountAutomaticDelete(id: $id) {
         deletedAutomaticDiscountId
         userErrors {
           field
           message
         }
       }
+    }`,
+    {
+      variables: { id: discountId },
     }
-  `)
+  )
 
-  return response.json()
+  const data = await response.json()
+  const result = data.data?.discountAutomaticDelete
+  return {
+    success: (result?.userErrors?.length ?? 0) === 0,
+    discountId: result?.deletedAutomaticDiscountId,
+    userErrors: result?.userErrors ?? [],
+  }
+}
+
+/**
+ * Auto-detects the bundle discount Shopify Function ID by searching deployed functions.
+ */
+export async function findBundleDiscountFunctionId(
+  admin: AdminGraphQL
+): Promise<string | null> {
+  const response = await admin.graphql(
+    `#graphql
+    query FindBundleFunction {
+      shopifyFunctions(first: 25) {
+        nodes {
+          id
+          title
+          apiType
+          app {
+            title
+          }
+        }
+      }
+    }`
+  )
+
+  const data = await response.json()
+  const functions = data.data?.shopifyFunctions?.nodes ?? []
+
+  // Match by apiType (discount) + title containing "bundle"
+  const match = functions.find(
+    (fn: { id: string; title: string; apiType: string }) =>
+      fn.apiType === 'discount_automatic_app' &&
+      fn.title.toLowerCase().includes('bundle')
+  )
+
+  return match?.id ?? null
+}
+
+/**
+ * Resolves variant GIDs to product info for display in the admin UI.
+ */
+export async function resolveVariantProducts(
+  admin: AdminGraphQL,
+  variantIds: string[]
+): Promise<
+  Array<{
+    variantId: string
+    productTitle: string
+    variantTitle: string
+    imageUrl: string | null
+  }>
+> {
+  if (variantIds.length === 0) return []
+
+  // Ensure GID format
+  const gids = variantIds.map((id) =>
+    id.startsWith('gid://') ? id : `gid://shopify/ProductVariant/${id}`
+  )
+
+  const response = await admin.graphql(
+    `#graphql
+    query ResolveVariants($ids: [ID!]!) {
+      nodes(ids: $ids) {
+        ... on ProductVariant {
+          id
+          title
+          displayName
+          image {
+            url(transform: { maxWidth: 80, maxHeight: 80 })
+          }
+          product {
+            title
+            featuredMedia {
+              preview {
+                image {
+                  url(transform: { maxWidth: 80, maxHeight: 80 })
+                }
+              }
+            }
+          }
+        }
+      }
+    }`,
+    {
+      variables: { ids: gids },
+    }
+  )
+
+  const data = await response.json()
+  const nodes = data.data?.nodes ?? []
+
+  return nodes
+    .filter((node: any) => node?.id)
+    .map((node: any) => ({
+      variantId: node.id,
+      productTitle: node.product?.title ?? 'Unknown Product',
+      variantTitle: node.title ?? 'Default',
+      imageUrl:
+        node.image?.url ??
+        node.product?.featuredMedia?.preview?.image?.url ??
+        null,
+    }))
 }
 
 /**

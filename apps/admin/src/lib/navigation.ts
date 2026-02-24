@@ -101,6 +101,7 @@ export const navigation: NavSection[] = [
     href: '/admin/commerce',
     children: [
       { label: 'Orders', href: '/admin/commerce/orders' },
+      { label: 'Bundles', href: '/admin/commerce/bundles' },
       { label: 'Customers', href: '/admin/commerce/customers' },
       { label: 'Subscriptions', href: '/admin/commerce/subscriptions' },
       { label: 'Selling Plans', href: '/admin/commerce/selling-plans' },
@@ -203,6 +204,7 @@ export const navigation: NavSection[] = [
     href: '/admin/analytics',
     children: [
       { label: 'Dashboard', href: '/admin/analytics' },
+      { label: 'Bundles', href: '/admin/commerce/bundles/analytics' },
       { label: 'BRI', href: '/admin/analytics/bri' },
       { label: 'Pipeline', href: '/admin/analytics/pipeline' },
       { label: 'P&L Breakdown', href: '/admin/analytics/pl-breakdown' },

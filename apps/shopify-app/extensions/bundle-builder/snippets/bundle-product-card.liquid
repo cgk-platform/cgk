@@ -14,6 +14,10 @@
   {%- unless first_variant.available -%}
     {%- assign is_sold_out = true -%}
   {%- endunless -%}
+  {%- assign has_variants = false -%}
+  {%- if product.variants.size > 1 -%}
+    {%- assign has_variants = true -%}
+  {%- endif -%}
 
   {%- comment -%} Compute image height from aspect ratio for proper intrinsic sizing {%- endcomment -%}
   {%- case card_aspect -%}
@@ -25,6 +29,18 @@
       {%- assign img_height = 400 -%}
   {%- endcase -%}
 
+  {%- comment -%} Build variants JSON for JS consumption {%- endcomment -%}
+  {%- if has_variants -%}
+    {%- capture variants_json -%}
+    [
+      {%- for variant in product.variants -%}
+        {%- if forloop.first == false -%},{%- endif -%}
+        {"id":"{{ variant.id }}","title":{{ variant.title | json }},"price":{{ variant.price }},"available":{{ variant.available }}}
+      {%- endfor -%}
+    ]
+    {%- endcapture -%}
+  {%- endif -%}
+
   <div
     class="bb-card{% if is_sold_out %} bb-card--sold-out{% endif %}"
     data-product-id="{{ product.id }}"
@@ -34,6 +50,7 @@
     data-title="{{ product.title | escape }}"
     data-index="{{ index }}"
     data-available="{{ first_variant.available }}"
+    {%- if has_variants %} data-variants="{{ variants_json | strip_newlines | escape }}"{% endif %}
     role="button"
     tabindex="{% if is_sold_out %}-1{% else %}0{% endif %}"
     aria-pressed="false"
@@ -79,6 +96,23 @@
 
     <div class="bb-card__info">
       <h3 class="bb-card__title">{{ product.title }}</h3>
+      {%- if has_variants -%}
+        <div class="bb-card__variant-select">
+          <select class="bb-variant-picker" aria-label="Select variant for {{ product.title | escape }}" data-action="variant-change">
+            {%- for variant in product.variants -%}
+              <option
+                value="{{ variant.id }}"
+                data-price="{{ variant.price }}"
+                data-available="{{ variant.available }}"
+                {% if variant == first_variant %}selected{% endif %}
+                {% unless variant.available %}disabled{% endunless %}
+              >
+                {{ variant.title }}{% unless variant.available %} — Sold out{% endunless %} — {{ variant.price | money }}
+              </option>
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- endif -%}
       <div class="bb-card__pricing">
         {%- if first_variant.compare_at_price > first_variant.price -%}
           <span class="bb-card__compare-price">{{ first_variant.compare_at_price | money }}</span>
