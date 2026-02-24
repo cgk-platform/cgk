@@ -59,7 +59,7 @@ export async function POST(
           ${body.total_cents},
           ${body.tier_label ?? null}
         )
-        ON CONFLICT (order_id) WHERE bundle_id = ${bundleId}
+        ON CONFLICT (order_id, bundle_id)
         DO UPDATE SET
           items_count = EXCLUDED.items_count,
           subtotal_cents = EXCLUDED.subtotal_cents,

@@ -237,6 +237,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   // Sync bundle config to CGK platform DB (best-effort, non-blocking)
   const platformApiUrl = process.env.CGK_PLATFORM_API_URL
   const platformApiKey = process.env.CGK_PLATFORM_API_KEY
+  // TODO: For multi-tenant support, replace with dynamic tenant detection
+  // from admin.session.shop → organizations.shopify_store_domain lookup.
+  // Current model: one Shopify app instance per tenant with CGK_TENANT_SLUG env var.
   const tenantSlug = process.env.CGK_TENANT_SLUG
 
   if (platformApiUrl && platformApiKey && tenantSlug) {
