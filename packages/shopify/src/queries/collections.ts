@@ -81,7 +81,7 @@ interface CollectionsResponse {
 }
 
 interface CollectionByHandleResponse {
-  collectionByHandle: ShopifyCollection | null
+  collection: ShopifyCollection | null
 }
 
 interface CollectionProductsResponse {
@@ -171,13 +171,13 @@ export async function getCollectionByHandle(
     `
     ${COLLECTION_FRAGMENT}
     query CollectionByHandle($handle: String!) {
-      collectionByHandle(handle: $handle) { ...CollectionFields }
+      collection(handle: $handle) { ...CollectionFields }
     }
     `,
     { handle }
   )
 
-  return result.collectionByHandle
+  return result.collection
 }
 
 export async function getCollectionProducts(

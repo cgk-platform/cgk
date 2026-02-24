@@ -166,6 +166,13 @@ function createLocalDBProductOperations(
         return fallbackProvider.products.search(query, params)
       }
     },
+
+    /**
+     * Get product recommendations from Shopify
+     */
+    async getRecommendations(productId: string): Promise<Product[]> {
+      return fallbackProvider.products.getRecommendations(productId)
+    },
   }
 }
 

@@ -26,11 +26,20 @@ import {
   RelatedProductsSkeleton,
   CollapsibleTabs,
 } from '@/components/products'
+import { MarqueeLogos } from '@/components/sections'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { getCommerceProvider } from '@/lib/commerce'
 import { getMetafields, parseBadges, parseVideoUrl } from '@/lib/metafields'
 import { getProductRating } from '@/lib/reviews'
 import { getTenantConfig } from '@/lib/tenant'
+
+const PRESS_LOGOS: { src: string; alt: string; width?: number }[] = [
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector.svg', alt: 'Good Housekeeping', width: 110 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3662.svg', alt: 'New York Magazine', width: 275 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector_1.svg', alt: 'Esquire', width: 110 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group.svg', alt: 'NBC Select', width: 185 },
+  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Mens_Health.svg', alt: "Men's Health", width: 125 },
+]
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -125,13 +134,18 @@ async function ProductContent({ handle }: ProductContentProps) {
     notFound()
   }
 
-  // Fetch metafields for badges and video
+  // Fetch metafields for badges, video, and favorite sheets badge
   const metafields = await getMetafields(handle, [
     { namespace: 'custom', key: 'badges' },
     { namespace: 'custom', key: 'video' },
+    { namespace: 'custom', key: 'favorite_sheets' },
   ])
   const badges = parseBadges(metafields.find(m => m.key === 'badges'))
   const videoUrl = parseVideoUrl(metafields.find(m => m.key === 'video'))
+  const favoriteSheetsMeta = metafields.find(m => m.key === 'favorite_sheets')
+  const showFavoriteSheetsBadge =
+    favoriteSheetsMeta?.value === 'true' ||
+    product.tags?.some((t: string) => t.toLowerCase() === "internet's favorite sheets" || t.toLowerCase() === 'favorite-sheets')
 
   const hasMultipleVariants = product.variants.length > 1
 
@@ -225,6 +239,16 @@ async function ProductContent({ handle }: ProductContentProps) {
 
         {/* Right: Product Info */}
         <div className="space-y-4">
+          {/* Internet's Favorite Sheets Badge */}
+          {showFavoriteSheetsBadge && (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-cgk-gold/15 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-cgk-gold">
+              <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+              The Internet&apos;s Favorite Sheets
+            </div>
+          )}
+
           {/* Title */}
           <h1 className="text-2xl font-bold text-cgk-navy md:text-3xl">{product.title}</h1>
 
@@ -318,9 +342,9 @@ async function ProductContent({ handle }: ProductContentProps) {
               ))}
             </div>
             <p className="text-sm italic text-cgk-charcoal">
-              &ldquo;They&apos;re like wrapping yourself in a cloud...&rdquo;
+              &ldquo;These sheets are absolutely fantastic! From the moment we put them on the bed, they felt like true hotel-quality linens.&rdquo;
             </p>
-            <p className="mt-1 text-xs font-semibold text-cgk-charcoal/70">&mdash; Lauren K.</p>
+            <p className="mt-1 text-xs font-semibold text-cgk-charcoal/70">&mdash; Guy and Brandy</p>
           </div>
 
           {/* Free Shipping Note */}
@@ -343,10 +367,12 @@ async function ProductContent({ handle }: ProductContentProps) {
                     <thead><tr class="border-b"><th class="py-2 text-left">Size</th><th class="py-2 text-left">Flat Sheet</th><th class="py-2 text-left">Fitted Sheet</th><th class="py-2 text-left">Pillowcases</th></tr></thead>
                     <tbody>
                       <tr class="border-b"><td class="py-2">Twin</td><td>66" x 96"</td><td>39" x 75" x 21"</td><td>1 Standard</td></tr>
+                      <tr class="border-b"><td class="py-2">Twin XL</td><td>66" x 102"</td><td>39" x 80" x 21"</td><td>1 Standard</td></tr>
                       <tr class="border-b"><td class="py-2">Full</td><td>81" x 96"</td><td>54" x 75" x 21"</td><td>2 Standard</td></tr>
                       <tr class="border-b"><td class="py-2">Queen</td><td>90" x 102"</td><td>60" x 80" x 21"</td><td>2 Standard</td></tr>
                       <tr class="border-b"><td class="py-2">King</td><td>108" x 102"</td><td>78" x 80" x 21"</td><td>2 King</td></tr>
-                      <tr><td class="py-2">Cal King</td><td>108" x 102"</td><td>72" x 84" x 21"</td><td>2 King</td></tr>
+                      <tr class="border-b"><td class="py-2">Cal King</td><td>108" x 102"</td><td>72" x 84" x 21"</td><td>2 King</td></tr>
+                      <tr><td class="py-2">Split King</td><td>108" x 102"</td><td>2x 39" x 80" x 21"</td><td>2 King</td></tr>
                     </tbody>
                   </table>
                 `,
@@ -402,6 +428,14 @@ async function ProductContent({ handle }: ProductContentProps) {
           <ProductReviewsSection productId={product.id} />
         </Suspense>
       </section>
+
+      {/* Press Logos Marquee */}
+      <div className="mt-16">
+        <MarqueeLogos
+          logos={PRESS_LOGOS}
+          title="As Seen In"
+        />
+      </div>
 
       {/* Related Products */}
       {product.productType && (

@@ -14,6 +14,7 @@ import {
   listProducts as shopifyListProducts,
   getProductById,
   getProductByHandle,
+  getProductRecommendations as shopifyGetProductRecommendations,
   listOrders as shopifyListOrders,
   getOrder as shopifyGetOrder,
   listCustomers as shopifyListCustomers,
@@ -221,7 +222,6 @@ function mapCart(c: ShopifyCart): Cart {
     cost: {
       subtotalAmount: mapMoneyRequired(c.cost.subtotalAmount),
       totalAmount: mapMoneyRequired(c.cost.totalAmount),
-      totalTaxAmount: mapMoney(c.cost.totalTaxAmount),
     },
     lines: c.lines.edges.map((e): CartLine => ({
       id: e.node.id,
@@ -322,6 +322,11 @@ export function createShopifyProvider(config: CommerceConfig): CommerceProvider 
           items: result.products.map(mapProduct),
           pageInfo: result.pageInfo,
         }
+      },
+
+      async getRecommendations(productId: string): Promise<Product[]> {
+        const recommendations = await shopifyGetProductRecommendations(storefront, productId)
+        return recommendations.map(mapProduct)
       },
     },
 
@@ -438,7 +443,7 @@ export function createShopifyProvider(config: CommerceConfig): CommerceProvider 
           webUrl: mapped.checkoutUrl,
           totalPrice: mapped.cost.totalAmount,
           subtotalPrice: mapped.cost.subtotalAmount,
-          totalTax: mapped.cost.totalTaxAmount,
+          totalTax: undefined,
           lineItems: mapped.lines.map((line) => ({
             id: line.id,
             title: line.merchandise.title,

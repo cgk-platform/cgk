@@ -157,7 +157,7 @@ async function lookupTenantFromCustomDomain(hostname: string): Promise<string | 
 
   if (!internalApiUrl) {
     // No API URL configured, cache null result
-    domainCache.set(host, { slug: null, timestamp: Date.now() })
+    cacheSet(host, null)
     return null
   }
 
@@ -180,7 +180,7 @@ async function lookupTenantFromCustomDomain(hostname: string): Promise<string | 
     if (response.ok) {
       const data = (await response.json()) as { tenantSlug?: string | null }
       const slug = data.tenantSlug || null
-      domainCache.set(host, { slug, timestamp: Date.now() })
+      cacheSet(host, slug)
       return slug
     }
   } catch {
@@ -188,7 +188,7 @@ async function lookupTenantFromCustomDomain(hostname: string): Promise<string | 
   }
 
   // Cache null result to avoid repeated lookups for unknown domains
-  domainCache.set(host, { slug: null, timestamp: Date.now() })
+  cacheSet(host, null)
   return null
 }
 

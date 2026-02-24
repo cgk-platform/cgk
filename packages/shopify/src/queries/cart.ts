@@ -13,6 +13,12 @@ export interface ShopifyCartDiscountAllocation {
   discountedAmount: { amount: string; currencyCode: string }
 }
 
+export interface ShopifyCartUserError {
+  code: string | null
+  field: string[]
+  message: string
+}
+
 export interface ShopifyCart {
   id: string
   checkoutUrl: string
@@ -25,8 +31,6 @@ export interface ShopifyCart {
   cost: {
     subtotalAmount: { amount: string; currencyCode: string }
     totalAmount: { amount: string; currencyCode: string }
-    totalTaxAmount: { amount: string; currencyCode: string } | null
-    totalDutyAmount: { amount: string; currencyCode: string } | null
   }
   lines: {
     edges: Array<{
@@ -76,8 +80,6 @@ const CART_FRAGMENT = `
     cost {
       subtotalAmount { amount currencyCode }
       totalAmount { amount currencyCode }
-      totalTaxAmount { amount currencyCode }
-      totalDutyAmount { amount currencyCode }
     }
     lines(first: 100) {
       edges {
@@ -118,14 +120,14 @@ export interface CartBuyerIdentityInput {
 }
 
 interface CartResponse {
-  cartCreate?: { cart: ShopifyCart }
+  cartCreate?: { cart: ShopifyCart; userErrors: ShopifyCartUserError[] }
   cart?: ShopifyCart
-  cartLinesAdd?: { cart: ShopifyCart }
-  cartLinesUpdate?: { cart: ShopifyCart }
-  cartLinesRemove?: { cart: ShopifyCart }
-  cartAttributesUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
-  cartDiscountCodesUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
-  cartBuyerIdentityUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
+  cartLinesAdd?: { cart: ShopifyCart; userErrors: ShopifyCartUserError[] }
+  cartLinesUpdate?: { cart: ShopifyCart; userErrors: ShopifyCartUserError[] }
+  cartLinesRemove?: { cart: ShopifyCart; userErrors: ShopifyCartUserError[] }
+  cartAttributesUpdate?: { cart: ShopifyCart; userErrors: ShopifyCartUserError[] }
+  cartDiscountCodesUpdate?: { cart: ShopifyCart; userErrors: ShopifyCartUserError[] }
+  cartBuyerIdentityUpdate?: { cart: ShopifyCart; userErrors: ShopifyCartUserError[] }
 }
 
 export async function createCart(client: StorefrontClient): Promise<ShopifyCart> {
@@ -133,12 +135,24 @@ export async function createCart(client: StorefrontClient): Promise<ShopifyCart>
     `
     ${CART_FRAGMENT}
     mutation CartCreate {
-      cartCreate { cart { ...CartFields } }
+      cartCreate {
+        cart { ...CartFields }
+        userErrors { code field message }
+      }
     }
     `
   )
 
-  return result.cartCreate!.cart
+  const userErrors = result.cartCreate?.userErrors
+  if (userErrors && userErrors.length > 0) {
+    throw new Error(userErrors[0]?.message ?? 'Failed to create cart')
+  }
+
+  if (!result.cartCreate?.cart) {
+    throw new Error('Failed to create cart')
+  }
+
+  return result.cartCreate.cart
 }
 
 export async function getCart(client: StorefrontClient, cartId: string): Promise<ShopifyCart | null> {
@@ -172,13 +186,23 @@ export async function addCartLines(
     mutation CartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
       cartLinesAdd(cartId: $cartId, lines: $lines) {
         cart { ...CartFields }
+        userErrors { code field message }
       }
     }
     `,
     { cartId, lines }
   )
 
-  return result.cartLinesAdd!.cart
+  const userErrors = result.cartLinesAdd?.userErrors
+  if (userErrors && userErrors.length > 0) {
+    throw new Error(userErrors[0]?.message ?? 'Failed to add cart lines')
+  }
+
+  if (!result.cartLinesAdd?.cart) {
+    throw new Error('Failed to add cart lines')
+  }
+
+  return result.cartLinesAdd.cart
 }
 
 export async function updateCartLines(
@@ -192,13 +216,23 @@ export async function updateCartLines(
     mutation CartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!) {
       cartLinesUpdate(cartId: $cartId, lines: $lines) {
         cart { ...CartFields }
+        userErrors { code field message }
       }
     }
     `,
     { cartId, lines }
   )
 
-  return result.cartLinesUpdate!.cart
+  const userErrors = result.cartLinesUpdate?.userErrors
+  if (userErrors && userErrors.length > 0) {
+    throw new Error(userErrors[0]?.message ?? 'Failed to update cart lines')
+  }
+
+  if (!result.cartLinesUpdate?.cart) {
+    throw new Error('Failed to update cart lines')
+  }
+
+  return result.cartLinesUpdate.cart
 }
 
 export async function removeCartLines(
@@ -212,13 +246,23 @@ export async function removeCartLines(
     mutation CartLinesRemove($cartId: ID!, $lineIds: [ID!]!) {
       cartLinesRemove(cartId: $cartId, lineIds: $lineIds) {
         cart { ...CartFields }
+        userErrors { code field message }
       }
     }
     `,
     { cartId, lineIds }
   )
 
-  return result.cartLinesRemove!.cart
+  const userErrors = result.cartLinesRemove?.userErrors
+  if (userErrors && userErrors.length > 0) {
+    throw new Error(userErrors[0]?.message ?? 'Failed to remove cart lines')
+  }
+
+  if (!result.cartLinesRemove?.cart) {
+    throw new Error('Failed to remove cart lines')
+  }
+
+  return result.cartLinesRemove.cart
 }
 
 /**
@@ -235,10 +279,7 @@ export async function updateCartAttributes(
     mutation CartAttributesUpdate($cartId: ID!, $attributes: [AttributeInput!]!) {
       cartAttributesUpdate(cartId: $cartId, attributes: $attributes) {
         cart { ...CartFields }
-        userErrors {
-          field
-          message
-        }
+        userErrors { code field message }
       }
     }
     `,
@@ -268,13 +309,10 @@ export async function applyCartDiscountCodes(
   const result = await client.query<CartResponse>(
     `
     ${CART_FRAGMENT}
-    mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]) {
+    mutation CartDiscountCodesUpdate($cartId: ID!, $discountCodes: [String!]!) {
       cartDiscountCodesUpdate(cartId: $cartId, discountCodes: $discountCodes) {
         cart { ...CartFields }
-        userErrors {
-          field
-          message
-        }
+        userErrors { code field message }
       }
     }
     `,
@@ -317,10 +355,7 @@ export async function updateCartBuyerIdentity(
     mutation CartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
       cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
         cart { ...CartFields }
-        userErrors {
-          field
-          message
-        }
+        userErrors { code field message }
       }
     }
     `,

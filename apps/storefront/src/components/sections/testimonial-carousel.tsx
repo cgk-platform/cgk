@@ -18,12 +18,18 @@ interface Testimonial {
 
 interface TestimonialCarouselProps {
   title?: string
+  subtitle?: string
   testimonials: Testimonial[]
+  ctaText?: string
+  ctaHref?: string
 }
 
 export function TestimonialCarousel({
   title = 'The Sheets Everyone Is Talking About',
+  subtitle,
   testimonials,
+  ctaText,
+  ctaHref,
 }: TestimonialCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -42,9 +48,14 @@ export function TestimonialCarousel({
     <section className="bg-cgk-cream py-16">
       <div className="mx-auto max-w-store px-4">
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-cgk-navy md:text-3xl">
-            {title}
-          </h2>
+          <div>
+            <h2 className="whitespace-pre-line text-2xl font-bold text-cgk-navy md:text-3xl">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="mt-2 text-gray-600">{subtitle}</p>
+            )}
+          </div>
           <div className="flex gap-2">
             <button
               type="button"
@@ -103,6 +114,17 @@ export function TestimonialCarousel({
             </div>
           ))}
         </div>
+
+        {ctaText && ctaHref && (
+          <div className="mt-8 text-center">
+            <a
+              href={ctaHref}
+              className="inline-block rounded-lg border-2 border-cgk-navy px-8 py-3 text-sm font-semibold text-cgk-navy transition-colors hover:bg-cgk-navy hover:text-white"
+            >
+              {ctaText}
+            </a>
+          </div>
+        )}
       </div>
     </section>
   )

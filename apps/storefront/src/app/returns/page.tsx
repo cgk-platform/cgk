@@ -12,9 +12,14 @@ import { CheckCircle, Clock, Package, RefreshCcw, XCircle } from 'lucide-react'
 import { createStorefrontClient, getShopPolicies } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
 
-export const metadata: Metadata = {
-  title: 'Returns & Exchanges',
-  description: '30-day hassle-free returns. If you\'re not satisfied, we\'ll make it right.',
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantConfig()
+  const tenantName = tenant?.name ?? 'Store'
+
+  return {
+    title: `Returns & Exchanges | ${tenantName}`,
+    description: `${tenantName} 30-day hassle-free returns. If you're not satisfied, we'll make it right.`,
+  }
 }
 
 export const dynamic = 'force-dynamic'

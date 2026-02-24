@@ -90,7 +90,7 @@ export default function LoginPage() {
                   Password
                 </label>
                 <Link
-                  href="/account/forgot-password"
+                  href="/forgot-password"
                   className="text-sm text-[hsl(var(--portal-primary))] hover:underline"
                 >
                   Forgot password?
@@ -130,7 +130,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center text-sm text-[hsl(var(--portal-muted-foreground))]">
             Don&apos;t have an account?{' '}
             <Link
-              href="/account/register"
+              href="/register"
               className="font-medium text-[hsl(var(--portal-primary))] hover:underline"
             >
               Create one

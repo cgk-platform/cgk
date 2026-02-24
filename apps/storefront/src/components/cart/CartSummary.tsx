@@ -95,13 +95,7 @@ export function CartSummary({
           <span className="text-sm italic">Calculated at checkout</span>
         </div>
 
-        {/* Taxes (if available) */}
-        {cost.totalTaxAmount && parseFloat(cost.totalTaxAmount.amount) > 0 && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Tax</span>
-            <span className="font-medium">{formatMoney(cost.totalTaxAmount)}</span>
-          </div>
-        )}
+        {/* Taxes — calculated at checkout */}
       </div>
 
       {/* Divider */}

@@ -12,9 +12,14 @@ import { Clock, Package, Truck } from 'lucide-react'
 import { createStorefrontClient, getShopPolicies } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
 
-export const metadata: Metadata = {
-  title: 'Shipping Information',
-  description: 'Free 3-day delivery on orders over $50. Learn about our shipping options and delivery times.',
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantConfig()
+  const tenantName = tenant?.name ?? 'Store'
+
+  return {
+    title: `Shipping Information | ${tenantName}`,
+    description: `Free 3-day delivery on orders over $50. Learn about ${tenantName} shipping options and delivery times.`,
+  }
 }
 
 export const dynamic = 'force-dynamic'

@@ -155,14 +155,14 @@ export default async function HomePage() {
         <div className="mx-auto max-w-store px-4">
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-cgk-navy">Best Sellers</h2>
+              <h2 className="text-2xl font-bold text-cgk-navy">Shop Our Best Sellers</h2>
               <p className="mt-1 text-gray-600">Our most popular products</p>
             </div>
             <a
-              href="/collections/featured"
+              href="/collections/best-sellers"
               className="text-sm font-medium text-cgk-navy hover:underline"
             >
-              View All
+              Shop All Best Sellers
             </a>
           </div>
 
@@ -221,8 +221,11 @@ export default async function HomePage() {
 
       {/* Testimonials */}
       <TestimonialCarousel
-        title="The Sheets Everyone Is Talking About"
+        title={"What our\ncustomers say"}
+        subtitle="Real reviews from real customers"
         testimonials={TESTIMONIALS}
+        ctaText="Read More Reviews"
+        ctaHref="/collections/featured#reviews"
       />
 
       {/* Newsletter CTA */}

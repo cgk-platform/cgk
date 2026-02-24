@@ -6,6 +6,7 @@ export {
   listProducts,
   getProductByHandle,
   getProductById,
+  getProductRecommendations,
   adminListProducts,
   adminGetProduct,
   type ListProductsParams,
@@ -37,6 +38,7 @@ export {
   type ShopifyCart,
   type ShopifyCartDiscountCode,
   type ShopifyCartDiscountAllocation,
+  type ShopifyCartUserError,
   type CartLineInput,
   type CartBuyerIdentityInput,
 } from './cart'

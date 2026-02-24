@@ -13,10 +13,19 @@ import { Suspense } from 'react'
 import type { CollectionFilter } from '@cgk-platform/commerce'
 
 import { CollectionJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
+import { CollectionGrid } from '@/components/sections'
 import { getCommerceProvider } from '@/lib/commerce'
 import { getTenantConfig } from '@/lib/tenant'
 
 import { CollectionFilterWrapper } from './components'
+
+const CROSS_NAV_HANDLES = [
+  '6-piece-sheet-sets',
+  'bedding',
+  'featured',
+  'blankets',
+  'comforters-1',
+]
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -296,6 +305,11 @@ export default async function CollectionPage({
           searchParams={search}
         />
       </Suspense>
+
+      {/* Shop By Collection Cross-Navigation */}
+      <Suspense fallback={null}>
+        <ShopByCollectionSection currentHandle={handle} />
+      </Suspense>
     </div>
   )
 }
@@ -394,4 +408,43 @@ async function CollectionProducts({
       currentSort={currentSort}
     />
   )
+}
+
+// ---------------------------------------------------------------------------
+// Shop By Collection (Cross-Navigation)
+// ---------------------------------------------------------------------------
+
+async function ShopByCollectionSection({ currentHandle }: { currentHandle: string }) {
+  const commerce = await getCommerceProvider()
+  if (!commerce) return null
+
+  try {
+    const collectionResults = await Promise.all(
+      CROSS_NAV_HANDLES
+        .filter((h) => h !== currentHandle)
+        .slice(0, 5)
+        .map((h) => commerce.collections.getByHandle(h))
+    )
+
+    const collections = collectionResults
+      .filter((c) => c !== null)
+      .map((c) => ({
+        title: c.title,
+        href: `/collections/${c.handle}`,
+        imageUrl: c.image?.url,
+      }))
+
+    if (collections.length === 0) return null
+
+    return (
+      <div className="mt-16">
+        <CollectionGrid
+          title="Shop By Collection"
+          collections={collections}
+        />
+      </div>
+    )
+  } catch {
+    return null
+  }
 }

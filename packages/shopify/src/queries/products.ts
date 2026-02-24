@@ -35,6 +35,13 @@ const STOREFRONT_PRODUCT_FRAGMENT = `
       minVariantPrice { amount currencyCode }
       maxVariantPrice { amount currencyCode }
     }
+    featuredImage {
+      id
+      url(transform: { maxWidth: 800, maxHeight: 800 })
+      altText
+      width
+      height
+    }
     variants(first: 100) {
       edges {
         node {
@@ -45,13 +52,25 @@ const STOREFRONT_PRODUCT_FRAGMENT = `
           price { amount currencyCode }
           compareAtPrice { amount currencyCode }
           selectedOptions { name value }
-          image { id url altText width height }
+          image {
+            id
+            url(transform: { maxWidth: 800, maxHeight: 800 })
+            altText
+            width
+            height
+          }
         }
       }
     }
     images(first: 20) {
       edges {
-        node { id url altText width height }
+        node {
+          id
+          url(transform: { maxWidth: 800, maxHeight: 800 })
+          altText
+          width
+          height
+        }
       }
     }
   }
@@ -65,7 +84,7 @@ interface StorefrontProductsResponse {
 }
 
 interface StorefrontProductByHandleResponse {
-  productByHandle: ShopifyProduct | null
+  product: ShopifyProduct | null
 }
 
 interface StorefrontProductByIdResponse {
@@ -113,13 +132,13 @@ export async function getProductByHandle(
     `
     ${STOREFRONT_PRODUCT_FRAGMENT}
     query ProductByHandle($handle: String!) {
-      productByHandle(handle: $handle) { ...ProductFields }
+      product(handle: $handle) { ...ProductFields }
     }
     `,
     { handle }
   )
 
-  return result.productByHandle
+  return result.product
 }
 
 export async function getProductById(
@@ -231,4 +250,41 @@ export async function adminGetProduct(
   )
 
   return result.product
+}
+
+// ---------------------------------------------------------------------------
+// Storefront API - Product Recommendations
+// ---------------------------------------------------------------------------
+
+interface ProductRecommendationsResponse {
+  productRecommendations: ShopifyProduct[]
+}
+
+/**
+ * Get product recommendations from Shopify.
+ *
+ * Uses Shopify's built-in recommendation engine to suggest related products
+ * based on purchase history, product descriptions, and collections.
+ *
+ * @param client - Storefront API client
+ * @param productId - The Shopify product GID (e.g. "gid://shopify/Product/123")
+ * @returns Array of recommended products
+ */
+export async function getProductRecommendations(
+  client: StorefrontClient,
+  productId: string
+): Promise<ShopifyProduct[]> {
+  const result = await client.query<ProductRecommendationsResponse>(
+    `
+    ${STOREFRONT_PRODUCT_FRAGMENT}
+    query ProductRecommendations($productId: ID!) {
+      productRecommendations(productId: $productId) {
+        ...ProductFields
+      }
+    }
+    `,
+    { productId }
+  )
+
+  return result.productRecommendations ?? []
 }

@@ -10,9 +10,14 @@ import type { Metadata } from 'next'
 import { createStorefrontClient, getShopPolicies } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
 
-export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'Terms of service for our store.',
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getTenantConfig()
+  const tenantName = tenant?.name ?? 'Store'
+
+  return {
+    title: `Terms of Service | ${tenantName}`,
+    description: `Terms of service for ${tenantName}.`,
+  }
 }
 
 export const dynamic = 'force-dynamic'

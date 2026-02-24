@@ -42,6 +42,7 @@ export interface ProductOperations {
   get(id: string): Promise<Product | null>
   getByHandle(handle: string): Promise<Product | null>
   search(query: string, params?: ListParams): Promise<PaginatedResult<Product>>
+  getRecommendations(productId: string): Promise<Product[]>
 }
 
 export interface CollectionOperations {
@@ -291,7 +292,6 @@ export interface Cart {
 export interface CartCost {
   subtotalAmount: Money
   totalAmount: Money
-  totalTaxAmount?: Money
 }
 
 export interface CartLine {

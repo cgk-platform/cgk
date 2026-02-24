@@ -94,8 +94,8 @@ export function getCartTotals(cart: Cart): CartTotals {
   return {
     subtotal: cart.cost.subtotalAmount,
     discount: discountTotal,
-    tax: cart.cost.totalTaxAmount ?? null,
-    shipping: null, // Shipping not available until checkout
+    tax: null,
+    shipping: null,
     total: cart.cost.totalAmount,
     itemCount: cart.totalQuantity,
     lineCount: cart.lines.length,

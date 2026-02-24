@@ -60,7 +60,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function OrderConfirmationPage({ params }: PageProps) {
   const { orderId } = await params
   const tenantSlug = await getTenantSlug()
-  const tenant = await getTenantConfig()
 
   if (!tenantSlug) {
     notFound()
@@ -97,15 +96,6 @@ export default async function OrderConfirmationPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
-      <header className="border-b bg-background">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold">
-            {tenant?.name ?? 'Store'}
-          </Link>
-        </div>
-      </header>
-
       <div className="container mx-auto px-4 py-12">
         <div className="mx-auto max-w-2xl">
           {/* Success Message */}

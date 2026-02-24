@@ -216,7 +216,7 @@ export default function RegisterPage() {
           <div className="mt-6 text-center text-sm text-[hsl(var(--portal-muted-foreground))]">
             Already have an account?{' '}
             <Link
-              href="/account/login"
+              href="/login"
               className="font-medium text-[hsl(var(--portal-primary))] hover:underline"
             >
               Sign in
