@@ -76,6 +76,11 @@ export {
   getCollectionMetafield,
   type ShopifyMetafield,
   type MetafieldIdentifier,
+  // Blog & Articles
+  getBlogArticles,
+  getArticleByHandle,
+  type ShopifyBlog,
+  type ShopifyArticle,
 } from './queries'
 
 // Common types

@@ -37,20 +37,24 @@ const NAV_LINKS = [
     href: '/products',
   },
   {
+    label: 'Kids',
+    href: '/collections/kids',
+  },
+  {
+    label: 'Protectors + Toppers',
+    href: '/collections/protectors-toppers',
+  },
+  {
+    label: 'Comforters + Duvets',
+    href: '/collections/comforters-duvets',
+  },
+  {
+    label: 'Blankets + Throws',
+    href: '/collections/blankets-throws',
+  },
+  {
     label: 'Sheet Sets',
-    href: '/collections/6-piece-sheet-sets',
-  },
-  {
-    label: 'Bedding',
-    href: '/collections/bedding',
-  },
-  {
-    label: 'Blankets',
-    href: '/collections/blankets',
-  },
-  {
-    label: 'Comforters',
-    href: '/collections/comforters',
+    href: '/collections/sheet-sets',
   },
 ]
 
@@ -90,7 +94,10 @@ export function StorefrontHeader({
           style={{ height: scrolled ? '60px' : '72px' }}
         >
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className={cn(
+            'flex-shrink-0 origin-left transition-transform duration-300',
+            scrolled ? 'scale-[0.85]' : 'scale-100'
+          )}>
             {logoComponent ?? (
               <Link href="/" className="text-xl font-bold tracking-tight text-cgk-navy">
                 {storeName}

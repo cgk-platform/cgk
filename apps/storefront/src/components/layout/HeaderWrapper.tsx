@@ -37,7 +37,7 @@ export async function HeaderWrapper(props: HeaderWrapperProps) {
         storefrontAccessToken: config.shopify.storefrontAccessToken,
       })
 
-      const menu = await getMenu(client, 'main-menu')
+      const menu = await getMenu(client, 'new-menu')
       if (menu) {
         menuItems = menu.items.map(mapMenuItem)
       }

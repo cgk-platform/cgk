@@ -79,3 +79,10 @@ export {
   type ShopifyMetafield,
   type MetafieldIdentifier,
 } from './metafields'
+
+export {
+  getBlogArticles,
+  getArticleByHandle,
+  type ShopifyBlog,
+  type ShopifyArticle,
+} from './blog'

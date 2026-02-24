@@ -93,6 +93,15 @@ export default async function RootLayout({
         <ThemeHead theme={theme} />
         {tenantSlug && <AnalyticsHead tenantSlug={tenantSlug} />}
 
+        {/* DNS Prefetch & Preconnect for performance */}
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://connect.facebook.net" />
+        <link rel="dns-prefetch" href="https://analytics.tiktok.com" />
+        <link rel="preconnect" href="https://ajax.googleapis.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.shopify.com" />
+        <link rel="dns-prefetch" href="https://tools.luckyorange.com" />
+
         {/* Google Tag Manager */}
         {process.env.NEXT_PUBLIC_GTM_ID && (
           <script
@@ -121,6 +130,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             async
             defer
             src={`https://tools.luckyorange.com/core/lo.js?site-id=${process.env.NEXT_PUBLIC_LUCKY_ORANGE_ID}`}
+          />
+        )}
+
+        {/* Buy with Prime (Amazon) */}
+        {process.env.NEXT_PUBLIC_BWP_SITE_ID && (
+          <script
+            async
+            src="https://code.buywithprime.amazon.com/bwp.v1.js"
+          />
+        )}
+
+        {/* Bazaarvoice Reviews */}
+        {process.env.NEXT_PUBLIC_BAZAARVOICE_CLIENT_ID && (
+          <script
+            async
+            src={`https://apps.bazaarvoice.com/deployments/${process.env.NEXT_PUBLIC_BAZAARVOICE_CLIENT_ID}/main_site/en_US/bv.js`}
           />
         )}
       </head>
@@ -162,6 +187,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           <Footer storeName={storeName} />
           <BackToTop />
           <CookieConsent />
+          {/* Buy with Prime Cart Widget */}
+          {process.env.NEXT_PUBLIC_BWP_SITE_ID && (
+            <div
+              id="amzn-bwp-cart"
+              data-site-id={process.env.NEXT_PUBLIC_BWP_SITE_ID}
+              data-widget-id={process.env.NEXT_PUBLIC_BWP_WIDGET_ID ?? ''}
+            />
+          )}
         </ThemeProvider>
       </body>
     </html>
@@ -236,28 +269,30 @@ function Footer({ storeName }: FooterProps) {
           <FooterAccordion title="Shop">
             <ul className="space-y-2 text-sm">
               <li><a href="/products" className="text-white/80 transition-colors hover:text-white">All Products</a></li>
-              <li><a href="/collections/6-piece-sheet-sets" className="text-white/80 transition-colors hover:text-white">Sheet Sets</a></li>
-              <li><a href="/collections/bedding" className="text-white/80 transition-colors hover:text-white">Bedding</a></li>
-              <li><a href="/collections/blankets" className="text-white/80 transition-colors hover:text-white">Blankets</a></li>
-              <li><a href="/collections/comforters" className="text-white/80 transition-colors hover:text-white">Comforters</a></li>
+              <li><a href="/collections/kids" className="text-white/80 transition-colors hover:text-white">Kids</a></li>
+              <li><a href="/collections/protectors-toppers" className="text-white/80 transition-colors hover:text-white">Protectors + Toppers</a></li>
+              <li><a href="/collections/comforters-duvets" className="text-white/80 transition-colors hover:text-white">Comforters + Duvets</a></li>
+              <li><a href="/collections/blankets-throws" className="text-white/80 transition-colors hover:text-white">Blankets + Throws</a></li>
+              <li><a href="/collections/sheet-sets" className="text-white/80 transition-colors hover:text-white">Sheet Sets</a></li>
             </ul>
           </FooterAccordion>
 
-          {/* Support — expandable on mobile */}
-          <FooterAccordion title="Support">
+          {/* Help — expandable on mobile */}
+          <FooterAccordion title="Help">
             <ul className="space-y-2 text-sm">
               <li><a href="/contact" className="text-white/80 transition-colors hover:text-white">Contact Us</a></li>
               <li><a href="/faq" className="text-white/80 transition-colors hover:text-white">FAQ</a></li>
-              <li><a href="/shipping" className="text-white/80 transition-colors hover:text-white">Shipping</a></li>
-              <li><a href="/returns" className="text-white/80 transition-colors hover:text-white">Returns</a></li>
+              <li><a href="/shipping" className="text-white/80 transition-colors hover:text-white">Shipping Info</a></li>
+              <li><a href="/returns" className="text-white/80 transition-colors hover:text-white">Returns & Exchanges</a></li>
+              <li><a href="/wholesale" className="text-white/80 transition-colors hover:text-white">Wholesale</a></li>
             </ul>
           </FooterAccordion>
 
-          {/* Account — expandable on mobile */}
-          <FooterAccordion title="Account">
+          {/* Company — expandable on mobile */}
+          <FooterAccordion title="Company">
             <ul className="space-y-2 text-sm">
+              <li><a href="/about" className="text-white/80 transition-colors hover:text-white">About Us</a></li>
               <li><a href="/account" className="text-white/80 transition-colors hover:text-white">My Account</a></li>
-              <li><a href="/account/orders" className="text-white/80 transition-colors hover:text-white">Orders</a></li>
               <li><a href="/privacy" className="text-white/80 transition-colors hover:text-white">Privacy Policy</a></li>
               <li><a href="/terms" className="text-white/80 transition-colors hover:text-white">Terms of Service</a></li>
             </ul>
