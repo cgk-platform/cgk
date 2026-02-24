@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { checkPermissionOrRespond, requireAuth, type AuthContext } from '@cgk-platform/auth'
+import { timingSafeEqual } from 'crypto'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
@@ -35,7 +36,9 @@ export async function POST(
   const authHeader = request.headers.get('authorization')
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.slice(7)
-    if (!process.env.CGK_PLATFORM_API_KEY || token !== process.env.CGK_PLATFORM_API_KEY) {
+    const expected = process.env.CGK_PLATFORM_API_KEY
+    if (!expected || token.length !== expected.length ||
+        !timingSafeEqual(Buffer.from(token), Buffer.from(expected))) {
       return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
     }
   } else {

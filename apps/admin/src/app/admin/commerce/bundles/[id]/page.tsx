@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, StatusBadge, cn } from '@cgk-platform/ui'
+import { Button, Card, CardContent, CardHeader, CardTitle, StatusBadge, cn } from '@cgk-platform/ui'
 import { getBundle, getBundleOrderStats } from '@/lib/bundles/db'
+import { getShopifyConnection } from '@cgk-platform/shopify'
 import { formatDateTime, formatMoney } from '@/lib/format'
 
 export default async function BundleDetailPage({
@@ -16,12 +17,16 @@ export default async function BundleDetailPage({
   const tenantSlug = headerList.get('x-tenant-slug')
   if (!tenantSlug) notFound()
 
-  const bundle = await getBundle(tenantSlug, id)
+  const [bundle, shopifyConnection] = await Promise.all([
+    getBundle(tenantSlug, id),
+    getShopifyConnection(tenantSlug).catch(() => null),
+  ])
   if (!bundle) notFound()
 
   const stats = await getBundleOrderStats(tenantSlug, id)
 
   const hasColors = bundle.bgColor || bundle.textColor || bundle.accentColor
+  const shopDomain = shopifyConnection?.shop ?? null
 
   return (
     <div className="space-y-6">
@@ -41,6 +46,18 @@ export default async function BundleDetailPage({
             <p className="text-sm text-muted-foreground">{bundle.description}</p>
           )}
         </div>
+        {shopDomain && (
+          <Button variant="outline" size="sm" asChild>
+            <a
+              href={`https://${shopDomain}/admin/discounts`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Open in Shopify
+            </a>
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">

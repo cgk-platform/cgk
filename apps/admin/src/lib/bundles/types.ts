@@ -10,7 +10,7 @@ export interface BundleItem {
 export interface BundleTier {
   count: number
   discount: number // percentage or cents depending on discount_type
-  label: string
+  label?: string
 }
 
 export interface Bundle {

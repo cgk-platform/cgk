@@ -1,4 +1,4 @@
-import { Card, CardContent, StatusBadge, cn } from '@cgk-platform/ui'
+import { Card, CardContent, StatusBadge } from '@cgk-platform/ui'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Package } from 'lucide-react'
@@ -9,9 +9,8 @@ import { Pagination } from '@/components/commerce/pagination'
 import { formatDateTime } from '@/lib/format'
 import { getBundles } from '@/lib/bundles/db'
 import type { Bundle } from '@/lib/bundles/types'
-import { parseBundleFilters, buildFilterUrl } from '@/lib/search-params'
-
-const BUNDLE_STATUSES = ['active', 'draft', 'archived'] as const
+import { parseBundleFilters } from '@/lib/search-params'
+import { BundleStatusFilter } from './bundle-status-filter'
 
 export default async function BundlesPage({
   searchParams,
@@ -30,62 +29,15 @@ export default async function BundlesPage({
         </p>
       </div>
 
-      <BundleFilterBar filters={filters} />
+      <Suspense fallback={<div className="h-9 w-40 animate-pulse rounded bg-muted" />}>
+        <div className="flex flex-wrap items-center gap-3">
+          <BundleStatusFilter currentStatus={filters.status} />
+        </div>
+      </Suspense>
 
       <Suspense fallback={<BundlesTableSkeleton />}>
         <BundlesLoader filters={filters} />
       </Suspense>
-    </div>
-  )
-}
-
-function BundleFilterBar({
-  filters,
-}: {
-  filters: ReturnType<typeof parseBundleFilters>
-}) {
-  const base = '/admin/commerce/bundles'
-  const filterParams: Record<string, string | number | undefined> = {
-    search: filters.search || undefined,
-    status: filters.status || undefined,
-    sort: filters.sort !== 'created_at' ? filters.sort : undefined,
-    dir: filters.dir !== 'desc' ? filters.dir : undefined,
-  }
-
-  return (
-    <div className="flex flex-wrap items-center gap-1">
-      <span className="text-sm text-muted-foreground">Status:</span>
-      <div className="flex gap-1">
-        <Link
-          href={buildFilterUrl(base, { ...filterParams, status: undefined })}
-          className={cn(
-            'rounded-md px-2 py-1 text-xs',
-            !filters.status
-              ? 'bg-primary text-primary-foreground'
-              : 'hover:bg-muted',
-          )}
-        >
-          All
-        </Link>
-        {BUNDLE_STATUSES.map((status) => (
-          <Link
-            key={status}
-            href={buildFilterUrl(base, {
-              ...filterParams,
-              status,
-              page: undefined,
-            })}
-            className={cn(
-              'rounded-md px-2 py-1 text-xs capitalize',
-              filters.status === status
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-muted',
-            )}
-          >
-            {status}
-          </Link>
-        ))}
-      </div>
     </div>
   )
 }
