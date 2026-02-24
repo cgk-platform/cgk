@@ -250,7 +250,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
       tiers: bundle.tiers.map((t: TierConfig) => ({
         count: t.count,
         discount: t.discount,
-        label: '',
+        label: t.label || '',
       })),
       status: 'active',
     }
@@ -344,6 +344,14 @@ export default function BundleEdit() {
 
   const handleTierChange = useCallback(
     (index: number, field: keyof TierConfig, value: string) => {
+      if (field === 'label') {
+        setTiers(
+          tiers.map((tier, i) =>
+            i === index ? { ...tier, label: value } : tier
+          )
+        )
+        return
+      }
       const num = parseFloat(value)
       if (isNaN(num)) return
       setTiers(
@@ -633,6 +641,18 @@ export default function BundleEdit() {
                             discountType === 'percentage' ? '%' : undefined
                           }
                           error={errors[`tier_${index}_discount`]}
+                          disabled={isSubmitting}
+                        />
+                      </Box>
+                      <Box minWidth="140px">
+                        <TextField
+                          label="Label (optional)"
+                          value={tier.label || ''}
+                          onChange={(val) =>
+                            handleTierChange(index, 'label', val)
+                          }
+                          autoComplete="off"
+                          placeholder="e.g. Gold Tier"
                           disabled={isSubmitting}
                         />
                       </Box>

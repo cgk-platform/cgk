@@ -97,10 +97,13 @@ fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
             // not the cart transform. Only apply percentage adjustments here.
             None
         } else {
-            discount_value.map(|pct| schema::PriceAdjustment {
-                percentage_decrease: Some(schema::PriceAdjustmentValue {
-                    value: Decimal(pct),
-                }),
+            discount_value.map(|pct| {
+                let capped = if pct > 100.0 { 100.0 } else { pct };
+                schema::PriceAdjustment {
+                    percentage_decrease: Some(schema::PriceAdjustmentValue {
+                        value: Decimal(capped),
+                    }),
+                }
             })
         };
 
@@ -145,6 +148,25 @@ mod tests {
         let result =
             run_function_with_input(run, include_str!("../tests/bundle-with-gift.json"))?;
         assert_eq!(result.operations.len(), 1);
+        Ok(())
+    }
+
+    #[test]
+    fn test_percentage_capped_at_100() -> Result<()> {
+        let result =
+            run_function_with_input(run, include_str!("../tests/bundle-merge-over-100.json"))?;
+        assert_eq!(result.operations.len(), 1);
+        if let schema::CartOperation::Merge(ref merge) = result.operations[0] {
+            if let Some(ref price) = merge.price {
+                if let Some(ref pct) = price.percentage_decrease {
+                    assert!(
+                        pct.value.0 <= 100.0,
+                        "Percentage should be capped at 100, got {}",
+                        pct.value.0
+                    );
+                }
+            }
+        }
         Ok(())
     }
 }

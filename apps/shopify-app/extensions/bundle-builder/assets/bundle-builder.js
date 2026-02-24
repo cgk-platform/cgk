@@ -490,9 +490,17 @@
         clearTimeout(this.notificationTimeout);
       }
 
-      // Render with tier icon if present
+      // Render with tier icon if present (safe DOM construction — no innerHTML)
+      this.els.notification.textContent = '';
       if (tier.icon) {
-        this.els.notification.innerHTML = '<img src="' + tier.icon + '" alt="" class="bb-notification__icon" width="24" height="24"> ' + message;
+        var img = document.createElement('img');
+        img.src = tier.icon;
+        img.alt = '';
+        img.className = 'bb-notification__icon';
+        img.width = 24;
+        img.height = 24;
+        this.els.notification.appendChild(img);
+        this.els.notification.appendChild(document.createTextNode(' ' + message));
       } else {
         this.els.notification.textContent = message;
       }
@@ -527,44 +535,35 @@
       // Get the currently active gift (if any)
       var currentGiftId = this.activeFreeGifts.size > 0 ? this.activeFreeGifts.keys().next().value : null;
 
-      // If tier dropped and gift should be removed
-      if (!targetGiftId && currentGiftId) {
-        this.freeGiftPending = true;
-        this.removeFreeGift(currentGiftId).then(function () {
+      // No change needed
+      if (targetGiftId === currentGiftId) return;
+
+      this.freeGiftPending = true;
+      var operation = Promise.resolve();
+
+      // Remove old gift first if present
+      if (currentGiftId) {
+        operation = operation.then(function () {
+          return self.removeFreeGift(currentGiftId);
+        }).then(function () {
           self.activeFreeGifts.delete(currentGiftId);
-          self.freeGiftPending = false;
-        }).catch(function () {
-          self.freeGiftPending = false;
         });
-        return;
       }
 
-      // If gift should change
-      if (targetGiftId && targetGiftId !== currentGiftId) {
-        this.freeGiftPending = true;
-
-        var addGift = function () {
-          return self.addFreeGift(targetGiftId).then(function () {
-            self.activeFreeGifts.set(targetGiftId, true);
-            self.freeGiftPending = false;
-            self.showFreeGiftNotification();
-          }).catch(function () {
-            self.freeGiftPending = false;
-          });
-        };
-
-        // Remove old gift first if present
-        if (currentGiftId) {
-          this.removeFreeGift(currentGiftId).then(function () {
-            self.activeFreeGifts.delete(currentGiftId);
-            addGift();
-          }).catch(function () {
-            self.freeGiftPending = false;
-          });
-        } else {
-          addGift();
-        }
+      // Add new gift if needed
+      if (targetGiftId) {
+        operation = operation.then(function () {
+          return self.addFreeGift(targetGiftId);
+        }).then(function () {
+          self.activeFreeGifts.set(targetGiftId, true);
+          self.showFreeGiftNotification();
+        });
       }
+
+      // Guard released ONLY at the end of the full chain
+      operation
+        .then(function () { self.freeGiftPending = false; })
+        .catch(function () { self.freeGiftPending = false; });
     }
 
     addFreeGift(variantId) {

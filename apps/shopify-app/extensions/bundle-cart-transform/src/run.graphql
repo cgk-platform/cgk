@@ -32,9 +32,4 @@ query Input {
       }
     }
   }
-  cartTransform {
-    metafield(namespace: "$app:bundle-transform", key: "config") {
-      jsonValue
-    }
-  }
 }

@@ -62,8 +62,5 @@
         "isFreeGift": { "value": "true" }
       }
     ]
-  },
-  "cartTransform": {
-    "metafield": null
   }
 }

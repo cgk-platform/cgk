@@ -8,6 +8,7 @@
 export interface TierConfig {
   count: number
   discount: number
+  label?: string
 }
 
 export interface BundleConfig {
@@ -337,7 +338,36 @@ export function parseBundleConfig(
     return { bundles: [] }
   }
   try {
-    return JSON.parse(metafieldValue) as BundleDiscountConfig
+    const parsed = JSON.parse(metafieldValue)
+    if (!parsed || !Array.isArray(parsed.bundles)) {
+      return { bundles: [] }
+    }
+    const bundles: BundleConfig[] = parsed.bundles
+      .filter((b: unknown): b is Record<string, unknown> =>
+        typeof b === 'object' && b !== null &&
+        typeof (b as Record<string, unknown>).bundleId === 'string' &&
+        typeof (b as Record<string, unknown>).discountType === 'string' &&
+        Array.isArray((b as Record<string, unknown>).tiers)
+      )
+      .map((b: Record<string, unknown>) => ({
+        bundleId: b.bundleId as string,
+        discountType: (b.discountType === 'fixed' ? 'fixed' : 'percentage') as 'percentage' | 'fixed',
+        tiers: (b.tiers as unknown[])
+          .filter((t: unknown): t is Record<string, unknown> =>
+            typeof t === 'object' && t !== null &&
+            typeof (t as Record<string, unknown>).count === 'number' &&
+            typeof (t as Record<string, unknown>).discount === 'number'
+          )
+          .map((t: Record<string, unknown>) => ({
+            count: t.count as number,
+            discount: t.discount as number,
+            ...(typeof t.label === 'string' ? { label: t.label } : {}),
+          })),
+        freeGiftVariantIds: Array.isArray(b.freeGiftVariantIds)
+          ? (b.freeGiftVariantIds as unknown[]).filter((v): v is string => typeof v === 'string')
+          : [],
+      }))
+    return { bundles }
   } catch {
     return { bundles: [] }
   }

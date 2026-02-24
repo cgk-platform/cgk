@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { checkPermissionOrRespond, requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
@@ -16,17 +17,36 @@ interface CreateBundleOrderInput {
 
 /**
  * POST /api/admin/bundles/:id/orders
- * Record a bundle order (called by Shopify webhook handler)
+ * Record a bundle order (called by Shopify webhook handler or admin UI)
  */
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const headerList = await headers()
+  const tenantId = headerList.get('x-tenant-id')
   const tenantSlug = headerList.get('x-tenant-slug')
 
-  if (!tenantSlug) {
+  if (!tenantId || !tenantSlug) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
+  }
+
+  // Dual auth: Bearer token (Shopify webhook) or session auth
+  const authHeader = request.headers.get('authorization')
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7)
+    if (!process.env.CGK_PLATFORM_API_KEY || token !== process.env.CGK_PLATFORM_API_KEY) {
+      return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
+    }
+  } else {
+    let auth: AuthContext
+    try {
+      auth = await requireAuth(request)
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
+    if (denied) return denied
   }
 
   const { id: bundleId } = await params
@@ -87,16 +107,27 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const headerList = await headers()
+  const tenantId = headerList.get('x-tenant-id')
   const tenantSlug = headerList.get('x-tenant-slug')
 
-  if (!tenantSlug) {
+  if (!tenantId || !tenantSlug) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
+  if (denied) return denied
+
   const { id: bundleId } = await params
   const { searchParams } = new URL(request.url)
-  const limit = parseInt(searchParams.get('limit') ?? '50', 10)
-  const offset = parseInt(searchParams.get('offset') ?? '0', 10)
+  const limit = Math.max(1, Math.min(parseInt(searchParams.get('limit') || '50', 10) || 50, 500))
+  const offset = Math.max(0, parseInt(searchParams.get('offset') || '0', 10) || 0)
 
   try {
     const result = await withTenant(tenantSlug, async () => {

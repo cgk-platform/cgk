@@ -1,10 +1,12 @@
 export const dynamic = 'force-dynamic'
 
+import { checkPermissionOrRespond, requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { deleteBundle, getBundle, getBundleOrderStats, updateBundle } from '@/lib/bundles/db'
 import type { UpdateBundleInput } from '@/lib/bundles/types'
+import { validateUpdateBundle } from '@/lib/bundles/validation'
 
 /**
  * GET /api/admin/bundles/:id
@@ -15,11 +17,22 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const headerList = await headers()
+  const tenantId = headerList.get('x-tenant-id')
   const tenantSlug = headerList.get('x-tenant-slug')
 
-  if (!tenantSlug) {
+  if (!tenantId || !tenantSlug) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
+
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
+  if (denied) return denied
 
   const { id } = await params
   const { searchParams } = new URL(request.url)
@@ -49,11 +62,22 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const headerList = await headers()
+  const tenantId = headerList.get('x-tenant-id')
   const tenantSlug = headerList.get('x-tenant-slug')
 
-  if (!tenantSlug) {
+  if (!tenantId || !tenantSlug) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
+
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
+  if (denied) return denied
 
   const { id } = await params
 
@@ -62,6 +86,11 @@ export async function PATCH(
     body = await request.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  const validationErrors = validateUpdateBundle(body)
+  if (validationErrors.length > 0) {
+    return NextResponse.json({ errors: validationErrors }, { status: 422 })
   }
 
   try {
@@ -82,15 +111,26 @@ export async function PATCH(
  * Delete a bundle configuration
  */
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const headerList = await headers()
+  const tenantId = headerList.get('x-tenant-id')
   const tenantSlug = headerList.get('x-tenant-slug')
 
-  if (!tenantSlug) {
+  if (!tenantId || !tenantSlug) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
+
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
+  if (denied) return denied
 
   const { id } = await params
 

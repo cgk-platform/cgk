@@ -4,9 +4,6 @@ query Input {
       id
       quantity
       cost {
-        amountPerQuantity {
-          amount
-        }
         subtotalAmount {
           amount
         }
