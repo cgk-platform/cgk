@@ -47,6 +47,10 @@
       "esbuild",
       "protobufjs",
       "sharp"
-    ]
+    ],
+    "overrides": {
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0"
+    }
   }
 }
