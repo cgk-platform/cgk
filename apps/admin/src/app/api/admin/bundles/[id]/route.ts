@@ -1,9 +1,8 @@
 export const dynamic = 'force-dynamic'
 
-import { checkPermissionOrRespond, requireAuth, type AuthContext } from '@cgk-platform/auth'
-import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+import { authenticateBundleRequest } from '@/lib/bundles/api-auth'
 import { deleteBundle, getBundle, getBundleOrderStats, updateBundle } from '@/lib/bundles/db'
 import type { UpdateBundleInput } from '@/lib/bundles/types'
 import { validateUpdateBundle } from '@/lib/bundles/validation'
@@ -16,39 +15,20 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const headerList = await headers()
-  const tenantId = headerList.get('x-tenant-id')
-  const tenantSlug = headerList.get('x-tenant-slug')
-
-  if (!tenantId || !tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
-
-  let auth: AuthContext
-  try {
-    auth = await requireAuth(request)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  if (auth.tenantId && auth.tenantId !== tenantId) {
-    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
-  }
-
-  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
-  if (denied) return denied
+  const auth = await authenticateBundleRequest(request, 'products.view')
+  if (!auth.ok) return auth.response
 
   const { id } = await params
   const { searchParams } = new URL(request.url)
   const includeStats = searchParams.get('stats') === 'true'
 
   try {
-    const bundle = await getBundle(tenantSlug, id)
+    const bundle = await getBundle(auth.tenantSlug, id)
     if (!bundle) {
       return NextResponse.json({ error: 'Bundle not found' }, { status: 404 })
     }
 
-    const stats = includeStats ? await getBundleOrderStats(tenantSlug, id) : undefined
+    const stats = includeStats ? await getBundleOrderStats(auth.tenantSlug, id) : undefined
 
     return NextResponse.json({ bundle, stats })
   } catch (error) {
@@ -65,27 +45,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const headerList = await headers()
-  const tenantId = headerList.get('x-tenant-id')
-  const tenantSlug = headerList.get('x-tenant-slug')
-
-  if (!tenantId || !tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
-
-  let auth: AuthContext
-  try {
-    auth = await requireAuth(request)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  if (auth.tenantId && auth.tenantId !== tenantId) {
-    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
-  }
-
-  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
-  if (denied) return denied
+  const auth = await authenticateBundleRequest(request, 'products.sync')
+  if (!auth.ok) return auth.response
 
   const { id } = await params
 
@@ -102,7 +63,7 @@ export async function PATCH(
   }
 
   try {
-    const bundle = await updateBundle(tenantSlug, id, body)
+    const bundle = await updateBundle(auth.tenantSlug, id, body)
     if (!bundle) {
       return NextResponse.json({ error: 'Bundle not found' }, { status: 404 })
     }
@@ -122,32 +83,13 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const headerList = await headers()
-  const tenantId = headerList.get('x-tenant-id')
-  const tenantSlug = headerList.get('x-tenant-slug')
-
-  if (!tenantId || !tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
-
-  let auth: AuthContext
-  try {
-    auth = await requireAuth(request)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  if (auth.tenantId && auth.tenantId !== tenantId) {
-    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
-  }
-
-  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
-  if (denied) return denied
+  const auth = await authenticateBundleRequest(request, 'products.sync')
+  if (!auth.ok) return auth.response
 
   const { id } = await params
 
   try {
-    const deleted = await deleteBundle(tenantSlug, id)
+    const deleted = await deleteBundle(auth.tenantSlug, id)
     if (!deleted) {
       return NextResponse.json({ error: 'Bundle not found' }, { status: 404 })
     }

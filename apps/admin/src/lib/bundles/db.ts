@@ -82,35 +82,66 @@ export async function createBundle(
   const tiersJson = JSON.stringify(input.tiers ?? [])
 
   return withTenant(tenantSlug, async () => {
-    const result = await sql`
-      INSERT INTO bundles (
-        name, headline, description, items, discount_type, tiers,
-        min_items, max_items, layout, columns_desktop, image_ratio,
-        cta_text, show_savings, show_tier_progress, enable_quantity,
-        bg_color, text_color, accent_color, created_by
-      ) VALUES (
-        ${input.name},
-        ${input.headline ?? null},
-        ${input.description ?? null},
-        ${itemsJson}::jsonb,
-        ${input.discount_type ?? 'percentage'},
-        ${tiersJson}::jsonb,
-        ${input.min_items ?? 2},
-        ${input.max_items ?? 8},
-        ${input.layout ?? 'grid'},
-        ${input.columns_desktop ?? 3},
-        ${input.image_ratio ?? 'square'},
-        ${input.cta_text ?? 'Add Bundle to Cart'},
-        ${input.show_savings !== false},
-        ${input.show_tier_progress !== false},
-        ${input.enable_quantity !== false},
-        ${input.bg_color ?? null},
-        ${input.text_color ?? null},
-        ${input.accent_color ?? null},
-        ${userId ?? null}
-      )
-      RETURNING *
-    `
+    const result = input.bundle_id
+      ? await sql`
+          INSERT INTO bundles (
+            id, name, headline, description, items, discount_type, tiers,
+            min_items, max_items, layout, columns_desktop, image_ratio,
+            cta_text, show_savings, show_tier_progress, enable_quantity,
+            bg_color, text_color, accent_color, created_by
+          ) VALUES (
+            ${input.bundle_id},
+            ${input.name},
+            ${input.headline ?? null},
+            ${input.description ?? null},
+            ${itemsJson}::jsonb,
+            ${input.discount_type ?? 'percentage'},
+            ${tiersJson}::jsonb,
+            ${input.min_items ?? 2},
+            ${input.max_items ?? 8},
+            ${input.layout ?? 'grid'},
+            ${input.columns_desktop ?? 3},
+            ${input.image_ratio ?? 'square'},
+            ${input.cta_text ?? 'Add Bundle to Cart'},
+            ${input.show_savings !== false},
+            ${input.show_tier_progress !== false},
+            ${input.enable_quantity !== false},
+            ${input.bg_color ?? null},
+            ${input.text_color ?? null},
+            ${input.accent_color ?? null},
+            ${userId ?? null}
+          )
+          RETURNING *
+        `
+      : await sql`
+          INSERT INTO bundles (
+            name, headline, description, items, discount_type, tiers,
+            min_items, max_items, layout, columns_desktop, image_ratio,
+            cta_text, show_savings, show_tier_progress, enable_quantity,
+            bg_color, text_color, accent_color, created_by
+          ) VALUES (
+            ${input.name},
+            ${input.headline ?? null},
+            ${input.description ?? null},
+            ${itemsJson}::jsonb,
+            ${input.discount_type ?? 'percentage'},
+            ${tiersJson}::jsonb,
+            ${input.min_items ?? 2},
+            ${input.max_items ?? 8},
+            ${input.layout ?? 'grid'},
+            ${input.columns_desktop ?? 3},
+            ${input.image_ratio ?? 'square'},
+            ${input.cta_text ?? 'Add Bundle to Cart'},
+            ${input.show_savings !== false},
+            ${input.show_tier_progress !== false},
+            ${input.enable_quantity !== false},
+            ${input.bg_color ?? null},
+            ${input.text_color ?? null},
+            ${input.accent_color ?? null},
+            ${userId ?? null}
+          )
+          RETURNING *
+        `
     const row = result.rows[0]
     if (!row) throw new Error('Failed to create bundle')
     return rowToBundle(row as Record<string, unknown>)

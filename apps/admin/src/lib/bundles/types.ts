@@ -41,6 +41,7 @@ export interface Bundle {
 }
 
 export interface CreateBundleInput {
+  bundle_id?: string
   name: string
   headline?: string
   description?: string

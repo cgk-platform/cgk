@@ -8,6 +8,9 @@
       "cache": true,
       "env": [
         "ADMIN_BASE_URL",
+        "CGK_PLATFORM_API_KEY",
+        "CGK_PLATFORM_API_URL",
+        "CGK_TENANT_SLUG",
         "ALERT_EMAIL_FROM",
         "ALERT_EMAIL_RECIPIENTS",
         "ALERT_WEBHOOK_URL",

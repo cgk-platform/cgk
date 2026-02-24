@@ -1,10 +1,9 @@
 export const dynamic = 'force-dynamic'
 
-import { checkPermissionOrRespond, requireAuth, type AuthContext } from '@cgk-platform/auth'
-import { timingSafeEqual } from 'crypto'
-import { headers } from 'next/headers'
-import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
+import { NextResponse } from 'next/server'
+
+import { authenticateBundleRequest } from '@/lib/bundles/api-auth'
 
 interface CreateBundleOrderInput {
   order_id: string
@@ -24,36 +23,8 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const headerList = await headers()
-  const tenantId = headerList.get('x-tenant-id')
-  const tenantSlug = headerList.get('x-tenant-slug')
-
-  if (!tenantId || !tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
-
-  // Dual auth: Bearer token (Shopify webhook) or session auth
-  const authHeader = request.headers.get('authorization')
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.slice(7)
-    const expected = process.env.CGK_PLATFORM_API_KEY
-    if (!expected || token.length !== expected.length ||
-        !timingSafeEqual(Buffer.from(token), Buffer.from(expected))) {
-      return NextResponse.json({ error: 'Invalid API key' }, { status: 401 })
-    }
-  } else {
-    let auth: AuthContext
-    try {
-      auth = await requireAuth(request)
-    } catch {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    if (auth.tenantId && auth.tenantId !== tenantId) {
-      return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
-    }
-    const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
-    if (denied) return denied
-  }
+  const auth = await authenticateBundleRequest(request, 'products.sync')
+  if (!auth.ok) return auth.response
 
   const { id: bundleId } = await params
 
@@ -82,8 +53,7 @@ export async function POST(
   }
 
   try {
-    const result = await withTenant(tenantSlug, async () => {
-      // Upsert: if this order_id + bundle_id combo exists, update it
+    const result = await withTenant(auth.tenantSlug, async () => {
       return sql`
         INSERT INTO bundle_orders (
           bundle_id, order_id, customer_id,
@@ -125,27 +95,8 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const headerList = await headers()
-  const tenantId = headerList.get('x-tenant-id')
-  const tenantSlug = headerList.get('x-tenant-slug')
-
-  if (!tenantId || !tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
-
-  let auth: AuthContext
-  try {
-    auth = await requireAuth(request)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  if (auth.tenantId && auth.tenantId !== tenantId) {
-    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
-  }
-
-  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
-  if (denied) return denied
+  const auth = await authenticateBundleRequest(request, 'products.view')
+  if (!auth.ok) return auth.response
 
   const { id: bundleId } = await params
   const { searchParams } = new URL(request.url)
@@ -153,7 +104,7 @@ export async function GET(
   const offset = Math.max(0, parseInt(searchParams.get('offset') || '0', 10) || 0)
 
   try {
-    const [result, countResult] = await withTenant(tenantSlug, async () => {
+    const [result, countResult] = await withTenant(auth.tenantSlug, async () => {
       const rows = await sql`
         SELECT * FROM bundle_orders
         WHERE bundle_id = ${bundleId}

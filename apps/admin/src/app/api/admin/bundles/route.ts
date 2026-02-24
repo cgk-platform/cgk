@@ -1,9 +1,8 @@
 export const dynamic = 'force-dynamic'
 
-import { checkPermissionOrRespond, requireAuth, type AuthContext } from '@cgk-platform/auth'
-import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+import { authenticateBundleRequest } from '@/lib/bundles/api-auth'
 import { createBundle, getBundles } from '@/lib/bundles/db'
 import type { CreateBundleInput } from '@/lib/bundles/types'
 import { validateCreateBundle } from '@/lib/bundles/validation'
@@ -13,27 +12,8 @@ import { validateCreateBundle } from '@/lib/bundles/validation'
  * List bundle configurations
  */
 export async function GET(request: Request) {
-  const headerList = await headers()
-  const tenantId = headerList.get('x-tenant-id')
-  const tenantSlug = headerList.get('x-tenant-slug')
-
-  if (!tenantId || !tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
-
-  let auth: AuthContext
-  try {
-    auth = await requireAuth(request)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  if (auth.tenantId && auth.tenantId !== tenantId) {
-    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
-  }
-
-  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
-  if (denied) return denied
+  const auth = await authenticateBundleRequest(request, 'products.view')
+  if (!auth.ok) return auth.response
 
   const { searchParams } = new URL(request.url)
   const limit = Math.max(1, Math.min(parseInt(searchParams.get('limit') || '50', 10) || 50, 500))
@@ -49,7 +29,7 @@ export async function GET(request: Request) {
   const status = statusParam || undefined
 
   try {
-    const result = await getBundles(tenantSlug, { status, limit, offset })
+    const result = await getBundles(auth.tenantSlug, { status, limit, offset })
 
     return NextResponse.json({
       bundles: result.bundles,
@@ -68,27 +48,8 @@ export async function GET(request: Request) {
  * Create a new bundle configuration
  */
 export async function POST(request: Request) {
-  const headerList = await headers()
-  const tenantId = headerList.get('x-tenant-id')
-  const tenantSlug = headerList.get('x-tenant-slug')
-
-  if (!tenantId || !tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
-
-  let auth: AuthContext
-  try {
-    auth = await requireAuth(request)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  if (auth.tenantId && auth.tenantId !== tenantId) {
-    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
-  }
-
-  const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
-  if (denied) return denied
+  const auth = await authenticateBundleRequest(request, 'products.sync')
+  if (!auth.ok) return auth.response
 
   let body: CreateBundleInput
   try {
@@ -103,7 +64,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const bundle = await createBundle(tenantSlug, body, auth.userId)
+    const bundle = await createBundle(auth.tenantSlug, body, auth.userId ?? undefined)
     return NextResponse.json({ bundle }, { status: 201 })
   } catch (error) {
     console.error('Error creating bundle:', error)
