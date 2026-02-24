@@ -9,6 +9,7 @@ pub mod schema {
     pub mod run {}
 }
 
+#[allow(dead_code)]
 fn main() {
     eprintln!("Please invoke a named export.");
     process::exit(1);
