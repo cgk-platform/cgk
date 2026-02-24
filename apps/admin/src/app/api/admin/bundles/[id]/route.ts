@@ -31,6 +31,10 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  if (auth.tenantId && auth.tenantId !== tenantId) {
+    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
+  }
+
   const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
   if (denied) return denied
 
@@ -74,6 +78,10 @@ export async function PATCH(
     auth = await requireAuth(request)
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (auth.tenantId && auth.tenantId !== tenantId) {
+    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
   }
 
   const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
@@ -127,6 +135,10 @@ export async function DELETE(
     auth = await requireAuth(request)
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (auth.tenantId && auth.tenantId !== tenantId) {
+    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
   }
 
   const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')

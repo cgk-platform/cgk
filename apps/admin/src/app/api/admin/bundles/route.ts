@@ -28,13 +28,25 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  if (auth.tenantId && auth.tenantId !== tenantId) {
+    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
+  }
+
   const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
   if (denied) return denied
 
   const { searchParams } = new URL(request.url)
   const limit = Math.max(1, Math.min(parseInt(searchParams.get('limit') || '50', 10) || 50, 500))
   const offset = Math.max(0, parseInt(searchParams.get('offset') || '0', 10) || 0)
-  const status = searchParams.get('status') || undefined
+  const statusParam = searchParams.get('status')
+  const validStatuses = ['draft', 'active', 'archived']
+  if (statusParam && !validStatuses.includes(statusParam)) {
+    return NextResponse.json(
+      { error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` },
+      { status: 400 }
+    )
+  }
+  const status = statusParam || undefined
 
   try {
     const result = await getBundles(tenantSlug, { status, limit, offset })
@@ -69,6 +81,10 @@ export async function POST(request: Request) {
     auth = await requireAuth(request)
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  if (auth.tenantId && auth.tenantId !== tenantId) {
+    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
   }
 
   const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')

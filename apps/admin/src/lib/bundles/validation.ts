@@ -9,10 +9,16 @@ const VALID_DISCOUNT_TYPES = ['percentage', 'fixed'] as const
 const VALID_LAYOUTS = ['grid', 'list'] as const
 const VALID_IMAGE_RATIOS = ['square', 'portrait', 'landscape'] as const
 const HEX_COLOR_RE = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
-const RGB_COLOR_RE = /^rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)$/
+const RGB_COLOR_RE = /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/
 
 function validateColor(value: string): boolean {
-  return HEX_COLOR_RE.test(value) || RGB_COLOR_RE.test(value)
+  if (HEX_COLOR_RE.test(value)) return true
+  const match = RGB_COLOR_RE.exec(value)
+  if (!match) return false
+  return [match[1], match[2], match[3]].every((v) => {
+    const n = parseInt(v!, 10)
+    return n >= 0 && n <= 255
+  })
 }
 
 export function validateCreateBundle(input: CreateBundleInput): ValidationError[] {

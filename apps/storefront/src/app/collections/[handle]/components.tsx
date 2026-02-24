@@ -19,6 +19,7 @@ import { useCallback, useMemo, useState } from 'react'
 
 import { ProductFilterSidebar } from '@/components/products/filters'
 import { ProductGrid } from '@/components/products'
+import { LoadMoreButton } from '@/components/products/LoadMoreButton'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,6 +32,9 @@ interface CollectionFilterWrapperProps {
   hasNextPage: boolean
   handle: string
   currentSort: string
+  endCursor?: string
+  sortKey?: string
+  reverse?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -353,6 +357,9 @@ export function CollectionFilterWrapper({
   hasNextPage,
   handle,
   currentSort,
+  endCursor,
+  sortKey,
+  reverse,
 }: CollectionFilterWrapperProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -396,14 +403,6 @@ export function CollectionFilterWrapper({
   }, [router, pathname, searchParams])
 
   const hasFilters = filters.length > 0
-
-  // Build pagination URL preserving all current params
-  const paginationUrl = useMemo(() => {
-    const params = new URLSearchParams(searchParams.toString())
-    const currentPage = parseInt(params.get('page') || '1', 10)
-    params.set('page', (currentPage + 1).toString())
-    return `/collections/${handle}?${params.toString()}`
-  }, [searchParams, handle])
 
   const sidebarContent = hasFilters ? (
     <ProductFilterSidebar
@@ -523,20 +522,18 @@ export function CollectionFilterWrapper({
             <>
               <ProductGrid
                 products={products}
-                columns={{ sm: 2, dawn: 3, lg: 3 }}
-                priorityCount={6}
+                columns={{ sm: 2, dawn: 3, lg: 4 }}
+                priorityCount={8}
               />
 
               {/* Pagination */}
               {hasNextPage && (
-                <div className="flex justify-center pt-8">
-                  <Link
-                    href={paginationUrl}
-                    className="rounded-btn border border-cgk-navy px-8 py-3 text-sm font-semibold text-cgk-navy transition-colors hover:bg-cgk-navy hover:text-white"
-                  >
-                    Load More Products
-                  </Link>
-                </div>
+                <LoadMoreButton
+                  handle={handle}
+                  initialEndCursor={endCursor}
+                  sortKey={sortKey}
+                  reverse={reverse}
+                />
               )}
             </>
           )}

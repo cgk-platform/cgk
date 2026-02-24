@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { CartProvider, useCart } from '@/components/cart/CartProvider'
 import { CartLineItem } from '@/components/cart/CartLineItem'
 import { CartSummary } from '@/components/cart/CartSummary'
+import { GiftMessage } from '@/components/cart/GiftMessage'
 
 function FreeShippingBar({ subtotal }: { subtotal: number }) {
   const threshold = 50
@@ -91,6 +92,16 @@ function CartPageInner() {
               <CartLineItem line={line} />
             </div>
           ))}
+        </div>
+
+        {/* Shipping/Tax Notice */}
+        <p className="mt-4 text-xs text-muted-foreground">
+          Shipping &amp; taxes calculated at checkout.
+        </p>
+
+        {/* Gift Message */}
+        <div className="mt-4">
+          <GiftMessage />
         </div>
 
         {/* Continue Shopping */}

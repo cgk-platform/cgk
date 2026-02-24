@@ -26,7 +26,7 @@ export interface BundleVariant {
 export interface BundleTier {
   /** Minimum item count to unlock this tier */
   count: number
-  /** Discount value: percentage (0-100) or fixed amount in cents */
+  /** Discount value: percentage (0-100) or fixed amount in dollars */
   discount: number
   /** Display label for this tier (e.g. "Starter Bundle") */
   label?: string
@@ -68,4 +68,17 @@ export interface SelectedProduct {
   /** Price in cents */
   price: number
   quantity: number
+}
+
+export interface BundleTheme {
+  /** Background color for the bundle section */
+  bgColor?: string
+  /** Primary text color */
+  textColor?: string
+  /** Accent color (buttons, progress, selections) */
+  accentColor?: string
+  /** Button text color */
+  btnTextColor?: string
+  /** Card border radius in pixels */
+  cardRadius?: number
 }

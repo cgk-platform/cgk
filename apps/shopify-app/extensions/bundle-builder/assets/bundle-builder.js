@@ -618,7 +618,10 @@
       // Fetch cart to find the line with this variant + _bundle_free_gift
       var self = this;
       return fetch('/cart.js')
-        .then(function (res) { return res.json(); })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Failed to fetch cart');
+          return res.json();
+        })
         .then(function (cart) {
           var giftItem = cart.items.find(function (item) {
             return String(item.variant_id) === String(variantId)
@@ -634,6 +637,9 @@
               line: cart.items.indexOf(giftItem) + 1,
               quantity: 0,
             }),
+          }).then(function (res) {
+            if (!res.ok) throw new Error('Failed to remove free gift');
+            return res;
           });
         })
         .then(function () {

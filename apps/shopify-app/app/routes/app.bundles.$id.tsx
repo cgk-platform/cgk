@@ -245,6 +245,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   if (platformApiUrl && platformApiKey && tenantSlug) {
     const bundle = data.bundle
     const platformPayload = {
+      bundle_id: bundle.bundleId,
       name: data.title,
       discount_type: bundle.discountType,
       tiers: bundle.tiers.map((t: TierConfig) => ({
@@ -756,7 +757,7 @@ export default function BundleEdit() {
                     <Text as="span" variant="bodyMd">
                       {discountType === 'percentage'
                         ? `${tier.discount}% off`
-                        : `$${tier.discount} off each item`}
+                        : `$${tier.discount} off bundle total`}
                     </Text>
                   </InlineStack>
                 ))}

@@ -23,6 +23,7 @@ import type {
   BundleCartItem,
   SelectedProduct,
   BundleTier,
+  BundleTheme,
 } from './types'
 
 interface BundleBuilderProps {
@@ -48,6 +49,10 @@ interface BundleBuilderProps {
   onAddToCart?: (items: BundleCartItem[]) => Promise<void>
   /** ISO 4217 currency code for formatting */
   currencyCode?: string
+  /** Layout mode: grid (default) or list */
+  layout?: 'grid' | 'list'
+  /** Theme overrides via CSS custom properties */
+  theme?: Partial<BundleTheme>
 }
 
 type ButtonState = 'idle' | 'loading' | 'success' | 'error'
@@ -70,6 +75,8 @@ export function BundleBuilder({
   imageAspectRatio = 'square',
   onAddToCart,
   currencyCode = 'USD',
+  layout = 'grid',
+  theme,
 }: BundleBuilderProps) {
   const [selectedProducts, setSelectedProducts] = useState<Map<string, SelectedProduct>>(
     () => new Map()
@@ -136,7 +143,9 @@ export function BundleBuilder({
     if (config.discountType === 'percentage') {
       return Math.round(subtotal * (Math.min(activeTier.discount, 100) / 100))
     }
-    return Math.min(activeTier.discount, subtotal)
+    // Fixed discount is in dollars; subtotal is in cents — convert to cents for comparison
+    const fixedCents = Math.round(activeTier.discount * 100)
+    return Math.min(fixedCents, subtotal)
   }, [activeTier, subtotal, config.discountType])
 
   const total = useMemo(() => Math.max(0, subtotal - discountAmount), [subtotal, discountAmount])
@@ -151,6 +160,16 @@ export function BundleBuilder({
     return ids
   }, [config.freeGiftVariantIds, sortedTiers])
 
+  const activeGiftVariantId = useMemo(() => {
+    for (let i = activeTierIndex; i >= 0; i--) {
+      const tier = sortedTiers[i]
+      if (tier?.freeGiftVariantId) return tier.freeGiftVariantId
+    }
+    return null
+  }, [activeTierIndex, sortedTiers])
+
+  const previousGiftRef = useRef<string | null>(null)
+
   // -- Tier unlock notification --
 
   useEffect(() => {
@@ -159,13 +178,24 @@ export function BundleBuilder({
       if (tier) {
         const discLabel = config.discountType === 'percentage'
           ? `${tier.discount}% off`
-          : `${formatMoney(tier.discount, currencyCode)} off`
+          : `${formatDollars(tier.discount, currencyCode)} off`
         const msg = tier.label ? `${tier.label} unlocked! ${discLabel}` : `Discount unlocked: ${discLabel}`
         fireNotification(msg)
       }
     }
     previousTierIndexRef.current = activeTierIndex
   }, [activeTierIndex, sortedTiers, config.discountType, currencyCode])
+
+  useEffect(() => {
+    if (activeGiftVariantId !== previousGiftRef.current) {
+      if (activeGiftVariantId && previousGiftRef.current !== null) {
+        fireNotification('Free gift added to your bundle!')
+      } else if (!activeGiftVariantId && previousGiftRef.current) {
+        fireNotification('Free gift removed')
+      }
+      previousGiftRef.current = activeGiftVariantId
+    }
+  }, [activeGiftVariantId])
 
   useEffect(() => {
     if (buttonState === 'success' || buttonState === 'error') {
@@ -281,6 +311,19 @@ export function BundleBuilder({
       items.push({ variantId: item.variantId, quantity: item.quantity, properties })
     })
 
+    // Auto-include free gift if tier qualifies
+    if (activeGiftVariantId) {
+      items.push({
+        variantId: activeGiftVariantId,
+        quantity: 1,
+        properties: {
+          _bundle_id: config.bundleId,
+          _bundle_name: config.bundleName,
+          _bundle_free_gift: 'true',
+        },
+      })
+    }
+
     try {
       if (onAddToCart) {
         await onAddToCart(items)
@@ -311,13 +354,13 @@ export function BundleBuilder({
       percent = Math.min(100, Math.max(0, percent))
       const nextDisc = config.discountType === 'percentage'
         ? `${nextTier.discount}% off`
-        : `${formatMoney(nextTier.discount, currencyCode)} off`
+        : `${formatDollars(nextTier.discount, currencyCode)} off`
       const nextName = nextTier.label ? `${nextTier.label} \u2014 ${nextDisc}` : nextDisc
       let hint = ''
       if (activeTier) {
         const curDisc = config.discountType === 'percentage'
           ? `${activeTier.discount}% off`
-          : `${formatMoney(activeTier.discount, currencyCode)} off`
+          : `${formatDollars(activeTier.discount, currencyCode)} off`
         hint = `Current: ${activeTier.label ?? curDisc}`
       }
       return { percent, label: `Add ${needed} more for ${nextName}!`, hint }
@@ -341,12 +384,22 @@ export function BundleBuilder({
     if (!activeTier) return null
     const disc = config.discountType === 'percentage'
       ? `${activeTier.discount}% off`
-      : `${formatMoney(activeTier.discount, currencyCode)} off`
+      : `${formatDollars(activeTier.discount, currencyCode)} off`
     return activeTier.label ? `${activeTier.label} \u2014 ${disc}` : disc
   }, [activeTier, config.discountType, currencyCode])
 
   return (
-    <section className="mx-auto w-full max-w-store px-4 py-10 sm:px-6 lg:px-8 lg:py-14" aria-label={config.bundleName}>
+    <section
+      className="mx-auto w-full max-w-store px-4 py-10 sm:px-6 lg:px-8 lg:py-14"
+      aria-label={config.bundleName}
+      style={{
+        '--bb-accent': theme?.accentColor ?? '#1e2a4a',
+        '--bb-bg': theme?.bgColor,
+        '--bb-text': theme?.textColor,
+        '--bb-btn-text': theme?.btnTextColor ?? '#ffffff',
+        '--bb-card-radius': theme?.cardRadius != null ? `${theme.cardRadius}px` : undefined,
+      } as React.CSSProperties}
+    >
       {(headline || subheadline) && (
         <div className="mb-8 text-center">
           {headline && (
@@ -379,7 +432,11 @@ export function BundleBuilder({
 
       {/* Product grid */}
       {products.length > 0 ? (
-        <div className={cn('grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5', COLUMN_CLASSES[columns])}>
+        <div className={cn(
+          layout === 'list'
+            ? 'flex flex-col gap-3'
+            : cn('grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5', COLUMN_CLASSES[columns])
+        )}>
           {products.map((product) => {
             const variant = activeVariants.get(product.id) ?? product.variants[0]
             if (!variant) return null
@@ -396,6 +453,7 @@ export function BundleBuilder({
                 maxReached={maxReached}
                 isFreeGift={isGift}
                 imageAspectRatio={imageAspectRatio}
+                layout={layout}
               />
             )
           })}
@@ -422,6 +480,7 @@ export function BundleBuilder({
         canAddToCart={canAddToCart}
         currencyCode={currencyCode}
         onAddToCart={handleAddToCart}
+        activeGiftVariantId={activeGiftVariantId}
       />
     </section>
   )
@@ -429,4 +488,8 @@ export function BundleBuilder({
 
 function formatMoney(cents: number, currencyCode: string = 'USD'): string {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(cents / 100)
+}
+
+function formatDollars(dollars: number, currencyCode: string = 'USD'): string {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(dollars)
 }

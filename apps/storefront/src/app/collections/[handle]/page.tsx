@@ -406,6 +406,9 @@ async function CollectionProducts({
       hasNextPage={result.pageInfo.hasNextPage}
       handle={handle}
       currentSort={currentSort}
+      endCursor={result.pageInfo.endCursor ?? undefined}
+      sortKey={resolvedSortKey}
+      reverse={resolvedReverse}
     />
   )
 }

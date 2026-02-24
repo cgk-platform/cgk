@@ -291,8 +291,14 @@ export async function resolveVariantProducts(
           id
           title
           displayName
-          image {
-            url(transform: { maxWidth: 80, maxHeight: 80 })
+          media(first: 1) {
+            nodes {
+              ... on MediaImage {
+                image {
+                  url(transform: { maxWidth: 80, maxHeight: 80 })
+                }
+              }
+            }
           }
           product {
             title
@@ -322,7 +328,7 @@ export async function resolveVariantProducts(
       productTitle: node.product?.title ?? 'Unknown Product',
       variantTitle: node.title ?? 'Default',
       imageUrl:
-        node.image?.url ??
+        node.media?.nodes?.[0]?.image?.url ??
         node.product?.featuredMedia?.preview?.image?.url ??
         null,
     }))

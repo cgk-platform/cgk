@@ -4,9 +4,6 @@
       {
         "id": "gid://shopify/CartLine/1",
         "quantity": 1,
-        "cost": {
-          "amountPerQuantity": { "amount": "29.99", "currencyCode": "USD" }
-        },
         "merchandise": {
           "__typename": "ProductVariant",
           "id": "gid://shopify/ProductVariant/100"
@@ -14,14 +11,12 @@
         "bundleId": { "value": "block-abc123" },
         "bundleName": { "value": "Bedroom Bundle" },
         "bundleDiscount": { "value": "20" },
+        "bundleDiscountType": null,
         "isFreeGift": null
       },
       {
         "id": "gid://shopify/CartLine/2",
         "quantity": 1,
-        "cost": {
-          "amountPerQuantity": { "amount": "49.99", "currencyCode": "USD" }
-        },
         "merchandise": {
           "__typename": "ProductVariant",
           "id": "gid://shopify/ProductVariant/200"
@@ -29,14 +24,12 @@
         "bundleId": { "value": "block-abc123" },
         "bundleName": { "value": "Bedroom Bundle" },
         "bundleDiscount": { "value": "20" },
+        "bundleDiscountType": null,
         "isFreeGift": null
       },
       {
         "id": "gid://shopify/CartLine/3",
         "quantity": 1,
-        "cost": {
-          "amountPerQuantity": { "amount": "39.99", "currencyCode": "USD" }
-        },
         "merchandise": {
           "__typename": "ProductVariant",
           "id": "gid://shopify/ProductVariant/300"
@@ -44,14 +37,12 @@
         "bundleId": { "value": "block-abc123" },
         "bundleName": { "value": "Bedroom Bundle" },
         "bundleDiscount": { "value": "20" },
+        "bundleDiscountType": null,
         "isFreeGift": null
       },
       {
         "id": "gid://shopify/CartLine/4",
         "quantity": 1,
-        "cost": {
-          "amountPerQuantity": { "amount": "14.99", "currencyCode": "USD" }
-        },
         "merchandise": {
           "__typename": "ProductVariant",
           "id": "gid://shopify/ProductVariant/400"
@@ -59,6 +50,7 @@
         "bundleId": { "value": "block-abc123" },
         "bundleName": { "value": "Bedroom Bundle" },
         "bundleDiscount": { "value": "20" },
+        "bundleDiscountType": null,
         "isFreeGift": { "value": "true" }
       }
     ]

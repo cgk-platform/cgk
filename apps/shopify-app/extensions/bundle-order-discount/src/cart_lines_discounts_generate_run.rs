@@ -88,8 +88,8 @@ fn cart_lines_discounts_generate_run(
             .max_by(|a, b| a.count.cmp(&b.count));
 
         let active_tier = match active_tier {
-            Some(t) => t,
-            None => continue,
+            Some(t) if t.discount > 0.0 => t,
+            _ => continue,
         };
 
         // Apply discount to each qualifying (non-gift) line in the bundle

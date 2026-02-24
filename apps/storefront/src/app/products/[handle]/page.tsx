@@ -25,6 +25,7 @@ import {
   CompactStarRating,
   RelatedProductsSkeleton,
   CollapsibleTabs,
+  SocialShare,
 } from '@/components/products'
 import { MarqueeLogos } from '@/components/sections'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
@@ -291,6 +292,18 @@ async function ProductContent({ handle }: ProductContentProps) {
             showSavings
           />
 
+          {/* Shipping / Tax Notice */}
+          <p className="text-xs text-muted-foreground">
+            Shipping calculated at checkout
+          </p>
+
+          {/* SKU Display */}
+          {product.variants[0]?.sku && (
+            <p className="text-xs text-muted-foreground">
+              SKU: {product.variants[0].sku}
+            </p>
+          )}
+
           {/* Product Info Client Component (handles variant selection) */}
           <ProductInfo
             product={product}
@@ -386,6 +399,13 @@ async function ProductContent({ handle }: ProductContentProps) {
                 content: '<p>Machine wash cold on a gentle cycle. Tumble dry low. Remove promptly to minimize wrinkles. Do not bleach. Iron on low if needed.</p>',
               },
             ]}
+          />
+
+          {/* Social Share */}
+          <SocialShare
+            url={productUrl}
+            title={product.title}
+            image={product.images[0]?.url}
           />
 
           {/* Product Video */}

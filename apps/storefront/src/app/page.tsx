@@ -19,6 +19,8 @@ import {
   MarqueeLogos,
   PressSlider,
   InstagramFeed,
+  IconTextBar,
+  ReviewsSection,
 } from '@/components/sections'
 import { NewsletterForm } from '@/components/forms/NewsletterForm'
 import { getTenantConfig, getTenantSlug } from '@/lib/tenant'
@@ -150,6 +152,9 @@ export default async function HomePage() {
         mobileImageUrl="https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3714.jpg"
       />
 
+      {/* Icon/Text Benefits Bar */}
+      <IconTextBar />
+
       {/* Best Sellers */}
       <section className="py-16">
         <div className="mx-auto max-w-store px-4">
@@ -162,7 +167,7 @@ export default async function HomePage() {
               href="/collections/best-sellers"
               className="text-sm font-medium text-cgk-navy hover:underline"
             >
-              Shop All Best Sellers
+              Shop Our Sheets
             </a>
           </div>
 
@@ -221,12 +226,15 @@ export default async function HomePage() {
 
       {/* Testimonials */}
       <TestimonialCarousel
-        title={"What our\ncustomers say"}
-        subtitle="Real reviews from real customers"
+        title={"The Sheets Everyone\n(and Their Mom) Are Talking About"}
+        subtitle="Trusted by Over 5 Million Sleepers a Year"
         testimonials={TESTIMONIALS}
-        ctaText="Read More Reviews"
+        ctaText="See Why Everyone's Obsessed"
         ctaHref="/collections/featured#reviews"
       />
+
+      {/* Reviews Section */}
+      <ReviewsSection />
 
       {/* Newsletter CTA */}
       <section className="bg-cgk-light-blue/30 py-16">

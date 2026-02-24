@@ -44,7 +44,7 @@ export function AnnouncementBar({
   }, [advance, interval, messages.length])
 
   return (
-    <div className="bg-cgk-navy text-center text-sm text-white py-2.5 px-4 overflow-hidden">
+    <div className="bg-[#121212] text-center text-sm text-white py-2.5 px-4 overflow-hidden">
       <p
         className="transition-all duration-300 ease-in-out"
         style={{

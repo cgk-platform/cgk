@@ -8,8 +8,8 @@ use shopify_function::Result;
 /// for bundles with 2+ items. The merged line shows the bundle name and a
 /// price adjustment matching the bundle discount.
 #[shopify_function]
-fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
-    let no_changes = schema::FunctionRunResult { operations: vec![] };
+fn run(input: schema::run::Input) -> Result<schema::CartTransformRunResult> {
+    let no_changes = schema::CartTransformRunResult { operations: vec![] };
 
     // Group cart lines by _bundle_id
     let mut bundle_groups: std::collections::HashMap<
@@ -32,7 +32,7 @@ fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
         return Ok(no_changes);
     }
 
-    let mut operations: Vec<schema::CartOperation> = Vec::new();
+    let mut operations: Vec<schema::Operation> = Vec::new();
 
     for (_bundle_id, lines) in &bundle_groups {
         // Only merge bundles with 2+ lines
@@ -107,7 +107,7 @@ fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
             })
         };
 
-        operations.push(schema::CartOperation::Merge(schema::MergeOperation {
+        operations.push(schema::Operation::LinesMerge(schema::LinesMergeOperation {
             cart_lines,
             parent_variant_id: first_variant_id,
             title: Some(title),
@@ -121,7 +121,7 @@ fn run(input: schema::run::Input) -> Result<schema::FunctionRunResult> {
         return Ok(no_changes);
     }
 
-    Ok(schema::FunctionRunResult { operations })
+    Ok(schema::CartTransformRunResult { operations })
 }
 
 #[cfg(test)]
@@ -156,7 +156,7 @@ mod tests {
         let result =
             run_function_with_input(run, include_str!("../tests/bundle-merge-over-100.json"))?;
         assert_eq!(result.operations.len(), 1);
-        if let schema::CartOperation::Merge(ref merge) = result.operations[0] {
+        if let schema::Operation::LinesMerge(ref merge) = result.operations[0] {
             if let Some(ref price) = merge.price {
                 if let Some(ref pct) = price.percentage_decrease {
                     assert!(

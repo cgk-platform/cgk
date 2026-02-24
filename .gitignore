@@ -46,5 +46,8 @@ coverage/
 apps/shopify-app/extensions/*/target/
 apps/shopify-app/extensions/delivery-customization/schema.graphql
 
+# Theme reference (downloaded Liquid theme for conversion)
+theme-reference/
+
 # Claude Code
 .claude/

@@ -48,6 +48,9 @@ export async function POST(
     } catch {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    if (auth.tenantId && auth.tenantId !== tenantId) {
+      return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
+    }
     const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.sync')
     if (denied) return denied
   }
@@ -63,6 +66,19 @@ export async function POST(
 
   if (!body.order_id) {
     return NextResponse.json({ error: 'order_id is required' }, { status: 400 })
+  }
+
+  if (body.items_count !== undefined && (typeof body.items_count !== 'number' || !Number.isFinite(body.items_count))) {
+    return NextResponse.json({ error: 'items_count must be a number' }, { status: 422 })
+  }
+  if (body.subtotal_cents !== undefined && (typeof body.subtotal_cents !== 'number' || !Number.isFinite(body.subtotal_cents))) {
+    return NextResponse.json({ error: 'subtotal_cents must be a number' }, { status: 422 })
+  }
+  if (body.discount_cents !== undefined && (typeof body.discount_cents !== 'number' || !Number.isFinite(body.discount_cents))) {
+    return NextResponse.json({ error: 'discount_cents must be a number' }, { status: 422 })
+  }
+  if (body.total_cents !== undefined && (typeof body.total_cents !== 'number' || !Number.isFinite(body.total_cents))) {
+    return NextResponse.json({ error: 'total_cents must be a number' }, { status: 422 })
   }
 
   try {
@@ -124,6 +140,10 @@ export async function GET(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  if (auth.tenantId && auth.tenantId !== tenantId) {
+    return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 })
+  }
+
   const denied = await checkPermissionOrRespond(auth.userId, tenantId, 'products.view')
   if (denied) return denied
 
@@ -133,16 +153,22 @@ export async function GET(
   const offset = Math.max(0, parseInt(searchParams.get('offset') || '0', 10) || 0)
 
   try {
-    const result = await withTenant(tenantSlug, async () => {
-      return sql`
+    const [result, countResult] = await withTenant(tenantSlug, async () => {
+      const rows = await sql`
         SELECT * FROM bundle_orders
         WHERE bundle_id = ${bundleId}
         ORDER BY created_at DESC
         OFFSET ${offset} LIMIT ${limit}
       `
+      const count = await sql`
+        SELECT COUNT(*)::int AS total FROM bundle_orders
+        WHERE bundle_id = ${bundleId}
+      `
+      return [rows, count] as const
     })
 
-    return NextResponse.json({ orders: result.rows })
+    const totalCount = (countResult.rows[0] as Record<string, unknown> | undefined)?.total ?? 0
+    return NextResponse.json({ orders: result.rows, totalCount, limit, offset })
   } catch (error) {
     console.error('Error fetching bundle orders:', error)
     return NextResponse.json({ error: 'Failed to fetch bundle orders' }, { status: 500 })

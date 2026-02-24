@@ -98,6 +98,8 @@ export function MediaGallery({
   const [canScrollPrev, setCanScrollPrev] = useState(false)
   const [canScrollNext, setCanScrollNext] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [zoomOrigin, setZoomOrigin] = useState('center center')
+  const [isZooming, setIsZooming] = useState(false)
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return
@@ -151,14 +153,26 @@ export function MediaGallery({
               {filteredImages.map((img, i) => (
                 <div
                   key={img.id}
-                  className="relative aspect-square min-w-0 flex-[0_0_100%] cursor-zoom-in"
+                  className="relative aspect-square min-w-0 flex-[0_0_100%] cursor-zoom-in overflow-hidden"
                   onClick={() => setLightboxOpen(true)}
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect()
+                    const x = ((e.clientX - rect.left) / rect.width) * 100
+                    const y = ((e.clientY - rect.top) / rect.height) * 100
+                    setZoomOrigin(`${x}% ${y}%`)
+                    setIsZooming(true)
+                  }}
+                  onMouseLeave={() => setIsZooming(false)}
                 >
                   <Image
                     src={img.url}
                     alt={img.altText ?? productTitle}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-200 ease-out"
+                    style={{
+                      transformOrigin: zoomOrigin,
+                      transform: isZooming && i === selectedIndex ? 'scale(1.5)' : 'scale(1)',
+                    }}
                     sizes="(max-width: 768px) 100vw, 50vw"
                     priority={i === 0}
                   />

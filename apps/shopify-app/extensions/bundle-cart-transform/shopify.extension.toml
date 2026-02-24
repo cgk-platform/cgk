@@ -7,7 +7,7 @@ uid = "5aba5aca-3794-6182-792a-573aa0da0363f772ce4c"
 type = "function"
 
   [[extensions.targeting]]
-  target = "purchase.cart-transform.run"
+  target = "cart.transform.run"
   input_query = "src/run.graphql"
   export = "run"
 

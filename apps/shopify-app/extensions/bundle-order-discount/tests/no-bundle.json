@@ -5,7 +5,6 @@
         "id": "gid://shopify/CartLine/1",
         "quantity": 1,
         "cost": {
-          "amountPerQuantity": { "amount": "29.99" },
           "subtotalAmount": { "amount": "29.99" }
         },
         "merchandise": {

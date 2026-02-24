@@ -272,3 +272,24 @@ export async function updateCartBuyerIdentity(email: string): Promise<Cart | nul
     return null
   }
 }
+
+/**
+ * Update cart note (e.g. gift message)
+ * Stored as a cart attribute with key '_gift_note'
+ */
+export async function updateCartNote(note: string): Promise<Cart | null> {
+  const cart = await getCurrentCart()
+  if (!cart) return null
+
+  const attribute: CartAttribute = {
+    key: '_gift_note',
+    value: note.trim(),
+  }
+
+  try {
+    return await setCartAttributesInternal(cart.id, [attribute])
+  } catch (error) {
+    console.warn('updateCartNote: failed to update cart note', error)
+    return null
+  }
+}

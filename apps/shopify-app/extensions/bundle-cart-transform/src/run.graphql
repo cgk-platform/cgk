@@ -3,12 +3,6 @@ query Input {
     lines {
       id
       quantity
-      cost {
-        amountPerQuantity {
-          amount
-          currencyCode
-        }
-      }
       merchandise {
         __typename
         ... on ProductVariant {

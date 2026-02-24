@@ -10,6 +10,10 @@ automatically_update_urls_on_dev = true
 include_config_on_deploy = true
 dev_store_url = "cgk-unlimited.myshopify.com"
 
+# Webhooks use 2026-04 for latest features. Extensions use 2026-01 (their own
+# api_version in each extension's shopify.extension.toml). This is intentional —
+# extensions pin to the API version they were built/tested against and are bumped
+# independently on each deployment cycle.
 [webhooks]
 api_version = "2026-04"
 

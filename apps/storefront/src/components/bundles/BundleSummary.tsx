@@ -27,6 +27,7 @@ interface BundleSummaryProps {
   canAddToCart: boolean
   currencyCode: string
   onAddToCart: () => void
+  activeGiftVariantId?: string | null
 }
 
 export function BundleSummary({
@@ -44,6 +45,7 @@ export function BundleSummary({
   canAddToCart,
   currencyCode,
   onAddToCart,
+  activeGiftVariantId,
 }: BundleSummaryProps) {
   return (
     <>
@@ -120,6 +122,12 @@ export function BundleSummary({
               <span className="rounded-md bg-cgk-navy/10 px-2 py-0.5 text-xs font-semibold text-cgk-navy">
                 {tierBadgeText}
               </span>
+            </SummaryRow>
+          )}
+
+          {activeGiftVariantId && (
+            <SummaryRow label="Free gift">
+              <span className="font-semibold text-cgk-gold">Included</span>
             </SummaryRow>
           )}
 

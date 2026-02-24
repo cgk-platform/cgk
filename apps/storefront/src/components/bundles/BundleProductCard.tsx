@@ -24,6 +24,7 @@ interface BundleProductCardProps {
   maxReached: boolean
   isFreeGift: boolean
   imageAspectRatio: 'square' | 'portrait' | 'landscape'
+  layout?: 'grid' | 'list'
 }
 
 const ASPECT_CLASSES = {
@@ -42,6 +43,7 @@ export function BundleProductCard({
   maxReached,
   isFreeGift,
   imageAspectRatio,
+  layout = 'grid',
 }: BundleProductCardProps) {
   const selectId = useId()
   const isSelected = !!selected
@@ -99,15 +101,26 @@ export function BundleProductCard({
   return (
     <div
       className={cn(
-        'group relative flex flex-col rounded-xl border-2 bg-white transition-all duration-200',
+        'group relative bg-white transition-all duration-200',
         'cursor-pointer select-none',
-        isSelected
-          ? 'border-cgk-navy shadow-lg ring-1 ring-cgk-navy/20'
-          : 'border-gray-200 hover:border-cgk-light-blue hover:shadow-md',
-        isSelected && 'hover:-translate-y-0.5',
+        layout === 'list'
+          ? cn(
+              'grid grid-cols-[100px_1fr_auto] items-center gap-4 rounded-lg border-2 px-3 py-2 sm:grid-cols-[100px_1fr_auto]',
+              isSelected
+                ? 'border-cgk-navy shadow-lg ring-1 ring-cgk-navy/20'
+                : 'border-gray-200 hover:border-cgk-light-blue hover:shadow-md',
+            )
+          : cn(
+              'flex flex-col rounded-xl border-2',
+              isSelected
+                ? 'border-cgk-navy shadow-lg ring-1 ring-cgk-navy/20'
+                : 'border-gray-200 hover:border-cgk-light-blue hover:shadow-md',
+              isSelected && 'hover:-translate-y-0.5',
+            ),
         dimmed && 'cursor-not-allowed opacity-50',
         isSoldOut && 'cursor-not-allowed'
       )}
+      style={{ borderRadius: 'var(--bb-card-radius)' }}
       role="button"
       tabIndex={isSoldOut ? -1 : 0}
       aria-pressed={isSelected}
@@ -123,7 +136,12 @@ export function BundleProductCard({
       onKeyDown={handleKeyDown}
     >
       {/* Image */}
-      <div className={cn('relative overflow-hidden rounded-t-[10px]', ASPECT_CLASSES[imageAspectRatio])}>
+      <div className={cn(
+        'relative overflow-hidden',
+        layout === 'list'
+          ? 'h-[100px] w-[100px] shrink-0 rounded-l-lg'
+          : cn('rounded-t-[10px]', ASPECT_CLASSES[imageAspectRatio])
+      )}>
         {product.image ? (
           <Image
             src={product.image.url}
@@ -185,7 +203,10 @@ export function BundleProductCard({
       </div>
 
       {/* Product info */}
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
+      <div className={cn(
+        'flex flex-1 gap-1.5',
+        layout === 'list' ? 'flex-row items-center justify-between' : 'flex-col p-3'
+      )}>
         <h3 className="line-clamp-2 text-sm font-medium leading-snug text-cgk-navy">
           {product.title}
         </h3>
@@ -238,7 +259,12 @@ export function BundleProductCard({
       {/* Quantity controls (only shown when selected) */}
       {isSelected && selected && (
         <div
-          className="flex items-center justify-center gap-3 border-t border-gray-100 px-3 py-2"
+          className={cn(
+            'flex items-center justify-center gap-3',
+            layout === 'list'
+              ? 'border-l border-gray-100 pl-3'
+              : 'border-t border-gray-100 px-3 py-2'
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           <button
