@@ -25,3 +25,7 @@ export {
   useRecentlyViewed,
 } from './RecentlyViewedProducts'
 export { ProductFilters, MobileFiltersButton } from './ProductFilters'
+export { MediaGallery } from './media-gallery'
+export { VariantPicker } from './variant-picker'
+export { CollapsibleTabs } from './collapsible-tabs'
+export { ProductFilterSidebar } from './filters'

@@ -1,0 +1,7 @@
+export { HeroBanner } from './hero-banner'
+export { MarqueeLogos } from './marquee-logos'
+export { PressSlider } from './press-slider'
+export { TestimonialCarousel } from './testimonial-carousel'
+export { CollectionGrid } from './collection-grid'
+export { ImageTextBlock } from './image-text-block'
+export { InstagramFeed } from './instagram-feed'

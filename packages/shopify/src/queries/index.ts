@@ -33,8 +33,44 @@ export {
   updateCartAttributes,
   applyCartDiscountCodes,
   removeCartDiscountCodes,
+  updateCartBuyerIdentity,
   type ShopifyCart,
   type ShopifyCartDiscountCode,
   type ShopifyCartDiscountAllocation,
   type CartLineInput,
+  type CartBuyerIdentityInput,
 } from './cart'
+
+export {
+  listCollections,
+  getCollectionByHandle,
+  getCollectionProducts,
+  type ListCollectionsParams,
+  type CollectionProductsParams,
+  type ProductFilter,
+  type ShopifyProductFilter,
+} from './collections'
+
+export {
+  predictiveSearch,
+  searchProducts,
+  type PredictiveSearchParams,
+  type SearchParams,
+  type SearchFilter,
+  type ShopifySearchFilter,
+} from './search'
+
+export {
+  getShop,
+  getMenu,
+  type ShopInfo,
+  type ShopifyMenu,
+  type ShopifyMenuItem,
+} from './shop'
+
+export {
+  getProductMetafields,
+  getCollectionMetafield,
+  type ShopifyMetafield,
+  type MetafieldIdentifier,
+} from './metafields'

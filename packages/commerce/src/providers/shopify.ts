@@ -25,8 +25,12 @@ import {
   updateCartLines,
   removeCartLines,
   updateCartAttributes as shopifyUpdateCartAttributes,
+  updateCartBuyerIdentity as shopifyUpdateCartBuyerIdentity,
   applyCartDiscountCodes,
   removeCartDiscountCodes,
+  listCollections as shopifyListCollections,
+  getCollectionByHandle as shopifyGetCollectionByHandle,
+  getCollectionProducts as shopifyGetCollectionProducts,
 } from '@cgk-platform/shopify'
 import type {
   ShopifyProduct,
@@ -37,6 +41,7 @@ import type {
   ShopifyLineItem,
   ShopifyCart,
   ShopifyAddress,
+  ShopifyCollection,
 } from '@cgk-platform/shopify'
 
 import type {
@@ -46,11 +51,15 @@ import type {
   ProductVariant,
   ProductImage,
   Address,
+  Collection,
+  CollectionProductsListParams,
+  CollectionProductsResult,
   Order,
   OrderLineItem,
   Customer,
   Cart,
   CartLine,
+  CartBuyerIdentity,
   CartDiscountCode,
   CartDiscountAllocation,
   Checkout,
@@ -137,6 +146,7 @@ function mapProduct(p: ShopifyProduct): Product {
     availableForSale: p.availableForSale,
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
+    seo: p.seo,
   }
 }
 
@@ -181,6 +191,25 @@ function mapCustomer(c: ShopifyCustomer): Customer {
     addresses: c.addresses.edges.map((e) => mapAddress(e.node)!),
     createdAt: c.createdAt,
     updatedAt: c.updatedAt,
+  }
+}
+
+function mapCollection(c: ShopifyCollection): Collection {
+  return {
+    id: c.id,
+    title: c.title,
+    handle: c.handle,
+    description: c.description,
+    descriptionHtml: c.descriptionHtml,
+    image: c.image
+      ? {
+          id: c.image.id,
+          url: c.image.url,
+          altText: c.image.altText ?? undefined,
+          width: c.image.width,
+          height: c.image.height,
+        }
+      : undefined,
   }
 }
 
@@ -296,6 +325,53 @@ export function createShopifyProvider(config: CommerceConfig): CommerceProvider 
       },
     },
 
+    collections: {
+      async list(params?: ListParams) {
+        const result = await shopifyListCollections(storefront, {
+          first: params?.first,
+          after: params?.after,
+          query: params?.query,
+          sortKey: params?.sortKey as 'TITLE' | 'UPDATED_AT' | 'ID' | undefined,
+          reverse: params?.reverse,
+        })
+        return {
+          items: result.collections.map(mapCollection),
+          pageInfo: result.pageInfo,
+        }
+      },
+
+      async getByHandle(handle: string) {
+        const collection = await shopifyGetCollectionByHandle(storefront, handle)
+        return collection ? mapCollection(collection) : null
+      },
+
+      async getProducts(
+        handle: string,
+        params?: CollectionProductsListParams
+      ): Promise<CollectionProductsResult | null> {
+        const result = await shopifyGetCollectionProducts(storefront, handle, {
+          first: params?.first,
+          after: params?.after,
+          filters: params?.filters,
+          sortKey: params?.sortKey as
+            | 'TITLE'
+            | 'PRICE'
+            | 'CREATED'
+            | 'BEST_SELLING'
+            | 'MANUAL'
+            | 'COLLECTION_DEFAULT'
+            | undefined,
+          reverse: params?.reverse,
+        })
+        if (!result) return null
+        return {
+          items: result.products.map(mapProduct),
+          pageInfo: result.pageInfo,
+          filters: result.filters,
+        }
+      },
+    },
+
     cart: {
       async create() {
         const cart = await shopifyCreateCart(storefront)
@@ -328,6 +404,15 @@ export function createShopifyProvider(config: CommerceConfig): CommerceProvider 
 
       async setAttributes(cartId: string, attributes) {
         const cart = await shopifyUpdateCartAttributes(storefront, cartId, attributes)
+        return mapCart(cart)
+      },
+
+      async updateBuyerIdentity(cartId: string, buyerIdentity: CartBuyerIdentity) {
+        const cart = await shopifyUpdateCartBuyerIdentity(storefront, cartId, {
+          email: buyerIdentity.email,
+          countryCode: buyerIdentity.countryCode,
+          phone: buyerIdentity.phone,
+        })
         return mapCart(cart)
       },
 

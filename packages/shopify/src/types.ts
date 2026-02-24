@@ -17,6 +17,10 @@ export interface ShopifyProduct {
   availableForSale: boolean
   createdAt: string
   updatedAt: string
+  seo?: {
+    title: string | null
+    description: string | null
+  }
 }
 
 export interface ShopifyVariant {

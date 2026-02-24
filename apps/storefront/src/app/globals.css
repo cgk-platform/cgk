@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 220 60% 23%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -22,8 +22,17 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+    --ring: 220 60% 23%;
+    --radius: 0.375rem;
+
+    /* CGK Brand Tokens */
+    --cgk-navy: 220 60% 23%;
+    --cgk-light-blue: 207 53% 83%;
+    --cgk-cream: 27 29% 90%;
+    --cgk-gold: 40 68% 49%;
+    --cgk-off-white: 0 0% 98%;
+    --cgk-charcoal: 227 18% 18%;
+    --cgk-near-white: 24 18% 97%;
   }
 
   .dark {
@@ -163,6 +172,20 @@
   .stagger-4 { animation-delay: 400ms; }
   .stagger-5 { animation-delay: 500ms; }
   .stagger-6 { animation-delay: 600ms; }
+
+  /* Marquee animation for infinitely scrolling logos */
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee linear infinite;
+  }
 }
 
 /* ==========================================================================

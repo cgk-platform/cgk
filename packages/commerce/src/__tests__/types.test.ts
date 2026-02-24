@@ -3,6 +3,7 @@ import { describe, it, expect } from 'vitest'
 import type {
   CommerceProvider,
   ProductOperations,
+  CollectionOperations,
   CartOperations,
   CheckoutOperations,
   OrderOperations,
@@ -29,6 +30,7 @@ describe('CommerceProvider interface', () => {
     const mockProvider: CommerceProvider = {
       name: 'shopify',
       products: {} as ProductOperations,
+      collections: {} as CollectionOperations,
       cart: {} as CartOperations,
       checkout: {} as CheckoutOperations,
       orders: {} as OrderOperations,
@@ -39,6 +41,7 @@ describe('CommerceProvider interface', () => {
 
     expect(mockProvider.name).toBe('shopify')
     expect(mockProvider.products).toBeDefined()
+    expect(mockProvider.collections).toBeDefined()
     expect(mockProvider.cart).toBeDefined()
     expect(mockProvider.checkout).toBeDefined()
     expect(mockProvider.orders).toBeDefined()

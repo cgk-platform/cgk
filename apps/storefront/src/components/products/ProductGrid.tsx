@@ -13,7 +13,10 @@ interface ProductGridProps {
   products: Product[]
   /** Number of columns at each breakpoint */
   columns?: {
+    /** Mobile base columns (below 750px / below Dawn breakpoint) */
     sm?: 2 | 3 | 4
+    /** Dawn breakpoint (750px) — matches Shopify Dawn 2-col→3-col transition */
+    dawn?: 2 | 3 | 4
     md?: 2 | 3 | 4
     lg?: 3 | 4 | 5 | 6
   }
@@ -37,6 +40,9 @@ export function ProductGrid({
     columns.sm === 2 && 'grid-cols-2',
     columns.sm === 3 && 'grid-cols-3',
     columns.sm === 4 && 'grid-cols-4',
+    columns.dawn === 2 && 'dawn:grid-cols-2',
+    columns.dawn === 3 && 'dawn:grid-cols-3',
+    columns.dawn === 4 && 'dawn:grid-cols-4',
     columns.md === 2 && 'md:grid-cols-2',
     columns.md === 3 && 'md:grid-cols-3',
     columns.md === 4 && 'md:grid-cols-4',

@@ -5,6 +5,8 @@ import { randomBytes } from 'crypto'
 import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 
+import { updateCartBuyerIdentity } from '@/lib/cart/actions'
+
 /**
  * POST /api/auth/signin
  * Customer login - validates email/password, creates session
@@ -81,6 +83,13 @@ export async function POST(request: Request) {
     if (isProduction) {
       cookieParts.push('Secure')
     }
+
+    // Associate the customer's email with any existing cart so Shopify
+    // can pre-fill checkout and apply customer-specific pricing.
+    // This is fire-and-forget: a failure here must not break login.
+    updateCartBuyerIdentity(customer.email as string).catch((err) => {
+      console.warn('signin: updateCartBuyerIdentity failed', err)
+    })
 
     return Response.json(
       {

@@ -39,10 +39,38 @@ export {
   updateCartAttributes,
   applyCartDiscountCodes,
   removeCartDiscountCodes,
+  updateCartBuyerIdentity,
   type ShopifyCart,
   type ShopifyCartDiscountCode,
   type ShopifyCartDiscountAllocation,
   type CartLineInput,
+  type CartBuyerIdentityInput,
+  // Collections
+  listCollections,
+  getCollectionByHandle,
+  getCollectionProducts,
+  type ListCollectionsParams,
+  type CollectionProductsParams,
+  type ProductFilter,
+  type ShopifyProductFilter,
+  // Search
+  predictiveSearch,
+  searchProducts,
+  type PredictiveSearchParams,
+  type SearchParams,
+  type SearchFilter,
+  type ShopifySearchFilter,
+  // Shop & Navigation
+  getShop,
+  getMenu,
+  type ShopInfo,
+  type ShopifyMenu,
+  type ShopifyMenuItem,
+  // Metafields
+  getProductMetafields,
+  getCollectionMetafield,
+  type ShopifyMetafield,
+  type MetafieldIdentifier,
 } from './queries'
 
 // Common types

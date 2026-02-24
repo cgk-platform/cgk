@@ -111,6 +111,12 @@ const CART_FRAGMENT = `
   }
 `
 
+export interface CartBuyerIdentityInput {
+  email?: string
+  countryCode?: string
+  phone?: string
+}
+
 interface CartResponse {
   cartCreate?: { cart: ShopifyCart }
   cart?: ShopifyCart
@@ -119,6 +125,7 @@ interface CartResponse {
   cartLinesRemove?: { cart: ShopifyCart }
   cartAttributesUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
   cartDiscountCodesUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
+  cartBuyerIdentityUpdate?: { cart: ShopifyCart; userErrors: Array<{ field: string[]; message: string }> }
 }
 
 export async function createCart(client: StorefrontClient): Promise<ShopifyCart> {
@@ -294,4 +301,40 @@ export async function removeCartDiscountCodes(
   cartId: string
 ): Promise<ShopifyCart> {
   return applyCartDiscountCodes(client, cartId, [])
+}
+
+/**
+ * Associate buyer identity with cart (e.g. after customer login)
+ */
+export async function updateCartBuyerIdentity(
+  client: StorefrontClient,
+  cartId: string,
+  buyerIdentity: CartBuyerIdentityInput
+): Promise<ShopifyCart> {
+  const result = await client.query<CartResponse>(
+    `
+    ${CART_FRAGMENT}
+    mutation CartBuyerIdentityUpdate($cartId: ID!, $buyerIdentity: CartBuyerIdentityInput!) {
+      cartBuyerIdentityUpdate(cartId: $cartId, buyerIdentity: $buyerIdentity) {
+        cart { ...CartFields }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+    `,
+    { cartId, buyerIdentity }
+  )
+
+  const userErrors = result.cartBuyerIdentityUpdate?.userErrors
+  if (userErrors && userErrors.length > 0) {
+    throw new Error(userErrors[0]?.message ?? 'Failed to update cart buyer identity')
+  }
+
+  if (!result.cartBuyerIdentityUpdate?.cart) {
+    throw new Error('Failed to update cart buyer identity')
+  }
+
+  return result.cartBuyerIdentityUpdate.cart
 }

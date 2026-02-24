@@ -24,6 +24,7 @@ export interface CommerceProvider {
   readonly name: 'shopify' | 'custom'
 
   products: ProductOperations
+  collections: CollectionOperations
   cart: CartOperations
   checkout: CheckoutOperations
   orders: OrderOperations
@@ -43,6 +44,51 @@ export interface ProductOperations {
   search(query: string, params?: ListParams): Promise<PaginatedResult<Product>>
 }
 
+export interface CollectionOperations {
+  list(params?: ListParams): Promise<PaginatedResult<Collection>>
+  getByHandle(handle: string): Promise<Collection | null>
+  getProducts(
+    handle: string,
+    params?: CollectionProductsListParams
+  ): Promise<CollectionProductsResult | null>
+}
+
+export interface CollectionProductsListParams extends ListParams {
+  filters?: CollectionFilter[]
+}
+
+export interface CollectionFilter {
+  variantOption?: { name: string; value: string }
+  price?: { min?: number; max?: number }
+  available?: boolean
+  productType?: string
+  tag?: string
+}
+
+export interface CollectionProductsResult {
+  items: Product[]
+  pageInfo: PageInfo
+  filters: CollectionFilterGroup[]
+}
+
+export interface CollectionFilterGroup {
+  id: string
+  label: string
+  type: string
+  values: Array<{
+    id: string
+    label: string
+    count: number
+    input: string
+  }>
+}
+
+export interface CartBuyerIdentity {
+  email?: string
+  countryCode?: string
+  phone?: string
+}
+
 export interface CartOperations {
   create(): Promise<Cart>
   get(id: string): Promise<Cart | null>
@@ -50,6 +96,7 @@ export interface CartOperations {
   updateItem(cartId: string, lineId: string, quantity: number): Promise<Cart>
   removeItem(cartId: string, lineId: string): Promise<Cart>
   setAttributes(cartId: string, attributes: CartAttribute[]): Promise<Cart>
+  updateBuyerIdentity(cartId: string, buyerIdentity: CartBuyerIdentity): Promise<Cart>
   applyDiscountCode(cartId: string, code: string): Promise<Cart>
   removeDiscountCodes(cartId: string): Promise<Cart>
 }
@@ -127,6 +174,10 @@ export interface Product {
   availableForSale: boolean
   createdAt: string
   updatedAt: string
+  seo?: {
+    title: string | null
+    description: string | null
+  }
 }
 
 export interface ProductVariant {
@@ -283,6 +334,15 @@ export interface CheckoutLineItem {
   quantity: number
   variant?: ProductVariant
   price: Money
+}
+
+export interface Collection {
+  id: string
+  title: string
+  handle: string
+  description: string
+  descriptionHtml?: string
+  image?: ProductImage
 }
 
 export interface Discount {

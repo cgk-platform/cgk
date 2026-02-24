@@ -14,7 +14,9 @@ import { requireCommerceProvider } from '../commerce'
 import { getTenantSlug } from '../tenant'
 import { buildCartAttributes, generateVisitorId, generateSessionId } from './attributes'
 
-const CART_ID_COOKIE = 'cgk_cart_id'
+function getCartCookieName(tenantSlug: string | null): string {
+  return tenantSlug ? `${tenantSlug}_cart_id` : 'cgk_cart_id'
+}
 const VISITOR_ID_COOKIE = 'cgk_visitor_id'
 const CART_COOKIE_DAYS = 7
 const VISITOR_COOKIE_DAYS = 365
@@ -25,9 +27,11 @@ const VISITOR_COOKIE_DAYS = 365
 export async function getOrCreateCart(): Promise<Cart> {
   const commerce = await requireCommerceProvider()
   const cookieStore = await cookies()
+  const tenantSlug = await getTenantSlug()
+  const cookieName = getCartCookieName(tenantSlug)
 
   // Try to get existing cart
-  const cartId = cookieStore.get(CART_ID_COOKIE)?.value
+  const cartId = cookieStore.get(cookieName)?.value
   if (cartId) {
     const existingCart = await commerce.cart.get(cartId)
     if (existingCart) {
@@ -36,7 +40,6 @@ export async function getOrCreateCart(): Promise<Cart> {
   }
 
   // Create new cart with tenant attributes
-  const tenantSlug = await getTenantSlug()
   if (!tenantSlug) {
     throw new Error('Tenant context required for cart operations')
   }
@@ -64,7 +67,7 @@ export async function getOrCreateCart(): Promise<Cart> {
   const cartWithAttributes = await setCartAttributesInternal(cart.id, attributes)
 
   // Store cart ID in cookie
-  cookieStore.set(CART_ID_COOKIE, cart.id, {
+  cookieStore.set(cookieName, cart.id, {
     maxAge: CART_COOKIE_DAYS * 24 * 60 * 60,
     path: '/',
     sameSite: 'lax',
@@ -79,8 +82,10 @@ export async function getOrCreateCart(): Promise<Cart> {
 export async function getCurrentCart(): Promise<Cart | null> {
   const commerce = await requireCommerceProvider()
   const cookieStore = await cookies()
+  const tenantSlug = await getTenantSlug()
+  const cookieName = getCartCookieName(tenantSlug)
 
-  const cartId = cookieStore.get(CART_ID_COOKIE)?.value
+  const cartId = cookieStore.get(cookieName)?.value
   if (!cartId) {
     return null
   }
@@ -89,7 +94,7 @@ export async function getCurrentCart(): Promise<Cart | null> {
 
   // If cart doesn't exist or is empty, clean up cookie
   if (!cart) {
-    cookieStore.delete(CART_ID_COOKIE)
+    cookieStore.delete(cookieName)
     return null
   }
 
@@ -212,7 +217,9 @@ async function setCartAttributesInternal(
  */
 export async function clearCart(): Promise<void> {
   const cookieStore = await cookies()
-  cookieStore.delete(CART_ID_COOKIE)
+  const tenantSlug = await getTenantSlug()
+  const cookieName = getCartCookieName(tenantSlug)
+  cookieStore.delete(cookieName)
 }
 
 /**
@@ -237,4 +244,31 @@ export async function removeDiscountCodes(): Promise<Cart> {
   }
 
   return commerce.cart.removeDiscountCodes(cart.id)
+}
+
+/**
+ * Associate the logged-in customer's identity with the current cart.
+ * Should be called after a successful login so Shopify can personalize
+ * checkout (pre-fill email, apply customer-specific pricing, etc.).
+ *
+ * Silently no-ops if there is no active cart — the identity will be set
+ * the next time a cart is created via getOrCreateCart.
+ */
+export async function updateCartBuyerIdentity(email: string): Promise<Cart | null> {
+  const cart = await getCurrentCart()
+  if (!cart) {
+    // No cart in session yet; nothing to update.
+    return null
+  }
+
+  const commerce = await requireCommerceProvider()
+
+  try {
+    return await commerce.cart.updateBuyerIdentity(cart.id, { email })
+  } catch (error) {
+    // Non-fatal: log and continue. A failed identity update should not
+    // block the login flow.
+    console.warn('updateCartBuyerIdentity: failed to update buyer identity', error)
+    return null
+  }
 }

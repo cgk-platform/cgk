@@ -4,8 +4,10 @@
  * Handles cart ID persistence using cookies for cross-session cart recovery.
  */
 
-/** Cookie name for cart ID */
-const CART_ID_COOKIE = 'cgk_cart_id'
+/** Get tenant-specific cookie name for cart ID */
+function getCartCookieName(tenantSlug?: string): string {
+  return tenantSlug ? `${tenantSlug}_cart_id` : 'cgk_cart_id'
+}
 
 /** Cookie name for visitor ID */
 const VISITOR_ID_COOKIE = 'cgk_visitor_id'
@@ -21,25 +23,25 @@ const SESSION_COOKIE_HOURS = 24
 /**
  * Get cart ID from cookie (client-side)
  */
-export function getCartIdFromCookie(): string | null {
+export function getCartIdFromCookie(tenantSlug?: string): string | null {
   if (typeof document === 'undefined') return null
-  return getCookie(CART_ID_COOKIE)
+  return getCookie(getCartCookieName(tenantSlug))
 }
 
 /**
  * Set cart ID in cookie (client-side)
  */
-export function setCartIdCookie(cartId: string): void {
+export function setCartIdCookie(cartId: string, tenantSlug?: string): void {
   if (typeof document === 'undefined') return
-  setCookie(CART_ID_COOKIE, cartId, CART_COOKIE_DAYS)
+  setCookie(getCartCookieName(tenantSlug), cartId, CART_COOKIE_DAYS)
 }
 
 /**
  * Remove cart ID cookie (client-side)
  */
-export function removeCartIdCookie(): void {
+export function removeCartIdCookie(tenantSlug?: string): void {
   if (typeof document === 'undefined') return
-  deleteCookie(CART_ID_COOKIE)
+  deleteCookie(getCartCookieName(tenantSlug))
 }
 
 /**
@@ -102,13 +104,14 @@ function deleteCookie(name: string): void {
 /**
  * Parse cart ID from request cookies (server-side)
  */
-export function parseCartIdFromHeaders(cookieHeader: string | null): string | null {
+export function parseCartIdFromHeaders(cookieHeader: string | null, tenantSlug?: string): string | null {
   if (!cookieHeader) return null
 
+  const cartCookieName = getCartCookieName(tenantSlug)
   const cookies = cookieHeader.split(';')
   for (const cookie of cookies) {
     const [name, value] = cookie.trim().split('=')
-    if (name === CART_ID_COOKIE && value) {
+    if (name === cartCookieName && value) {
       return decodeURIComponent(value)
     }
   }
@@ -134,10 +137,10 @@ export function parseVisitorIdFromHeaders(cookieHeader: string | null): string |
 /**
  * Build Set-Cookie header for cart ID (server-side)
  */
-export function buildCartIdSetCookieHeader(cartId: string): string {
+export function buildCartIdSetCookieHeader(cartId: string, tenantSlug?: string): string {
   const expires = new Date()
   expires.setTime(expires.getTime() + CART_COOKIE_DAYS * 24 * 60 * 60 * 1000)
-  return `${CART_ID_COOKIE}=${encodeURIComponent(cartId)}; Expires=${expires.toUTCString()}; Path=/; SameSite=Lax`
+  return `${getCartCookieName(tenantSlug)}=${encodeURIComponent(cartId)}; Expires=${expires.toUTCString()}; Path=/; SameSite=Lax`
 }
 
 /**

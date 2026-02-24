@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 
@@ -19,12 +20,15 @@ import {
 } from './sections'
 
 import {
-  ProductGallery,
+  MediaGallery,
   PriceDisplay,
   CompactStarRating,
   RelatedProductsSkeleton,
+  CollapsibleTabs,
 } from '@/components/products'
+import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { getCommerceProvider } from '@/lib/commerce'
+import { getMetafields, parseBadges, parseVideoUrl } from '@/lib/metafields'
 import { getProductRating } from '@/lib/reviews'
 import { getTenantConfig } from '@/lib/tenant'
 
@@ -61,8 +65,8 @@ export async function generateMetadata({
   const image = product.images[0]
 
   return {
-    title: `${product.title} | ${tenant?.name ?? 'Store'}`,
-    description: product.description?.slice(0, 160),
+    title: product.seo?.title || `${product.title} | ${tenant?.name ?? 'Store'}`,
+    description: product.seo?.description || product.description?.slice(0, 160),
     openGraph: {
       title: product.title,
       description: product.description ?? '',
@@ -84,7 +88,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { handle } = await params
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="mx-auto max-w-store px-4 py-8">
       <Suspense fallback={<ProductSkeleton />}>
         <ProductContent handle={handle} />
       </Suspense>
@@ -121,6 +125,14 @@ async function ProductContent({ handle }: ProductContentProps) {
     notFound()
   }
 
+  // Fetch metafields for badges and video
+  const metafields = await getMetafields(handle, [
+    { namespace: 'custom', key: 'badges' },
+    { namespace: 'custom', key: 'video' },
+  ])
+  const badges = parseBadges(metafields.find(m => m.key === 'badges'))
+  const videoUrl = parseVideoUrl(metafields.find(m => m.key === 'video'))
+
   const hasMultipleVariants = product.variants.length > 1
 
   // Build options from variants
@@ -140,21 +152,51 @@ async function ProductContent({ handle }: ProductContentProps) {
     options.push({ name, values: Array.from(values) })
   }
 
+  // Build absolute URL for structured data
+  const headersList = await headers()
+  const host = headersList.get('x-forwarded-host') || headersList.get('host') || 'localhost'
+  const protocol = headersList.get('x-forwarded-proto') || 'https'
+  const productUrl = `${protocol}://${host}/products/${handle}`
+  const siteUrl = `${protocol}://${host}`
+
+  // Fetch rating for structured data
+  const rating = await getProductRating(product.id)
+
+  // Build breadcrumb items for JSON-LD
+  const breadcrumbItems = [
+    { name: 'Home', url: siteUrl },
+    { name: 'Products', url: `${siteUrl}/products` },
+    ...(product.productType
+      ? [{
+          name: product.productType,
+          url: `${siteUrl}/collections/${product.productType.toLowerCase().replace(/\s+/g, '-')}`,
+        }]
+      : []),
+    { name: product.title, url: productUrl },
+  ]
+
   return (
     <>
+      {/* Structured Data */}
+      <ProductJsonLd
+        product={product}
+        brandName={tenant?.name ?? 'Store'}
+        url={productUrl}
+        rating={rating && rating.totalReviews > 0
+          ? { averageRating: rating.averageRating, totalReviews: rating.totalReviews }
+          : null}
+      />
+      <BreadcrumbJsonLd items={breadcrumbItems} />
+
       {/* Breadcrumb */}
       <nav className="mb-6" aria-label="Breadcrumb">
-        <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+        <ol className="flex items-center gap-2 text-sm text-gray-500">
           <li>
-            <a href="/" className="hover:text-foreground">
-              Home
-            </a>
+            <a href="/" className="hover:text-cgk-navy">Home</a>
           </li>
           <li>/</li>
           <li>
-            <a href="/products" className="hover:text-foreground">
-              Products
-            </a>
+            <a href="/products" className="hover:text-cgk-navy">Products</a>
           </li>
           {product.productType && (
             <>
@@ -162,7 +204,7 @@ async function ProductContent({ handle }: ProductContentProps) {
               <li>
                 <a
                   href={`/collections/${product.productType.toLowerCase().replace(/\s+/g, '-')}`}
-                  className="hover:text-foreground"
+                  className="hover:text-cgk-navy"
                 >
                   {product.productType}
                 </a>
@@ -170,31 +212,36 @@ async function ProductContent({ handle }: ProductContentProps) {
             </>
           )}
           <li>/</li>
-          <li className="text-foreground">{product.title}</li>
+          <li className="text-cgk-navy">{product.title}</li>
         </ol>
       </nav>
 
       {/* Main Product Layout */}
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
         {/* Left: Gallery */}
-        <div className="lg:sticky lg:top-8 lg:self-start">
-          <ProductGallery images={product.images} productTitle={product.title} />
+        <div className="lg:sticky lg:top-20 lg:self-start">
+          <MediaGallery images={product.images} productTitle={product.title} />
         </div>
 
         {/* Right: Product Info */}
-        <div className="space-y-6">
-          {/* Vendor */}
-          {product.vendor && (
-            <a
-              href={`/collections/vendor/${product.vendor.toLowerCase().replace(/\s+/g, '-')}`}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              {product.vendor}
-            </a>
-          )}
-
+        <div className="space-y-4">
           {/* Title */}
-          <h1 className="text-2xl font-bold md:text-3xl">{product.title}</h1>
+          <h1 className="text-2xl font-bold text-cgk-navy md:text-3xl">{product.title}</h1>
+
+          {/* Product Badges */}
+          {badges.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {badges.map((badge, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+                  style={{ backgroundColor: badge.color + '20', color: badge.color }}
+                >
+                  {badge.text}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Rating Summary (if reviews exist) */}
           <Suspense fallback={null}>
@@ -228,40 +275,58 @@ async function ProductContent({ handle }: ProductContentProps) {
             tenantSlug={tenant?.slug ?? 'unknown'}
           />
 
-          {/* Description */}
-          {product.description && (
-            <div className="border-t pt-6">
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                Description
-              </h2>
-              {product.descriptionHtml ? (
-                <div
-                  className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
-                />
-              ) : (
-                <p className="text-muted-foreground">{product.description}</p>
-              )}
-            </div>
-          )}
+          {/* Free Shipping Note */}
+          <p className="text-sm font-semibold text-cgk-gold">
+            FREE 3-DAY DELIVERY FOR ORDERS OVER $50
+          </p>
 
-          {/* Tags */}
-          {product.tags.length > 0 && (
-            <div className="border-t pt-6">
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-                Tags
-              </h2>
-              <div className="flex flex-wrap gap-2">
-                {product.tags.map((tag) => (
-                  <a
-                    key={tag}
-                    href={`/search?q=${encodeURIComponent(tag)}`}
-                    className="rounded-full bg-muted px-3 py-1 text-sm hover:bg-muted/80"
-                  >
-                    {tag}
-                  </a>
-                ))}
-              </div>
+          {/* Collapsible Tabs */}
+          <CollapsibleTabs
+            tabs={[
+              ...(product.descriptionHtml
+                ? [{ title: 'Description', content: product.descriptionHtml }]
+                : product.description
+                  ? [{ title: 'Description', content: `<p>${product.description}</p>` }]
+                  : []),
+              {
+                title: 'Size Guide',
+                content: `
+                  <table class="w-full text-sm">
+                    <thead><tr class="border-b"><th class="py-2 text-left">Size</th><th class="py-2 text-left">Flat Sheet</th><th class="py-2 text-left">Fitted Sheet</th><th class="py-2 text-left">Pillowcases</th></tr></thead>
+                    <tbody>
+                      <tr class="border-b"><td class="py-2">Twin</td><td>66" x 96"</td><td>39" x 75" x 21"</td><td>1 Standard</td></tr>
+                      <tr class="border-b"><td class="py-2">Full</td><td>81" x 96"</td><td>54" x 75" x 21"</td><td>2 Standard</td></tr>
+                      <tr class="border-b"><td class="py-2">Queen</td><td>90" x 102"</td><td>60" x 80" x 21"</td><td>2 Standard</td></tr>
+                      <tr class="border-b"><td class="py-2">King</td><td>108" x 102"</td><td>78" x 80" x 21"</td><td>2 King</td></tr>
+                      <tr><td class="py-2">Cal King</td><td>108" x 102"</td><td>72" x 84" x 21"</td><td>2 King</td></tr>
+                    </tbody>
+                  </table>
+                `,
+              },
+              {
+                title: 'Shipping & Returns',
+                content: '<p>Free standard shipping on orders over $50. Express 2-3 day shipping available. 30-day hassle-free returns — if you\'re not satisfied, we\'ll make it right.</p>',
+              },
+              {
+                title: 'Care Instructions',
+                content: '<p>Machine wash cold on a gentle cycle. Tumble dry low. Remove promptly to minimize wrinkles. Do not bleach. Iron on low if needed.</p>',
+              },
+            ]}
+          />
+
+          {/* Product Video */}
+          {videoUrl && (
+            <div className="mt-4 overflow-hidden rounded-lg">
+              <video
+                src={videoUrl}
+                controls
+                playsInline
+                preload="metadata"
+                className="w-full rounded-lg"
+                poster={product.images[0]?.url}
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           )}
         </div>

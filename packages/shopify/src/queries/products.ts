@@ -27,6 +27,10 @@ const STOREFRONT_PRODUCT_FRAGMENT = `
     availableForSale
     createdAt
     updatedAt
+    seo {
+      title
+      description
+    }
     priceRange {
       minVariantPrice { amount currencyCode }
       maxVariantPrice { amount currencyCode }

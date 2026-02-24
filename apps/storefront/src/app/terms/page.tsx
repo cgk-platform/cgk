@@ -1,47 +1,41 @@
 /**
  * Terms of Service Page
  *
- * Static placeholder for terms of service - tenant should customize via CMS.
+ * CGK Linens terms of service.
  */
 
 import type { Metadata } from 'next'
 
-import { getTenantConfig } from '@/lib/tenant'
-
-export async function generateMetadata(): Promise<Metadata> {
-  const tenant = await getTenantConfig()
-  return {
-    title: 'Terms of Service',
-    description: `Terms of service for ${tenant?.name ?? 'our store'}`,
-  }
+export const metadata: Metadata = {
+  title: 'Terms of Service | CGK Linens',
+  description: 'Terms of service for CGK Linens.',
 }
 
-export default async function TermsOfServicePage() {
-  const tenant = await getTenantConfig()
-  const storeName = tenant?.name ?? 'Our Store'
-
+export default function TermsOfServicePage() {
   return (
-    <div className="container mx-auto px-4 py-12" style={{ maxWidth: 'var(--portal-max-width)' }}>
+    <div className="mx-auto max-w-store px-4 py-12">
       <article className="mx-auto max-w-3xl">
-        <h1 className="mb-8 text-3xl font-bold tracking-tight md:text-4xl">Terms of Service</h1>
+        <h1 className="mb-2 text-3xl font-bold tracking-tight text-cgk-navy md:text-4xl">
+          Terms of Service
+        </h1>
 
-        <div className="prose prose-slate max-w-none dark:prose-invert">
-          <p className="text-lg text-[hsl(var(--portal-muted-foreground))]">
-            Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-          </p>
+        <p className="mb-8 text-gray-500">
+          Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+        </p>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Agreement to Terms</h2>
-            <p className="mt-4 text-[hsl(var(--portal-muted-foreground))]">
-              By accessing and using {storeName}&apos;s website and services, you agree to be bound by
+        <div className="space-y-8 text-gray-600">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Agreement to Terms</h2>
+            <p className="mt-4">
+              By accessing and using CGK Linens&apos; website and services, you agree to be bound by
               these Terms of Service. If you do not agree with any part of these terms, you may not
               access or use our services.
             </p>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Purchases and Payment</h2>
-            <div className="mt-4 space-y-4 text-[hsl(var(--portal-muted-foreground))]">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Purchases and Payment</h2>
+            <div className="mt-4 space-y-4">
               <p>When making a purchase, you agree that:</p>
               <ul className="list-disc space-y-2 pl-6">
                 <li>You are authorized to use the payment method provided</li>
@@ -52,39 +46,43 @@ export default async function TermsOfServicePage() {
             </div>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Shipping and Delivery</h2>
-            <p className="mt-4 text-[hsl(var(--portal-muted-foreground))]">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Shipping and Delivery</h2>
+            <p className="mt-4">
               Shipping times are estimates only and not guarantees. We are not responsible for delays
               caused by carriers, customs, or circumstances beyond our control. Risk of loss passes to
-              you upon delivery to the carrier.
+              you upon delivery to the carrier. For full shipping details, see our{' '}
+              <a href="/shipping" className="text-cgk-navy font-medium underline hover:no-underline">
+                Shipping Information
+              </a>{' '}
+              page.
             </p>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Returns and Refunds</h2>
-            <p className="mt-4 text-[hsl(var(--portal-muted-foreground))]">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Returns and Refunds</h2>
+            <p className="mt-4">
               Please refer to our{' '}
-              <a href="/returns" className="text-[hsl(var(--portal-primary))] underline hover:no-underline">
-                Returns Policy
+              <a href="/returns" className="text-cgk-navy font-medium underline hover:no-underline">
+                Returns & Exchanges Policy
               </a>{' '}
               for information about returns, exchanges, and refunds. Items must be returned in their
-              original condition within the specified return window.
+              original condition within 30 days of delivery.
             </p>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Intellectual Property</h2>
-            <p className="mt-4 text-[hsl(var(--portal-muted-foreground))]">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Intellectual Property</h2>
+            <p className="mt-4">
               All content on this website, including text, images, logos, and graphics, is the property
-              of {storeName} or its content suppliers and is protected by intellectual property laws.
+              of CGK Linens or its content suppliers and is protected by intellectual property laws.
               You may not use, reproduce, or distribute any content without prior written permission.
             </p>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">User Accounts</h2>
-            <div className="mt-4 space-y-4 text-[hsl(var(--portal-muted-foreground))]">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">User Accounts</h2>
+            <div className="mt-4 space-y-4">
               <p>If you create an account with us, you are responsible for:</p>
               <ul className="list-disc space-y-2 pl-6">
                 <li>Maintaining the confidentiality of your account credentials</li>
@@ -94,32 +92,31 @@ export default async function TermsOfServicePage() {
             </div>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Limitation of Liability</h2>
-            <p className="mt-4 text-[hsl(var(--portal-muted-foreground))]">
-              To the maximum extent permitted by law, {storeName} shall not be liable for any indirect,
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Limitation of Liability</h2>
+            <p className="mt-4">
+              To the maximum extent permitted by law, CGK Linens shall not be liable for any indirect,
               incidental, special, consequential, or punitive damages arising out of or related to your
               use of our services.
             </p>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Changes to Terms</h2>
-            <p className="mt-4 text-[hsl(var(--portal-muted-foreground))]">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Changes to Terms</h2>
+            <p className="mt-4">
               We reserve the right to modify these terms at any time. Changes will be effective
               immediately upon posting to the website. Your continued use of our services constitutes
               acceptance of any modified terms.
             </p>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-xl font-semibold">Contact Us</h2>
-            <p className="mt-4 text-[hsl(var(--portal-muted-foreground))]">
+          <section>
+            <h2 className="text-xl font-semibold text-cgk-navy">Contact Us</h2>
+            <p className="mt-4">
               If you have questions about these Terms of Service, please{' '}
-              <a href="/contact" className="text-[hsl(var(--portal-primary))] underline hover:no-underline">
+              <a href="/contact" className="text-cgk-navy font-medium underline hover:no-underline">
                 contact us
-              </a>
-              .
+              </a>.
             </p>
           </section>
         </div>
