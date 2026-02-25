@@ -949,7 +949,7 @@
 
         // Icon — priority: 1) manual giftImage, 2) auto-fetch from free gift variant, 3) gift box SVG
         if (giftImage) {
-          cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image"><img src="' + giftImage + '" alt="" width="48" height="48" loading="lazy"></div>';
+          cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image"><img src="' + giftImage + '" alt="" width="52" height="52" loading="lazy"></div>';
         } else if (hasGiftVariant) {
           // Placeholder — will be replaced with product image once fetched
           cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image" data-tier-icon="' + j + '">' + this._giftBoxSvg() + '</div>';
@@ -989,7 +989,7 @@
 
             var iconEl = self.els.tierCards.querySelector('[data-tier-icon="' + idx + '"]');
             if (iconEl) {
-              iconEl.innerHTML = '<img src="' + imgUrl + '" alt="' + (variant.title || 'Free gift') + '" width="48" height="48" loading="lazy">';
+              iconEl.innerHTML = '<img src="' + imgUrl + '" alt="' + (variant.title || 'Free gift') + '" width="52" height="52" loading="lazy">';
             }
           })
           .catch(function () { /* keep gift box SVG fallback */ });

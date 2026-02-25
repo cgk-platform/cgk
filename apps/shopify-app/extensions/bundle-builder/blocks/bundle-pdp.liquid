@@ -357,6 +357,19 @@
         <p class="bb-pdp__shipping">{{ block.settings.shipping_callout }}</p>
       {%- endif -%}
 
+      {%- comment -%} 5b. Tier rewards (top position — before variant picker + bundle items) {%- endcomment -%}
+      {%- if show_tier_progress -%}
+        <div class="bb-pdp__tier" data-pdp-tier>
+          <p class="bb-pdp__tier-label" data-pdp-tier-label>Add products to unlock free gifts</p>
+          <div class="bb-pdp__tier-bar" data-pdp-tier-bar>
+            <div class="bb-pdp__tier-bar-bg"></div>
+            <div class="bb-pdp__tier-bar-fill" data-pdp-tier-fill></div>
+            <div class="bb-pdp__tier-dots" data-pdp-tier-dots></div>
+          </div>
+          <div class="bb-pdp__tier-cards" data-pdp-tier-cards></div>
+        </div>
+      {%- endif -%}
+
       {%- comment -%} 6. Variant picker {%- endcomment -%}
       {%- if show_variant_selector and product.options.size > 0 and product.variants.size > 1 -%}
         <div class="bb-pdp__options" data-pdp-options>
@@ -464,33 +477,6 @@
       {%- endif -%}
 
       {%- comment -%} === BUNDLE BUILDER === {%- endcomment -%}
-
-      {%- comment -%} 7. Tier progress — Rawdog-style milestone bar + reward cards {%- endcomment -%}
-      {%- if show_tier_progress -%}
-        <div class="bb-pdp__tier" data-pdp-tier>
-          {%- comment -%} Progress message {%- endcomment -%}
-          <p class="bb-pdp__tier-label" data-pdp-tier-label>Add products to unlock free gifts</p>
-
-          {%- comment -%} Milestone progress bar {%- endcomment -%}
-          <div class="bb-pdp__tier-bar" data-pdp-tier-bar>
-            <div class="bb-pdp__tier-bar-bg"></div>
-            <div class="bb-pdp__tier-bar-fill" data-pdp-tier-fill></div>
-            {%- comment -%} Milestone dots rendered by JS based on tier count {%- endcomment -%}
-            <div class="bb-pdp__tier-dots" data-pdp-tier-dots></div>
-          </div>
-
-          {%- comment -%} Reward tier cards {%- endcomment -%}
-          <div class="bb-pdp__tier-cards" data-pdp-tier-cards>
-            {%- comment -%} Cards rendered by JS from tier data {%- endcomment -%}
-          </div>
-
-          {%- comment -%} Unlocked rewards callout {%- endcomment -%}
-          <div class="bb-pdp__tier-callout" data-pdp-tier-callout style="display:none;">
-            <svg class="bb-pdp__tier-callout-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
-            <span data-pdp-tier-callout-text></span>
-          </div>
-        </div>
-      {%- endif -%}
 
       {%- comment -%} 8. Bundle items {%- endcomment -%}
       {%- assign product_count = bundle_products | size -%}
@@ -636,6 +622,14 @@
           <span data-pdp-total>{{ 0 | money }}</span>
         </div>
       </div>
+
+      {%- comment -%} Unlocked rewards callout (near CTA for visibility) {%- endcomment -%}
+      {%- if show_tier_progress -%}
+        <div class="bb-pdp__tier-callout" data-pdp-tier-callout style="display:none;">
+          <svg class="bb-pdp__tier-callout-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+          <span data-pdp-tier-callout-text></span>
+        </div>
+      {%- endif -%}
 
       <button type="button" class="bb-pdp__cta" disabled data-pdp-cta>{{ cta_text }}</button>
 
