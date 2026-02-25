@@ -822,6 +822,7 @@
         var reward = tier.reward || tier.label || '';
         var giftImage = tier.giftImage || '';
         var valueBadge = tier.valueBadge || '';
+        var hasGiftVariant = tier.freeGiftVariantIds && tier.freeGiftVariantIds.length > 0;
 
         cardsHtml += '<div class="bb-pdp__tier-card" data-tier-card="' + j + '">';
 
@@ -833,9 +834,12 @@
         // Threshold label
         cardsHtml += '<span class="bb-pdp__tier-card-threshold">' + label + '</span>';
 
-        // Icon
+        // Icon — priority: 1) manual giftImage, 2) auto-fetch from free gift variant, 3) gift box SVG
         if (giftImage) {
           cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image"><img src="' + giftImage + '" alt="" width="48" height="48" loading="lazy"></div>';
+        } else if (hasGiftVariant) {
+          // Placeholder — will be replaced with product image once fetched
+          cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image" data-tier-icon="' + j + '">' + this._giftBoxSvg() + '</div>';
         } else {
           cardsHtml += '<div class="bb-pdp__tier-card-icon">' + this._giftBoxSvg() + '</div>';
         }
@@ -848,6 +852,35 @@
         cardsHtml += '</div>';
       }
       this.els.tierCards.innerHTML = cardsHtml;
+
+      // Auto-fetch free gift product images for tiers without a manual giftImage
+      this._fetchGiftImages();
+    }
+
+    _fetchGiftImages() {
+      var self = this;
+      this.tiers.forEach(function (tier, idx) {
+        if (tier.giftImage) return; // manual image already set
+        var giftIds = tier.freeGiftVariantIds || [];
+        if (giftIds.length === 0) return;
+
+        var numericId = Core.numericVariantId(giftIds[0]);
+        fetch('/variants/' + numericId + '.js')
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (variant) {
+            if (!variant) return;
+            var imgUrl = (variant.featured_image && variant.featured_image.src)
+              || (variant.image)
+              || '';
+            if (!imgUrl) return;
+
+            var iconEl = self.els.tierCards.querySelector('[data-tier-icon="' + idx + '"]');
+            if (iconEl) {
+              iconEl.innerHTML = '<img src="' + imgUrl + '" alt="' + (variant.title || 'Free gift') + '" width="48" height="48" loading="lazy">';
+            }
+          })
+          .catch(function () { /* keep gift box SVG fallback */ });
+      });
     }
 
     _badgeLines(text) {
