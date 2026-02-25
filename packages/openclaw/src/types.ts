@@ -5,17 +5,20 @@
 /** Profile slugs for the 3 openCLAW instances */
 export type ProfileSlug = 'cgk' | 'rawdog' | 'vitahustle'
 
-/** Outbound RPC request frame */
+/** Outbound RPC request frame (protocol v3) */
 export interface RequestFrame {
+  type: 'req'
   id: string
   method: string
   params?: Record<string, unknown>
 }
 
-/** Inbound RPC response frame */
+/** Inbound RPC response frame (protocol v3) */
 export interface ResponseFrame {
+  type?: string
   id: string
-  result?: unknown
+  ok: boolean
+  payload?: unknown
   error?: {
     code: number
     message: string
@@ -25,12 +28,39 @@ export interface ResponseFrame {
 
 /** Inbound push event frame */
 export interface EventFrame {
+  type?: string
   event: string
   data: unknown
 }
 
+/** Connect challenge from gateway after WS open (arrives as event frame) */
+export interface ConnectChallengeFrame {
+  type: 'event'
+  event: 'connect.challenge'
+  payload: {
+    nonce: string
+    ts: number
+  }
+}
+
+/** Hello-ok response after successful connect handshake (arrives as res frame) */
+export interface HelloOkFrame {
+  type: 'res'
+  id: string
+  ok: true
+  payload: {
+    type: 'hello-ok'
+    protocol: number
+    server: Record<string, unknown>
+    features?: {
+      methods?: string[]
+      [key: string]: unknown
+    }
+  }
+}
+
 /** Union of all inbound frames */
-export type InboundFrame = ResponseFrame | EventFrame
+export type InboundFrame = ResponseFrame | EventFrame | ConnectChallengeFrame | HelloOkFrame
 
 /** Gateway health snapshot */
 export interface GatewayHealth {

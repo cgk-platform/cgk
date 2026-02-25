@@ -11,7 +11,6 @@ import type {
   LogEntry,
   ModelEntry,
   ProfileSlug,
-  RequestFrame,
   ResponseFrame,
   Session,
   SessionUsage,
@@ -27,14 +26,19 @@ interface PendingRequest {
 }
 
 const RPC_TIMEOUT_MS = 10_000
+const CONNECT_TIMEOUT_MS = 15_000
 const RECONNECT_BASE_MS = 5_000
 const MAX_RECONNECT_MS = 30_000
 
 /**
  * WebSocket RPC client for a single openCLAW gateway.
  *
- * Handles connection lifecycle, request/response tracking,
- * reconnection with exponential backoff, and event subscriptions.
+ * Implements the protocol v3 handshake:
+ *   1. Open WebSocket
+ *   2. Receive `connect.challenge` frame with nonce
+ *   3. Send `connect` request with auth token + client info
+ *   4. Receive `hello-ok` response
+ *   5. RPC ready
  */
 export class OpenClawGatewayClient {
   readonly profile: ProfileSlug
@@ -56,12 +60,12 @@ export class OpenClawGatewayClient {
     return this._state
   }
 
-  /** Whether the client is connected */
+  /** Whether the client is connected and authenticated */
   get connected(): boolean {
     return this._state === 'connected'
   }
 
-  /** Connect to the gateway */
+  /** Connect to the gateway and complete the protocol v3 handshake */
   async connect(): Promise<void> {
     if (this._state === 'connected' || this._state === 'connecting') return
 
@@ -72,30 +76,96 @@ export class OpenClawGatewayClient {
       const token = getProfileToken(this.profile)
       const url = getProfileUrl(this.profile)
 
-      this.ws = new WebSocket(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
+      this.ws = new WebSocket(url)
+
+      const connectId = `${this.profile}-connect`
 
       await new Promise<void>((resolve, reject) => {
-        const onOpen = () => {
+        const connectTimeout = setTimeout(() => {
           cleanup()
-          this.setState('connected')
-          this.reconnectAttempt = 0
-          resolve()
+          reject(new Error(`Connect timeout for ${this.profile} (${CONNECT_TIMEOUT_MS}ms)`))
+        }, CONNECT_TIMEOUT_MS)
+
+        const onMessage = (data: import('ws').RawData) => {
+          let frame: Record<string, unknown>
+          try {
+            frame = JSON.parse(data.toString()) as Record<string, unknown>
+          } catch {
+            return
+          }
+
+          // Step 2: Receive connect.challenge (arrives as event frame)
+          if (frame.type === 'event' && frame.event === 'connect.challenge') {
+            const connectFrame = {
+              type: 'req',
+              id: connectId,
+              method: 'connect',
+              params: {
+                minProtocol: 3,
+                maxProtocol: 3,
+                client: {
+                  id: 'gateway-client',
+                  version: '2026.2.23',
+                  platform: 'darwin',
+                  mode: 'backend',
+                },
+                role: 'operator',
+                scopes: ['operator.read'],
+                caps: [],
+                commands: [],
+                auth: { token: token || '' },
+                locale: 'en-US',
+                userAgent: 'command-center/1.0',
+              },
+            }
+            this.ws!.send(JSON.stringify(connectFrame))
+            return
+          }
+
+          // Step 4: Connect response (type:"res", ok:true, payload.type:"hello-ok")
+          if (frame.id === connectId && frame.ok === true) {
+            cleanup()
+            clearTimeout(connectTimeout)
+            this.setState('connected')
+            this.reconnectAttempt = 0
+            resolve()
+            return
+          }
+
+          // Handle connect rejection
+          if (frame.id === connectId && frame.ok === false) {
+            cleanup()
+            clearTimeout(connectTimeout)
+            const errMsg = (frame.error as { message?: string })?.message || 'Connect rejected'
+            reject(new Error(`Gateway auth failed for ${this.profile}: ${errMsg}`))
+            return
+          }
         }
+
         const onError = (err: Error) => {
           cleanup()
+          clearTimeout(connectTimeout)
           reject(err)
         }
-        const cleanup = () => {
-          this.ws?.removeListener('open', onOpen)
-          this.ws?.removeListener('error', onError)
+
+        const onClose = () => {
+          cleanup()
+          clearTimeout(connectTimeout)
+          reject(new Error(`WebSocket closed during handshake for ${this.profile}`))
         }
 
-        this.ws!.on('open', onOpen)
+        const cleanup = () => {
+          this.ws?.removeListener('message', onMessage)
+          this.ws?.removeListener('error', onError)
+          this.ws?.removeListener('close', onClose)
+        }
+
+        this.ws!.on('message', onMessage)
         this.ws!.on('error', onError)
+        this.ws!.on('close', onClose)
       })
 
+      // Handshake complete — attach persistent listeners
       this.ws.on('message', (data) => this.handleMessage(data))
       this.ws.on('close', () => this.handleClose())
       this.ws.on('error', (err) => {
@@ -103,6 +173,11 @@ export class OpenClawGatewayClient {
       })
     } catch (err) {
       this.setState('disconnected')
+      if (this.ws) {
+        this.ws.removeAllListeners()
+        this.ws.close()
+        this.ws = null
+      }
       this.scheduleReconnect()
       throw err
     }
@@ -119,7 +194,6 @@ export class OpenClawGatewayClient {
       this.ws.close()
       this.ws = null
     }
-    // Reject all pending requests
     for (const [id, pending] of this.pending) {
       clearTimeout(pending.timer)
       pending.reject(new Error('Client disconnected'))
@@ -135,7 +209,12 @@ export class OpenClawGatewayClient {
     }
 
     const id = `${this.profile}-${++this.requestCounter}`
-    const frame: RequestFrame = { id, method, ...(params ? { params } : {}) }
+    const frame = {
+      type: 'req' as const,
+      id,
+      method,
+      ...(params ? { params } : {}),
+    }
 
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
@@ -234,32 +313,33 @@ export class OpenClawGatewayClient {
   // ─── Internal ────────────────────────────────────────────────────
 
   private handleMessage(data: import('ws').RawData): void {
-    let frame: ResponseFrame | EventFrame
+    let frame: Record<string, unknown>
     try {
-      frame = JSON.parse(data.toString()) as ResponseFrame | EventFrame
+      frame = JSON.parse(data.toString()) as Record<string, unknown>
     } catch {
       return
     }
 
     // Check if it's a response to a pending RPC
     if ('id' in frame && frame.id) {
-      const pending = this.pending.get(frame.id)
+      const pending = this.pending.get(frame.id as string)
       if (pending) {
         clearTimeout(pending.timer)
-        this.pending.delete(frame.id)
-        const response = frame as ResponseFrame
-        if (response.error) {
-          pending.reject(new Error(response.error.message))
+        this.pending.delete(frame.id as string)
+        const response = frame as unknown as ResponseFrame
+        if (response.ok === false || response.error) {
+          const errMsg = response.error?.message || 'RPC call failed'
+          pending.reject(new Error(errMsg))
         } else {
-          pending.resolve(response.result)
+          pending.resolve(response.payload)
         }
       }
       return
     }
 
-    // Otherwise treat as push event
+    // Push events
     if ('event' in frame) {
-      const eventFrame = frame as EventFrame
+      const eventFrame = frame as unknown as EventFrame
       const handlers = this.eventHandlers.get(eventFrame.event)
       if (handlers) {
         for (const handler of handlers) {

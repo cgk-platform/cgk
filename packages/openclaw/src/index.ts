@@ -1,5 +1,5 @@
 export { OpenClawGatewayClient } from './client.js'
-export { PROFILES, PROFILE_SLUGS, isValidProfile, getProfilePort, getProfileToken } from './profiles.js'
+export { PROFILES, PROFILE_SLUGS, isValidProfile, getProfilePort, getProfileToken, getProfileUrl } from './profiles.js'
 export type {
   ProfileSlug,
   ProfileConfig,
@@ -7,6 +7,8 @@ export type {
   RequestFrame,
   ResponseFrame,
   EventFrame,
+  ConnectChallengeFrame,
+  HelloOkFrame,
   InboundFrame,
   GatewayHealth,
   CronJob,
