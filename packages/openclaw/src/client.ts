@@ -1,4 +1,4 @@
-import { getProfilePort, getProfileToken } from './profiles.js'
+import { getProfileToken, getProfileUrl } from './profiles.js'
 import type {
   AgentIdentity,
   ChannelStatus,
@@ -69,9 +69,8 @@ export class OpenClawGatewayClient {
 
     try {
       const { WebSocket } = await import('ws')
-      const port = getProfilePort(this.profile)
       const token = getProfileToken(this.profile)
-      const url = `ws://127.0.0.1:${port}`
+      const url = getProfileUrl(this.profile)
 
       this.ws = new WebSocket(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},

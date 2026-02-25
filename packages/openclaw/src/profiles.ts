@@ -51,3 +51,17 @@ export function getProfilePort(slug: ProfileSlug): number {
 export function getProfileToken(slug: ProfileSlug): string | undefined {
   return process.env[PROFILES[slug].tokenEnvVar]
 }
+
+/**
+ * Get the full WebSocket URL for a profile.
+ * Checks for OPENCLAW_{SLUG}_URL env var override first (for remote/Tailscale access),
+ * then falls back to ws://127.0.0.1:{port}.
+ */
+export function getProfileUrl(slug: ProfileSlug): string {
+  const urlEnvVar = `OPENCLAW_${slug.toUpperCase()}_URL`
+  const envUrl = process.env[urlEnvVar]
+  if (envUrl) return envUrl
+
+  const port = getProfilePort(slug)
+  return `ws://127.0.0.1:${port}`
+}
