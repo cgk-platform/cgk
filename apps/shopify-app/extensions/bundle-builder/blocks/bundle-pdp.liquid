@@ -56,20 +56,12 @@
 {%- assign bundle_products = block.settings.products -%}
 {%- assign current_variant = product.selected_or_first_available_variant -%}
 
-{%- comment -%} Determine selected color & size {%- endcomment -%}
+{%- comment -%} Determine selected color for media filtering {%- endcomment -%}
 {%- assign selected_color = '' -%}
-{%- assign selected_size = '' -%}
-{%- assign color_position = 0 -%}
-{%- assign size_position = 0 -%}
 {%- for option in product.options_with_values -%}
   {%- assign opt_down = option.name | downcase -%}
   {%- if opt_down == 'color' or opt_down == 'colour' or opt_down == 'colors' -%}
     {%- assign selected_color = option.selected_value -%}
-    {%- assign color_position = option.position -%}
-  {%- endif -%}
-  {%- if opt_down == 'size' -%}
-    {%- assign selected_size = option.selected_value -%}
-    {%- assign size_position = option.position -%}
   {%- endif -%}
 {%- endfor -%}
 
