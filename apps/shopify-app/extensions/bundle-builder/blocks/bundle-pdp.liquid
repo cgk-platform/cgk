@@ -195,27 +195,18 @@
         {%- assign rating_value = product.metafields.reviews.rating.value.rating -%}
         {%- assign rating_max = product.metafields.reviews.rating.value.scale_max | default: 5 -%}
         {%- assign rating_count = product.metafields.reviews.rating_count | default: 0 -%}
+        {%- assign rating_floor = rating_value | floor -%}
+        {%- assign rating_decimal = rating_value | minus: rating_floor -%}
         <div class="bb-pdp__rating" data-pdp-rating>
           <div class="bb-pdp__stars" aria-label="{{ rating_value }} out of {{ rating_max }} stars">
             {%- for i in (1..5) -%}
-              {%- assign star_filled = false -%}
-              {%- assign star_half = false -%}
-              {%- if rating_value >= i -%}
-                {%- assign star_filled = true -%}
-              {%- elsif rating_value | plus: 0.5 >= i -%}
-                {%- assign star_half = true -%}
+              {%- if i <= rating_floor -%}
+                <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="#d29b28" stroke="#d29b28" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {%- elsif i == rating_floor | plus: 1 and rating_decimal >= 0.3 -%}
+                <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="url(#bb-half-{{ section.id }})" stroke="#d29b28" stroke-width="1.5"><defs><linearGradient id="bb-half-{{ section.id }}"><stop offset="50%" stop-color="#d29b28"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {%- else -%}
+                <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--bb-border);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               {%- endif -%}
-              <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="{% if star_filled %}var(--bb-gold, #d29b28){% elsif star_half %}url(#bb-half-star){% else %}none{% endif %}" stroke="{% if star_filled or star_half %}var(--bb-gold, #d29b28){% else %}var(--bb-border){% endif %}" stroke-width="1.5">
-                {%- if star_half -%}
-                  <defs>
-                    <linearGradient id="bb-half-star">
-                      <stop offset="50%" stop-color="var(--bb-gold, #d29b28)"/>
-                      <stop offset="50%" stop-color="transparent"/>
-                    </linearGradient>
-                  </defs>
-                {%- endif -%}
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
             {%- endfor -%}
           </div>
           {%- if rating_count > 0 -%}
@@ -413,15 +404,15 @@
         <div class="bb-pdp__review-callout">
           <div class="bb-pdp__stars bb-pdp__stars--small">
             {%- for i in (1..5) -%}
-              {%- assign star_filled = false -%}
-              {%- if rating_value >= i -%}{%- assign star_filled = true -%}{%- endif -%}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="{% if star_filled %}var(--bb-gold, #d29b28){% else %}none{% endif %}" stroke="{% if star_filled %}var(--bb-gold, #d29b28){% else %}var(--bb-border){% endif %}" stroke-width="1.5">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
+              {%- if i <= rating_floor -%}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#d29b28" stroke="#d29b28" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {%- else -%}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--bb-border);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              {%- endif -%}
             {%- endfor -%}
           </div>
           <span class="bb-pdp__review-callout-text">
-            {{ rating_value }} / {{ rating_max }} based on {{ rating_count }} review{{ rating_count | pluralize: '', 's' }}
+            {{ rating_value }} / {{ rating_max }} based on {{ rating_count }} reviews
           </span>
         </div>
       {%- endif -%}
