@@ -100,21 +100,15 @@
       if (!this.els.slider) return;
       var self = this;
 
-      // Apply variant-group media filtering on init (overrides server-side alt-text filter)
-      var initialColor = this._getInitialColor();
-      if (initialColor) {
-        var slides = Array.from(this.els.slider.querySelectorAll('.bb-pdp__slide'));
-        var visibleIndices = this._buildMediaGroupForColor(initialColor, slides);
-        slides.forEach(function (slide) {
-          var idx = parseInt(slide.dataset.slideIndex, 10);
-          slide.style.display = visibleIndices.has(idx) ? '' : 'none';
-        });
-        if (this.els.thumbsContainer) {
-          var thumbs = Array.from(this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb'));
-          thumbs.forEach(function (thumb) {
-            var idx = parseInt(thumb.dataset.thumbIndex, 10);
-            thumb.style.display = visibleIndices.has(idx) ? '' : 'none';
-          });
+      // Apply per-variant media filtering on init
+      // Trust the Liquid server-side filter for initial render — just
+      // ensure we have at least 2 visible. If not, the variant's
+      // featured_media group will fix it.
+      var visibleCount = this.els.slider.querySelectorAll('.bb-pdp__slide:not([style*="display:none"])').length;
+      if (visibleCount < 2) {
+        var currentVariant = this.findVariant();
+        if (currentVariant) {
+          this.filterMediaByVariant(currentVariant);
         }
       }
 
@@ -160,18 +154,6 @@
           self.goToSlide(slideIndex);
         });
       }
-    }
-
-    _getInitialColor() {
-      var color = '';
-      this.els.optionGroups.forEach(function (group) {
-        var name = (group.dataset.optionName || '').toLowerCase();
-        if (name === 'color' || name === 'colour' || name === 'colors') {
-          var activeBtn = group.querySelector('.bb-pdp__swatch--active');
-          if (activeBtn) color = activeBtn.dataset.optionValue || '';
-        }
-      });
-      return color;
     }
 
     navigateSlide(direction) {
@@ -222,11 +204,19 @@
       });
     }
 
-    filterMediaByColor(colorName) {
+    /**
+     * Filter gallery to show images for a specific variant.
+     * Uses the variant's featured_media_id to find its image group:
+     * from that image forward until the next variant's featured_media.
+     * This replicates per-variant (color+size) image sets.
+     *
+     * Fallback chain: variant group → alt-text color match → show all.
+     */
+    filterMediaByVariant(variant) {
       if (!this.els.slider || !this.els.thumbsContainer) return;
       var self = this;
 
-      // Disconnect observer before changing visibility
+      // Disconnect observer
       if (this._slideObserver) {
         this.els.slider.querySelectorAll('.bb-pdp__slide').forEach(function (slide) {
           self._slideObserver.unobserve(slide);
@@ -236,13 +226,8 @@
       var slides = Array.from(this.els.slider.querySelectorAll('.bb-pdp__slide'));
       var thumbs = Array.from(this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb'));
 
-      // Build visible indices using variant featured_media grouping.
-      // Each variant has a featured_media_id. A color's "group" is: for each
-      // variant of that color, show media from its featured_media position
-      // through the consecutive images until the next variant's featured_media.
-      var visibleIndices = this._buildMediaGroupForColor(colorName, slides);
+      var visibleIndices = this._buildVariantMediaGroup(variant, slides);
 
-      // Apply visibility
       slides.forEach(function (slide) {
         var idx = parseInt(slide.dataset.slideIndex, 10);
         slide.style.display = visibleIndices.has(idx) ? '' : 'none';
@@ -270,46 +255,54 @@
     }
 
     /**
-     * Build a Set of slide indices to show for the given color.
+     * Build visible indices for a variant's image group.
      *
-     * Strategy (in priority order):
-     * 1. Per-color boundary via featured_media_id — find the lowest
-     *    featured_media index per color, show everything from this color's
-     *    start to the next color's start. Best result when images are
-     *    organized in color blocks in Shopify admin.
-     * 2. Alt-text matching — show media where data-media-color matches.
-     * 3. Fallback — show ALL media (if nothing else produces results).
+     * Each variant has a featured_media_id. In Shopify, product images
+     * are ordered so a variant's images start at its featured_media and
+     * continue until the next variant's featured_media. This gives ~4-5
+     * images per variant (color+size combo).
      *
-     * If strategy 1 returns < 2 results, we try strategy 2.
-     * If strategy 2 also returns < 2, we show all.
+     * Fallback: alt-text color match → show all.
      */
-    _buildMediaGroupForColor(colorName, slides) {
-      var result;
-
-      // Strategy 1: per-color boundary from featured_media
-      result = this._mediaGroupByFeaturedMedia(colorName, slides);
-      if (result.size >= 2) return result;
-
-      // Strategy 2: alt-text color matching
-      result = this._mediaGroupByAltText(colorName, slides);
-      if (result.size >= 2) return result;
-
-      // Strategy 3: show everything
-      var all = new Set();
-      slides.forEach(function (_, i) { all.add(i); });
-      return all;
-    }
-
-    _mediaGroupByFeaturedMedia(colorName, slides) {
+    _buildVariantMediaGroup(variant, slides) {
       var visibleIndices = new Set();
 
+      // Map media IDs to slide indices
       var mediaIdToIndex = {};
       slides.forEach(function (slide) {
-        var mediaId = slide.dataset.mediaId;
-        if (mediaId) mediaIdToIndex[mediaId] = parseInt(slide.dataset.slideIndex, 10);
+        var mid = slide.dataset.mediaId;
+        if (mid) mediaIdToIndex[mid] = parseInt(slide.dataset.slideIndex, 10);
       });
 
-      // Find color option position
+      // Collect ALL unique featured_media positions (sorted), one per variant
+      var allFeaturedPositions = [];
+      this.variants.forEach(function (v) {
+        if (v.featured_media_id && String(v.featured_media_id) in mediaIdToIndex) {
+          allFeaturedPositions.push(mediaIdToIndex[String(v.featured_media_id)]);
+        }
+      });
+      allFeaturedPositions = Array.from(new Set(allFeaturedPositions)).sort(function (a, b) { return a - b; });
+
+      // Find THIS variant's featured_media position
+      var myFmId = variant.featured_media_id;
+      var myStart = myFmId ? mediaIdToIndex[String(myFmId)] : undefined;
+
+      if (myStart !== undefined && allFeaturedPositions.length > 1) {
+        // Find end: next featured_media position after ours
+        var myEnd = slides.length;
+        for (var i = 0; i < allFeaturedPositions.length; i++) {
+          if (allFeaturedPositions[i] > myStart) {
+            myEnd = allFeaturedPositions[i];
+            break;
+          }
+        }
+
+        for (var j = myStart; j < myEnd; j++) visibleIndices.add(j);
+
+        if (visibleIndices.size >= 2) return visibleIndices;
+      }
+
+      // Fallback: alt-text color match
       var colorPosition = -1;
       this.els.optionGroups.forEach(function (group) {
         var name = (group.dataset.optionName || '').toLowerCase();
@@ -317,40 +310,20 @@
           colorPosition = parseInt(group.dataset.optionPosition, 10);
         }
       });
-      if (colorPosition < 1) return visibleIndices;
 
-      // Find minimum featured_media index per color
-      var colorMinIndex = {};
-      this.variants.forEach(function (v) {
-        var vc = v.options[colorPosition - 1];
-        var fmId = v.featured_media_id;
-        if (!vc || !fmId || !(String(fmId) in mediaIdToIndex)) return;
-        var idx = mediaIdToIndex[String(fmId)];
-        if (!(vc in colorMinIndex) || idx < colorMinIndex[vc]) colorMinIndex[vc] = idx;
-      });
-
-      if (!(colorName in colorMinIndex)) return visibleIndices;
-
-      // Build sorted color boundaries
-      var boundaries = [];
-      for (var c in colorMinIndex) boundaries.push(colorMinIndex[c]);
-      boundaries = Array.from(new Set(boundaries)).sort(function (a, b) { return a - b; });
-
-      var startIdx = colorMinIndex[colorName];
-      var endIdx = slides.length;
-      for (var i = 0; i < boundaries.length; i++) {
-        if (boundaries[i] > startIdx) { endIdx = boundaries[i]; break; }
+      if (colorPosition >= 1) {
+        var colorName = variant.options[colorPosition - 1];
+        if (colorName) {
+          var altMatches = new Set();
+          slides.forEach(function (slide, i) {
+            if (slide.dataset.mediaColor === colorName) altMatches.add(i);
+          });
+          if (altMatches.size >= 2) return altMatches;
+        }
       }
 
-      for (var j = startIdx; j < endIdx; j++) visibleIndices.add(j);
-      return visibleIndices;
-    }
-
-    _mediaGroupByAltText(colorName, slides) {
-      var visibleIndices = new Set();
-      slides.forEach(function (slide, i) {
-        if (slide.dataset.mediaColor === colorName) visibleIndices.add(i);
-      });
+      // Last fallback: show all
+      slides.forEach(function (_, i) { visibleIndices.add(i); });
       return visibleIndices;
     }
 
@@ -537,10 +510,8 @@
       var matchingVariant = this.findVariant();
 
       if (matchingVariant) {
-        // Filter gallery if color changed
-        if (optionName === 'color' || optionName === 'colour' || optionName === 'colors') {
-          this.filterMediaByColor(value);
-        }
+        // Filter gallery for this variant (color+size combo)
+        this.filterMediaByVariant(matchingVariant);
 
         // Update price display
         this.updatePriceDisplay(matchingVariant);
