@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 6%;
+    --foreground: 40 15% 95%;
+
+    --card: 222 47% 8%;
+    --card-foreground: 40 15% 95%;
+
+    --popover: 222 47% 8%;
+    --popover-foreground: 40 15% 95%;
+
+    --primary: 40 15% 95%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 40 15% 95%;
+
+    --muted: 217 32% 17%;
+    --muted-foreground: 40 8% 65%;
+
+    --accent: 217 32% 17%;
+    --accent-foreground: 40 15% 95%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 40 15% 95%;
+
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 40 8% 78%;
+
+    --radius: 0.5rem;
+
+    --gold: 38 88% 55%;
+    --gold-light: 38 82% 65%;
+    --gold-dark: 38 90% 45%;
+
+    --success: 152 40% 45%;
+    --success-foreground: 40 20% 98%;
+
+    --warning: 38 70% 55%;
+    --warning-foreground: 40 10% 10%;
+
+    --info: 210 50% 55%;
+    --info-foreground: 40 20% 98%;
+
+    --gray-50: 222 47% 6%;
+    --gray-100: 222 45% 10%;
+    --gray-200: 222 40% 15%;
+    --gray-300: 222 35% 22%;
+    --gray-400: 222 25% 35%;
+    --gray-500: 222 20% 45%;
+    --gray-600: 222 15% 58%;
+    --gray-700: 222 12% 72%;
+    --gray-800: 222 10% 85%;
+    --gray-900: 222 8% 95%;
+
+    --navy-50: 222 47% 6%;
+    --navy-100: 222 47% 11%;
+    --navy-200: 222 47% 14%;
+    --navy-300: 222 47% 20%;
+    --navy-400: 222 47% 28%;
+    --navy-500: 222 47% 40%;
+    --navy-600: 222 46% 55%;
+    --navy-700: 222 45% 70%;
+    --navy-800: 222 44% 84%;
+    --navy-900: 222 42% 92%;
+
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --duration-slow: 300ms;
+    --duration-slower: 500ms;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans tracking-tight;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-700/50 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-600/70;
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+
+  .text-success {
+    color: hsl(var(--success));
+  }
+
+  .text-warning {
+    color: hsl(var(--warning));
+  }
+
+  .text-info {
+    color: hsl(var(--info));
+  }
+
+  .animate-fade-up {
+    animation: fade-up var(--duration-normal) var(--ease-out);
+  }
+
+  .animate-fade-in {
+    animation: fade-in var(--duration-normal) var(--ease-out);
+  }
+
+  .glass {
+    @apply bg-gray-800/60 backdrop-blur-sm border border-gray-700/50;
+  }
+
+  .card-hover {
+    @apply transition-all duration-normal ease-smooth-out;
+  }
+
+  .card-hover:hover {
+    @apply shadow-lg shadow-black/20 -translate-y-0.5 border-gray-600/50;
+  }
+
+  .glow-gold {
+    box-shadow: 0 0 20px hsl(var(--gold) / 0.15);
+  }
+
+  .status-pulse {
+    @apply relative;
+  }
+
+  .status-pulse::before {
+    content: '';
+    @apply absolute inset-0 rounded-full animate-ping opacity-75;
+    background-color: inherit;
+  }
+}
+
+[data-sonner-toaster] {
+  --normal-bg: hsl(var(--card));
+  --normal-border: hsl(var(--border));
+  --normal-text: hsl(var(--foreground));
+
+  --success-bg: hsl(var(--success) / 0.15);
+  --success-border: hsl(var(--success) / 0.3);
+  --success-text: hsl(var(--success));
+
+  --error-bg: hsl(var(--destructive) / 0.15);
+  --error-border: hsl(var(--destructive) / 0.3);
+  --error-text: hsl(var(--destructive));
+
+  --warning-bg: hsl(var(--warning) / 0.15);
+  --warning-border: hsl(var(--warning) / 0.3);
+  --warning-text: hsl(var(--warning));
+
+  --info-bg: hsl(var(--info) / 0.15);
+  --info-border: hsl(var(--info) / 0.3);
+  --info-text: hsl(var(--info));
+}

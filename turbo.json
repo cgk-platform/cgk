@@ -170,7 +170,13 @@
         "WISE_PROFILE_ID",
         "YOTPO_API_SECRET",
         "YOTPO_APP_KEY",
-        "YOTPO_SECRET_KEY"
+        "YOTPO_SECRET_KEY",
+        "OPENCLAW_CGK_GATEWAY_TOKEN",
+        "OPENCLAW_RAWDOG_GATEWAY_TOKEN",
+        "OPENCLAW_VITA_GATEWAY_TOKEN",
+        "OPENCLAW_CGK_PORT",
+        "OPENCLAW_RAWDOG_PORT",
+        "OPENCLAW_VITA_PORT"
       ]
     },
     "dev": {
