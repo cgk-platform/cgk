@@ -6,19 +6,25 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Cpu,
+  FolderOpen,
   GitCompare,
+  Image,
   LayoutDashboard,
   LogOut,
   Menu,
   MessageSquare,
   Puzzle,
   Radio,
+  Settings,
   Terminal,
   X,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+
+import { NotificationBell } from './notification-bell'
 
 interface NavItem {
   label: string
@@ -38,8 +44,12 @@ const PROFILE_TABS: NavItem[] = [
   { label: 'Cron Jobs', href: '/cron', icon: 'Clock' },
   { label: 'Sessions', href: '/sessions', icon: 'Terminal' },
   { label: 'Logs', href: '/logs', icon: 'Terminal' },
+  { label: 'Models', href: '/models', icon: 'Cpu' },
   { label: 'Channels', href: '/channels', icon: 'MessageSquare' },
   { label: 'Skills', href: '/skills', icon: 'Puzzle' },
+  { label: 'Media', href: '/media', icon: 'Image' },
+  { label: 'Workspace', href: '/workspace', icon: 'FolderOpen' },
+  { label: 'Config', href: '/config', icon: 'Settings' },
 ]
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -51,6 +61,30 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BarChart3,
   GitCompare,
   MessageSquare,
+  Cpu,
+  Image,
+  FolderOpen,
+  Settings,
+}
+
+const STORAGE_KEY = 'cc-sidebar-expanded'
+
+function loadExpandedProfiles(pathname: string): Set<string> {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      const arr = JSON.parse(stored) as string[]
+      const set = new Set(arr)
+      // Also include the active profile
+      const active = PROFILE_NAV.find((p) => pathname.startsWith(p.href))
+      if (active) set.add(active.href)
+      return set
+    }
+  } catch {
+    // ignore
+  }
+  const active = PROFILE_NAV.find((p) => pathname.startsWith(p.href))
+  return active ? new Set([active.href]) : new Set<string>()
 }
 
 interface SidebarProps {
@@ -62,11 +96,26 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const [isMobileOpen, setIsMobileOpen] = useState(false)
-  const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(() => {
-    // Auto-expand the active profile
-    const active = PROFILE_NAV.find((p) => pathname.startsWith(p.href))
-    return active ? new Set([active.href]) : new Set<string>()
-  })
+  const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(() =>
+    loadExpandedProfiles(pathname)
+  )
+
+  // Auto-expand active profile via useEffect (not in render body)
+  useEffect(() => {
+    const activeProfile = PROFILE_NAV.find((p) => pathname.startsWith(p.href))
+    if (activeProfile && !expandedProfiles.has(activeProfile.href)) {
+      setExpandedProfiles((prev) => new Set([...prev, activeProfile.href]))
+    }
+  }, [pathname]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist to localStorage on change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify([...expandedProfiles]))
+    } catch {
+      // ignore
+    }
+  }, [expandedProfiles])
 
   const toggleProfile = useCallback((href: string) => {
     setExpandedProfiles((prev) => {
@@ -97,12 +146,6 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
     }
   }, [router])
 
-  // Auto-expand active profile
-  const activeProfile = PROFILE_NAV.find((p) => pathname.startsWith(p.href))
-  if (activeProfile && !expandedProfiles.has(activeProfile.href)) {
-    setExpandedProfiles((prev) => new Set([...prev, activeProfile.href]))
-  }
-
   return (
     <>
       <button
@@ -132,13 +175,16 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
             <Radio className="h-5 w-5 text-gold" />
             <span className="font-bold">Command Center</span>
           </Link>
-          <button
-            onClick={() => setIsMobileOpen(false)}
-            className="rounded-md p-1 hover:bg-accent lg:hidden"
-            aria-label="Close menu"
-          >
-            <X className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <button
+              onClick={() => setIsMobileOpen(false)}
+              className="rounded-md p-1 hover:bg-accent lg:hidden"
+              aria-label="Close menu"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation */}

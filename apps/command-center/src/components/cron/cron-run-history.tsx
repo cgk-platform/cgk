@@ -1,7 +1,7 @@
 'use client'
 
-import { StatusBadge } from '@cgk-platform/ui'
-import { useEffect, useState } from 'react'
+import { Button, StatusBadge } from '@cgk-platform/ui'
+import { useCallback, useEffect, useState } from 'react'
 
 interface CronRun {
   id: string
@@ -21,21 +21,34 @@ interface CronRunHistoryProps {
 export function CronRunHistory({ profile, jobId }: CronRunHistoryProps) {
   const [runs, setRuns] = useState<CronRun[]>([])
   const [loading, setLoading] = useState(true)
+  const [hasMore, setHasMore] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  const fetchRuns = useCallback(async (offset = 0, append = false) => {
+    try {
+      const res = await fetch(
+        `/api/openclaw/${profile}/cron/${jobId}/runs?offset=${offset}&limit=10`
+      )
+      const data = await res.json()
+      const newRuns = data.runs || []
+      setRuns((prev) => append ? [...prev, ...newRuns] : newRuns)
+      setHasMore(data.hasMore ?? false)
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false)
+      setLoadingMore(false)
+    }
+  }, [profile, jobId])
 
   useEffect(() => {
-    async function fetchRuns() {
-      try {
-        const res = await fetch(`/api/openclaw/${profile}/cron/${jobId}/runs`)
-        const data = await res.json()
-        setRuns(data.runs || [])
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchRuns()
-  }, [profile, jobId])
+  }, [fetchRuns])
+
+  const loadMore = useCallback(() => {
+    setLoadingMore(true)
+    fetchRuns(runs.length, true)
+  }, [fetchRuns, runs.length])
 
   if (loading) {
     return <div className="text-sm text-muted-foreground">Loading run history...</div>
@@ -51,7 +64,7 @@ export function CronRunHistory({ profile, jobId }: CronRunHistoryProps) {
         Recent Runs
       </h4>
       <div className="space-y-1">
-        {runs.slice(0, 10).map((run) => (
+        {runs.map((run) => (
           <div
             key={run.id}
             className="flex items-center justify-between rounded-md bg-background px-3 py-2 text-xs"
@@ -84,6 +97,17 @@ export function CronRunHistory({ profile, jobId }: CronRunHistoryProps) {
           </div>
         ))}
       </div>
+      {hasMore && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full text-xs"
+          onClick={loadMore}
+          disabled={loadingMore}
+        >
+          {loadingMore ? 'Loading...' : 'Load More'}
+        </Button>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { use, useCallback, useEffect, useState } from 'react'
 
 import { SessionList } from '@/components/sessions/session-list'
 import { SessionUsage } from '@/components/sessions/session-usage'
+import { RefreshButton } from '@/components/ui/refresh-button'
 
 interface SessionItem {
   id: string
@@ -57,14 +58,17 @@ export default function SessionsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Sessions — {config?.label || profile}
-        </h1>
-        <p className="text-muted-foreground">
-          {sessions.length} active sessions
-          {usage?.startDate && ` (${usage.startDate} – ${usage.endDate})`}
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Sessions — {config?.label || profile}
+          </h1>
+          <p className="text-muted-foreground">
+            {sessions.length} active sessions
+            {usage?.startDate && ` (${usage.startDate} – ${usage.endDate})`}
+          </p>
+        </div>
+        <RefreshButton onRefresh={fetchData} />
       </div>
 
       {loading ? (

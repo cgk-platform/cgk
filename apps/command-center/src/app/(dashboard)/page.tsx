@@ -5,6 +5,9 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { ConnectionBar } from '@/components/overview/connection-bar'
 import { ProfileCard } from '@/components/overview/profile-card'
+import { QuickActions } from '@/components/overview/quick-actions'
+import { ServiceHealth } from '@/components/overview/service-health'
+import { RefreshButton } from '@/components/ui/refresh-button'
 
 interface NormalizedHealth {
   ok: boolean
@@ -55,16 +58,23 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">openCLAW Command Center</h1>
-        <p className="text-muted-foreground">
-          Unified dashboard for all gateway profiles
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">openCLAW Command Center</h1>
+          <p className="text-muted-foreground">
+            Unified dashboard for all gateway profiles
+          </p>
+        </div>
+        <RefreshButton onRefresh={fetchHealth} />
       </div>
 
       {!loading && Object.keys(profiles).length > 0 && (
         <ConnectionBar profiles={profiles} />
       )}
+
+      <ServiceHealth />
+
+      <QuickActions />
 
       <div className="grid gap-6 md:grid-cols-3">
         {loading ? (

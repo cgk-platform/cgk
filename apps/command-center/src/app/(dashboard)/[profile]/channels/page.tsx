@@ -4,6 +4,7 @@ import { PROFILES } from '@cgk-platform/openclaw'
 import { use, useCallback, useEffect, useState } from 'react'
 
 import { ChannelGrid } from '@/components/channels/channel-grid'
+import { RefreshButton } from '@/components/ui/refresh-button'
 
 interface Channel {
   id: string
@@ -52,11 +53,14 @@ export default function ChannelsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Channels — {config?.label || profile}
-        </h1>
-        <p className="text-muted-foreground">Communication channel status</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Channels — {config?.label || profile}
+          </h1>
+          <p className="text-muted-foreground">Communication channel status</p>
+        </div>
+        <RefreshButton onRefresh={fetchData} />
       </div>
 
       {loading ? (

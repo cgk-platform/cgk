@@ -1,7 +1,8 @@
 'use client'
 
 import { cn } from '@cgk-platform/ui'
-import { useEffect, useRef, useState } from 'react'
+import { RefreshCw } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface LogEntry {
   timestamp: string
@@ -26,28 +27,86 @@ const LEVEL_COLORS: Record<string, string> = {
 
 const LEVEL_OPTIONS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const
 
+const MAX_BACKOFF_MS = 30_000
+const INITIAL_BACKOFF_MS = 1_000
+
 export function LogViewer({ profile }: LogViewerProps) {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [connected, setConnected] = useState(false)
+  const [reconnecting, setReconnecting] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const [minLevel, setMinLevel] = useState<string>('info')
   const [search, setSearch] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const autoScrollRef = useRef(true)
+  const eventSourceRef = useRef<EventSource | null>(null)
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const backoffRef = useRef(INITIAL_BACKOFF_MS)
 
-  useEffect(() => {
+  const connect = useCallback(() => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close()
+    }
+
     const eventSource = new EventSource(`/api/openclaw/${profile}/logs/stream`)
+    eventSourceRef.current = eventSource
 
-    eventSource.addEventListener('connected', () => setConnected(true))
-
-    eventSource.addEventListener('log', (event) => {
-      const entry = JSON.parse(event.data) as LogEntry
-      setLogs((prev) => [...prev.slice(-500), entry])
+    eventSource.addEventListener('connected', () => {
+      setConnected(true)
+      setReconnecting(false)
+      setRetryCount(0)
+      backoffRef.current = INITIAL_BACKOFF_MS
     })
 
-    eventSource.addEventListener('error', () => setConnected(false))
+    eventSource.addEventListener('log', (event) => {
+      try {
+        const entry = JSON.parse(event.data) as LogEntry
+        setLogs((prev) => [...prev.slice(-500), entry])
+      } catch {
+        // Ignore malformed JSON to keep the stream alive
+      }
+    })
 
-    return () => eventSource.close()
+    eventSource.addEventListener('error', () => {
+      setConnected(false)
+      eventSource.close()
+      eventSourceRef.current = null
+
+      // Schedule reconnect with exponential backoff
+      setReconnecting(true)
+      setRetryCount((prev) => prev + 1)
+      const delay = Math.min(backoffRef.current, MAX_BACKOFF_MS)
+      backoffRef.current = Math.min(backoffRef.current * 2, MAX_BACKOFF_MS)
+
+      retryTimerRef.current = setTimeout(() => {
+        connect()
+      }, delay)
+    })
   }, [profile])
+
+  const handleManualReconnect = useCallback(() => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current)
+      retryTimerRef.current = null
+    }
+    backoffRef.current = INITIAL_BACKOFF_MS
+    setRetryCount(0)
+    connect()
+  }, [connect])
+
+  useEffect(() => {
+    connect()
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close()
+        eventSourceRef.current = null
+      }
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current)
+        retryTimerRef.current = null
+      }
+    }
+  }, [connect])
 
   useEffect(() => {
     if (autoScrollRef.current && containerRef.current) {
@@ -76,11 +135,28 @@ export function LogViewer({ profile }: LogViewerProps) {
     <div className="space-y-3">
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-1.5">
-          <div className={cn('h-2 w-2 rounded-full', connected ? 'bg-success' : 'bg-destructive')} />
+          <div className={cn(
+            'h-2 w-2 rounded-full',
+            connected ? 'bg-success' : reconnecting ? 'bg-warning animate-pulse' : 'bg-destructive'
+          )} />
           <span className="text-xs text-muted-foreground">
-            {connected ? 'Streaming' : 'Disconnected'}
+            {connected
+              ? 'Streaming'
+              : reconnecting
+                ? `Reconnecting${retryCount > 0 ? ` (${retryCount})` : ''}...`
+                : 'Disconnected'}
           </span>
         </div>
+
+        {!connected && (
+          <button
+            onClick={handleManualReconnect}
+            className="flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <RefreshCw className="h-3 w-3" />
+            Reconnect
+          </button>
+        )}
 
         <select
           value={minLevel}
@@ -115,7 +191,7 @@ export function LogViewer({ profile }: LogViewerProps) {
       >
         {filteredLogs.length === 0 ? (
           <div className="flex h-full items-center justify-center text-muted-foreground">
-            {connected ? 'Waiting for logs...' : 'Connecting...'}
+            {connected ? 'Waiting for logs...' : reconnecting ? 'Reconnecting...' : 'Disconnected'}
           </div>
         ) : (
           filteredLogs.map((log, i) => (

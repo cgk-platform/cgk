@@ -1,9 +1,12 @@
 'use client'
 
 import { PROFILES } from '@cgk-platform/openclaw'
+import { cn } from '@cgk-platform/ui'
 import { use, useCallback, useEffect, useState } from 'react'
 
 import { CronTable } from '@/components/cron/cron-table'
+import { CronTimeline } from '@/components/cron/cron-timeline'
+import { RefreshButton } from '@/components/ui/refresh-button'
 
 interface CronJob {
   id: string
@@ -31,6 +34,8 @@ interface CronJob {
   }
 }
 
+type ViewMode = 'table' | 'timeline'
+
 export default function CronPage({
   params,
 }: {
@@ -40,6 +45,7 @@ export default function CronPage({
   const config = PROFILES[profile as keyof typeof PROFILES]
   const [jobs, setJobs] = useState<CronJob[]>([])
   const [loading, setLoading] = useState(true)
+  const [view, setView] = useState<ViewMode>('table')
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -64,7 +70,6 @@ export default function CronPage({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jobId }),
       })
-      // Refresh after trigger
       setTimeout(fetchJobs, 2000)
     },
     [profile, fetchJobs]
@@ -72,19 +77,42 @@ export default function CronPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          Cron Jobs — {config?.label || profile}
-        </h1>
-        <p className="text-muted-foreground">
-          {jobs.length} jobs configured, {jobs.filter((j) => j.enabled).length} enabled
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">
+            Cron Jobs — {config?.label || profile}
+          </h1>
+          <p className="text-muted-foreground">
+            {jobs.length} jobs configured, {jobs.filter((j) => j.enabled).length} enabled
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5 rounded-lg border p-0.5">
+            {(['table', 'timeline'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setView(mode)}
+                className={cn(
+                  'rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors',
+                  view === mode
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                )}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+          <RefreshButton onRefresh={fetchJobs} />
+        </div>
       </div>
 
       {loading ? (
         <div className="h-64 animate-pulse rounded-lg border bg-card" />
-      ) : (
+      ) : view === 'table' ? (
         <CronTable jobs={jobs} profile={profile} onTrigger={handleTrigger} />
+      ) : (
+        <CronTimeline jobs={jobs} />
       )}
     </div>
   )

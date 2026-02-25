@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 
 import { Sidebar } from '../../components/nav/sidebar'
+import { DashboardProviders } from './providers'
 
 export const metadata: Metadata = {
   title: 'openCLAW Command Center',
@@ -29,11 +30,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar userName={userName} userEmail={userEmail} />
-      <main className="lg:pl-64">
-        <div className="p-6 lg:p-8">{children}</div>
-      </main>
-    </div>
+    <DashboardProviders>
+      <div className="min-h-screen bg-background">
+        <Sidebar userName={userName} userEmail={userEmail} />
+        <main className="lg:pl-64">
+          <div className="p-6 lg:p-8">{children}</div>
+        </main>
+      </div>
+    </DashboardProviders>
   )
 }

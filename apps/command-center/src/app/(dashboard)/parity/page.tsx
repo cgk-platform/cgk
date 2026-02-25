@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle, cn } from '@cgk-platform/ui'
 import { Check, X } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
+import { RefreshButton } from '@/components/ui/refresh-button'
+
 const PROFILE_LABELS: Record<string, string> = {
   cgk: 'CGK',
   rawdog: 'RAWDOG',
@@ -40,11 +42,14 @@ export default function ParityPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Parity Checker</h1>
-        <p className="text-muted-foreground">
-          Compare configuration and skills across all profiles
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Parity Checker</h1>
+          <p className="text-muted-foreground">
+            Compare configuration and skills across all profiles
+          </p>
+        </div>
+        <RefreshButton onRefresh={fetchData} />
       </div>
 
       {loading ? (

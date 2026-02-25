@@ -11,6 +11,12 @@ interface Session {
   agentId?: string
 }
 
+const SESSION_TYPE_MAP: Record<string, string> = {
+  main: 'active',
+  isolated: 'pending',
+  group: 'connected',
+}
+
 interface SessionListProps {
   sessions: Session[]
 }
@@ -42,7 +48,7 @@ export function SessionList({ sessions }: SessionListProps) {
                 {session.displayName || session.id}
               </td>
               <td className="p-3">
-                <StatusBadge status={session.type === 'group' ? 'active' : session.type === 'isolated' ? 'pending' : 'ready'} label={session.type} />
+                <StatusBadge status={SESSION_TYPE_MAP[session.type] || 'ready'} label={session.type} />
               </td>
               <td className="p-3 text-xs text-muted-foreground">
                 {session.groupChannel || session.channel || '-'}

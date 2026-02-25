@@ -3,35 +3,35 @@
 import { PROFILES } from '@cgk-platform/openclaw'
 import { use, useCallback, useEffect, useState } from 'react'
 
-import { SkillsGrid } from '@/components/skills/skills-grid'
+import { ModelsGrid } from '@/components/models/models-grid'
 import { RefreshButton } from '@/components/ui/refresh-button'
 
-interface Skill {
-  name: string
-  description?: string
-  source: string
-  bundled: boolean
+interface Model {
+  id: string
+  name?: string
+  provider?: string
+  contextWindow?: number
+  reasoning?: boolean
+  inputModalities?: string[]
+  capabilities?: string[]
+  [key: string]: unknown
 }
 
-export default function SkillsPage({
+export default function ModelsPage({
   params,
 }: {
   params: Promise<{ profile: string }>
 }) {
   const { profile } = use(params)
   const config = PROFILES[profile as keyof typeof PROFILES]
-  const [skills, setSkills] = useState<Skill[]>([])
-  const [bundledCount, setBundledCount] = useState(0)
-  const [managedCount, setManagedCount] = useState(0)
+  const [models, setModels] = useState<Model[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/openclaw/${profile}/skills`)
+      const res = await fetch(`/api/openclaw/${profile}/models`)
       const data = await res.json()
-      setSkills(data.skills || [])
-      setBundledCount(data.bundledCount || 0)
-      setManagedCount(data.managedCount || 0)
+      setModels(data.models || [])
     } catch {
       // ignore
     } finally {
@@ -48,10 +48,10 @@ export default function SkillsPage({
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Skills — {config?.label || profile}
+            Models — {config?.label || profile}
           </h1>
           <p className="text-muted-foreground">
-            {skills.length} skills installed ({bundledCount} bundled, {managedCount} managed)
+            {models.length} models available
           </p>
         </div>
         <RefreshButton onRefresh={fetchData} />
@@ -60,7 +60,7 @@ export default function SkillsPage({
       {loading ? (
         <div className="h-64 animate-pulse rounded-lg border bg-card" />
       ) : (
-        <SkillsGrid skills={skills} />
+        <ModelsGrid models={models} />
       )}
     </div>
   )

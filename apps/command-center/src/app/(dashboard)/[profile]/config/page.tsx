@@ -3,37 +3,32 @@
 import { PROFILES } from '@cgk-platform/openclaw'
 import { use, useCallback, useEffect, useState } from 'react'
 
-import { SkillsGrid } from '@/components/skills/skills-grid'
+import { ConfigViewer } from '@/components/config/config-viewer'
 import { RefreshButton } from '@/components/ui/refresh-button'
 
-interface Skill {
-  name: string
-  description?: string
-  source: string
-  bundled: boolean
-}
-
-export default function SkillsPage({
+export default function ConfigPage({
   params,
 }: {
   params: Promise<{ profile: string }>
 }) {
   const { profile } = use(params)
   const config = PROFILES[profile as keyof typeof PROFILES]
-  const [skills, setSkills] = useState<Skill[]>([])
-  const [bundledCount, setBundledCount] = useState(0)
-  const [managedCount, setManagedCount] = useState(0)
+  const [data, setData] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await fetch(`/api/openclaw/${profile}/skills`)
-      const data = await res.json()
-      setSkills(data.skills || [])
-      setBundledCount(data.bundledCount || 0)
-      setManagedCount(data.managedCount || 0)
+      setError(null)
+      const res = await fetch(`/api/openclaw/${profile}/config`)
+      const json = await res.json()
+      if (!res.ok) {
+        setError(json.error || 'Failed to load config')
+      } else {
+        setData(json.config || json)
+      }
     } catch {
-      // ignore
+      setError('Failed to fetch config')
     } finally {
       setLoading(false)
     }
@@ -48,10 +43,10 @@ export default function SkillsPage({
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            Skills — {config?.label || profile}
+            Config — {config?.label || profile}
           </h1>
           <p className="text-muted-foreground">
-            {skills.length} skills installed ({bundledCount} bundled, {managedCount} managed)
+            Gateway configuration (resolved, read-only)
           </p>
         </div>
         <RefreshButton onRefresh={fetchData} />
@@ -59,9 +54,13 @@ export default function SkillsPage({
 
       {loading ? (
         <div className="h-64 animate-pulse rounded-lg border bg-card" />
-      ) : (
-        <SkillsGrid skills={skills} />
-      )}
+      ) : error ? (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      ) : data ? (
+        <ConfigViewer config={data} />
+      ) : null}
     </div>
   )
 }

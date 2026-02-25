@@ -4,6 +4,8 @@ import { PROFILES } from '@cgk-platform/openclaw'
 import { Card, CardContent, CardHeader, CardTitle, StatusBadge } from '@cgk-platform/ui'
 import { use, useCallback, useEffect, useState } from 'react'
 
+import { RefreshButton } from '@/components/ui/refresh-button'
+
 interface HealthData {
   connected: boolean
   health: {
@@ -62,9 +64,12 @@ export default function ProfileOverviewPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{config?.label || profile}</h1>
-        <p className="text-muted-foreground">Gateway profile overview</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{config?.label || profile}</h1>
+          <p className="text-muted-foreground">Gateway profile overview</p>
+        </div>
+        <RefreshButton onRefresh={fetchData} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
