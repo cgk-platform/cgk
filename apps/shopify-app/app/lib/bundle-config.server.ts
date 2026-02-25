@@ -9,6 +9,7 @@ export interface TierConfig {
   count: number
   discount: number
   label?: string
+  freeGiftVariantIds?: string[]
 }
 
 export interface BundleConfig {
@@ -252,11 +253,12 @@ export async function findBundleDiscountFunctionId(
   const data = await response.json()
   const functions = data.data?.shopifyFunctions?.nodes ?? []
 
-  // Match by apiType (discount) + title containing "bundle"
+  // Match by apiType (discount) + title or app title containing "bundle"
   const match = functions.find(
-    (fn: { id: string; title: string; apiType: string }) =>
+    (fn: { id: string; title: string; apiType: string; app?: { title: string } }) =>
       fn.apiType === 'discount_automatic_app' &&
-      fn.title.toLowerCase().includes('bundle')
+      (fn.title.toLowerCase().includes('bundle') ||
+       fn.app?.title?.toLowerCase()?.includes('bundle'))
   )
 
   return match?.id ?? null
@@ -368,11 +370,33 @@ export function parseBundleConfig(
             count: t.count as number,
             discount: t.discount as number,
             ...(typeof t.label === 'string' ? { label: t.label } : {}),
+            ...(Array.isArray(t.freeGiftVariantIds)
+              ? { freeGiftVariantIds: (t.freeGiftVariantIds as unknown[]).filter((v): v is string => typeof v === 'string') }
+              : {}),
           })),
         freeGiftVariantIds: Array.isArray(b.freeGiftVariantIds)
           ? (b.freeGiftVariantIds as unknown[]).filter((v): v is string => typeof v === 'string')
           : [],
       }))
+
+    // Backward compat: migrate global freeGiftVariantIds to highest tier
+    for (const bundle of bundles) {
+      if (bundle.freeGiftVariantIds.length > 0) {
+        const hasTierGifts = bundle.tiers.some(t => t.freeGiftVariantIds && t.freeGiftVariantIds.length > 0)
+        if (!hasTierGifts && bundle.tiers.length > 0) {
+          const sortedTiers = [...bundle.tiers].sort((a, b) => a.count - b.count)
+          const highestTier = sortedTiers[sortedTiers.length - 1]
+          const tierIndex = bundle.tiers.indexOf(highestTier)
+          if (tierIndex >= 0) {
+            bundle.tiers[tierIndex] = {
+              ...bundle.tiers[tierIndex],
+              freeGiftVariantIds: [...bundle.freeGiftVariantIds],
+            }
+          }
+        }
+      }
+    }
+
     return { bundles }
   } catch {
     return { bundles: [] }

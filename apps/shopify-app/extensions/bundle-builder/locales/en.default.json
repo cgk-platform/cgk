@@ -8,7 +8,23 @@
     "items_selected": "{{ count }} items selected",
     "tier_reached": "You unlocked {{ discount }}!",
     "free_gift_added": "Free gift added to your cart!",
+    "free_gift_unavailable": "Free gift is currently unavailable",
     "add_bundle_to_cart": "Add bundle to cart",
     "adding": "Adding..."
+  },
+  "bundle_pdp": {
+    "build_your_bundle": "Build your bundle",
+    "items_range": "{{ min }}–{{ max }} items",
+    "select_items_to_unlock": "Select items to unlock discounts",
+    "add_more_for": "Add {{ count }} more for {{ tier }}!",
+    "max_discount_unlocked": "Max discount unlocked!",
+    "items_selected": "Items selected",
+    "bundle_discount": "Bundle discount",
+    "total": "Total",
+    "you_save": "You save {{ amount }}!",
+    "added_to_cart": "Added to Cart!",
+    "error_try_again": "Error — Try Again",
+    "description": "Description",
+    "view_image": "View image {{ index }}"
   }
 }

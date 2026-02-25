@@ -1,0 +1,521 @@
+{{ 'bundle-pdp.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%} Read bundle config from app metafield {%- endcomment -%}
+{%- assign metafield_config_raw = app.metafields["bundle-discount"]["config"].value -%}
+{%- assign has_metafield_config = false -%}
+{%- if metafield_config_raw != blank -%}
+  {%- assign has_metafield_config = true -%}
+{%- endif -%}
+
+{%- liquid
+  assign headline = block.settings.headline
+  assign cta_text = block.settings.cta_text | default: 'Add Bundle to Cart'
+  assign show_savings = block.settings.show_savings
+  assign show_tier_progress = block.settings.show_tier_progress
+  assign cart_redirect = block.settings.cart_redirect
+  assign bg_color = block.settings.bg_color | default: '#ffffff'
+  assign text_color = block.settings.text_color | default: '#1a1a2e'
+  assign accent_color = block.settings.accent_color | default: '#2563eb'
+  assign button_text_color = block.settings.button_text_color | default: '#ffffff'
+  assign padding_top = block.settings.padding_top | default: 48
+  assign padding_bottom = block.settings.padding_bottom | default: 48
+  assign image_ratio = block.settings.image_ratio | default: 'portrait'
+  assign bundle_name = block.settings.bundle_name | default: 'Custom Bundle'
+  assign min_items = block.settings.min_items
+  assign max_items = block.settings.max_items
+  assign show_variant_selector = block.settings.show_variant_selector
+  assign show_accordion = block.settings.show_accordion
+-%}
+
+{%- if has_metafield_config -%}
+  {%- assign tiers_json = '[]' -%}
+  {%- assign discount_type = 'percentage' -%}
+  {%- assign bundle_id_attr = '' -%}
+{%- else -%}
+  {%- assign discount_type = block.settings.discount_type | default: 'percentage' -%}
+  {%- assign bundle_id_attr = block.id -%}
+  {%- capture tiers_json -%}
+[
+  {%- assign tier_count = 0 -%}
+  {%- if block.settings.discount_2_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":2,"discount":{{ block.settings.discount_2_items }},"label":{{ block.settings.tier_2_label | default: '' | json }}}
+    {%- assign tier_count = tier_count | plus: 1 -%}
+  {%- endif -%}
+  {%- if block.settings.discount_3_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":3,"discount":{{ block.settings.discount_3_items }},"label":{{ block.settings.tier_3_label | default: '' | json }}}
+    {%- assign tier_count = tier_count | plus: 1 -%}
+  {%- endif -%}
+  {%- if block.settings.discount_4_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":4,"discount":{{ block.settings.discount_4_items }},"label":{{ block.settings.tier_4_label | default: '' | json }}}
+    {%- assign tier_count = tier_count | plus: 1 -%}
+  {%- endif -%}
+  {%- if block.settings.discount_5_items > 0 -%}
+    {%- if tier_count > 0 -%},{%- endif -%}
+    {"count":5,"discount":{{ block.settings.discount_5_items }},"label":{{ block.settings.tier_5_label | default: '' | json }}}
+  {%- endif -%}
+]
+  {%- endcapture -%}
+{%- endif -%}
+
+{%- comment -%} Map image ratio to CSS aspect-ratio {%- endcomment -%}
+{%- case image_ratio -%}
+  {%- when 'portrait' -%}
+    {%- assign aspect_css = '3/4' -%}
+  {%- when 'landscape' -%}
+    {%- assign aspect_css = '4/3' -%}
+  {%- else -%}
+    {%- assign aspect_css = '1' -%}
+{%- endcase -%}
+
+{%- assign bundle_products = block.settings.products -%}
+
+<div
+  class="bb-pdp"
+  data-bundle-pdp
+  data-section-id="{{ section.id }}"
+  data-block-id="{{ block.id }}"
+  data-discount-type="{{ discount_type }}"
+  data-min-items="{{ min_items }}"
+  data-max-items="{{ max_items }}"
+  data-show-savings="{{ show_savings }}"
+  data-show-tier-progress="{{ show_tier_progress }}"
+  data-bundle-name="{{ bundle_name | escape }}"
+  data-cta-text="{{ cta_text | escape }}"
+  data-cart-redirect="{{ cart_redirect }}"
+  data-tiers="{{ tiers_json | strip_newlines | escape }}"
+  data-money-format="{{ shop.money_format | escape }}"
+  {%- if has_metafield_config %}
+  data-metafield-config="{{ metafield_config_raw | escape }}"
+  {%- endif -%}
+  {%- if bundle_id_attr != blank %}
+  data-bundle-id="{{ bundle_id_attr }}"
+  {%- endif -%}
+  role="region"
+  aria-label="{{ bundle_name | escape }} product page"
+  style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }}; --bb-btn-text-color: {{ button_text_color }}; --bb-padding-top: {{ padding_top }}px; --bb-padding-bottom: {{ padding_bottom }}px;"
+>
+  <div class="bb-pdp__layout">
+    {%- comment -%} ===== Left column: Image gallery ===== {%- endcomment -%}
+    <div class="bb-pdp__gallery">
+      <div class="bb-pdp__main-image" style="aspect-ratio: {{ aspect_css }};" data-pdp-main-image>
+        {%- if product.featured_image -%}
+          <img
+            src="{{ product.featured_image | image_url: width: 800 }}"
+            srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
+                    {{ product.featured_image | image_url: width: 600 }} 600w,
+                    {{ product.featured_image | image_url: width: 800 }} 800w,
+                    {{ product.featured_image | image_url: width: 1200 }} 1200w"
+            sizes="(max-width: 899px) 100vw, 55vw"
+            alt="{{ product.featured_image.alt | default: product.title | escape }}"
+            width="800"
+            height="{{ 800 | divided_by: 1.0 | times: 1.33 | round }}"
+            loading="eager"
+            data-pdp-main-img
+          >
+        {%- endif -%}
+      </div>
+
+      {%- if product.media.size > 1 -%}
+        <div class="bb-pdp__thumbs" data-pdp-thumbs>
+          {%- for media in product.media -%}
+            {%- if media.media_type == 'image' -%}
+              <button
+                type="button"
+                class="bb-pdp__thumb{% if forloop.first %} bb-pdp__thumb--active{% endif %}"
+                data-pdp-thumb
+                data-media-index="{{ forloop.index0 }}"
+                data-image-src="{{ media | image_url: width: 800 }}"
+                data-image-srcset="{{ media | image_url: width: 400 }} 400w, {{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 800 }} 800w, {{ media | image_url: width: 1200 }} 1200w"
+                data-image-alt="{{ media.alt | default: product.title | escape }}"
+                aria-label="View image {{ forloop.index }}"
+              >
+                <img
+                  src="{{ media | image_url: width: 150 }}"
+                  alt="{{ media.alt | default: product.title | escape }}"
+                  width="72"
+                  height="72"
+                  loading="lazy"
+                >
+              </button>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} ===== Right column: Buy box with bundle builder ===== {%- endcomment -%}
+    <div class="bb-pdp__buybox">
+      <h1 class="bb-pdp__title">{{ product.title }}</h1>
+
+      <div class="bb-pdp__price-row">
+        {%- assign current_variant = product.selected_or_first_available_variant -%}
+        {%- if current_variant.compare_at_price > current_variant.price -%}
+          <span class="bb-pdp__compare-price" data-pdp-compare-price>{{ current_variant.compare_at_price | money }}</span>
+        {%- endif -%}
+        <span class="bb-pdp__price" data-pdp-price>{{ current_variant.price | money }}</span>
+      </div>
+
+      {%- if show_variant_selector and product.variants.size > 1 -%}
+        <div class="bb-pdp__variants">
+          <label class="bb-pdp__variant-label" for="bb-pdp-variant-{{ block.id }}">Options</label>
+          <select
+            id="bb-pdp-variant-{{ block.id }}"
+            class="bb-pdp__variant-select"
+            data-pdp-variant-select
+            data-product-id="{{ product.id }}"
+          >
+            {%- for variant in product.variants -%}
+              <option
+                value="{{ variant.id }}"
+                data-price="{{ variant.price }}"
+                data-compare-price="{{ variant.compare_at_price | default: variant.price }}"
+                data-available="{{ variant.available }}"
+                data-image-index="{{ variant.featured_media.position | minus: 1 | default: 0 }}"
+                {% if variant == current_variant %}selected{% endif %}
+                {% unless variant.available %}disabled{% endunless %}
+              >
+                {{ variant.title }}{% unless variant.available %} — Sold out{% endunless %} — {{ variant.price | money }}
+              </option>
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- endif -%}
+
+      {%- if show_tier_progress -%}
+        <div class="bb-pdp__tier" data-pdp-tier>
+          <p class="bb-pdp__tier-label" data-pdp-tier-label>Select items to unlock discounts</p>
+          <div class="bb-pdp__tier-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Discount tier progress">
+            <div class="bb-pdp__tier-fill" data-pdp-tier-fill></div>
+          </div>
+          <p class="bb-pdp__tier-hint" data-pdp-tier-hint style="display: none;"></p>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Bundle product selection (compact inline cards) {%- endcomment -%}
+      {%- assign product_count = bundle_products | size -%}
+      {%- if product_count > 0 -%}
+        <div class="bb-pdp__bundle-items" data-pdp-items>
+          <h3 class="bb-pdp__bundle-items-title">Build your bundle ({{ min_items }}–{{ max_items }} items)</h3>
+
+          {%- for bp in bundle_products -%}
+            {%- assign bv = bp.selected_or_first_available_variant -%}
+            {%- assign bp_sold_out = false -%}
+            {%- unless bv.available -%}{%- assign bp_sold_out = true -%}{%- endunless -%}
+
+            <div
+              class="bb-pdp__bundle-item{% if bp_sold_out %} bb-pdp__bundle-item--disabled{% endif %}"
+              data-pdp-bundle-item
+              data-product-id="{{ bp.id }}"
+              data-variant-id="{{ bv.id }}"
+              data-price="{{ bv.price }}"
+              data-title="{{ bp.title | escape }}"
+              data-available="{{ bv.available }}"
+              role="button"
+              tabindex="{% if bp_sold_out %}-1{% else %}0{% endif %}"
+              aria-pressed="false"
+              aria-label="{% if bp_sold_out %}{{ bp.title }} — Sold out{% else %}Add {{ bp.title }} to bundle{% endif %}"
+              {% if bp_sold_out %}aria-disabled="true"{% endif %}
+            >
+              {%- if bp.featured_image -%}
+                <img
+                  src="{{ bp.featured_image | image_url: width: 96 }}"
+                  alt="{{ bp.title | escape }}"
+                  class="bb-pdp__bundle-item-image"
+                  width="48"
+                  height="48"
+                  loading="lazy"
+                >
+              {%- endif -%}
+              <div class="bb-pdp__bundle-item-info">
+                <div class="bb-pdp__bundle-item-title">{{ bp.title }}</div>
+                <div class="bb-pdp__bundle-item-price">
+                  {%- if bp_sold_out -%}Sold out{%- else -%}{{ bv.price | money }}{%- endif -%}
+                </div>
+              </div>
+              <div class="bb-pdp__bundle-item-qty" style="display: none;" data-pdp-item-qty>
+                <button type="button" data-action="decrease" aria-label="Decrease quantity" disabled>&#8722;</button>
+                <span data-pdp-qty-value>1</span>
+                <button type="button" data-action="increase" aria-label="Increase quantity">&#43;</button>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- else -%}
+        <p style="color: var(--bb-text-faded); font-size: 0.95rem;">
+          Select products in the theme editor to build your bundle.
+        </p>
+      {%- endif -%}
+
+      <div class="bb-pdp__savings" hidden data-pdp-savings>You save $0.00!</div>
+
+      <div class="bb-pdp__summary" data-pdp-summary aria-live="polite">
+        <div class="bb-pdp__summary-row">
+          <span>Items selected</span>
+          <span data-pdp-count>0</span>
+        </div>
+        <div class="bb-pdp__summary-row bb-pdp__summary-row--discount" style="display: none;">
+          <span>Bundle discount</span>
+          <span data-pdp-discount>-{{ 0 | money }}</span>
+        </div>
+        <div class="bb-pdp__summary-row bb-pdp__summary-row--total">
+          <span>Total</span>
+          <span data-pdp-total>{{ 0 | money }}</span>
+        </div>
+      </div>
+
+      <button type="button" class="bb-pdp__cta" disabled data-pdp-cta>
+        {{ cta_text }}
+      </button>
+
+      {%- if show_accordion and product.description != blank -%}
+        <div class="bb-pdp__accordion">
+          <details class="bb-pdp__accordion-item">
+            <summary class="bb-pdp__accordion-trigger">
+              Description
+              <svg class="bb-pdp__accordion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="bb-pdp__accordion-content">
+              {{ product.description }}
+            </div>
+          </details>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+
+  {%- comment -%} Notification toast {%- endcomment -%}
+  <div class="bb-pdp__notification" aria-live="polite" role="status" data-pdp-notification></div>
+</div>
+
+<script src="{{ 'bundle-core.js' | asset_url }}" defer></script>
+<script src="{{ 'bundle-pdp.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Bundle PDP",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "bundle_name",
+      "label": "Bundle name",
+      "default": "Custom Bundle",
+      "info": "Internal name for bundle line item properties"
+    },
+    {
+      "type": "header",
+      "content": "Products"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Bundle products",
+      "limit": 12,
+      "info": "Products available for the bundle. Displayed as compact cards in the buy box."
+    },
+    {
+      "type": "header",
+      "content": "Discount Tiers (fallback)"
+    },
+    {
+      "type": "select",
+      "id": "discount_type",
+      "label": "Discount type",
+      "options": [
+        { "value": "percentage", "label": "Percentage off" },
+        { "value": "fixed", "label": "Fixed amount off" }
+      ],
+      "default": "percentage",
+      "info": "Overridden by Bundle Builder app config when available."
+    },
+    {
+      "type": "range",
+      "id": "discount_2_items",
+      "label": "Discount for 2 items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "text",
+      "id": "tier_2_label",
+      "label": "Tier 2 label",
+      "default": "Starter Bundle"
+    },
+    {
+      "type": "range",
+      "id": "discount_3_items",
+      "label": "Discount for 3 items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 15
+    },
+    {
+      "type": "text",
+      "id": "tier_3_label",
+      "label": "Tier 3 label",
+      "default": "Value Bundle"
+    },
+    {
+      "type": "range",
+      "id": "discount_4_items",
+      "label": "Discount for 4 items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "text",
+      "id": "tier_4_label",
+      "label": "Tier 4 label",
+      "default": "Best Value"
+    },
+    {
+      "type": "range",
+      "id": "discount_5_items",
+      "label": "Discount for 5+ items",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 25
+    },
+    {
+      "type": "text",
+      "id": "tier_5_label",
+      "label": "Tier 5+ label",
+      "default": "Ultimate Bundle"
+    },
+    {
+      "type": "header",
+      "content": "Bundle Limits"
+    },
+    {
+      "type": "range",
+      "id": "min_items",
+      "label": "Minimum items",
+      "min": 1,
+      "max": 8,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "max_items",
+      "label": "Maximum items",
+      "min": 2,
+      "max": 20,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Display Options"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Main image ratio",
+      "options": [
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_variant_selector",
+      "label": "Show variant selector",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_accordion",
+      "label": "Show product description accordion",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_savings",
+      "label": "Show savings callout",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tier_progress",
+      "label": "Show tier progress bar",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Button & Behavior"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button text",
+      "default": "Add Bundle to Cart"
+    },
+    {
+      "type": "checkbox",
+      "id": "cart_redirect",
+      "label": "Redirect to cart after adding",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Colors & Spacing"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1a1a2e"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent color",
+      "default": "#2563eb"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 48,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "default": 48,
+      "unit": "px"
+    }
+  ]
+}
+{% endschema %}

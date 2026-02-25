@@ -2,7 +2,7 @@
  * Bundle Configuration — Create / Edit
  *
  * Allows merchants to create or edit a bundle discount configuration.
- * Manages tier thresholds, discount values, discount type, and free gift
+ * Manages tier thresholds, discount values, discount type, and per-tier free gift
  * products. Saves configuration as a metafield on the automatic discount.
  */
 import { useState, useCallback } from 'react'
@@ -29,7 +29,6 @@ import {
   Divider,
   Box,
   Thumbnail,
-  Spinner,
 } from '@shopify/polaris'
 import { useAppBridge } from '@shopify/app-bridge-react'
 import { authenticate } from '../shopify.server'
@@ -57,13 +56,15 @@ interface ActionErrors {
   [key: string]: string | undefined
 }
 
+const MAX_TIERS = 8
+
 const DEFAULT_BUNDLE: BundleConfig = {
   bundleId: '',
   discountType: 'percentage',
   tiers: [
-    { count: 2, discount: 10 },
-    { count: 3, discount: 15 },
-    { count: 4, discount: 20 },
+    { count: 2, discount: 10, freeGiftVariantIds: [] },
+    { count: 3, discount: 15, freeGiftVariantIds: [] },
+    { count: 4, discount: 20, freeGiftVariantIds: [] },
   ],
   freeGiftVariantIds: [],
 }
@@ -73,7 +74,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const { id } = params
 
   if (id === 'new') {
-    // Auto-detect Function ID
     const detectedFunctionId = await findBundleDiscountFunctionId(admin)
 
     return json({
@@ -87,7 +87,6 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     })
   }
 
-  // Fetch the specific discount by ID
   const response = await admin.graphql(
     `#graphql
     query GetDiscount($id: ID!) {
@@ -117,10 +116,22 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
   const config = parseBundleConfig(node.metafield?.value)
   const bundle = config.bundles[0] ?? DEFAULT_BUNDLE
 
-  // Resolve free gift variant IDs to product info for display
+  // Collect all free gift variant IDs from tiers + global (backward compat)
+  const allGiftVariantIds = new Set<string>()
+  for (const tier of bundle.tiers) {
+    if (tier.freeGiftVariantIds) {
+      for (const gid of tier.freeGiftVariantIds) {
+        allGiftVariantIds.add(gid)
+      }
+    }
+  }
+  for (const gid of bundle.freeGiftVariantIds) {
+    allGiftVariantIds.add(gid)
+  }
+
   let freeGiftProducts: FreeGiftProduct[] = []
-  if (bundle.freeGiftVariantIds.length > 0) {
-    freeGiftProducts = await resolveVariantProducts(admin, bundle.freeGiftVariantIds)
+  if (allGiftVariantIds.size > 0) {
+    freeGiftProducts = await resolveVariantProducts(admin, [...allGiftVariantIds])
   }
 
   return json({
@@ -188,8 +199,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   const { id } = params
 
+  // Auto-detect function ID as fallback when creating
   if (id === 'new' && !data.functionId?.trim()) {
-    errors.functionId = 'Function ID is required. Deploy the bundle-order-discount extension first.'
+    const detectedId = await findBundleDiscountFunctionId(admin)
+    if (detectedId) {
+      data.functionId = detectedId
+    } else {
+      errors.functionId = 'Function ID is required. Deploy the bundle-order-discount extension first.'
+    }
   }
 
   if (Object.keys(errors).length > 0) {
@@ -237,9 +254,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
   // Sync bundle config to CGK platform DB (best-effort, non-blocking)
   const platformApiUrl = process.env.CGK_PLATFORM_API_URL
   const platformApiKey = process.env.CGK_PLATFORM_API_KEY
-  // TODO: For multi-tenant support, replace with dynamic tenant detection
-  // from admin.session.shop → organizations.shopify_store_domain lookup.
-  // Current model: one Shopify app instance per tenant with CGK_TENANT_SLUG env var.
   const tenantSlug = process.env.CGK_TENANT_SLUG
 
   if (platformApiUrl && platformApiKey && tenantSlug) {
@@ -252,7 +266,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
         count: t.count,
         discount: t.discount,
         label: t.label || '',
+        free_gift_variant_ids: t.freeGiftVariantIds || [],
       })),
+      free_gift_variant_ids: bundle.freeGiftVariantIds || [],
       status: 'active',
     }
 
@@ -268,7 +284,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
           body: JSON.stringify(platformPayload),
         })
       } else {
-        // Use bundleId from config if available
         const bundleConfigId = bundle.bundleId
         if (bundleConfigId) {
           await fetch(
@@ -286,7 +301,6 @@ export async function action({ request, params }: ActionFunctionArgs) {
         }
       }
     } catch (err) {
-      // Non-blocking: log but don't fail the save
       console.error('[BundleSync] Failed to sync to platform:', err)
     }
   }
@@ -314,37 +328,41 @@ export default function BundleEdit() {
   const [discountType, setDiscountType] = useState<'percentage' | 'fixed'>(
     initialBundle.discountType
   )
-  const [tiers, setTiers] = useState<TierConfig[]>(initialBundle.tiers)
-  const [freeGiftProducts, setFreeGiftProducts] = useState<FreeGiftProduct[]>(
-    initialFreeGiftProducts
+  const [tiers, setTiers] = useState<TierConfig[]>(
+    initialBundle.tiers.map(t => ({
+      ...t,
+      freeGiftVariantIds: t.freeGiftVariantIds ?? [],
+    }))
+  )
+  const [giftProductInfo, setGiftProductInfo] = useState<Record<string, FreeGiftProduct>>(
+    Object.fromEntries(initialFreeGiftProducts.map((p: FreeGiftProduct) => [p.variantId, p]))
   )
   const [functionId, setFunctionId] = useState(initialFunctionId)
   const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
 
-  // Merge server errors with client errors (server takes priority)
   const errors = { ...clientErrors, ...actionData?.errors }
 
   const handleAddTier = useCallback(() => {
+    if (tiers.length >= MAX_TIERS) return
     const lastTier = tiers[tiers.length - 1]
-    setTiers([
-      ...tiers,
-      {
-        count: (lastTier?.count ?? 1) + 1,
-        discount: (lastTier?.discount ?? 5) + 5,
-      },
-    ])
+    const newTier: TierConfig = {
+      count: (lastTier?.count ?? 1) + 1,
+      discount: (lastTier?.discount ?? 5) + 5,
+      freeGiftVariantIds: [],
+    }
+    setTiers([...tiers, newTier].sort((a, b) => a.count - b.count))
   }, [tiers])
 
   const handleRemoveTier = useCallback(
     (index: number) => {
       if (tiers.length <= 1) return
-      setTiers(tiers.filter((_, i) => i !== index))
+      setTiers(tiers.filter((_, i) => i !== index).sort((a, b) => a.count - b.count))
     },
     [tiers]
   )
 
   const handleTierChange = useCallback(
-    (index: number, field: keyof TierConfig, value: string) => {
+    (index: number, field: 'count' | 'discount' | 'label', value: string) => {
       if (field === 'label') {
         setTiers(
           tiers.map((tier, i) =>
@@ -364,7 +382,7 @@ export default function BundleEdit() {
     [tiers]
   )
 
-  const handleSelectFreeGifts = useCallback(async () => {
+  const handleSelectTierGifts = useCallback(async (tierIndex: number) => {
     try {
       const selected = await shopify.resourcePicker({
         type: 'product',
@@ -392,23 +410,35 @@ export default function BundleEdit() {
         }
       )
 
-      // Merge with existing, avoiding duplicates by variantId
-      const existingIds = new Set(freeGiftProducts.map((p) => p.variantId))
-      const merged = [
-        ...freeGiftProducts,
-        ...newProducts.filter((p) => !existingIds.has(p.variantId)),
-      ]
-      setFreeGiftProducts(merged)
+      // Update display info lookup
+      const newInfo = { ...giftProductInfo }
+      newProducts.forEach(p => { newInfo[p.variantId] = p })
+      setGiftProductInfo(newInfo)
+
+      // Add to this tier's freeGiftVariantIds (dedupe)
+      const tier = tiers[tierIndex]
+      const existingIds = new Set(tier.freeGiftVariantIds || [])
+      const newIds = newProducts.map(p => p.variantId).filter(id => !existingIds.has(id))
+
+      setTiers(tiers.map((t, i) =>
+        i === tierIndex
+          ? { ...t, freeGiftVariantIds: [...(t.freeGiftVariantIds || []), ...newIds] }
+          : t
+      ))
     } catch {
       // User cancelled the picker
     }
-  }, [shopify, freeGiftProducts])
+  }, [shopify, tiers, giftProductInfo])
 
-  const handleRemoveFreeGift = useCallback(
-    (variantId: string) => {
-      setFreeGiftProducts(freeGiftProducts.filter((p) => p.variantId !== variantId))
+  const handleRemoveTierGift = useCallback(
+    (tierIndex: number, variantId: string) => {
+      setTiers(tiers.map((t, i) =>
+        i === tierIndex
+          ? { ...t, freeGiftVariantIds: (t.freeGiftVariantIds || []).filter(id => id !== variantId) }
+          : t
+      ))
     },
-    [freeGiftProducts]
+    [tiers]
   )
 
   const validate = useCallback((): boolean => {
@@ -420,7 +450,7 @@ export default function BundleEdit() {
       newErrors.title = 'Title must be 255 characters or fewer'
     }
 
-    if (isNew && !functionId.trim()) {
+    if (isNew && !functionAutoDetected && !functionId.trim()) {
       newErrors.functionId = 'Function ID is required for new discounts'
     }
 
@@ -440,26 +470,35 @@ export default function BundleEdit() {
       }
     }
 
+    // Check for duplicate counts and ascending order
     const counts = tiers.map((t) => t.count)
     const uniqueCounts = new Set(counts)
     if (uniqueCounts.size !== counts.length) {
       newErrors.tiers = 'Each tier must have a unique item count'
     }
 
+    const sortedCounts = [...counts].sort((a, b) => a - b)
+    for (let i = 1; i < sortedCounts.length; i++) {
+      if (sortedCounts[i] <= sortedCounts[i - 1]) {
+        newErrors.tiers = newErrors.tiers || 'Tier item counts must be unique and ascending'
+        break
+      }
+    }
+
     setClientErrors(newErrors)
     return Object.keys(newErrors).length === 0
-  }, [title, tiers, discountType, isNew, functionId])
+  }, [title, tiers, discountType, isNew, functionId, functionAutoDetected])
 
   const handleSave = useCallback(() => {
     if (!validate()) return
 
-    const freeGiftVariantIds = freeGiftProducts.map((p) => p.variantId)
+    const sortedTiers = [...tiers].sort((a, b) => a.count - b.count)
 
     const bundle: BundleConfig = {
       bundleId: bundleId || `bundle-${Date.now()}`,
       discountType,
-      tiers: [...tiers].sort((a, b) => a.count - b.count),
-      freeGiftVariantIds,
+      tiers: sortedTiers,
+      freeGiftVariantIds: [],
     }
 
     const formData = new FormData()
@@ -468,7 +507,12 @@ export default function BundleEdit() {
       JSON.stringify({ title, bundle, functionId })
     )
     submit(formData, { method: 'post' })
-  }, [validate, title, bundleId, discountType, tiers, freeGiftProducts, functionId, submit])
+  }, [validate, title, bundleId, discountType, tiers, functionId, submit])
+
+  // Compute all free gift variant IDs across all tiers for the preview
+  const allTierGiftIds = tiers.reduce<string[]>((acc, t) => {
+    return acc.concat(t.freeGiftVariantIds || [])
+  }, [])
 
   return (
     <Page
@@ -518,14 +562,6 @@ export default function BundleEdit() {
           </Layout.Section>
         )}
 
-        {isNew && functionAutoDetected && functionId && (
-          <Layout.Section>
-            <Banner tone="success">
-              Bundle discount function auto-detected.
-            </Banner>
-          </Layout.Section>
-        )}
-
         <Layout.Section>
           <Card>
             <BlockStack gap="400">
@@ -564,20 +600,38 @@ export default function BundleEdit() {
                   disabled={isSubmitting}
                 />
                 {isNew && (
-                  <TextField
-                    label="Function ID"
-                    value={functionId}
-                    onChange={setFunctionId}
-                    autoComplete="off"
-                    helpText={
-                      functionAutoDetected
-                        ? 'Auto-detected from deployed functions. You can override this.'
-                        : 'The Shopify Function ID for the bundle-order-discount extension. Deploy the extension first, then enter the Function ID or run: shopify app function info'
-                    }
-                    error={errors.functionId}
-                    placeholder="e.g. 01ABCDEF-1234-5678-9ABC-DEF012345678"
-                    disabled={isSubmitting}
-                  />
+                  functionAutoDetected ? (
+                    <Banner tone="info">
+                      <Text as="p" variant="bodyMd">
+                        Bundle discount function auto-detected:{' '}
+                        <Text as="span" variant="bodyMd" fontWeight="semibold">
+                          {functionId.length > 24
+                            ? functionId.substring(0, 24) + '...'
+                            : functionId}
+                        </Text>
+                      </Text>
+                    </Banner>
+                  ) : (
+                    <BlockStack gap="200">
+                      <Banner tone="warning">
+                        <Text as="p" variant="bodyMd">
+                          No deployed bundle discount function found. Deploy the
+                          bundle-order-discount extension first, then paste the
+                          Function ID below.
+                        </Text>
+                      </Banner>
+                      <TextField
+                        label="Function ID"
+                        value={functionId}
+                        onChange={setFunctionId}
+                        autoComplete="off"
+                        helpText="Run: shopify app function info"
+                        error={errors.functionId}
+                        placeholder="e.g. 01ABCDEF-1234-5678-9ABC-DEF012345678"
+                        disabled={isSubmitting}
+                      />
+                    </BlockStack>
+                  )
                 )}
               </FormLayout>
             </BlockStack>
@@ -591,8 +645,11 @@ export default function BundleEdit() {
                 <Text as="h2" variant="headingMd">
                   Tier rules
                 </Text>
-                <Button onClick={handleAddTier} disabled={isSubmitting}>
-                  Add tier
+                <Button
+                  onClick={handleAddTier}
+                  disabled={isSubmitting || tiers.length >= MAX_TIERS}
+                >
+                  {tiers.length >= MAX_TIERS ? `Max ${MAX_TIERS} tiers` : 'Add tier'}
                 </Button>
               </InlineStack>
 
@@ -602,138 +659,139 @@ export default function BundleEdit() {
 
               <Text as="p" variant="bodyMd" tone="subdued">
                 Define discount amounts based on how many items are in the
-                bundle. Higher tiers override lower ones.
+                bundle. Tiers are auto-sorted by item count ascending.
               </Text>
 
               {tiers.map((tier, index) => (
                 <Box key={index}>
                   {index > 0 && <Divider />}
                   <Box paddingBlockStart="300">
-                    <InlineStack gap="400" align="start" blockAlign="end">
-                      <Box minWidth="120px">
-                        <TextField
-                          label={`Tier ${index + 1} — Items`}
-                          type="number"
-                          value={String(tier.count)}
-                          onChange={(val) =>
-                            handleTierChange(index, 'count', val)
-                          }
-                          autoComplete="off"
-                          min={1}
-                          error={errors[`tier_${index}_count`]}
-                          disabled={isSubmitting}
-                        />
-                      </Box>
-                      <Box minWidth="120px">
-                        <TextField
-                          label={
-                            discountType === 'percentage'
-                              ? 'Discount %'
-                              : 'Discount amount'
-                          }
-                          type="number"
-                          value={String(tier.discount)}
-                          onChange={(val) =>
-                            handleTierChange(index, 'discount', val)
-                          }
-                          autoComplete="off"
-                          min={0}
-                          suffix={
-                            discountType === 'percentage' ? '%' : undefined
-                          }
-                          error={errors[`tier_${index}_discount`]}
-                          disabled={isSubmitting}
-                        />
-                      </Box>
-                      <Box minWidth="140px">
-                        <TextField
-                          label="Label (optional)"
-                          value={tier.label || ''}
-                          onChange={(val) =>
-                            handleTierChange(index, 'label', val)
-                          }
-                          autoComplete="off"
-                          placeholder="e.g. Gold Tier"
-                          disabled={isSubmitting}
-                        />
-                      </Box>
-                      {tiers.length > 1 && (
-                        <Button
-                          variant="plain"
-                          tone="critical"
-                          onClick={() => handleRemoveTier(index)}
-                          disabled={isSubmitting}
-                        >
-                          Remove
-                        </Button>
-                      )}
-                    </InlineStack>
-                  </Box>
-                </Box>
-              ))}
-            </BlockStack>
-          </Card>
-        </Layout.Section>
+                    <BlockStack gap="300">
+                      <InlineStack gap="400" align="start" blockAlign="end">
+                        <Box minWidth="120px">
+                          <TextField
+                            label={`Tier ${index + 1} — Items`}
+                            type="number"
+                            value={String(tier.count)}
+                            onChange={(val) =>
+                              handleTierChange(index, 'count', val)
+                            }
+                            autoComplete="off"
+                            min={1}
+                            error={errors[`tier_${index}_count`]}
+                            disabled={isSubmitting}
+                          />
+                        </Box>
+                        <Box minWidth="120px">
+                          <TextField
+                            label={
+                              discountType === 'percentage'
+                                ? 'Discount %'
+                                : 'Discount amount'
+                            }
+                            type="number"
+                            value={String(tier.discount)}
+                            onChange={(val) =>
+                              handleTierChange(index, 'discount', val)
+                            }
+                            autoComplete="off"
+                            min={0}
+                            suffix={
+                              discountType === 'percentage' ? '%' : undefined
+                            }
+                            error={errors[`tier_${index}_discount`]}
+                            disabled={isSubmitting}
+                          />
+                        </Box>
+                        <Box minWidth="140px">
+                          <TextField
+                            label="Label (optional)"
+                            value={tier.label || ''}
+                            onChange={(val) =>
+                              handleTierChange(index, 'label', val)
+                            }
+                            autoComplete="off"
+                            placeholder="e.g. Gold Tier"
+                            disabled={isSubmitting}
+                          />
+                        </Box>
+                        {tiers.length > 1 && (
+                          <Button
+                            variant="plain"
+                            tone="critical"
+                            onClick={() => handleRemoveTier(index)}
+                            disabled={isSubmitting}
+                          >
+                            Remove
+                          </Button>
+                        )}
+                      </InlineStack>
 
-        <Layout.Section>
-          <Card>
-            <BlockStack gap="400">
-              <InlineStack align="space-between" blockAlign="center">
-                <Text as="h2" variant="headingMd">
-                  Free gifts
-                </Text>
-                <Button onClick={handleSelectFreeGifts} disabled={isSubmitting}>
-                  Select products
-                </Button>
-              </InlineStack>
-              <Text as="p" variant="bodyMd" tone="subdued">
-                Products automatically added as free gifts when customers
-                qualify. Free gifts receive a 100% discount at checkout via the
-                bundle discount function.
-              </Text>
-
-              {freeGiftProducts.length > 0 ? (
-                <BlockStack gap="300">
-                  {freeGiftProducts.map((product) => (
-                    <InlineStack
-                      key={product.variantId}
-                      gap="300"
-                      align="start"
-                      blockAlign="center"
-                    >
-                      <Thumbnail
-                        source={product.imageUrl ?? ''}
-                        alt={product.productTitle}
-                        size="small"
-                      />
-                      <Box minWidth="0">
-                        <BlockStack gap="050">
-                          <Text as="span" variant="bodyMd" fontWeight="semibold">
-                            {product.productTitle}
-                          </Text>
-                          {product.variantTitle !== 'Default Title' && (
+                      {/* Per-tier free gifts */}
+                      <Box paddingInlineStart="200">
+                        <BlockStack gap="200">
+                          <InlineStack align="space-between" blockAlign="center">
                             <Text as="span" variant="bodySm" tone="subdued">
-                              {product.variantTitle}
+                              Free gifts for this tier
+                            </Text>
+                            <Button
+                              variant="plain"
+                              onClick={() => handleSelectTierGifts(index)}
+                              disabled={isSubmitting}
+                            >
+                              Add free gifts
+                            </Button>
+                          </InlineStack>
+
+                          {(tier.freeGiftVariantIds || []).length > 0 ? (
+                            <InlineStack gap="200" wrap>
+                              {(tier.freeGiftVariantIds || []).map((variantId) => {
+                                const product = giftProductInfo[variantId]
+                                return (
+                                  <InlineStack
+                                    key={variantId}
+                                    gap="200"
+                                    blockAlign="center"
+                                  >
+                                    <Thumbnail
+                                      source={product?.imageUrl ?? ''}
+                                      alt={product?.productTitle ?? variantId}
+                                      size="small"
+                                    />
+                                    <BlockStack gap="050">
+                                      <Text as="span" variant="bodySm" fontWeight="semibold">
+                                        {product?.productTitle ?? 'Unknown'}
+                                      </Text>
+                                      {product?.variantTitle && product.variantTitle !== 'Default Title' && (
+                                        <Text as="span" variant="bodySm" tone="subdued">
+                                          {product.variantTitle}
+                                        </Text>
+                                      )}
+                                    </BlockStack>
+                                    <Button
+                                      variant="plain"
+                                      tone="critical"
+                                      onClick={() => handleRemoveTierGift(index, variantId)}
+                                      disabled={isSubmitting}
+                                    >
+                                      Remove
+                                    </Button>
+                                  </InlineStack>
+                                )
+                              })}
+                            </InlineStack>
+                          ) : (
+                            <Text as="p" variant="bodySm" tone="subdued">
+                              No free gifts. Customers qualifying for this tier
+                              won&apos;t receive a gift.
                             </Text>
                           )}
                         </BlockStack>
                       </Box>
-                      <Button
-                        variant="plain"
-                        tone="critical"
-                        onClick={() => handleRemoveFreeGift(product.variantId)}
-                        disabled={isSubmitting}
-                      >
-                        Remove
-                      </Button>
-                    </InlineStack>
-                  ))}
-                </BlockStack>
-              ) : (
-                <Text as="p" variant="bodySm" tone="subdued">
-                  No free gifts selected. Click "Select products" to add.
-                </Text>
-              )}
+                    </BlockStack>
+                  </Box>
+                </Box>
+              ))}
             </BlockStack>
           </Card>
         </Layout.Section>
@@ -750,24 +808,32 @@ export default function BundleEdit() {
               {[...tiers]
                 .sort((a, b) => a.count - b.count)
                 .map((tier) => (
-                  <InlineStack key={tier.count} gap="200">
-                    <Text as="span" variant="bodyMd" fontWeight="semibold">
-                      {tier.count}+ items:
-                    </Text>
-                    <Text as="span" variant="bodyMd">
-                      {discountType === 'percentage'
-                        ? `${tier.discount}% off`
-                        : `$${tier.discount} off bundle total`}
-                    </Text>
-                  </InlineStack>
+                  <BlockStack key={tier.count} gap="100">
+                    <InlineStack gap="200">
+                      <Text as="span" variant="bodyMd" fontWeight="semibold">
+                        {tier.count}+ items:
+                      </Text>
+                      <Text as="span" variant="bodyMd">
+                        {discountType === 'percentage'
+                          ? `${tier.discount}% off`
+                          : `$${tier.discount} off bundle total`}
+                      </Text>
+                    </InlineStack>
+                    {(tier.freeGiftVariantIds || []).length > 0 && (
+                      <Text as="p" variant="bodySm" tone="subdued">
+                        + {tier.freeGiftVariantIds!.length} free gift
+                        {tier.freeGiftVariantIds!.length !== 1 ? 's' : ''}
+                      </Text>
+                    )}
+                  </BlockStack>
                 ))}
-              {freeGiftProducts.length > 0 && (
+              {allTierGiftIds.length > 0 && (
                 <>
                   <Divider />
                   <Text as="p" variant="bodyMd">
-                    {freeGiftProducts.length} free gift
-                    {freeGiftProducts.length !== 1 ? 's' : ''} included when
-                    bundle qualifies.
+                    {allTierGiftIds.length} free gift
+                    {allTierGiftIds.length !== 1 ? 's' : ''} configured across tiers
+                    (cumulative — customers unlock gifts as they reach each tier).
                   </Text>
                 </>
               )}
