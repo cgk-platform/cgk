@@ -7,16 +7,28 @@ import { CronTable } from '@/components/cron/cron-table'
 
 interface CronJob {
   id: string
+  agentId: string
   name: string
-  schedule: string
   enabled: boolean
-  timezone: string
-  lastRun?: string
-  nextRun?: string
-  lastStatus?: string
+  notify: boolean
+  schedule: {
+    kind: string
+    cron?: string
+    everyMs?: number
+  }
   sessionTarget: string
-  delivery?: { mode: string; channel?: string }
-  agentId?: string
+  delivery: {
+    mode: string
+    channel?: string
+    to?: string
+  }
+  state: {
+    nextRunAtMs: number | null
+    lastRunAtMs: number | null
+    lastRunStatus: string | null
+    lastDurationMs: number | null
+    consecutiveErrors: number
+  }
 }
 
 export default function CronPage({

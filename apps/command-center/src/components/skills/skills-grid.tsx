@@ -5,10 +5,9 @@ import { Puzzle } from 'lucide-react'
 
 interface Skill {
   name: string
-  version?: string
-  category?: string
-  enabled: boolean
-  scriptCount: number
+  description?: string
+  source: string
+  bundled: boolean
 }
 
 interface SkillsGridProps {
@@ -24,9 +23,9 @@ export function SkillsGrid({ skills }: SkillsGridProps) {
     )
   }
 
-  // Group by category
+  // Group by source
   const grouped = skills.reduce<Record<string, Skill[]>>((acc, skill) => {
-    const cat = skill.category || 'Other'
+    const cat = skill.bundled ? 'Bundled' : 'Managed'
     if (!acc[cat]) acc[cat] = []
     acc[cat].push(skill)
     return acc
@@ -49,12 +48,16 @@ export function SkillsGrid({ skills }: SkillsGridProps) {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <p className="truncate text-sm font-medium">{skill.name}</p>
-                        <StatusBadge status={skill.enabled ? 'active' : 'disabled'} />
+                        <StatusBadge
+                          status={skill.bundled ? 'active' : 'ready'}
+                          label={skill.source}
+                        />
                       </div>
-                      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                        {skill.version && <span>v{skill.version}</span>}
-                        <span>{skill.scriptCount} scripts</span>
-                      </div>
+                      {skill.description && (
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          {skill.description}
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

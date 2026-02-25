@@ -1,6 +1,7 @@
 import {
   OpenClawGatewayClient,
   PROFILE_SLUGS,
+  type GatewayHealth,
   type ProfileSlug,
 } from '@cgk-platform/openclaw'
 
@@ -33,17 +34,51 @@ export async function tryGetGatewayClient(profile: ProfileSlug): Promise<OpenCla
   }
 }
 
+/** Normalize raw gateway health into a shape the dashboard UI can consume */
+export function normalizeHealth(raw: GatewayHealth) {
+  const slack = raw.channels?.slack
+  // Slack is "connected" if either socket mode is running OR probe shows ok
+  const slackConnected = slack?.running === true || slack?.probe?.ok === true
+  const slackConfigured = slack?.configured === true
+  const slackBotName = slack?.probe?.bot?.name
+  const slackTeamName = slack?.probe?.team?.name
+
+  // Count sessions if available
+  const sessionCount = raw.sessions
+    ? (raw.sessions as { count?: number }).count ?? 0
+    : 0
+
+  return {
+    ok: raw.ok,
+    ts: raw.ts,
+    slackConnected,
+    slackConfigured,
+    slackBotName,
+    slackTeamName,
+    heartbeatSeconds: raw.heartbeatSeconds,
+    defaultAgentId: raw.defaultAgentId,
+    agentCount: raw.agents?.length ?? 0,
+    agents: raw.agents?.map((a) => ({
+      agentId: a.agentId,
+      isDefault: a.isDefault,
+      heartbeatEnabled: a.heartbeat?.enabled ?? false,
+      heartbeatEvery: a.heartbeat?.every,
+    })),
+    sessionCount,
+  }
+}
+
 /** Get health from all profiles, settling independently */
 export async function getAllGatewayHealth() {
   const results = await Promise.allSettled(
     PROFILE_SLUGS.map(async (slug) => {
       const client = await getGatewayClient(slug)
-      const health = await client.health()
-      return { slug, connected: true, health, error: undefined }
+      const raw = await client.health()
+      return { slug, connected: true, health: normalizeHealth(raw), error: undefined }
     })
   )
 
-  const profiles: Record<string, { connected: boolean; health: unknown; error?: string }> = {}
+  const profiles: Record<string, { connected: boolean; health: ReturnType<typeof normalizeHealth> | null; error?: string }> = {}
 
   for (let i = 0; i < PROFILE_SLUGS.length; i++) {
     const slug = PROFILE_SLUGS[i]!

@@ -19,7 +19,7 @@ export async function GET(request: Request): Promise<Response> {
       ])
       return {
         slug,
-        skills: skills.status === 'fulfilled' ? skills.value : null,
+        skills: skills.status === 'fulfilled' ? skills.value.skills : null,
         config: config.status === 'fulfilled' ? config.value : null,
       }
     })

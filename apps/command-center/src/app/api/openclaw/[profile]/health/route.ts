@@ -1,4 +1,4 @@
-import { getGatewayClient } from '@/lib/gateway-pool'
+import { getGatewayClient, normalizeHealth } from '@/lib/gateway-pool'
 import { validateProfileParam } from '@/lib/profile-param'
 
 export const dynamic = 'force-dynamic'
@@ -16,8 +16,8 @@ export async function GET(
 
   try {
     const client = await getGatewayClient(result.profile)
-    const health = await client.health()
-    return Response.json({ connected: true, health })
+    const raw = await client.health()
+    return Response.json({ connected: true, health: normalizeHealth(raw) })
   } catch (err) {
     return Response.json({
       connected: false,

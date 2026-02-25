@@ -179,7 +179,10 @@
         "OPENCLAW_VITA_URL",
         "OPENCLAW_CGK_PORT",
         "OPENCLAW_RAWDOG_PORT",
-        "OPENCLAW_VITA_PORT"
+        "OPENCLAW_VITA_PORT",
+        "OPENCLAW_DEVICE_ID",
+        "OPENCLAW_DEVICE_PRIVATE_KEY",
+        "OPENCLAW_DEVICE_PUBLIC_KEY"
       ]
     },
     "dev": {

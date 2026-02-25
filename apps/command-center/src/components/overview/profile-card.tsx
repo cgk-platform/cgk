@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle, cn, StatusBadge } from '@cgk-platform/ui'
-import { Clock, Radio, Terminal, Puzzle } from 'lucide-react'
+import { Radio, Terminal, Users } from 'lucide-react'
 import Link from 'next/link'
 
 interface ProfileCardProps {
@@ -9,25 +9,15 @@ interface ProfileCardProps {
   label: string
   connected: boolean
   health: {
-    status: string
-    uptime: number
-    version: string
-    agentCount: number
+    ok: boolean
     slackConnected: boolean
-    activeSessionCount: number
-    cronJobCount: number
-    skillCount: number
+    slackBotName?: string
+    heartbeatSeconds: number
+    defaultAgentId: string
+    agentCount: number
+    sessionCount: number
   } | null
   error?: string
-}
-
-function formatUptime(seconds: number): string {
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const mins = Math.floor((seconds % 3600) / 60)
-  if (days > 0) return `${days}d ${hours}h`
-  if (hours > 0) return `${hours}h ${mins}m`
-  return `${mins}m`
 }
 
 export function ProfileCard({ slug, label, connected, health, error }: ProfileCardProps) {
@@ -41,7 +31,7 @@ export function ProfileCard({ slug, label, connected, health, error }: ProfileCa
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-base font-medium">{label}</CardTitle>
           <StatusBadge
-            status={connected ? (health?.status || 'connected') : 'disconnected'}
+            status={connected ? 'connected' : 'disconnected'}
             showDot
           />
         </CardHeader>
@@ -49,34 +39,36 @@ export function ProfileCard({ slug, label, connected, health, error }: ProfileCa
           {connected && health ? (
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Version</span>
-                <span className="font-mono text-xs">{health.version}</span>
-              </div>
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Uptime</span>
-                <span>{formatUptime(health.uptime)}</span>
+                <span className="text-muted-foreground">Gateway</span>
+                <StatusBadge status={health.ok ? 'healthy' : 'degraded'} />
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Slack</span>
-                <StatusBadge
-                  status={health.slackConnected ? 'connected' : 'disconnected'}
-                />
+                <div className="flex items-center gap-1.5">
+                  {health.slackBotName && (
+                    <span className="text-xs text-muted-foreground">{health.slackBotName}</span>
+                  )}
+                  <StatusBadge
+                    status={health.slackConnected ? 'connected' : 'disconnected'}
+                  />
+                </div>
               </div>
-              <div className="mt-3 grid grid-cols-3 gap-2 border-t pt-3">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-muted-foreground">Heartbeat</span>
+                <span className="font-mono text-xs">
+                  {Math.round(health.heartbeatSeconds / 60)}m
+                </span>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 border-t pt-3">
                 <div className="flex flex-col items-center gap-1">
                   <Terminal className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-lg font-semibold">{health.activeSessionCount}</span>
+                  <span className="text-lg font-semibold">{health.sessionCount}</span>
                   <span className="text-2xs text-muted-foreground">Sessions</span>
                 </div>
                 <div className="flex flex-col items-center gap-1">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-lg font-semibold">{health.cronJobCount}</span>
-                  <span className="text-2xs text-muted-foreground">Cron</span>
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <Puzzle className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-lg font-semibold">{health.skillCount}</span>
-                  <span className="text-2xs text-muted-foreground">Skills</span>
+                  <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className="text-lg font-semibold">{health.agentCount}</span>
+                  <span className="text-2xs text-muted-foreground">Agents</span>
                 </div>
               </div>
             </div>

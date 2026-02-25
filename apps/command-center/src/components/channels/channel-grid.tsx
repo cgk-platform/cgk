@@ -5,10 +5,20 @@ import { Hash } from 'lucide-react'
 
 interface Channel {
   id: string
-  name: string
+  label: string
+  detailLabel?: string
+  configured: boolean
+  running: boolean
   connected: boolean
-  requireMention: boolean
-  lastMessage?: string
+  botTokenSource?: string
+  probe: {
+    ok: boolean
+    status: number
+    elapsedMs: number
+    botName?: string
+    teamName?: string
+  } | null
+  lastError: string | null
 }
 
 interface ChannelGridProps {
@@ -24,15 +34,8 @@ export function ChannelGrid({ channels }: ChannelGridProps) {
     )
   }
 
-  const connected = channels.filter((c) => c.connected).length
-  const total = channels.length
-
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        {connected}/{total} channels connected
-      </p>
-
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {channels.map((channel) => (
           <Card key={channel.id} className="card-hover">
@@ -40,16 +43,41 @@ export function ChannelGrid({ channels }: ChannelGridProps) {
               <Hash className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-medium">{channel.name}</p>
+                  <p className="truncate text-sm font-medium">{channel.label}</p>
                   <StatusBadge
-                    status={channel.connected ? 'connected' : 'disconnected'}
+                    status={channel.connected ? 'connected' : channel.configured ? 'degraded' : 'disconnected'}
                   />
                 </div>
-                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="font-mono">{channel.id}</span>
-                  {channel.requireMention && (
-                    <span className="rounded bg-muted px-1 py-0.5">@mention</span>
+                {channel.detailLabel && (
+                  <p className="text-xs text-muted-foreground">{channel.detailLabel}</p>
+                )}
+                <div className="mt-2 space-y-1 text-xs text-muted-foreground">
+                  {channel.probe && (
+                    <div className="flex items-center gap-2">
+                      <span>Bot: {channel.probe.botName || 'unknown'}</span>
+                      {channel.probe.teamName && (
+                        <span>({channel.probe.teamName})</span>
+                      )}
+                      <span className="font-mono">{channel.probe.elapsedMs}ms</span>
+                    </div>
                   )}
+                  {channel.lastError && (
+                    <p className="truncate text-destructive" title={channel.lastError}>
+                      {channel.lastError}
+                    </p>
+                  )}
+                  <div className="flex gap-2">
+                    {channel.botTokenSource && (
+                      <span className="rounded bg-muted px-1 py-0.5">
+                        token: {channel.botTokenSource}
+                      </span>
+                    )}
+                    {channel.running && (
+                      <span className="rounded bg-success/10 px-1 py-0.5 text-success">
+                        socket active
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>

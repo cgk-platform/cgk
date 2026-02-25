@@ -16,8 +16,22 @@ export async function GET(
 
   try {
     const client = await getGatewayClient(result.profile)
-    const skills = await client.skillsStatus()
-    return Response.json({ skills })
+    const data = await client.skillsStatus()
+
+    // Normalize for the UI
+    const skills = data.skills.map((s) => ({
+      name: s.name,
+      description: s.description,
+      source: s.source,
+      bundled: s.bundled,
+    }))
+
+    return Response.json({
+      skills,
+      totalCount: data.skills.length,
+      bundledCount: data.skills.filter((s) => s.bundled).length,
+      managedCount: data.skills.filter((s) => !s.bundled).length,
+    })
   } catch (err) {
     return Response.json(
       { error: err instanceof Error ? err.message : 'Failed to fetch skills' },

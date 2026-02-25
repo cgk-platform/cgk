@@ -7,40 +7,30 @@ import { use, useCallback, useEffect, useState } from 'react'
 interface HealthData {
   connected: boolean
   health: {
-    status: string
-    uptime: number
-    version: string
-    agentCount: number
+    ok: boolean
+    ts: number
     slackConnected: boolean
-    activeSessionCount: number
-    cronJobCount: number
-    skillCount: number
-    memoryUsage?: { rss: number; heapUsed: number; heapTotal: number }
+    slackConfigured: boolean
+    slackBotName?: string
+    slackTeamName?: string
+    heartbeatSeconds: number
+    defaultAgentId: string
+    agentCount: number
+    agents: Array<{
+      agentId: string
+      isDefault: boolean
+      heartbeatEnabled: boolean
+      heartbeatEvery?: string
+    }>
+    sessionCount: number
   } | null
   error?: string
 }
 
 interface AgentData {
-  identity: {
-    name: string
-    model: string
-    workspace: string
-  } | null
-}
-
-function formatUptime(seconds: number): string {
-  const days = Math.floor(seconds / 86400)
-  const hours = Math.floor((seconds % 86400) / 3600)
-  const mins = Math.floor((seconds % 3600) / 60)
-  if (days > 0) return `${days}d ${hours}h ${mins}m`
-  if (hours > 0) return `${hours}h ${mins}m`
-  return `${mins}m`
-}
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes}B`
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)}KB`
-  return `${(bytes / 1048576).toFixed(1)}MB`
+  defaultId: string
+  scope: string
+  agents: Array<{ id: string }>
 }
 
 export default function ProfileOverviewPage({
@@ -68,6 +58,8 @@ export default function ProfileOverviewPage({
     return () => clearInterval(interval)
   }, [fetchData])
 
+  const h = health?.health
+
   return (
     <div className="space-y-6">
       <div>
@@ -82,40 +74,36 @@ export default function ProfileOverviewPage({
             <CardTitle className="text-base">Health</CardTitle>
           </CardHeader>
           <CardContent>
-            {health?.connected && health.health ? (
+            {health?.connected && h ? (
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Status</span>
-                  <StatusBadge status={health.health.status} showDot />
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Version</span>
-                  <span className="font-mono text-xs">{health.health.version}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Uptime</span>
-                  <span>{formatUptime(health.health.uptime)}</span>
+                  <StatusBadge status={h.ok ? 'healthy' : 'degraded'} showDot />
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Slack</span>
-                  <StatusBadge status={health.health.slackConnected ? 'connected' : 'disconnected'} />
+                  <div className="flex items-center gap-2">
+                    {h.slackBotName && (
+                      <span className="text-xs text-muted-foreground">
+                        {h.slackBotName}
+                        {h.slackTeamName ? ` (${h.slackTeamName})` : ''}
+                      </span>
+                    )}
+                    <StatusBadge status={h.slackConnected ? 'connected' : 'disconnected'} />
+                  </div>
                 </div>
-                {health.health.memoryUsage && (
-                  <>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">RSS</span>
-                      <span className="font-mono text-xs">
-                        {formatBytes(health.health.memoryUsage.rss)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Heap</span>
-                      <span className="font-mono text-xs">
-                        {formatBytes(health.health.memoryUsage.heapUsed)} / {formatBytes(health.health.memoryUsage.heapTotal)}
-                      </span>
-                    </div>
-                  </>
-                )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Heartbeat</span>
+                  <span className="font-mono text-xs">{Math.round(h.heartbeatSeconds / 60)}m</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Sessions</span>
+                  <span className="font-semibold">{h.sessionCount}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Default Agent</span>
+                  <span className="font-mono text-xs">{h.defaultAgentId}</span>
+                </div>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">
@@ -125,28 +113,46 @@ export default function ProfileOverviewPage({
           </CardContent>
         </Card>
 
-        {/* Agent Identity */}
+        {/* Agents */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Agent</CardTitle>
+            <CardTitle className="text-base">Agents</CardTitle>
           </CardHeader>
           <CardContent>
-            {agent?.identity ? (
+            {agent?.agents ? (
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Name</span>
-                  <span className="font-medium">{agent.identity.name}</span>
+                  <span className="text-muted-foreground">Default</span>
+                  <span className="font-mono text-xs">{agent.defaultId}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Model</span>
-                  <span className="font-mono text-xs">{agent.identity.model}</span>
+                  <span className="text-muted-foreground">Scope</span>
+                  <span className="font-mono text-xs">{agent.scope}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Workspace</span>
-                  <span className="max-w-48 truncate font-mono text-xs">
-                    {agent.identity.workspace}
-                  </span>
+                  <span className="text-muted-foreground">Count</span>
+                  <span className="font-semibold">{agent.agents.length}</span>
                 </div>
+                {h?.agents && h.agents.length > 0 && (
+                  <div className="mt-3 space-y-2 border-t pt-3">
+                    <h4 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Agent Details
+                    </h4>
+                    {h.agents.map((a) => (
+                      <div key={a.agentId} className="flex items-center justify-between">
+                        <span className="font-mono text-xs">{a.agentId}</span>
+                        <div className="flex items-center gap-2">
+                          {a.heartbeatEvery && (
+                            <span className="text-xs text-muted-foreground">
+                              HB: {a.heartbeatEvery}
+                            </span>
+                          )}
+                          <StatusBadge status={a.isDefault ? 'active' : 'ready'} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <p className="text-sm text-muted-foreground">Loading...</p>

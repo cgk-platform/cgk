@@ -37,14 +37,20 @@ export async function GET(
 
         try {
           const client = await getGatewayClient(result.profile)
-          const logs = await client.logsTail(20)
+          const logData = await client.logsTail()
 
-          for (const entry of logs) {
-            controller.enqueue(
-              encoder.encode(
-                `event: log\ndata: ${JSON.stringify(entry)}\n\n`
+          // logsTail returns { lines: string[], ... } where lines are JSON strings
+          for (const line of logData.lines) {
+            try {
+              const entry = JSON.parse(line)
+              controller.enqueue(
+                encoder.encode(
+                  `event: log\ndata: ${JSON.stringify(entry)}\n\n`
+                )
               )
-            )
+            } catch {
+              // Skip malformed lines
+            }
           }
 
           controller.enqueue(

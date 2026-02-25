@@ -20,7 +20,7 @@ export interface ResponseFrame {
   ok: boolean
   payload?: unknown
   error?: {
-    code: number
+    code: number | string
     message: string
     data?: unknown
   }
@@ -62,40 +62,122 @@ export interface HelloOkFrame {
 /** Union of all inbound frames */
 export type InboundFrame = ResponseFrame | EventFrame | ConnectChallengeFrame | HelloOkFrame
 
-/** Gateway health snapshot */
-export interface GatewayHealth {
-  status: 'healthy' | 'degraded' | 'unhealthy'
-  uptime: number
-  version: string
-  agentCount: number
-  slackConnected: boolean
-  activeSessionCount: number
-  cronJobCount: number
-  skillCount: number
-  memoryUsage?: {
-    rss: number
-    heapUsed: number
-    heapTotal: number
+// ─── Gateway Health ─────────────────────────────────────────
+
+export interface SlackChannelHealth {
+  configured: boolean
+  botTokenSource: string
+  appTokenSource: string
+  running: boolean
+  lastStartAt: number | null
+  lastStopAt: number | null
+  lastError: string | null
+  probe?: {
+    ok: boolean
+    status: number
+    elapsedMs: number
+    bot?: { id: string; name: string }
+    team?: { id: string; name: string }
   }
+  lastProbeAt: number | null
+  accountId: string
+  accounts?: Record<string, unknown>
 }
 
-/** Cron job definition */
+export interface GatewayAgent {
+  agentId: string
+  isDefault: boolean
+  heartbeat?: {
+    enabled: boolean
+    every: string
+    everyMs: number
+    prompt: string
+    target: string
+    ackMaxChars: number
+  }
+  sessions?: Record<string, unknown>
+}
+
+/** Gateway health snapshot — actual wire format from health RPC */
+export interface GatewayHealth {
+  ok: boolean
+  ts: number
+  durationMs: number
+  channels: {
+    slack: SlackChannelHealth
+    [key: string]: unknown
+  }
+  channelOrder: string[]
+  channelLabels: Record<string, string>
+  heartbeatSeconds: number
+  defaultAgentId: string
+  agents: GatewayAgent[]
+  sessions?: unknown
+}
+
+// ─── Cron ───────────────────────────────────────────────────
+
+export interface CronJobSchedule {
+  kind: 'cron' | 'every'
+  cron?: string
+  everyMs?: number
+  anchorMs?: number
+  timezone?: string
+}
+
+export interface CronJobState {
+  nextRunAtMs: number | null
+  lastRunAtMs: number | null
+  lastRunStatus: string | null
+  lastStatus: string | null
+  lastDurationMs: number | null
+  lastDeliveryStatus: string | null
+  consecutiveErrors: number
+  lastDelivered: boolean
+}
+
+/** Cron job definition — actual wire format */
 export interface CronJob {
   id: string
+  agentId: string
   name: string
-  schedule: string
   enabled: boolean
-  timezone: string
-  lastRun?: string
-  nextRun?: string
-  lastStatus?: 'success' | 'failure' | 'running'
+  notify: boolean
+  createdAtMs: number
+  updatedAtMs: number
+  schedule: CronJobSchedule
   sessionTarget: string
-  delivery?: {
+  wakeMode: string
+  payload: {
+    kind: string
+    message: string
+    timeoutSeconds?: number
+  }
+  delivery: {
     mode: string
     channel?: string
     to?: string
+    threadId?: string | null
   }
-  agentId?: string
+  state: CronJobState
+}
+
+/** Cron list response wrapper */
+export interface CronListResponse {
+  jobs: CronJob[]
+  total: number
+  offset: number
+  limit: number
+  hasMore: boolean
+  nextOffset: number | null
+}
+
+/** Cron status response */
+export interface CronStatusResponse {
+  enabled: boolean
+  storePath: string
+  jobs: number
+  nextWakeAtMs: number | null
 }
 
 /** Cron run history entry */
@@ -104,82 +186,169 @@ export interface CronRun {
   jobId: string
   startedAt: string
   completedAt?: string
-  status: 'success' | 'failure' | 'running' | 'timeout'
-  duration?: number
+  status: string
+  durationMs?: number
   error?: string
 }
 
-/** Active session info */
+/** Cron runs response wrapper */
+export interface CronRunsResponse {
+  entries: CronRun[]
+  total: number
+  offset: number
+  limit: number
+  hasMore: boolean
+  nextOffset: number | null
+}
+
+// ─── Sessions ───────────────────────────────────────────────
+
+/** Active session info — actual wire format */
 export interface Session {
-  id: string
-  type: 'main' | 'isolated' | 'group'
+  key: string
+  kind: string
+  displayName?: string
+  channel?: string
+  groupChannel?: string
   agentId?: string
-  createdAt: string
-  lastActivity?: string
-  messageCount: number
-  tokenUsage?: {
-    input: number
-    output: number
-    total: number
+  [key: string]: unknown
+}
+
+/** Sessions list response wrapper */
+export interface SessionsListResponse {
+  ts: number
+  path: string
+  count: number
+  defaults: {
+    modelProvider: string
+    model: string
+    contextTokens: number
+  }
+  sessions: Session[]
+}
+
+/** Session usage entry */
+export interface SessionUsageEntry {
+  key: string
+  sessionId: string
+  updatedAt: number
+  agentId: string
+  usage: {
+    sessionId: string
+    firstActivity: number
+    lastActivity: number
+    durationMs: number
+    activityDates: string[]
+    dailyBreakdown?: unknown[]
+    [key: string]: unknown
   }
 }
 
-/** Aggregated session usage / cost info */
-export interface SessionUsage {
-  totalSessions: number
-  activeSessions: number
-  totalTokens: number
-  totalCost: number
-  byModel: Record<string, { tokens: number; cost: number }>
+/** Aggregated session usage response */
+export interface SessionUsageResponse {
+  updatedAt: number
+  startDate: string
+  endDate: string
+  sessions: SessionUsageEntry[]
 }
 
-/** Agent identity */
-export interface AgentIdentity {
-  name: string
-  model: string
-  workspace: string
-  instructions?: string
+// ─── Agents ─────────────────────────────────────────────────
+
+/** Agent list response */
+export interface AgentsListResponse {
+  defaultId: string
+  mainKey: string
+  scope: string
+  agents: Array<{ id: string; [key: string]: unknown }>
 }
+
+// ─── Models ─────────────────────────────────────────────────
 
 /** Model entry */
 export interface ModelEntry {
   id: string
+  name: string
   provider: string
+  contextWindow?: number
+  reasoning?: boolean
+  input?: string[]
+}
+
+/** Models list response */
+export interface ModelsListResponse {
+  models: ModelEntry[]
+}
+
+// ─── Skills ─────────────────────────────────────────────────
+
+/** Skill info — actual wire format */
+export interface SkillInfo {
   name: string
-  active: boolean
-}
-
-/** Skill status */
-export interface SkillStatus {
-  name: string
-  version?: string
-  category?: string
-  enabled: boolean
-  scriptCount: number
-}
-
-/** Slack channel status */
-export interface ChannelStatus {
-  id: string
-  name: string
-  connected: boolean
-  requireMention: boolean
-  lastMessage?: string
-}
-
-/** Log entry from gateway */
-export interface LogEntry {
-  timestamp: string
-  level: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
-  message: string
-  source?: string
-  data?: Record<string, unknown>
-}
-
-/** Gateway config snapshot */
-export interface GatewayConfig {
+  description?: string
+  source: string
+  bundled: boolean
+  filePath?: string
   [key: string]: unknown
 }
+
+/** Skills status response */
+export interface SkillsStatusResponse {
+  workspaceDir: string
+  managedSkillsDir: string
+  skills: SkillInfo[]
+}
+
+// ─── Channels ───────────────────────────────────────────────
+
+/** Channels status response — actual wire format */
+export interface ChannelsStatusResponse {
+  ts: number
+  channelOrder: string[]
+  channelLabels: Record<string, string>
+  channelDetailLabels?: Record<string, string>
+  channelMeta?: Array<{ id: string; label: string; [key: string]: unknown }>
+  channels: Record<string, SlackChannelHealth>
+}
+
+// ─── Logs ───────────────────────────────────────────────────
+
+/** Log tail response */
+export interface LogsTailResponse {
+  file: string
+  cursor: number
+  size: number
+  lines: string[]
+  truncated: boolean
+  reset?: unknown
+}
+
+/** Parsed log entry (from JSON lines) */
+export interface LogEntry {
+  time: string
+  level: string
+  subsystem?: string
+  message: string
+  [key: string]: unknown
+}
+
+// ─── Config ─────────────────────────────────────────────────
+
+/** Gateway config response */
+export interface GatewayConfig {
+  path: string
+  exists: boolean
+  raw?: string
+  parsed?: Record<string, unknown>
+  resolved?: Record<string, unknown>
+  valid: boolean
+  config: Record<string, unknown>
+  hash?: string
+  issues?: unknown[]
+  warnings?: unknown[]
+  [key: string]: unknown
+}
+
+// ─── Profile ────────────────────────────────────────────────
 
 /** Profile definition with connection details */
 export interface ProfileConfig {

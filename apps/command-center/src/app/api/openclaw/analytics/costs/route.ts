@@ -27,8 +27,21 @@ export async function GET(request: Request): Promise<Response> {
       const { slug, usage } = result.value
       costs[slug] = usage
       if (usage) {
-        totalCost += usage.totalCost
-        totalTokens += usage.totalTokens
+        // Aggregate costs from daily breakdowns
+        for (const session of usage.sessions) {
+          const u = session.usage as Record<string, unknown>
+          const breakdown = u.dailyBreakdown as Array<{ models?: Array<{ totalCost?: number; inputTokens?: number; outputTokens?: number }> }> | undefined
+          if (breakdown) {
+            for (const day of breakdown) {
+              if (day.models) {
+                for (const model of day.models) {
+                  totalCost += model.totalCost ?? 0
+                  totalTokens += (model.inputTokens ?? 0) + (model.outputTokens ?? 0)
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

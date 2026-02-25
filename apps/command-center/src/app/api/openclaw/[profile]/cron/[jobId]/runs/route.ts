@@ -17,8 +17,8 @@ export async function GET(
 
   try {
     const client = await getGatewayClient(result.profile)
-    const runs = await client.cronRuns(jobId)
-    return Response.json({ runs })
+    const data = await client.cronRuns(jobId)
+    return Response.json({ runs: data.entries, total: data.total })
   } catch (err) {
     return Response.json(
       { error: err instanceof Error ? err.message : 'Failed to fetch runs' },

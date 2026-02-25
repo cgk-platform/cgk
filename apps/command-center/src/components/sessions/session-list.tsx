@@ -5,11 +5,10 @@ import { StatusBadge } from '@cgk-platform/ui'
 interface Session {
   id: string
   type: string
+  displayName?: string
+  channel?: string
+  groupChannel?: string
   agentId?: string
-  createdAt: string
-  lastActivity?: string
-  messageCount: number
-  tokenUsage?: { input: number; output: number; total: number }
 }
 
 interface SessionListProps {
@@ -30,37 +29,26 @@ export function SessionList({ sessions }: SessionListProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            <th className="p-3 text-left font-medium">ID</th>
+            <th className="p-3 text-left font-medium">Session</th>
             <th className="p-3 text-left font-medium">Type</th>
+            <th className="p-3 text-left font-medium">Channel</th>
             <th className="p-3 text-left font-medium">Agent</th>
-            <th className="p-3 text-left font-medium">Created</th>
-            <th className="p-3 text-right font-medium">Messages</th>
-            <th className="p-3 text-right font-medium">Tokens</th>
           </tr>
         </thead>
         <tbody>
           {sessions.map((session) => (
             <tr key={session.id} className="border-b transition-colors hover:bg-accent/50">
-              <td className="p-3 font-mono text-xs">{session.id.slice(0, 12)}...</td>
-              <td className="p-3">
-                <StatusBadge status={session.type} />
+              <td className="max-w-xs truncate p-3 text-xs">
+                {session.displayName || session.id}
               </td>
-              <td className="p-3 text-muted-foreground">
-                {session.agentId || 'default'}
+              <td className="p-3">
+                <StatusBadge status={session.type === 'group' ? 'active' : session.type === 'isolated' ? 'pending' : 'ready'} label={session.type} />
               </td>
               <td className="p-3 text-xs text-muted-foreground">
-                {new Date(session.createdAt).toLocaleString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+                {session.groupChannel || session.channel || '-'}
               </td>
-              <td className="p-3 text-right font-mono">{session.messageCount}</td>
-              <td className="p-3 text-right font-mono text-xs">
-                {session.tokenUsage
-                  ? session.tokenUsage.total.toLocaleString()
-                  : '-'}
+              <td className="p-3 text-xs text-muted-foreground">
+                {session.agentId || 'default'}
               </td>
             </tr>
           ))}

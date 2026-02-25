@@ -8,22 +8,62 @@ import { CronRunHistory } from './cron-run-history'
 
 interface CronJob {
   id: string
+  agentId: string
   name: string
-  schedule: string
   enabled: boolean
-  timezone: string
-  lastRun?: string
-  nextRun?: string
-  lastStatus?: string
+  notify: boolean
+  schedule: {
+    kind: string
+    cron?: string
+    everyMs?: number
+  }
   sessionTarget: string
-  delivery?: { mode: string; channel?: string }
-  agentId?: string
+  delivery: {
+    mode: string
+    channel?: string
+    to?: string
+  }
+  state: {
+    nextRunAtMs: number | null
+    lastRunAtMs: number | null
+    lastRunStatus: string | null
+    lastDurationMs: number | null
+    consecutiveErrors: number
+  }
 }
 
 interface CronTableProps {
   jobs: CronJob[]
   profile: string
   onTrigger: (jobId: string) => Promise<void>
+}
+
+function formatSchedule(schedule: CronJob['schedule']): string {
+  if (schedule.kind === 'cron' && schedule.cron) return schedule.cron
+  if (schedule.kind === 'every' && schedule.everyMs) {
+    const mins = Math.round(schedule.everyMs / 60_000)
+    if (mins < 60) return `every ${mins}m`
+    const hours = Math.round(mins / 60)
+    return `every ${hours}h`
+  }
+  return schedule.kind
+}
+
+function formatTimestamp(ms: number | null): string {
+  if (!ms) return 'Never'
+  return new Date(ms).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+function mapStatus(status: string | null): string {
+  if (!status) return 'ready'
+  if (status === 'ok') return 'completed'
+  if (status === 'error') return 'failed'
+  return status
 }
 
 export function CronTable({ jobs, profile, onTrigger }: CronTableProps) {
@@ -89,23 +129,28 @@ export function CronTable({ jobs, profile, onTrigger }: CronTableProps) {
                         <span className="font-medium">{job.name}</span>
                       </div>
                       <div className="p-3 font-mono text-xs text-muted-foreground">
-                        {job.schedule}
+                        {formatSchedule(job.schedule)}
                       </div>
                       <div className="p-3">
-                        <StatusBadge status={job.enabled ? (job.lastStatus || 'ready') : 'disabled'} />
+                        <StatusBadge status={job.enabled ? mapStatus(job.state.lastRunStatus) : 'disabled'} />
+                        {job.state.consecutiveErrors > 0 && (
+                          <span className="ml-1 text-xs text-destructive">
+                            ({job.state.consecutiveErrors} errors)
+                          </span>
+                        )}
                       </div>
                       <div className="p-3 text-xs text-muted-foreground">
-                        {job.lastRun
-                          ? new Date(job.lastRun).toLocaleString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : 'Never'}
+                        {formatTimestamp(job.state.lastRunAtMs)}
+                        {job.state.lastDurationMs != null && (
+                          <span className="ml-1 font-mono">
+                            ({job.state.lastDurationMs < 1000
+                              ? `${job.state.lastDurationMs}ms`
+                              : `${(job.state.lastDurationMs / 1000).toFixed(1)}s`})
+                          </span>
+                        )}
                       </div>
                       <div className="p-3 text-xs text-muted-foreground">
-                        {job.delivery?.mode || 'announce'}
+                        {job.delivery.mode}
                       </div>
                       <div className="flex justify-end p-3">
                         <Button

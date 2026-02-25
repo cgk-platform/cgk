@@ -16,13 +16,11 @@ export async function GET(
 
   try {
     const client = await getGatewayClient(result.profile)
-    const [agents, identity] = await Promise.allSettled([
-      client.agentsList(),
-      client.agentIdentity(),
-    ])
+    const agentsData = await client.agentsList()
     return Response.json({
-      agents: agents.status === 'fulfilled' ? agents.value : [],
-      identity: identity.status === 'fulfilled' ? identity.value : null,
+      defaultId: agentsData.defaultId,
+      scope: agentsData.scope,
+      agents: agentsData.agents,
     })
   } catch (err) {
     return Response.json(

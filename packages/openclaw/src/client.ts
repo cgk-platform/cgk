@@ -1,20 +1,22 @@
+import crypto from 'crypto'
 import { getProfileToken, getProfileUrl } from './profiles.js'
 import type {
-  AgentIdentity,
-  ChannelStatus,
+  AgentsListResponse,
+  ChannelsStatusResponse,
   ConnectionState,
-  CronJob,
-  CronRun,
+  CronListResponse,
+  CronRunsResponse,
+  CronStatusResponse,
   EventFrame,
   GatewayConfig,
   GatewayHealth,
-  LogEntry,
-  ModelEntry,
+  LogsTailResponse,
+  ModelsListResponse,
   ProfileSlug,
   ResponseFrame,
-  Session,
-  SessionUsage,
-  SkillStatus,
+  SessionsListResponse,
+  SessionUsageResponse,
+  SkillsStatusResponse,
 } from './types.js'
 
 type EventHandler = (data: unknown) => void
@@ -25,10 +27,84 @@ interface PendingRequest {
   timer: ReturnType<typeof setTimeout>
 }
 
+interface DeviceIdentity {
+  deviceId: string
+  privateKeyPem: string
+  publicKeyBase64Url: string
+}
+
 const RPC_TIMEOUT_MS = 10_000
 const CONNECT_TIMEOUT_MS = 15_000
 const RECONNECT_BASE_MS = 5_000
 const MAX_RECONNECT_MS = 30_000
+
+/** Default scopes to request when device signing is available */
+const DEFAULT_SCOPES = ['operator.admin', 'operator.read', 'operator.write']
+
+/**
+ * Load device identity from environment variables.
+ * Returns null if not configured (falls back to token-only auth).
+ */
+function getDeviceIdentity(): DeviceIdentity | null {
+  const deviceId = process.env.OPENCLAW_DEVICE_ID
+  const privateKeyB64 = process.env.OPENCLAW_DEVICE_PRIVATE_KEY
+  const publicKeyB64 = process.env.OPENCLAW_DEVICE_PUBLIC_KEY
+
+  if (!deviceId || !privateKeyB64 || !publicKeyB64) {
+    return null
+  }
+
+  // Keys are stored as base64-encoded PEM strings (to avoid newline issues in env vars)
+  const privateKeyPem = Buffer.from(privateKeyB64, 'base64').toString('utf8')
+  const publicKeyPem = Buffer.from(publicKeyB64, 'base64').toString('utf8')
+
+  // Extract raw 32-byte Ed25519 public key from PEM and base64url encode
+  const pubKeyDer = crypto.createPublicKey(publicKeyPem).export({ type: 'spki', format: 'der' })
+  const rawPubKey = pubKeyDer.subarray(12) // Ed25519 SPKI has 12-byte prefix
+  const publicKeyBase64Url = rawPubKey.toString('base64url')
+
+  return { deviceId, privateKeyPem, publicKeyBase64Url }
+}
+
+/**
+ * Build the v2 pipe-delimited auth payload and Ed25519 signature.
+ */
+function buildDeviceAuth(
+  identity: DeviceIdentity,
+  token: string,
+  nonce: string,
+  scopes: string[]
+): { device: Record<string, unknown>; scopes: string[] } {
+  const signedAtMs = Date.now()
+  const scopesStr = scopes.join(',')
+
+  // v2 pipe-delimited payload format (from CLI source)
+  const payload = [
+    'v2',
+    identity.deviceId,
+    'gateway-client',
+    'backend',
+    'operator',
+    scopesStr,
+    String(signedAtMs),
+    token,
+    nonce,
+  ].join('|')
+
+  const privateKey = crypto.createPrivateKey(identity.privateKeyPem)
+  const signature = crypto.sign(null, Buffer.from(payload, 'utf8'), privateKey).toString('base64url')
+
+  return {
+    device: {
+      id: identity.deviceId,
+      publicKey: identity.publicKeyBase64Url,
+      signature,
+      signedAt: signedAtMs,
+      nonce,
+    },
+    scopes,
+  }
+}
 
 /**
  * WebSocket RPC client for a single openCLAW gateway.
@@ -36,7 +112,7 @@ const MAX_RECONNECT_MS = 30_000
  * Implements the protocol v3 handshake:
  *   1. Open WebSocket
  *   2. Receive `connect.challenge` frame with nonce
- *   3. Send `connect` request with auth token + client info
+ *   3. Send `connect` request with auth token + device signature
  *   4. Receive `hello-ok` response
  *   5. RPC ready
  */
@@ -73,8 +149,9 @@ export class OpenClawGatewayClient {
 
     try {
       const { WebSocket } = await import('ws')
-      const token = getProfileToken(this.profile)
+      const token = getProfileToken(this.profile) || ''
       const url = getProfileUrl(this.profile)
+      const deviceIdentity = getDeviceIdentity()
 
       this.ws = new WebSocket(url)
 
@@ -96,7 +173,24 @@ export class OpenClawGatewayClient {
 
           // Step 2: Receive connect.challenge (arrives as event frame)
           if (frame.type === 'event' && frame.event === 'connect.challenge') {
-            const connectFrame = {
+            const challengePayload = frame.payload as { nonce: string; ts: number }
+
+            // Build connect frame with optional device-signed auth
+            let scopes = ['operator.read']
+            let deviceField: Record<string, unknown> | undefined
+
+            if (deviceIdentity) {
+              const auth = buildDeviceAuth(
+                deviceIdentity,
+                token,
+                challengePayload.nonce,
+                DEFAULT_SCOPES
+              )
+              scopes = auth.scopes
+              deviceField = auth.device
+            }
+
+            const connectFrame: Record<string, unknown> = {
               type: 'req',
               id: connectId,
               method: 'connect',
@@ -110,10 +204,11 @@ export class OpenClawGatewayClient {
                   mode: 'backend',
                 },
                 role: 'operator',
-                scopes: ['operator.read'],
+                scopes,
                 caps: [],
                 commands: [],
-                auth: { token: token || '' },
+                auth: { token },
+                ...(deviceField ? { device: deviceField } : {}),
                 locale: 'en-US',
                 userAgent: 'command-center/1.0',
               },
@@ -122,7 +217,7 @@ export class OpenClawGatewayClient {
             return
           }
 
-          // Step 4: Connect response (type:"res", ok:true, payload.type:"hello-ok")
+          // Step 4: Connect response
           if (frame.id === connectId && frame.ok === true) {
             cleanup()
             clearTimeout(connectTimeout)
@@ -258,56 +353,52 @@ export class OpenClawGatewayClient {
     return this.rpc<GatewayHealth>('health')
   }
 
-  async cronList(): Promise<CronJob[]> {
-    return this.rpc<CronJob[]>('cron.list')
+  async cronList(): Promise<CronListResponse> {
+    return this.rpc<CronListResponse>('cron.list')
   }
 
-  async cronStatus(): Promise<Record<string, unknown>> {
-    return this.rpc<Record<string, unknown>>('cron.status')
+  async cronStatus(): Promise<CronStatusResponse> {
+    return this.rpc<CronStatusResponse>('cron.status')
   }
 
-  async cronRuns(jobId: string, limit = 20): Promise<CronRun[]> {
-    return this.rpc<CronRun[]>('cron.runs', { jobId, limit })
+  async cronRuns(jobId: string, limit = 20): Promise<CronRunsResponse> {
+    return this.rpc<CronRunsResponse>('cron.runs', { jobId, limit })
   }
 
-  async cronRun(jobId: string): Promise<{ success: boolean }> {
-    return this.rpc<{ success: boolean }>('cron.run', { jobId })
+  async cronRun(jobId: string): Promise<unknown> {
+    return this.rpc('cron.run', { jobId })
   }
 
-  async sessionsList(): Promise<Session[]> {
-    return this.rpc<Session[]>('sessions.list')
+  async sessionsList(): Promise<SessionsListResponse> {
+    return this.rpc<SessionsListResponse>('sessions.list')
   }
 
-  async sessionsUsage(): Promise<SessionUsage> {
-    return this.rpc<SessionUsage>('sessions.usage')
+  async sessionsUsage(): Promise<SessionUsageResponse> {
+    return this.rpc<SessionUsageResponse>('sessions.usage')
   }
 
-  async agentsList(): Promise<AgentIdentity[]> {
-    return this.rpc<AgentIdentity[]>('agents.list')
+  async agentsList(): Promise<AgentsListResponse> {
+    return this.rpc<AgentsListResponse>('agents.list')
   }
 
-  async agentIdentity(): Promise<AgentIdentity> {
-    return this.rpc<AgentIdentity>('agent.identity')
+  async modelsList(): Promise<ModelsListResponse> {
+    return this.rpc<ModelsListResponse>('models.list')
   }
 
-  async modelsList(): Promise<ModelEntry[]> {
-    return this.rpc<ModelEntry[]>('models.list')
+  async skillsStatus(): Promise<SkillsStatusResponse> {
+    return this.rpc<SkillsStatusResponse>('skills.status')
   }
 
-  async skillsStatus(): Promise<SkillStatus[]> {
-    return this.rpc<SkillStatus[]>('skills.status')
-  }
-
-  async channelsStatus(): Promise<ChannelStatus[]> {
-    return this.rpc<ChannelStatus[]>('channels.status')
+  async channelsStatus(): Promise<ChannelsStatusResponse> {
+    return this.rpc<ChannelsStatusResponse>('channels.status')
   }
 
   async configGet(): Promise<GatewayConfig> {
     return this.rpc<GatewayConfig>('config.get')
   }
 
-  async logsTail(count = 50): Promise<LogEntry[]> {
-    return this.rpc<LogEntry[]>('logs.tail', { count })
+  async logsTail(): Promise<LogsTailResponse> {
+    return this.rpc<LogsTailResponse>('logs.tail')
   }
 
   // ─── Internal ────────────────────────────────────────────────────

@@ -5,6 +5,13 @@ import { use, useCallback, useEffect, useState } from 'react'
 
 import { SkillsGrid } from '@/components/skills/skills-grid'
 
+interface Skill {
+  name: string
+  description?: string
+  source: string
+  bundled: boolean
+}
+
 export default function SkillsPage({
   params,
 }: {
@@ -12,7 +19,9 @@ export default function SkillsPage({
 }) {
   const { profile } = use(params)
   const config = PROFILES[profile as keyof typeof PROFILES]
-  const [skills, setSkills] = useState<unknown[]>([])
+  const [skills, setSkills] = useState<Skill[]>([])
+  const [bundledCount, setBundledCount] = useState(0)
+  const [managedCount, setManagedCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
@@ -20,6 +29,8 @@ export default function SkillsPage({
       const res = await fetch(`/api/openclaw/${profile}/skills`)
       const data = await res.json()
       setSkills(data.skills || [])
+      setBundledCount(data.bundledCount || 0)
+      setManagedCount(data.managedCount || 0)
     } catch {
       // ignore
     } finally {
@@ -38,14 +49,14 @@ export default function SkillsPage({
           Skills — {config?.label || profile}
         </h1>
         <p className="text-muted-foreground">
-          {skills.length} skills installed
+          {skills.length} skills installed ({bundledCount} bundled, {managedCount} managed)
         </p>
       </div>
 
       {loading ? (
         <div className="h-64 animate-pulse rounded-lg border bg-card" />
       ) : (
-        <SkillsGrid skills={skills as Parameters<typeof SkillsGrid>[0]['skills']} />
+        <SkillsGrid skills={skills} />
       )}
     </div>
   )

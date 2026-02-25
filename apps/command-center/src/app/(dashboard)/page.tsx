@@ -6,18 +6,28 @@ import { useCallback, useEffect, useState } from 'react'
 import { ConnectionBar } from '@/components/overview/connection-bar'
 import { ProfileCard } from '@/components/overview/profile-card'
 
+interface NormalizedHealth {
+  ok: boolean
+  ts: number
+  slackConnected: boolean
+  slackConfigured: boolean
+  slackBotName?: string
+  slackTeamName?: string
+  heartbeatSeconds: number
+  defaultAgentId: string
+  agentCount: number
+  agents: Array<{
+    agentId: string
+    isDefault: boolean
+    heartbeatEnabled: boolean
+    heartbeatEvery?: string
+  }>
+  sessionCount: number
+}
+
 interface ProfileHealth {
   connected: boolean
-  health: {
-    status: string
-    uptime: number
-    version: string
-    agentCount: number
-    slackConnected: boolean
-    activeSessionCount: number
-    cronJobCount: number
-    skillCount: number
-  } | null
+  health: NormalizedHealth | null
   error?: string
 }
 

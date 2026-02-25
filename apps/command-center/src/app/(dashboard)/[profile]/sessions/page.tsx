@@ -6,6 +6,25 @@ import { use, useCallback, useEffect, useState } from 'react'
 import { SessionList } from '@/components/sessions/session-list'
 import { SessionUsage } from '@/components/sessions/session-usage'
 
+interface SessionItem {
+  id: string
+  type: string
+  displayName?: string
+  channel?: string
+  groupChannel?: string
+  agentId?: string
+}
+
+interface UsageData {
+  totalSessions: number
+  activeSessions: number
+  totalTokens: number
+  totalCost: number
+  byModel: Record<string, { tokens: number; cost: number }>
+  startDate?: string
+  endDate?: string
+}
+
 export default function SessionsPage({
   params,
 }: {
@@ -13,8 +32,8 @@ export default function SessionsPage({
 }) {
   const { profile } = use(params)
   const config = PROFILES[profile as keyof typeof PROFILES]
-  const [sessions, setSessions] = useState<unknown[]>([])
-  const [usage, setUsage] = useState(null)
+  const [sessions, setSessions] = useState<SessionItem[]>([])
+  const [usage, setUsage] = useState<UsageData | null>(null)
   const [loading, setLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
@@ -42,7 +61,10 @@ export default function SessionsPage({
         <h1 className="text-2xl font-bold tracking-tight">
           Sessions — {config?.label || profile}
         </h1>
-        <p className="text-muted-foreground">Active and recent sessions</p>
+        <p className="text-muted-foreground">
+          {sessions.length} active sessions
+          {usage?.startDate && ` (${usage.startDate} – ${usage.endDate})`}
+        </p>
       </div>
 
       {loading ? (
@@ -50,7 +72,7 @@ export default function SessionsPage({
       ) : (
         <>
           <SessionUsage usage={usage} />
-          <SessionList sessions={sessions as Parameters<typeof SessionList>[0]['sessions']} />
+          <SessionList sessions={sessions} />
         </>
       )}
     </div>

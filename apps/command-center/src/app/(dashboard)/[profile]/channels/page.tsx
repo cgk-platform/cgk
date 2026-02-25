@@ -5,6 +5,25 @@ import { use, useCallback, useEffect, useState } from 'react'
 
 import { ChannelGrid } from '@/components/channels/channel-grid'
 
+interface Channel {
+  id: string
+  label: string
+  detailLabel?: string
+  configured: boolean
+  running: boolean
+  connected: boolean
+  botTokenSource?: string
+  appTokenSource?: string
+  probe: {
+    ok: boolean
+    status: number
+    elapsedMs: number
+    botName?: string
+    teamName?: string
+  } | null
+  lastError: string | null
+}
+
 export default function ChannelsPage({
   params,
 }: {
@@ -12,7 +31,7 @@ export default function ChannelsPage({
 }) {
   const { profile } = use(params)
   const config = PROFILES[profile as keyof typeof PROFILES]
-  const [channels, setChannels] = useState<unknown[]>([])
+  const [channels, setChannels] = useState<Channel[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchData = useCallback(async () => {
@@ -37,13 +56,13 @@ export default function ChannelsPage({
         <h1 className="text-2xl font-bold tracking-tight">
           Channels — {config?.label || profile}
         </h1>
-        <p className="text-muted-foreground">Slack channel configuration and status</p>
+        <p className="text-muted-foreground">Communication channel status</p>
       </div>
 
       {loading ? (
         <div className="h-64 animate-pulse rounded-lg border bg-card" />
       ) : (
-        <ChannelGrid channels={channels as Parameters<typeof ChannelGrid>[0]['channels']} />
+        <ChannelGrid channels={channels} />
       )}
     </div>
   )

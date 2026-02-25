@@ -16,11 +16,15 @@ export async function GET(
 
   try {
     const client = await getGatewayClient(result.profile)
-    const [jobs, status] = await Promise.all([
+    const [cronList, cronStatus] = await Promise.all([
       client.cronList(),
       client.cronStatus(),
     ])
-    return Response.json({ jobs, status })
+    return Response.json({
+      jobs: cronList.jobs,
+      total: cronList.total,
+      status: cronStatus,
+    })
   } catch (err) {
     return Response.json(
       { error: err instanceof Error ? err.message : 'Failed to fetch cron' },
