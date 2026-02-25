@@ -82,8 +82,17 @@
 ]
 {%- endcapture -%}
 
-{%- comment -%} Media color prefix for filtering {%- endcomment -%}
+{%- comment -%} Media color filtering — match theme's exact `where: 'alt', image_color_name` logic {%- endcomment -%}
 {%- assign title_prefix = product.title | append: ' - ' -%}
+{%- assign image_color_name = product.title -%}
+{%- if selected_color != blank -%}
+  {%- assign image_color_name = product.title | append: ' - ' | append: selected_color -%}
+{%- endif -%}
+{%- assign color_medias = product.media | where: 'alt', image_color_name -%}
+{%- assign has_color_media = false -%}
+{%- if color_medias != blank and selected_color != blank -%}
+  {%- assign has_color_media = true -%}
+{%- endif -%}
 
 {%- comment -%} Capture icon HTML (reused in desktop and mobile) {%- endcomment -%}
 {%- capture icons_html -%}
@@ -204,9 +213,12 @@
                     {%- assign media_color = stripped_alt -%}
                   {%- endif -%}
                 {%- endif -%}
+                {%- comment -%} Theme logic: if color media exist, ONLY show matching. Otherwise show all. {%- endcomment -%}
                 {%- assign show_media = true -%}
-                {%- if selected_color != blank and media_color != blank and media_color != selected_color -%}
-                  {%- assign show_media = false -%}
+                {%- if has_color_media -%}
+                  {%- if media.alt != image_color_name -%}
+                    {%- assign show_media = false -%}
+                  {%- endif -%}
                 {%- endif -%}
                 <button
                   class="bb-pdp__thumb"
@@ -240,8 +252,10 @@
                   {%- endif -%}
                 {%- endif -%}
                 {%- assign show_media = true -%}
-                {%- if selected_color != blank and media_color != blank and media_color != selected_color -%}
-                  {%- assign show_media = false -%}
+                {%- if has_color_media -%}
+                  {%- if media.alt != image_color_name -%}
+                    {%- assign show_media = false -%}
+                  {%- endif -%}
                 {%- endif -%}
                 <div
                   class="bb-pdp__slide"

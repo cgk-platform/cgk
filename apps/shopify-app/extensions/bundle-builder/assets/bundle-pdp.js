@@ -26,7 +26,6 @@
       this.ctaText = section.dataset.ctaText || 'Add Bundle to Cart';
       this.cartRedirect = section.dataset.cartRedirect === 'true';
       this.moneyFormat = section.dataset.moneyFormat || '';
-      this.productTitle = section.dataset.productTitle || '';
       this.isLoading = false;
       this.isRedirecting = false;
       this.previousTierIndex = -1;
@@ -191,7 +190,6 @@
 
     filterMediaByColor(colorName) {
       if (!this.els.slider || !this.els.thumbsContainer) return;
-      var titlePrefix = this.productTitle + ' - ';
       var self = this;
 
       // Disconnect observer before changing visibility
@@ -201,22 +199,32 @@
         });
       }
 
-      // Show/hide slides
+      // Check if any media are tagged with this color
       var slides = this.els.slider.querySelectorAll('.bb-pdp__slide');
+      var hasColorMedia = false;
       slides.forEach(function (slide) {
-        var mediaColor = slide.dataset.mediaColor || '';
-        if (mediaColor === '' || mediaColor === colorName) {
+        if (slide.dataset.mediaColor === colorName) {
+          hasColorMedia = true;
+        }
+      });
+
+      // Theme logic: if color-tagged media exist, show ONLY those.
+      // If no color-tagged media exist for this color, show ALL media.
+      slides.forEach(function (slide) {
+        if (!hasColorMedia) {
+          slide.style.display = '';
+        } else if (slide.dataset.mediaColor === colorName) {
           slide.style.display = '';
         } else {
           slide.style.display = 'none';
         }
       });
 
-      // Show/hide thumbnails
       var thumbs = this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb');
       thumbs.forEach(function (thumb) {
-        var mediaColor = thumb.dataset.mediaColor || '';
-        if (mediaColor === '' || mediaColor === colorName) {
+        if (!hasColorMedia) {
+          thumb.style.display = '';
+        } else if (thumb.dataset.mediaColor === colorName) {
           thumb.style.display = '';
         } else {
           thumb.style.display = 'none';
