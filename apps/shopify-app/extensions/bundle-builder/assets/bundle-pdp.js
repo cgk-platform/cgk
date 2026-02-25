@@ -270,30 +270,46 @@
     }
 
     /**
-     * Build a Set of slide indices that belong to the given color, using
-     * per-color boundary grouping from variant featured_media_id data.
+     * Build a Set of slide indices to show for the given color.
      *
-     * Algorithm:
-     * 1. Find the color option position.
-     * 2. Group variants by color, find the MINIMUM featured_media index per color.
-     *    This gives one "start boundary" per color (not per variant).
-     * 3. For the selected color, show all media from its boundary to the
-     *    next color's boundary.
-     * 4. Falls back to alt-text matching if no featured_media data exists.
+     * Strategy (in priority order):
+     * 1. Per-color boundary via featured_media_id — find the lowest
+     *    featured_media index per color, show everything from this color's
+     *    start to the next color's start. Best result when images are
+     *    organized in color blocks in Shopify admin.
+     * 2. Alt-text matching — show media where data-media-color matches.
+     * 3. Fallback — show ALL media (if nothing else produces results).
+     *
+     * If strategy 1 returns < 2 results, we try strategy 2.
+     * If strategy 2 also returns < 2, we show all.
      */
     _buildMediaGroupForColor(colorName, slides) {
+      var result;
+
+      // Strategy 1: per-color boundary from featured_media
+      result = this._mediaGroupByFeaturedMedia(colorName, slides);
+      if (result.size >= 2) return result;
+
+      // Strategy 2: alt-text color matching
+      result = this._mediaGroupByAltText(colorName, slides);
+      if (result.size >= 2) return result;
+
+      // Strategy 3: show everything
+      var all = new Set();
+      slides.forEach(function (_, i) { all.add(i); });
+      return all;
+    }
+
+    _mediaGroupByFeaturedMedia(colorName, slides) {
       var visibleIndices = new Set();
 
-      // Build media-id → slide-index map
       var mediaIdToIndex = {};
       slides.forEach(function (slide) {
         var mediaId = slide.dataset.mediaId;
-        if (mediaId) {
-          mediaIdToIndex[mediaId] = parseInt(slide.dataset.slideIndex, 10);
-        }
+        if (mediaId) mediaIdToIndex[mediaId] = parseInt(slide.dataset.slideIndex, 10);
       });
 
-      // Find color option position (1-based in Shopify)
+      // Find color option position
       var colorPosition = -1;
       this.els.optionGroups.forEach(function (group) {
         var name = (group.dataset.optionName || '').toLowerCase();
@@ -301,67 +317,40 @@
           colorPosition = parseInt(group.dataset.optionPosition, 10);
         }
       });
+      if (colorPosition < 1) return visibleIndices;
 
-      if (colorPosition < 1) {
-        // No color option — show all media
-        slides.forEach(function (_, i) { visibleIndices.add(i); });
-        return visibleIndices;
-      }
-
-      // Group variants by color → find the MINIMUM featured_media index per color.
-      // Multiple size variants of the same color may share or have different
-      // featured_media, but we only care about the lowest index per color
-      // to establish color boundaries.
-      var colorMinIndex = {}; // { colorName: minSlideIndex }
-
+      // Find minimum featured_media index per color
+      var colorMinIndex = {};
       this.variants.forEach(function (v) {
-        var variantColor = v.options[colorPosition - 1]; // 0-based array
+        var vc = v.options[colorPosition - 1];
         var fmId = v.featured_media_id;
-        if (!variantColor || !fmId || !(String(fmId) in mediaIdToIndex)) return;
-
-        var slideIdx = mediaIdToIndex[String(fmId)];
-        if (!(variantColor in colorMinIndex) || slideIdx < colorMinIndex[variantColor]) {
-          colorMinIndex[variantColor] = slideIdx;
-        }
+        if (!vc || !fmId || !(String(fmId) in mediaIdToIndex)) return;
+        var idx = mediaIdToIndex[String(fmId)];
+        if (!(vc in colorMinIndex) || idx < colorMinIndex[vc]) colorMinIndex[vc] = idx;
       });
 
-      // Check if we have boundary data for the selected color
-      if (!(colorName in colorMinIndex)) {
-        // No featured_media data for this color — fall back to alt-text matching
-        var hasColorMedia = false;
-        slides.forEach(function (slide) {
-          if (slide.dataset.mediaColor === colorName) hasColorMedia = true;
-        });
-        slides.forEach(function (slide, i) {
-          if (!hasColorMedia || slide.dataset.mediaColor === colorName) {
-            visibleIndices.add(i);
-          }
-        });
-        return visibleIndices;
-      }
+      if (!(colorName in colorMinIndex)) return visibleIndices;
 
-      // Build sorted list of all color boundaries (one per unique color)
-      var allBoundaries = [];
-      for (var c in colorMinIndex) {
-        allBoundaries.push(colorMinIndex[c]);
-      }
-      allBoundaries = Array.from(new Set(allBoundaries)).sort(function (a, b) { return a - b; });
+      // Build sorted color boundaries
+      var boundaries = [];
+      for (var c in colorMinIndex) boundaries.push(colorMinIndex[c]);
+      boundaries = Array.from(new Set(boundaries)).sort(function (a, b) { return a - b; });
 
-      // Find this color's start and the next color's start
       var startIdx = colorMinIndex[colorName];
-      var nextBoundary = slides.length; // default: end of media
-      for (var i = 0; i < allBoundaries.length; i++) {
-        if (allBoundaries[i] > startIdx) {
-          nextBoundary = allBoundaries[i];
-          break;
-        }
+      var endIdx = slides.length;
+      for (var i = 0; i < boundaries.length; i++) {
+        if (boundaries[i] > startIdx) { endIdx = boundaries[i]; break; }
       }
 
-      // Include all slides from startIdx to just before nextBoundary
-      for (var j = startIdx; j < nextBoundary; j++) {
-        visibleIndices.add(j);
-      }
+      for (var j = startIdx; j < endIdx; j++) visibleIndices.add(j);
+      return visibleIndices;
+    }
 
+    _mediaGroupByAltText(colorName, slides) {
+      var visibleIndices = new Set();
+      slides.forEach(function (slide, i) {
+        if (slide.dataset.mediaColor === colorName) visibleIndices.add(i);
+      });
       return visibleIndices;
     }
 
