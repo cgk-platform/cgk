@@ -271,17 +271,15 @@
 
     /**
      * Build a Set of slide indices that belong to the given color, using
-     * variant featured_media_id grouping. This mirrors how Shopify Dawn
-     * groups product media by variant/color.
+     * per-color boundary grouping from variant featured_media_id data.
      *
      * Algorithm:
-     * 1. Identify the "color" option position from the product options.
-     * 2. Find all variants whose color matches `colorName`.
-     * 3. Collect their featured_media_ids (unique).
-     * 4. Build an ordered list of ALL variants' featured_media positions (indices).
-     * 5. For each color-matching featured position, include all consecutive
-     *    media from that position until the next variant's featured position.
-     * 6. If no featured_media data exists, fall back to alt-text color matching.
+     * 1. Find the color option position.
+     * 2. Group variants by color, find the MINIMUM featured_media index per color.
+     *    This gives one "start boundary" per color (not per variant).
+     * 3. For the selected color, show all media from its boundary to the
+     *    next color's boundary.
+     * 4. Falls back to alt-text matching if no featured_media data exists.
      */
     _buildMediaGroupForColor(colorName, slides) {
       var visibleIndices = new Set();
@@ -297,7 +295,6 @@
 
       // Find color option position (1-based in Shopify)
       var colorPosition = -1;
-      var self = this;
       this.els.optionGroups.forEach(function (group) {
         var name = (group.dataset.optionName || '').toLowerCase();
         if (name === 'color' || name === 'colour' || name === 'colors') {
@@ -311,28 +308,25 @@
         return visibleIndices;
       }
 
-      // Collect featured_media_ids for variants of the selected color
-      var colorFeaturedIds = [];
-      var allFeaturedIndices = [];
+      // Group variants by color → find the MINIMUM featured_media index per color.
+      // Multiple size variants of the same color may share or have different
+      // featured_media, but we only care about the lowest index per color
+      // to establish color boundaries.
+      var colorMinIndex = {}; // { colorName: minSlideIndex }
 
       this.variants.forEach(function (v) {
         var variantColor = v.options[colorPosition - 1]; // 0-based array
         var fmId = v.featured_media_id;
-        if (!fmId || !(String(fmId) in mediaIdToIndex)) return;
+        if (!variantColor || !fmId || !(String(fmId) in mediaIdToIndex)) return;
 
         var slideIdx = mediaIdToIndex[String(fmId)];
-        allFeaturedIndices.push(slideIdx);
-
-        if (variantColor === colorName) {
-          colorFeaturedIds.push(slideIdx);
+        if (!(variantColor in colorMinIndex) || slideIdx < colorMinIndex[variantColor]) {
+          colorMinIndex[variantColor] = slideIdx;
         }
       });
 
-      // Deduplicate and sort
-      allFeaturedIndices = Array.from(new Set(allFeaturedIndices)).sort(function (a, b) { return a - b; });
-      colorFeaturedIds = Array.from(new Set(colorFeaturedIds)).sort(function (a, b) { return a - b; });
-
-      if (colorFeaturedIds.length === 0) {
+      // Check if we have boundary data for the selected color
+      if (!(colorName in colorMinIndex)) {
         // No featured_media data for this color — fall back to alt-text matching
         var hasColorMedia = false;
         slides.forEach(function (slide) {
@@ -346,23 +340,27 @@
         return visibleIndices;
       }
 
-      // For each color's featured index, include media from that index
-      // up to (not including) the next featured index from ANY variant.
-      colorFeaturedIds.forEach(function (startIdx) {
-        // Find the next featured index after startIdx (from any color)
-        var nextFeaturedIdx = slides.length; // default: end of media
-        for (var i = 0; i < allFeaturedIndices.length; i++) {
-          if (allFeaturedIndices[i] > startIdx) {
-            nextFeaturedIdx = allFeaturedIndices[i];
-            break;
-          }
-        }
+      // Build sorted list of all color boundaries (one per unique color)
+      var allBoundaries = [];
+      for (var c in colorMinIndex) {
+        allBoundaries.push(colorMinIndex[c]);
+      }
+      allBoundaries = Array.from(new Set(allBoundaries)).sort(function (a, b) { return a - b; });
 
-        // Include all slides from startIdx to just before nextFeaturedIdx
-        for (var j = startIdx; j < nextFeaturedIdx; j++) {
-          visibleIndices.add(j);
+      // Find this color's start and the next color's start
+      var startIdx = colorMinIndex[colorName];
+      var nextBoundary = slides.length; // default: end of media
+      for (var i = 0; i < allBoundaries.length; i++) {
+        if (allBoundaries[i] > startIdx) {
+          nextBoundary = allBoundaries[i];
+          break;
         }
-      });
+      }
+
+      // Include all slides from startIdx to just before nextBoundary
+      for (var j = startIdx; j < nextBoundary; j++) {
+        visibleIndices.add(j);
+      }
 
       return visibleIndices;
     }
