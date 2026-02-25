@@ -298,7 +298,7 @@
         </div>
       {%- endif -%}
 
-      {%- comment -%} Bundle product selection (compact inline cards) {%- endcomment -%}
+      {%- comment -%} Bundle product selection with inline variant pickers {%- endcomment -%}
       {%- assign product_count = bundle_products | size -%}
       {%- if product_count > 0 -%}
         <div class="bb-pdp__bundle-items" data-pdp-items>
@@ -308,6 +308,15 @@
             {%- assign bv = bp.selected_or_first_available_variant -%}
             {%- assign bp_sold_out = false -%}
             {%- unless bv.available -%}{%- assign bp_sold_out = true -%}{%- endunless -%}
+            {%- assign bp_has_variants = false -%}
+            {%- if bp.variants.size > 1 -%}{%- assign bp_has_variants = true -%}{%- endif -%}
+
+            {%- comment -%} Build per-product variant JSON {%- endcomment -%}
+            {%- if bp_has_variants -%}
+              {%- capture bp_variants_json -%}
+              [{%- for bpv in bp.variants -%}{%- if forloop.index > 1 -%},{%- endif -%}{"id":{{ bpv.id }},"available":{{ bpv.available }},"price":{{ bpv.price }},"options":{{ bpv.options | json }},"image":"{{ bpv.featured_image | default: bp.featured_image | image_url: width: 96, crop: 'center' }}"}{%- endfor -%}]
+              {%- endcapture -%}
+            {%- endif -%}
 
             <div
               class="bb-pdp__bundle-item{% if bp_sold_out %} bb-pdp__bundle-item--disabled{% endif %}"
@@ -317,33 +326,99 @@
               data-price="{{ bv.price }}"
               data-title="{{ bp.title | escape }}"
               data-available="{{ bv.available }}"
+              {%- if bp_has_variants %} data-has-variants="true"{% endif %}
               role="button"
               tabindex="{% if bp_sold_out %}-1{% else %}0{% endif %}"
               aria-pressed="false"
               aria-label="{% if bp_sold_out %}{{ bp.title }} — Sold out{% else %}Add {{ bp.title }} to bundle{% endif %}"
               {% if bp_sold_out %}aria-disabled="true"{% endif %}
             >
-              {%- if bp.featured_image -%}
-                <img
-                  src="{{ bp.featured_image | image_url: width: 96 }}"
-                  alt="{{ bp.title | escape }}"
-                  class="bb-pdp__bundle-item-image"
-                  width="48"
-                  height="48"
-                  loading="lazy"
-                >
+              {%- if bp_has_variants -%}
+                <script type="application/json" data-item-variants>{{ bp_variants_json | strip_newlines }}</script>
               {%- endif -%}
-              <div class="bb-pdp__bundle-item-info">
-                <div class="bb-pdp__bundle-item-title">{{ bp.title }}</div>
-                <div class="bb-pdp__bundle-item-price">
-                  {%- if bp_sold_out -%}Sold out{%- else -%}{{ bv.price | money }}{%- endif -%}
+
+              <div class="bb-pdp__bundle-item-top">
+                {%- if bp.featured_image -%}
+                  <img
+                    src="{{ bp.featured_image | image_url: width: 96, crop: 'center' }}"
+                    alt="{{ bp.title | escape }}"
+                    class="bb-pdp__bundle-item-image"
+                    width="48"
+                    height="48"
+                    loading="lazy"
+                    data-item-image
+                  >
+                {%- endif -%}
+                <div class="bb-pdp__bundle-item-info">
+                  <div class="bb-pdp__bundle-item-title">{{ bp.title }}</div>
+                  <div class="bb-pdp__bundle-item-price" data-item-price>
+                    {%- if bp_sold_out -%}Sold out{%- else -%}{{ bv.price | money }}{%- endif -%}
+                  </div>
+                </div>
+                <div class="bb-pdp__bundle-item-qty" style="display: none;" data-pdp-item-qty>
+                  <button type="button" data-action="decrease" aria-label="Decrease quantity" disabled>&#8722;</button>
+                  <span data-pdp-qty-value>1</span>
+                  <button type="button" data-action="increase" aria-label="Increase quantity">&#43;</button>
                 </div>
               </div>
-              <div class="bb-pdp__bundle-item-qty" style="display: none;" data-pdp-item-qty>
-                <button type="button" data-action="decrease" aria-label="Decrease quantity" disabled>&#8722;</button>
-                <span data-pdp-qty-value>1</span>
-                <button type="button" data-action="increase" aria-label="Increase quantity">&#43;</button>
-              </div>
+
+              {%- if bp_has_variants -%}
+                <div class="bb-pdp__item-options" data-item-options>
+                  {%- for bp_option in bp.options_with_values -%}
+                    {%- assign bp_opt_down = bp_option.name | downcase -%}
+                    {%- assign bp_is_color = false -%}
+                    {%- if bp_opt_down == 'color' or bp_opt_down == 'colour' or bp_opt_down == 'colors' -%}
+                      {%- assign bp_is_color = true -%}
+                    {%- endif -%}
+
+                    <div class="bb-pdp__item-option-group" data-item-option-group data-item-option-position="{{ bp_option.position }}">
+                      {%- if bp_is_color -%}
+                        <div class="bb-pdp__item-swatches">
+                          {%- for val in bp_option.values -%}
+                            {%- assign bp_color_handle = val | handle -%}
+                            {%- assign bp_swatch_style = '' -%}
+                            {%- if val.swatch.image -%}
+                              {%- assign bp_swatch_style = 'background-image: url(' | append: val.swatch.image | image_url: width: 36 | prepend: "'" | append: "'" | append: '); background-size: cover;' -%}
+                            {%- elsif val.swatch.color -%}
+                              {%- assign bp_swatch_style = 'background-color: ' | append: val.swatch.color | append: ';' -%}
+                            {%- else -%}
+                              {%- assign bp_meta_swatch = metaobjects['shopify--color-pattern'][bp_color_handle] -%}
+                              {%- if bp_meta_swatch.image -%}
+                                {%- assign bp_swatch_style = 'background-image: url(' | append: bp_meta_swatch.image | image_url: width: 36 | prepend: "'" | append: "'" | append: '); background-size: cover;' -%}
+                              {%- elsif bp_meta_swatch.color -%}
+                                {%- assign bp_swatch_style = 'background-color: ' | append: bp_meta_swatch.color | append: ';' -%}
+                              {%- endif -%}
+                            {%- endif -%}
+                            <button
+                              type="button"
+                              class="bb-pdp__item-swatch{% if bp_option.selected_value == val %} bb-pdp__item-swatch--active{% endif %}"
+                              data-item-option-value="{{ val | escape }}"
+                              data-item-option-position="{{ bp_option.position }}"
+                              title="{{ val }}"
+                              aria-label="{{ val }}"
+                            >
+                              <span class="bb-pdp__item-swatch-visual"{% if bp_swatch_style != '' %} style="{{ bp_swatch_style }}"{% endif %} data-color-handle="{{ bp_color_handle }}"></span>
+                            </button>
+                          {%- endfor -%}
+                        </div>
+                      {%- else -%}
+                        <div class="bb-pdp__item-pills">
+                          {%- for val in bp_option.values -%}
+                            <button
+                              type="button"
+                              class="bb-pdp__item-pill{% if bp_option.selected_value == val %} bb-pdp__item-pill--active{% endif %}"
+                              data-item-option-value="{{ val | escape }}"
+                              data-item-option-position="{{ bp_option.position }}"
+                            >
+                              {{ val }}
+                            </button>
+                          {%- endfor -%}
+                        </div>
+                      {%- endif -%}
+                    </div>
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
             </div>
           {%- endfor -%}
         </div>

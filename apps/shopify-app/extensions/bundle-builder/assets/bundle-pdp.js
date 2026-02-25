@@ -176,19 +176,48 @@
         });
       });
 
-      // Bundle item selection
+      // Bundle item selection + per-item variant options
       this.els.bundleItems.forEach(function (item) {
+        // Parse per-item variants if available
+        var variantScript = item.querySelector('[data-item-variants]');
+        if (variantScript) {
+          try {
+            item._variants = JSON.parse(variantScript.textContent);
+            item._selectedOptions = {};
+            // Initialize selected options from current active buttons
+            var optGroups = item.querySelectorAll('[data-item-option-group]');
+            optGroups.forEach(function (grp) {
+              var pos = grp.dataset.itemOptionPosition;
+              var activeBtn = grp.querySelector('.bb-pdp__item-swatch--active, .bb-pdp__item-pill--active');
+              if (activeBtn && pos) {
+                item._selectedOptions[pos] = activeBtn.dataset.itemOptionValue;
+              }
+            });
+          } catch (_e) { /* ignore parse errors */ }
+        }
+
+        // Per-item option buttons (swatches + pills)
+        var itemOptBtns = item.querySelectorAll('[data-item-option-value]');
+        itemOptBtns.forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            self.handleItemOptionSelect(item, btn);
+          });
+        });
+
         if (item.dataset.available === 'false') return;
 
-        item.addEventListener('click', function (e) {
-          if (e.target.closest('[data-action]')) return;
+        // Click to toggle bundle item (only on the top row, not options area)
+        var topRow = item.querySelector('.bb-pdp__bundle-item-top') || item;
+        topRow.addEventListener('click', function (e) {
+          if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-value]')) return;
           self.toggleBundleItem(item);
         });
 
         item.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            if (!e.target.closest('[data-action]')) {
+            if (!e.target.closest('[data-action]') && !e.target.closest('[data-item-option-value]')) {
               self.toggleBundleItem(item);
             }
           }
@@ -408,6 +437,88 @@
           }
         });
       });
+    }
+
+    handleItemOptionSelect(item, btn) {
+      if (!item._variants || !item._selectedOptions) return;
+
+      var position = btn.dataset.itemOptionPosition;
+      var value = btn.dataset.itemOptionValue;
+      var group = btn.closest('[data-item-option-group]');
+
+      // Update active state in this group
+      var isSwatch = btn.classList.contains('bb-pdp__item-swatch');
+      var activeClass = isSwatch ? 'bb-pdp__item-swatch--active' : 'bb-pdp__item-pill--active';
+      if (group) {
+        group.querySelectorAll('[data-item-option-value]').forEach(function (b) {
+          b.classList.remove('bb-pdp__item-swatch--active', 'bb-pdp__item-pill--active');
+        });
+      }
+      btn.classList.add(activeClass);
+
+      // Update selected options and find matching variant
+      item._selectedOptions[position] = value;
+      var matchingVariant = this.findItemVariant(item);
+
+      if (matchingVariant) {
+        // Update the item's variant ID and price
+        var oldVariantId = item.dataset.variantId;
+        item.dataset.variantId = String(matchingVariant.id);
+        item.dataset.price = String(matchingVariant.price);
+        item.dataset.available = String(matchingVariant.available);
+
+        // Update displayed price
+        var priceEl = item.querySelector('[data-item-price]');
+        if (priceEl) {
+          priceEl.textContent = matchingVariant.available
+            ? Core.formatMoney(matchingVariant.price, this.moneyFormat)
+            : 'Sold out';
+        }
+
+        // Update thumbnail image
+        if (matchingVariant.image) {
+          var imgEl = item.querySelector('[data-item-image]');
+          if (imgEl) imgEl.src = matchingVariant.image;
+        }
+
+        // Update the selectedProducts map if this item was already selected
+        if (this.selectedProducts.has(oldVariantId)) {
+          var entry = this.selectedProducts.get(oldVariantId);
+          this.selectedProducts.delete(oldVariantId);
+          entry.variantId = String(matchingVariant.id);
+          entry.price = matchingVariant.price;
+          this.selectedProducts.set(entry.variantId, entry);
+          this.recalculate();
+        }
+
+        // Toggle availability styling
+        if (!matchingVariant.available) {
+          item.classList.add('bb-pdp__bundle-item--disabled');
+        } else if (item.getAttribute('aria-disabled') !== 'true') {
+          item.classList.remove('bb-pdp__bundle-item--disabled');
+        }
+      }
+    }
+
+    findItemVariant(item) {
+      if (!item._variants || !item._selectedOptions) return null;
+      var selectedOptions = item._selectedOptions;
+      var positions = Object.keys(selectedOptions);
+
+      for (var i = 0; i < item._variants.length; i++) {
+        var variant = item._variants[i];
+        var match = true;
+        for (var j = 0; j < positions.length; j++) {
+          var pos = positions[j];
+          var optionIndex = parseInt(pos, 10) - 1;
+          if (variant.options[optionIndex] !== selectedOptions[pos]) {
+            match = false;
+            break;
+          }
+        }
+        if (match) return variant;
+      }
+      return null;
     }
 
     toggleBundleItem(item) {
