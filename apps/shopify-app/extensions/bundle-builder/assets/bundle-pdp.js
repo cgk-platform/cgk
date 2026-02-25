@@ -42,6 +42,13 @@
         try { this.variants = JSON.parse(variantScript.textContent); } catch (_e) { /* ignore */ }
       }
 
+      // Parse media map (shared vs variant-specific image assignments)
+      this.mediaMap = {};
+      var mediaMapScript = section.querySelector('[data-pdp-media-map]');
+      if (mediaMapScript) {
+        try { this.mediaMap = JSON.parse(mediaMapScript.textContent); } catch (_e) { /* ignore */ }
+      }
+
       this.els = {
         // Gallery
         gallery: section.querySelector('[data-gallery]'),
@@ -257,49 +264,37 @@
     /**
      * Build visible indices for a variant's image group.
      *
-     * Each variant has a featured_media_id. In Shopify, product images
-     * are ordered so a variant's images start at its featured_media and
-     * continue until the next variant's featured_media. This gives ~4-5
-     * images per variant (color+size combo).
+     * Uses Shopify's image.attached_to_variant? and image.variants data
+     * (serialized in data-pdp-media-map) to determine which images to show:
+     * - Shared images (not attached to any variant) → always visible
+     * - Variant-specific images → visible only when assigned to current variant
      *
-     * Fallback: alt-text color match → show all.
+     * Fallback chain: media map → featured_media boundary → alt-text → show all.
      */
     _buildVariantMediaGroup(variant, slides) {
       var visibleIndices = new Set();
+      var variantId = variant.id;
+      var self = this;
+      var hasMediaMap = Object.keys(this.mediaMap).length > 0;
 
-      // Map media IDs to slide indices
-      var mediaIdToIndex = {};
-      slides.forEach(function (slide) {
-        var mid = slide.dataset.mediaId;
-        if (mid) mediaIdToIndex[mid] = parseInt(slide.dataset.slideIndex, 10);
-      });
-
-      // Collect ALL unique featured_media positions (sorted), one per variant
-      var allFeaturedPositions = [];
-      this.variants.forEach(function (v) {
-        if (v.featured_media_id && String(v.featured_media_id) in mediaIdToIndex) {
-          allFeaturedPositions.push(mediaIdToIndex[String(v.featured_media_id)]);
-        }
-      });
-      allFeaturedPositions = Array.from(new Set(allFeaturedPositions)).sort(function (a, b) { return a - b; });
-
-      // Find THIS variant's featured_media position
-      var myFmId = variant.featured_media_id;
-      var myStart = myFmId ? mediaIdToIndex[String(myFmId)] : undefined;
-
-      if (myStart !== undefined && allFeaturedPositions.length > 1) {
-        // Find end: next featured_media position after ours
-        var myEnd = slides.length;
-        for (var i = 0; i < allFeaturedPositions.length; i++) {
-          if (allFeaturedPositions[i] > myStart) {
-            myEnd = allFeaturedPositions[i];
-            break;
+      // Primary: use media map (shared vs variant-specific)
+      if (hasMediaMap) {
+        slides.forEach(function (slide) {
+          var idx = parseInt(slide.dataset.slideIndex, 10);
+          var entry = self.mediaMap[String(idx)];
+          if (!entry) {
+            visibleIndices.add(idx);
+            return;
           }
-        }
-
-        for (var j = myStart; j < myEnd; j++) visibleIndices.add(j);
-
-        if (visibleIndices.size >= 2) return visibleIndices;
+          if (entry.shared) {
+            // Shared image — show for all variants
+            visibleIndices.add(idx);
+          } else if (entry.variantIds && entry.variantIds.indexOf(variantId) !== -1) {
+            // Variant-specific image assigned to current variant
+            visibleIndices.add(idx);
+          }
+        });
+        if (visibleIndices.size >= 1) return visibleIndices;
       }
 
       // Fallback: alt-text color match
@@ -315,8 +310,9 @@
         var colorName = variant.options[colorPosition - 1];
         if (colorName) {
           var altMatches = new Set();
-          slides.forEach(function (slide, i) {
-            if (slide.dataset.mediaColor === colorName) altMatches.add(i);
+          slides.forEach(function (slide) {
+            var idx = parseInt(slide.dataset.slideIndex, 10);
+            if (slide.dataset.mediaColor === colorName) altMatches.add(idx);
           });
           if (altMatches.size >= 2) return altMatches;
         }

@@ -56,14 +56,8 @@
 {%- assign bundle_products = block.settings.products -%}
 {%- assign current_variant = product.selected_or_first_available_variant -%}
 
-{%- comment -%} Determine selected color for media filtering {%- endcomment -%}
-{%- assign selected_color = '' -%}
-{%- for option in product.options_with_values -%}
-  {%- assign opt_down = option.name | downcase -%}
-  {%- if opt_down == 'color' or opt_down == 'colour' or opt_down == 'colors' -%}
-    {%- assign selected_color = option.selected_value -%}
-  {%- endif -%}
-{%- endfor -%}
+{%- comment -%} Title prefix for extracting color name from media alt text {%- endcomment -%}
+{%- assign title_prefix = product.title | append: ' - ' -%}
 
 {%- comment -%} Build variant JSON {%- endcomment -%}
 {%- capture variants_json -%}
@@ -82,17 +76,23 @@
 ]
 {%- endcapture -%}
 
-{%- comment -%} Media color filtering — match theme's exact `where: 'alt', image_color_name` logic {%- endcomment -%}
-{%- assign title_prefix = product.title | append: ' - ' -%}
-{%- assign image_color_name = product.title -%}
-{%- if selected_color != blank -%}
-  {%- assign image_color_name = product.title | append: ' - ' | append: selected_color -%}
-{%- endif -%}
-{%- assign color_medias = product.media | where: 'alt', image_color_name -%}
-{%- assign has_color_media = false -%}
-{%- if color_medias != blank and selected_color != blank -%}
-  {%- assign has_color_media = true -%}
-{%- endif -%}
+{%- comment -%} Build media map: which images are shared vs variant-specific (using product.images) {%- endcomment -%}
+{%- capture media_map_json -%}
+{
+  {%- assign mm_img_idx = 0 -%}
+  {%- for media in product.media -%}
+    {%- if forloop.index > 1 -%},{%- endif -%}
+    "{{ forloop.index0 }}":
+    {%- if media.media_type == 'image' -%}
+      {%- assign mm_image = product.images[mm_img_idx] -%}
+      {"shared":{% if mm_image.attached_to_variant? %}false{% else %}true{% endif %},"variantIds":[{%- for v in mm_image.variants -%}{%- if forloop.index > 1 -%},{%- endif -%}{{ v.id }}{%- endfor -%}]}
+      {%- assign mm_img_idx = mm_img_idx | plus: 1 -%}
+    {%- else -%}
+      {"shared":true,"variantIds":[]}
+    {%- endif -%}
+  {%- endfor -%}
+}
+{%- endcapture -%}
 
 {%- comment -%} Capture icon HTML (reused in desktop and mobile) {%- endcomment -%}
 {%- capture icons_html -%}
@@ -196,6 +196,7 @@
   style="--bb-accent-color: {{ accent_color }}; --bb-btn-text-color: {{ button_text_color }};"
 >
   <script type="application/json" data-pdp-variants>{{ variants_json | strip_newlines }}</script>
+  <script type="application/json" data-pdp-media-map>{{ media_map_json | strip_newlines }}</script>
 
   <div class="bb-pdp__layout">
     {%- comment -%} ===== GALLERY COLUMN ===== {%- endcomment -%}
@@ -205,6 +206,7 @@
           {%- comment -%} Thumbnails {%- endcomment -%}
           <div class="bb-pdp__thumbs" data-gallery-thumbs>
             <div class="bb-pdp__thumbs-track">
+              {%- assign thumb_img_idx = 0 -%}
               {%- for media in product.media -%}
                 {%- assign media_color = '' -%}
                 {%- if media.alt != blank -%}
@@ -213,12 +215,19 @@
                     {%- assign media_color = stripped_alt -%}
                   {%- endif -%}
                 {%- endif -%}
-                {%- comment -%} Theme logic: if color media exist, ONLY show matching. Otherwise show all. {%- endcomment -%}
+                {%- comment -%} Show/hide: shared images show for all, variant-specific only for assigned variants {%- endcomment -%}
                 {%- assign show_media = true -%}
-                {%- if has_color_media -%}
-                  {%- if media.alt != image_color_name -%}
+                {%- if media.media_type == 'image' -%}
+                  {%- assign t_image = product.images[thumb_img_idx] -%}
+                  {%- if t_image.attached_to_variant? -%}
                     {%- assign show_media = false -%}
+                    {%- for v in t_image.variants -%}
+                      {%- if v.id == current_variant.id -%}
+                        {%- assign show_media = true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
                   {%- endif -%}
+                  {%- assign thumb_img_idx = thumb_img_idx | plus: 1 -%}
                 {%- endif -%}
                 <button
                   class="bb-pdp__thumb"
@@ -244,6 +253,7 @@
           {%- comment -%} Main slider {%- endcomment -%}
           <div class="bb-pdp__slider-wrap">
             <div class="bb-pdp__slider" data-gallery-slider>
+              {%- assign slide_img_idx = 0 -%}
               {%- for media in product.media -%}
                 {%- assign media_color = '' -%}
                 {%- if media.alt != blank -%}
@@ -253,10 +263,17 @@
                   {%- endif -%}
                 {%- endif -%}
                 {%- assign show_media = true -%}
-                {%- if has_color_media -%}
-                  {%- if media.alt != image_color_name -%}
+                {%- if media.media_type == 'image' -%}
+                  {%- assign s_image = product.images[slide_img_idx] -%}
+                  {%- if s_image.attached_to_variant? -%}
                     {%- assign show_media = false -%}
+                    {%- for v in s_image.variants -%}
+                      {%- if v.id == current_variant.id -%}
+                        {%- assign show_media = true -%}
+                      {%- endif -%}
+                    {%- endfor -%}
                   {%- endif -%}
+                  {%- assign slide_img_idx = slide_img_idx | plus: 1 -%}
                 {%- endif -%}
                 <div
                   class="bb-pdp__slide"
