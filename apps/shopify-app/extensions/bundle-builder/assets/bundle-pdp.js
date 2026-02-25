@@ -278,23 +278,30 @@
       var hasMediaMap = Object.keys(this.mediaMap).length > 0;
 
       // Primary: use media map (shared vs variant-specific)
+      // Only if the map actually has variant-specific entries
       if (hasMediaMap) {
-        slides.forEach(function (slide) {
-          var idx = parseInt(slide.dataset.slideIndex, 10);
-          var entry = self.mediaMap[String(idx)];
-          if (!entry) {
-            visibleIndices.add(idx);
-            return;
-          }
-          if (entry.shared) {
-            // Shared image — show for all variants
-            visibleIndices.add(idx);
-          } else if (entry.variantIds && entry.variantIds.indexOf(variantId) !== -1) {
-            // Variant-specific image assigned to current variant
-            visibleIndices.add(idx);
-          }
-        });
-        if (visibleIndices.size >= 1) return visibleIndices;
+        var hasVariantSpecific = false;
+        var mapKeys = Object.keys(this.mediaMap);
+        for (var mi = 0; mi < mapKeys.length; mi++) {
+          if (!this.mediaMap[mapKeys[mi]].shared) { hasVariantSpecific = true; break; }
+        }
+
+        if (hasVariantSpecific) {
+          slides.forEach(function (slide) {
+            var idx = parseInt(slide.dataset.slideIndex, 10);
+            var entry = self.mediaMap[String(idx)];
+            if (!entry) {
+              visibleIndices.add(idx);
+              return;
+            }
+            if (entry.shared) {
+              visibleIndices.add(idx);
+            } else if (entry.variantIds && entry.variantIds.indexOf(variantId) !== -1) {
+              visibleIndices.add(idx);
+            }
+          });
+          if (visibleIndices.size >= 1) return visibleIndices;
+        }
       }
 
       // Fallback: alt-text color match
