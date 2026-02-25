@@ -1,11 +1,8 @@
 /**
  * Environment variable validation for Command Center
  *
- * Imported at app startup to fail fast on missing variables.
- * Gateway tokens are required — without them we can't connect.
+ * Called at request time (not import time) to avoid failing during next build.
  */
-
-import { validateRequiredEnv, validateEnv } from '@cgk-platform/core'
 
 const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET'] as const
 
@@ -16,12 +13,16 @@ const OPTIONAL_ENV_VARS = [
   'OPENCLAW_VITA_GATEWAY_TOKEN',
 ] as const
 
-validateRequiredEnv([...REQUIRED_ENV_VARS])
+let validated = false
 
-if (process.env.NODE_ENV === 'development') {
-  const result = validateEnv([], [...OPTIONAL_ENV_VARS])
-  if (result.warnings.length > 0) {
-    console.warn(`[COMMAND-CENTER] Missing optional env vars: ${result.warnings.join(', ')}`)
+/** Call at request time to validate env vars once */
+export function ensureEnvValidated(): void {
+  if (validated) return
+  validated = true
+
+  const missing = REQUIRED_ENV_VARS.filter((key) => !process.env[key])
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`)
   }
 }
 

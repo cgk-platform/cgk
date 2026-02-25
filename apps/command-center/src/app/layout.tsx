@@ -1,5 +1,3 @@
-import '@/lib/env-validation'
-
 import { Toaster } from '@cgk-platform/ui'
 import { TooltipProvider } from '@cgk-platform/ui'
 import type { Metadata, Viewport } from 'next'
