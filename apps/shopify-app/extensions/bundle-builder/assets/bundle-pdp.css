@@ -703,40 +703,84 @@
   text-decoration: line-through;
 }
 
-/* ===== 11. TIER PROGRESS ===== */
-.bb-pdp__tier {
-  padding: 1.4rem 1.6rem;
-  background: var(--bb-accent-light);
-  border-radius: var(--bb-radius);
-  margin-top: 20px;
-}
+/* ===== 11. TIER PROGRESS (milestone bar + reward cards) ===== */
+
+.bb-pdp__tier { margin-top: 20px; }
 
 .bb-pdp__tier-label {
-  font-size: 1.3rem;
+  font-family: var(--bb-font-1);
+  font-size: 13px;
   font-weight: 600;
-  margin: 0 0 0.8rem;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px;
   color: var(--bb-text);
+  text-align: center;
 }
 
-.bb-pdp__tier-bar {
-  height: 0.6rem;
-  background: var(--bb-accent-muted);
-  border-radius: 0.3rem;
-  overflow: hidden;
+/* Milestone progress bar */
+.bb-pdp__tier-bar { position: relative; height: 10px; margin-bottom: 12px; }
+.bb-pdp__tier-bar-bg {
+  position: absolute; top: 50%; left: 0; right: 0; height: 3px;
+  transform: translateY(-50%); background: #e0e0e0; border-radius: 2px;
+}
+.bb-pdp__tier-bar-fill {
+  position: absolute; top: 50%; left: 0; height: 3px;
+  transform: translateY(-50%); background: var(--bb-accent); border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); width: 0%;
+}
+.bb-pdp__tier-dots { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
+.bb-pdp__tier-dot {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; border: 2px solid #cacaca; transition: border-color 0.3s;
+}
+.bb-pdp__tier-dot--active { border-color: var(--bb-accent); }
+
+/* Reward cards */
+.bb-pdp__tier-cards { display: flex; gap: 8px; }
+.bb-pdp__tier-card {
+  position: relative; flex: 1; padding: 10px 6px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px;
+  border-radius: 4px; border: 1px dashed #cacaca;
+  background: rgba(234, 234, 233, 0.15); transition: all 0.3s;
+}
+.bb-pdp__tier-card--unlocked { border: 1px solid var(--bb-accent); background: #fff; }
+.bb-pdp__tier-card-threshold {
+  font-family: var(--bb-font-1); font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.3px; color: #000;
+}
+.bb-pdp__tier-card-icon {
+  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+}
+.bb-pdp__tier-card-icon--has-image { width: 48px; height: 48px; }
+.bb-pdp__tier-card-icon img {
+  width: 100%; height: 100%; object-fit: contain; border-radius: 2px;
+}
+.bb-pdp__tier-card:not(.bb-pdp__tier-card--unlocked) .bb-pdp__tier-card-icon img { opacity: 0.3; }
+.bb-pdp__tier-card:not(.bb-pdp__tier-card--unlocked) .bb-pdp__tier-card-icon svg { opacity: 0.5; }
+.bb-pdp__tier-card-reward {
+  font-family: var(--bb-font-1); font-size: 9px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.3px; color: #929292;
+}
+.bb-pdp__tier-card--unlocked .bb-pdp__tier-card-reward { color: #000; }
+.bb-pdp__tier-card-badge {
+  position: absolute; top: -12px; right: -12px;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bb-accent); color: #fff;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-family: var(--bb-font-1); font-size: 8px; font-weight: 600;
+  text-transform: uppercase; line-height: 1.1; z-index: 2;
 }
 
-.bb-pdp__tier-fill {
-  height: 100%;
-  background: var(--bb-accent);
-  border-radius: 0.3rem;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 0%;
+/* Unlocked callout */
+.bb-pdp__tier-callout {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 6px 12px; margin-top: 12px; border-radius: 4px; border: 1px solid var(--bb-accent);
 }
-
-.bb-pdp__tier-hint {
-  font-size: 1.2rem;
-  color: var(--bb-text-hint);
-  margin: 0.6rem 0 0;
+.bb-pdp__tier-callout-icon { flex-shrink: 0; color: var(--bb-accent); }
+.bb-pdp__tier-callout span {
+  font-family: var(--bb-font-1); font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.3px; color: var(--bb-accent);
 }
 
 /* ===== 12. BUNDLE ITEM CARDS ===== */

@@ -32,22 +32,22 @@
   {%- assign tier_count = 0 -%}
   {%- if block.settings.discount_2_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":2,"discount":{{ block.settings.discount_2_items }},"label":{{ block.settings.tier_2_label | default: '' | json }}}
+    {"count":{{ block.settings.discount_2_items }},"discount":{{ block.settings.discount_2_items }},"label":{{ block.settings.tier_2_label | default: '' | json }},"reward":{{ block.settings.tier_2_reward | default: '' | json }},"giftImage":{{ block.settings.tier_2_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_2_value_badge | default: '' | json }}}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_3_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":3,"discount":{{ block.settings.discount_3_items }},"label":{{ block.settings.tier_3_label | default: '' | json }}}
+    {"count":{{ block.settings.discount_3_items }},"discount":{{ block.settings.discount_3_items }},"label":{{ block.settings.tier_3_label | default: '' | json }},"reward":{{ block.settings.tier_3_reward | default: '' | json }},"giftImage":{{ block.settings.tier_3_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_3_value_badge | default: '' | json }}}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_4_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":4,"discount":{{ block.settings.discount_4_items }},"label":{{ block.settings.tier_4_label | default: '' | json }}}
+    {"count":{{ block.settings.discount_4_items }},"discount":{{ block.settings.discount_4_items }},"label":{{ block.settings.tier_4_label | default: '' | json }},"reward":{{ block.settings.tier_4_reward | default: '' | json }},"giftImage":{{ block.settings.tier_4_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_4_value_badge | default: '' | json }}}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.discount_5_items > 0 -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":5,"discount":{{ block.settings.discount_5_items }},"label":{{ block.settings.tier_5_label | default: '' | json }}}
+    {"count":{{ block.settings.discount_5_items }},"discount":{{ block.settings.discount_5_items }},"label":{{ block.settings.tier_5_label | default: '' | json }},"reward":{{ block.settings.tier_5_reward | default: '' | json }},"giftImage":{{ block.settings.tier_5_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_5_value_badge | default: '' | json }}}
   {%- endif -%}
 ]
   {%- endcapture -%}
@@ -463,14 +463,30 @@
 
       {%- comment -%} === BUNDLE BUILDER === {%- endcomment -%}
 
-      {%- comment -%} 7. Tier progress {%- endcomment -%}
+      {%- comment -%} 7. Tier progress — Rawdog-style milestone bar + reward cards {%- endcomment -%}
       {%- if show_tier_progress -%}
         <div class="bb-pdp__tier" data-pdp-tier>
-          <p class="bb-pdp__tier-label" data-pdp-tier-label>Select items to unlock discounts</p>
-          <div class="bb-pdp__tier-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Discount tier progress">
-            <div class="bb-pdp__tier-fill" data-pdp-tier-fill></div>
+          {%- comment -%} Progress message {%- endcomment -%}
+          <p class="bb-pdp__tier-label" data-pdp-tier-label>Add products to unlock free gifts</p>
+
+          {%- comment -%} Milestone progress bar {%- endcomment -%}
+          <div class="bb-pdp__tier-bar" data-pdp-tier-bar>
+            <div class="bb-pdp__tier-bar-bg"></div>
+            <div class="bb-pdp__tier-bar-fill" data-pdp-tier-fill></div>
+            {%- comment -%} Milestone dots rendered by JS based on tier count {%- endcomment -%}
+            <div class="bb-pdp__tier-dots" data-pdp-tier-dots></div>
           </div>
-          <p class="bb-pdp__tier-hint" data-pdp-tier-hint style="display: none;"></p>
+
+          {%- comment -%} Reward tier cards {%- endcomment -%}
+          <div class="bb-pdp__tier-cards" data-pdp-tier-cards>
+            {%- comment -%} Cards rendered by JS from tier data {%- endcomment -%}
+          </div>
+
+          {%- comment -%} Unlocked rewards callout {%- endcomment -%}
+          <div class="bb-pdp__tier-callout" data-pdp-tier-callout style="display:none;">
+            <svg class="bb-pdp__tier-callout-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            <span data-pdp-tier-callout-text></span>
+          </div>
         </div>
       {%- endif -%}
 
@@ -789,50 +805,118 @@
     {
       "type": "range",
       "id": "discount_2_items",
-      "label": "Discount for 2 items",
-      "min": 0, "max": 100, "step": 1, "default": 10
+      "label": "Tier 1 — item count to unlock",
+      "min": 0, "max": 100, "step": 1, "default": 2
     },
     {
       "type": "text",
       "id": "tier_2_label",
-      "label": "Tier 2 label",
-      "default": "Starter Bundle"
+      "label": "Tier 1 threshold label",
+      "default": "2+ Items",
+      "info": "Shown above the card (e.g. '2+ Items' or 'Shop $50+')"
+    },
+    {
+      "type": "text",
+      "id": "tier_2_reward",
+      "label": "Tier 1 reward text",
+      "default": "Free Shipping",
+      "info": "Shown inside the card when unlocked"
+    },
+    {
+      "type": "text",
+      "id": "tier_2_gift_image",
+      "label": "Tier 1 gift image URL",
+      "info": "Optional product image for the reward card"
+    },
+    {
+      "type": "text",
+      "id": "tier_2_value_badge",
+      "label": "Tier 1 value badge",
+      "info": "e.g. '$15 VALUE' — leave blank to hide"
     },
     {
       "type": "range",
       "id": "discount_3_items",
-      "label": "Discount for 3 items",
-      "min": 0, "max": 100, "step": 1, "default": 15
+      "label": "Tier 2 — item count to unlock",
+      "min": 0, "max": 100, "step": 1, "default": 3
     },
     {
       "type": "text",
       "id": "tier_3_label",
-      "label": "Tier 3 label",
-      "default": "Value Bundle"
+      "label": "Tier 2 threshold label",
+      "default": "3+ Items"
+    },
+    {
+      "type": "text",
+      "id": "tier_3_reward",
+      "label": "Tier 2 reward text",
+      "default": "Free Gift"
+    },
+    {
+      "type": "text",
+      "id": "tier_3_gift_image",
+      "label": "Tier 2 gift image URL"
+    },
+    {
+      "type": "text",
+      "id": "tier_3_value_badge",
+      "label": "Tier 2 value badge"
     },
     {
       "type": "range",
       "id": "discount_4_items",
-      "label": "Discount for 4 items",
-      "min": 0, "max": 100, "step": 1, "default": 20
+      "label": "Tier 3 — item count to unlock",
+      "min": 0, "max": 100, "step": 1, "default": 5
     },
     {
       "type": "text",
       "id": "tier_4_label",
-      "label": "Tier 4 label",
-      "default": "Best Value"
+      "label": "Tier 3 threshold label",
+      "default": "5+ Items"
+    },
+    {
+      "type": "text",
+      "id": "tier_4_reward",
+      "label": "Tier 3 reward text",
+      "default": "Best Deal"
+    },
+    {
+      "type": "text",
+      "id": "tier_4_gift_image",
+      "label": "Tier 3 gift image URL"
+    },
+    {
+      "type": "text",
+      "id": "tier_4_value_badge",
+      "label": "Tier 3 value badge"
     },
     {
       "type": "range",
       "id": "discount_5_items",
-      "label": "Discount for 5+ items",
-      "min": 0, "max": 100, "step": 1, "default": 25
+      "label": "Tier 4 — item count to unlock (0 to disable)",
+      "min": 0, "max": 100, "step": 1, "default": 0
     },
     {
       "type": "text",
       "id": "tier_5_label",
-      "label": "Tier 5+ label",
-      "default": "Ultimate Bundle"
+      "label": "Tier 4 threshold label",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "tier_5_reward",
+      "label": "Tier 4 reward text",
+      "default": ""
+    },
+    {
+      "type": "text",
+      "id": "tier_5_gift_image",
+      "label": "Tier 4 gift image URL"
+    },
+    {
+      "type": "text",
+      "id": "tier_5_value_badge",
+      "label": "Tier 4 value badge"
     },
     {
       "type": "range",

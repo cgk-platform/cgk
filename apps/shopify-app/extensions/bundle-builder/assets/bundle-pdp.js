@@ -58,11 +58,14 @@
         priceBadge: section.querySelector('[data-pdp-price-badge]'),
         // Tabs
         tabsContainer: section.querySelector('[data-pdp-tabs]'),
-        // Tier
+        // Tier (milestone bar + cards)
         tierSection: section.querySelector('[data-pdp-tier]'),
         tierLabel: section.querySelector('[data-pdp-tier-label]'),
         tierFill: section.querySelector('[data-pdp-tier-fill]'),
-        tierHint: section.querySelector('[data-pdp-tier-hint]'),
+        tierDots: section.querySelector('[data-pdp-tier-dots]'),
+        tierCards: section.querySelector('[data-pdp-tier-cards]'),
+        tierCallout: section.querySelector('[data-pdp-tier-callout]'),
+        tierCalloutText: section.querySelector('[data-pdp-tier-callout-text]'),
         // Bundle
         bundleItems: section.querySelectorAll('[data-pdp-bundle-item]'),
         savings: section.querySelector('[data-pdp-savings]'),
@@ -86,6 +89,7 @@
       this.initGallery();
       this.initSelectlike();
       this.initTabs();
+      this.initTierCards();
       this.bindEvents();
       this.recalculate();
     }
@@ -796,51 +800,131 @@
       }
     }
 
+    /* ===== TIER CARDS INIT ===== */
+
+    initTierCards() {
+      if (!this.els.tierCards || !this.els.tierDots || this.tiers.length === 0) return;
+      var totalTiers = this.tiers.length;
+
+      // Render milestone dots
+      var dotsHtml = '';
+      for (var i = 0; i < totalTiers; i++) {
+        var leftPos = ((i + 0.5) / totalTiers) * 100;
+        dotsHtml += '<div class="bb-pdp__tier-dot" data-tier-dot="' + i + '" style="left:' + leftPos + '%"></div>';
+      }
+      this.els.tierDots.innerHTML = dotsHtml;
+
+      // Render reward cards
+      var cardsHtml = '';
+      for (var j = 0; j < totalTiers; j++) {
+        var tier = this.tiers[j];
+        var label = tier.label || (tier.count + '+ Items');
+        var reward = tier.reward || tier.label || '';
+        var giftImage = tier.giftImage || '';
+        var valueBadge = tier.valueBadge || '';
+
+        cardsHtml += '<div class="bb-pdp__tier-card" data-tier-card="' + j + '">';
+
+        // Value badge
+        if (valueBadge) {
+          cardsHtml += '<div class="bb-pdp__tier-card-badge">' + this._badgeLines(valueBadge) + '</div>';
+        }
+
+        // Threshold label
+        cardsHtml += '<span class="bb-pdp__tier-card-threshold">' + label + '</span>';
+
+        // Icon
+        if (giftImage) {
+          cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image"><img src="' + giftImage + '" alt="" width="48" height="48" loading="lazy"></div>';
+        } else {
+          cardsHtml += '<div class="bb-pdp__tier-card-icon">' + this._giftBoxSvg() + '</div>';
+        }
+
+        // Reward text
+        if (reward) {
+          cardsHtml += '<span class="bb-pdp__tier-card-reward">' + reward + '</span>';
+        }
+
+        cardsHtml += '</div>';
+      }
+      this.els.tierCards.innerHTML = cardsHtml;
+    }
+
+    _badgeLines(text) {
+      var words = text.split(' ');
+      var html = '';
+      for (var i = 0; i < words.length; i++) html += '<div>' + words[i] + '</div>';
+      return html;
+    }
+
+    _giftBoxSvg() {
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
+    }
+
+    /* ===== TIER PROGRESS UPDATE ===== */
+
     updateTierProgress(totalItems, activeTier, activeTierIndex, nextTier) {
       if (!this.els.tierFill || !this.els.tierLabel) return;
+      var totalTiers = this.tiers.length;
+      if (totalTiers === 0) return;
 
-      var lastTierCount = this.tiers.length > 0 ? this.tiers[this.tiers.length - 1].count : 0;
+      // Progress bar — fill extends to the center of the last unlocked tier's dot
+      var lastUnlockedIdx = -1;
+      for (var i = 0; i < totalTiers; i++) {
+        if (totalItems >= this.tiers[i].count) lastUnlockedIdx = i;
+      }
+      var progressWidth = lastUnlockedIdx >= 0 ? ((lastUnlockedIdx + 0.5) / totalTiers) * 100 : 0;
+      this.els.tierFill.style.width = progressWidth + '%';
 
-      if (lastTierCount === 0) {
-        this.els.tierFill.style.width = '0%';
-        this.els.tierLabel.textContent = 'Select items to unlock discounts';
-        if (this.els.tierHint) this.els.tierHint.style.display = 'none';
-        return;
+      // Update milestone dots
+      var dots = this.els.tierDots ? this.els.tierDots.querySelectorAll('.bb-pdp__tier-dot') : [];
+      for (var d = 0; d < dots.length; d++) {
+        if (totalItems >= this.tiers[d].count) {
+          dots[d].classList.add('bb-pdp__tier-dot--active');
+        } else {
+          dots[d].classList.remove('bb-pdp__tier-dot--active');
+        }
       }
 
-      var progress = Math.min(100, Math.max(0, (totalItems / lastTierCount) * 100));
-      this.els.tierFill.style.width = progress + '%';
-
-      if (nextTier) {
-        var needed = nextTier.count - totalItems;
-        var nextLabel = this.discountType === 'percentage'
-          ? nextTier.discount + '% off'
-          : Core.formatMoney(nextTier.discount, this.moneyFormat) + ' off';
-        var nextName = nextTier.label || nextLabel;
-        this.els.tierLabel.textContent = 'Add ' + needed + ' more for ' + nextName + '!';
-
-        if (this.els.tierHint && activeTier) {
-          var currentLabel = this.discountType === 'percentage'
-            ? activeTier.discount + '% off'
-            : Core.formatMoney(activeTier.discount, this.moneyFormat) + ' off';
-          this.els.tierHint.textContent = 'Current: ' + (activeTier.label || currentLabel);
-          this.els.tierHint.style.display = '';
-        } else if (this.els.tierHint) {
-          this.els.tierHint.style.display = 'none';
+      // Update card unlock states
+      var cards = this.els.tierCards ? this.els.tierCards.querySelectorAll('.bb-pdp__tier-card') : [];
+      for (var c = 0; c < cards.length; c++) {
+        if (totalItems >= this.tiers[c].count) {
+          cards[c].classList.add('bb-pdp__tier-card--unlocked');
+        } else {
+          cards[c].classList.remove('bb-pdp__tier-card--unlocked');
         }
-      } else if (activeTier) {
-        this.els.tierFill.style.width = '100%';
-        var maxLabel = this.discountType === 'percentage'
-          ? activeTier.discount + '% off'
-          : Core.formatMoney(activeTier.discount, this.moneyFormat) + ' off';
-        this.els.tierLabel.textContent = activeTier.label
-          ? activeTier.label + ' unlocked!'
-          : 'Max discount unlocked: ' + maxLabel;
-        if (this.els.tierHint) this.els.tierHint.style.display = 'none';
+      }
+
+      // Progress label text
+      if (totalItems === 0) {
+        this.els.tierLabel.textContent = 'Add products to unlock free gifts';
+      } else if (nextTier) {
+        var needed = nextTier.count - totalItems;
+        var itemWord = needed === 1 ? 'item' : 'items';
+        var nextName = nextTier.reward || nextTier.label || 'next reward';
+        this.els.tierLabel.textContent = 'Add ' + needed + ' more ' + itemWord + ' to unlock ' + nextName + '!';
       } else {
-        this.els.tierFill.style.width = '0%';
-        this.els.tierLabel.textContent = 'Select items to unlock discounts';
-        if (this.els.tierHint) this.els.tierHint.style.display = 'none';
+        this.els.tierLabel.textContent = 'All rewards unlocked!';
+      }
+
+      // Callout banner — show unlocked rewards
+      if (this.els.tierCallout && this.els.tierCalloutText) {
+        if (lastUnlockedIdx >= 0 && totalItems > 0) {
+          var rewardTexts = [];
+          for (var r = 0; r <= lastUnlockedIdx; r++) {
+            var rText = this.tiers[r].reward || this.tiers[r].label || '';
+            if (rText) rewardTexts.push(rText);
+          }
+          if (rewardTexts.length > 0) {
+            this.els.tierCalloutText.textContent = "You've unlocked " + rewardTexts.join(' + ') + '!';
+            this.els.tierCallout.style.display = '';
+          } else {
+            this.els.tierCallout.style.display = 'none';
+          }
+        } else {
+          this.els.tierCallout.style.display = 'none';
+        }
       }
     }
 
