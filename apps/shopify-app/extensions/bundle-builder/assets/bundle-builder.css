@@ -11,24 +11,24 @@
 .bb-container {
   --bb-bg: var(--bb-bg-color, #ffffff);
   --bb-text: var(--bb-text-color, #1a1a2e);
-  --bb-accent: var(--bb-accent-color, #2563eb);
+  --bb-accent: var(--bb-accent-color, #182f5c);
   --bb-btn-text: var(--bb-btn-text-color, #ffffff);
-  --bb-accent-light: color-mix(in srgb, var(--bb-accent) 12%, transparent);
-  --bb-accent-hover: color-mix(in srgb, var(--bb-accent) 40%, transparent);
-  --bb-accent-muted: color-mix(in srgb, var(--bb-accent) 20%, transparent);
-  --bb-text-muted: color-mix(in srgb, var(--bb-text) 65%, transparent);
-  --bb-text-faded: color-mix(in srgb, var(--bb-text) 50%, transparent);
-  --bb-text-hint: color-mix(in srgb, var(--bb-text) 60%, transparent);
-  --bb-border: color-mix(in srgb, var(--bb-text) 15%, transparent);
-  --bb-card-placeholder-bg: color-mix(in srgb, var(--bb-text) 5%, var(--bb-bg));
-  --bb-card-placeholder-icon: color-mix(in srgb, var(--bb-text) 25%, transparent);
+  --bb-accent-light: color-mix(in srgb, var(--bb-accent) 10%, transparent);
+  --bb-accent-hover: color-mix(in srgb, var(--bb-accent) 35%, transparent);
+  --bb-accent-muted: color-mix(in srgb, var(--bb-accent) 18%, transparent);
+  --bb-text-muted: color-mix(in srgb, var(--bb-text) 60%, transparent);
+  --bb-text-faded: color-mix(in srgb, var(--bb-text) 45%, transparent);
+  --bb-text-hint: color-mix(in srgb, var(--bb-text) 55%, transparent);
+  --bb-border: color-mix(in srgb, var(--bb-text) 12%, transparent);
+  --bb-card-placeholder-bg: color-mix(in srgb, var(--bb-text) 4%, var(--bb-bg));
+  --bb-card-placeholder-icon: color-mix(in srgb, var(--bb-text) 20%, transparent);
   --bb-compare-price: color-mix(in srgb, var(--bb-text) 45%, transparent);
-  --bb-radius: 12px;
-  --bb-card-radius: 10px;
-  --bb-success-bg: color-mix(in srgb, var(--bb-accent) 12%, var(--bb-bg));
-  --bb-success-text: color-mix(in srgb, var(--bb-accent) 80%, var(--bb-text));
+  --bb-radius: 6px;
+  --bb-card-radius: 0px;
+  --bb-success-bg: color-mix(in srgb, #16a34a 10%, var(--bb-bg));
+  --bb-success-text: #16a34a;
 
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: var(--bb-padding-top, 48px) 24px var(--bb-padding-bottom, 48px);
   background: var(--bb-bg);
@@ -96,8 +96,6 @@
 
 .bb-card:hover:not(.bb-card--sold-out) {
   border-color: var(--bb-accent-hover);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
 }
 
 .bb-card:focus-visible {
@@ -107,7 +105,7 @@
 
 .bb-card--selected {
   border-color: var(--bb-accent);
-  box-shadow: 0 0 0 1px var(--bb-accent), 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 1px var(--bb-accent);
 }
 
 .bb-card--selected .bb-card__check {
@@ -477,20 +475,24 @@
   display: block;
   width: 100%;
   padding: 16px 24px;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
   font-family: inherit;
   color: var(--bb-btn-text);
   background: var(--bb-accent);
-  border: none;
+  border: 1px solid var(--bb-accent);
   border-radius: var(--bb-radius);
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s, background-color 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
   text-align: center;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .bb-cta:hover:not(:disabled) {
-  opacity: 0.9;
+  background: var(--bb-bg);
+  color: var(--bb-accent);
+  border-color: var(--bb-accent);
 }
 
 .bb-cta:active:not(:disabled) {
@@ -523,6 +525,13 @@
 
 .bb-cta--success {
   background: var(--bb-success-text);
+  border-color: var(--bb-success-text);
+  color: #ffffff;
+}
+
+.bb-cta--success:hover:not(:disabled) {
+  background: var(--bb-success-text);
+  color: #ffffff;
 }
 
 @keyframes bb-spin {

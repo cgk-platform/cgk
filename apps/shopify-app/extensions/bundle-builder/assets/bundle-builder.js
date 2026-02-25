@@ -340,25 +340,32 @@
       });
     }
 
+    /**
+     * Continuous tier progress — fills smoothly from 0% to 100% across all tiers.
+     * Uses the last tier's count as the 100% mark.
+     */
     updateTierProgress(totalItems, activeTier, nextTier) {
       if (!this.els.tierFill || !this.els.tierLabel) return;
 
-      var progress = 0;
+      var lastTierCount = this.tiers.length > 0 ? this.tiers[this.tiers.length - 1].count : 0;
+
+      if (lastTierCount === 0) {
+        this.els.tierFill.style.width = '0%';
+        this.els.tierLabel.textContent = 'Select items to unlock discounts';
+        if (this.els.tierHint) this.els.tierHint.style.display = 'none';
+        if (this.els.tierBar) this.els.tierBar.setAttribute('aria-valuenow', '0');
+        return;
+      }
+
+      var progress = Math.min(100, Math.max(0, (totalItems / lastTierCount) * 100));
+      this.els.tierFill.style.width = progress + '%';
 
       if (nextTier) {
         var needed = nextTier.count - totalItems;
-        if (activeTier) {
-          progress = ((totalItems - activeTier.count) / (nextTier.count - activeTier.count)) * 100;
-        } else {
-          progress = (totalItems / nextTier.count) * 100;
-        }
-        progress = Math.min(100, Math.max(0, progress));
-        this.els.tierFill.style.width = progress + '%';
-
         var nextDiscountLabel = this.discountType === 'percentage'
           ? nextTier.discount + '% off'
           : Core.formatMoney(nextTier.discount, this.moneyFormat) + ' off';
-        var nextName = nextTier.label ? nextTier.label + ' \u2014 ' + nextDiscountLabel : nextDiscountLabel;
+        var nextName = nextTier.label || nextDiscountLabel;
         this.els.tierLabel.textContent = 'Add ' + needed + ' more for ' + nextName + '!';
 
         if (this.els.tierHint && activeTier) {
@@ -372,28 +379,23 @@
           this.els.tierHint.style.display = 'none';
         }
       } else if (activeTier) {
-        progress = 100;
         this.els.tierFill.style.width = '100%';
         var maxDiscountLabel = this.discountType === 'percentage'
           ? activeTier.discount + '% off'
           : Core.formatMoney(activeTier.discount, this.moneyFormat) + ' off';
         var maxName = activeTier.label ? activeTier.label + ' unlocked!' : 'Max discount unlocked: ' + maxDiscountLabel;
         this.els.tierLabel.textContent = maxName;
-        if (this.els.tierHint) {
-          this.els.tierHint.style.display = 'none';
-        }
+        if (this.els.tierHint) this.els.tierHint.style.display = 'none';
       } else {
         this.els.tierFill.style.width = '0%';
         if (this.tiers.length > 0) {
           this.els.tierLabel.textContent = 'Select items to unlock discounts';
         }
-        if (this.els.tierHint) {
-          this.els.tierHint.style.display = 'none';
-        }
+        if (this.els.tierHint) this.els.tierHint.style.display = 'none';
       }
 
       if (this.els.tierBar) {
-        this.els.tierBar.setAttribute('aria-valuenow', Math.round(progress));
+        this.els.tierBar.setAttribute('aria-valuenow', String(Math.round(progress)));
       }
     }
 

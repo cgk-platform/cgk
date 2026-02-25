@@ -33,12 +33,28 @@
       this.activeFreeGifts = new Map();
       this.freeGiftPending = false;
       this.activeThumbIndex = 0;
+      this.imageCount = 0;
+      this.touchStartX = 0;
+      this.touchStartY = 0;
+      this.isSwiping = false;
+
+      // Parse product variants for option selection
+      this.variants = [];
+      this.selectedOptions = {};
+      var variantScript = section.querySelector('[data-pdp-variants]');
+      if (variantScript) {
+        try { this.variants = JSON.parse(variantScript.textContent); } catch (_e) { /* ignore */ }
+      }
 
       this.els = {
         mainImage: section.querySelector('[data-pdp-main-img]'),
         mainImageWrap: section.querySelector('[data-pdp-main-image]'),
+        mainImageContainer: section.querySelector('.bb-pdp__main-image-container'),
         thumbs: section.querySelectorAll('[data-pdp-thumb]'),
-        variantSelect: section.querySelector('[data-pdp-variant-select]'),
+        dots: section.querySelectorAll('[data-pdp-dot]'),
+        prevArrow: section.querySelector('[data-pdp-arrow="prev"]'),
+        nextArrow: section.querySelector('[data-pdp-arrow="next"]'),
+        optionGroups: section.querySelectorAll('[data-option-group]'),
         priceEl: section.querySelector('[data-pdp-price]'),
         comparePriceEl: section.querySelector('[data-pdp-compare-price]'),
         tierSection: section.querySelector('[data-pdp-tier]'),
@@ -54,6 +70,18 @@
         notification: section.querySelector('[data-pdp-notification]'),
       };
 
+      this.imageCount = this.els.thumbs.length;
+
+      // Initialize selected options from active buttons/swatches
+      var self = this;
+      this.els.optionGroups.forEach(function (group) {
+        var pos = group.dataset.optionPosition;
+        var activeBtn = group.querySelector('.bb-pdp__swatch--active, .bb-pdp__option-btn--active');
+        if (activeBtn && pos) {
+          self.selectedOptions[pos] = activeBtn.dataset.optionValue;
+        }
+      });
+
       this.bindEvents();
       this.recalculate();
     }
@@ -64,42 +92,89 @@
       // Thumbnail gallery clicks
       this.els.thumbs.forEach(function (thumb) {
         thumb.addEventListener('click', function () {
-          self.selectThumb(thumb);
+          self.goToImage(parseInt(thumb.dataset.mediaIndex, 10) || 0);
         });
       });
 
+      // Dot indicator clicks
+      this.els.dots.forEach(function (dot) {
+        dot.addEventListener('click', function () {
+          self.goToImage(parseInt(dot.dataset.dotIndex, 10) || 0);
+        });
+      });
+
+      // Arrow button clicks
+      if (this.els.prevArrow) {
+        this.els.prevArrow.addEventListener('click', function () {
+          self.prevImage();
+        });
+      }
+      if (this.els.nextArrow) {
+        this.els.nextArrow.addEventListener('click', function () {
+          self.nextImage();
+        });
+      }
+
+      // Keyboard navigation on gallery
+      if (this.els.mainImageContainer) {
+        this.els.mainImageContainer.setAttribute('tabindex', '0');
+        this.els.mainImageContainer.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            self.prevImage();
+          } else if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            self.nextImage();
+          }
+        });
+      }
+
       // Touch/swipe support on main image
       if (this.els.mainImageWrap) {
-        var startX = 0;
         this.els.mainImageWrap.addEventListener('touchstart', function (e) {
-          startX = e.touches[0].clientX;
+          self.touchStartX = e.touches[0].clientX;
+          self.touchStartY = e.touches[0].clientY;
+          self.isSwiping = false;
         }, { passive: true });
 
+        this.els.mainImageWrap.addEventListener('touchmove', function (e) {
+          if (!self.isSwiping) {
+            var dx = Math.abs(e.touches[0].clientX - self.touchStartX);
+            var dy = Math.abs(e.touches[0].clientY - self.touchStartY);
+            // If horizontal movement is dominant, we're swiping the gallery
+            if (dx > dy && dx > 10) {
+              self.isSwiping = true;
+            }
+          }
+          // Prevent page scroll during horizontal swipe
+          if (self.isSwiping) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+
         this.els.mainImageWrap.addEventListener('touchend', function (e) {
+          if (!self.isSwiping) return;
           var endX = e.changedTouches[0].clientX;
-          var diff = startX - endX;
-          if (Math.abs(diff) > 50) {
-            var totalThumbs = self.els.thumbs.length;
-            if (totalThumbs <= 1) return;
+          var diff = self.touchStartX - endX;
+          if (Math.abs(diff) > 40) {
             if (diff > 0) {
-              // Swipe left -> next
-              var nextIndex = (self.activeThumbIndex + 1) % totalThumbs;
-              self.selectThumb(self.els.thumbs[nextIndex]);
+              self.nextImage();
             } else {
-              // Swipe right -> prev
-              var prevIndex = (self.activeThumbIndex - 1 + totalThumbs) % totalThumbs;
-              self.selectThumb(self.els.thumbs[prevIndex]);
+              self.prevImage();
             }
           }
         }, { passive: true });
       }
 
-      // Variant selector
-      if (this.els.variantSelect) {
-        this.els.variantSelect.addEventListener('change', function () {
-          self.handleVariantChange();
+      // Variant option buttons (swatches + size buttons)
+      this.els.optionGroups.forEach(function (group) {
+        var buttons = group.querySelectorAll('[data-option-value]');
+        buttons.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            self.handleOptionSelect(group, btn);
+          });
         });
-      }
+      });
 
       // Bundle item selection
       this.els.bundleItems.forEach(function (item) {
@@ -145,17 +220,44 @@
       }
     }
 
-    selectThumb(thumb) {
-      if (!this.els.mainImage) return;
+    // ---- Gallery navigation ----
 
+    prevImage() {
+      if (this.imageCount <= 1) return;
+      var idx = (this.activeThumbIndex - 1 + this.imageCount) % this.imageCount;
+      this.goToImage(idx);
+    }
+
+    nextImage() {
+      if (this.imageCount <= 1) return;
+      var idx = (this.activeThumbIndex + 1) % this.imageCount;
+      this.goToImage(idx);
+    }
+
+    goToImage(index) {
+      if (index < 0 || index >= this.imageCount) return;
+      if (index === this.activeThumbIndex) return;
+
+      var thumb = this.els.thumbs[index];
+      if (!thumb || !this.els.mainImage) return;
+
+      // Update thumb active state
       this.els.thumbs.forEach(function (t) {
         t.classList.remove('bb-pdp__thumb--active');
       });
       thumb.classList.add('bb-pdp__thumb--active');
 
-      this.activeThumbIndex = parseInt(thumb.dataset.mediaIndex, 10) || 0;
+      // Update dot active state
+      this.els.dots.forEach(function (d) {
+        d.classList.remove('bb-pdp__dot--active');
+      });
+      if (this.els.dots[index]) {
+        this.els.dots[index].classList.add('bb-pdp__dot--active');
+      }
 
-      // Swap main image
+      this.activeThumbIndex = index;
+
+      // Swap main image with fade
       var newSrc = thumb.dataset.imageSrc;
       var newSrcset = thumb.dataset.imageSrcset;
       var newAlt = thumb.dataset.imageAlt;
@@ -174,32 +276,138 @@
           self.els.mainImageWrap.classList.remove('bb-pdp__main-image--loading');
         }
       };
-    }
 
-    handleVariantChange() {
-      var select = this.els.variantSelect;
-      var option = select.options[select.selectedIndex];
-      var price = parseInt(option.dataset.price, 10);
-      var comparePrice = parseInt(option.dataset.comparePrice, 10);
-      var imageIndex = parseInt(option.dataset.imageIndex, 10);
+      // Scroll thumb into view if needed
+      var thumbsContainer = thumb.parentElement;
+      if (thumbsContainer) {
+        var thumbLeft = thumb.offsetLeft;
+        var thumbWidth = thumb.offsetWidth;
+        var containerScrollLeft = thumbsContainer.scrollLeft;
+        var containerWidth = thumbsContainer.offsetWidth;
 
-      if (this.els.priceEl) {
-        this.els.priceEl.textContent = Core.formatMoney(price, this.moneyFormat);
-      }
-
-      if (this.els.comparePriceEl) {
-        if (comparePrice > price) {
-          this.els.comparePriceEl.textContent = Core.formatMoney(comparePrice, this.moneyFormat);
-          this.els.comparePriceEl.style.display = '';
-        } else {
-          this.els.comparePriceEl.style.display = 'none';
+        if (thumbLeft < containerScrollLeft) {
+          thumbsContainer.scrollTo({ left: thumbLeft - 8, behavior: 'smooth' });
+        } else if (thumbLeft + thumbWidth > containerScrollLeft + containerWidth) {
+          thumbsContainer.scrollTo({ left: thumbLeft + thumbWidth - containerWidth + 8, behavior: 'smooth' });
         }
       }
+    }
 
-      // Select corresponding thumbnail
-      if (!isNaN(imageIndex) && this.els.thumbs[imageIndex]) {
-        this.selectThumb(this.els.thumbs[imageIndex]);
+    handleOptionSelect(group, btn) {
+      var position = group.dataset.optionPosition;
+      var value = btn.dataset.optionValue;
+
+      // Update active state for buttons in this group
+      var isSwatch = btn.classList.contains('bb-pdp__swatch');
+      var activeClass = isSwatch ? 'bb-pdp__swatch--active' : 'bb-pdp__option-btn--active';
+
+      group.querySelectorAll('[data-option-value]').forEach(function (b) {
+        b.classList.remove('bb-pdp__swatch--active', 'bb-pdp__option-btn--active');
+      });
+      btn.classList.add(activeClass);
+
+      // Update selected option name display (for color)
+      var nameSpan = group.querySelector('[data-option-selected-name]');
+      if (nameSpan) nameSpan.textContent = value;
+
+      // Update selectedOptions and find matching variant
+      this.selectedOptions[position] = value;
+      var matchingVariant = this.findVariant();
+
+      if (matchingVariant) {
+        // Update price
+        if (this.els.priceEl) {
+          this.els.priceEl.textContent = Core.formatMoney(matchingVariant.price, this.moneyFormat);
+        }
+
+        if (this.els.comparePriceEl) {
+          if (matchingVariant.compare_at_price && matchingVariant.compare_at_price > matchingVariant.price) {
+            this.els.comparePriceEl.textContent = Core.formatMoney(matchingVariant.compare_at_price, this.moneyFormat);
+            this.els.comparePriceEl.style.display = '';
+          } else {
+            this.els.comparePriceEl.style.display = 'none';
+          }
+        }
+
+        // Jump to variant's featured image
+        if (matchingVariant.featured_media_id) {
+          for (var i = 0; i < this.els.thumbs.length; i++) {
+            if (String(this.els.thumbs[i].dataset.mediaId) === String(matchingVariant.featured_media_id)) {
+              this.goToImage(i);
+              break;
+            }
+          }
+        }
+
+        // Mark unavailable options across other groups
+        this.updateOptionAvailability();
+
+        // Update URL
+        var productUrl = this.section.dataset.productUrl;
+        if (productUrl && window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', productUrl + '?variant=' + matchingVariant.id);
+        }
       }
+    }
+
+    findVariant() {
+      var selectedOptions = this.selectedOptions;
+      var positions = Object.keys(selectedOptions);
+
+      for (var i = 0; i < this.variants.length; i++) {
+        var variant = this.variants[i];
+        var match = true;
+        for (var j = 0; j < positions.length; j++) {
+          var pos = positions[j];
+          var optionIndex = parseInt(pos, 10) - 1;
+          if (variant.options[optionIndex] !== selectedOptions[pos]) {
+            match = false;
+            break;
+          }
+        }
+        if (match) return variant;
+      }
+      return null;
+    }
+
+    updateOptionAvailability() {
+      var self = this;
+      this.els.optionGroups.forEach(function (group) {
+        var pos = group.dataset.optionPosition;
+        var optionIndex = parseInt(pos, 10) - 1;
+        var buttons = group.querySelectorAll('[data-option-value]');
+
+        buttons.forEach(function (btn) {
+          var testValue = btn.dataset.optionValue;
+          // Check if any variant with this option value is available
+          var available = self.variants.some(function (v) {
+            if (v.options[optionIndex] !== testValue) return false;
+            // Check if all other selected options match
+            var otherPositions = Object.keys(self.selectedOptions);
+            for (var k = 0; k < otherPositions.length; k++) {
+              var otherPos = otherPositions[k];
+              if (otherPos === pos) continue;
+              var otherIdx = parseInt(otherPos, 10) - 1;
+              if (v.options[otherIdx] !== self.selectedOptions[otherPos]) return false;
+            }
+            return v.available;
+          });
+
+          if (btn.classList.contains('bb-pdp__swatch')) {
+            if (available) {
+              btn.classList.remove('bb-pdp__swatch--unavailable');
+            } else {
+              btn.classList.add('bb-pdp__swatch--unavailable');
+            }
+          } else {
+            if (available) {
+              btn.classList.remove('bb-pdp__option-btn--unavailable');
+            } else {
+              btn.classList.add('bb-pdp__option-btn--unavailable');
+            }
+          }
+        });
+      });
     }
 
     toggleBundleItem(item) {
@@ -317,7 +525,7 @@
 
       // Tier progress
       if (this.showTierProgress && this.els.tierSection) {
-        this.updateTierProgress(totalItems, activeTier, nextTier);
+        this.updateTierProgress(totalItems, activeTier, activeTierIndex, nextTier);
       }
 
       // Tier notification
@@ -375,25 +583,33 @@
       }
     }
 
-    updateTierProgress(totalItems, activeTier, nextTier) {
+    /**
+     * Continuous tier progress — fills smoothly from 0% to 100% across all tiers.
+     * Uses the last tier's count as the 100% mark. Shows current tier status and
+     * what's needed for the next tier.
+     */
+    updateTierProgress(totalItems, activeTier, activeTierIndex, nextTier) {
       if (!this.els.tierFill || !this.els.tierLabel) return;
 
-      var progress = 0;
+      var lastTierCount = this.tiers.length > 0 ? this.tiers[this.tiers.length - 1].count : 0;
+
+      if (lastTierCount === 0) {
+        this.els.tierFill.style.width = '0%';
+        this.els.tierLabel.textContent = 'Select items to unlock discounts';
+        if (this.els.tierHint) this.els.tierHint.style.display = 'none';
+        return;
+      }
+
+      // Continuous progress: 0% at 0 items, 100% at last tier count
+      var progress = Math.min(100, Math.max(0, (totalItems / lastTierCount) * 100));
+      this.els.tierFill.style.width = progress + '%';
 
       if (nextTier) {
         var needed = nextTier.count - totalItems;
-        if (activeTier) {
-          progress = ((totalItems - activeTier.count) / (nextTier.count - activeTier.count)) * 100;
-        } else {
-          progress = (totalItems / nextTier.count) * 100;
-        }
-        progress = Math.min(100, Math.max(0, progress));
-        this.els.tierFill.style.width = progress + '%';
-
         var nextLabel = this.discountType === 'percentage'
           ? nextTier.discount + '% off'
           : Core.formatMoney(nextTier.discount, this.moneyFormat) + ' off';
-        var nextName = nextTier.label ? nextTier.label + ' \u2014 ' + nextLabel : nextLabel;
+        var nextName = nextTier.label || nextLabel;
         this.els.tierLabel.textContent = 'Add ' + needed + ' more for ' + nextName + '!';
 
         if (this.els.tierHint && activeTier) {
@@ -406,18 +622,19 @@
           this.els.tierHint.style.display = 'none';
         }
       } else if (activeTier) {
-        progress = 100;
+        // All tiers unlocked
         this.els.tierFill.style.width = '100%';
         var maxLabel = this.discountType === 'percentage'
           ? activeTier.discount + '% off'
           : Core.formatMoney(activeTier.discount, this.moneyFormat) + ' off';
-        this.els.tierLabel.textContent = activeTier.label ? activeTier.label + ' unlocked!' : 'Max discount unlocked: ' + maxLabel;
+        this.els.tierLabel.textContent = activeTier.label
+          ? activeTier.label + ' unlocked!'
+          : 'Max discount unlocked: ' + maxLabel;
         if (this.els.tierHint) this.els.tierHint.style.display = 'none';
       } else {
+        // No items selected
         this.els.tierFill.style.width = '0%';
-        if (this.tiers.length > 0) {
-          this.els.tierLabel.textContent = 'Select items to unlock discounts';
-        }
+        this.els.tierLabel.textContent = 'Select items to unlock discounts';
         if (this.els.tierHint) this.els.tierHint.style.display = 'none';
       }
     }

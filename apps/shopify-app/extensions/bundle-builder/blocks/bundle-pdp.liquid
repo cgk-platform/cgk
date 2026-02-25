@@ -15,16 +15,16 @@
   assign cart_redirect = block.settings.cart_redirect
   assign bg_color = block.settings.bg_color | default: '#ffffff'
   assign text_color = block.settings.text_color | default: '#1a1a2e'
-  assign accent_color = block.settings.accent_color | default: '#2563eb'
+  assign accent_color = block.settings.accent_color | default: '#182f5c'
   assign button_text_color = block.settings.button_text_color | default: '#ffffff'
   assign padding_top = block.settings.padding_top | default: 48
   assign padding_bottom = block.settings.padding_bottom | default: 48
-  assign image_ratio = block.settings.image_ratio | default: 'portrait'
   assign bundle_name = block.settings.bundle_name | default: 'Custom Bundle'
   assign min_items = block.settings.min_items
   assign max_items = block.settings.max_items
   assign show_variant_selector = block.settings.show_variant_selector
-  assign show_accordion = block.settings.show_accordion
+  assign show_reviews = block.settings.show_reviews
+  assign show_trust_badges = block.settings.show_trust_badges
 -%}
 
 {%- if has_metafield_config -%}
@@ -60,17 +60,25 @@
   {%- endcapture -%}
 {%- endif -%}
 
-{%- comment -%} Map image ratio to CSS aspect-ratio {%- endcomment -%}
-{%- case image_ratio -%}
-  {%- when 'portrait' -%}
-    {%- assign aspect_css = '3/4' -%}
-  {%- when 'landscape' -%}
-    {%- assign aspect_css = '4/3' -%}
-  {%- else -%}
-    {%- assign aspect_css = '1' -%}
-{%- endcase -%}
-
 {%- assign bundle_products = block.settings.products -%}
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+
+{%- comment -%} Build variant JSON for JS {%- endcomment -%}
+{%- capture variants_json -%}
+[
+  {%- for variant in product.variants -%}
+    {%- if forloop.index > 1 -%},{%- endif -%}
+    {
+      "id":{{ variant.id }},
+      "available":{{ variant.available }},
+      "price":{{ variant.price }},
+      "compare_at_price":{{ variant.compare_at_price | default: 'null' }},
+      "options":{{ variant.options | json }},
+      "featured_media_id":{{ variant.featured_media.id | default: 'null' }}
+    }
+  {%- endfor -%}
+]
+{%- endcapture -%}
 
 <div
   class="bb-pdp"
@@ -87,6 +95,7 @@
   data-cart-redirect="{{ cart_redirect }}"
   data-tiers="{{ tiers_json | strip_newlines | escape }}"
   data-money-format="{{ shop.money_format | escape }}"
+  data-product-url="{{ product.url }}"
   {%- if has_metafield_config %}
   data-metafield-config="{{ metafield_config_raw | escape }}"
   {%- endif -%}
@@ -97,24 +106,38 @@
   aria-label="{{ bundle_name | escape }} product page"
   style="--bb-bg-color: {{ bg_color }}; --bb-text-color: {{ text_color }}; --bb-accent-color: {{ accent_color }}; --bb-btn-text-color: {{ button_text_color }}; --bb-padding-top: {{ padding_top }}px; --bb-padding-bottom: {{ padding_bottom }}px;"
 >
+  {%- comment -%} Variant data for JS {%- endcomment -%}
+  <script type="application/json" data-pdp-variants>{{ variants_json | strip_newlines }}</script>
+
   <div class="bb-pdp__layout">
     {%- comment -%} ===== Left column: Image gallery ===== {%- endcomment -%}
     <div class="bb-pdp__gallery">
-      <div class="bb-pdp__main-image" style="aspect-ratio: {{ aspect_css }};" data-pdp-main-image>
-        {%- if product.featured_image -%}
-          <img
-            src="{{ product.featured_image | image_url: width: 800 }}"
-            srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
-                    {{ product.featured_image | image_url: width: 600 }} 600w,
-                    {{ product.featured_image | image_url: width: 800 }} 800w,
-                    {{ product.featured_image | image_url: width: 1200 }} 1200w"
-            sizes="(max-width: 899px) 100vw, 55vw"
-            alt="{{ product.featured_image.alt | default: product.title | escape }}"
-            width="800"
-            height="{{ 800 | divided_by: 1.0 | times: 1.33 | round }}"
-            loading="eager"
-            data-pdp-main-img
-          >
+      <div class="bb-pdp__main-image-container">
+        <div class="bb-pdp__main-image" data-pdp-main-image>
+          {%- if product.featured_image -%}
+            <img
+              src="{{ product.featured_image | image_url: width: 900 }}"
+              srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
+                      {{ product.featured_image | image_url: width: 600 }} 600w,
+                      {{ product.featured_image | image_url: width: 900 }} 900w,
+                      {{ product.featured_image | image_url: width: 1200 }} 1200w"
+              sizes="(max-width: 899px) 100vw, 55vw"
+              alt="{{ product.featured_image.alt | default: product.title | escape }}"
+              width="{{ product.featured_image.width }}"
+              height="{{ product.featured_image.height }}"
+              loading="eager"
+              data-pdp-main-img
+            >
+          {%- endif -%}
+        </div>
+
+        {%- if product.media.size > 1 -%}
+          <button type="button" class="bb-pdp__arrow bb-pdp__arrow--prev" data-pdp-arrow="prev" aria-label="Previous image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button type="button" class="bb-pdp__arrow bb-pdp__arrow--next" data-pdp-arrow="next" aria-label="Next image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
         {%- endif -%}
       </div>
 
@@ -124,12 +147,15 @@
             {%- if media.media_type == 'image' -%}
               <button
                 type="button"
-                class="bb-pdp__thumb{% if forloop.first %} bb-pdp__thumb--active{% endif %}"
+                class="bb-pdp__thumb{% if media.id == current_variant.featured_media.id or forloop.first and current_variant.featured_media == blank %} bb-pdp__thumb--active{% endif %}"
                 data-pdp-thumb
                 data-media-index="{{ forloop.index0 }}"
-                data-image-src="{{ media | image_url: width: 800 }}"
-                data-image-srcset="{{ media | image_url: width: 400 }} 400w, {{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 800 }} 800w, {{ media | image_url: width: 1200 }} 1200w"
+                data-media-id="{{ media.id }}"
+                data-image-src="{{ media | image_url: width: 900 }}"
+                data-image-srcset="{{ media | image_url: width: 400 }} 400w, {{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 900 }} 900w, {{ media | image_url: width: 1200 }} 1200w"
                 data-image-alt="{{ media.alt | default: product.title | escape }}"
+                data-image-width="{{ media.width }}"
+                data-image-height="{{ media.height }}"
                 aria-label="View image {{ forloop.index }}"
               >
                 <img
@@ -143,6 +169,20 @@
             {%- endif -%}
           {%- endfor -%}
         </div>
+
+        <div class="bb-pdp__dots" data-pdp-dots>
+          {%- for media in product.media -%}
+            {%- if media.media_type == 'image' -%}
+              <button
+                type="button"
+                class="bb-pdp__dot{% if media.id == current_variant.featured_media.id or forloop.first and current_variant.featured_media == blank %} bb-pdp__dot--active{% endif %}"
+                data-pdp-dot
+                data-dot-index="{{ forloop.index0 }}"
+                aria-label="View image {{ forloop.index }}"
+              ></button>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
       {%- endif -%}
     </div>
 
@@ -150,37 +190,105 @@
     <div class="bb-pdp__buybox">
       <h1 class="bb-pdp__title">{{ product.title }}</h1>
 
+      {%- comment -%} Star rating {%- endcomment -%}
+      {%- if show_reviews and product.metafields.reviews.rating.value != blank -%}
+        {%- assign rating_value = product.metafields.reviews.rating.value.rating -%}
+        {%- assign rating_max = product.metafields.reviews.rating.value.scale_max | default: 5 -%}
+        {%- assign rating_count = product.metafields.reviews.rating_count | default: 0 -%}
+        <div class="bb-pdp__rating" data-pdp-rating>
+          <div class="bb-pdp__stars" aria-label="{{ rating_value }} out of {{ rating_max }} stars">
+            {%- for i in (1..5) -%}
+              {%- assign star_filled = false -%}
+              {%- assign star_half = false -%}
+              {%- if rating_value >= i -%}
+                {%- assign star_filled = true -%}
+              {%- elsif rating_value | plus: 0.5 >= i -%}
+                {%- assign star_half = true -%}
+              {%- endif -%}
+              <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="{% if star_filled %}var(--bb-gold, #d29b28){% elsif star_half %}url(#bb-half-star){% else %}none{% endif %}" stroke="{% if star_filled or star_half %}var(--bb-gold, #d29b28){% else %}var(--bb-border){% endif %}" stroke-width="1.5">
+                {%- if star_half -%}
+                  <defs>
+                    <linearGradient id="bb-half-star">
+                      <stop offset="50%" stop-color="var(--bb-gold, #d29b28)"/>
+                      <stop offset="50%" stop-color="transparent"/>
+                    </linearGradient>
+                  </defs>
+                {%- endif -%}
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            {%- endfor -%}
+          </div>
+          {%- if rating_count > 0 -%}
+            <span class="bb-pdp__rating-count">({{ rating_count }})</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
       <div class="bb-pdp__price-row">
-        {%- assign current_variant = product.selected_or_first_available_variant -%}
         {%- if current_variant.compare_at_price > current_variant.price -%}
           <span class="bb-pdp__compare-price" data-pdp-compare-price>{{ current_variant.compare_at_price | money }}</span>
         {%- endif -%}
         <span class="bb-pdp__price" data-pdp-price>{{ current_variant.price | money }}</span>
       </div>
 
-      {%- if show_variant_selector and product.variants.size > 1 -%}
-        <div class="bb-pdp__variants">
-          <label class="bb-pdp__variant-label" for="bb-pdp-variant-{{ block.id }}">Options</label>
-          <select
-            id="bb-pdp-variant-{{ block.id }}"
-            class="bb-pdp__variant-select"
-            data-pdp-variant-select
-            data-product-id="{{ product.id }}"
-          >
-            {%- for variant in product.variants -%}
-              <option
-                value="{{ variant.id }}"
-                data-price="{{ variant.price }}"
-                data-compare-price="{{ variant.compare_at_price | default: variant.price }}"
-                data-available="{{ variant.available }}"
-                data-image-index="{{ variant.featured_media.position | minus: 1 | default: 0 }}"
-                {% if variant == current_variant %}selected{% endif %}
-                {% unless variant.available %}disabled{% endunless %}
-              >
-                {{ variant.title }}{% unless variant.available %} — Sold out{% endunless %} — {{ variant.price | money }}
-              </option>
-            {%- endfor -%}
-          </select>
+      {%- comment -%} ===== Variant options (Color swatches + Size buttons) ===== {%- endcomment -%}
+      {%- if show_variant_selector and product.options.size > 0 and product.variants.size > 1 -%}
+        <div class="bb-pdp__options" data-pdp-options>
+          {%- for option in product.options_with_values -%}
+            {%- assign option_name_down = option.name | downcase -%}
+            {%- assign is_color = false -%}
+            {%- if option_name_down == 'color' or option_name_down == 'colour' or option_name_down == 'colors' -%}
+              {%- assign is_color = true -%}
+            {%- endif -%}
+
+            <div class="bb-pdp__option-group" data-option-group data-option-position="{{ option.position }}">
+              <label class="bb-pdp__option-label">
+                {{ option.name }}{% if is_color %}: <span data-option-selected-name>{{ option.selected_value }}</span>{% endif %}
+              </label>
+
+              {%- if is_color -%}
+                {%- comment -%} Render color swatches {%- endcomment -%}
+                <div class="bb-pdp__swatches">
+                  {%- for value in option.values -%}
+                    {%- assign color_handle = value | handle -%}
+                    <button
+                      type="button"
+                      class="bb-pdp__swatch{% if option.selected_value == value %} bb-pdp__swatch--active{% endif %}"
+                      data-option-value="{{ value | escape }}"
+                      data-option-position="{{ option.position }}"
+                      title="{{ value }}"
+                      aria-label="{{ value }}"
+                      {%- if value.swatch.color %}
+                      style="--swatch-bg: {{ value.swatch.color }};"
+                      {%- endif %}
+                    >
+                      {%- if value.swatch.image -%}
+                        <span class="bb-pdp__swatch-visual" style="background-image: url('{{ value.swatch.image | image_url: width: 50 }}'); background-size: cover;"></span>
+                      {%- elsif value.swatch.color -%}
+                        <span class="bb-pdp__swatch-visual" style="background-color: {{ value.swatch.color }};"></span>
+                      {%- else -%}
+                        <span class="bb-pdp__swatch-visual" data-color-handle="{{ color_handle }}"></span>
+                      {%- endif -%}
+                    </button>
+                  {%- endfor -%}
+                </div>
+              {%- else -%}
+                {%- comment -%} Render option buttons (Size, etc.) {%- endcomment -%}
+                <div class="bb-pdp__option-buttons">
+                  {%- for value in option.values -%}
+                    <button
+                      type="button"
+                      class="bb-pdp__option-btn{% if option.selected_value == value %} bb-pdp__option-btn--active{% endif %}"
+                      data-option-value="{{ value | escape }}"
+                      data-option-position="{{ option.position }}"
+                    >
+                      {{ value }}
+                    </button>
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
         </div>
       {%- endif -%}
 
@@ -270,17 +378,106 @@
         {{ cta_text }}
       </button>
 
-      {%- if show_accordion and product.description != blank -%}
-        <div class="bb-pdp__accordion">
-          <details class="bb-pdp__accordion-item">
-            <summary class="bb-pdp__accordion-trigger">
-              Description
-              <svg class="bb-pdp__accordion-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </summary>
-            <div class="bb-pdp__accordion-content">
-              {{ product.description }}
+      {%- comment -%} Trust badges {%- endcomment -%}
+      {%- if show_trust_badges -%}
+        <div class="bb-pdp__trust">
+          {%- if block.settings.trust_1_text != blank -%}
+            <div class="bb-pdp__trust-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <span>{{ block.settings.trust_1_text }}</span>
             </div>
-          </details>
+          {%- endif -%}
+          {%- if block.settings.trust_2_text != blank -%}
+            <div class="bb-pdp__trust-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span>{{ block.settings.trust_2_text }}</span>
+            </div>
+          {%- endif -%}
+          {%- if block.settings.trust_3_text != blank -%}
+            <div class="bb-pdp__trust-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              <span>{{ block.settings.trust_3_text }}</span>
+            </div>
+          {%- endif -%}
+          {%- if block.settings.trust_4_text != blank -%}
+            <div class="bb-pdp__trust-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>{{ block.settings.trust_4_text }}</span>
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Review star callout below ATC {%- endcomment -%}
+      {%- if show_reviews and product.metafields.reviews.rating.value != blank -%}
+        <div class="bb-pdp__review-callout">
+          <div class="bb-pdp__stars bb-pdp__stars--small">
+            {%- for i in (1..5) -%}
+              {%- assign star_filled = false -%}
+              {%- if rating_value >= i -%}{%- assign star_filled = true -%}{%- endif -%}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="{% if star_filled %}var(--bb-gold, #d29b28){% else %}none{% endif %}" stroke="{% if star_filled %}var(--bb-gold, #d29b28){% else %}var(--bb-border){% endif %}" stroke-width="1.5">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            {%- endfor -%}
+          </div>
+          <span class="bb-pdp__review-callout-text">
+            {{ rating_value }} / {{ rating_max }} based on {{ rating_count }} review{{ rating_count | pluralize: '', 's' }}
+          </span>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Accordion: Description, Shipping, Care {%- endcomment -%}
+      {%- assign has_accordion = false -%}
+      {%- if product.description != blank or block.settings.shipping_info != blank or block.settings.care_info != blank -%}
+        {%- assign has_accordion = true -%}
+      {%- endif -%}
+
+      {%- if has_accordion -%}
+        <div class="bb-pdp__accordion">
+          {%- if product.description != blank -%}
+            <details class="bb-pdp__accordion-item" open>
+              <summary class="bb-pdp__accordion-trigger">
+                <span class="bb-pdp__accordion-trigger-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  Description
+                </span>
+                <svg class="bb-pdp__accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </summary>
+              <div class="bb-pdp__accordion-content">
+                {{ product.description }}
+              </div>
+            </details>
+          {%- endif -%}
+
+          {%- if block.settings.shipping_info != blank -%}
+            <details class="bb-pdp__accordion-item">
+              <summary class="bb-pdp__accordion-trigger">
+                <span class="bb-pdp__accordion-trigger-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                  Shipping
+                </span>
+                <svg class="bb-pdp__accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </summary>
+              <div class="bb-pdp__accordion-content">
+                {{ block.settings.shipping_info }}
+              </div>
+            </details>
+          {%- endif -%}
+
+          {%- if block.settings.care_info != blank -%}
+            <details class="bb-pdp__accordion-item">
+              <summary class="bb-pdp__accordion-trigger">
+                <span class="bb-pdp__accordion-trigger-inner">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  Care Instructions
+                </span>
+                <svg class="bb-pdp__accordion-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </summary>
+              <div class="bb-pdp__accordion-content">
+                {{ block.settings.care_info }}
+              </div>
+            </details>
+          {%- endif -%}
         </div>
       {%- endif -%}
     </div>
@@ -335,10 +532,7 @@
       "type": "range",
       "id": "discount_2_items",
       "label": "Discount for 2 items",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "default": 10
+      "min": 0, "max": 100, "step": 1, "default": 10
     },
     {
       "type": "text",
@@ -350,10 +544,7 @@
       "type": "range",
       "id": "discount_3_items",
       "label": "Discount for 3 items",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "default": 15
+      "min": 0, "max": 100, "step": 1, "default": 15
     },
     {
       "type": "text",
@@ -365,10 +556,7 @@
       "type": "range",
       "id": "discount_4_items",
       "label": "Discount for 4 items",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "default": 20
+      "min": 0, "max": 100, "step": 1, "default": 20
     },
     {
       "type": "text",
@@ -380,10 +568,7 @@
       "type": "range",
       "id": "discount_5_items",
       "label": "Discount for 5+ items",
-      "min": 0,
-      "max": 100,
-      "step": 1,
-      "default": 25
+      "min": 0, "max": 100, "step": 1, "default": 25
     },
     {
       "type": "text",
@@ -399,45 +584,22 @@
       "type": "range",
       "id": "min_items",
       "label": "Minimum items",
-      "min": 1,
-      "max": 8,
-      "step": 1,
-      "default": 2
+      "min": 1, "max": 8, "step": 1, "default": 2
     },
     {
       "type": "range",
       "id": "max_items",
       "label": "Maximum items",
-      "min": 2,
-      "max": 20,
-      "step": 1,
-      "default": 8
+      "min": 2, "max": 20, "step": 1, "default": 8
     },
     {
       "type": "header",
       "content": "Display Options"
     },
     {
-      "type": "select",
-      "id": "image_ratio",
-      "label": "Main image ratio",
-      "options": [
-        { "value": "square", "label": "Square (1:1)" },
-        { "value": "portrait", "label": "Portrait (3:4)" },
-        { "value": "landscape", "label": "Landscape (4:3)" }
-      ],
-      "default": "portrait"
-    },
-    {
       "type": "checkbox",
       "id": "show_variant_selector",
-      "label": "Show variant selector",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "show_accordion",
-      "label": "Show product description accordion",
+      "label": "Show variant selector (color/size)",
       "default": true
     },
     {
@@ -451,6 +613,63 @@
       "id": "show_tier_progress",
       "label": "Show tier progress bar",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reviews",
+      "label": "Show review rating",
+      "default": true,
+      "info": "Displays star rating from product review metafields"
+    },
+    {
+      "type": "header",
+      "content": "Trust Badges"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_badges",
+      "label": "Show trust badges",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "trust_1_text",
+      "label": "Trust badge 1 (shipping icon)",
+      "default": "Free shipping over $100"
+    },
+    {
+      "type": "text",
+      "id": "trust_2_text",
+      "label": "Trust badge 2 (returns icon)",
+      "default": "30-day easy returns"
+    },
+    {
+      "type": "text",
+      "id": "trust_3_text",
+      "label": "Trust badge 3 (quality icon)",
+      "default": "Premium quality guaranteed"
+    },
+    {
+      "type": "text",
+      "id": "trust_4_text",
+      "label": "Trust badge 4 (support icon)",
+      "default": ""
+    },
+    {
+      "type": "header",
+      "content": "Accordion Content"
+    },
+    {
+      "type": "richtext",
+      "id": "shipping_info",
+      "label": "Shipping information",
+      "default": "<p>We offer free standard shipping on all orders over $100. Orders are processed within 1-2 business days and typically arrive within 5-7 business days.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "care_info",
+      "label": "Care instructions",
+      "default": "<p>Machine wash cold with like colors. Tumble dry low. Do not bleach. Iron on low heat if needed.</p>"
     },
     {
       "type": "header",
@@ -488,7 +707,7 @@
       "type": "color",
       "id": "accent_color",
       "label": "Accent color",
-      "default": "#2563eb"
+      "default": "#182f5c"
     },
     {
       "type": "color",
@@ -500,21 +719,13 @@
       "type": "range",
       "id": "padding_top",
       "label": "Top padding",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "default": 48,
-      "unit": "px"
+      "min": 0, "max": 100, "step": 4, "default": 48, "unit": "px"
     },
     {
       "type": "range",
       "id": "padding_bottom",
       "label": "Bottom padding",
-      "min": 0,
-      "max": 100,
-      "step": 4,
-      "default": 48,
-      "unit": "px"
+      "min": 0, "max": 100, "step": 4, "default": 48, "unit": "px"
     }
   ]
 }
