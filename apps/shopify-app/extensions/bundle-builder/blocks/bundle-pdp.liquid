@@ -197,12 +197,15 @@
         {%- assign rating_count = product.metafields.reviews.rating_count | default: 0 -%}
         {%- assign rating_floor = rating_value | floor -%}
         {%- assign rating_decimal = rating_value | minus: rating_floor -%}
+        {%- assign rating_half_star = rating_floor | plus: 1 -%}
+        {%- assign rating_has_half = false -%}
+        {%- if rating_decimal >= 0.3 -%}{%- assign rating_has_half = true -%}{%- endif -%}
         <div class="bb-pdp__rating" data-pdp-rating>
           <div class="bb-pdp__stars" aria-label="{{ rating_value }} out of {{ rating_max }} stars">
             {%- for i in (1..5) -%}
               {%- if i <= rating_floor -%}
                 <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="#d29b28" stroke="#d29b28" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              {%- elsif i == rating_floor | plus: 1 and rating_decimal >= 0.3 -%}
+              {%- elsif i == rating_half_star and rating_has_half -%}
                 <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="url(#bb-half-{{ section.id }})" stroke="#d29b28" stroke-width="1.5"><defs><linearGradient id="bb-half-{{ section.id }}"><stop offset="50%" stop-color="#d29b28"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               {%- else -%}
                 <svg class="bb-pdp__star" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--bb-border);"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
