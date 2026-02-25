@@ -116,15 +116,14 @@
         <div class="bb-pdp__main-image" data-pdp-main-image>
           {%- if product.featured_image -%}
             <img
-              src="{{ product.featured_image | image_url: width: 900 }}"
-              srcset="{{ product.featured_image | image_url: width: 400 }} 400w,
-                      {{ product.featured_image | image_url: width: 600 }} 600w,
-                      {{ product.featured_image | image_url: width: 900 }} 900w,
-                      {{ product.featured_image | image_url: width: 1200 }} 1200w"
-              sizes="(max-width: 899px) 100vw, 55vw"
+              src="{{ product.featured_image | image_url: width: 900, crop: 'center' }}"
+              srcset="{{ product.featured_image | image_url: width: 400, crop: 'center' }} 400w,
+                      {{ product.featured_image | image_url: width: 600, crop: 'center' }} 600w,
+                      {{ product.featured_image | image_url: width: 900, crop: 'center' }} 900w"
+              sizes="(max-width: 899px) 100vw, 50vw"
               alt="{{ product.featured_image.alt | default: product.title | escape }}"
-              width="{{ product.featured_image.width }}"
-              height="{{ product.featured_image.height }}"
+              width="900"
+              height="900"
               loading="eager"
               data-pdp-main-img
             >
@@ -151,15 +150,13 @@
                 data-pdp-thumb
                 data-media-index="{{ forloop.index0 }}"
                 data-media-id="{{ media.id }}"
-                data-image-src="{{ media | image_url: width: 900 }}"
-                data-image-srcset="{{ media | image_url: width: 400 }} 400w, {{ media | image_url: width: 600 }} 600w, {{ media | image_url: width: 900 }} 900w, {{ media | image_url: width: 1200 }} 1200w"
+                data-image-src="{{ media | image_url: width: 900, crop: 'center' }}"
+                data-image-srcset="{{ media | image_url: width: 400, crop: 'center' }} 400w, {{ media | image_url: width: 600, crop: 'center' }} 600w, {{ media | image_url: width: 900, crop: 'center' }} 900w"
                 data-image-alt="{{ media.alt | default: product.title | escape }}"
-                data-image-width="{{ media.width }}"
-                data-image-height="{{ media.height }}"
                 aria-label="View image {{ forloop.index }}"
               >
                 <img
-                  src="{{ media | image_url: width: 150 }}"
+                  src="{{ media | image_url: width: 150, crop: 'center' }}"
                   alt="{{ media.alt | default: product.title | escape }}"
                   width="72"
                   height="72"
@@ -241,28 +238,33 @@
               </label>
 
               {%- if is_color -%}
-                {%- comment -%} Render color swatches {%- endcomment -%}
+                {%- comment -%} Render color swatches — uses Shopify swatch data + metaobject fallback {%- endcomment -%}
                 <div class="bb-pdp__swatches">
                   {%- for value in option.values -%}
                     {%- assign color_handle = value | handle -%}
+                    {%- assign swatch_style = '' -%}
+                    {%- if value.swatch.image -%}
+                      {%- assign swatch_style = 'background-image: url(' | append: value.swatch.image | image_url: width: 50 | prepend: "'" | append: "'" | append: '); background-size: cover;' -%}
+                    {%- elsif value.swatch.color -%}
+                      {%- assign swatch_style = 'background-color: ' | append: value.swatch.color | append: ';' -%}
+                    {%- else -%}
+                      {%- comment -%} Fallback: try metaobject color-pattern {%- endcomment -%}
+                      {%- assign meta_swatch = metaobjects['shopify--color-pattern'][color_handle] -%}
+                      {%- if meta_swatch.image -%}
+                        {%- assign swatch_style = 'background-image: url(' | append: meta_swatch.image | image_url: width: 50 | prepend: "'" | append: "'" | append: '); background-size: cover;' -%}
+                      {%- elsif meta_swatch.color -%}
+                        {%- assign swatch_style = 'background-color: ' | append: meta_swatch.color | append: ';' -%}
+                      {%- endif -%}
+                    {%- endif -%}
                     <button
                       type="button"
-                      class="bb-pdp__swatch{% if option.selected_value == value %} bb-pdp__swatch--active{% endif %}"
+                      class="bb-pdp__swatch{% if option.selected_value == value %} bb-pdp__swatch--active{% endif %}{% unless value.available %} bb-pdp__swatch--unavailable{% endunless %}"
                       data-option-value="{{ value | escape }}"
                       data-option-position="{{ option.position }}"
                       title="{{ value }}"
                       aria-label="{{ value }}"
-                      {%- if value.swatch.color %}
-                      style="--swatch-bg: {{ value.swatch.color }};"
-                      {%- endif %}
                     >
-                      {%- if value.swatch.image -%}
-                        <span class="bb-pdp__swatch-visual" style="background-image: url('{{ value.swatch.image | image_url: width: 50 }}'); background-size: cover;"></span>
-                      {%- elsif value.swatch.color -%}
-                        <span class="bb-pdp__swatch-visual" style="background-color: {{ value.swatch.color }};"></span>
-                      {%- else -%}
-                        <span class="bb-pdp__swatch-visual" data-color-handle="{{ color_handle }}"></span>
-                      {%- endif -%}
+                      <span class="bb-pdp__swatch-visual"{% if swatch_style != '' %} style="{{ swatch_style }}"{% endif %} data-color-handle="{{ color_handle }}"></span>
                     </button>
                   {%- endfor -%}
                 </div>
@@ -272,7 +274,7 @@
                   {%- for value in option.values -%}
                     <button
                       type="button"
-                      class="bb-pdp__option-btn{% if option.selected_value == value %} bb-pdp__option-btn--active{% endif %}"
+                      class="bb-pdp__option-btn{% if option.selected_value == value %} bb-pdp__option-btn--active{% endif %}{% unless value.available %} bb-pdp__option-btn--unavailable{% endunless %}"
                       data-option-value="{{ value | escape }}"
                       data-option-position="{{ option.position }}"
                     >

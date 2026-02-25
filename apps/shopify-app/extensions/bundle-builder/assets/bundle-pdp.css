@@ -71,8 +71,10 @@
 
 .bb-pdp__main-image {
   width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   background: color-mix(in srgb, var(--bb-text) 4%, var(--bb-bg));
+  border-radius: var(--bb-radius);
 }
 
 .bb-pdp__main-image img {
@@ -80,6 +82,7 @@
   height: 100%;
   display: block;
   object-fit: cover;
+  object-position: center;
   transition: opacity 0.3s ease;
 }
 
@@ -711,7 +714,47 @@
   height: 100%;
   border-radius: 50%;
   display: block;
+  background-color: #ccc; /* fallback */
 }
+
+/* Common color name fallbacks for swatches without metaobject data */
+.bb-pdp__swatch-visual[data-color-handle="white"] { background-color: #ffffff; }
+.bb-pdp__swatch-visual[data-color-handle="ivory"] { background-color: #fffff0; }
+.bb-pdp__swatch-visual[data-color-handle="cream"] { background-color: #fffdd0; }
+.bb-pdp__swatch-visual[data-color-handle="beige"] { background-color: #f5f5dc; }
+.bb-pdp__swatch-visual[data-color-handle="tan"] { background-color: #d2b48c; }
+.bb-pdp__swatch-visual[data-color-handle="taupe"] { background-color: #b8a99a; }
+.bb-pdp__swatch-visual[data-color-handle="sand"] { background-color: #c2b280; }
+.bb-pdp__swatch-visual[data-color-handle="grey"],
+.bb-pdp__swatch-visual[data-color-handle="gray"] { background-color: #808080; }
+.bb-pdp__swatch-visual[data-color-handle="light-grey"],
+.bb-pdp__swatch-visual[data-color-handle="light-gray"] { background-color: #c0c0c0; }
+.bb-pdp__swatch-visual[data-color-handle="charcoal"] { background-color: #36454f; }
+.bb-pdp__swatch-visual[data-color-handle="slate"] { background-color: #708090; }
+.bb-pdp__swatch-visual[data-color-handle="black"] { background-color: #000000; }
+.bb-pdp__swatch-visual[data-color-handle="navy"],
+.bb-pdp__swatch-visual[data-color-handle="navy-blue"] { background-color: #182f5c; }
+.bb-pdp__swatch-visual[data-color-handle="blue"] { background-color: #4169e1; }
+.bb-pdp__swatch-visual[data-color-handle="light-blue"] { background-color: #add8e6; }
+.bb-pdp__swatch-visual[data-color-handle="sage"],
+.bb-pdp__swatch-visual[data-color-handle="sage-green"] { background-color: #bcb88a; }
+.bb-pdp__swatch-visual[data-color-handle="green"] { background-color: #228b22; }
+.bb-pdp__swatch-visual[data-color-handle="olive"] { background-color: #808000; }
+.bb-pdp__swatch-visual[data-color-handle="blush"],
+.bb-pdp__swatch-visual[data-color-handle="blush-pink"] { background-color: #de5d83; }
+.bb-pdp__swatch-visual[data-color-handle="pink"] { background-color: #ffc0cb; }
+.bb-pdp__swatch-visual[data-color-handle="mauve"] { background-color: #e0b0ff; }
+.bb-pdp__swatch-visual[data-color-handle="lavender"] { background-color: #e6e6fa; }
+.bb-pdp__swatch-visual[data-color-handle="plum"] { background-color: #8e4585; }
+.bb-pdp__swatch-visual[data-color-handle="burgundy"] { background-color: #800020; }
+.bb-pdp__swatch-visual[data-color-handle="red"] { background-color: #dc143c; }
+.bb-pdp__swatch-visual[data-color-handle="rust"] { background-color: #b7410e; }
+.bb-pdp__swatch-visual[data-color-handle="terracotta"] { background-color: #cc7a5a; }
+.bb-pdp__swatch-visual[data-color-handle="gold"] { background-color: #d29b28; }
+.bb-pdp__swatch-visual[data-color-handle="camel"] { background-color: #c19a6b; }
+.bb-pdp__swatch-visual[data-color-handle="chocolate"] { background-color: #7b3f00; }
+.bb-pdp__swatch-visual[data-color-handle="brown"] { background-color: #8b4513; }
+.bb-pdp__swatch-visual[data-color-handle="espresso"] { background-color: #3c1414; }
 
 /* Option buttons (Size, etc.) */
 .bb-pdp__option-buttons {
