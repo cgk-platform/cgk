@@ -224,6 +224,7 @@
                   class="bb-pdp__thumb"
                   type="button"
                   data-thumb-index="{{ forloop.index0 }}"
+                  data-media-id="{{ media.id }}"
                   data-media-color="{{ media_color | escape }}"
                   {% unless show_media %}style="display:none"{% endunless %}
                   aria-label="View image {{ forloop.index }}"
@@ -260,6 +261,7 @@
                 <div
                   class="bb-pdp__slide"
                   data-slide-index="{{ forloop.index0 }}"
+                  data-media-id="{{ media.id }}"
                   data-media-color="{{ media_color | escape }}"
                   {% unless show_media %}style="display:none"{% endunless %}
                 >

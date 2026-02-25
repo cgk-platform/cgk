@@ -100,6 +100,24 @@
       if (!this.els.slider) return;
       var self = this;
 
+      // Apply variant-group media filtering on init (overrides server-side alt-text filter)
+      var initialColor = this._getInitialColor();
+      if (initialColor) {
+        var slides = Array.from(this.els.slider.querySelectorAll('.bb-pdp__slide'));
+        var visibleIndices = this._buildMediaGroupForColor(initialColor, slides);
+        slides.forEach(function (slide) {
+          var idx = parseInt(slide.dataset.slideIndex, 10);
+          slide.style.display = visibleIndices.has(idx) ? '' : 'none';
+        });
+        if (this.els.thumbsContainer) {
+          var thumbs = Array.from(this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb'));
+          thumbs.forEach(function (thumb) {
+            var idx = parseInt(thumb.dataset.thumbIndex, 10);
+            thumb.style.display = visibleIndices.has(idx) ? '' : 'none';
+          });
+        }
+      }
+
       // Set first visible thumb as active
       var firstThumb = this.els.thumbsContainer && this.els.thumbsContainer.querySelector('.bb-pdp__thumb:not([style*="display:none"])');
       if (firstThumb) firstThumb.classList.add('bb-pdp__thumb--active');
@@ -142,6 +160,18 @@
           self.goToSlide(slideIndex);
         });
       }
+    }
+
+    _getInitialColor() {
+      var color = '';
+      this.els.optionGroups.forEach(function (group) {
+        var name = (group.dataset.optionName || '').toLowerCase();
+        if (name === 'color' || name === 'colour' || name === 'colors') {
+          var activeBtn = group.querySelector('.bb-pdp__swatch--active');
+          if (activeBtn) color = activeBtn.dataset.optionValue || '';
+        }
+      });
+      return color;
     }
 
     navigateSlide(direction) {
@@ -203,36 +233,23 @@
         });
       }
 
-      // Check if any media are tagged with this color
-      var slides = this.els.slider.querySelectorAll('.bb-pdp__slide');
-      var hasColorMedia = false;
-      slides.forEach(function (slide) {
-        if (slide.dataset.mediaColor === colorName) {
-          hasColorMedia = true;
-        }
-      });
+      var slides = Array.from(this.els.slider.querySelectorAll('.bb-pdp__slide'));
+      var thumbs = Array.from(this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb'));
 
-      // Theme logic: if color-tagged media exist, show ONLY those.
-      // If no color-tagged media exist for this color, show ALL media.
-      slides.forEach(function (slide) {
-        if (!hasColorMedia) {
-          slide.style.display = '';
-        } else if (slide.dataset.mediaColor === colorName) {
-          slide.style.display = '';
-        } else {
-          slide.style.display = 'none';
-        }
-      });
+      // Build visible indices using variant featured_media grouping.
+      // Each variant has a featured_media_id. A color's "group" is: for each
+      // variant of that color, show media from its featured_media position
+      // through the consecutive images until the next variant's featured_media.
+      var visibleIndices = this._buildMediaGroupForColor(colorName, slides);
 
-      var thumbs = this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb');
+      // Apply visibility
+      slides.forEach(function (slide) {
+        var idx = parseInt(slide.dataset.slideIndex, 10);
+        slide.style.display = visibleIndices.has(idx) ? '' : 'none';
+      });
       thumbs.forEach(function (thumb) {
-        if (!hasColorMedia) {
-          thumb.style.display = '';
-        } else if (thumb.dataset.mediaColor === colorName) {
-          thumb.style.display = '';
-        } else {
-          thumb.style.display = 'none';
-        }
+        var idx = parseInt(thumb.dataset.thumbIndex, 10);
+        thumb.style.display = visibleIndices.has(idx) ? '' : 'none';
       });
 
       // Reconnect observer for visible slides
@@ -247,11 +264,107 @@
       // Go to first visible slide
       var firstVisible = this.getVisibleSlides()[0];
       if (firstVisible) {
-        var idx = parseInt(firstVisible.dataset.slideIndex, 10);
-        // Instant scroll (no smooth) for color change
         firstVisible.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
-        this.onSlideChange(idx);
+        this.onSlideChange(parseInt(firstVisible.dataset.slideIndex, 10));
       }
+    }
+
+    /**
+     * Build a Set of slide indices that belong to the given color, using
+     * variant featured_media_id grouping. This mirrors how Shopify Dawn
+     * groups product media by variant/color.
+     *
+     * Algorithm:
+     * 1. Identify the "color" option position from the product options.
+     * 2. Find all variants whose color matches `colorName`.
+     * 3. Collect their featured_media_ids (unique).
+     * 4. Build an ordered list of ALL variants' featured_media positions (indices).
+     * 5. For each color-matching featured position, include all consecutive
+     *    media from that position until the next variant's featured position.
+     * 6. If no featured_media data exists, fall back to alt-text color matching.
+     */
+    _buildMediaGroupForColor(colorName, slides) {
+      var visibleIndices = new Set();
+
+      // Build media-id → slide-index map
+      var mediaIdToIndex = {};
+      slides.forEach(function (slide) {
+        var mediaId = slide.dataset.mediaId;
+        if (mediaId) {
+          mediaIdToIndex[mediaId] = parseInt(slide.dataset.slideIndex, 10);
+        }
+      });
+
+      // Find color option position (1-based in Shopify)
+      var colorPosition = -1;
+      var self = this;
+      this.els.optionGroups.forEach(function (group) {
+        var name = (group.dataset.optionName || '').toLowerCase();
+        if (name === 'color' || name === 'colour' || name === 'colors') {
+          colorPosition = parseInt(group.dataset.optionPosition, 10);
+        }
+      });
+
+      if (colorPosition < 1) {
+        // No color option — show all media
+        slides.forEach(function (_, i) { visibleIndices.add(i); });
+        return visibleIndices;
+      }
+
+      // Collect featured_media_ids for variants of the selected color
+      var colorFeaturedIds = [];
+      var allFeaturedIndices = [];
+
+      this.variants.forEach(function (v) {
+        var variantColor = v.options[colorPosition - 1]; // 0-based array
+        var fmId = v.featured_media_id;
+        if (!fmId || !(String(fmId) in mediaIdToIndex)) return;
+
+        var slideIdx = mediaIdToIndex[String(fmId)];
+        allFeaturedIndices.push(slideIdx);
+
+        if (variantColor === colorName) {
+          colorFeaturedIds.push(slideIdx);
+        }
+      });
+
+      // Deduplicate and sort
+      allFeaturedIndices = Array.from(new Set(allFeaturedIndices)).sort(function (a, b) { return a - b; });
+      colorFeaturedIds = Array.from(new Set(colorFeaturedIds)).sort(function (a, b) { return a - b; });
+
+      if (colorFeaturedIds.length === 0) {
+        // No featured_media data for this color — fall back to alt-text matching
+        var hasColorMedia = false;
+        slides.forEach(function (slide) {
+          if (slide.dataset.mediaColor === colorName) hasColorMedia = true;
+        });
+        slides.forEach(function (slide, i) {
+          if (!hasColorMedia || slide.dataset.mediaColor === colorName) {
+            visibleIndices.add(i);
+          }
+        });
+        return visibleIndices;
+      }
+
+      // For each color's featured index, include media from that index
+      // up to (not including) the next featured index from ANY variant.
+      colorFeaturedIds.forEach(function (startIdx) {
+        // Find the next featured index after startIdx (from any color)
+        var nextFeaturedIdx = slides.length; // default: end of media
+        for (var i = 0; i < allFeaturedIndices.length; i++) {
+          if (allFeaturedIndices[i] > startIdx) {
+            nextFeaturedIdx = allFeaturedIndices[i];
+            break;
+          }
+        }
+
+        // Include all slides from startIdx to just before nextFeaturedIdx
+        for (var j = startIdx; j < nextFeaturedIdx; j++) {
+          visibleIndices.add(j);
+        }
+      });
+
+      return visibleIndices;
     }
 
     /* ===== SELECTLIKE DROPDOWN ===== */
