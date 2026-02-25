@@ -1,6 +1,6 @@
 /**
- * Bundle PDP — Product page layout with image gallery + bundle builder.
- * Uses BundleCore for shared pricing, tier, cart, and free gift logic.
+ * Bundle PDP — Full product page with gallery, variant picker, tabs,
+ * and bundle builder. Uses BundleCore for shared pricing/cart logic.
  */
 (function () {
   'use strict';
@@ -26,19 +26,16 @@
       this.ctaText = section.dataset.ctaText || 'Add Bundle to Cart';
       this.cartRedirect = section.dataset.cartRedirect === 'true';
       this.moneyFormat = section.dataset.moneyFormat || '';
+      this.productTitle = section.dataset.productTitle || '';
       this.isLoading = false;
       this.isRedirecting = false;
       this.previousTierIndex = -1;
       this.notificationTimeout = null;
       this.activeFreeGifts = new Map();
       this.freeGiftPending = false;
-      this.activeThumbIndex = 0;
-      this.imageCount = 0;
-      this.touchStartX = 0;
-      this.touchStartY = 0;
-      this.isSwiping = false;
+      this.currentSlideIndex = 0;
 
-      // Parse product variants for option selection
+      // Parse product variants
       this.variants = [];
       this.selectedOptions = {};
       var variantScript = section.querySelector('[data-pdp-variants]');
@@ -47,20 +44,27 @@
       }
 
       this.els = {
-        mainImage: section.querySelector('[data-pdp-main-img]'),
-        mainImageWrap: section.querySelector('[data-pdp-main-image]'),
-        mainImageContainer: section.querySelector('.bb-pdp__main-image-container'),
-        thumbs: section.querySelectorAll('[data-pdp-thumb]'),
-        dots: section.querySelectorAll('[data-pdp-dot]'),
-        prevArrow: section.querySelector('[data-pdp-arrow="prev"]'),
-        nextArrow: section.querySelector('[data-pdp-arrow="next"]'),
+        // Gallery
+        gallery: section.querySelector('[data-gallery]'),
+        slider: section.querySelector('[data-gallery-slider]'),
+        thumbsContainer: section.querySelector('[data-gallery-thumbs]'),
+        prevBtn: section.querySelector('[data-gallery-prev]'),
+        nextBtn: section.querySelector('[data-gallery-next]'),
+        // Variant options
         optionGroups: section.querySelectorAll('[data-option-group]'),
-        priceEl: section.querySelector('[data-pdp-price]'),
-        comparePriceEl: section.querySelector('[data-pdp-compare-price]'),
+        // Price
+        priceWrap: section.querySelector('[data-pdp-price]'),
+        priceRegular: section.querySelector('[data-pdp-price-regular]'),
+        priceCompare: section.querySelector('[data-pdp-price-compare]'),
+        priceBadge: section.querySelector('[data-pdp-price-badge]'),
+        // Tabs
+        tabsContainer: section.querySelector('[data-pdp-tabs]'),
+        // Tier
         tierSection: section.querySelector('[data-pdp-tier]'),
         tierLabel: section.querySelector('[data-pdp-tier-label]'),
         tierFill: section.querySelector('[data-pdp-tier-fill]'),
         tierHint: section.querySelector('[data-pdp-tier-hint]'),
+        // Bundle
         bundleItems: section.querySelectorAll('[data-pdp-bundle-item]'),
         savings: section.querySelector('[data-pdp-savings]'),
         itemCount: section.querySelector('[data-pdp-count]'),
@@ -70,103 +74,236 @@
         notification: section.querySelector('[data-pdp-notification]'),
       };
 
-      this.imageCount = this.els.thumbs.length;
-
       // Initialize selected options from active buttons/swatches
       var self = this;
       this.els.optionGroups.forEach(function (group) {
         var pos = group.dataset.optionPosition;
-        var activeBtn = group.querySelector('.bb-pdp__swatch--active, .bb-pdp__option-btn--active');
+        var activeBtn = group.querySelector('.bb-pdp__swatch--active, .bb-pdp__option-btn--active, .bb-pdp__selectlike-option--active, .bb-pdp__size-pill--active');
         if (activeBtn && pos) {
           self.selectedOptions[pos] = activeBtn.dataset.optionValue;
         }
       });
 
+      this.initGallery();
+      this.initSelectlike();
+      this.initTabs();
       this.bindEvents();
       this.recalculate();
     }
 
+    /* ===== GALLERY ===== */
+
+    initGallery() {
+      if (!this.els.slider) return;
+      var self = this;
+
+      // Set first visible thumb as active
+      var firstThumb = this.els.thumbsContainer && this.els.thumbsContainer.querySelector('.bb-pdp__thumb:not([style*="display:none"])');
+      if (firstThumb) firstThumb.classList.add('bb-pdp__thumb--active');
+
+      // IntersectionObserver to track visible slide
+      if ('IntersectionObserver' in window) {
+        this._slideObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var index = parseInt(entry.target.dataset.slideIndex, 10);
+              self.onSlideChange(index);
+            }
+          });
+        }, {
+          root: self.els.slider,
+          threshold: 0.6,
+        });
+
+        this.els.slider.querySelectorAll('.bb-pdp__slide').forEach(function (slide) {
+          if (slide.style.display !== 'none') {
+            self._slideObserver.observe(slide);
+          }
+        });
+      }
+
+      // Arrow buttons
+      if (this.els.prevBtn) {
+        this.els.prevBtn.addEventListener('click', function () { self.navigateSlide(-1); });
+      }
+      if (this.els.nextBtn) {
+        this.els.nextBtn.addEventListener('click', function () { self.navigateSlide(1); });
+      }
+
+      // Thumbnail clicks
+      if (this.els.thumbsContainer) {
+        this.els.thumbsContainer.addEventListener('click', function (e) {
+          var thumb = e.target.closest('.bb-pdp__thumb');
+          if (!thumb) return;
+          var slideIndex = parseInt(thumb.dataset.thumbIndex, 10);
+          self.goToSlide(slideIndex);
+        });
+      }
+    }
+
+    navigateSlide(direction) {
+      var visibleSlides = this.getVisibleSlides();
+      if (visibleSlides.length === 0) return;
+
+      var currentIdx = visibleSlides.findIndex(function (s) {
+        return parseInt(s.dataset.slideIndex, 10) === this.currentSlideIndex;
+      }.bind(this));
+
+      if (currentIdx === -1) currentIdx = 0;
+      var nextIdx = currentIdx + direction;
+      if (nextIdx < 0) nextIdx = visibleSlides.length - 1;
+      if (nextIdx >= visibleSlides.length) nextIdx = 0;
+
+      var targetSlide = visibleSlides[nextIdx];
+      this.goToSlide(parseInt(targetSlide.dataset.slideIndex, 10));
+    }
+
+    goToSlide(index) {
+      if (!this.els.slider) return;
+      var slide = this.els.slider.querySelector('[data-slide-index="' + index + '"]');
+      if (!slide || slide.style.display === 'none') return;
+
+      slide.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+      this.onSlideChange(index);
+    }
+
+    onSlideChange(index) {
+      this.currentSlideIndex = index;
+      if (!this.els.thumbsContainer) return;
+
+      var thumbs = this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb');
+      thumbs.forEach(function (t) { t.classList.remove('bb-pdp__thumb--active'); });
+
+      var activeThumb = this.els.thumbsContainer.querySelector('[data-thumb-index="' + index + '"]');
+      if (activeThumb) {
+        activeThumb.classList.add('bb-pdp__thumb--active');
+        // Scroll thumb into view
+        activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+      }
+    }
+
+    getVisibleSlides() {
+      if (!this.els.slider) return [];
+      return Array.from(this.els.slider.querySelectorAll('.bb-pdp__slide')).filter(function (s) {
+        return s.style.display !== 'none';
+      });
+    }
+
+    filterMediaByColor(colorName) {
+      if (!this.els.slider || !this.els.thumbsContainer) return;
+      var titlePrefix = this.productTitle + ' - ';
+      var self = this;
+
+      // Disconnect observer before changing visibility
+      if (this._slideObserver) {
+        this.els.slider.querySelectorAll('.bb-pdp__slide').forEach(function (slide) {
+          self._slideObserver.unobserve(slide);
+        });
+      }
+
+      // Show/hide slides
+      var slides = this.els.slider.querySelectorAll('.bb-pdp__slide');
+      slides.forEach(function (slide) {
+        var mediaColor = slide.dataset.mediaColor || '';
+        if (mediaColor === '' || mediaColor === colorName) {
+          slide.style.display = '';
+        } else {
+          slide.style.display = 'none';
+        }
+      });
+
+      // Show/hide thumbnails
+      var thumbs = this.els.thumbsContainer.querySelectorAll('.bb-pdp__thumb');
+      thumbs.forEach(function (thumb) {
+        var mediaColor = thumb.dataset.mediaColor || '';
+        if (mediaColor === '' || mediaColor === colorName) {
+          thumb.style.display = '';
+        } else {
+          thumb.style.display = 'none';
+        }
+      });
+
+      // Reconnect observer for visible slides
+      if (this._slideObserver) {
+        slides.forEach(function (slide) {
+          if (slide.style.display !== 'none') {
+            self._slideObserver.observe(slide);
+          }
+        });
+      }
+
+      // Go to first visible slide
+      var firstVisible = this.getVisibleSlides()[0];
+      if (firstVisible) {
+        var idx = parseInt(firstVisible.dataset.slideIndex, 10);
+        // Instant scroll (no smooth) for color change
+        firstVisible.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+        this.onSlideChange(idx);
+      }
+    }
+
+    /* ===== SELECTLIKE DROPDOWN ===== */
+
+    initSelectlike() {
+      var self = this;
+      var selectlikes = this.section.querySelectorAll('[data-selectlike]');
+
+      selectlikes.forEach(function (sl) {
+        var trigger = sl.querySelector('[data-selectlike-trigger]');
+        if (!trigger) return;
+
+        trigger.addEventListener('click', function (e) {
+          e.stopPropagation();
+          sl.classList.toggle('bb-pdp__selectlike--open');
+        });
+
+        // Close on outside click
+        document.addEventListener('click', function () {
+          sl.classList.remove('bb-pdp__selectlike--open');
+        });
+
+        // Prevent menu clicks from closing
+        var menu = sl.querySelector('[data-selectlike-menu]');
+        if (menu) {
+          menu.addEventListener('click', function (e) {
+            e.stopPropagation();
+          });
+        }
+      });
+    }
+
+    /* ===== TABS ===== */
+
+    initTabs() {
+      var tabsContainer = this.els.tabsContainer;
+      if (!tabsContainer) return;
+
+      var buttons = tabsContainer.querySelectorAll('.bb-pdp__tab-btn');
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var targetId = btn.dataset.tabTarget;
+          if (!targetId) return;
+
+          // Deactivate all
+          buttons.forEach(function (b) { b.classList.remove('bb-pdp__tab-btn--active'); });
+          tabsContainer.querySelectorAll('.bb-pdp__tab-panel').forEach(function (p) {
+            p.classList.remove('bb-pdp__tab-panel--active');
+          });
+
+          // Activate target
+          btn.classList.add('bb-pdp__tab-btn--active');
+          var panel = document.getElementById(targetId);
+          if (panel) panel.classList.add('bb-pdp__tab-panel--active');
+        });
+      });
+    }
+
+    /* ===== EVENT BINDING ===== */
+
     bindEvents() {
       var self = this;
 
-      // Thumbnail gallery clicks
-      this.els.thumbs.forEach(function (thumb) {
-        thumb.addEventListener('click', function () {
-          self.goToImage(parseInt(thumb.dataset.mediaIndex, 10) || 0);
-        });
-      });
-
-      // Dot indicator clicks
-      this.els.dots.forEach(function (dot) {
-        dot.addEventListener('click', function () {
-          self.goToImage(parseInt(dot.dataset.dotIndex, 10) || 0);
-        });
-      });
-
-      // Arrow button clicks
-      if (this.els.prevArrow) {
-        this.els.prevArrow.addEventListener('click', function () {
-          self.prevImage();
-        });
-      }
-      if (this.els.nextArrow) {
-        this.els.nextArrow.addEventListener('click', function () {
-          self.nextImage();
-        });
-      }
-
-      // Keyboard navigation on gallery
-      if (this.els.mainImageContainer) {
-        this.els.mainImageContainer.setAttribute('tabindex', '0');
-        this.els.mainImageContainer.addEventListener('keydown', function (e) {
-          if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            self.prevImage();
-          } else if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            self.nextImage();
-          }
-        });
-      }
-
-      // Touch/swipe support on main image
-      if (this.els.mainImageWrap) {
-        this.els.mainImageWrap.addEventListener('touchstart', function (e) {
-          self.touchStartX = e.touches[0].clientX;
-          self.touchStartY = e.touches[0].clientY;
-          self.isSwiping = false;
-        }, { passive: true });
-
-        this.els.mainImageWrap.addEventListener('touchmove', function (e) {
-          if (!self.isSwiping) {
-            var dx = Math.abs(e.touches[0].clientX - self.touchStartX);
-            var dy = Math.abs(e.touches[0].clientY - self.touchStartY);
-            // If horizontal movement is dominant, we're swiping the gallery
-            if (dx > dy && dx > 10) {
-              self.isSwiping = true;
-            }
-          }
-          // Prevent page scroll during horizontal swipe
-          if (self.isSwiping) {
-            e.preventDefault();
-          }
-        }, { passive: false });
-
-        this.els.mainImageWrap.addEventListener('touchend', function (e) {
-          if (!self.isSwiping) return;
-          var endX = e.changedTouches[0].clientX;
-          var diff = self.touchStartX - endX;
-          if (Math.abs(diff) > 40) {
-            if (diff > 0) {
-              self.nextImage();
-            } else {
-              self.prevImage();
-            }
-          }
-        }, { passive: true });
-      }
-
-      // Variant option buttons (swatches + size buttons)
+      // Variant option buttons (swatches, selectlike options, size pills, generic buttons)
       this.els.optionGroups.forEach(function (group) {
         var buttons = group.querySelectorAll('[data-option-value]');
         buttons.forEach(function (btn) {
@@ -178,13 +315,12 @@
 
       // Bundle item selection + per-item variant options
       this.els.bundleItems.forEach(function (item) {
-        // Parse per-item variants if available
+        // Parse per-item variants
         var variantScript = item.querySelector('[data-item-variants]');
         if (variantScript) {
           try {
             item._variants = JSON.parse(variantScript.textContent);
             item._selectedOptions = {};
-            // Initialize selected options from current active buttons
             var optGroups = item.querySelectorAll('[data-item-option-group]');
             optGroups.forEach(function (grp) {
               var pos = grp.dataset.itemOptionPosition;
@@ -193,10 +329,10 @@
                 item._selectedOptions[pos] = activeBtn.dataset.itemOptionValue;
               }
             });
-          } catch (_e) { /* ignore parse errors */ }
+          } catch (_e) { /* ignore */ }
         }
 
-        // Per-item option buttons (swatches + pills)
+        // Per-item option buttons
         var itemOptBtns = item.querySelectorAll('[data-item-option-value]');
         itemOptBtns.forEach(function (btn) {
           btn.addEventListener('click', function (e) {
@@ -207,7 +343,7 @@
 
         if (item.dataset.available === 'false') return;
 
-        // Click to toggle bundle item (only on the top row, not options area)
+        // Click to toggle
         var topRow = item.querySelector('.bb-pdp__bundle-item-top') || item;
         topRow.addEventListener('click', function (e) {
           if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-value]')) return;
@@ -232,7 +368,6 @@
             self.updateItemQuantity(item, -1);
           });
         }
-
         if (plusBtn) {
           plusBtn.addEventListener('click', function (e) {
             e.stopPropagation();
@@ -243,132 +378,65 @@
 
       // CTA
       if (this.els.cta) {
-        this.els.cta.addEventListener('click', function () {
-          self.addToCart();
-        });
+        this.els.cta.addEventListener('click', function () { self.addToCart(); });
       }
     }
 
-    // ---- Gallery navigation ----
-
-    prevImage() {
-      if (this.imageCount <= 1) return;
-      var idx = (this.activeThumbIndex - 1 + this.imageCount) % this.imageCount;
-      this.goToImage(idx);
-    }
-
-    nextImage() {
-      if (this.imageCount <= 1) return;
-      var idx = (this.activeThumbIndex + 1) % this.imageCount;
-      this.goToImage(idx);
-    }
-
-    goToImage(index) {
-      if (index < 0 || index >= this.imageCount) return;
-      if (index === this.activeThumbIndex) return;
-
-      var thumb = this.els.thumbs[index];
-      if (!thumb || !this.els.mainImage) return;
-
-      // Update thumb active state
-      this.els.thumbs.forEach(function (t) {
-        t.classList.remove('bb-pdp__thumb--active');
-      });
-      thumb.classList.add('bb-pdp__thumb--active');
-
-      // Update dot active state
-      this.els.dots.forEach(function (d) {
-        d.classList.remove('bb-pdp__dot--active');
-      });
-      if (this.els.dots[index]) {
-        this.els.dots[index].classList.add('bb-pdp__dot--active');
-      }
-
-      this.activeThumbIndex = index;
-
-      // Swap main image with fade
-      var newSrc = thumb.dataset.imageSrc;
-      var newSrcset = thumb.dataset.imageSrcset;
-      var newAlt = thumb.dataset.imageAlt;
-
-      if (this.els.mainImageWrap) {
-        this.els.mainImageWrap.classList.add('bb-pdp__main-image--loading');
-      }
-
-      this.els.mainImage.src = newSrc;
-      if (newSrcset) this.els.mainImage.srcset = newSrcset;
-      if (newAlt) this.els.mainImage.alt = newAlt;
-
-      var self = this;
-      this.els.mainImage.onload = function () {
-        if (self.els.mainImageWrap) {
-          self.els.mainImageWrap.classList.remove('bb-pdp__main-image--loading');
-        }
-      };
-
-      // Scroll thumb into view if needed
-      var thumbsContainer = thumb.parentElement;
-      if (thumbsContainer) {
-        var thumbLeft = thumb.offsetLeft;
-        var thumbWidth = thumb.offsetWidth;
-        var containerScrollLeft = thumbsContainer.scrollLeft;
-        var containerWidth = thumbsContainer.offsetWidth;
-
-        if (thumbLeft < containerScrollLeft) {
-          thumbsContainer.scrollTo({ left: thumbLeft - 8, behavior: 'smooth' });
-        } else if (thumbLeft + thumbWidth > containerScrollLeft + containerWidth) {
-          thumbsContainer.scrollTo({ left: thumbLeft + thumbWidth - containerWidth + 8, behavior: 'smooth' });
-        }
-      }
-    }
+    /* ===== VARIANT OPTION SELECTION ===== */
 
     handleOptionSelect(group, btn) {
       var position = group.dataset.optionPosition;
       var value = btn.dataset.optionValue;
+      var optionName = (group.dataset.optionName || '').toLowerCase();
 
-      // Update active state for buttons in this group
-      var isSwatch = btn.classList.contains('bb-pdp__swatch');
-      var activeClass = isSwatch ? 'bb-pdp__swatch--active' : 'bb-pdp__option-btn--active';
-
+      // Remove all active classes from every button in this group
       group.querySelectorAll('[data-option-value]').forEach(function (b) {
-        b.classList.remove('bb-pdp__swatch--active', 'bb-pdp__option-btn--active');
+        b.classList.remove(
+          'bb-pdp__swatch--active',
+          'bb-pdp__option-btn--active',
+          'bb-pdp__selectlike-option--active',
+          'bb-pdp__size-pill--active'
+        );
       });
-      btn.classList.add(activeClass);
 
-      // Update selected option name display (for color)
+      // Add active to ALL buttons matching this value (syncs desktop + mobile)
+      group.querySelectorAll('[data-option-value]').forEach(function (b) {
+        if (b.dataset.optionValue === value) {
+          if (b.classList.contains('bb-pdp__swatch')) b.classList.add('bb-pdp__swatch--active');
+          else if (b.classList.contains('bb-pdp__selectlike-option')) b.classList.add('bb-pdp__selectlike-option--active');
+          else if (b.classList.contains('bb-pdp__size-pill')) b.classList.add('bb-pdp__size-pill--active');
+          else if (b.classList.contains('bb-pdp__option-btn')) b.classList.add('bb-pdp__option-btn--active');
+        }
+      });
+
+      // Update displayed selected name
       var nameSpan = group.querySelector('[data-option-selected-name]');
       if (nameSpan) nameSpan.textContent = value;
 
-      // Update selectedOptions and find matching variant
+      // Update selectlike trigger value
+      var selectlikeValue = group.querySelector('[data-selectlike-value]');
+      if (selectlikeValue) selectlikeValue.textContent = value;
+
+      // Close selectlike dropdown
+      var selectlike = group.querySelector('[data-selectlike]');
+      if (selectlike) selectlike.classList.remove('bb-pdp__selectlike--open');
+
       this.selectedOptions[position] = value;
       var matchingVariant = this.findVariant();
 
       if (matchingVariant) {
-        // Update price
-        if (this.els.priceEl) {
-          this.els.priceEl.textContent = Core.formatMoney(matchingVariant.price, this.moneyFormat);
+        // Filter gallery if color changed
+        if (optionName === 'color' || optionName === 'colour' || optionName === 'colors') {
+          this.filterMediaByColor(value);
         }
 
-        if (this.els.comparePriceEl) {
-          if (matchingVariant.compare_at_price && matchingVariant.compare_at_price > matchingVariant.price) {
-            this.els.comparePriceEl.textContent = Core.formatMoney(matchingVariant.compare_at_price, this.moneyFormat);
-            this.els.comparePriceEl.style.display = '';
-          } else {
-            this.els.comparePriceEl.style.display = 'none';
-          }
-        }
+        // Update price display
+        this.updatePriceDisplay(matchingVariant);
 
-        // Jump to variant's featured image
-        if (matchingVariant.featured_media_id) {
-          for (var i = 0; i < this.els.thumbs.length; i++) {
-            if (String(this.els.thumbs[i].dataset.mediaId) === String(matchingVariant.featured_media_id)) {
-              this.goToImage(i);
-              break;
-            }
-          }
-        }
+        // Dispatch variant change for theme integration
+        this.dispatchVariantChange(matchingVariant);
 
-        // Mark unavailable options across other groups
+        // Mark unavailable options
         this.updateOptionAvailability();
 
         // Update URL
@@ -377,6 +445,51 @@
           window.history.replaceState({}, '', productUrl + '?variant=' + matchingVariant.id);
         }
       }
+    }
+
+    /* ===== PRICE DISPLAY ===== */
+
+    updatePriceDisplay(variant) {
+      if (!this.els.priceRegular) return;
+
+      this.els.priceRegular.textContent = Core.formatMoney(variant.price, this.moneyFormat);
+
+      if (variant.compare_at_price && variant.compare_at_price > variant.price) {
+        if (this.els.priceCompare) {
+          this.els.priceCompare.textContent = Core.formatMoney(variant.compare_at_price, this.moneyFormat);
+          this.els.priceCompare.style.display = '';
+        }
+        if (this.els.priceBadge) {
+          var pct = Math.round((variant.compare_at_price - variant.price) / variant.compare_at_price * 100);
+          this.els.priceBadge.textContent = pct + '% Off';
+          this.els.priceBadge.style.display = '';
+        }
+        if (this.els.priceWrap) this.els.priceWrap.classList.add('bb-pdp__price-wrap--sale');
+      } else {
+        if (this.els.priceCompare) this.els.priceCompare.style.display = 'none';
+        if (this.els.priceBadge) this.els.priceBadge.style.display = 'none';
+        if (this.els.priceWrap) this.els.priceWrap.classList.remove('bb-pdp__price-wrap--sale');
+      }
+    }
+
+    /* ===== VARIANT MATCHING ===== */
+
+    dispatchVariantChange(variant) {
+      var sectionId = this.section.dataset.sectionId;
+      var event = new CustomEvent('optionValueSelectionChange', {
+        bubbles: true,
+        detail: {
+          sectionId: sectionId,
+          variant: {
+            id: variant.id,
+            available: variant.available,
+            price: variant.price,
+            compare_at_price: variant.compare_at_price,
+            featured_media: variant.featured_media_id ? { id: variant.featured_media_id } : null,
+          },
+        },
+      });
+      this.section.dispatchEvent(event);
     }
 
     findVariant() {
@@ -408,10 +521,8 @@
 
         buttons.forEach(function (btn) {
           var testValue = btn.dataset.optionValue;
-          // Check if any variant with this option value is available
           var available = self.variants.some(function (v) {
             if (v.options[optionIndex] !== testValue) return false;
-            // Check if all other selected options match
             var otherPositions = Object.keys(self.selectedOptions);
             for (var k = 0; k < otherPositions.length; k++) {
               var otherPos = otherPositions[k];
@@ -423,21 +534,19 @@
           });
 
           if (btn.classList.contains('bb-pdp__swatch')) {
-            if (available) {
-              btn.classList.remove('bb-pdp__swatch--unavailable');
-            } else {
-              btn.classList.add('bb-pdp__swatch--unavailable');
-            }
+            btn.classList.toggle('bb-pdp__swatch--unavailable', !available);
+          } else if (btn.classList.contains('bb-pdp__selectlike-option')) {
+            btn.classList.toggle('bb-pdp__selectlike-option--unavailable', !available);
+          } else if (btn.classList.contains('bb-pdp__size-pill')) {
+            btn.classList.toggle('bb-pdp__size-pill--unavailable', !available);
           } else {
-            if (available) {
-              btn.classList.remove('bb-pdp__option-btn--unavailable');
-            } else {
-              btn.classList.add('bb-pdp__option-btn--unavailable');
-            }
+            btn.classList.toggle('bb-pdp__option-btn--unavailable', !available);
           }
         });
       });
     }
+
+    /* ===== BUNDLE ITEM VARIANT SELECTION ===== */
 
     handleItemOptionSelect(item, btn) {
       if (!item._variants || !item._selectedOptions) return;
@@ -446,7 +555,6 @@
       var value = btn.dataset.itemOptionValue;
       var group = btn.closest('[data-item-option-group]');
 
-      // Update active state in this group
       var isSwatch = btn.classList.contains('bb-pdp__item-swatch');
       var activeClass = isSwatch ? 'bb-pdp__item-swatch--active' : 'bb-pdp__item-pill--active';
       if (group) {
@@ -456,18 +564,15 @@
       }
       btn.classList.add(activeClass);
 
-      // Update selected options and find matching variant
       item._selectedOptions[position] = value;
       var matchingVariant = this.findItemVariant(item);
 
       if (matchingVariant) {
-        // Update the item's variant ID and price
         var oldVariantId = item.dataset.variantId;
         item.dataset.variantId = String(matchingVariant.id);
         item.dataset.price = String(matchingVariant.price);
         item.dataset.available = String(matchingVariant.available);
 
-        // Update displayed price
         var priceEl = item.querySelector('[data-item-price]');
         if (priceEl) {
           priceEl.textContent = matchingVariant.available
@@ -475,13 +580,12 @@
             : 'Sold out';
         }
 
-        // Update thumbnail image
         if (matchingVariant.image) {
           var imgEl = item.querySelector('[data-item-image]');
           if (imgEl) imgEl.src = matchingVariant.image;
         }
 
-        // Update the selectedProducts map if this item was already selected
+        // Update selectedProducts map if already selected
         if (this.selectedProducts.has(oldVariantId)) {
           var entry = this.selectedProducts.get(oldVariantId);
           this.selectedProducts.delete(oldVariantId);
@@ -491,7 +595,6 @@
           this.recalculate();
         }
 
-        // Toggle availability styling
         if (!matchingVariant.available) {
           item.classList.add('bb-pdp__bundle-item--disabled');
         } else if (item.getAttribute('aria-disabled') !== 'true') {
@@ -520,6 +623,8 @@
       }
       return null;
     }
+
+    /* ===== BUNDLE ITEM TOGGLE & QUANTITY ===== */
 
     toggleBundleItem(item) {
       var variantId = item.dataset.variantId;
@@ -586,19 +691,17 @@
 
     getTotalItems() {
       var total = 0;
-      this.selectedProducts.forEach(function (item) {
-        total += item.quantity;
-      });
+      this.selectedProducts.forEach(function (item) { total += item.quantity; });
       return total;
     }
 
     getSubtotal() {
       var subtotal = 0;
-      this.selectedProducts.forEach(function (item) {
-        subtotal += item.price * item.quantity;
-      });
+      this.selectedProducts.forEach(function (item) { subtotal += item.price * item.quantity; });
       return subtotal;
     }
+
+    /* ===== RECALCULATE ===== */
 
     recalculate() {
       var totalItems = this.getTotalItems();
@@ -609,10 +712,7 @@
       var discountAmount = Core.calculateDiscount(subtotal, activeTier, this.discountType);
       var total = Math.max(0, subtotal - discountAmount);
 
-      // Update summary
-      if (this.els.itemCount) {
-        this.els.itemCount.textContent = totalItems;
-      }
+      if (this.els.itemCount) this.els.itemCount.textContent = totalItems;
 
       if (this.els.discount) {
         this.els.discount.textContent = discountAmount > 0 ? '-' + Core.formatMoney(discountAmount, this.moneyFormat) : Core.formatMoney(0, this.moneyFormat);
@@ -620,11 +720,8 @@
         if (discountRow) discountRow.style.display = discountAmount > 0 ? '' : 'none';
       }
 
-      if (this.els.total) {
-        this.els.total.textContent = Core.formatMoney(total, this.moneyFormat);
-      }
+      if (this.els.total) this.els.total.textContent = Core.formatMoney(total, this.moneyFormat);
 
-      // Savings
       if (this.els.savings) {
         if (this.showSavings && discountAmount > 0) {
           this.els.savings.removeAttribute('hidden');
@@ -634,7 +731,6 @@
         }
       }
 
-      // Tier progress
       if (this.showTierProgress && this.els.tierSection) {
         this.updateTierProgress(totalItems, activeTier, activeTierIndex, nextTier);
       }
@@ -670,9 +766,7 @@
         var minusBtn = item.querySelector('[data-action="decrease"]');
         var plusBtn = item.querySelector('[data-action="increase"]');
 
-        if (minusBtn) {
-          minusBtn.disabled = !entry || entry.quantity <= 1;
-        }
+        if (minusBtn) minusBtn.disabled = !entry || entry.quantity <= 1;
         if (plusBtn) {
           var totalOther = self.getTotalItems() - (entry ? entry.quantity : 0);
           plusBtn.disabled = !entry || (totalOther + entry.quantity >= self.maxItems);
@@ -694,11 +788,6 @@
       }
     }
 
-    /**
-     * Continuous tier progress — fills smoothly from 0% to 100% across all tiers.
-     * Uses the last tier's count as the 100% mark. Shows current tier status and
-     * what's needed for the next tier.
-     */
     updateTierProgress(totalItems, activeTier, activeTierIndex, nextTier) {
       if (!this.els.tierFill || !this.els.tierLabel) return;
 
@@ -711,7 +800,6 @@
         return;
       }
 
-      // Continuous progress: 0% at 0 items, 100% at last tier count
       var progress = Math.min(100, Math.max(0, (totalItems / lastTierCount) * 100));
       this.els.tierFill.style.width = progress + '%';
 
@@ -733,7 +821,6 @@
           this.els.tierHint.style.display = 'none';
         }
       } else if (activeTier) {
-        // All tiers unlocked
         this.els.tierFill.style.width = '100%';
         var maxLabel = this.discountType === 'percentage'
           ? activeTier.discount + '% off'
@@ -743,12 +830,13 @@
           : 'Max discount unlocked: ' + maxLabel;
         if (this.els.tierHint) this.els.tierHint.style.display = 'none';
       } else {
-        // No items selected
         this.els.tierFill.style.width = '0%';
         this.els.tierLabel.textContent = 'Select items to unlock discounts';
         if (this.els.tierHint) this.els.tierHint.style.display = 'none';
       }
     }
+
+    /* ===== FREE GIFTS ===== */
 
     manageFreeGifts(activeTierIndex, previousTierIndex) {
       if (this.freeGiftPending) return;
@@ -756,9 +844,7 @@
 
       var targetGiftIds = Core.getTargetGiftIds(this.tiers, activeTierIndex);
       var targetSet = {};
-      for (var i = 0; i < targetGiftIds.length; i++) {
-        targetSet[targetGiftIds[i]] = true;
-      }
+      for (var i = 0; i < targetGiftIds.length; i++) targetSet[targetGiftIds[i]] = true;
 
       var toRemove = [];
       var toAdd = [];
@@ -768,9 +854,7 @@
       });
 
       for (var j = 0; j < targetGiftIds.length; j++) {
-        if (!this.activeFreeGifts.has(targetGiftIds[j])) {
-          toAdd.push(targetGiftIds[j]);
-        }
+        if (!this.activeFreeGifts.has(targetGiftIds[j])) toAdd.push(targetGiftIds[j]);
       }
 
       if (toAdd.length === 0 && toRemove.length === 0) return;
@@ -790,12 +874,8 @@
         operation = operation.then(function () {
           return Core.addFreeGiftToCart(id, self.bundleId, self.bundleName);
         }).then(function (result) {
-          if (result && result.added) {
-            self.activeFreeGifts.set(id, true);
-          }
-          if (result && result.reason === 'unavailable') {
-            self.showNotification('Free gift is currently unavailable');
-          }
+          if (result && result.added) self.activeFreeGifts.set(id, true);
+          if (result && result.reason === 'unavailable') self.showNotification('Free gift is currently unavailable');
         });
       });
 
@@ -810,6 +890,8 @@
         .catch(function () { self.freeGiftPending = false; });
     }
 
+    /* ===== NOTIFICATION ===== */
+
     showNotification(message) {
       if (!this.els.notification) return;
       if (this.notificationTimeout) clearTimeout(this.notificationTimeout);
@@ -823,6 +905,8 @@
         self.notificationTimeout = null;
       }, 3000);
     }
+
+    /* ===== ADD TO CART ===== */
 
     async addToCart() {
       if (this.isLoading || this.selectedProducts.size === 0) return;
@@ -857,9 +941,7 @@
           lineItem.properties['_bundle_discount'] = String(activeTier.discount);
           lineItem.properties['_bundle_discount_type'] = discountType;
         }
-        if (tierLabel) {
-          lineItem.properties['_bundle_tier'] = tierLabel;
-        }
+        if (tierLabel) lineItem.properties['_bundle_tier'] = tierLabel;
         items.push(lineItem);
       });
 
@@ -886,9 +968,7 @@
           this.els.cta.textContent = 'Error \u2014 Try Again';
           this.els.cta.classList.remove('bb-pdp__cta--loading');
         }
-        setTimeout(function () {
-          self.recalculate();
-        }, 3000);
+        setTimeout(function () { self.recalculate(); }, 3000);
       } finally {
         if (!this.isRedirecting) {
           this.isLoading = false;
@@ -897,6 +977,8 @@
       }
     }
   }
+
+  /* ===== INIT ===== */
 
   function init() {
     document.querySelectorAll('[data-bundle-pdp]').forEach(function (el) {
