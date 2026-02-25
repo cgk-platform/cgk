@@ -10,6 +10,7 @@ export const PROFILES: Record<ProfileSlug, ProfileConfig> = {
     label: 'CGK Linens',
     portEnvVar: 'OPENCLAW_CGK_PORT',
     tokenEnvVar: 'OPENCLAW_CGK_GATEWAY_TOKEN',
+    urlEnvVar: 'OPENCLAW_CGK_URL',
     defaultPort: 18789,
   },
   rawdog: {
@@ -17,6 +18,7 @@ export const PROFILES: Record<ProfileSlug, ProfileConfig> = {
     label: 'RAWDOG',
     portEnvVar: 'OPENCLAW_RAWDOG_PORT',
     tokenEnvVar: 'OPENCLAW_RAWDOG_GATEWAY_TOKEN',
+    urlEnvVar: 'OPENCLAW_RAWDOG_URL',
     defaultPort: 19001,
   },
   vitahustle: {
@@ -24,6 +26,7 @@ export const PROFILES: Record<ProfileSlug, ProfileConfig> = {
     label: 'VitaHustle',
     portEnvVar: 'OPENCLAW_VITA_PORT',
     tokenEnvVar: 'OPENCLAW_VITA_GATEWAY_TOKEN',
+    urlEnvVar: 'OPENCLAW_VITA_URL',
     defaultPort: 19021,
   },
 } as const
@@ -58,8 +61,8 @@ export function getProfileToken(slug: ProfileSlug): string | undefined {
  * then falls back to ws://127.0.0.1:{port}.
  */
 export function getProfileUrl(slug: ProfileSlug): string {
-  const urlEnvVar = `OPENCLAW_${slug.toUpperCase()}_URL`
-  const envUrl = process.env[urlEnvVar]
+  const profile = PROFILES[slug]
+  const envUrl = process.env[profile.urlEnvVar]
   if (envUrl) return envUrl
 
   const port = getProfilePort(slug)

@@ -157,6 +157,7 @@ export interface ProfileConfig {
   label: string
   portEnvVar: string
   tokenEnvVar: string
+  urlEnvVar: string
   defaultPort: number
 }
 
