@@ -1014,6 +1014,29 @@
 .bb-pdp__item-swatch-visual[data-color-handle="rust"] { background-color: #b7410e; }
 .bb-pdp__item-swatch-visual[data-color-handle="purple"] { background-color: #6a0dad; }
 .bb-pdp__item-swatch-visual[data-color-handle="spa-blue"] { background-color: #4a9daf; }
+.bb-pdp__item-swatch-visual[data-color-handle="camel"] { background-color: #c19a6b; }
+.bb-pdp__item-swatch-visual[data-color-handle="coral"] { background-color: #ff7f50; }
+.bb-pdp__item-swatch-visual[data-color-handle="denim"] { background-color: #1560bd; }
+.bb-pdp__item-swatch-visual[data-color-handle="emerald"] { background-color: #046a38; }
+.bb-pdp__item-swatch-visual[data-color-handle="forest"],
+.bb-pdp__item-swatch-visual[data-color-handle="forest-green"] { background-color: #228b22; }
+.bb-pdp__item-swatch-visual[data-color-handle="green"] { background-color: #2e8b57; }
+.bb-pdp__item-swatch-visual[data-color-handle="indigo"] { background-color: #4b0082; }
+.bb-pdp__item-swatch-visual[data-color-handle="khaki"] { background-color: #c3b091; }
+.bb-pdp__item-swatch-visual[data-color-handle="linen"] { background-color: #faf0e6; }
+.bb-pdp__item-swatch-visual[data-color-handle="moss"] { background-color: #8a9a5b; }
+.bb-pdp__item-swatch-visual[data-color-handle="nude"] { background-color: #e3bc9a; }
+.bb-pdp__item-swatch-visual[data-color-handle="oat"],
+.bb-pdp__item-swatch-visual[data-color-handle="oatmeal"] { background-color: #d2c6a5; }
+.bb-pdp__item-swatch-visual[data-color-handle="peach"] { background-color: #ffcba4; }
+.bb-pdp__item-swatch-visual[data-color-handle="pewter"] { background-color: #8e8e8e; }
+.bb-pdp__item-swatch-visual[data-color-handle="red"] { background-color: #cc3333; }
+.bb-pdp__item-swatch-visual[data-color-handle="rose"] { background-color: #e8909c; }
+.bb-pdp__item-swatch-visual[data-color-handle="stone"] { background-color: #928e85; }
+.bb-pdp__item-swatch-visual[data-color-handle="tan"] { background-color: #d2b48c; }
+.bb-pdp__item-swatch-visual[data-color-handle="turquoise"] { background-color: #40e0d0; }
+.bb-pdp__item-swatch-visual[data-color-handle="wine"] { background-color: #722f37; }
+.bb-pdp__item-swatch-visual[data-color-handle="yellow"] { background-color: #ffd700; }
 
 /* Inline size pills */
 .bb-pdp__item-pills {

@@ -1690,7 +1690,7 @@
                 visual.dataset.colorHandle = handle;
                 visual.dataset.initials = val.substring(0, 2).toUpperCase();
                 // Only show initials fallback if handle doesn't match a known CSS color
-                var knownHandles = ['white','ivory','cream','beige','tan','taupe','grey','gray','light-grey','light-gray','charcoal','slate','black','navy','navy-blue','blue','sage','sage-green','blush','blush-pink','pink','mauve','lavender','burgundy','gold','sand','denim-blue','emerald-green','heathered-beige','heathered-grey','heathered-gray','off-white','royal-blue','steel-blue','wheat','dusty-rose','mocha','terracotta','chocolate','brown','olive','plum','light-blue','sky-blue','teal','mint','silver','rust','purple','spa-blue'];
+                var knownHandles = ['white','ivory','cream','beige','tan','taupe','grey','gray','light-grey','light-gray','charcoal','slate','black','navy','navy-blue','blue','sage','sage-green','blush','blush-pink','pink','mauve','lavender','burgundy','gold','sand','denim','denim-blue','emerald','emerald-green','forest','forest-green','green','heathered-beige','heathered-grey','heathered-gray','off-white','royal-blue','steel-blue','wheat','dusty-rose','mocha','terracotta','chocolate','brown','olive','plum','light-blue','sky-blue','teal','mint','silver','rust','purple','spa-blue','camel','coral','indigo','khaki','linen','moss','nude','oat','oatmeal','peach','pewter','red','rose','stone','turquoise','wine','yellow'];
                 if (knownHandles.indexOf(handle) === -1) {
                   visual.setAttribute('data-no-color', '');
                 }
