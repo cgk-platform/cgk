@@ -111,7 +111,17 @@
 
       // Set initial main product variant price
       var initVariant = this.findVariant();
-      if (initVariant) this.mainVariantPrice = initVariant.price || 0;
+      if (initVariant) {
+        this.mainVariantPrice = initVariant.price || 0;
+      } else if (this.variants.length > 0) {
+        // Fallback: use first available variant price
+        for (var vi = 0; vi < this.variants.length; vi++) {
+          if (this.variants[vi].available) {
+            this.mainVariantPrice = this.variants[vi].price || 0;
+            break;
+          }
+        }
+      }
 
       this.initGallery();
       this.initSelectlike();
@@ -792,8 +802,9 @@
     /* ===== SHIPPING PROGRESS BAR ===== */
 
     updateShippingBar(subtotalCents) {
-      if (this.freeShippingThreshold <= 0) return;
+      if (!this.freeShippingThreshold || this.freeShippingThreshold <= 0) return;
       var thresholdCents = this.freeShippingThreshold * 100;
+      if (thresholdCents <= 0) return;
       var pct = Math.min(100, Math.round((subtotalCents / thresholdCents) * 100));
       var unlocked = subtotalCents >= thresholdCents;
       var spanHtml;

@@ -216,12 +216,15 @@
     var cartDrawer = document.querySelector('cart-drawer');
     if (!cartDrawer || typeof cartDrawer.renderContents !== 'function') return;
     var root = BundleCore.routeRoot();
-    fetch(root + '?sections=cart-drawer,cart-icon-bubble', { credentials: 'same-origin' })
-      .then(function (res) { return res.ok ? res.json() : null; })
-      .then(function (sections) {
-        if (sections) cartDrawer.renderContents({ id: null, sections: sections });
-      })
-      .catch(function () { /* silent */ });
+    // Small delay to ensure cart/add.js has fully propagated before fetching sections
+    setTimeout(function () {
+      fetch(root + '?sections=cart-drawer,cart-icon-bubble', { credentials: 'same-origin' })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (sections) {
+          if (sections) cartDrawer.renderContents({ id: null, sections: sections });
+        })
+        .catch(function () { /* silent */ });
+    }, 300);
   };
 
   /**
