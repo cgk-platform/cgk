@@ -1667,7 +1667,7 @@
           var selection = { selectedOptions: {}, variants: gift.variants };
           giftSelections.push(selection);
 
-          // Option groups
+          // Option groups — rendered as dropdowns
           gift.options.forEach(function (opt) {
             var optName = opt.name.toLowerCase();
             var groupEl = document.createElement('div');
@@ -1678,57 +1678,26 @@
             label.textContent = opt.name;
             groupEl.appendChild(label);
 
-            var isColor = (optName === 'color' || optName === 'colour' || optName === 'colors');
+            var select = document.createElement('select');
+            select.className = 'bb-pdp__gift-modal-select';
+            select.dataset.giftIdx = idx;
+            select.dataset.optionPosition = String(opt.position);
 
-            if (isColor) {
-              var swatchRow = document.createElement('div');
-              swatchRow.className = 'bb-pdp__item-swatches';
+            var placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = 'Select ' + opt.name + '...';
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            select.appendChild(placeholder);
 
-              opt.values.forEach(function (val) {
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'bb-pdp__item-swatch';
-                btn.dataset.giftIdx = idx;
-                btn.dataset.optionName = optName;
-                btn.dataset.optionPosition = String(opt.position);
-                btn.dataset.optionValue = val;
-                btn.title = val;
-                btn.setAttribute('aria-label', val);
+            opt.values.forEach(function (val) {
+              var option = document.createElement('option');
+              option.value = val;
+              option.textContent = val;
+              select.appendChild(option);
+            });
 
-                var visual = document.createElement('span');
-                visual.className = 'bb-pdp__item-swatch-visual';
-                var handle = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                visual.dataset.colorHandle = handle;
-                visual.dataset.initials = val.substring(0, 2).toUpperCase();
-                // Only show initials fallback if handle doesn't match a known CSS color
-                var knownHandles = ['white','ivory','cream','beige','tan','taupe','grey','gray','light-grey','light-gray','charcoal','slate','black','navy','navy-blue','blue','sage','sage-green','blush','blush-pink','pink','mauve','lavender','burgundy','gold','sand','denim','denim-blue','emerald','emerald-green','forest','forest-green','green','heathered-beige','heathered-grey','heathered-gray','off-white','royal-blue','steel-blue','wheat','dusty-rose','mocha','terracotta','chocolate','brown','olive','plum','light-blue','sky-blue','teal','mint','silver','rust','purple','spa-blue','camel','coral','indigo','khaki','linen','moss','nude','oat','oatmeal','peach','pewter','red','rose','stone','turquoise','wine','yellow'];
-                if (knownHandles.indexOf(handle) === -1) {
-                  visual.setAttribute('data-no-color', '');
-                }
-                btn.appendChild(visual);
-                swatchRow.appendChild(btn);
-              });
-
-              groupEl.appendChild(swatchRow);
-            } else {
-              var pillRow = document.createElement('div');
-              pillRow.className = 'bb-pdp__item-pills';
-
-              opt.values.forEach(function (val) {
-                var btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'bb-pdp__item-pill';
-                btn.dataset.giftIdx = idx;
-                btn.dataset.optionName = optName;
-                btn.dataset.optionPosition = String(opt.position);
-                btn.dataset.optionValue = val;
-                btn.textContent = val;
-                pillRow.appendChild(btn);
-              });
-
-              groupEl.appendChild(pillRow);
-            }
-
+            groupEl.appendChild(select);
             itemEl.appendChild(groupEl);
           });
 
@@ -1782,25 +1751,16 @@
           return null;
         }
 
-        // Option click handler
-        modal.addEventListener('click', function (e) {
-          var btn = e.target.closest('[data-option-value]');
-          if (!btn) return;
-          var gIdx = parseInt(btn.dataset.giftIdx, 10);
-          var pos = btn.dataset.optionPosition;
-          var val = btn.dataset.optionValue;
-          var group = btn.closest('.bb-pdp__gift-modal-option-group');
-
-          // Update active state
-          if (group) {
-            group.querySelectorAll('[data-option-value]').forEach(function (b) {
-              b.classList.remove('bb-pdp__item-swatch--active', 'bb-pdp__item-pill--active');
-            });
+        // Dropdown change handler
+        modal.addEventListener('change', function (e) {
+          var select = e.target.closest('.bb-pdp__gift-modal-select');
+          if (!select) return;
+          var gIdx = parseInt(select.dataset.giftIdx, 10);
+          var pos = select.dataset.optionPosition;
+          var val = select.value;
+          if (val) {
+            giftSelections[gIdx].selectedOptions[pos] = val;
           }
-          var isSwatch = btn.classList.contains('bb-pdp__item-swatch');
-          btn.classList.add(isSwatch ? 'bb-pdp__item-swatch--active' : 'bb-pdp__item-pill--active');
-
-          giftSelections[gIdx].selectedOptions[pos] = val;
           checkComplete();
         });
 
