@@ -572,20 +572,20 @@
             var optGroups = item.querySelectorAll('[data-item-option-group]');
             optGroups.forEach(function (grp) {
               var pos = grp.dataset.itemOptionPosition;
-              var activeBtn = grp.querySelector('.bb-pdp__item-swatch--active, .bb-pdp__item-pill--active');
-              if (activeBtn && pos) {
-                item._selectedOptions[pos] = activeBtn.dataset.itemOptionValue;
+              var sel = grp.querySelector('[data-item-option-select]');
+              if (sel && pos) {
+                item._selectedOptions[pos] = sel.value;
               }
             });
           } catch (_e) { /* ignore */ }
         }
 
-        // Per-item option buttons
-        var itemOptBtns = item.querySelectorAll('[data-item-option-value]');
-        itemOptBtns.forEach(function (btn) {
-          btn.addEventListener('click', function (e) {
+        // Per-item option dropdowns
+        var itemSelects = item.querySelectorAll('[data-item-option-select]');
+        itemSelects.forEach(function (sel) {
+          sel.addEventListener('change', function (e) {
             e.stopPropagation();
-            self.handleItemOptionSelect(item, btn);
+            self.handleItemOptionChange(item, sel);
           });
         });
 
@@ -594,14 +594,14 @@
         // Click to toggle
         var topRow = item.querySelector('.bb-pdp__bundle-item-top') || item;
         topRow.addEventListener('click', function (e) {
-          if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-value]')) return;
+          if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-select]')) return;
           self.toggleBundleItem(item);
         });
 
         item.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            if (!e.target.closest('[data-action]') && !e.target.closest('[data-item-option-value]')) {
+            if (!e.target.closest('[data-action]') && !e.target.closest('[data-item-option-select]')) {
               self.toggleBundleItem(item);
             }
           }
@@ -766,9 +766,14 @@
         var optGroups = item.querySelectorAll('[data-item-option-group]');
         optGroups.forEach(function (grp) {
           if ((grp.dataset.itemOptionName || '').toLowerCase() !== 'size') return;
-          var btn = grp.querySelector('[data-item-option-value="' + sizeValue + '"]');
-          if (btn) {
-            self.handleItemOptionSelect(item, btn);
+          var pos = grp.dataset.itemOptionPosition;
+          var sel = grp.querySelector('[data-item-option-select]');
+          if (sel && pos) {
+            // Check that the value exists as an option
+            var hasValue = Array.from(sel.options).some(function (o) { return o.value === sizeValue; });
+            if (hasValue) {
+              self.handleItemOptionSelect(item, pos, sizeValue);
+            }
           }
         });
       });
@@ -915,23 +920,36 @@
 
     /* ===== BUNDLE ITEM VARIANT SELECTION ===== */
 
-    handleItemOptionSelect(item, btn) {
+    /**
+     * Handle a bundle-item dropdown change.
+     */
+    handleItemOptionChange(item, sel) {
       if (!item._variants || !item._selectedOptions) return;
-
-      var position = btn.dataset.itemOptionPosition;
-      var value = btn.dataset.itemOptionValue;
-      var group = btn.closest('[data-item-option-group]');
-
-      var isSwatch = btn.classList.contains('bb-pdp__item-swatch');
-      var activeClass = isSwatch ? 'bb-pdp__item-swatch--active' : 'bb-pdp__item-pill--active';
-      if (group) {
-        group.querySelectorAll('[data-item-option-value]').forEach(function (b) {
-          b.classList.remove('bb-pdp__item-swatch--active', 'bb-pdp__item-pill--active');
-        });
-      }
-      btn.classList.add(activeClass);
+      var position = sel.dataset.itemOptionPosition;
+      var value = sel.value;
 
       item._selectedOptions[position] = value;
+      this._applyItemVariant(item);
+    }
+
+    /**
+     * Programmatically set a bundle-item dropdown and update variant.
+     */
+    handleItemOptionSelect(item, position, value) {
+      if (!item._variants || !item._selectedOptions) return;
+      var group = item.querySelector('[data-item-option-group][data-item-option-position="' + position + '"]');
+      if (!group) return;
+      var sel = group.querySelector('[data-item-option-select]');
+      if (!sel) return;
+      sel.value = value;
+      item._selectedOptions[position] = value;
+      this._applyItemVariant(item);
+    }
+
+    /**
+     * Shared: find + apply the matching variant after option change.
+     */
+    _applyItemVariant(item) {
       var matchingVariant = this.findItemVariant(item);
 
       if (matchingVariant) {

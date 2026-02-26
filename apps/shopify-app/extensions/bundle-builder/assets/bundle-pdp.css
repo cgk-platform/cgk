@@ -917,6 +917,27 @@
   gap: 0.4rem;
 }
 
+/* Bundle item option dropdowns */
+.bb-pdp__item-option-select {
+  width: 100%;
+  padding: 6px 28px 6px 10px;
+  font-family: var(--font-family-2, "Bitter", serif);
+  font-size: 13px;
+  color: #1a1a2e;
+  background: #fff;
+  border: 1.5px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.15s;
+}
+.bb-pdp__item-option-select:hover { border-color: #bbb; }
+.bb-pdp__item-option-select:focus { outline: none; border-color: var(--bb-accent, #1a1a2e); }
+
 .bb-pdp__item-swatches {
   display: flex;
   flex-wrap: wrap;
