@@ -587,7 +587,23 @@
           } catch (_e) { /* ignore */ }
         }
 
-        // Per-item color swatch buttons
+        // Per-item color dropdown triggers
+        var colorDropdowns = item.querySelectorAll('[data-color-dropdown]');
+        colorDropdowns.forEach(function (dd) {
+          var trigger = dd.querySelector('[data-color-dropdown-trigger]');
+          if (trigger) {
+            trigger.addEventListener('click', function (e) {
+              e.stopPropagation();
+              // Close other open dropdowns in this item
+              item.querySelectorAll('[data-color-dropdown].bb-pdp__color-dropdown--open').forEach(function (other) {
+                if (other !== dd) other.classList.remove('bb-pdp__color-dropdown--open');
+              });
+              dd.classList.toggle('bb-pdp__color-dropdown--open');
+            });
+          }
+        });
+
+        // Per-item color swatch buttons (inside dropdown panel)
         var itemSwatchBtns = item.querySelectorAll('.bb-pdp__item-swatch');
         itemSwatchBtns.forEach(function (btn) {
           btn.addEventListener('click', function (e) {
@@ -610,14 +626,14 @@
         // Click to toggle
         var topRow = item.querySelector('.bb-pdp__bundle-item-top') || item;
         topRow.addEventListener('click', function (e) {
-          if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-select]') || e.target.closest('.bb-pdp__item-swatch')) return;
+          if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-select]') || e.target.closest('[data-color-dropdown]')) return;
           self.toggleBundleItem(item);
         });
 
         item.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            if (!e.target.closest('[data-action]') && !e.target.closest('[data-item-option-select]') && !e.target.closest('.bb-pdp__item-swatch')) {
+            if (!e.target.closest('[data-action]') && !e.target.closest('[data-item-option-select]') && !e.target.closest('[data-color-dropdown]')) {
               self.toggleBundleItem(item);
             }
           }
@@ -636,6 +652,15 @@
           plusBtn.addEventListener('click', function (e) {
             e.stopPropagation();
             self.updateItemQuantity(item, 1);
+          });
+        }
+      });
+
+      // Close color dropdowns on outside click
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('[data-color-dropdown]')) {
+          self.section.querySelectorAll('.bb-pdp__color-dropdown--open').forEach(function (dd) {
+            dd.classList.remove('bb-pdp__color-dropdown--open');
           });
         }
       });
@@ -951,6 +976,14 @@
         });
       }
       btn.classList.add('bb-pdp__item-swatch--active');
+
+      // Update dropdown trigger label and close panel
+      var dropdown = btn.closest('[data-color-dropdown]');
+      if (dropdown) {
+        var labelEl = dropdown.querySelector('[data-color-dropdown-value]');
+        if (labelEl) labelEl.textContent = value;
+        dropdown.classList.remove('bb-pdp__color-dropdown--open');
+      }
 
       item._selectedOptions[position] = value;
       this._applyItemVariant(item);
