@@ -30,10 +30,8 @@ export async function POST(request: Request) {
   }
 
   const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
-  if (!tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
+  // CI pipeline doesn't send tenant context — default to cgk_linens
+  const tenantSlug = headerList.get('x-tenant-slug') || 'cgk_linens'
 
   let body: {
     brand_dir: string
@@ -130,10 +128,8 @@ export async function GET(request: Request) {
   }
 
   const headerList = await headers()
-  const tenantSlug = headerList.get('x-tenant-slug')
-  if (!tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
-  }
+  // CI pipeline doesn't send tenant context — default to cgk_linens
+  const tenantSlug = headerList.get('x-tenant-slug') || 'cgk_linens'
 
   const { searchParams } = new URL(request.url)
   const action = searchParams.get('action') || 'brands'

@@ -30,6 +30,8 @@ const PUBLIC_PATHS = [
   // Shopify OAuth (Shopify redirects merchants here; app verifies HMAC internally)
   '/api/admin/shopify-app/auth',
   '/api/admin/shopify-app/callback',
+  // CI pipeline uses its own API key auth (machine-to-machine)
+  '/api/admin/competitor-intelligence',
 ]
 
 const STATIC_PATHS = [
