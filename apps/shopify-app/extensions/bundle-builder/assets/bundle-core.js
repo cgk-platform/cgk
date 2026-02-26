@@ -202,6 +202,10 @@
           }
         }
       })
+      .then(function () {
+        // Decorate gift items after section HTML is injected
+        BundleCore.decorateCartGifts();
+      })
       .catch(function () { /* silent */ });
 
     document.dispatchEvent(new CustomEvent('cart:updated'));
@@ -223,8 +227,69 @@
         .then(function (sections) {
           if (sections) cartDrawer.renderContents({ id: null, sections: sections });
         })
+        .then(function () {
+          // Decorate gift items after drawer renders
+          setTimeout(function () { BundleCore.decorateCartGifts(); }, 200);
+        })
         .catch(function () { /* silent */ });
     }, 300);
+  };
+
+  /**
+   * Decorate free gift items in the cart drawer.
+   * Hides quantity selectors and adds a "FREE GIFT" badge for items
+   * with _bundle_free_gift property. Runs after cart drawer DOM is updated.
+   */
+  BundleCore.decorateCartGifts = function () {
+    var root = BundleCore.routeRoot();
+    fetch(root + 'cart.js', { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (cart) {
+        if (!cart || !cart.items) return;
+
+        cart.items.forEach(function (item, i) {
+          var props = item.properties || {};
+          if (props['_bundle_free_gift'] !== 'true') return;
+
+          var idx = i + 1; // Dawn uses 1-based indices
+          // Try multiple selectors used by Dawn cart drawer and cart page
+          var el = document.getElementById('CartItem-' + idx)
+            || document.querySelector('[data-cart-item-index="' + idx + '"]')
+            || document.querySelector('tr.cart-item:nth-child(' + idx + ')');
+          if (!el) return;
+
+          // Already decorated
+          if (el.querySelector('.bb-cart-gift-badge')) return;
+
+          // Mark for CSS targeting
+          el.classList.add('bb-cart-gift-item');
+
+          // Hide quantity selector
+          var qtySels = ['quantity-popover', '.cart-item__quantity', '.quantity'];
+          qtySels.forEach(function (sel) {
+            var qtyEl = el.querySelector(sel);
+            if (qtyEl) qtyEl.style.display = 'none';
+          });
+
+          // Add "FREE GIFT" badge near the item details
+          var badge = document.createElement('span');
+          badge.className = 'bb-cart-gift-badge';
+          badge.textContent = 'FREE GIFT';
+          var detailsEl = el.querySelector('.cart-item__details, .cart-item__info, td:nth-child(2)');
+          if (detailsEl) {
+            detailsEl.appendChild(badge);
+          }
+
+          // Replace price display with "FREE"
+          var priceEls = el.querySelectorAll('.cart-item__price-wrapper, .price, .cart-item__totals .price');
+          priceEls.forEach(function (priceEl) {
+            if (priceEl.dataset.bbGiftStyled) return;
+            priceEl.dataset.bbGiftStyled = 'true';
+            priceEl.innerHTML = '<span class="bb-cart-gift-price">FREE</span>';
+          });
+        });
+      })
+      .catch(function () { /* silent */ });
   };
 
   /**
@@ -235,7 +300,7 @@
    * @param {number} [minItems] - Minimum qualifying items for this gift (for cart enforcement)
    * Returns a Promise that resolves to { added: boolean }.
    */
-  BundleCore.addFreeGiftToCart = function (variantId, bundleId, bundleName, minItems) {
+  BundleCore.addFreeGiftToCart = function (variantId, bundleId, bundleName, minItems, options) {
     var numericId = BundleCore.numericVariantId(variantId);
     var root = BundleCore.routeRoot();
 
@@ -269,7 +334,9 @@
           return { added: false, reason: 'error' };
         });
       }
-      BundleCore.refreshCartUI();
+      if (!(options && options.skipRefresh)) {
+        BundleCore.refreshCartUI();
+      }
       return { added: true };
     }).catch(function () {
       return { added: false, reason: 'error' };
@@ -318,7 +385,7 @@
    * Add bundle items to cart.
    * Returns a Promise that resolves on success.
    */
-  BundleCore.addBundleToCart = function (items) {
+  BundleCore.addBundleToCart = function (items, options) {
     var root = BundleCore.routeRoot();
     return fetch(root + 'cart/add.js', {
       method: 'POST',
@@ -331,7 +398,9 @@
           throw new Error(err.description || 'Failed to add to cart');
         });
       }
-      BundleCore.refreshCartUI();
+      if (!(options && options.skipRefresh)) {
+        BundleCore.refreshCartUI();
+      }
       document.dispatchEvent(new CustomEvent('ajaxProduct:added'));
       return response;
     });
@@ -419,6 +488,8 @@
 
     // Run on initial page load
     BundleCore.enforceFreeGifts();
+    // Decorate gift items in cart on page load
+    setTimeout(function () { BundleCore.decorateCartGifts(); }, 500);
 
     // Listen for cart change events
     document.addEventListener('cart:updated', function () {
@@ -427,6 +498,11 @@
       BundleCore._enforceTimer = setTimeout(function () {
         BundleCore.enforceFreeGifts();
       }, 500);
+      // Decorate gifts after DOM settles
+      clearTimeout(BundleCore._decorateTimer);
+      BundleCore._decorateTimer = setTimeout(function () {
+        BundleCore.decorateCartGifts();
+      }, 800);
     });
   };
 

@@ -8,6 +8,45 @@
   var instances = new WeakMap();
   var Core = window.BundleCore;
 
+  /* Color-name → hex map for swatch/dot fallbacks when Shopify swatch data is missing */
+  var COLOR_MAP = {
+    'amber':'#FFBF00','aqua':'#00CED1','arctic':'#B0D4E8','ash':'#B2BEB5',
+    'beige':'#C8AD7F','black':'#222222','blue':'#4169E1','blush':'#DE5D83',
+    'bone':'#E3DAC9','bronze':'#CD7F32','brown':'#6B4226','burgundy':'#722F37',
+    'camel':'#C19A6B','caramel':'#C68E42','charcoal':'#4A4A4A','chocolate':'#5C3317',
+    'cinnamon':'#D2691E','cloud':'#F0F0F0','cocoa':'#6B4226','copper':'#B87333',
+    'coral':'#FF7F50','cream':'#FFFDD0','denim':'#1560BD','dove':'#B0A090',
+    'dune':'#C8B896','dusty':'#DCAE96','emerald':'#046A38','espresso':'#4A2C2A',
+    'eucalyptus':'#5F8575','fog':'#BABABA','forest':'#228B22','gold':'#CFB53B',
+    'graphite':'#4B4B4B','green':'#2E8B57','grey':'#9E9E9E','gray':'#9E9E9E',
+    'harbor':'#3A5A7C','harbour':'#3A5A7C','heathered':'#B0AFA8','indigo':'#4B0082',
+    'iron':'#5C5C5C','ivory':'#FFFFF0','khaki':'#C3B091','latte':'#C8A882',
+    'lavender':'#B57EDC','linen':'#FAF0E6','light':'#D3D3D3','marine':'#2B4F72',
+    'mauve':'#E0B0FF','midnight':'#191970','mint':'#98FF98','mist':'#C4C4C4',
+    'mocha':'#967969','moss':'#8A9A5B','mushroom':'#947A5E','natural':'#F5F0E1',
+    'navy':'#182F5C','nude':'#E3BC9A','oat':'#D2C6A5','oatmeal':'#D2C6A5',
+    'ocean':'#006994','off':'#FAF9F6','olive':'#708238','onyx':'#353839',
+    'peach':'#FFCBA4','pearl':'#EAE0CC','pebble':'#9E9081','pewter':'#8E8E8E',
+    'pink':'#FFB6C1','platinum':'#E5E4E2','plum':'#673147','purple':'#6A0DAD',
+    'red':'#CC3333','rose':'#E8909C','royal':'#4169E1','rust':'#B7410E',
+    'sage':'#B2AC88','sand':'#C2B280','sienna':'#A0522D','silver':'#C0C0C0',
+    'sky':'#87CEEB','slate':'#708090','smoke':'#848884','snow':'#FFFAFA',
+    'soft':'#E8DCD0','spa':'#4A9DAF','steel':'#4682B4','stone':'#928E85',
+    'tan':'#D2B48C','taupe':'#8B7D6B','teal':'#008080','terracotta':'#CC4E3C',
+    'turquoise':'#40E0D0','warm':'#D4A76A','white':'#FFFFFF','wheat':'#DEB887',
+    'wine':'#722F37','yellow':'#FFD700'
+  };
+
+  function resolveColorHex(colorName) {
+    if (!colorName) return null;
+    var lower = colorName.toLowerCase().trim();
+    if (COLOR_MAP[lower]) return COLOR_MAP[lower];
+    // First-word fallback for compound names like "Sage Pinstripe"
+    var first = lower.split(' ')[0];
+    if (first && COLOR_MAP[first]) return COLOR_MAP[first];
+    return null;
+  }
+
   class BundlePDP {
     constructor(section) {
       this.section = section;
@@ -40,6 +79,7 @@
       this.currentSlideIndex = 0;
       this.freeShippingThreshold = parseInt(section.dataset.freeShippingThreshold, 10) || 0;
       this.mainVariantPrice = 0;
+      this.existingCartTotal = 0;
 
       // Parse product variants
       this.variants = [];
@@ -128,6 +168,7 @@
       this.initTabs();
       this.initTierCards();
       this.initStickyMobile();
+      this.applyColorFallbacks();
       this.bindEvents();
 
       // Default to Queen if no variant specified in URL
@@ -136,6 +177,24 @@
       }
 
       this.recalculate();
+      this.fetchExistingCartTotal();
+    }
+
+    /* ===== COLOR FALLBACKS ===== */
+
+    applyColorFallbacks() {
+      // Apply color to swatch visuals and dropdown dots that have no inline style
+      var selectors = '.bb-pdp__swatch-visual[data-color-handle], .bb-pdp__color-dropdown-dot[data-color-handle]';
+      this.section.querySelectorAll(selectors).forEach(function (el) {
+        if (el.style.backgroundColor || el.style.backgroundImage) return; // Already has color
+        var handle = el.dataset.colorHandle || '';
+        // Convert handle back to readable name: "sage-pinstripe" → "sage pinstripe"
+        var colorName = handle.replace(/-/g, ' ');
+        var hex = resolveColorHex(colorName);
+        if (hex) {
+          el.style.backgroundColor = hex;
+        }
+      });
     }
 
     /* ===== GALLERY ===== */
@@ -851,13 +910,14 @@
       if (!this.freeShippingThreshold || this.freeShippingThreshold <= 0) return;
       var thresholdCents = this.freeShippingThreshold * 100;
       if (thresholdCents <= 0) return;
-      var pct = Math.min(100, Math.round((subtotalCents / thresholdCents) * 100));
-      var unlocked = subtotalCents >= thresholdCents;
+      var totalWithCart = subtotalCents + (this.existingCartTotal || 0);
+      var pct = Math.min(100, Math.round((totalWithCart / thresholdCents) * 100));
+      var unlocked = totalWithCart >= thresholdCents;
       var spanHtml;
       if (unlocked) {
         spanHtml = '<strong>FREE shipping</strong> unlocked!';
       } else {
-        var remaining = Core.formatMoney(thresholdCents - subtotalCents, this.moneyFormat);
+        var remaining = Core.formatMoney(thresholdCents - totalWithCart, this.moneyFormat);
         spanHtml = 'Spend ' + remaining + ' more for <strong>FREE shipping</strong>';
       }
 
@@ -1155,6 +1215,26 @@
       return subtotal;
     }
 
+    fetchExistingCartTotal() {
+      var self = this;
+      var root = Core.routeRoot();
+      fetch(root + 'cart.js', { credentials: 'same-origin' })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (cart) {
+          if (!cart) return;
+          var bundleId = self.bundleId;
+          var nonBundleTotal = 0;
+          (cart.items || []).forEach(function (item) {
+            var props = item.properties || {};
+            if (props['_bundle_id'] === bundleId) return;
+            nonBundleTotal += (Number(item.final_line_price) || 0) || (Number(item.price) || 0) * (item.quantity || 1);
+          });
+          self.existingCartTotal = nonBundleTotal;
+          self.recalculate();
+        })
+        .catch(function () { /* silent */ });
+    }
+
     /* ===== RECALCULATE ===== */
 
     recalculate() {
@@ -1188,7 +1268,7 @@
       }
 
       // Shipping progress bar
-      this.updateShippingBar(subtotal);
+      this.updateShippingBar(total);
 
       if (this.showTierProgress && this.els.tierSection) {
         this.updateTierProgress(tierValue, activeTier, activeTierIndex, nextTier);
@@ -1278,6 +1358,20 @@
 
       mql.addEventListener('change', handleMobileChange);
       handleMobileChange(mql);
+
+      // Hide sticky when cart drawer is open so it doesn't overlay the drawer
+      var cartDrawerEl = document.querySelector('cart-drawer');
+      if (cartDrawerEl && stickyEl) {
+        var observer = new MutationObserver(function () {
+          var isOpen = cartDrawerEl.hasAttribute('open');
+          if (isOpen) {
+            stickyEl.classList.add('bb-pdp__sticky-mobile--hidden');
+          } else {
+            stickyEl.classList.remove('bb-pdp__sticky-mobile--hidden');
+          }
+        });
+        observer.observe(cartDrawerEl, { attributes: true, attributeFilter: ['open'] });
+      }
     }
 
     /* ===== TIER CARDS INIT ===== */
@@ -1610,12 +1704,12 @@
               allCtas.forEach(function (b) { b.disabled = false; });
               return;
             }
-            // Add bundle items first
-            await Core.addBundleToCart(items);
+            // Add bundle items first (skip refresh — openCartDrawer will fetch fresh content)
+            await Core.addBundleToCart(items, { skipRefresh: true });
             // Add selected gift variants
             for (var gi = 0; gi < selectedGiftVariants.length; gi++) {
               var gift = selectedGiftVariants[gi];
-              await Core.addFreeGiftToCart(gift.variantId, bundleId, bundleName, gift.minItems);
+              await Core.addFreeGiftToCart(gift.variantId, bundleId, bundleName, gift.minItems, { skipRefresh: true });
               self.activeFreeGifts.set(String(gift.variantId), true);
             }
             Core.openCartDrawer();
@@ -1632,7 +1726,7 @@
           }
         }
 
-        await Core.addBundleToCart(items);
+        await Core.addBundleToCart(items, { skipRefresh: !this.cartRedirect });
 
         if (this.cartRedirect) {
           this.isRedirecting = true;

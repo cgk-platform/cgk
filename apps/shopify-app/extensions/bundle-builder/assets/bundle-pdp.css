@@ -1232,7 +1232,7 @@
   height: 100%;
   min-width: 2px;
   border-radius: 4px;
-  background: var(--bb-accent-color, #182f5c);
+  background: #182f5c;
   transition: width 0.4s ease;
 }
 .bb-pdp__shipping-bar--unlocked .bb-pdp__shipping-bar-fill {
@@ -1605,7 +1605,7 @@
   font-weight: 600;
   font-size: 1.3rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
-  z-index: 999999;
+  z-index: 999;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   white-space: nowrap;
@@ -1629,13 +1629,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 99999;
+  z-index: 50;
   background: #fff;
+  transition: transform 0.2s ease-out;
   padding: 10px 16px;
   padding-bottom: max(10px, env(safe-area-inset-bottom));
   box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
   border-top: 1px solid #e0e0e0;
   /* Re-declare CSS vars since this element is moved to document.body outside .bb-pdp */
+  --bb-accent-color: #182f5c;
   --bb-accent: var(--bb-accent-color, #182f5c);
   --bb-btn-text: var(--bb-btn-text-color, #ffffff);
   --bb-bg: rgb(var(--color-background, 255, 255, 255));
@@ -1645,6 +1647,11 @@
   --bb-radius: 6px;
   --bb-success-text: #16a34a;
   --bb-success-bg: rgba(22, 163, 74, 0.1);
+}
+.bb-pdp__sticky-mobile--hidden {
+  transform: translateY(100%);
+  pointer-events: none;
+  transition: transform 0.2s ease-in;
 }
 .bb-pdp__sticky-mobile--active .bb-pdp__shipping-bar {
   margin: 0 0 8px;
@@ -1666,6 +1673,30 @@
   color: var(--bb-text-faded);
   font-size: 1.3rem;
   margin-top: 16px;
+}
+
+/* ===== 22b. BUNDLE ITEM DROPDOWNS — MOBILE ===== */
+@media (max-width: 767px) {
+  .bb-pdp__color-dropdown-panel {
+    min-width: unset;
+    width: 100%;
+    max-height: 50vh;
+  }
+  .bb-pdp__color-dropdown-row {
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+  .bb-pdp__color-dropdown-dot {
+    width: 24px;
+    height: 24px;
+  }
+  .bb-pdp__color-dropdown-name {
+    font-size: 14px;
+  }
+  .bb-pdp__item-option-select {
+    min-height: 44px;
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
 }
 
 /* ===== 23. FREE GIFT SELECTION MODAL ===== */
@@ -1822,4 +1853,27 @@
     align-items: flex-end;
     padding: 0;
   }
+}
+
+/* ===== 24. CART DRAWER — FREE GIFT DECORATION ===== */
+.bb-cart-gift-item {
+  position: relative;
+}
+.bb-cart-gift-badge {
+  display: inline-block;
+  background: #16a34a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.bb-cart-gift-price {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 14px;
 }
