@@ -3,6 +3,7 @@
 import { PROFILES } from '@cgk-platform/openclaw'
 import { useCallback, useEffect, useState } from 'react'
 
+import { ActivityFeed } from '@/components/overview/activity-feed'
 import { ConnectionBar } from '@/components/overview/connection-bar'
 import { ProfileCard } from '@/components/overview/profile-card'
 import { QuickActions } from '@/components/overview/quick-actions'
@@ -73,6 +74,8 @@ export default function OverviewPage() {
       )}
 
       <ServiceHealth />
+
+      <ActivityFeed />
 
       <QuickActions />
 

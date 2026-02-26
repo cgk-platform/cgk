@@ -1,8 +1,10 @@
 'use client'
 
 import { PROFILES } from '@cgk-platform/openclaw'
+import { cn } from '@cgk-platform/ui'
 import { use, useCallback, useEffect, useState } from 'react'
 
+import { SkillCredentials } from '@/components/skills/skill-credentials'
 import { SkillsGrid } from '@/components/skills/skills-grid'
 import { RefreshButton } from '@/components/ui/refresh-button'
 
@@ -12,6 +14,8 @@ interface Skill {
   source: string
   bundled: boolean
 }
+
+type ViewMode = 'skills' | 'credentials'
 
 export default function SkillsPage({
   params,
@@ -24,6 +28,7 @@ export default function SkillsPage({
   const [bundledCount, setBundledCount] = useState(0)
   const [managedCount, setManagedCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [view, setView] = useState<ViewMode>('skills')
 
   const fetchData = useCallback(async () => {
     try {
@@ -54,13 +59,35 @@ export default function SkillsPage({
             {skills.length} skills installed ({bundledCount} bundled, {managedCount} managed)
           </p>
         </div>
-        <RefreshButton onRefresh={fetchData} />
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5 rounded-lg border p-0.5">
+            {(['skills', 'credentials'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setView(mode)}
+                className={cn(
+                  'rounded-md px-3 py-1 text-xs font-medium capitalize transition-colors',
+                  view === mode
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                )}
+              >
+                {mode}
+              </button>
+            ))}
+          </div>
+          <RefreshButton onRefresh={fetchData} />
+        </div>
       </div>
 
-      {loading ? (
-        <div className="h-64 animate-pulse rounded-lg border bg-card" />
+      {view === 'skills' ? (
+        loading ? (
+          <div className="h-64 animate-pulse rounded-lg border bg-card" />
+        ) : (
+          <SkillsGrid skills={skills} />
+        )
       ) : (
-        <SkillsGrid skills={skills} />
+        <SkillCredentials profile={profile} />
       )}
     </div>
   )

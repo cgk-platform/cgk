@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, cn, StatusBadge } from '@cgk-platform/ui'
-import { ChevronDown, ChevronRight, Play } from 'lucide-react'
+import { ChevronDown, ChevronRight, Pencil, Play, Trash2 } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
 import { CronRunHistory } from './cron-run-history'
@@ -36,6 +36,8 @@ interface CronTableProps {
   jobs: CronJob[]
   profile: string
   onTrigger: (jobId: string) => Promise<void>
+  onEdit?: (job: CronJob) => void
+  onDelete?: (job: CronJob) => void
 }
 
 function formatSchedule(schedule: CronJob['schedule']): string {
@@ -66,7 +68,7 @@ function mapStatus(status: string | null): string {
   return status
 }
 
-export function CronTable({ jobs, profile, onTrigger }: CronTableProps) {
+export function CronTable({ jobs, profile, onTrigger, onEdit, onDelete }: CronTableProps) {
   const [expandedJob, setExpandedJob] = useState<string | null>(null)
   const [triggeringJob, setTriggeringJob] = useState<string | null>(null)
 
@@ -152,7 +154,27 @@ export function CronTable({ jobs, profile, onTrigger }: CronTableProps) {
                       <div className="p-3 text-xs text-muted-foreground">
                         {job.delivery.mode}
                       </div>
-                      <div className="flex justify-end p-3">
+                      <div className="flex justify-end gap-1 p-3">
+                        {onEdit && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(job)}
+                            title="Edit"
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        )}
+                        {onDelete && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onDelete(job)}
+                            title="Delete"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="sm"

@@ -76,7 +76,7 @@ export default function SessionsPage({
       ) : (
         <>
           <SessionUsage usage={usage} />
-          <SessionList sessions={sessions} />
+          <SessionList sessions={sessions} profile={profile} />
         </>
       )}
     </div>

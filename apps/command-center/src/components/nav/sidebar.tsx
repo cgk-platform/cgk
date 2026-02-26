@@ -3,6 +3,8 @@
 import { Button, cn } from '@cgk-platform/ui'
 import {
   BarChart3,
+  Box,
+  Brain,
   ChevronDown,
   ChevronRight,
   Clock,
@@ -49,6 +51,7 @@ const PROFILE_TABS: NavItem[] = [
   { label: 'Skills', href: '/skills', icon: 'Puzzle' },
   { label: 'Media', href: '/media', icon: 'Image' },
   { label: 'Workspace', href: '/workspace', icon: 'FolderOpen' },
+  { label: 'Memory', href: '/memory', icon: 'Brain' },
   { label: 'Config', href: '/config', icon: 'Settings' },
 ]
 
@@ -65,6 +68,8 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   Image,
   FolderOpen,
   Settings,
+  Brain,
+  Box,
 }
 
 const STORAGE_KEY = 'cc-sidebar-expanded'
@@ -303,6 +308,21 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
               >
                 <GitCompare className="h-4 w-4" />
                 <span>Parity</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                href="/docker"
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors',
+                  isActive('/docker')
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                )}
+              >
+                <Box className="h-4 w-4" />
+                <span>Docker</span>
               </Link>
             </li>
           </ul>
