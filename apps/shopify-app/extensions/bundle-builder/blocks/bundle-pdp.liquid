@@ -490,17 +490,35 @@
                 </div>
 
               {%- elsif is_size -%}
-                {%- comment -%} Size: pill buttons (all breakpoints) {%- endcomment -%}
+                {%- comment -%} Size: Queen+King featured on top, others below {%- endcomment -%}
                 <div class="bb-pdp__size-pills">
                   {%- for value in option.values -%}
-                    <button
-                      type="button"
-                      class="bb-pdp__size-pill{% if option.selected_value == value %} bb-pdp__size-pill--active{% endif %}{% unless value.available %} bb-pdp__size-pill--unavailable{% endunless %}"
-                      data-option-value="{{ value | escape }}"
-                      data-option-position="{{ option.position }}"
-                    >
-                      {{ value }}
-                    </button>
+                    {%- assign size_down = value | downcase -%}
+                    {%- if size_down == 'queen' or size_down == 'king' -%}
+                      <button
+                        type="button"
+                        class="bb-pdp__size-pill bb-pdp__size-pill--featured{% if option.selected_value == value %} bb-pdp__size-pill--active{% endif %}{% unless value.available %} bb-pdp__size-pill--unavailable{% endunless %}"
+                        data-option-value="{{ value | escape }}"
+                        data-option-position="{{ option.position }}"
+                      >
+                        {{ value }}
+                      </button>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+                <div class="bb-pdp__size-pills bb-pdp__size-pills--secondary">
+                  {%- for value in option.values -%}
+                    {%- assign size_down = value | downcase -%}
+                    {%- unless size_down == 'queen' or size_down == 'king' -%}
+                      <button
+                        type="button"
+                        class="bb-pdp__size-pill{% if option.selected_value == value %} bb-pdp__size-pill--active{% endif %}{% unless value.available %} bb-pdp__size-pill--unavailable{% endunless %}"
+                        data-option-value="{{ value | escape }}"
+                        data-option-position="{{ option.position }}"
+                      >
+                        {{ value }}
+                      </button>
+                    {%- endunless -%}
                   {%- endfor -%}
                 </div>
 
@@ -598,7 +616,7 @@
                       {%- assign bp_is_color = true -%}
                     {%- endif -%}
 
-                    <div class="bb-pdp__item-option-group" data-item-option-group data-item-option-position="{{ bp_option.position }}">
+                    <div class="bb-pdp__item-option-group" data-item-option-group data-item-option-position="{{ bp_option.position }}" data-item-option-name="{{ bp_opt_down }}">
                       {%- if bp_is_color -%}
                         <div class="bb-pdp__item-swatches">
                           {%- for val in bp_option.values -%}
@@ -672,7 +690,7 @@
                               title="{{ val }}"
                               aria-label="{{ val }}"
                             >
-                              <span class="bb-pdp__item-swatch-visual"{% if bp_swatch_style != '' %} style="{{ bp_swatch_style }}"{% endif %} data-color-handle="{{ bp_color_handle }}"></span>
+                              <span class="bb-pdp__item-swatch-visual"{% if bp_swatch_style != '' %} style="{{ bp_swatch_style }}"{% else %} data-no-color{% endif %} data-color-handle="{{ bp_color_handle }}" data-initials="{{ val | truncate: 2, '' | upcase }}"></span>
                             </button>
                           {%- endfor -%}
                         </div>

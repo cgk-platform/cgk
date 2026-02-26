@@ -13,6 +13,10 @@
       this.section = section;
       this.selectedProducts = new Map();
 
+      // Prevent enforceFreeGifts from removing gifts while PDP manages them
+      Core._pdpManagingGifts = true;
+      window.addEventListener('beforeunload', function () { Core._pdpManagingGifts = false; });
+
       var metafieldConfig = Core.parseMetafieldConfig(section.dataset.metafieldConfig);
 
       this.tiers = metafieldConfig ? metafieldConfig.tiers : Core.parseTiers(section.dataset.tiers);
@@ -115,6 +119,12 @@
       this.initTierCards();
       this.initStickyMobile();
       this.bindEvents();
+
+      // Default to Queen if no variant specified in URL
+      if (!window.location.search.includes('variant=')) {
+        this.autoSelectSize('Queen');
+      }
+
       this.recalculate();
     }
 
@@ -714,6 +724,44 @@
           window.history.replaceState({}, '', productUrl + '?variant=' + matchingVariant.id);
         }
       }
+
+      // Auto-sync size to bundle items
+      if (optionName === 'size') {
+        this.syncBundleItemSize(value);
+      }
+    }
+
+    /**
+     * Auto-select a size on the main product by simulating a click.
+     */
+    autoSelectSize(targetSize) {
+      var self = this;
+      this.els.optionGroups.forEach(function (group) {
+        var name = (group.dataset.optionName || '').toLowerCase();
+        if (name !== 'size') return;
+        var btn = group.querySelector('[data-option-value="' + targetSize + '"]');
+        if (btn && !btn.classList.contains('bb-pdp__size-pill--unavailable')) {
+          self.handleOptionSelect(group, btn);
+        }
+      });
+    }
+
+    /**
+     * Sync the selected size to all bundle items that have a Size option.
+     */
+    syncBundleItemSize(sizeValue) {
+      var self = this;
+      this.els.bundleItems.forEach(function (item) {
+        if (!item._variants) return;
+        var optGroups = item.querySelectorAll('[data-item-option-group]');
+        optGroups.forEach(function (grp) {
+          if ((grp.dataset.itemOptionName || '').toLowerCase() !== 'size') return;
+          var btn = grp.querySelector('[data-item-option-value="' + sizeValue + '"]');
+          if (btn) {
+            self.handleItemOptionSelect(item, btn);
+          }
+        });
+      });
     }
 
     /* ===== PRICE DISPLAY ===== */
@@ -1448,6 +1496,44 @@
       });
 
       try {
+        // Check for multi-variant free gifts that need user selection
+        var activeTierIndex = Core.getActiveTierIndex(this.tiers, tierValue);
+        var giftVariantIds = Core.getTargetGiftIds(this.tiers, activeTierIndex);
+
+        if (giftVariantIds.length > 0 && !this.cartRedirect) {
+          var multiVariantGifts = await this.resolveGiftProducts(giftVariantIds, activeTierIndex);
+          if (multiVariantGifts.length > 0) {
+            // Show modal for user to pick options
+            var selectedGiftVariants = await this.showGiftSelectionModal(multiVariantGifts);
+            if (!selectedGiftVariants) {
+              // User cancelled
+              allCtas.forEach(function (b) { b.classList.remove('bb-pdp__cta--loading'); });
+              this.isLoading = false;
+              allCtas.forEach(function (b) { b.disabled = false; });
+              return;
+            }
+            // Add bundle items first
+            await Core.addBundleToCart(items);
+            // Add selected gift variants
+            for (var gi = 0; gi < selectedGiftVariants.length; gi++) {
+              var gift = selectedGiftVariants[gi];
+              await Core.addFreeGiftToCart(gift.variantId, bundleId, bundleName, gift.minItems);
+              self.activeFreeGifts.set(String(gift.variantId), true);
+            }
+            Core.openCartDrawer();
+            allCtas.forEach(function (b) {
+              b.textContent = 'Added to Cart!';
+              b.classList.remove('bb-pdp__cta--loading');
+              b.classList.add('bb-pdp__cta--success');
+            });
+            setTimeout(function () {
+              allCtas.forEach(function (b) { b.classList.remove('bb-pdp__cta--success'); });
+              self.recalculate();
+            }, 2000);
+            return;
+          }
+        }
+
         await Core.addBundleToCart(items);
 
         if (this.cartRedirect) {
@@ -1455,6 +1541,9 @@
           window.location.href = Core.routeRoot() + 'cart';
           return;
         }
+
+        // Open cart drawer with fresh content
+        Core.openCartDrawer();
 
         allCtas.forEach(function (b) {
           b.textContent = 'Added to Cart!';
@@ -1479,6 +1568,292 @@
           allCtas.forEach(function (b) { b.disabled = false; });
         }
       }
+    }
+
+    /* ===== FREE GIFT MODAL ===== */
+
+    /**
+     * Resolve gift variant IDs to full product data, filtering to multi-variant gifts only.
+     */
+    async resolveGiftProducts(giftVariantIds, activeTierIndex) {
+      var results = [];
+      var self = this;
+      for (var i = 0; i < giftVariantIds.length; i++) {
+        var gid = giftVariantIds[i];
+        var data = await Core.fetchProductForVariant(gid);
+        if (data && data.variants.length > 1) {
+          results.push({
+            product: data.product,
+            variants: data.variants,
+            options: data.options,
+            originalVariantId: gid,
+            minItems: self._getMinItemsForGift(gid),
+          });
+        }
+      }
+      return results;
+    }
+
+    /**
+     * Show a modal for the user to pick color/size on multi-variant free gifts.
+     * Returns a Promise that resolves with selected variant info, or null if cancelled.
+     */
+    showGiftSelectionModal(gifts) {
+      var self = this;
+      return new Promise(function (resolve) {
+        // Build modal DOM
+        var overlay = document.createElement('div');
+        overlay.className = 'bb-pdp__gift-modal-overlay';
+
+        var modal = document.createElement('div');
+        modal.className = 'bb-pdp__gift-modal';
+
+        var closeBtn = document.createElement('button');
+        closeBtn.className = 'bb-pdp__gift-modal-close';
+        closeBtn.innerHTML = '&times;';
+        closeBtn.setAttribute('aria-label', 'Close');
+        modal.appendChild(closeBtn);
+
+        var title = document.createElement('h3');
+        title.className = 'bb-pdp__gift-modal-title';
+        title.textContent = 'Select Your Free Gift Options';
+        modal.appendChild(title);
+
+        // Track selections per gift
+        var giftSelections = [];
+
+        gifts.forEach(function (gift, idx) {
+          var itemEl = document.createElement('div');
+          itemEl.className = 'bb-pdp__gift-modal-item';
+          itemEl.dataset.giftIdx = idx;
+
+          // Header with image + title
+          var header = document.createElement('div');
+          header.className = 'bb-pdp__gift-modal-item-header';
+
+          if (gift.product.featured_image) {
+            var img = document.createElement('img');
+            img.className = 'bb-pdp__gift-modal-item-image';
+            img.src = gift.product.featured_image;
+            img.alt = gift.product.title;
+            header.appendChild(img);
+          }
+
+          var infoDiv = document.createElement('div');
+          var titleDiv = document.createElement('div');
+          titleDiv.className = 'bb-pdp__gift-modal-item-title';
+          titleDiv.textContent = gift.product.title;
+          infoDiv.appendChild(titleDiv);
+
+          var badge = document.createElement('div');
+          badge.className = 'bb-pdp__gift-modal-item-badge';
+          badge.textContent = 'FREE';
+          infoDiv.appendChild(badge);
+          header.appendChild(infoDiv);
+          itemEl.appendChild(header);
+
+          // Init selection state for this gift
+          var selection = { selectedOptions: {}, variants: gift.variants };
+          giftSelections.push(selection);
+
+          // Option groups
+          gift.options.forEach(function (opt) {
+            var optName = opt.name.toLowerCase();
+            var groupEl = document.createElement('div');
+            groupEl.className = 'bb-pdp__gift-modal-option-group';
+            groupEl.dataset.optionName = optName;
+
+            var label = document.createElement('label');
+            label.textContent = opt.name;
+            groupEl.appendChild(label);
+
+            var isColor = (optName === 'color' || optName === 'colour' || optName === 'colors');
+
+            if (isColor) {
+              var swatchRow = document.createElement('div');
+              swatchRow.className = 'bb-pdp__item-swatches';
+
+              opt.values.forEach(function (val) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'bb-pdp__item-swatch';
+                btn.dataset.giftIdx = idx;
+                btn.dataset.optionName = optName;
+                btn.dataset.optionPosition = String(opt.position);
+                btn.dataset.optionValue = val;
+                btn.title = val;
+                btn.setAttribute('aria-label', val);
+
+                var visual = document.createElement('span');
+                visual.className = 'bb-pdp__item-swatch-visual';
+                var handle = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+                visual.dataset.colorHandle = handle;
+                visual.dataset.initials = val.substring(0, 2).toUpperCase();
+                // Only show initials fallback if handle doesn't match a known CSS color
+                var knownHandles = ['white','ivory','cream','beige','tan','taupe','grey','gray','light-grey','light-gray','charcoal','slate','black','navy','navy-blue','blue','sage','sage-green','blush','blush-pink','pink','mauve','lavender','burgundy','gold','sand','denim-blue','emerald-green','heathered-beige','heathered-grey','heathered-gray','off-white','royal-blue','steel-blue','wheat','dusty-rose','mocha','terracotta','chocolate','brown','olive','plum','light-blue','sky-blue','teal','mint','silver','rust','purple','spa-blue'];
+                if (knownHandles.indexOf(handle) === -1) {
+                  visual.setAttribute('data-no-color', '');
+                }
+                btn.appendChild(visual);
+                swatchRow.appendChild(btn);
+              });
+
+              groupEl.appendChild(swatchRow);
+            } else {
+              var pillRow = document.createElement('div');
+              pillRow.className = 'bb-pdp__item-pills';
+
+              opt.values.forEach(function (val) {
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'bb-pdp__item-pill';
+                btn.dataset.giftIdx = idx;
+                btn.dataset.optionName = optName;
+                btn.dataset.optionPosition = String(opt.position);
+                btn.dataset.optionValue = val;
+                btn.textContent = val;
+                pillRow.appendChild(btn);
+              });
+
+              groupEl.appendChild(pillRow);
+            }
+
+            itemEl.appendChild(groupEl);
+          });
+
+          modal.appendChild(itemEl);
+        });
+
+        // Confirm button
+        var confirmBtn = document.createElement('button');
+        confirmBtn.className = 'bb-pdp__gift-modal-confirm bb-pdp__cta';
+        confirmBtn.textContent = 'Confirm & Add to Cart';
+        confirmBtn.disabled = true;
+        modal.appendChild(confirmBtn);
+
+        // Skip link
+        var skipBtn = document.createElement('button');
+        skipBtn.className = 'bb-pdp__gift-modal-skip';
+        skipBtn.textContent = 'Skip — use default options';
+        modal.appendChild(skipBtn);
+
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Check if all gifts have all options selected
+        function checkComplete() {
+          var allComplete = true;
+          for (var i = 0; i < gifts.length; i++) {
+            var optCount = gifts[i].options.length;
+            var selCount = Object.keys(giftSelections[i].selectedOptions).length;
+            if (selCount < optCount) { allComplete = false; break; }
+          }
+          confirmBtn.disabled = !allComplete;
+        }
+
+        // Find matching variant for a gift selection
+        function findGiftVariant(giftIdx) {
+          var sel = giftSelections[giftIdx];
+          var variants = sel.variants;
+          var positions = Object.keys(sel.selectedOptions);
+          for (var i = 0; i < variants.length; i++) {
+            var v = variants[i];
+            var match = true;
+            for (var j = 0; j < positions.length; j++) {
+              var pos = positions[j];
+              var optIdx = parseInt(pos, 10) - 1;
+              // Storefront API uses options array (0-indexed option values mapped to option1/option2/option3)
+              var variantOptionVal = v['option' + (optIdx + 1)] || (v.options && v.options[optIdx]);
+              if (variantOptionVal !== sel.selectedOptions[pos]) { match = false; break; }
+            }
+            if (match) return v;
+          }
+          return null;
+        }
+
+        // Option click handler
+        modal.addEventListener('click', function (e) {
+          var btn = e.target.closest('[data-option-value]');
+          if (!btn) return;
+          var gIdx = parseInt(btn.dataset.giftIdx, 10);
+          var pos = btn.dataset.optionPosition;
+          var val = btn.dataset.optionValue;
+          var group = btn.closest('.bb-pdp__gift-modal-option-group');
+
+          // Update active state
+          if (group) {
+            group.querySelectorAll('[data-option-value]').forEach(function (b) {
+              b.classList.remove('bb-pdp__item-swatch--active', 'bb-pdp__item-pill--active');
+            });
+          }
+          var isSwatch = btn.classList.contains('bb-pdp__item-swatch');
+          btn.classList.add(isSwatch ? 'bb-pdp__item-swatch--active' : 'bb-pdp__item-pill--active');
+
+          giftSelections[gIdx].selectedOptions[pos] = val;
+          checkComplete();
+        });
+
+        // Close / Cancel
+        function cleanup() {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+        }
+
+        closeBtn.addEventListener('click', function () {
+          cleanup();
+          resolve(null);
+        });
+
+        overlay.addEventListener('click', function (e) {
+          if (e.target === overlay) {
+            cleanup();
+            resolve(null);
+          }
+        });
+
+        // Skip — use default (original) variant IDs
+        skipBtn.addEventListener('click', function () {
+          cleanup();
+          var defaults = gifts.map(function (g) {
+            return {
+              variantId: Core.numericVariantId(g.originalVariantId),
+              minItems: g.minItems,
+            };
+          });
+          resolve(defaults);
+        });
+
+        // Confirm — use selected variants
+        confirmBtn.addEventListener('click', function () {
+          cleanup();
+          var selected = [];
+          for (var i = 0; i < gifts.length; i++) {
+            var matchedVariant = findGiftVariant(i);
+            if (matchedVariant) {
+              selected.push({
+                variantId: matchedVariant.id,
+                minItems: gifts[i].minItems,
+              });
+            } else {
+              // Fallback to original
+              selected.push({
+                variantId: Core.numericVariantId(gifts[i].originalVariantId),
+                minItems: gifts[i].minItems,
+              });
+            }
+          }
+          resolve(selected);
+        });
+
+        // Escape key
+        function handleEsc(e) {
+          if (e.key === 'Escape') {
+            document.removeEventListener('keydown', handleEsc);
+            cleanup();
+            resolve(null);
+          }
+        }
+        document.addEventListener('keydown', handleEsc);
+      });
     }
   }
 

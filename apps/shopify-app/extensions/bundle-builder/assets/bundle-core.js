@@ -175,20 +175,53 @@
       })
       .catch(function () { /* silent */ });
 
-    // Try Dawn section rendering for cart icon bubble only (skip notifications — they cause persistent overlays)
-    fetch(root + '?sections=cart-icon-bubble,cart-drawer', { credentials: 'same-origin' })
+    // Dawn section rendering — target actual DOM elements (no shopify-section- prefix)
+    fetch(root + '?sections=cart-drawer,cart-icon-bubble', { credentials: 'same-origin' })
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (sections) {
         if (!sections) return;
-        Object.keys(sections).forEach(function (key) {
-          var el = document.getElementById('shopify-section-' + key);
-          if (el) el.innerHTML = new DOMParser().parseFromString(sections[key], 'text/html').body.innerHTML;
-        });
+        var parser = new DOMParser();
+
+        // Update cart drawer inner content
+        if (sections['cart-drawer']) {
+          var drawerTarget = document.getElementById('CartDrawer');
+          if (drawerTarget) {
+            var drawerDoc = parser.parseFromString(sections['cart-drawer'], 'text/html');
+            var drawerContent = drawerDoc.getElementById('CartDrawer');
+            if (drawerContent) drawerTarget.innerHTML = drawerContent.innerHTML;
+          }
+        }
+
+        // Update cart icon bubble
+        if (sections['cart-icon-bubble']) {
+          var bubbleTarget = document.getElementById('cart-icon-bubble');
+          if (bubbleTarget) {
+            var bubbleDoc = parser.parseFromString(sections['cart-icon-bubble'], 'text/html');
+            var bubbleContent = bubbleDoc.querySelector('.shopify-section');
+            if (bubbleContent) bubbleTarget.innerHTML = bubbleContent.innerHTML;
+          }
+        }
       })
       .catch(function () { /* silent */ });
 
     document.dispatchEvent(new CustomEvent('cart:updated'));
     document.dispatchEvent(new CustomEvent('cart:refresh'));
+  };
+
+  /**
+   * Open Dawn's cart drawer with fresh section data.
+   * Uses cart-drawer's renderContents() which updates content AND opens the drawer.
+   */
+  BundleCore.openCartDrawer = function () {
+    var cartDrawer = document.querySelector('cart-drawer');
+    if (!cartDrawer || typeof cartDrawer.renderContents !== 'function') return;
+    var root = BundleCore.routeRoot();
+    fetch(root + '?sections=cart-drawer,cart-icon-bubble', { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (sections) {
+        if (sections) cartDrawer.renderContents({ id: null, sections: sections });
+      })
+      .catch(function () { /* silent */ });
   };
 
   /**
@@ -309,6 +342,7 @@
    * Returns a Promise.
    */
   BundleCore.enforceFreeGifts = function () {
+    if (BundleCore._pdpManagingGifts) return Promise.resolve();
     if (BundleCore._enforcing) return Promise.resolve();
     BundleCore._enforcing = true;
     var root = BundleCore.routeRoot();
@@ -391,6 +425,47 @@
         BundleCore.enforceFreeGifts();
       }, 500);
     });
+  };
+
+  /**
+   * Fetch full product data for a variant ID via Storefront AJAX API.
+   * Returns { product, variants, options } or null.
+   * Results are cached to avoid re-fetching.
+   */
+  BundleCore._productCache = {};
+  BundleCore.fetchProductForVariant = function (variantId) {
+    var numericId = BundleCore.numericVariantId(variantId);
+    var root = BundleCore.routeRoot();
+
+    // Check cache by variant ID
+    if (BundleCore._productCache[numericId]) {
+      return Promise.resolve(BundleCore._productCache[numericId]);
+    }
+
+    return fetch(root + 'variants/' + numericId + '.js', { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (variant) {
+        if (!variant || !variant.product_id) return null;
+        return fetch(root + 'products/' + variant.product_id + '.js', { credentials: 'same-origin' });
+      })
+      .then(function (res) {
+        if (!res || typeof res.json !== 'function') return null;
+        return res.ok ? res.json() : null;
+      })
+      .then(function (product) {
+        if (!product) return null;
+        var result = {
+          product: product,
+          variants: product.variants || [],
+          options: product.options || [],
+        };
+        // Cache by all variant IDs of this product
+        (product.variants || []).forEach(function (v) {
+          BundleCore._productCache[v.id] = result;
+        });
+        return result;
+      })
+      .catch(function () { return null; });
   };
 
   window.BundleCore = BundleCore;
