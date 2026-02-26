@@ -1,0 +1,20 @@
+<script src="{{ 'bundle-core.js' | asset_url }}" defer></script>
+
+<script defer>
+  // Initialize cart enforcement on every page to catch:
+  // 1. Free gifts in cart without qualifying items (below threshold)
+  // 2. Free gift quantity > 1 (should always be 1)
+  document.addEventListener('DOMContentLoaded', function () {
+    if (window.BundleCore && window.BundleCore.initCartEnforcement) {
+      window.BundleCore.initCartEnforcement();
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Bundle Cart Enforcer",
+  "target": "body",
+  "settings": []
+}
+{% endschema %}

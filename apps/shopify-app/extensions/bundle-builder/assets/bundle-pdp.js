@@ -16,6 +16,7 @@
       var metafieldConfig = Core.parseMetafieldConfig(section.dataset.metafieldConfig);
 
       this.tiers = metafieldConfig ? metafieldConfig.tiers : Core.parseTiers(section.dataset.tiers);
+      this.tierMode = section.dataset.tierMode || 'count'; // 'count' or 'subtotal'
       this.minItems = parseInt(section.dataset.minItems, 10) || 1;
       this.maxItems = parseInt(section.dataset.maxItems, 10) || 99;
       this.discountType = metafieldConfig ? metafieldConfig.discountType : (section.dataset.discountType || 'percentage');
@@ -33,6 +34,8 @@
       this.activeFreeGifts = new Map();
       this.freeGiftPending = false;
       this.currentSlideIndex = 0;
+      this.freeShippingThreshold = parseInt(section.dataset.freeShippingThreshold, 10) || 0;
+      this.mainVariantPrice = 0;
 
       // Parse product variants
       this.variants = [];
@@ -81,6 +84,15 @@
         total: section.querySelector('[data-pdp-total]'),
         cta: section.querySelector('[data-pdp-cta]'),
         notification: section.querySelector('[data-pdp-notification]'),
+        // Shipping bar
+        shippingBar: section.querySelector('[data-pdp-shipping-bar]'),
+        shippingText: section.querySelector('[data-pdp-shipping-text]'),
+        shippingFill: section.querySelector('[data-pdp-shipping-fill]'),
+        // Mobile sticky duplicates
+        ctaMobile: section.querySelector('[data-pdp-cta-mobile]'),
+        shippingBarMobile: section.querySelector('[data-pdp-shipping-bar-mobile]'),
+        shippingTextMobile: section.querySelector('[data-pdp-shipping-text-mobile]'),
+        shippingFillMobile: section.querySelector('[data-pdp-shipping-fill-mobile]'),
       };
 
       // Initialize selected options from active buttons/swatches
@@ -93,10 +105,15 @@
         }
       });
 
+      // Set initial main product variant price
+      var initVariant = this.findVariant();
+      if (initVariant) this.mainVariantPrice = initVariant.price || 0;
+
       this.initGallery();
       this.initSelectlike();
       this.initTabs();
       this.initTierCards();
+      this.initStickyMobile();
       this.bindEvents();
       this.recalculate();
     }
@@ -107,16 +124,12 @@
       if (!this.els.slider) return;
       var self = this;
 
-      // Apply per-variant media filtering on init
-      // Trust the Liquid server-side filter for initial render — just
-      // ensure we have at least 2 visible. If not, the variant's
-      // featured_media group will fix it.
-      var visibleCount = this.els.slider.querySelectorAll('.bb-pdp__slide:not([style*="display:none"])').length;
-      if (visibleCount < 2) {
-        var currentVariant = this.findVariant();
-        if (currentVariant) {
-          this.filterMediaByVariant(currentVariant);
-        }
+      // Always apply JS-side variant media filtering on init.
+      // Liquid does color-only filtering; JS refines to the correct
+      // contiguous image run for the variant.
+      var currentVariant = this.findVariant();
+      if (currentVariant) {
+        this.filterMediaByVariant(currentVariant);
       }
 
       // Set first visible thumb as active
@@ -235,13 +248,51 @@
 
       var visibleIndices = this._buildVariantMediaGroup(variant, slides);
 
+      // Dedup: remove visible slides with the same normalized CDN src
+      var seenSrcs = {};
+      var sortedVisible = Array.from(visibleIndices).sort(function (a, b) { return a - b; });
+      sortedVisible.forEach(function (idx) {
+        var slide = self.els.slider.querySelector('[data-slide-index="' + idx + '"]');
+        if (!slide) return;
+        var img = slide.querySelector('img');
+        if (!img) return;
+        var src = (img.getAttribute('src') || '').replace(/\?.*$/, '').replace(/_\d+x\d*\./, '_.');
+        if (seenSrcs[src]) {
+          visibleIndices.delete(idx);
+          return;
+        }
+        seenSrcs[src] = true;
+      });
+
+      // Find which visible image is assigned to this variant (for ordering)
+      var variantImageIdx = -1;
+      sortedVisible.forEach(function (idx) {
+        if (!visibleIndices.has(idx)) return;
+        var entry = self.mediaMap[String(idx)];
+        if (entry && entry.assigned && entry.variantIds && entry.variantIds.indexOf(variant.id) !== -1) {
+          if (variantImageIdx === -1) variantImageIdx = idx;
+        }
+      });
+      // Show/hide and reorder: variant-assigned image first (like original theme)
       slides.forEach(function (slide) {
         var idx = parseInt(slide.dataset.slideIndex, 10);
-        slide.style.display = visibleIndices.has(idx) ? '' : 'none';
+        if (visibleIndices.has(idx)) {
+          slide.style.display = '';
+          slide.style.order = (idx === variantImageIdx) ? '-1' : '';
+        } else {
+          slide.style.display = 'none';
+          slide.style.order = '';
+        }
       });
       thumbs.forEach(function (thumb) {
         var idx = parseInt(thumb.dataset.thumbIndex, 10);
-        thumb.style.display = visibleIndices.has(idx) ? '' : 'none';
+        if (visibleIndices.has(idx)) {
+          thumb.style.display = '';
+          thumb.style.order = (idx === variantImageIdx) ? '-1' : '';
+        } else {
+          thumb.style.display = 'none';
+          thumb.style.order = '';
+        }
       });
 
       // Reconnect observer for visible slides
@@ -253,31 +304,41 @@
         });
       }
 
-      // Go to first visible slide
-      var firstVisible = this.getVisibleSlides()[0];
-      if (firstVisible) {
-        firstVisible.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
-        this.onSlideChange(parseInt(firstVisible.dataset.slideIndex, 10));
+      // Scroll to variant-assigned image (or first visible)
+      var targetSlide = variantImageIdx >= 0
+        ? this.els.slider.querySelector('[data-slide-index="' + variantImageIdx + '"]')
+        : this.getVisibleSlides()[0];
+      if (targetSlide && targetSlide.style.display !== 'none') {
+        targetSlide.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+        this.onSlideChange(parseInt(targetSlide.dataset.slideIndex, 10));
+      } else {
+        var firstVisible = this.getVisibleSlides()[0];
+        if (firstVisible) {
+          firstVisible.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
+          this.onSlideChange(parseInt(firstVisible.dataset.slideIndex, 10));
+        }
       }
     }
 
     /**
      * Build visible indices for a variant's image group.
      *
-     * Two-layer filter:
-     * 1. Color: alt-text "Title - Color" groups images by color
-     * 2. Size: within color, variant_ids narrows to current variant
-     *    - Images with no variant assignment (shared) → always show
-     *    - Images assigned to specific variants → show only if current variant matches
+     * Clean approach:
+     * 1. Color alt-text → get same-color images
+     * 2. Variant filter → remove images assigned to OTHER size variants
+     * 3. If <=8 remain → show all (small set, no dupes)
+     * 4. If >8 → group into contiguous runs, pick run closest to featured
+     * 5. Fallback for colors with no alt-text → variant_ids + featured
      *
-     * Fallback: show all if no color matches found.
+     * Excluded indices (from block setting) are applied in filterMediaByVariant.
      */
     _buildVariantMediaGroup(variant, slides) {
       var visibleIndices = new Set();
       var variantId = variant.id;
       var self = this;
+      var hasMediaMap = Object.keys(this.mediaMap).length > 0;
 
-      // Layer 1: find color matches
+      // --- Find color option ---
       var colorPosition = -1;
       this.els.optionGroups.forEach(function (group) {
         var name = (group.dataset.optionName || '').toLowerCase();
@@ -285,36 +346,127 @@
           colorPosition = parseInt(group.dataset.optionPosition, 10);
         }
       });
-
-      if (colorPosition >= 1) {
-        var colorName = variant.options[colorPosition - 1];
-        if (colorName) {
-          var hasMediaMap = Object.keys(this.mediaMap).length > 0;
-
-          slides.forEach(function (slide) {
-            var idx = parseInt(slide.dataset.slideIndex, 10);
-            // Must match color first
-            if (slide.dataset.mediaColor !== colorName) return;
-
-            // Layer 2: check variant_ids within color group
-            if (hasMediaMap) {
-              var entry = self.mediaMap[String(idx)];
-              if (entry && entry.assigned && entry.variantIds && entry.variantIds.length > 0) {
-                // Image is assigned to specific variants — only show if current variant matches
-                if (entry.variantIds.indexOf(variantId) === -1) return;
-              }
-              // If not assigned (shared within color) or matches variant → show
-            }
-
-            visibleIndices.add(idx);
-          });
-
-          if (visibleIndices.size >= 1) return visibleIndices;
-        }
+      if (colorPosition < 1) {
+        slides.forEach(function (s) { visibleIndices.add(parseInt(s.dataset.slideIndex, 10)); });
+        return visibleIndices;
+      }
+      var colorName = variant.options[colorPosition - 1];
+      if (!colorName) {
+        slides.forEach(function (s) { visibleIndices.add(parseInt(s.dataset.slideIndex, 10)); });
+        return visibleIndices;
       }
 
-      // Fallback: show all
-      slides.forEach(function (_, i) { visibleIndices.add(i); });
+      // --- Find featured media position ---
+      var featuredMediaId = variant.featured_media_id || null;
+      var featuredIndex = -1;
+      if (featuredMediaId) {
+        slides.forEach(function (slide) {
+          if (parseInt(slide.dataset.mediaId, 10) === featuredMediaId) {
+            featuredIndex = parseInt(slide.dataset.slideIndex, 10);
+          }
+        });
+      }
+
+      // --- Collect same-color slide indices ---
+      var colorIndices = [];
+      slides.forEach(function (slide) {
+        if (slide.dataset.mediaColor === colorName) {
+          colorIndices.push(parseInt(slide.dataset.slideIndex, 10));
+        }
+      });
+
+      // --- FALLBACK: no alt-text images for this color ---
+      if (colorIndices.length === 0) {
+        // Show variant-assigned images + featured
+        if (hasMediaMap) {
+          slides.forEach(function (slide) {
+            var idx = parseInt(slide.dataset.slideIndex, 10);
+            var entry = self.mediaMap[String(idx)];
+            if (entry && entry.assigned && entry.variantIds && entry.variantIds.indexOf(variantId) !== -1) {
+              visibleIndices.add(idx);
+            }
+          });
+        }
+        if (featuredIndex >= 0) visibleIndices.add(featuredIndex);
+        if (visibleIndices.size >= 1) return visibleIndices;
+        // Last resort: all images
+        slides.forEach(function (s) { visibleIndices.add(parseInt(s.dataset.slideIndex, 10)); });
+        return visibleIndices;
+      }
+
+      // --- Step 1: variant filter on ALL color images ---
+      // Shared (no variant_ids) → keep. Assigned to this variant → keep. Assigned to other → drop.
+      var filtered = [];
+      colorIndices.forEach(function (idx) {
+        if (hasMediaMap) {
+          var entry = self.mediaMap[String(idx)];
+          if (entry && entry.assigned && entry.variantIds && entry.variantIds.length > 0) {
+            if (entry.variantIds.indexOf(variantId) === -1) return;
+          }
+        }
+        filtered.push(idx);
+      });
+
+      if (filtered.length === 0) {
+        // Variant filter eliminated everything — fall back to featured only
+        if (featuredIndex >= 0) visibleIndices.add(featuredIndex);
+        return visibleIndices;
+      }
+
+      // --- Step 2: if small set, just show them ---
+      if (filtered.length <= 8) {
+        filtered.forEach(function (idx) { visibleIndices.add(idx); });
+        return visibleIndices;
+      }
+
+      // --- Step 3: group filtered images into contiguous runs ---
+      filtered.sort(function (a, b) { return a - b; });
+      var runs = [];
+      var currentRun = [filtered[0]];
+      for (var i = 1; i < filtered.length; i++) {
+        if (filtered[i] - filtered[i - 1] <= 2) {
+          currentRun.push(filtered[i]);
+        } else {
+          runs.push(currentRun);
+          currentRun = [filtered[i]];
+        }
+      }
+      runs.push(currentRun);
+
+      // --- Step 4: pick the best gallery run (3+ images) ---
+      // If featured is INSIDE a run, pick that run. Otherwise pick the first
+      // run (lowest indices = primary/original images).
+      var galleryRuns = runs.filter(function (r) { return r.length >= 3; });
+      var bestRun = null;
+
+      if (galleryRuns.length === 1) {
+        bestRun = galleryRuns[0];
+      } else if (galleryRuns.length > 1 && featuredIndex >= 0) {
+        // Check if featured is actually inside a run
+        for (var r = 0; r < galleryRuns.length; r++) {
+          if (galleryRuns[r].indexOf(featuredIndex) !== -1) {
+            bestRun = galleryRuns[r];
+            break;
+          }
+        }
+        // Featured not in any run — pick first (primary) run
+        if (!bestRun) bestRun = galleryRuns[0];
+      } else if (galleryRuns.length > 1) {
+        bestRun = galleryRuns[0];
+      }
+
+      if (bestRun) {
+        bestRun.forEach(function (idx) { visibleIndices.add(idx); });
+      } else {
+        filtered.forEach(function (idx) { visibleIndices.add(idx); });
+      }
+
+      // Always include the variant's featured image so it can be ordered first.
+      // URL dedup in filterMediaByVariant will remove it if it's a duplicate.
+      if (featuredIndex >= 0) {
+        visibleIndices.add(featuredIndex);
+      }
+
       return visibleIndices;
     }
 
@@ -452,9 +604,12 @@
         }
       });
 
-      // CTA
+      // CTA (desktop + mobile sticky)
       if (this.els.cta) {
         this.els.cta.addEventListener('click', function () { self.addToCart(); });
+      }
+      if (this.els.ctaMobile) {
+        this.els.ctaMobile.addEventListener('click', function () { self.addToCart(); });
       }
     }
 
@@ -500,12 +655,52 @@
       this.selectedOptions[position] = value;
       var matchingVariant = this.findVariant();
 
+      // If no exact match, find the first available variant that has the newly
+      // selected option and auto-switch the other options to match.
+      if (!matchingVariant) {
+        var optionIndex = parseInt(position, 10) - 1;
+        for (var i = 0; i < this.variants.length; i++) {
+          var v = this.variants[i];
+          if (v.available && v.options[optionIndex] === value) {
+            matchingVariant = v;
+            // Sync all other options to this variant
+            var self2 = this;
+            var positions = Object.keys(this.selectedOptions);
+            for (var j = 0; j < positions.length; j++) {
+              var p = positions[j];
+              if (p === position) continue;
+              var idx = parseInt(p, 10) - 1;
+              self2.selectedOptions[p] = v.options[idx];
+              // Update the UI for this other option group
+              self2.els.optionGroups.forEach(function (g) {
+                if (g.dataset.optionPosition !== p) return;
+                g.querySelectorAll('[data-option-value]').forEach(function (b) {
+                  b.classList.remove('bb-pdp__swatch--active', 'bb-pdp__option-btn--active', 'bb-pdp__selectlike-option--active', 'bb-pdp__size-pill--active');
+                  if (b.dataset.optionValue === v.options[idx]) {
+                    if (b.classList.contains('bb-pdp__swatch')) b.classList.add('bb-pdp__swatch--active');
+                    else if (b.classList.contains('bb-pdp__size-pill')) b.classList.add('bb-pdp__size-pill--active');
+                    else if (b.classList.contains('bb-pdp__option-btn')) b.classList.add('bb-pdp__option-btn--active');
+                  }
+                });
+                var nameEl = g.querySelector('[data-option-selected-name]');
+                if (nameEl) nameEl.textContent = v.options[idx];
+              });
+            }
+            break;
+          }
+        }
+      }
+
       if (matchingVariant) {
         // Filter gallery for this variant (color+size combo)
         this.filterMediaByVariant(matchingVariant);
 
         // Update price display
         this.updatePriceDisplay(matchingVariant);
+
+        // Update main product price and recalculate tier/shipping progress
+        this.mainVariantPrice = matchingVariant.price || 0;
+        this.recalculate();
 
         // Dispatch variant change for theme integration
         this.dispatchVariantChange(matchingVariant);
@@ -544,6 +739,45 @@
         if (this.els.priceBadge) this.els.priceBadge.style.display = 'none';
         if (this.els.priceWrap) this.els.priceWrap.classList.remove('bb-pdp__price-wrap--sale');
       }
+    }
+
+    /* ===== SHIPPING PROGRESS BAR ===== */
+
+    updateShippingBar(subtotalCents) {
+      if (this.freeShippingThreshold <= 0) return;
+      var thresholdCents = this.freeShippingThreshold * 100;
+      var pct = Math.min(100, Math.round((subtotalCents / thresholdCents) * 100));
+      var unlocked = subtotalCents >= thresholdCents;
+      var spanHtml;
+      if (unlocked) {
+        spanHtml = '<strong>FREE shipping</strong> unlocked!';
+      } else {
+        var remaining = Core.formatMoney(thresholdCents - subtotalCents, this.moneyFormat);
+        spanHtml = 'Spend ' + remaining + ' more for <strong>FREE shipping</strong>';
+      }
+
+      // Update desktop shipping bar
+      this._syncShippingEl(this.els.shippingBar, this.els.shippingFill, this.els.shippingText, pct, unlocked, spanHtml);
+      // Update mobile sticky shipping bar
+      this._syncShippingEl(this.els.shippingBarMobile, this.els.shippingFillMobile, this.els.shippingTextMobile, pct, unlocked, spanHtml);
+    }
+
+    _syncShippingEl(bar, fill, textEl, pct, unlocked, spanHtml) {
+      if (!bar) return;
+      if (fill) fill.style.width = pct + '%';
+      var span = textEl ? textEl.querySelector('span') : null;
+      if (span) span.innerHTML = spanHtml;
+      if (unlocked) {
+        bar.classList.add('bb-pdp__shipping-bar--unlocked');
+      } else {
+        bar.classList.remove('bb-pdp__shipping-bar--unlocked');
+      }
+    }
+
+    _syncCta(btn, canAdd, label) {
+      if (!btn) return;
+      btn.disabled = !canAdd || this.isLoading;
+      if (!this.isLoading) btn.textContent = label;
     }
 
     /* ===== VARIANT MATCHING ===== */
@@ -764,13 +998,13 @@
     }
 
     getTotalItems() {
-      var total = 0;
+      var total = this.mainVariantPrice > 0 ? 1 : 0;
       this.selectedProducts.forEach(function (item) { total += item.quantity; });
       return total;
     }
 
     getSubtotal() {
-      var subtotal = 0;
+      var subtotal = this.mainVariantPrice || 0;
       this.selectedProducts.forEach(function (item) { subtotal += item.price * item.quantity; });
       return subtotal;
     }
@@ -780,9 +1014,11 @@
     recalculate() {
       var totalItems = this.getTotalItems();
       var subtotal = this.getSubtotal();
-      var activeTier = Core.getActiveTier(this.tiers, totalItems);
-      var activeTierIndex = Core.getActiveTierIndex(this.tiers, totalItems);
-      var nextTier = Core.getNextTier(this.tiers, totalItems);
+      // Tier value: item count or subtotal in dollars depending on tierMode
+      var tierValue = this.tierMode === 'subtotal' ? Math.floor(subtotal / 100) : totalItems;
+      var activeTier = Core.getActiveTier(this.tiers, tierValue);
+      var activeTierIndex = Core.getActiveTierIndex(this.tiers, tierValue);
+      var nextTier = Core.getNextTier(this.tiers, tierValue);
       var discountAmount = Core.calculateDiscount(subtotal, activeTier, this.discountType);
       var total = Math.max(0, subtotal - discountAmount);
 
@@ -805,17 +1041,21 @@
         }
       }
 
+      // Shipping progress bar
+      this.updateShippingBar(subtotal);
+
       if (this.showTierProgress && this.els.tierSection) {
-        this.updateTierProgress(totalItems, activeTier, activeTierIndex, nextTier);
+        this.updateTierProgress(tierValue, activeTier, activeTierIndex, nextTier);
       }
 
       // Tier notification
       if (activeTierIndex > this.previousTierIndex && this.previousTierIndex >= 0) {
-        this.showNotification(
-          activeTier.label
+        var notifText = activeTier.reward
+          ? activeTier.reward + ' unlocked!'
+          : activeTier.label
             ? activeTier.label + ' unlocked!'
-            : 'Discount unlocked: ' + activeTier.discount + (this.discountType === 'percentage' ? '% off' : ' off')
-        );
+            : 'New reward unlocked!';
+        this.showNotification(notifText);
       }
       var previousTierIndex = this.previousTierIndex;
       this.previousTierIndex = activeTierIndex;
@@ -847,19 +1087,51 @@
         }
       });
 
-      // CTA
-      if (this.els.cta) {
-        var canAdd = totalItems >= this.minItems && totalItems > 0;
-        this.els.cta.disabled = !canAdd || this.isLoading;
+      // CTA — main product alone is always buyable
+      var canAdd = totalItems > 0;
+      var ctaLabel = this.ctaText;
+      if (!this.isLoading && canAdd && total > 0) {
+        ctaLabel = this.ctaText + ' \u2014 ' + Core.formatMoney(total, this.moneyFormat);
+      }
+      this._syncCta(this.els.cta, canAdd, ctaLabel);
+      this._syncCta(this.els.ctaMobile, canAdd, ctaLabel);
+    }
 
-        if (!this.isLoading) {
-          if (canAdd && total > 0) {
-            this.els.cta.textContent = this.ctaText + ' \u2014 ' + Core.formatMoney(total, this.moneyFormat);
+    /* ===== STICKY MOBILE CTA ===== */
+
+    initStickyMobile() {
+      // Move notification to body so position:fixed works regardless of ancestor transforms
+      if (this.els.notification) {
+        document.body.appendChild(this.els.notification);
+      }
+
+      var stickyEl = this.section.querySelector('.bb-pdp__sticky-mobile');
+      if (!stickyEl) return;
+      this._stickyEl = stickyEl;
+      this._stickyOriginalParent = stickyEl.parentNode;
+      this._stickyOriginalNext = stickyEl.nextSibling;
+
+      var self = this;
+      var mql = window.matchMedia('(max-width: 767px)');
+
+      function handleMobileChange(e) {
+        if (e.matches) {
+          // Mobile — move to body so position:fixed works
+          document.body.appendChild(stickyEl);
+          stickyEl.classList.add('bb-pdp__sticky-mobile--active');
+        } else {
+          // Desktop — move back and hide
+          stickyEl.classList.remove('bb-pdp__sticky-mobile--active');
+          if (self._stickyOriginalNext) {
+            self._stickyOriginalParent.insertBefore(stickyEl, self._stickyOriginalNext);
           } else {
-            this.els.cta.textContent = this.ctaText;
+            self._stickyOriginalParent.appendChild(stickyEl);
           }
         }
       }
+
+      mql.addEventListener('change', handleMobileChange);
+      handleMobileChange(mql);
     }
 
     /* ===== TIER CARDS INIT ===== */
@@ -898,7 +1170,7 @@
 
         // Icon — priority: 1) manual giftImage, 2) auto-fetch from free gift variant, 3) gift box SVG
         if (giftImage) {
-          cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image"><img src="' + giftImage + '" alt="" width="52" height="52" loading="lazy"></div>';
+          cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image"><img src="' + giftImage + '" alt="" width="68" height="68" loading="lazy"></div>';
         } else if (hasGiftVariant) {
           // Placeholder — will be replaced with product image once fetched
           cardsHtml += '<div class="bb-pdp__tier-card-icon bb-pdp__tier-card-icon--has-image" data-tier-icon="' + j + '">' + this._giftBoxSvg() + '</div>';
@@ -921,13 +1193,14 @@
 
     _fetchGiftImages() {
       var self = this;
+      var root = Core.routeRoot();
       this.tiers.forEach(function (tier, idx) {
         if (tier.giftImage) return; // manual image already set
         var giftIds = tier.freeGiftVariantIds || [];
         if (giftIds.length === 0) return;
 
         var numericId = Core.numericVariantId(giftIds[0]);
-        fetch('/variants/' + numericId + '.js')
+        fetch(root + 'variants/' + numericId + '.js', { credentials: 'same-origin' })
           .then(function (res) { return res.ok ? res.json() : null; })
           .then(function (variant) {
             if (!variant) return;
@@ -938,7 +1211,7 @@
 
             var iconEl = self.els.tierCards.querySelector('[data-tier-icon="' + idx + '"]');
             if (iconEl) {
-              iconEl.innerHTML = '<img src="' + imgUrl + '" alt="' + (variant.title || 'Free gift') + '" width="52" height="52" loading="lazy">';
+              iconEl.innerHTML = '<img src="' + imgUrl + '" alt="' + (variant.title || 'Free gift') + '" width="68" height="68" loading="lazy">';
             }
           })
           .catch(function () { /* keep gift box SVG fallback */ });
@@ -946,27 +1219,25 @@
     }
 
     _badgeLines(text) {
-      var words = text.split(' ');
-      var html = '';
-      for (var i = 0; i < words.length; i++) html += '<div>' + words[i] + '</div>';
-      return html;
+      return text;
     }
 
     _giftBoxSvg() {
-      return '<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
+      return '<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
     }
 
     /* ===== TIER PROGRESS UPDATE ===== */
 
-    updateTierProgress(totalItems, activeTier, activeTierIndex, nextTier) {
+    updateTierProgress(tierValue, activeTier, activeTierIndex, nextTier) {
       if (!this.els.tierFill || !this.els.tierLabel) return;
       var totalTiers = this.tiers.length;
       if (totalTiers === 0) return;
+      var isSubtotal = this.tierMode === 'subtotal';
 
       // Progress bar — fill extends to the center of the last unlocked tier's dot
       var lastUnlockedIdx = -1;
       for (var i = 0; i < totalTiers; i++) {
-        if (totalItems >= this.tiers[i].count) lastUnlockedIdx = i;
+        if (tierValue >= this.tiers[i].count) lastUnlockedIdx = i;
       }
       var progressWidth = lastUnlockedIdx >= 0 ? ((lastUnlockedIdx + 0.5) / totalTiers) * 100 : 0;
       this.els.tierFill.style.width = progressWidth + '%';
@@ -974,7 +1245,7 @@
       // Update milestone dots
       var dots = this.els.tierDots ? this.els.tierDots.querySelectorAll('.bb-pdp__tier-dot') : [];
       for (var d = 0; d < dots.length; d++) {
-        if (totalItems >= this.tiers[d].count) {
+        if (tierValue >= this.tiers[d].count) {
           dots[d].classList.add('bb-pdp__tier-dot--active');
         } else {
           dots[d].classList.remove('bb-pdp__tier-dot--active');
@@ -984,7 +1255,7 @@
       // Update card unlock states
       var cards = this.els.tierCards ? this.els.tierCards.querySelectorAll('.bb-pdp__tier-card') : [];
       for (var c = 0; c < cards.length; c++) {
-        if (totalItems >= this.tiers[c].count) {
+        if (tierValue >= this.tiers[c].count) {
           cards[c].classList.add('bb-pdp__tier-card--unlocked');
         } else {
           cards[c].classList.remove('bb-pdp__tier-card--unlocked');
@@ -992,20 +1263,24 @@
       }
 
       // Progress label text
-      if (totalItems === 0) {
+      if (tierValue === 0) {
         this.els.tierLabel.textContent = 'Add products to unlock free gifts';
       } else if (nextTier) {
-        var needed = nextTier.count - totalItems;
-        var itemWord = needed === 1 ? 'item' : 'items';
+        var needed = nextTier.count - tierValue;
         var nextName = nextTier.reward || nextTier.label || 'next reward';
-        this.els.tierLabel.textContent = 'Add ' + needed + ' more ' + itemWord + ' to unlock ' + nextName + '!';
+        if (isSubtotal) {
+          this.els.tierLabel.textContent = 'Spend $' + needed + ' more to unlock ' + nextName + '!';
+        } else {
+          var itemWord = needed === 1 ? 'item' : 'items';
+          this.els.tierLabel.textContent = 'Add ' + needed + ' more ' + itemWord + ' to unlock ' + nextName + '!';
+        }
       } else {
         this.els.tierLabel.textContent = 'All rewards unlocked!';
       }
 
       // Callout banner — show unlocked rewards
       if (this.els.tierCallout && this.els.tierCalloutText) {
-        if (lastUnlockedIdx >= 0 && totalItems > 0) {
+        if (lastUnlockedIdx >= 0 && this.getTotalItems() > 0) {
           var rewardTexts = [];
           for (var r = 0; r <= lastUnlockedIdx; r++) {
             var rText = this.tiers[r].reward || this.tiers[r].label || '';
@@ -1024,6 +1299,21 @@
     }
 
     /* ===== FREE GIFTS ===== */
+
+    /**
+     * Find the minimum tier count needed to unlock a specific gift variant.
+     * Used for _bundle_gift_min_items cart property.
+     */
+    _getMinItemsForGift(giftVariantId) {
+      for (var i = 0; i < this.tiers.length; i++) {
+        var giftIds = this.tiers[i].freeGiftVariantIds || [];
+        for (var j = 0; j < giftIds.length; j++) {
+          if (giftIds[j] === giftVariantId) return this.tiers[i].count;
+        }
+      }
+      // Fallback: use the first tier's count
+      return this.tiers.length > 0 ? this.tiers[0].count : 1;
+    }
 
     manageFreeGifts(activeTierIndex, previousTierIndex) {
       if (this.freeGiftPending) return;
@@ -1058,8 +1348,9 @@
       });
 
       toAdd.forEach(function (id) {
+        var minItems = self._getMinItemsForGift(id);
         operation = operation.then(function () {
-          return Core.addFreeGiftToCart(id, self.bundleId, self.bundleName);
+          return Core.addFreeGiftToCart(id, self.bundleId, self.bundleName, minItems);
         }).then(function (result) {
           if (result && result.added) self.activeFreeGifts.set(id, true);
           if (result && result.reason === 'unavailable') self.showNotification('Free gift is currently unavailable');
@@ -1096,24 +1387,48 @@
     /* ===== ADD TO CART ===== */
 
     async addToCart() {
-      if (this.isLoading || this.selectedProducts.size === 0) return;
-      if (!this.els.cta) return;
-      if (this.getTotalItems() < this.minItems) return;
+      if (this.isLoading) return;
+      if (!this.els.cta && !this.els.ctaMobile) return;
 
       var self = this;
+      var allCtas = [this.els.cta, this.els.ctaMobile].filter(Boolean);
       this.isLoading = true;
       this.isRedirecting = false;
-      this.els.cta.disabled = true;
-      this.els.cta.classList.add('bb-pdp__cta--loading');
+      allCtas.forEach(function (b) { b.disabled = true; b.classList.add('bb-pdp__cta--loading'); });
 
-      var activeTier = Core.getActiveTier(this.tiers, this.getTotalItems());
+      var totalItems = this.getTotalItems();
+      var subtotal = this.getSubtotal();
+      var tierValue = this.tierMode === 'subtotal' ? Math.floor(subtotal / 100) : totalItems;
+      var activeTier = Core.getActiveTier(this.tiers, tierValue);
       var items = [];
       var bundleId = this.bundleId;
       var bundleName = this.bundleName;
       var discountType = this.discountType;
       var tierLabel = activeTier && activeTier.label ? activeTier.label : '';
-      var totalItems = this.getTotalItems();
+      var hasBundleItems = this.selectedProducts.size > 0;
 
+      // Always add the main product variant
+      var mainVariant = this.findVariant();
+      if (mainVariant) {
+        var mainItem = {
+          id: parseInt(mainVariant.id, 10),
+          quantity: 1,
+          properties: {},
+        };
+        if (hasBundleItems) {
+          mainItem.properties['_bundle_id'] = bundleId;
+          mainItem.properties['_bundle_name'] = bundleName;
+          mainItem.properties['_bundle_size'] = String(totalItems);
+          if (activeTier) {
+            mainItem.properties['_bundle_discount'] = String(activeTier.discount);
+            mainItem.properties['_bundle_discount_type'] = discountType;
+          }
+          if (tierLabel) mainItem.properties['_bundle_tier'] = tierLabel;
+        }
+        items.push(mainItem);
+      }
+
+      // Add bundle items
       this.selectedProducts.forEach(function (entry) {
         var lineItem = {
           id: parseInt(entry.variantId, 10),
@@ -1137,29 +1452,31 @@
 
         if (this.cartRedirect) {
           this.isRedirecting = true;
-          window.location.href = '/cart';
+          window.location.href = Core.routeRoot() + 'cart';
           return;
         }
 
-        this.els.cta.textContent = 'Added to Cart!';
-        this.els.cta.classList.remove('bb-pdp__cta--loading');
-        this.els.cta.classList.add('bb-pdp__cta--success');
+        allCtas.forEach(function (b) {
+          b.textContent = 'Added to Cart!';
+          b.classList.remove('bb-pdp__cta--loading');
+          b.classList.add('bb-pdp__cta--success');
+        });
 
         setTimeout(function () {
-          self.els.cta.classList.remove('bb-pdp__cta--success');
+          allCtas.forEach(function (b) { b.classList.remove('bb-pdp__cta--success'); });
           self.recalculate();
         }, 2000);
       } catch (err) {
         console.error('[BundlePDP] Cart error:', err);
-        if (this.els.cta) {
-          this.els.cta.textContent = 'Error \u2014 Try Again';
-          this.els.cta.classList.remove('bb-pdp__cta--loading');
-        }
+        allCtas.forEach(function (b) {
+          b.textContent = 'Error \u2014 Try Again';
+          b.classList.remove('bb-pdp__cta--loading');
+        });
         setTimeout(function () { self.recalculate(); }, 3000);
       } finally {
         if (!this.isRedirecting) {
           this.isLoading = false;
-          if (this.els.cta) this.els.cta.disabled = false;
+          allCtas.forEach(function (b) { b.disabled = false; });
         }
       }
     }

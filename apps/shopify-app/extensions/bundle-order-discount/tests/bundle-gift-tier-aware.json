@@ -1,0 +1,75 @@
+{
+  "cart": {
+    "lines": [
+      {
+        "id": "gid://shopify/CartLine/1",
+        "quantity": 1,
+        "cost": {
+          "subtotalAmount": { "amount": "29.99" }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/100"
+        },
+        "bundleId": { "value": "block-abc123" },
+        "isFreeGift": null
+      },
+      {
+        "id": "gid://shopify/CartLine/2",
+        "quantity": 1,
+        "cost": {
+          "subtotalAmount": { "amount": "39.99" }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/200"
+        },
+        "bundleId": { "value": "block-abc123" },
+        "isFreeGift": null
+      },
+      {
+        "id": "gid://shopify/CartLine/4",
+        "quantity": 1,
+        "cost": {
+          "subtotalAmount": { "amount": "14.99" }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/400"
+        },
+        "bundleId": { "value": "block-abc123" },
+        "isFreeGift": { "value": "true" }
+      },
+      {
+        "id": "gid://shopify/CartLine/5",
+        "quantity": 1,
+        "cost": {
+          "subtotalAmount": { "amount": "9.99" }
+        },
+        "merchandise": {
+          "__typename": "ProductVariant",
+          "id": "gid://shopify/ProductVariant/500"
+        },
+        "bundleId": { "value": "block-abc123" },
+        "isFreeGift": { "value": "true" }
+      }
+    ]
+  },
+  "discount": {
+    "metafield": {
+      "jsonValue": {
+        "bundles": [
+          {
+            "bundleId": "block-abc123",
+            "discountType": "percentage",
+            "tiers": [
+              { "count": 2, "discount": 10.0, "freeGiftVariantIds": ["gid://shopify/ProductVariant/400"] },
+              { "count": 4, "discount": 20.0, "freeGiftVariantIds": ["gid://shopify/ProductVariant/500"] }
+            ],
+            "freeGiftVariantIds": []
+          }
+        ]
+      }
+    }
+  }
+}

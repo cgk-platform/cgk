@@ -23,31 +23,35 @@
 {%- if has_metafield_config -%}
   {%- assign tiers_json = '[]' -%}
   {%- assign discount_type = 'percentage' -%}
+  {%- assign tier_mode = 'count' -%}
   {%- assign bundle_id_attr = '' -%}
 {%- else -%}
   {%- assign discount_type = block.settings.discount_type | default: 'percentage' -%}
+  {%- assign tier_mode = block.settings.tier_mode | default: 'subtotal' -%}
   {%- assign bundle_id_attr = block.id -%}
   {%- capture tiers_json -%}
 [
   {%- assign tier_count = 0 -%}
-  {%- if block.settings.discount_2_items > 0 -%}
+  {%- if block.settings.tier_1_threshold > 0 -%}
+    {%- assign t1_gifts_raw = block.settings.tier_1_gift_variant_ids | default: '' -%}
+    {%- assign t1_gifts = t1_gifts_raw | split: ',' -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":{{ block.settings.discount_2_items }},"discount":{{ block.settings.discount_2_items }},"label":{{ block.settings.tier_2_label | default: '' | json }},"reward":{{ block.settings.tier_2_reward | default: '' | json }},"giftImage":{{ block.settings.tier_2_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_2_value_badge | default: '' | json }}}
+    {"count":{{ block.settings.tier_1_threshold }},"discount":0,"label":{{ block.settings.tier_1_label | default: '' | json }},"reward":{{ block.settings.tier_1_reward | default: '' | json }},"giftImage":{{ block.settings.tier_1_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_1_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t1_gifts_raw != blank -%}{%- for gid in t1_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}{{ gid | strip | json }}{%- endfor -%}{%- endif -%}]}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
-  {%- if block.settings.discount_3_items > 0 -%}
+  {%- if block.settings.tier_2_threshold > 0 -%}
+    {%- assign t2_gifts_raw = block.settings.tier_2_gift_variant_ids | default: '' -%}
+    {%- assign t2_gifts = t2_gifts_raw | split: ',' -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":{{ block.settings.discount_3_items }},"discount":{{ block.settings.discount_3_items }},"label":{{ block.settings.tier_3_label | default: '' | json }},"reward":{{ block.settings.tier_3_reward | default: '' | json }},"giftImage":{{ block.settings.tier_3_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_3_value_badge | default: '' | json }}}
+    {"count":{{ block.settings.tier_2_threshold }},"discount":0,"label":{{ block.settings.tier_2_label | default: '' | json }},"reward":{{ block.settings.tier_2_reward | default: '' | json }},"giftImage":{{ block.settings.tier_2_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_2_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t2_gifts_raw != blank -%}{%- for gid in t2_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}{{ gid | strip | json }}{%- endfor -%}{%- endif -%}]}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
-  {%- if block.settings.discount_4_items > 0 -%}
+  {%- if block.settings.tier_3_threshold > 0 -%}
+    {%- assign t3_gifts_raw = block.settings.tier_3_gift_variant_ids | default: '' -%}
+    {%- assign t3_gifts = t3_gifts_raw | split: ',' -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":{{ block.settings.discount_4_items }},"discount":{{ block.settings.discount_4_items }},"label":{{ block.settings.tier_4_label | default: '' | json }},"reward":{{ block.settings.tier_4_reward | default: '' | json }},"giftImage":{{ block.settings.tier_4_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_4_value_badge | default: '' | json }}}
+    {"count":{{ block.settings.tier_3_threshold }},"discount":0,"label":{{ block.settings.tier_3_label | default: '' | json }},"reward":{{ block.settings.tier_3_reward | default: '' | json }},"giftImage":{{ block.settings.tier_3_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_3_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t3_gifts_raw != blank -%}{%- for gid in t3_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}{{ gid | strip | json }}{%- endfor -%}{%- endif -%}]}
     {%- assign tier_count = tier_count | plus: 1 -%}
-  {%- endif -%}
-  {%- if block.settings.discount_5_items > 0 -%}
-    {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":{{ block.settings.discount_5_items }},"discount":{{ block.settings.discount_5_items }},"label":{{ block.settings.tier_5_label | default: '' | json }},"reward":{{ block.settings.tier_5_reward | default: '' | json }},"giftImage":{{ block.settings.tier_5_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_5_value_badge | default: '' | json }}}
   {%- endif -%}
 ]
   {%- endcapture -%}
@@ -195,6 +199,8 @@
   data-max-items="{{ max_items }}"
   data-show-savings="{{ show_savings }}"
   data-show-tier-progress="{{ show_tier_progress }}"
+  data-tier-mode="{{ tier_mode }}"
+  data-free-shipping-threshold="{{ block.settings.free_shipping_threshold | default: 50 }}"
   data-bundle-name="{{ bundle_name | escape }}"
   data-cta-text="{{ cta_text | escape }}"
   data-cart-redirect="{{ cart_redirect }}"
@@ -202,6 +208,7 @@
   data-money-format="{{ shop.money_format | escape }}"
   data-product-url="{{ product.url }}"
   data-product-title="{{ product.title | escape }}"
+
   {%- if has_metafield_config %}
   data-metafield-config="{{ metafield_config_raw | escape }}"
   {%- endif -%}
@@ -222,7 +229,6 @@
           {%- comment -%} Thumbnails {%- endcomment -%}
           <div class="bb-pdp__thumbs" data-gallery-thumbs>
             <div class="bb-pdp__thumbs-track">
-              {%- assign t_img_idx = 0 -%}
               {%- for media in product.media -%}
                 {%- assign media_color = '' -%}
                 {%- if media.alt != blank -%}
@@ -231,25 +237,10 @@
                     {%- assign media_color = stripped_alt -%}
                   {%- endif -%}
                 {%- endif -%}
-                {%- comment -%} Layer 1: color filter. Layer 2: variant_ids filter within color {%- endcomment -%}
+                {%- comment -%} Color filter only; JS refines to correct run on init {%- endcomment -%}
                 {%- assign show_media = true -%}
-                {%- if has_color_media -%}
-                  {%- if media.alt != image_color_name -%}
-                    {%- assign show_media = false -%}
-                  {%- elsif media.media_type == 'image' -%}
-                    {%- assign t_image = product.images[t_img_idx] -%}
-                    {%- if t_image.attached_to_variant? -%}
-                      {%- assign show_media = false -%}
-                      {%- for v in t_image.variants -%}
-                        {%- if v.id == current_variant.id -%}
-                          {%- assign show_media = true -%}
-                        {%- endif -%}
-                      {%- endfor -%}
-                    {%- endif -%}
-                  {%- endif -%}
-                {%- endif -%}
-                {%- if media.media_type == 'image' -%}
-                  {%- assign t_img_idx = t_img_idx | plus: 1 -%}
+                {%- if has_color_media and media.alt != image_color_name -%}
+                  {%- assign show_media = false -%}
                 {%- endif -%}
                 <button
                   class="bb-pdp__thumb"
@@ -275,7 +266,6 @@
           {%- comment -%} Main slider {%- endcomment -%}
           <div class="bb-pdp__slider-wrap">
             <div class="bb-pdp__slider" data-gallery-slider>
-              {%- assign s_img_idx = 0 -%}
               {%- for media in product.media -%}
                 {%- assign media_color = '' -%}
                 {%- if media.alt != blank -%}
@@ -284,24 +274,10 @@
                     {%- assign media_color = stripped_alt -%}
                   {%- endif -%}
                 {%- endif -%}
+                {%- comment -%} Color filter only; JS refines to correct run on init {%- endcomment -%}
                 {%- assign show_media = true -%}
-                {%- if has_color_media -%}
-                  {%- if media.alt != image_color_name -%}
-                    {%- assign show_media = false -%}
-                  {%- elsif media.media_type == 'image' -%}
-                    {%- assign s_image = product.images[s_img_idx] -%}
-                    {%- if s_image.attached_to_variant? -%}
-                      {%- assign show_media = false -%}
-                      {%- for v in s_image.variants -%}
-                        {%- if v.id == current_variant.id -%}
-                          {%- assign show_media = true -%}
-                        {%- endif -%}
-                      {%- endfor -%}
-                    {%- endif -%}
-                  {%- endif -%}
-                {%- endif -%}
-                {%- if media.media_type == 'image' -%}
-                  {%- assign s_img_idx = s_img_idx | plus: 1 -%}
+                {%- if has_color_media and media.alt != image_color_name -%}
+                  {%- assign show_media = false -%}
                 {%- endif -%}
                 <div
                   class="bb-pdp__slide"
@@ -449,6 +425,55 @@
                         {%- assign swatch_style = 'background-image: url(' | append: meta_swatch.image | image_url: width: 80 | prepend: "'" | append: "'" | append: '); background-size: cover;' -%}
                       {%- elsif meta_swatch.color -%}
                         {%- assign swatch_style = 'background-color: ' | append: meta_swatch.color | append: ';' -%}
+                      {%- else -%}
+                        {%- comment -%} Color-name fallback map {%- endcomment -%}
+                        {%- assign _cn = value | downcase -%}
+                        {%- assign _hex = '' -%}
+                        {%- case _cn -%}
+                          {%- when 'beige' -%}{%- assign _hex = '#C8AD7F' -%}
+                          {%- when 'black' -%}{%- assign _hex = '#222222' -%}
+                          {%- when 'brown' -%}{%- assign _hex = '#6B4226' -%}
+                          {%- when 'burgundy' -%}{%- assign _hex = '#722F37' -%}
+                          {%- when 'charcoal' -%}{%- assign _hex = '#4A4A4A' -%}
+                          {%- when 'chocolate' -%}{%- assign _hex = '#5C3317' -%}
+                          {%- when 'cream' -%}{%- assign _hex = '#FFFDD0' -%}
+                          {%- when 'denim blue' -%}{%- assign _hex = '#1560BD' -%}
+                          {%- when 'dusty rose' -%}{%- assign _hex = '#DCAE96' -%}
+                          {%- when 'emerald green' -%}{%- assign _hex = '#046A38' -%}
+                          {%- when 'gold' -%}{%- assign _hex = '#CFB53B' -%}
+                          {%- when 'grey', 'gray' -%}{%- assign _hex = '#9E9E9E' -%}
+                          {%- when 'heathered beige' -%}{%- assign _hex = '#C2B280' -%}
+                          {%- when 'heathered grey', 'heathered gray' -%}{%- assign _hex = '#B0AFA8' -%}
+                          {%- when 'ivory' -%}{%- assign _hex = '#FFFFF0' -%}
+                          {%- when 'lavender' -%}{%- assign _hex = '#B57EDC' -%}
+                          {%- when 'light blue' -%}{%- assign _hex = '#ADD8E6' -%}
+                          {%- when 'light grey', 'light gray' -%}{%- assign _hex = '#D3D3D3' -%}
+                          {%- when 'mauve' -%}{%- assign _hex = '#E0B0FF' -%}
+                          {%- when 'mint' -%}{%- assign _hex = '#98FF98' -%}
+                          {%- when 'mocha' -%}{%- assign _hex = '#967969' -%}
+                          {%- when 'navy', 'navy blue' -%}{%- assign _hex = '#182F5C' -%}
+                          {%- when 'off white' -%}{%- assign _hex = '#FAF9F6' -%}
+                          {%- when 'olive' -%}{%- assign _hex = '#708238' -%}
+                          {%- when 'pink' -%}{%- assign _hex = '#FFB6C1' -%}
+                          {%- when 'plum' -%}{%- assign _hex = '#673147' -%}
+                          {%- when 'purple' -%}{%- assign _hex = '#6A0DAD' -%}
+                          {%- when 'royal blue' -%}{%- assign _hex = '#4169E1' -%}
+                          {%- when 'sage', 'sage green' -%}{%- assign _hex = '#B2AC88' -%}
+                          {%- when 'sand' -%}{%- assign _hex = '#C2B280' -%}
+                          {%- when 'silver' -%}{%- assign _hex = '#C0C0C0' -%}
+                          {%- when 'sky blue' -%}{%- assign _hex = '#87CEEB' -%}
+                          {%- when 'slate' -%}{%- assign _hex = '#708090' -%}
+                          {%- when 'spa blue' -%}{%- assign _hex = '#4A9DAF' -%}
+                          {%- when 'steel blue' -%}{%- assign _hex = '#4682B4' -%}
+                          {%- when 'taupe' -%}{%- assign _hex = '#8B7D6B' -%}
+                          {%- when 'teal' -%}{%- assign _hex = '#008080' -%}
+                          {%- when 'terracotta' -%}{%- assign _hex = '#CC4E3C' -%}
+                          {%- when 'white' -%}{%- assign _hex = '#FFFFFF' -%}
+                          {%- when 'wheat' -%}{%- assign _hex = '#DEB887' -%}
+                        {%- endcase -%}
+                        {%- if _hex != '' -%}
+                          {%- assign swatch_style = 'background-color: ' | append: _hex | append: ';' -%}
+                        {%- endif -%}
                       {%- endif -%}
                     {%- endif -%}
                     <button
@@ -465,30 +490,8 @@
                 </div>
 
               {%- elsif is_size -%}
-                {%- comment -%} Desktop: selectlike dropdown {%- endcomment -%}
-                <div class="bb-pdp__selectlike bb-pdp__desktop-only" data-selectlike>
-                  <button type="button" class="bb-pdp__selectlike-trigger" data-selectlike-trigger>
-                    <span class="bb-pdp__selectlike-value" data-selectlike-value>{{ option.selected_value }}</span>
-                    <span class="bb-pdp__selectlike-chev">
-                      <svg width="12" height="8" viewBox="0 0 12 8" fill="none"><path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </span>
-                  </button>
-                  <div class="bb-pdp__selectlike-menu" data-selectlike-menu>
-                    {%- for value in option.values -%}
-                      <button
-                        type="button"
-                        class="bb-pdp__selectlike-option{% if option.selected_value == value %} bb-pdp__selectlike-option--active{% endif %}{% unless value.available %} bb-pdp__selectlike-option--unavailable{% endunless %}"
-                        data-option-value="{{ value | escape }}"
-                        data-option-position="{{ option.position }}"
-                      >
-                        {{ value }}
-                      </button>
-                    {%- endfor -%}
-                  </div>
-                </div>
-
-                {%- comment -%} Mobile: pill buttons {%- endcomment -%}
-                <div class="bb-pdp__size-pills bb-pdp__mobile-only">
+                {%- comment -%} Size: pill buttons (all breakpoints) {%- endcomment -%}
+                <div class="bb-pdp__size-pills">
                   {%- for value in option.values -%}
                     <button
                       type="button"
@@ -611,6 +614,54 @@
                                 {%- assign bp_swatch_style = 'background-image: url(' | append: bp_meta_swatch.image | image_url: width: 36 | prepend: "'" | append: "'" | append: '); background-size: cover;' -%}
                               {%- elsif bp_meta_swatch.color -%}
                                 {%- assign bp_swatch_style = 'background-color: ' | append: bp_meta_swatch.color | append: ';' -%}
+                              {%- else -%}
+                                {%- assign _bcn = val | downcase -%}
+                                {%- assign _bhex = '' -%}
+                                {%- case _bcn -%}
+                                  {%- when 'beige' -%}{%- assign _bhex = '#C8AD7F' -%}
+                                  {%- when 'black' -%}{%- assign _bhex = '#222222' -%}
+                                  {%- when 'brown' -%}{%- assign _bhex = '#6B4226' -%}
+                                  {%- when 'burgundy' -%}{%- assign _bhex = '#722F37' -%}
+                                  {%- when 'charcoal' -%}{%- assign _bhex = '#4A4A4A' -%}
+                                  {%- when 'chocolate' -%}{%- assign _bhex = '#5C3317' -%}
+                                  {%- when 'cream' -%}{%- assign _bhex = '#FFFDD0' -%}
+                                  {%- when 'denim blue' -%}{%- assign _bhex = '#1560BD' -%}
+                                  {%- when 'dusty rose' -%}{%- assign _bhex = '#DCAE96' -%}
+                                  {%- when 'emerald green' -%}{%- assign _bhex = '#046A38' -%}
+                                  {%- when 'gold' -%}{%- assign _bhex = '#CFB53B' -%}
+                                  {%- when 'grey', 'gray' -%}{%- assign _bhex = '#9E9E9E' -%}
+                                  {%- when 'heathered beige' -%}{%- assign _bhex = '#C2B280' -%}
+                                  {%- when 'heathered grey', 'heathered gray' -%}{%- assign _bhex = '#B0AFA8' -%}
+                                  {%- when 'ivory' -%}{%- assign _bhex = '#FFFFF0' -%}
+                                  {%- when 'lavender' -%}{%- assign _bhex = '#B57EDC' -%}
+                                  {%- when 'light blue' -%}{%- assign _bhex = '#ADD8E6' -%}
+                                  {%- when 'light grey', 'light gray' -%}{%- assign _bhex = '#D3D3D3' -%}
+                                  {%- when 'mauve' -%}{%- assign _bhex = '#E0B0FF' -%}
+                                  {%- when 'mint' -%}{%- assign _bhex = '#98FF98' -%}
+                                  {%- when 'mocha' -%}{%- assign _bhex = '#967969' -%}
+                                  {%- when 'navy', 'navy blue' -%}{%- assign _bhex = '#182F5C' -%}
+                                  {%- when 'off white' -%}{%- assign _bhex = '#FAF9F6' -%}
+                                  {%- when 'olive' -%}{%- assign _bhex = '#708238' -%}
+                                  {%- when 'pink' -%}{%- assign _bhex = '#FFB6C1' -%}
+                                  {%- when 'plum' -%}{%- assign _bhex = '#673147' -%}
+                                  {%- when 'purple' -%}{%- assign _bhex = '#6A0DAD' -%}
+                                  {%- when 'royal blue' -%}{%- assign _bhex = '#4169E1' -%}
+                                  {%- when 'sage', 'sage green' -%}{%- assign _bhex = '#B2AC88' -%}
+                                  {%- when 'sand' -%}{%- assign _bhex = '#C2B280' -%}
+                                  {%- when 'silver' -%}{%- assign _bhex = '#C0C0C0' -%}
+                                  {%- when 'sky blue' -%}{%- assign _bhex = '#87CEEB' -%}
+                                  {%- when 'slate' -%}{%- assign _bhex = '#708090' -%}
+                                  {%- when 'spa blue' -%}{%- assign _bhex = '#4A9DAF' -%}
+                                  {%- when 'steel blue' -%}{%- assign _bhex = '#4682B4' -%}
+                                  {%- when 'taupe' -%}{%- assign _bhex = '#8B7D6B' -%}
+                                  {%- when 'teal' -%}{%- assign _bhex = '#008080' -%}
+                                  {%- when 'terracotta' -%}{%- assign _bhex = '#CC4E3C' -%}
+                                  {%- when 'white' -%}{%- assign _bhex = '#FFFFFF' -%}
+                                  {%- when 'wheat' -%}{%- assign _bhex = '#DEB887' -%}
+                                {%- endcase -%}
+                                {%- if _bhex != '' -%}
+                                  {%- assign bp_swatch_style = 'background-color: ' | append: _bhex | append: ';' -%}
+                                {%- endif -%}
                               {%- endif -%}
                             {%- endif -%}
                             <button
@@ -676,7 +727,37 @@
         </div>
       {%- endif -%}
 
-      <button type="button" class="bb-pdp__cta" disabled data-pdp-cta>{{ cta_text }}</button>
+      {%- comment -%} Free shipping progress bar (inline — hidden on mobile, shown on desktop) {%- endcomment -%}
+      {%- assign fs_threshold = block.settings.free_shipping_threshold | default: 50 -%}
+      {%- if fs_threshold > 0 -%}
+        <div class="bb-pdp__shipping-bar bb-pdp__desktop-only" data-pdp-shipping-bar>
+          <div class="bb-pdp__shipping-bar-text" data-pdp-shipping-text>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <span>Spend ${{ fs_threshold }} for <strong>FREE shipping</strong></span>
+          </div>
+          <div class="bb-pdp__shipping-bar-track">
+            <div class="bb-pdp__shipping-bar-fill" data-pdp-shipping-fill style="width: 0%;"></div>
+          </div>
+        </div>
+      {%- endif -%}
+
+      <button type="button" class="bb-pdp__cta bb-pdp__desktop-only" disabled data-pdp-cta>{{ cta_text }}</button>
+
+      {%- comment -%} Sticky mobile CTA + shipping bar {%- endcomment -%}
+      <div class="bb-pdp__sticky-mobile">
+        {%- if fs_threshold > 0 -%}
+          <div class="bb-pdp__shipping-bar" data-pdp-shipping-bar-mobile>
+            <div class="bb-pdp__shipping-bar-text" data-pdp-shipping-text-mobile>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <span>Spend ${{ fs_threshold }} for <strong>FREE shipping</strong></span>
+            </div>
+            <div class="bb-pdp__shipping-bar-track">
+              <div class="bb-pdp__shipping-bar-fill" data-pdp-shipping-fill-mobile style="width: 0%;"></div>
+            </div>
+          </div>
+        {%- endif -%}
+        <button type="button" class="bb-pdp__cta" disabled data-pdp-cta-mobile>{{ cta_text }}</button>
+      </div>
 
       {%- comment -%} 10. Testimonial {%- endcomment -%}
       {%- if block.settings.show_testimonial -%}
@@ -844,120 +925,130 @@
       "info": "Overridden by Bundle Builder app config when available."
     },
     {
+      "type": "select",
+      "id": "tier_mode",
+      "label": "Tier threshold mode",
+      "options": [
+        { "value": "subtotal", "label": "Dollar amount (subtotal)" },
+        { "value": "count", "label": "Item count" }
+      ],
+      "default": "subtotal",
+      "info": "How tier thresholds are measured — by cart subtotal or item count"
+    },
+    {
       "type": "range",
-      "id": "discount_2_items",
-      "label": "Tier 1 — item count to unlock",
-      "min": 0, "max": 100, "step": 1, "default": 2
+      "id": "free_shipping_threshold",
+      "label": "Free shipping threshold ($)",
+      "min": 0, "max": 200, "step": 5, "default": 50,
+      "info": "Shows a shipping progress bar above the CTA. 0 to disable."
+    },
+    {
+      "type": "range",
+      "id": "tier_1_threshold",
+      "label": "Tier 1 threshold ($)",
+      "min": 0, "max": 500, "step": 5, "default": 75,
+      "info": "Dollar subtotal to unlock this gift tier"
+    },
+    {
+      "type": "text",
+      "id": "tier_1_label",
+      "label": "Tier 1 label",
+      "default": "$75+"
+    },
+    {
+      "type": "text",
+      "id": "tier_1_reward",
+      "label": "Tier 1 reward text",
+      "default": "Free Pillowcase Set"
+    },
+    {
+      "type": "text",
+      "id": "tier_1_gift_image",
+      "label": "Tier 1 gift image URL"
+    },
+    {
+      "type": "text",
+      "id": "tier_1_value_badge",
+      "label": "Tier 1 value badge",
+      "default": "$18 VALUE"
+    },
+    {
+      "type": "text",
+      "id": "tier_1_gift_variant_ids",
+      "label": "Tier 1 free gift variant IDs",
+      "default": "44670184783941",
+      "info": "2 Pillowcase Set — Queen/Standard White"
+    },
+    {
+      "type": "range",
+      "id": "tier_2_threshold",
+      "label": "Tier 2 threshold ($)",
+      "min": 0, "max": 500, "step": 5, "default": 100
     },
     {
       "type": "text",
       "id": "tier_2_label",
-      "label": "Tier 1 threshold label",
-      "default": "2+ Items",
-      "info": "Shown above the card (e.g. '2+ Items' or 'Shop $50+')"
+      "label": "Tier 2 label",
+      "default": "$100+"
     },
     {
       "type": "text",
       "id": "tier_2_reward",
-      "label": "Tier 1 reward text",
-      "default": "Free Shipping",
-      "info": "Shown inside the card when unlocked"
+      "label": "Tier 2 reward text",
+      "default": "2 Free Pillows"
     },
     {
       "type": "text",
       "id": "tier_2_gift_image",
-      "label": "Tier 1 gift image URL",
-      "info": "Optional product image for the reward card"
-    },
-    {
-      "type": "text",
-      "id": "tier_2_value_badge",
-      "label": "Tier 1 value badge",
-      "info": "e.g. '$15 VALUE' — leave blank to hide"
-    },
-    {
-      "type": "range",
-      "id": "discount_3_items",
-      "label": "Tier 2 — item count to unlock",
-      "min": 0, "max": 100, "step": 1, "default": 3
-    },
-    {
-      "type": "text",
-      "id": "tier_3_label",
-      "label": "Tier 2 threshold label",
-      "default": "3+ Items"
-    },
-    {
-      "type": "text",
-      "id": "tier_3_reward",
-      "label": "Tier 2 reward text",
-      "default": "Free Gift"
-    },
-    {
-      "type": "text",
-      "id": "tier_3_gift_image",
       "label": "Tier 2 gift image URL"
     },
     {
       "type": "text",
-      "id": "tier_3_value_badge",
-      "label": "Tier 2 value badge"
+      "id": "tier_2_value_badge",
+      "label": "Tier 2 value badge",
+      "default": "$60 VALUE"
+    },
+    {
+      "type": "text",
+      "id": "tier_2_gift_variant_ids",
+      "label": "Tier 2 free gift variant IDs",
+      "default": "44670158831685,44670158864453",
+      "info": "2x Bed Pillow Basic — Standard + Queen White"
     },
     {
       "type": "range",
-      "id": "discount_4_items",
-      "label": "Tier 3 — item count to unlock",
-      "min": 0, "max": 100, "step": 1, "default": 5
+      "id": "tier_3_threshold",
+      "label": "Tier 3 threshold ($ — 0 to disable)",
+      "min": 0, "max": 500, "step": 5, "default": 125
     },
     {
       "type": "text",
-      "id": "tier_4_label",
-      "label": "Tier 3 threshold label",
-      "default": "5+ Items"
+      "id": "tier_3_label",
+      "label": "Tier 3 label",
+      "default": "$125+"
     },
     {
       "type": "text",
-      "id": "tier_4_reward",
+      "id": "tier_3_reward",
       "label": "Tier 3 reward text",
-      "default": "Best Deal"
+      "default": "$25 Gift Card"
     },
     {
       "type": "text",
-      "id": "tier_4_gift_image",
+      "id": "tier_3_gift_image",
       "label": "Tier 3 gift image URL"
     },
     {
       "type": "text",
-      "id": "tier_4_value_badge",
-      "label": "Tier 3 value badge"
-    },
-    {
-      "type": "range",
-      "id": "discount_5_items",
-      "label": "Tier 4 — item count to unlock (0 to disable)",
-      "min": 0, "max": 100, "step": 1, "default": 0
+      "id": "tier_3_value_badge",
+      "label": "Tier 3 value badge",
+      "default": "$25 VALUE"
     },
     {
       "type": "text",
-      "id": "tier_5_label",
-      "label": "Tier 4 threshold label",
-      "default": "7+ Items"
-    },
-    {
-      "type": "text",
-      "id": "tier_5_reward",
-      "label": "Tier 4 reward text",
-      "default": "VIP Bundle"
-    },
-    {
-      "type": "text",
-      "id": "tier_5_gift_image",
-      "label": "Tier 4 gift image URL"
-    },
-    {
-      "type": "text",
-      "id": "tier_5_value_badge",
-      "label": "Tier 4 value badge"
+      "id": "tier_3_gift_variant_ids",
+      "label": "Tier 3 free gift variant IDs",
+      "info": "Leave blank if reward is handled outside cart (e.g. gift card email)"
     },
     {
       "type": "range",

@@ -6,6 +6,9 @@
 (function () {
   'use strict';
 
+  // Prevent double-init if loaded by multiple blocks on the same page
+  if (window.BundleCore) return;
+
   var BundleCore = {};
 
   /**
@@ -141,45 +144,100 @@
   };
 
   /**
-   * Add a free gift variant to the cart with bundle properties.
-   * Returns a Promise that resolves to { added: boolean }.
+   * Get locale-aware route root.
    */
-  BundleCore.addFreeGiftToCart = function (variantId, bundleId, bundleName) {
-    var numericId = BundleCore.numericVariantId(variantId);
+  BundleCore.routeRoot = function () {
+    return (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+  };
 
-    return fetch('/variants/' + numericId + '.js')
-      .then(function (res) {
-        if (!res.ok) throw new Error('Variant not found');
-        return res.json();
-      })
-      .then(function (variant) {
-        if (!variant.available) {
-          return { added: false, reason: 'unavailable' };
-        }
-        return fetch('/cart/add.js', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            items: [{
-              id: numericId,
-              quantity: 1,
-              properties: {
-                '_bundle_id': bundleId,
-                '_bundle_name': bundleName,
-                '_bundle_free_gift': 'true',
-              },
-            }],
-          }),
-        }).then(function (res) {
-          if (!res.ok) throw new Error('Failed to add free gift');
-          document.dispatchEvent(new CustomEvent('cart:updated'));
-          document.dispatchEvent(new CustomEvent('cart:refresh'));
-          return { added: true };
+  /**
+   * Update the theme's cart count bubble after cart changes.
+   */
+  BundleCore.refreshCartUI = function () {
+    var root = BundleCore.routeRoot();
+    // Fetch updated cart to get item count
+    fetch(root + 'cart.js', { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (cart) {
+        if (!cart) return;
+        // Update common cart count selectors used by Dawn and similar themes
+        var selectors = ['.cart-count-bubble span', '[data-cart-count]', '.cart-count', '#cart-icon-bubble span[aria-hidden]', '.js-cart-count'];
+        selectors.forEach(function (sel) {
+          document.querySelectorAll(sel).forEach(function (el) {
+            el.textContent = cart.item_count;
+          });
+        });
+        // Show bubble if items exist
+        var bubbles = document.querySelectorAll('.cart-count-bubble, #cart-icon-bubble');
+        bubbles.forEach(function (b) {
+          if (cart.item_count > 0) b.removeAttribute('hidden');
         });
       })
-      .catch(function () {
-        return { added: false, reason: 'error' };
-      });
+      .catch(function () { /* silent */ });
+
+    // Try Dawn section rendering for cart icon bubble only (skip notifications — they cause persistent overlays)
+    fetch(root + '?sections=cart-icon-bubble,cart-drawer', { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (sections) {
+        if (!sections) return;
+        Object.keys(sections).forEach(function (key) {
+          var el = document.getElementById('shopify-section-' + key);
+          if (el) el.innerHTML = new DOMParser().parseFromString(sections[key], 'text/html').body.innerHTML;
+        });
+      })
+      .catch(function () { /* silent */ });
+
+    document.dispatchEvent(new CustomEvent('cart:updated'));
+    document.dispatchEvent(new CustomEvent('cart:refresh'));
+  };
+
+  /**
+   * Add a free gift variant to the cart with bundle properties.
+   * @param {string} variantId - Variant GID or numeric ID
+   * @param {string} bundleId - Bundle identifier
+   * @param {string} bundleName - Bundle display name
+   * @param {number} [minItems] - Minimum qualifying items for this gift (for cart enforcement)
+   * Returns a Promise that resolves to { added: boolean }.
+   */
+  BundleCore.addFreeGiftToCart = function (variantId, bundleId, bundleName, minItems) {
+    var numericId = BundleCore.numericVariantId(variantId);
+    var root = BundleCore.routeRoot();
+
+    var properties = {
+      '_bundle_id': bundleId,
+      '_bundle_name': bundleName,
+      '_bundle_free_gift': 'true',
+    };
+    if (minItems) {
+      properties['_bundle_gift_min_items'] = String(minItems);
+    }
+
+    return fetch(root + 'cart/add.js', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        items: [{
+          id: numericId,
+          quantity: 1,
+          properties: properties,
+        }],
+      }),
+    }).then(function (res) {
+      if (!res.ok) {
+        return res.json().catch(function () { return {}; }).then(function (err) {
+          var desc = err.description || '';
+          if (desc.indexOf('unavailable') !== -1 || desc.indexOf('not available') !== -1) {
+            return { added: false, reason: 'unavailable' };
+          }
+          return { added: false, reason: 'error' };
+        });
+      }
+      BundleCore.refreshCartUI();
+      return { added: true };
+    }).catch(function () {
+      return { added: false, reason: 'error' };
+    });
   };
 
   /**
@@ -188,8 +246,9 @@
    */
   BundleCore.removeFreeGiftFromCart = function (variantId, bundleId) {
     var numericId = BundleCore.numericVariantId(variantId);
+    var root = BundleCore.routeRoot();
 
-    return fetch('/cart.js')
+    return fetch(root + 'cart.js', { credentials: 'same-origin' })
       .then(function (res) {
         if (!res.ok) throw new Error('Failed to fetch cart');
         return res.json();
@@ -202,9 +261,10 @@
             && item.properties['_bundle_id'] === bundleId;
         });
         if (!giftItem) return;
-        return fetch('/cart/change.js', {
+        return fetch(root + 'cart/change.js', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
           body: JSON.stringify({
             line: cart.items.indexOf(giftItem) + 1,
             quantity: 0,
@@ -214,8 +274,7 @@
         });
       })
       .then(function () {
-        document.dispatchEvent(new CustomEvent('cart:updated'));
-        document.dispatchEvent(new CustomEvent('cart:refresh'));
+        BundleCore.refreshCartUI();
       });
   };
 
@@ -224,9 +283,11 @@
    * Returns a Promise that resolves on success.
    */
   BundleCore.addBundleToCart = function (items) {
-    return fetch('/cart/add.js', {
+    var root = BundleCore.routeRoot();
+    return fetch(root + 'cart/add.js', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({ items: items }),
     }).then(function (response) {
       if (!response.ok) {
@@ -234,10 +295,101 @@
           throw new Error(err.description || 'Failed to add to cart');
         });
       }
-      document.dispatchEvent(new CustomEvent('cart:updated'));
-      document.dispatchEvent(new CustomEvent('cart:refresh'));
+      BundleCore.refreshCartUI();
       document.dispatchEvent(new CustomEvent('ajaxProduct:added'));
       return response;
+    });
+  };
+
+  /**
+   * Audit the cart and enforce free gift rules:
+   * 1. Remove free gifts whose bundle doesn't meet the minimum item threshold
+   * 2. Cap free gift quantity to 1 (remove excess)
+   * Runs on any page (cart page, etc.) without needing the bundle PDP.
+   * Returns a Promise.
+   */
+  BundleCore.enforceFreeGifts = function () {
+    if (BundleCore._enforcing) return Promise.resolve();
+    BundleCore._enforcing = true;
+    var root = BundleCore.routeRoot();
+
+    return fetch(root + 'cart.js', { credentials: 'same-origin' })
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (cart) {
+        if (!cart || !cart.items) return;
+
+        // Group non-gift items by bundle_id to count qualifying items
+        var bundleCounts = {};
+        var changes = []; // { key: string, quantity: number }
+
+        cart.items.forEach(function (item) {
+          var props = item.properties || {};
+          var bid = props['_bundle_id'];
+          if (!bid) return;
+
+          if (props['_bundle_free_gift'] !== 'true') {
+            bundleCounts[bid] = (bundleCounts[bid] || 0) + item.quantity;
+          }
+        });
+
+        cart.items.forEach(function (item) {
+          var props = item.properties || {};
+          if (props['_bundle_free_gift'] !== 'true') return;
+
+          var bid = props['_bundle_id'];
+          var minItems = parseInt(props['_bundle_gift_min_items'], 10) || 0;
+          var qualifyingCount = bundleCounts[bid] || 0;
+
+          if (minItems > 0 && qualifyingCount < minItems) {
+            // Below threshold — remove entirely
+            changes.push({ key: item.key, quantity: 0 });
+          } else if (item.quantity > 1) {
+            // Cap at 1
+            changes.push({ key: item.key, quantity: 1 });
+          }
+        });
+
+        if (changes.length === 0) return;
+
+        // Apply changes sequentially using line item keys
+        var chain = Promise.resolve();
+        changes.forEach(function (change) {
+          chain = chain.then(function () {
+            return fetch(root + 'cart/change.js', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ id: change.key, quantity: change.quantity }),
+            });
+          });
+        });
+
+        return chain.then(function () {
+          BundleCore.refreshCartUI();
+        });
+      })
+      .catch(function () { /* silent */ })
+      .then(function () { BundleCore._enforcing = false; });
+  };
+
+  /**
+   * Start cart enforcement listener. Runs enforceFreeGifts on cart changes.
+   * Should be called once on page load (any page).
+   */
+  BundleCore.initCartEnforcement = function () {
+    if (BundleCore._enforcementInitialized) return;
+    BundleCore._enforcementInitialized = true;
+
+    // Run on initial page load
+    BundleCore.enforceFreeGifts();
+
+    // Listen for cart change events
+    document.addEventListener('cart:updated', function () {
+      // Debounce: wait 500ms after last cart change
+      clearTimeout(BundleCore._enforceTimer);
+      BundleCore._enforceTimer = setTimeout(function () {
+        BundleCore.enforceFreeGifts();
+      }, 500);
     });
   };
 

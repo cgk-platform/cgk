@@ -210,12 +210,16 @@
   position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
+  background: #fff;
 }
 
 .bb-pdp__slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
   display: block;
 }
 
@@ -436,7 +440,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  max-width: 337px;
 }
 
 .bb-pdp__swatch {
@@ -530,12 +533,29 @@
 .bb-pdp__swatch-visual[data-color-handle="chocolate"] { background-color: #7b3f00; }
 .bb-pdp__swatch-visual[data-color-handle="brown"] { background-color: #8b4513; }
 .bb-pdp__swatch-visual[data-color-handle="espresso"] { background-color: #3c1414; }
+.bb-pdp__swatch-visual[data-color-handle="denim-blue"] { background-color: #1560bd; }
+.bb-pdp__swatch-visual[data-color-handle="emerald-green"] { background-color: #046a38; }
+.bb-pdp__swatch-visual[data-color-handle="heathered-beige"] { background-color: #c2b280; }
+.bb-pdp__swatch-visual[data-color-handle="heathered-grey"],
+.bb-pdp__swatch-visual[data-color-handle="heathered-gray"] { background-color: #b0afa8; }
+.bb-pdp__swatch-visual[data-color-handle="off-white"] { background-color: #faf9f6; }
+.bb-pdp__swatch-visual[data-color-handle="royal-blue"] { background-color: #4169e1; }
+.bb-pdp__swatch-visual[data-color-handle="steel-blue"] { background-color: #4682b4; }
+.bb-pdp__swatch-visual[data-color-handle="wheat"] { background-color: #deb887; }
+.bb-pdp__swatch-visual[data-color-handle="dusty-rose"] { background-color: #dcae96; }
+.bb-pdp__swatch-visual[data-color-handle="mocha"] { background-color: #967969; }
+.bb-pdp__swatch-visual[data-color-handle="sky-blue"] { background-color: #87ceeb; }
+.bb-pdp__swatch-visual[data-color-handle="teal"] { background-color: #008080; }
+.bb-pdp__swatch-visual[data-color-handle="mint"] { background-color: #98ff98; }
+.bb-pdp__swatch-visual[data-color-handle="silver"] { background-color: #c0c0c0; }
+.bb-pdp__swatch-visual[data-color-handle="purple"] { background-color: #6a0dad; }
+.bb-pdp__swatch-visual[data-color-handle="spa-blue"] { background-color: #4a9daf; }
 
 /* Size selectlike dropdown (desktop) */
 .bb-pdp__selectlike {
   position: relative;
-  width: 166px;
-  max-width: 166px;
+  width: 100%;
+  max-width: 280px;
 }
 
 .bb-pdp__selectlike-trigger {
@@ -643,8 +663,8 @@
   justify-content: center;
   align-items: center;
   min-height: 30px;
-  min-width: 107px;
-  max-width: 107px;
+  flex: 1;
+  min-width: 80px;
   border-radius: 4px;
   border: 0.75px solid #2E2E2E;
   background: #FAFAFA;
@@ -754,40 +774,40 @@
 /* Reward cards */
 .bb-pdp__tier-cards { display: flex; gap: 9px; }
 .bb-pdp__tier-card {
-  position: relative; flex: 1; padding: 10px;
-  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 9px;
-  border-radius: 4px; border: 1px dashed #cacaca;
-  background: rgba(234, 234, 233, 0.15); transition: all 0.3s;
+  position: relative; flex: 1; padding: 10px 8px;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
+  border-radius: 4px; border: 1px solid #e0e0e0;
+  background: #fff; transition: all 0.3s;
 }
-.bb-pdp__tier-card--unlocked { border: 1px solid var(--bb-accent); background: #fff; }
+.bb-pdp__tier-card--unlocked { border-color: var(--bb-accent); box-shadow: 0 0 0 1px var(--bb-accent); }
 .bb-pdp__tier-card-threshold {
   font-family: var(--bb-font-1); font-size: 10px; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.3px; color: #000;
 }
 .bb-pdp__tier-card-icon {
-  width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+  width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
 }
-.bb-pdp__tier-card-icon--has-image { width: 52px; height: 52px; }
+.bb-pdp__tier-card-icon--has-image { width: 68px; height: 68px; }
 .bb-pdp__tier-card-icon img {
   width: 100%; height: 100%; object-fit: contain; border-radius: 2px;
 }
-.bb-pdp__tier-card:not(.bb-pdp__tier-card--unlocked) .bb-pdp__tier-card-icon img { opacity: 0.3; }
-.bb-pdp__tier-card:not(.bb-pdp__tier-card--unlocked) .bb-pdp__tier-card-icon svg { opacity: 0.5; }
 .bb-pdp__tier-card-reward {
-  font-family: var(--bb-font-1); font-size: 8px; font-weight: 500;
-  text-transform: uppercase; letter-spacing: 0.3px; color: #929292;
+  font-family: var(--bb-font-1); font-size: 9px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.3px; color: #333;
 }
-.bb-pdp__tier-card--unlocked .bb-pdp__tier-card-reward { color: #000; }
+.bb-pdp__tier-card--unlocked .bb-pdp__tier-card-reward { color: var(--bb-accent); }
 .bb-pdp__tier-card-badge {
-  position: absolute; top: -14px; right: -14px;
-  width: 41px; height: 41px; border-radius: 50%;
+  position: absolute; top: -12px; right: -8px;
+  padding: 4px 9px; border-radius: 12px;
   background: var(--bb-accent); color: #fff;
   display: flex; align-items: center; justify-content: center; text-align: center;
-  font-family: var(--bb-font-1); font-size: 8px; font-weight: 600;
-  text-transform: uppercase; line-height: 8px; z-index: 2;
+  font-family: var(--bb-font-1); font-size: 9px; font-weight: 700;
+  text-transform: uppercase; line-height: 1.1; letter-spacing: 0.3px;
+  white-space: nowrap; z-index: 2;
 }
 @media (min-width: 768px) {
-  .bb-pdp__tier-card-badge { width: 48px; height: 48px; font-size: 9px; line-height: 10px; top: -14px; right: -14px; }
+  .bb-pdp__tier-card-badge { font-size: 10px; padding: 5px 10px; border-radius: 14px; }
+  .bb-pdp__tier-card { padding: 12px 10px; }
 }
 
 /* Unlocked callout — positioned near CTA, not inside tier container */
@@ -951,6 +971,30 @@
 .bb-pdp__item-swatch-visual[data-color-handle="burgundy"] { background-color: #800020; }
 .bb-pdp__item-swatch-visual[data-color-handle="gold"] { background-color: #d29b28; }
 .bb-pdp__item-swatch-visual[data-color-handle="sand"] { background-color: #c2b280; }
+.bb-pdp__item-swatch-visual[data-color-handle="denim-blue"] { background-color: #1560bd; }
+.bb-pdp__item-swatch-visual[data-color-handle="emerald-green"] { background-color: #046a38; }
+.bb-pdp__item-swatch-visual[data-color-handle="heathered-beige"] { background-color: #c2b280; }
+.bb-pdp__item-swatch-visual[data-color-handle="heathered-grey"],
+.bb-pdp__item-swatch-visual[data-color-handle="heathered-gray"] { background-color: #b0afa8; }
+.bb-pdp__item-swatch-visual[data-color-handle="off-white"] { background-color: #faf9f6; }
+.bb-pdp__item-swatch-visual[data-color-handle="royal-blue"] { background-color: #4169e1; }
+.bb-pdp__item-swatch-visual[data-color-handle="steel-blue"] { background-color: #4682b4; }
+.bb-pdp__item-swatch-visual[data-color-handle="wheat"] { background-color: #deb887; }
+.bb-pdp__item-swatch-visual[data-color-handle="dusty-rose"] { background-color: #dcae96; }
+.bb-pdp__item-swatch-visual[data-color-handle="mocha"] { background-color: #967969; }
+.bb-pdp__item-swatch-visual[data-color-handle="terracotta"] { background-color: #cc7a5a; }
+.bb-pdp__item-swatch-visual[data-color-handle="chocolate"] { background-color: #7b3f00; }
+.bb-pdp__item-swatch-visual[data-color-handle="brown"] { background-color: #8b4513; }
+.bb-pdp__item-swatch-visual[data-color-handle="olive"] { background-color: #808000; }
+.bb-pdp__item-swatch-visual[data-color-handle="plum"] { background-color: #8e4585; }
+.bb-pdp__item-swatch-visual[data-color-handle="light-blue"] { background-color: #add8e6; }
+.bb-pdp__item-swatch-visual[data-color-handle="sky-blue"] { background-color: #87ceeb; }
+.bb-pdp__item-swatch-visual[data-color-handle="teal"] { background-color: #008080; }
+.bb-pdp__item-swatch-visual[data-color-handle="mint"] { background-color: #98ff98; }
+.bb-pdp__item-swatch-visual[data-color-handle="silver"] { background-color: #c0c0c0; }
+.bb-pdp__item-swatch-visual[data-color-handle="rust"] { background-color: #b7410e; }
+.bb-pdp__item-swatch-visual[data-color-handle="purple"] { background-color: #6a0dad; }
+.bb-pdp__item-swatch-visual[data-color-handle="spa-blue"] { background-color: #4a9daf; }
 
 /* Inline size pills */
 .bb-pdp__item-pills {
@@ -1050,6 +1094,52 @@
   padding-top: 0.8rem;
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+/* ===== 13b. SHIPPING PROGRESS BAR ===== */
+.bb-pdp__shipping-bar {
+  max-width: 536px;
+  margin: 20px 0 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #f8f8f8;
+  border: 1px solid #e8e8e8;
+  transition: background 0.3s, border-color 0.3s;
+}
+.bb-pdp__shipping-bar--unlocked {
+  background: #e8f5e9;
+  border-color: #a5d6a7;
+}
+.bb-pdp__shipping-bar-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-family-2, "Bitter", serif);
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 6px;
+}
+.bb-pdp__shipping-bar-text svg {
+  flex-shrink: 0;
+  color: #555;
+}
+.bb-pdp__shipping-bar--unlocked .bb-pdp__shipping-bar-text svg {
+  color: #2e7d32;
+}
+.bb-pdp__shipping-bar-track {
+  height: 6px;
+  border-radius: 3px;
+  background: #ddd;
+  overflow: hidden;
+}
+.bb-pdp__shipping-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--bb-accent-color, #182f5c);
+  transition: width 0.4s ease;
+}
+.bb-pdp__shipping-bar--unlocked .bb-pdp__shipping-bar-fill {
+  background: #43a047;
 }
 
 /* ===== 14. CTA BUTTON ===== */
@@ -1411,24 +1501,70 @@
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%) translateY(120%);
-  background: var(--bb-success-bg);
-  color: var(--bb-success-text);
+  background: #15803d;
+  color: #fff;
   padding: 1.2rem 2.4rem;
-  border-radius: var(--bb-radius);
+  border-radius: 6px;
   font-weight: 600;
   font-size: 1.3rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
+  z-index: 999999;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .bb-pdp__notification { bottom: 160px; }
 }
 
 .bb-pdp__notification--visible {
   transform: translateX(-50%) translateY(0);
 }
 
-/* ===== 21. EMPTY STATE ===== */
+/* ===== 21. STICKY MOBILE CTA + SHIPPING BAR ===== */
+/* Hidden by default — JS moves it to document.body on mobile for position:fixed to work */
+.bb-pdp__sticky-mobile {
+  display: none;
+}
+.bb-pdp__sticky-mobile--active {
+  display: block;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  background: #fff;
+  padding: 10px 16px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid #e0e0e0;
+  /* Re-declare CSS vars since this element is moved to document.body outside .bb-pdp */
+  --bb-accent: var(--bb-accent-color, #182f5c);
+  --bb-btn-text: var(--bb-btn-text-color, #ffffff);
+  --bb-bg: rgb(var(--color-background, 255, 255, 255));
+  --bb-font-1: var(--font-family-1, "Raleway", sans-serif);
+  --bb-font-2: var(--font-family-2, "Bitter", serif);
+  --bb-border: rgba(26, 26, 46, 0.12);
+  --bb-radius: 6px;
+  --bb-success-text: #16a34a;
+  --bb-success-bg: rgba(22, 163, 74, 0.1);
+}
+.bb-pdp__sticky-mobile--active .bb-pdp__shipping-bar {
+  margin: 0 0 8px;
+  max-width: 100%;
+}
+.bb-pdp__sticky-mobile--active .bb-pdp__cta {
+  margin: 0;
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  /* Add bottom padding to info col so content isn't hidden behind sticky bar */
+  .bb-pdp__info-col {
+    padding-bottom: 140px;
+  }
+}
+
+/* ===== 22. EMPTY STATE ===== */
 .bb-pdp__empty-msg {
   color: var(--bb-text-faded);
   font-size: 1.3rem;
