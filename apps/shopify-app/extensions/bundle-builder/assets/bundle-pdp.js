@@ -572,15 +572,31 @@
             var optGroups = item.querySelectorAll('[data-item-option-group]');
             optGroups.forEach(function (grp) {
               var pos = grp.dataset.itemOptionPosition;
-              var sel = grp.querySelector('[data-item-option-select]');
-              if (sel && pos) {
-                item._selectedOptions[pos] = sel.value;
+              // Color swatches: read from active button
+              var activeBtn = grp.querySelector('.bb-pdp__item-swatch--active');
+              if (activeBtn && pos) {
+                item._selectedOptions[pos] = activeBtn.dataset.itemOptionValue;
+              } else {
+                // Size dropdowns: read from select
+                var sel = grp.querySelector('[data-item-option-select]');
+                if (sel && pos) {
+                  item._selectedOptions[pos] = sel.value;
+                }
               }
             });
           } catch (_e) { /* ignore */ }
         }
 
-        // Per-item option dropdowns
+        // Per-item color swatch buttons
+        var itemSwatchBtns = item.querySelectorAll('.bb-pdp__item-swatch');
+        itemSwatchBtns.forEach(function (btn) {
+          btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            self.handleItemSwatchClick(item, btn);
+          });
+        });
+
+        // Per-item option dropdowns (size, etc.)
         var itemSelects = item.querySelectorAll('[data-item-option-select]');
         itemSelects.forEach(function (sel) {
           sel.addEventListener('change', function (e) {
@@ -594,14 +610,14 @@
         // Click to toggle
         var topRow = item.querySelector('.bb-pdp__bundle-item-top') || item;
         topRow.addEventListener('click', function (e) {
-          if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-select]')) return;
+          if (e.target.closest('[data-action]') || e.target.closest('[data-item-option-select]') || e.target.closest('.bb-pdp__item-swatch')) return;
           self.toggleBundleItem(item);
         });
 
         item.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            if (!e.target.closest('[data-action]') && !e.target.closest('[data-item-option-select]')) {
+            if (!e.target.closest('[data-action]') && !e.target.closest('[data-item-option-select]') && !e.target.closest('.bb-pdp__item-swatch')) {
               self.toggleBundleItem(item);
             }
           }
@@ -919,6 +935,26 @@
     }
 
     /* ===== BUNDLE ITEM VARIANT SELECTION ===== */
+
+    /**
+     * Handle a bundle-item color swatch click.
+     */
+    handleItemSwatchClick(item, btn) {
+      if (!item._variants || !item._selectedOptions) return;
+      var position = btn.dataset.itemOptionPosition;
+      var value = btn.dataset.itemOptionValue;
+      var group = btn.closest('[data-item-option-group]');
+
+      if (group) {
+        group.querySelectorAll('.bb-pdp__item-swatch').forEach(function (b) {
+          b.classList.remove('bb-pdp__item-swatch--active');
+        });
+      }
+      btn.classList.add('bb-pdp__item-swatch--active');
+
+      item._selectedOptions[position] = value;
+      this._applyItemVariant(item);
+    }
 
     /**
      * Handle a bundle-item dropdown change.
