@@ -42,7 +42,7 @@
         try { this.variants = JSON.parse(variantScript.textContent); } catch (_e) { /* ignore */ }
       }
 
-      // Parse media map (shared vs variant-specific image assignments)
+      // Parse media map (per-image variant_ids for size filtering within color)
       this.mediaMap = {};
       var mediaMapScript = section.querySelector('[data-pdp-media-map]');
       if (mediaMapScript) {
@@ -264,47 +264,20 @@
     /**
      * Build visible indices for a variant's image group.
      *
-     * Uses Shopify's image.attached_to_variant? and image.variants data
-     * (serialized in data-pdp-media-map) to determine which images to show:
-     * - Shared images (not attached to any variant) → always visible
-     * - Variant-specific images → visible only when assigned to current variant
+     * Two-layer filter:
+     * 1. Color: alt-text "Title - Color" groups images by color
+     * 2. Size: within color, variant_ids narrows to current variant
+     *    - Images with no variant assignment (shared) → always show
+     *    - Images assigned to specific variants → show only if current variant matches
      *
-     * Fallback chain: media map → featured_media boundary → alt-text → show all.
+     * Fallback: show all if no color matches found.
      */
     _buildVariantMediaGroup(variant, slides) {
       var visibleIndices = new Set();
       var variantId = variant.id;
       var self = this;
-      var hasMediaMap = Object.keys(this.mediaMap).length > 0;
 
-      // Primary: use media map (shared vs variant-specific)
-      // Only if the map actually has variant-specific entries
-      if (hasMediaMap) {
-        var hasVariantSpecific = false;
-        var mapKeys = Object.keys(this.mediaMap);
-        for (var mi = 0; mi < mapKeys.length; mi++) {
-          if (!this.mediaMap[mapKeys[mi]].shared) { hasVariantSpecific = true; break; }
-        }
-
-        if (hasVariantSpecific) {
-          slides.forEach(function (slide) {
-            var idx = parseInt(slide.dataset.slideIndex, 10);
-            var entry = self.mediaMap[String(idx)];
-            if (!entry) {
-              visibleIndices.add(idx);
-              return;
-            }
-            if (entry.shared) {
-              visibleIndices.add(idx);
-            } else if (entry.variantIds && entry.variantIds.indexOf(variantId) !== -1) {
-              visibleIndices.add(idx);
-            }
-          });
-          if (visibleIndices.size >= 1) return visibleIndices;
-        }
-      }
-
-      // Fallback: alt-text color match
+      // Layer 1: find color matches
       var colorPosition = -1;
       this.els.optionGroups.forEach(function (group) {
         var name = (group.dataset.optionName || '').toLowerCase();
@@ -316,16 +289,31 @@
       if (colorPosition >= 1) {
         var colorName = variant.options[colorPosition - 1];
         if (colorName) {
-          var altMatches = new Set();
+          var hasMediaMap = Object.keys(this.mediaMap).length > 0;
+
           slides.forEach(function (slide) {
             var idx = parseInt(slide.dataset.slideIndex, 10);
-            if (slide.dataset.mediaColor === colorName) altMatches.add(idx);
+            // Must match color first
+            if (slide.dataset.mediaColor !== colorName) return;
+
+            // Layer 2: check variant_ids within color group
+            if (hasMediaMap) {
+              var entry = self.mediaMap[String(idx)];
+              if (entry && entry.assigned && entry.variantIds && entry.variantIds.length > 0) {
+                // Image is assigned to specific variants — only show if current variant matches
+                if (entry.variantIds.indexOf(variantId) === -1) return;
+              }
+              // If not assigned (shared within color) or matches variant → show
+            }
+
+            visibleIndices.add(idx);
           });
-          if (altMatches.size >= 2) return altMatches;
+
+          if (visibleIndices.size >= 1) return visibleIndices;
         }
       }
 
-      // Last fallback: show all
+      // Fallback: show all
       slides.forEach(function (_, i) { visibleIndices.add(i); });
       return visibleIndices;
     }
