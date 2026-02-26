@@ -572,10 +572,10 @@
             var optGroups = item.querySelectorAll('[data-item-option-group]');
             optGroups.forEach(function (grp) {
               var pos = grp.dataset.itemOptionPosition;
-              // Color swatches: read from active button
-              var activeBtn = grp.querySelector('.bb-pdp__item-swatch--active');
-              if (activeBtn && pos) {
-                item._selectedOptions[pos] = activeBtn.dataset.itemOptionValue;
+              // Color dropdown rows: read from active row
+              var activeRow = grp.querySelector('.bb-pdp__color-dropdown-row--active');
+              if (activeRow && pos) {
+                item._selectedOptions[pos] = activeRow.dataset.itemOptionValue;
               } else {
                 // Size dropdowns: read from select
                 var sel = grp.querySelector('[data-item-option-select]');
@@ -603,9 +603,9 @@
           }
         });
 
-        // Per-item color swatch buttons (inside dropdown panel)
-        var itemSwatchBtns = item.querySelectorAll('.bb-pdp__item-swatch');
-        itemSwatchBtns.forEach(function (btn) {
+        // Per-item color dropdown rows
+        var colorRows = item.querySelectorAll('.bb-pdp__color-dropdown-row');
+        colorRows.forEach(function (btn) {
           btn.addEventListener('click', function (e) {
             e.stopPropagation();
             self.handleItemSwatchClick(item, btn);
@@ -971,11 +971,11 @@
       var group = btn.closest('[data-item-option-group]');
 
       if (group) {
-        group.querySelectorAll('.bb-pdp__item-swatch').forEach(function (b) {
-          b.classList.remove('bb-pdp__item-swatch--active');
+        group.querySelectorAll('.bb-pdp__color-dropdown-row').forEach(function (b) {
+          b.classList.remove('bb-pdp__color-dropdown-row--active');
         });
       }
-      btn.classList.add('bb-pdp__item-swatch--active');
+      btn.classList.add('bb-pdp__color-dropdown-row--active');
 
       // Update dropdown trigger label and close panel
       var dropdown = btn.closest('[data-color-dropdown]');
