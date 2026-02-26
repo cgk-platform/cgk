@@ -680,19 +680,7 @@
 }
 
 .bb-pdp__size-pill--featured {
-  flex: 1 1 calc(50% - 5px);
-  min-height: 44px;
-  font-size: 16px;
   font-weight: 600;
-}
-.bb-pdp__size-pills--secondary {
-  gap: 6px;
-}
-.bb-pdp__size-pills--secondary .bb-pdp__size-pill {
-  min-width: 60px;
-  flex: 0 1 auto;
-  font-size: 12px;
-  min-height: 28px;
 }
 
 .bb-pdp__size-pill--active {
