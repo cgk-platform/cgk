@@ -909,6 +909,13 @@
     updateShippingBar(subtotalCents) {
       if (!this.freeShippingThreshold || this.freeShippingThreshold <= 0) return;
       var thresholdCents = this.freeShippingThreshold * 100;
+      console.log('[ShippingBar]', {
+        bundleTotal: subtotalCents,
+        existingCart: this.existingCartTotal,
+        combined: subtotalCents + (this.existingCartTotal || 0),
+        thresholdCents: thresholdCents,
+        unlocked: (subtotalCents + (this.existingCartTotal || 0)) >= thresholdCents
+      });
       if (thresholdCents <= 0) return;
       var totalWithCart = subtotalCents + (this.existingCartTotal || 0);
       var pct = Math.min(100, Math.round((totalWithCart / thresholdCents) * 100));
@@ -929,13 +936,21 @@
 
     _syncShippingEl(bar, fill, textEl, pct, unlocked, spanHtml) {
       if (!bar) return;
-      if (fill) fill.style.width = pct + '%';
+      if (fill) {
+        fill.style.display = 'block'; // Theme hides empty divs via div:empty { display:none }
+        fill.style.width = pct + '%';
+        fill.style.backgroundColor = unlocked ? '#43a047' : '#182f5c';
+      }
       var span = textEl ? textEl.querySelector('span') : null;
       if (span) span.innerHTML = spanHtml;
       if (unlocked) {
         bar.classList.add('bb-pdp__shipping-bar--unlocked');
+        bar.style.background = '#e8f5e9';
+        bar.style.borderColor = '#a5d6a7';
       } else {
         bar.classList.remove('bb-pdp__shipping-bar--unlocked');
+        bar.style.background = '#f8f8f8';
+        bar.style.borderColor = '';
       }
     }
 
@@ -1286,8 +1301,7 @@
       var previousTierIndex = this.previousTierIndex;
       this.previousTierIndex = activeTierIndex;
 
-      // Free gifts
-      this.manageFreeGifts(activeTierIndex, previousTierIndex);
+      // Free gifts handled in addToCart() — not during selection
 
       // Max items dim
       var self = this;
@@ -1692,41 +1706,32 @@
         var activeTierIndex = Core.getActiveTierIndex(this.tiers, tierValue);
         var giftVariantIds = Core.getTargetGiftIds(this.tiers, activeTierIndex);
 
+        // Resolve which gifts need a modal (multi-variant) vs auto-add (single-variant)
+        var multiVariantGifts = [];
+        var multiVariantGiftOriginalIds = {};
         if (giftVariantIds.length > 0 && !this.cartRedirect) {
-          var multiVariantGifts = await this.resolveGiftProducts(giftVariantIds, activeTierIndex);
-          if (multiVariantGifts.length > 0) {
-            // Show modal for user to pick options
-            var selectedGiftVariants = await this.showGiftSelectionModal(multiVariantGifts);
-            if (!selectedGiftVariants) {
-              // User cancelled
-              allCtas.forEach(function (b) { b.classList.remove('bb-pdp__cta--loading'); });
-              this.isLoading = false;
-              allCtas.forEach(function (b) { b.disabled = false; });
-              return;
-            }
-            // Add bundle items first (skip refresh — openCartDrawer will fetch fresh content)
-            await Core.addBundleToCart(items, { skipRefresh: true });
-            // Add selected gift variants
-            for (var gi = 0; gi < selectedGiftVariants.length; gi++) {
-              var gift = selectedGiftVariants[gi];
-              await Core.addFreeGiftToCart(gift.variantId, bundleId, bundleName, gift.minItems, { skipRefresh: true });
-              self.activeFreeGifts.set(String(gift.variantId), true);
-            }
-            Core.openCartDrawer();
-            allCtas.forEach(function (b) {
-              b.textContent = 'Added to Cart!';
-              b.classList.remove('bb-pdp__cta--loading');
-              b.classList.add('bb-pdp__cta--success');
-            });
-            setTimeout(function () {
-              allCtas.forEach(function (b) { b.classList.remove('bb-pdp__cta--success'); });
-              self.recalculate();
-            }, 2000);
-            return;
+          multiVariantGifts = await this.resolveGiftProducts(giftVariantIds, activeTierIndex);
+          for (var mvi = 0; mvi < multiVariantGifts.length; mvi++) {
+            multiVariantGiftOriginalIds[String(multiVariantGifts[mvi].originalVariantId)] = true;
           }
         }
 
-        await Core.addBundleToCart(items, { skipRefresh: !this.cartRedirect });
+        // If multi-variant gifts exist, show selection modal before adding anything
+        var selectedGiftVariants = [];
+        if (multiVariantGifts.length > 0) {
+          var modalResult = await this.showGiftSelectionModal(multiVariantGifts);
+          if (!modalResult) {
+            // User cancelled
+            allCtas.forEach(function (b) { b.classList.remove('bb-pdp__cta--loading'); });
+            this.isLoading = false;
+            allCtas.forEach(function (b) { b.disabled = false; });
+            return;
+          }
+          selectedGiftVariants = modalResult;
+        }
+
+        // 1. Add bundle items (always skipRefresh — cart drawer renders once at the end)
+        await Core.addBundleToCart(items, { skipRefresh: true });
 
         if (this.cartRedirect) {
           this.isRedirecting = true;
@@ -1734,7 +1739,23 @@
           return;
         }
 
-        // Open cart drawer with fresh content
+        // 2. Add multi-variant gifts (user-selected from modal)
+        for (var gi = 0; gi < selectedGiftVariants.length; gi++) {
+          var gift = selectedGiftVariants[gi];
+          await Core.addFreeGiftToCart(gift.variantId, bundleId, bundleName, gift.minItems, { skipRefresh: true });
+          self.activeFreeGifts.set(String(gift.variantId), true);
+        }
+
+        // 3. Add single-variant gifts (auto-add, no modal needed)
+        for (var si = 0; si < giftVariantIds.length; si++) {
+          var giftId = giftVariantIds[si];
+          if (multiVariantGiftOriginalIds[String(giftId)]) continue; // handled by modal
+          var minItems = self._getMinItemsForGift(giftId);
+          var result = await Core.addFreeGiftToCart(giftId, bundleId, bundleName, minItems, { skipRefresh: true });
+          if (result && result.added) self.activeFreeGifts.set(String(giftId), true);
+        }
+
+        // 4. Single cart drawer render — no competing refreshCartUI calls
         Core.openCartDrawer();
 
         allCtas.forEach(function (b) {

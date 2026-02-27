@@ -214,24 +214,63 @@
 
   /**
    * Open Dawn's cart drawer with fresh section data.
-   * Uses cart-drawer's renderContents() which updates content AND opens the drawer.
+   * Manually updates #CartDrawer innerHTML then calls .open() —
+   * avoids renderContents() which has an is-empty class bug that blanks the drawer.
    */
   BundleCore.openCartDrawer = function () {
     var cartDrawer = document.querySelector('cart-drawer');
-    if (!cartDrawer || typeof cartDrawer.renderContents !== 'function') return;
+    if (!cartDrawer) return;
     var root = BundleCore.routeRoot();
     // Small delay to ensure cart/add.js has fully propagated before fetching sections
     setTimeout(function () {
       fetch(root + '?sections=cart-drawer,cart-icon-bubble', { credentials: 'same-origin' })
         .then(function (res) { return res.ok ? res.json() : null; })
         .then(function (sections) {
-          if (sections) cartDrawer.renderContents({ id: null, sections: sections });
+          if (!sections) return;
+          var parser = new DOMParser();
+
+          // Update #CartDrawer content
+          if (sections['cart-drawer']) {
+            var drawerTarget = document.getElementById('CartDrawer');
+            if (drawerTarget) {
+              var drawerDoc = parser.parseFromString(sections['cart-drawer'], 'text/html');
+              var drawerContent = drawerDoc.getElementById('CartDrawer');
+              if (drawerContent) drawerTarget.innerHTML = drawerContent.innerHTML;
+            }
+          }
+
+          // Update cart icon bubble
+          if (sections['cart-icon-bubble']) {
+            var bubbleTarget = document.getElementById('cart-icon-bubble');
+            if (bubbleTarget) {
+              var bubbleDoc = parser.parseFromString(sections['cart-icon-bubble'], 'text/html');
+              var bubbleContent = bubbleDoc.querySelector('.shopify-section');
+              if (bubbleContent) bubbleTarget.innerHTML = bubbleContent.innerHTML;
+            }
+          }
+
+          // Remove is-empty from both <cart-drawer> and .drawer__inner
+          // (Dawn only removes it from .drawer__inner in renderContents, causing trapFocus crash)
+          cartDrawer.classList.remove('is-empty');
+          var drawerInner = cartDrawer.querySelector('.drawer__inner');
+          if (drawerInner) drawerInner.classList.remove('is-empty');
+          var cartDrawerItems = cartDrawer.querySelector('cart-drawer-items');
+          if (cartDrawerItems) cartDrawerItems.classList.remove('is-empty');
+
+          // Re-attach overlay close handler (innerHTML replacement removes old listeners)
+          var overlay = cartDrawer.querySelector('#CartDrawer-Overlay');
+          if (overlay) overlay.addEventListener('click', function () { cartDrawer.close(); });
+
+          // Open the drawer
+          if (typeof cartDrawer.open === 'function') {
+            cartDrawer.open();
+          }
         })
         .then(function () {
           // Decorate gift items after drawer renders
           setTimeout(function () { BundleCore.decorateCartGifts(); }, 200);
         })
-        .catch(function () { /* silent */ });
+        .catch(function (err) { console.error('[BundleCore] openCartDrawer error:', err); });
     }, 300);
   };
 

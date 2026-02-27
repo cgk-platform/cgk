@@ -12,7 +12,8 @@
           "id": "gid://shopify/ProductVariant/100"
         },
         "bundleId": null,
-        "isFreeGift": null
+        "isFreeGift": null,
+        "giftMinItems": null
       }
     ]
   },

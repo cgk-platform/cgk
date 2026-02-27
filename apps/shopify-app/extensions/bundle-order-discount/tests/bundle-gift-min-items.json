@@ -11,7 +11,7 @@
           "__typename": "ProductVariant",
           "id": "gid://shopify/ProductVariant/100"
         },
-        "bundleId": { "value": "block-abc123" },
+        "bundleId": { "value": "shopify-block-unknown" },
         "isFreeGift": null,
         "giftMinItems": null
       },
@@ -19,15 +19,15 @@
         "id": "gid://shopify/CartLine/2",
         "quantity": 1,
         "cost": {
-          "subtotalAmount": { "amount": "39.99" }
+          "subtotalAmount": { "amount": "14.99" }
         },
         "merchandise": {
           "__typename": "ProductVariant",
-          "id": "gid://shopify/ProductVariant/200"
+          "id": "gid://shopify/ProductVariant/400"
         },
-        "bundleId": { "value": "block-abc123" },
-        "isFreeGift": null,
-        "giftMinItems": null
+        "bundleId": { "value": "shopify-block-unknown" },
+        "isFreeGift": { "value": "true" },
+        "giftMinItems": { "value": "2" }
       }
     ]
   },
@@ -39,10 +39,7 @@
             "bundleId": "block-abc123",
             "discountType": "percentage",
             "tiers": [
-              { "count": 2, "discount": 10.0 },
-              { "count": 3, "discount": 15.0 },
-              { "count": 4, "discount": 20.0 },
-              { "count": 5, "discount": 25.0 }
+              { "count": 2, "discount": 10.0 }
             ],
             "freeGiftVariantIds": []
           }

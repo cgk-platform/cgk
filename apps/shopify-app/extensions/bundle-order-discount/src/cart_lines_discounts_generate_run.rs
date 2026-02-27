@@ -91,189 +91,217 @@ fn cart_lines_discounts_generate_run(
     let mut all_candidates: Vec<schema::ProductDiscountCandidate> = Vec::new();
 
     for (bundle_id, lines) in &bundle_groups {
-        // Find the config for this bundle
-        let bundle_config = config.bundles.iter().find(|b| b.bundle_id == *bundle_id);
-        let bundle_config = match bundle_config {
-            Some(c) => c,
-            None => continue,
-        };
-
-        // Count qualifying items (exclude free gifts)
+        // Count qualifying items (exclude free gifts) — needed for both paths
         let qualifying_count: i32 = lines
             .iter()
             .filter(|line| !is_free_gift(line))
             .map(|line| *line.quantity())
             .sum();
 
-        // Find the highest qualifying tier INDEX for cumulative gift logic
-        let active_tier_index = bundle_config
-            .tiers
-            .iter()
-            .enumerate()
-            .filter(|(_, t)| qualifying_count >= t.count)
-            .max_by(|(_, a), (_, b)| a.count.cmp(&b.count))
-            .map(|(i, _)| i);
+        // Find the config for this bundle
+        let bundle_config = config.bundles.iter().find(|b| b.bundle_id == *bundle_id);
 
-        // Collect unlocked gift variant IDs (cumulative from tiers 0..=active)
-        let unlocked_gift_ids: std::collections::HashSet<String> = match active_tier_index {
-            Some(idx) => {
-                let mut ids = std::collections::HashSet::new();
-                let mut has_tier_level_gifts = false;
-                for i in 0..=idx {
-                    if let Some(ref tier_gifts) = bundle_config.tiers[i].free_gift_variant_ids {
-                        if !tier_gifts.is_empty() {
-                            has_tier_level_gifts = true;
-                            for gid in tier_gifts {
-                                ids.insert(normalize_variant_id(gid));
+        match bundle_config {
+            None => {
+                // Bundle not in config — still discount free gifts if qualifying items exist
+                for line in lines.iter() {
+                    if !is_free_gift(line) {
+                        continue;
+                    }
+                    // Use _bundle_gift_min_items for validation (default 1)
+                    let min_items = get_gift_min_items(line).unwrap_or(1);
+                    if qualifying_count >= min_items {
+                        all_candidates.push(schema::ProductDiscountCandidate {
+                            targets: vec![schema::ProductDiscountCandidateTarget::CartLine(
+                                schema::CartLineTarget {
+                                    id: line.id().clone(),
+                                    quantity: Some(1),
+                                },
+                            )],
+                            message: Some("Free gift".to_string()),
+                            value: schema::ProductDiscountCandidateValue::Percentage(
+                                schema::Percentage {
+                                    value: Decimal(100.0),
+                                },
+                            ),
+                            associated_discount_code: None,
+                        });
+                    }
+                }
+                continue;
+            }
+            Some(bundle_config) => {
+                // Find the highest qualifying tier INDEX for cumulative gift logic
+                let active_tier_index = bundle_config
+                    .tiers
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, t)| qualifying_count >= t.count)
+                    .max_by(|(_, a), (_, b)| a.count.cmp(&b.count))
+                    .map(|(i, _)| i);
+
+                // Collect unlocked gift variant IDs (cumulative from tiers 0..=active)
+                let unlocked_gift_ids: std::collections::HashSet<String> = match active_tier_index {
+                    Some(idx) => {
+                        let mut ids = std::collections::HashSet::new();
+                        let mut has_tier_level_gifts = false;
+                        for i in 0..=idx {
+                            if let Some(ref tier_gifts) = bundle_config.tiers[i].free_gift_variant_ids {
+                                if !tier_gifts.is_empty() {
+                                    has_tier_level_gifts = true;
+                                    for gid in tier_gifts {
+                                        ids.insert(normalize_variant_id(gid));
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-                // Backwards compat: if no tier-level gifts, use bundle-level gifts
-                if !has_tier_level_gifts {
-                    if let Some(ref bundle_gifts) = bundle_config.free_gift_variant_ids {
-                        for gid in bundle_gifts {
-                            ids.insert(normalize_variant_id(gid));
+                        // Backwards compat: if no tier-level gifts, use bundle-level gifts
+                        if !has_tier_level_gifts {
+                            if let Some(ref bundle_gifts) = bundle_config.free_gift_variant_ids {
+                                for gid in bundle_gifts {
+                                    ids.insert(normalize_variant_id(gid));
+                                }
+                            }
                         }
+                        ids
                     }
-                }
-                ids
-            }
-            None => std::collections::HashSet::new(),
-        };
-
-        // Process free gift lines: only discount if variant is unlocked by current tier
-        // and cap at quantity 1 per gift line
-        for line in lines.iter() {
-            if !is_free_gift(line) {
-                continue;
-            }
-            let variant_id = get_variant_id(line);
-            let is_unlocked = match variant_id {
-                Some(ref vid) => unlocked_gift_ids.contains(vid),
-                None => false,
-            };
-            // Legacy fallback: if no gift IDs configured at all, allow any gift
-            // when there's an active tier
-            let should_discount = if unlocked_gift_ids.is_empty() && active_tier_index.is_some() {
-                true
-            } else {
-                is_unlocked
-            };
-
-            if should_discount {
-                all_candidates.push(schema::ProductDiscountCandidate {
-                    targets: vec![schema::ProductDiscountCandidateTarget::CartLine(
-                        schema::CartLineTarget {
-                            id: line.id().clone(),
-                            quantity: Some(1), // Cap: only 1 unit is free
-                        },
-                    )],
-                    message: Some("Free gift".to_string()),
-                    value: schema::ProductDiscountCandidateValue::Percentage(
-                        schema::Percentage {
-                            value: Decimal(100.0),
-                        },
-                    ),
-                    associated_discount_code: None,
-                });
-            }
-        }
-
-        // Apply bundle discount to qualifying lines (only if tier discount > 0)
-        let active_tier = active_tier_index.map(|i| &bundle_config.tiers[i]);
-        let active_tier = match active_tier {
-            Some(t) if t.discount > 0.0 => t,
-            _ => continue,
-        };
-
-        let is_percentage = bundle_config.discount_type == "percentage";
-
-        // Collect qualifying (non-gift) lines
-        let qualifying_lines: Vec<_> = lines.iter().filter(|l| !is_free_gift(l)).collect();
-
-        if qualifying_lines.is_empty() {
-            continue;
-        }
-
-        if is_percentage {
-            // Percentage discount on each bundle line
-            let pct = if active_tier.discount > 100.0 {
-                100.0
-            } else {
-                active_tier.discount
-            };
-            let message = format!("Bundle: {}% off", pct as i32);
-            for line in &qualifying_lines {
-                all_candidates.push(schema::ProductDiscountCandidate {
-                    targets: vec![schema::ProductDiscountCandidateTarget::CartLine(
-                        schema::CartLineTarget {
-                            id: line.id().clone(),
-                            quantity: None,
-                        },
-                    )],
-                    message: Some(message.clone()),
-                    value: schema::ProductDiscountCandidateValue::Percentage(
-                        schema::Percentage {
-                            value: Decimal(pct),
-                        },
-                    ),
-                    associated_discount_code: None,
-                });
-            }
-        } else {
-            // Fixed amount discount — distribute proportionally across qualifying lines
-            let bundle_subtotal: f64 = qualifying_lines
-                .iter()
-                .map(|l| l.cost().subtotal_amount().amount().as_f64())
-                .sum();
-
-            if bundle_subtotal <= 0.0 {
-                continue;
-            }
-
-            // Cap total discount at bundle subtotal
-            let total_discount = if active_tier.discount > bundle_subtotal {
-                bundle_subtotal
-            } else {
-                active_tier.discount
-            };
-
-            let message = format!("Bundle: ${:.2} off", active_tier.discount);
-            let mut allocated_sum = 0.0;
-
-            for (i, line) in qualifying_lines.iter().enumerate() {
-                let line_subtotal = line.cost().subtotal_amount().amount().as_f64();
-                let is_last = i == qualifying_lines.len() - 1;
-
-                // Proportional allocation; last line absorbs rounding remainder
-                let line_discount = if is_last {
-                    // Round to cents
-                    ((total_discount - allocated_sum) * 100.0).round() / 100.0
-                } else {
-                    let raw = total_discount * (line_subtotal / bundle_subtotal);
-                    (raw * 100.0).round() / 100.0
+                    None => std::collections::HashSet::new(),
                 };
 
-                allocated_sum += line_discount;
+                // Process free gift lines: only discount if variant is unlocked by current tier
+                // and cap at quantity 1 per gift line
+                for line in lines.iter() {
+                    if !is_free_gift(line) {
+                        continue;
+                    }
+                    let variant_id = get_variant_id(line);
+                    let is_unlocked = match variant_id {
+                        Some(ref vid) => unlocked_gift_ids.contains(vid),
+                        None => false,
+                    };
+                    // Legacy fallback: if no gift IDs configured at all, allow any gift
+                    // when there's an active tier
+                    let should_discount = if unlocked_gift_ids.is_empty() && active_tier_index.is_some() {
+                        true
+                    } else {
+                        is_unlocked
+                    };
 
-                if line_discount > 0.0 {
-                    all_candidates.push(schema::ProductDiscountCandidate {
-                        targets: vec![schema::ProductDiscountCandidateTarget::CartLine(
-                            schema::CartLineTarget {
-                                id: line.id().clone(),
-                                quantity: None,
-                            },
-                        )],
-                        message: Some(message.clone()),
-                        value: schema::ProductDiscountCandidateValue::FixedAmount(
-                            schema::ProductDiscountCandidateFixedAmount {
-                                applies_to_each_item: Some(false),
-                                amount: Decimal(line_discount),
-                            },
-                        ),
-                        associated_discount_code: None,
-                    });
+                    if should_discount {
+                        all_candidates.push(schema::ProductDiscountCandidate {
+                            targets: vec![schema::ProductDiscountCandidateTarget::CartLine(
+                                schema::CartLineTarget {
+                                    id: line.id().clone(),
+                                    quantity: Some(1), // Cap: only 1 unit is free
+                                },
+                            )],
+                            message: Some("Free gift".to_string()),
+                            value: schema::ProductDiscountCandidateValue::Percentage(
+                                schema::Percentage {
+                                    value: Decimal(100.0),
+                                },
+                            ),
+                            associated_discount_code: None,
+                        });
+                    }
+                }
+
+                // Apply bundle discount to qualifying lines (only if tier discount > 0)
+                let active_tier = active_tier_index.map(|i| &bundle_config.tiers[i]);
+                let active_tier = match active_tier {
+                    Some(t) if t.discount > 0.0 => t,
+                    _ => continue,
+                };
+
+                let is_percentage = bundle_config.discount_type == "percentage";
+
+                // Collect qualifying (non-gift) lines
+                let qualifying_lines: Vec<_> = lines.iter().filter(|l| !is_free_gift(l)).collect();
+
+                if qualifying_lines.is_empty() {
+                    continue;
+                }
+
+                if is_percentage {
+                    // Percentage discount on each bundle line
+                    let pct = if active_tier.discount > 100.0 {
+                        100.0
+                    } else {
+                        active_tier.discount
+                    };
+                    let message = format!("Bundle: {}% off", pct as i32);
+                    for line in &qualifying_lines {
+                        all_candidates.push(schema::ProductDiscountCandidate {
+                            targets: vec![schema::ProductDiscountCandidateTarget::CartLine(
+                                schema::CartLineTarget {
+                                    id: line.id().clone(),
+                                    quantity: None,
+                                },
+                            )],
+                            message: Some(message.clone()),
+                            value: schema::ProductDiscountCandidateValue::Percentage(
+                                schema::Percentage {
+                                    value: Decimal(pct),
+                                },
+                            ),
+                            associated_discount_code: None,
+                        });
+                    }
+                } else {
+                    // Fixed amount discount — distribute proportionally across qualifying lines
+                    let bundle_subtotal: f64 = qualifying_lines
+                        .iter()
+                        .map(|l| l.cost().subtotal_amount().amount().as_f64())
+                        .sum();
+
+                    if bundle_subtotal <= 0.0 {
+                        continue;
+                    }
+
+                    // Cap total discount at bundle subtotal
+                    let total_discount = if active_tier.discount > bundle_subtotal {
+                        bundle_subtotal
+                    } else {
+                        active_tier.discount
+                    };
+
+                    let message = format!("Bundle: ${:.2} off", active_tier.discount);
+                    let mut allocated_sum = 0.0;
+
+                    for (i, line) in qualifying_lines.iter().enumerate() {
+                        let line_subtotal = line.cost().subtotal_amount().amount().as_f64();
+                        let is_last = i == qualifying_lines.len() - 1;
+
+                        // Proportional allocation; last line absorbs rounding remainder
+                        let line_discount = if is_last {
+                            // Round to cents
+                            ((total_discount - allocated_sum) * 100.0).round() / 100.0
+                        } else {
+                            let raw = total_discount * (line_subtotal / bundle_subtotal);
+                            (raw * 100.0).round() / 100.0
+                        };
+
+                        allocated_sum += line_discount;
+
+                        if line_discount > 0.0 {
+                            all_candidates.push(schema::ProductDiscountCandidate {
+                                targets: vec![schema::ProductDiscountCandidateTarget::CartLine(
+                                    schema::CartLineTarget {
+                                        id: line.id().clone(),
+                                        quantity: None,
+                                    },
+                                )],
+                                message: Some(message.clone()),
+                                value: schema::ProductDiscountCandidateValue::FixedAmount(
+                                    schema::ProductDiscountCandidateFixedAmount {
+                                        applies_to_each_item: Some(false),
+                                        amount: Decimal(line_discount),
+                                    },
+                                ),
+                                associated_discount_code: None,
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -301,6 +329,15 @@ fn is_free_gift(
         .and_then(|attr| attr.value())
         .map(|v| v == "true")
         .unwrap_or(false)
+}
+
+/// Reads the `_bundle_gift_min_items` attribute from a cart line.
+fn get_gift_min_items(
+    line: &schema::cart_lines_discounts_generate_run::input::cart::Lines,
+) -> Option<i32> {
+    line.gift_min_items()
+        .and_then(|attr| attr.value())
+        .and_then(|v| v.parse::<i32>().ok())
 }
 
 #[cfg(test)]
@@ -437,6 +474,40 @@ mod tests {
         } else {
             panic!("Expected ProductDiscountsAdd operation");
         }
+        Ok(())
+    }
+
+    #[test]
+    fn test_unconfigured_bundle_still_discounts_gift() -> Result<()> {
+        // Bundle ID "shopify-block-xyz789" doesn't match any config entry ("block-abc123")
+        // The free gift should still get 100% discount via the unconfigured-bundle fallback
+        let result = run_function_with_input(
+            cart_lines_discounts_generate_run,
+            include_str!("../tests/bundle-unconfigured-gift.json"),
+        )?;
+        assert_eq!(result.operations.len(), 1);
+        if let schema::CartOperation::ProductDiscountsAdd(ref op) = result.operations[0] {
+            assert_eq!(op.candidates.len(), 1, "Only the free gift should be discounted");
+            let gift = &op.candidates[0];
+            assert_eq!(gift.message.as_deref(), Some("Free gift"));
+            if let schema::ProductDiscountCandidateTarget::CartLine(ref target) = gift.targets[0] {
+                assert_eq!(target.quantity, Some(1));
+            }
+        } else {
+            panic!("Expected ProductDiscountsAdd operation");
+        }
+        Ok(())
+    }
+
+    #[test]
+    fn test_gift_min_items_below_threshold() -> Result<()> {
+        // 1 qualifying item, but free gift requires min 2 items (_bundle_gift_min_items: "2")
+        // Gift should NOT get a discount
+        let result = run_function_with_input(
+            cart_lines_discounts_generate_run,
+            include_str!("../tests/bundle-gift-min-items.json"),
+        )?;
+        assert!(result.operations.is_empty(), "Below min_items threshold: no discount");
         Ok(())
     }
 

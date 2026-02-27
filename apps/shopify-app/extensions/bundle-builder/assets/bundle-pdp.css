@@ -1229,6 +1229,7 @@
   overflow: hidden;
 }
 .bb-pdp__shipping-bar-fill {
+  display: block !important; /* Override theme div:empty { display:none } */
   height: 100%;
   min-width: 2px;
   border-radius: 4px;

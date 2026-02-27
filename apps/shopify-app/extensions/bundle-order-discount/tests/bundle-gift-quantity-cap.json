@@ -12,7 +12,8 @@
           "id": "gid://shopify/ProductVariant/100"
         },
         "bundleId": { "value": "block-abc123" },
-        "isFreeGift": null
+        "isFreeGift": null,
+        "giftMinItems": null
       },
       {
         "id": "gid://shopify/CartLine/2",
@@ -25,7 +26,8 @@
           "id": "gid://shopify/ProductVariant/200"
         },
         "bundleId": { "value": "block-abc123" },
-        "isFreeGift": null
+        "isFreeGift": null,
+        "giftMinItems": null
       },
       {
         "id": "gid://shopify/CartLine/4",
@@ -38,7 +40,8 @@
           "id": "gid://shopify/ProductVariant/400"
         },
         "bundleId": { "value": "block-abc123" },
-        "isFreeGift": { "value": "true" }
+        "isFreeGift": { "value": "true" },
+        "giftMinItems": null
       }
     ]
   },

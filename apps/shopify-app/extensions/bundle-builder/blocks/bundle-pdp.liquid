@@ -33,24 +33,21 @@
 [
   {%- assign tier_count = 0 -%}
   {%- if block.settings.tier_1_threshold > 0 -%}
-    {%- assign t1_gifts_raw = block.settings.tier_1_gift_variant_ids | default: '' -%}
-    {%- assign t1_gifts = t1_gifts_raw | split: ',' -%}
+    {%- assign t1_gifts = block.settings.tier_1_gift_products -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":{{ block.settings.tier_1_threshold }},"discount":0,"label":{{ block.settings.tier_1_label | default: '' | json }},"reward":{{ block.settings.tier_1_reward | default: '' | json }},"giftImage":{{ block.settings.tier_1_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_1_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t1_gifts_raw != blank -%}{%- for gid in t1_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}{{ gid | strip | json }}{%- endfor -%}{%- endif -%}]}
+    {"count":{{ block.settings.tier_1_threshold }},"discount":0,"label":{{ block.settings.tier_1_label | default: '' | json }},"reward":{{ block.settings.tier_1_reward | default: '' | json }},"giftImage":{% if t1_gifts != blank and t1_gifts.first.featured_image %}{{ t1_gifts.first.featured_image | image_url: width: 200 | json }}{% else %}{{ block.settings.tier_1_gift_image | default: '' | json }}{% endif %},"valueBadge":{{ block.settings.tier_1_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t1_gifts != blank -%}{%- for gp in t1_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}"{{ gp.selected_or_first_available_variant.id }}"{%- endfor -%}{%- endif -%}]}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.tier_2_threshold > 0 -%}
-    {%- assign t2_gifts_raw = block.settings.tier_2_gift_variant_ids | default: '' -%}
-    {%- assign t2_gifts = t2_gifts_raw | split: ',' -%}
+    {%- assign t2_gifts = block.settings.tier_2_gift_products -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":{{ block.settings.tier_2_threshold }},"discount":0,"label":{{ block.settings.tier_2_label | default: '' | json }},"reward":{{ block.settings.tier_2_reward | default: '' | json }},"giftImage":{{ block.settings.tier_2_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_2_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t2_gifts_raw != blank -%}{%- for gid in t2_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}{{ gid | strip | json }}{%- endfor -%}{%- endif -%}]}
+    {"count":{{ block.settings.tier_2_threshold }},"discount":0,"label":{{ block.settings.tier_2_label | default: '' | json }},"reward":{{ block.settings.tier_2_reward | default: '' | json }},"giftImage":{% if t2_gifts != blank and t2_gifts.first.featured_image %}{{ t2_gifts.first.featured_image | image_url: width: 200 | json }}{% else %}{{ block.settings.tier_2_gift_image | default: '' | json }}{% endif %},"valueBadge":{{ block.settings.tier_2_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t2_gifts != blank -%}{%- for gp in t2_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}"{{ gp.selected_or_first_available_variant.id }}"{%- endfor -%}{%- endif -%}]}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
   {%- if block.settings.tier_3_threshold > 0 -%}
-    {%- assign t3_gifts_raw = block.settings.tier_3_gift_variant_ids | default: '' -%}
-    {%- assign t3_gifts = t3_gifts_raw | split: ',' -%}
+    {%- assign t3_gifts = block.settings.tier_3_gift_products -%}
     {%- if tier_count > 0 -%},{%- endif -%}
-    {"count":{{ block.settings.tier_3_threshold }},"discount":0,"label":{{ block.settings.tier_3_label | default: '' | json }},"reward":{{ block.settings.tier_3_reward | default: '' | json }},"giftImage":{{ block.settings.tier_3_gift_image | default: '' | json }},"valueBadge":{{ block.settings.tier_3_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t3_gifts_raw != blank -%}{%- for gid in t3_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}{{ gid | strip | json }}{%- endfor -%}{%- endif -%}]}
+    {"count":{{ block.settings.tier_3_threshold }},"discount":0,"label":{{ block.settings.tier_3_label | default: '' | json }},"reward":{{ block.settings.tier_3_reward | default: '' | json }},"giftImage":{% if t3_gifts != blank and t3_gifts.first.featured_image %}{{ t3_gifts.first.featured_image | image_url: width: 200 | json }}{% else %}{{ block.settings.tier_3_gift_image | default: '' | json }}{% endif %},"valueBadge":{{ block.settings.tier_3_value_badge | default: '' | json }},"freeGiftVariantIds":[{%- if t3_gifts != blank -%}{%- for gp in t3_gifts -%}{%- if forloop.index > 1 -%},{%- endif -%}"{{ gp.selected_or_first_available_variant.id }}"{%- endfor -%}{%- endif -%}]}
     {%- assign tier_count = tier_count | plus: 1 -%}
   {%- endif -%}
 ]
@@ -864,7 +861,7 @@
       "type": "range",
       "id": "free_shipping_threshold",
       "label": "Free shipping threshold ($)",
-      "min": 0, "max": 200, "step": 5, "default": 50,
+      "min": 0, "max": 500, "step": 5, "default": 50,
       "info": "Shows a shipping progress bar above the CTA. 0 to disable."
     },
     {
@@ -898,11 +895,11 @@
       "default": "$18 VALUE"
     },
     {
-      "type": "text",
-      "id": "tier_1_gift_variant_ids",
-      "label": "Tier 1 free gift variant IDs",
-      "default": "44670184783941",
-      "info": "2 Pillowcase Set — Queen/Standard White"
+      "type": "product_list",
+      "id": "tier_1_gift_products",
+      "label": "Tier 1 free gift products",
+      "limit": 5,
+      "info": "Select products to add as free gifts when this tier is unlocked"
     },
     {
       "type": "range",
@@ -934,11 +931,11 @@
       "default": "$60 VALUE"
     },
     {
-      "type": "text",
-      "id": "tier_2_gift_variant_ids",
-      "label": "Tier 2 free gift variant IDs",
-      "default": "44670158831685,44670158864453",
-      "info": "2x Bed Pillow Basic — Standard + Queen White"
+      "type": "product_list",
+      "id": "tier_2_gift_products",
+      "label": "Tier 2 free gift products",
+      "limit": 5,
+      "info": "Select products to add as free gifts when this tier is unlocked"
     },
     {
       "type": "range",
@@ -970,10 +967,11 @@
       "default": "$25 VALUE"
     },
     {
-      "type": "text",
-      "id": "tier_3_gift_variant_ids",
-      "label": "Tier 3 free gift variant IDs",
-      "info": "Leave blank if reward is handled outside cart (e.g. gift card email)"
+      "type": "product_list",
+      "id": "tier_3_gift_products",
+      "label": "Tier 3 free gift products",
+      "limit": 5,
+      "info": "Select products to add as free gifts (leave empty if reward is handled outside cart)"
     },
     {
       "type": "range",

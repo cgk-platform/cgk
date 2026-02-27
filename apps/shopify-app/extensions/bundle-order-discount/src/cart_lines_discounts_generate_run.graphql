@@ -20,6 +20,9 @@ query Input {
       isFreeGift: attribute(key: "_bundle_free_gift") {
         value
       }
+      giftMinItems: attribute(key: "_bundle_gift_min_items") {
+        value
+      }
     }
   }
   discount {
