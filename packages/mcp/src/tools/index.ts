@@ -10,8 +10,10 @@
  * - Content: Brand documents, creative ideas (12 tools)
  * - Creators: Directory, projects, payouts, communications (18 tools)
  * - System: Health, config, notifications, users, audit, cache (20 tools)
+ * - Schema: Database introspection, migration validation (5 tools)
+ * - Jobs: Job event discovery, payload validation (4 tools)
  *
- * Total: ~84 tools
+ * Total: ~93 tools
  *
  * @ai-pattern mcp-tools
  */
@@ -165,6 +167,37 @@ export {
 } from './system'
 
 // =============================================================================
+// Schema Tools
+// =============================================================================
+
+export {
+  // Tool definitions
+  schemaTools,
+  schemaToolNames,
+  // Individual tools
+  describeTableTool,
+  listTablesTool,
+  checkForeignKeyCompatibilityTool,
+  validateMigrationSQLTool,
+  getIdTypeReferenceTool,
+} from './schema'
+
+// =============================================================================
+// Job Discovery Tools
+// =============================================================================
+
+export {
+  // Tool definitions
+  jobTools,
+  jobToolNames,
+  // Individual tools
+  listJobEventsTool,
+  getJobEventSchemaTool,
+  validateJobPayloadTool,
+  getJobCategoriesTool,
+} from './jobs'
+
+// =============================================================================
 // Tool Categories (for registry)
 // =============================================================================
 
@@ -173,6 +206,8 @@ import { commerceTools } from './commerce'
 import { contentTools } from './content'
 import { creatorTools } from './creators'
 import { systemTools } from './system'
+import { schemaTools } from './schema'
+import { jobTools } from './jobs'
 import type { ToolDefinition } from '../tools'
 
 /**
@@ -184,6 +219,8 @@ export const toolCategories = {
   content: contentTools,
   creators: creatorTools,
   system: systemTools,
+  schema: schemaTools,
+  jobs: jobTools,
 } as const
 
 /**
@@ -423,6 +460,23 @@ export const toolAnnotations: Record<string, ToolAnnotations> = {
   create_creative_idea: { destructiveHint: false, requiresAuth: true },
   update_creative_idea: { destructiveHint: true, requiresAuth: true },
   delete_creative_idea: { destructiveHint: true, requiresAuth: true },
+
+  // Schema Tools
+  describe_table: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  list_tables: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  check_foreign_key_compatibility: {
+    readOnlyHint: true,
+    idempotentHint: true,
+    requiresAuth: true,
+  },
+  validate_migration_sql: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_id_type_reference: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+
+  // Job Discovery Tools
+  list_job_events: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_job_event_schema: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  validate_job_payload: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
+  get_job_categories: { readOnlyHint: true, idempotentHint: true, requiresAuth: true },
 }
 
 /**
