@@ -4,6 +4,26 @@
 
 ---
 
+## 🚨 MANDATORY: Always Enter Plan Mode First
+
+**CRITICAL REQUIREMENT**: At the start of EVERY Claude session, you MUST enter plan mode before doing any implementation work.
+
+**Exceptions** (when plan mode is NOT required):
+- Simple research/exploration tasks (reading files, searching code, answering questions)
+- Trivial single-line fixes (typos, obvious bugs)
+- Tasks where the user explicitly says "skip planning"
+
+**For ALL other work** (features, refactors, multi-file changes):
+1. Use the `EnterPlanMode` tool immediately
+2. Explore the codebase thoroughly
+3. Design your approach
+4. Get user approval via `ExitPlanMode`
+5. Then implement
+
+**Why this matters**: Planning prevents wasted effort, ensures alignment with architecture, and catches issues before code is written.
+
+---
+
 ## CRITICAL: Master Execution Guide
 
 **Before starting ANY work, read the Master Execution Guide:**
