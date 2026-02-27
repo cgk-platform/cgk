@@ -1,0 +1,15 @@
+{
+  "name": "meliusly-figma-audit",
+  "version": "1.0.0",
+  "description": "Figma audit and extraction tool for Meliusly storefront - ensures pixel-perfect implementation",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [
+    "figma",
+    "audit",
+    "meliusly",
+    "design-to-code"
+  ],
+  "author": "CGK Platform",
+  "license": "MIT"
+}

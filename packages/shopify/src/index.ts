@@ -155,3 +155,18 @@ export {
   unregisterWebhooks,
   type WebhookHandler,
 } from './oauth'
+
+// Tenant resolution - Multi-tenant shop-to-tenant mapping
+export {
+  getOrganizationIdForShop,
+  recordShopInstallation,
+  recordShopUninstallation,
+  reactivateShopInstallation,
+  suspendShopInstallation,
+  getShopInstallation,
+  getOrganizationShops,
+  isShopActive,
+  listAllInstallations,
+  type ShopInstallation,
+  type RecordInstallationParams,
+} from './app/tenant-resolution'
