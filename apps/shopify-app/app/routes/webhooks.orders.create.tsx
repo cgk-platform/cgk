@@ -107,17 +107,36 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     `[BundleWebhook] Order #${order.order_number}: found ${bundleGroups.length} bundle(s)`
   )
 
+  // Resolve tenant from shop domain (multi-tenant support)
+  const { getOrganizationIdForShop } = await import('@cgk-platform/shopify')
+  const { sql } = await import('@cgk-platform/db')
+
+  const organizationId = await getOrganizationIdForShop(shop)
+
+  if (!organizationId) {
+    console.warn(`[BundleWebhook] Shop ${shop} not registered with any tenant — skipping`)
+    return new Response()
+  }
+
+  // Get tenant slug from organization
+  const orgResult = await sql`
+    SELECT slug FROM public.organizations WHERE id = ${organizationId} LIMIT 1
+  `
+
+  const tenantSlug = orgResult.rows[0]?.slug as string | undefined
+
+  if (!tenantSlug) {
+    console.warn(`[BundleWebhook] Organization ${organizationId} not found — skipping`)
+    return new Response()
+  }
+
   // Post bundle order data to CGK platform admin API
   const platformApiUrl = process.env.CGK_PLATFORM_API_URL
   const platformApiKey = process.env.CGK_PLATFORM_API_KEY
-  // TODO: For multi-tenant support, replace with dynamic tenant detection
-  // from admin.session.shop → organizations.shopify_store_domain lookup.
-  // Current model: one Shopify app instance per tenant with CGK_TENANT_SLUG env var.
-  const tenantSlug = process.env.CGK_TENANT_SLUG
 
-  if (!platformApiUrl || !platformApiKey || !tenantSlug) {
+  if (!platformApiUrl || !platformApiKey) {
     console.warn(
-      '[BundleWebhook] Missing CGK_PLATFORM_API_URL, CGK_PLATFORM_API_KEY, or CGK_TENANT_SLUG — skipping platform sync'
+      '[BundleWebhook] Missing CGK_PLATFORM_API_URL or CGK_PLATFORM_API_KEY — skipping platform sync'
     )
     return new Response()
   }

@@ -105,6 +105,9 @@ export async function getOrganizationIdForShop(shop: string): Promise<string | n
  * })
  */
 export async function recordShopInstallation(params: RecordInstallationParams): Promise<void> {
+  // Convert scopes array to PostgreSQL array literal
+  const scopesArrayLiteral = `{${params.scopes.join(',')}}`
+
   await sql`
     INSERT INTO public.shopify_app_installations (
       shop,
@@ -117,7 +120,7 @@ export async function recordShopInstallation(params: RecordInstallationParams): 
     ) VALUES (
       ${params.shop},
       ${params.organizationId},
-      ${params.scopes},
+      ${scopesArrayLiteral}::TEXT[],
       ${params.shopifyAppId || null},
       ${params.primaryContactEmail || null},
       'active',

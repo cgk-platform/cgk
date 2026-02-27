@@ -252,11 +252,34 @@ export async function action({ request, params }: ActionFunctionArgs) {
   }
 
   // Sync bundle config to CGK platform DB (best-effort, non-blocking)
+  // Resolve tenant from shop domain (multi-tenant support)
+  const { session } = await authenticate.admin(request)
+  const { getOrganizationIdForShop } = await import('@cgk-platform/shopify')
+  const { sql: dbSql } = await import('@cgk-platform/db')
+
+  const organizationId = await getOrganizationIdForShop(session.shop)
+
+  if (!organizationId) {
+    console.warn(`[BundleSync] Shop ${session.shop} not registered with any tenant — skipping platform sync`)
+    return json({ saved: true, bundleTitle: data.title })
+  }
+
+  // Get tenant slug from organization
+  const orgResult = await dbSql`
+    SELECT slug FROM public.organizations WHERE id = ${organizationId} LIMIT 1
+  `
+
+  const tenantSlug = orgResult.rows[0]?.slug as string | undefined
+
+  if (!tenantSlug) {
+    console.warn(`[BundleSync] Organization ${organizationId} not found — skipping platform sync`)
+    return json({ saved: true, bundleTitle: data.title })
+  }
+
   const platformApiUrl = process.env.CGK_PLATFORM_API_URL
   const platformApiKey = process.env.CGK_PLATFORM_API_KEY
-  const tenantSlug = process.env.CGK_TENANT_SLUG
 
-  if (platformApiUrl && platformApiKey && tenantSlug) {
+  if (platformApiUrl && platformApiKey) {
     const bundle = data.bundle
     const platformPayload = {
       bundle_id: bundle.bundleId,

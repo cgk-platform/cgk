@@ -7,6 +7,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   console.log(`Received ${topic} webhook for ${shop}`);
 
+  // Record app uninstallation in public schema (multi-tenant tracking)
+  const { recordShopUninstallation } = await import('@cgk-platform/shopify')
+  await recordShopUninstallation(shop)
+
+  // Clean up local Shopify app session
   if (session) {
     await db.session.deleteMany({ where: { shop } });
   }

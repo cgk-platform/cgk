@@ -184,7 +184,7 @@ export async function handleOAuthCallback(
   // Convert scopes array to PostgreSQL array literal
   const scopesArrayLiteral = `{${scopes.join(',')}}`
 
-  // Store the connection
+  // Store the connection in tenant schema
   const apiVersion = getApiVersion()
 
   await withTenant(tenantId, async () => {
@@ -219,6 +219,16 @@ export async function handleOAuthCallback(
         status = 'active',
         updated_at = NOW()
     `
+  })
+
+  // MULTI-TENANT: Record installation in public schema for shop-to-tenant resolution
+  // This enables dynamic tenant routing (one app serves all tenants)
+  const { recordShopInstallation } = await import('../app/tenant-resolution.js')
+  await recordShopInstallation({
+    shop,
+    organizationId: tenantId,
+    scopes,
+    shopifyAppId: null, // Shopify doesn't provide this in OAuth response
   })
 
   // Clean up OAuth state
