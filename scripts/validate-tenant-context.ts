@@ -41,24 +41,32 @@ interface ScanResult {
   }
 }
 
-async function scanFiles(targetPath: string, verbose: boolean): Promise<ScanResult> {
+async function scanFiles(targetPaths: string[], verbose: boolean): Promise<ScanResult> {
   console.log('🔍 Scanning for tenant isolation violations...\n')
 
-  // Find all TypeScript/JavaScript files
-  const files = await glob('**/*.{ts,tsx,js,jsx}', {
-    cwd: targetPath,
-    ignore: [
-      'node_modules/**',
-      'dist/**',
-      '.next/**',
-      'build/**',
-      'coverage/**',
-      '**/*.test.{ts,tsx,js,jsx}',
-      '**/*.spec.{ts,tsx,js,jsx}',
-    ],
-    absolute: true,
-    nodir: true, // Only files, no directories
-  })
+  let files: string[]
+
+  // If specific files provided (lint-staged mode), use them directly
+  if (targetPaths.length > 0 && targetPaths[0] !== '.') {
+    files = targetPaths.filter((f) => /\.(ts|tsx|js|jsx)$/.test(f))
+  } else {
+    // Otherwise, glob for all TypeScript/JavaScript files
+    const searchPath = targetPaths[0] || '.'
+    files = await glob('**/*.{ts,tsx,js,jsx}', {
+      cwd: searchPath,
+      ignore: [
+        'node_modules/**',
+        'dist/**',
+        '.next/**',
+        'build/**',
+        'coverage/**',
+        '**/*.test.{ts,tsx,js,jsx}',
+        '**/*.spec.{ts,tsx,js,jsx}',
+      ],
+      absolute: true,
+      nodir: true, // Only files, no directories
+    })
+  }
 
   const violations: Violation[] = []
   let filesScanned = 0
@@ -77,9 +85,17 @@ async function scanFiles(targetPath: string, verbose: boolean): Promise<ScanResu
       if (/await\s+sql`/.test(line) || /return\s+sql`/.test(line)) {
         // Check if withTenant is used in surrounding context (within 10 lines before)
         const contextStart = Math.max(0, idx - 10)
-        const contextLines = lines.slice(contextStart, idx + 1).join('\n')
+        const contextEnd = Math.min(lines.length, idx + 10)
+        const contextLines = lines.slice(contextStart, contextEnd).join('\n')
 
-        if (!/withTenant\s*\(/.test(contextLines)) {
+        // Skip if query explicitly uses public schema or withTenant is present
+        const hasWithTenant = /withTenant\s*\(/.test(contextLines)
+        const usesPublicSchema =
+          /FROM\s+public\.|JOIN\s+public\.|UPDATE\s+public\.|INSERT\s+INTO\s+public\./i.test(
+            contextLines
+          )
+
+        if (!hasWithTenant && !usesPublicSchema) {
           fileViolations.push({
             file,
             line: idx + 1,
@@ -178,9 +194,7 @@ async function scanFiles(targetPath: string, verbose: boolean): Promise<ScanResu
     )
 
     Object.entries(byRule).forEach(([rule, ruleViolations]) => {
-      console.log(
-        `\n  ${getRuleIcon(rule)} ${getRuleTitle(rule)} (${ruleViolations.length})`
-      )
+      console.log(`\n  ${getRuleIcon(rule)} ${getRuleTitle(rule)} (${ruleViolations.length})`)
       ruleViolations.forEach((v, i) => {
         if (verbose || i < 5) {
           const relativePath = v.file.replace(process.cwd(), '.')
@@ -196,9 +210,7 @@ async function scanFiles(targetPath: string, verbose: boolean): Promise<ScanResu
     })
 
     console.log('\n📝 Remediation:')
-    console.log(
-      '  1. Wrap SQL queries in withTenant(): withTenant(tenantId, () => sql`...`)'
-    )
+    console.log('  1. Wrap SQL queries in withTenant(): withTenant(tenantId, () => sql`...`)')
     console.log('  2. Use createTenantCache(tenantId) instead of direct cache access')
     console.log('  3. Include { tenantId } in all job payloads\n')
 
@@ -251,10 +263,13 @@ function getRuleTitle(rule: string): string {
 async function main() {
   const args = process.argv.slice(2)
   const verbose = args.includes('--verbose') || args.includes('-v')
-  const pathArg = args.find((arg) => !arg.startsWith('--'))
-  const targetPath = resolve(process.cwd(), pathArg || '.')
+  const pathArgs = args.filter((arg) => !arg.startsWith('--'))
 
-  const result = await scanFiles(targetPath, verbose)
+  // If no paths provided, scan current directory
+  const targetPaths =
+    pathArgs.length > 0 ? pathArgs.map((p) => resolve(process.cwd(), p)) : [process.cwd()]
+
+  const result = await scanFiles(targetPaths, verbose)
 
   process.exit(result.status === 'pass' ? 0 : 1)
 }

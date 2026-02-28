@@ -63,7 +63,11 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
+      "pnpm validate:tenant-isolation",
       "prettier --write"
+    ],
+    "packages/db/src/migrations/**/*.sql": [
+      "bash scripts/validate-migration.sh"
     ],
     "*.{md,json,yml,yaml}": [
       "prettier --write"

@@ -48,6 +48,11 @@ check_if_not_exists() {
   while IFS= read -r line; do
     ((line_num++))
 
+    # Skip comment lines
+    if echo "$line" | grep -qE '^\s*--'; then
+      continue
+    fi
+
     # Check CREATE TABLE without IF NOT EXISTS
     if echo "$line" | grep -qi "CREATE TABLE" && ! echo "$line" | grep -qi "IF NOT EXISTS"; then
       violations+=("$file:$line_num:critical:missing-if-not-exists:CREATE TABLE without IF NOT EXISTS:$line")
@@ -75,6 +80,11 @@ check_fk_type_mismatch() {
 
   while IFS= read -r line; do
     ((line_num++))
+
+    # Skip comment lines
+    if echo "$line" | grep -qE '^\s*--'; then
+      continue
+    fi
 
     # Check for REFERENCES public.users(id) with wrong type
     if echo "$line" | grep -qi "REFERENCES public.users(id)"; then
@@ -108,6 +118,11 @@ check_function_prefix() {
   while IFS= read -r line; do
     ((line_num++))
 
+    # Skip comment lines
+    if echo "$line" | grep -qE '^\s*--'; then
+      continue
+    fi
+
     # Check EXECUTE FUNCTION without public. prefix
     if echo "$line" | grep -qi "EXECUTE FUNCTION" && ! echo "$line" | grep -qi "EXECUTE FUNCTION public\."; then
       # Common functions that should have public. prefix
@@ -131,6 +146,11 @@ check_vector_prefix() {
 
   while IFS= read -r line; do
     ((line_num++))
+
+    # Skip comment lines
+    if echo "$line" | grep -qE '^\s*--'; then
+      continue
+    fi
 
     # Check for vector type without public. prefix
     if echo "$line" | grep -qiE "\svector\(|vector_cosine_ops" && ! echo "$line" | grep -qi "public\.vector"; then
