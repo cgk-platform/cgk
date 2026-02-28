@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       const orgsResult = await sqlClient`
         SELECT id, slug
         FROM public.organizations
-        WHERE status != 'deleted'
+        WHERE status IN ('active', 'onboarding', 'suspended')
         ORDER BY name ASC
       `
       orgs = orgsResult.rows.map((row: any) => ({

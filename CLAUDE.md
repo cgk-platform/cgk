@@ -159,6 +159,10 @@ vercel env pull .env.local --scope cgk-linens-88e79683
 2. **ALL apps already exist** except `meliusly-storefront` (to be created in Phase 1F)
 3. **ALWAYS use `--scope cgk-linens-88e79683`** with Vercel CLI commands
 4. When updating env vars, update for ALL environments: production, preview, development
+5. **NEVER deploy using Vercel CLI** - All apps are linked to GitHub and auto-deploy on push to main branch
+   - Use `git push origin main` to deploy changes
+   - Vercel automatically builds and deploys when commits are pushed
+   - Check deployment status at vercel.com dashboard, NOT via CLI commands
 
 ---
 

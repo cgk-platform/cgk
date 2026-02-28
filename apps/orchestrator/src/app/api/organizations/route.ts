@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         shopify_store_domain,
         created_at
       FROM public.organizations
-      WHERE status != 'deleted'
+      WHERE status IN ('active', 'onboarding', 'suspended')
       ORDER BY name ASC
       LIMIT ${limit} OFFSET ${offset}
     `
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     const countResult = await sql`
       SELECT COUNT(*) as count
       FROM public.organizations
-      WHERE status != 'deleted'
+      WHERE status IN ('active', 'onboarding', 'suspended')
     `
     const total = parseInt(countResult.rows[0]?.count || '0')
 
