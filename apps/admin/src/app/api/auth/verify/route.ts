@@ -47,8 +47,27 @@ export async function POST(request: Request) {
       return Response.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Get user organizations
-    const orgs = await getUserOrganizations(user.id)
+    // Get user organizations (handle super admins specially)
+    let orgs
+    if (user.role === 'super_admin') {
+      // Super admins get ALL organizations
+      const { sql } = await import('@cgk-platform/db')
+      const orgsResult = await sql`
+        SELECT id, slug
+        FROM public.organizations
+        WHERE status IN ('active', 'onboarding', 'suspended')
+        ORDER BY name ASC
+      `
+      orgs = orgsResult.rows.map((row: any) => ({
+        id: row.id as string,
+        slug: row.slug as string,
+        role: 'super_admin' as const,
+      }))
+    } else {
+      // Regular users get their memberships
+      orgs = await getUserOrganizations(user.id)
+    }
+
     if (orgs.length === 0) {
       return Response.json(
         { error: 'No organizations found for this account' },
