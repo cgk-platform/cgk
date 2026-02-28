@@ -57,7 +57,7 @@ export async function POST(
 
     // Create membership
     await sql`
-      INSERT INTO public.team_memberships (user_id, organization_id, role)
+      INSERT INTO public.user_organizations (user_id, organization_id, role)
       VALUES (${userId}, ${organizationId}, ${role})
     `
 
@@ -99,7 +99,7 @@ export async function DELETE(
 
     // Remove membership
     const result = await sql`
-      DELETE FROM public.team_memberships
+      DELETE FROM public.user_organizations
       WHERE user_id = ${userId} AND organization_id = ${organizationId}
       RETURNING id
     `

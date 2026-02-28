@@ -8,6 +8,12 @@ import { sql } from '@cgk-platform/db'
 
 export const dynamic = 'force-dynamic'
 
+// UUID validation helper
+function isValidUUID(value: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(value)
+}
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -318,6 +324,14 @@ async function logAudit(
   resourceId: string | null,
   request: Request
 ) {
+  // Validate UUIDs before casting
+  if (!isValidUUID(userId)) {
+    throw new Error('Invalid user ID format')
+  }
+  if (resourceId !== null && !isValidUUID(resourceId)) {
+    throw new Error('Invalid resource ID format')
+  }
+
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
              request.headers.get('x-real-ip') ||
              'unknown'

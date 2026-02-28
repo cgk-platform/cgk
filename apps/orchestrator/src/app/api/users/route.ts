@@ -70,9 +70,9 @@ export async function GET(request: Request) {
         u.last_login_at,
         u.created_at,
         u.is_super_admin,
-        COUNT(DISTINCT tm.organization_id) as tenant_count
+        COUNT(DISTINCT uo.organization_id) as tenant_count
       FROM public.users u
-      LEFT JOIN public.team_memberships tm ON u.id = tm.user_id
+      LEFT JOIN public.user_organizations uo ON u.id = uo.user_id
       ${whereClause}
       GROUP BY u.id
       ORDER BY u.created_at DESC
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
 
       // Check if already a member
       const existingMembership = await sql`
-        SELECT id FROM public.team_memberships
+        SELECT id FROM public.user_organizations
         WHERE user_id = ${userId} AND organization_id = ${organizationId}
       `
 
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
 
     // Add user to organization
     await sql`
-      INSERT INTO public.team_memberships (user_id, organization_id, role)
+      INSERT INTO public.user_organizations (user_id, organization_id, role)
       VALUES (${userId}, ${organizationId}, ${role})
     `
 
