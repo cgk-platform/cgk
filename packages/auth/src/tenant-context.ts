@@ -49,21 +49,50 @@ export async function switchTenantContext(
   sessionId: string,
   ipAddress?: string | null
 ): Promise<SwitchTenantResult> {
-  // Validate user has access to target tenant
-  const membershipResult = await sql`
-    SELECT
-      uo.role,
-      uo.is_default,
-      o.id,
-      o.slug,
-      o.name,
-      o.logo_url,
-      o.status
-    FROM public.user_organizations uo
-    JOIN public.organizations o ON o.id = uo.organization_id
-    WHERE uo.user_id = ${userId}
-      AND o.slug = ${targetTenantSlug}
+  // Get user email and role
+  const userResult = await sql`
+    SELECT email, role FROM public.users WHERE id = ${userId}
   `
+
+  if (userResult.rows.length === 0) {
+    throw new TenantAccessError('User not found')
+  }
+
+  const user = userResult.rows[0] as { email: string; role: UserRole }
+  const userEmail = user.email
+
+  // Validate user has access to target tenant
+  let membershipResult: { rows: Array<Record<string, unknown>> }
+
+  if (user.role === 'super_admin') {
+    // Super admins can access any active organization
+    membershipResult = await sql`
+      SELECT
+        o.id,
+        o.slug,
+        o.name,
+        o.settings->>'logo_url' as logo_url,
+        o.status
+      FROM public.organizations o
+      WHERE o.slug = ${targetTenantSlug}
+    `
+  } else {
+    // Regular users need membership
+    membershipResult = await sql`
+      SELECT
+        uo.role,
+        uo.is_default,
+        o.id,
+        o.slug,
+        o.name,
+        o.settings->>'logo_url' as logo_url,
+        o.status
+      FROM public.user_organizations uo
+      JOIN public.organizations o ON o.id = uo.organization_id
+      WHERE uo.user_id = ${userId}
+        AND o.slug = ${targetTenantSlug}
+    `
+  }
 
   if (membershipResult.rows.length === 0) {
     throw new TenantAccessError('User does not have access to this tenant')
@@ -76,45 +105,48 @@ export async function switchTenantContext(
     throw new TenantAccessError('Cannot switch to suspended or disabled tenant')
   }
 
-  // Get user email for JWT
-  const userResult = await sql`
-    SELECT email FROM public.users WHERE id = ${userId}
-  `
-
-  if (userResult.rows.length === 0) {
-    throw new TenantAccessError('User not found')
-  }
-
-  const userEmail = (userResult.rows[0] as Record<string, unknown>).email as string
-
   // Get all user's organizations for JWT
-  const orgsResult = await sql`
-    SELECT uo.role, o.id, o.slug
-    FROM public.user_organizations uo
-    JOIN public.organizations o ON o.id = uo.organization_id
-    WHERE uo.user_id = ${userId}
-      AND o.status = 'active'
-  `
+  let orgsResult: { rows: Array<Record<string, unknown>> }
+
+  if (user.role === 'super_admin') {
+    // Super admins get all organizations
+    orgsResult = await sql`
+      SELECT o.id, o.slug
+      FROM public.organizations o
+      WHERE o.status = 'active'
+    `
+  } else {
+    // Regular users get their memberships
+    orgsResult = await sql`
+      SELECT uo.role, o.id, o.slug
+      FROM public.user_organizations uo
+      JOIN public.organizations o ON o.id = uo.organization_id
+      WHERE uo.user_id = ${userId}
+        AND o.status = 'active'
+    `
+  }
 
   const orgs: OrgContext[] = orgsResult.rows.map((r) => ({
     id: (r as Record<string, unknown>).id as string,
     slug: (r as Record<string, unknown>).slug as string,
-    role: (r as Record<string, unknown>).role as UserRole,
+    role: user.role === 'super_admin' ? 'super_admin' : ((r as Record<string, unknown>).role as UserRole),
   }))
 
   const tenantId = row.id as string
-  const tenantRole = row.role as UserRole
+  const tenantRole = user.role === 'super_admin' ? 'super_admin' : (row.role as UserRole)
 
   // Update session organization
   await updateSessionOrganization(sessionId, tenantId)
 
-  // Update last_active_at for membership
-  await sql`
-    UPDATE public.user_organizations
-    SET last_active_at = NOW()
-    WHERE user_id = ${userId}
-      AND organization_id = ${tenantId}
-  `
+  // Update last_active_at for membership (only for regular users)
+  if (user.role !== 'super_admin') {
+    await sql`
+      UPDATE public.user_organizations
+      SET last_active_at = NOW()
+      WHERE user_id = ${userId}
+        AND organization_id = ${tenantId}
+    `
+  }
 
   // Create new JWT with updated context
   const token = await signJWT({
@@ -142,7 +174,7 @@ export async function switchTenantContext(
     name: row.name as string,
     logoUrl: (row.logo_url as string) || null,
     role: tenantRole,
-    isDefault: Boolean(row.is_default),
+    isDefault: user.role === 'super_admin' ? false : Boolean(row.is_default),
     lastActiveAt: null,
   }
 
@@ -156,12 +188,51 @@ export async function switchTenantContext(
  * @returns Array of tenant contexts
  */
 export async function getUserTenants(userId: string): Promise<TenantContext[]> {
+  // Fetch user to check if super admin
+  const userResult = await sql`
+    SELECT role FROM public.users WHERE id = ${userId}
+  `
+
+  if (userResult.rows.length === 0) {
+    return []
+  }
+
+  const user = userResult.rows[0] as { role: UserRole }
+
+  // Super admins get ALL organizations
+  if (user.role === 'super_admin') {
+    const orgsResult = await sql`
+      SELECT
+        o.id,
+        o.slug,
+        o.name,
+        o.settings->>'logo_url' as logo_url
+      FROM public.organizations o
+      WHERE o.status = 'active'
+      ORDER BY o.name ASC
+    `
+
+    return orgsResult.rows.map((row) => {
+      const r = row as Record<string, unknown>
+      return {
+        id: r.id as string,
+        slug: r.slug as string,
+        name: r.name as string,
+        logoUrl: (r.logo_url as string) || null,
+        role: 'super_admin' as UserRole,
+        isDefault: false,
+        lastActiveAt: null,
+      }
+    })
+  }
+
+  // Regular users get only their memberships
   const result = await sql`
     SELECT
       o.id,
       o.slug,
       o.name,
-      o.logo_url,
+      o.settings->>'logo_url' as logo_url,
       uo.role,
       uo.is_default,
       uo.last_active_at

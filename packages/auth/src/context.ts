@@ -234,6 +234,33 @@ export async function getUserById(userId: string): Promise<User | null> {
  * Get user's organization memberships
  */
 export async function getUserOrganizations(userId: string): Promise<OrgContext[]> {
+  // Fetch user to check if super admin
+  const userResult = await sql`
+    SELECT role FROM public.users WHERE id = ${userId}
+  `
+
+  if (userResult.rows.length === 0) {
+    return []
+  }
+
+  const user = userResult.rows[0] as { role: UserRole }
+
+  // Super admins get ALL organizations
+  if (user.role === 'super_admin') {
+    const orgsResult = await sql`
+      SELECT id, slug
+      FROM public.organizations
+      WHERE status IN ('active', 'onboarding', 'suspended')
+      ORDER BY name ASC
+    `
+    return orgsResult.rows.map((row) => ({
+      id: row.id as string,
+      slug: row.slug as string,
+      role: 'super_admin' as UserRole,
+    }))
+  }
+
+  // Regular users get only their memberships
   const result = await sql`
     SELECT uo.role, o.id, o.slug
     FROM public.user_organizations uo

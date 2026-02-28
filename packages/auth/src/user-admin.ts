@@ -318,10 +318,10 @@ export async function getUserWithMemberships(userId: string): Promise<UserWithMe
       o.id as tenant_id,
       o.name as tenant_name,
       o.slug as tenant_slug,
-      o.logo_url as tenant_logo_url,
+      o.settings->>'logo_url' as tenant_logo_url,
       uo.role,
       uo.created_at as joined_at,
-      o.is_active
+      o.status
     FROM public.user_organizations uo
     JOIN public.organizations o ON o.id = uo.organization_id
     WHERE uo.user_id = ${userId}
@@ -337,7 +337,7 @@ export async function getUserWithMemberships(userId: string): Promise<UserWithMe
       tenantLogoUrl: (r.tenant_logo_url as string) || null,
       role: r.role as string,
       joinedAt: new Date(r.joined_at as string),
-      isActive: r.is_active as boolean,
+      isActive: r.status === 'active',
     }
   })
 
