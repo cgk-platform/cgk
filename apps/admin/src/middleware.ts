@@ -27,19 +27,14 @@ const PUBLIC_PATHS = [
   '/api/feeds',
   '/api/surveys/submit',
   '/api/ab-tests/shipping-config',
-  // Shopify OAuth (Shopify redirects merchants here; app verifies HMAC internally)
-  '/api/admin/shopify-app/auth',
+  // Shopify OAuth callback (Shopify redirects here; app verifies HMAC internally)
+  // Note: /auth is NOT public - it's user-initiated and needs tenant context from JWT
   '/api/admin/shopify-app/callback',
   // CI pipeline uses its own API key auth (machine-to-machine)
   '/api/admin/competitor-intelligence',
 ]
 
-const STATIC_PATHS = [
-  '/_next',
-  '/favicon.ico',
-  '/robots.txt',
-  '/sitemap.xml',
-]
+const STATIC_PATHS = ['/_next', '/favicon.ico', '/robots.txt', '/sitemap.xml']
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl
@@ -166,9 +161,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 }
 
-async function resolveTenantFromHost(
-  host: string
-): Promise<{ id: string; slug: string } | null> {
+async function resolveTenantFromHost(host: string): Promise<{ id: string; slug: string } | null> {
   const hostname = host.split(':')[0] ?? ''
 
   // Check for custom domain match
@@ -207,7 +200,5 @@ async function resolveTenantFromHost(
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

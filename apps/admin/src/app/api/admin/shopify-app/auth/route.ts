@@ -3,11 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import {
-  initiateOAuth,
-  normalizeShopDomain,
-  ShopifyError,
-} from '@cgk-platform/shopify'
+import { initiateOAuth, normalizeShopDomain, ShopifyError } from '@cgk-platform/shopify'
 
 /**
  * GET /api/admin/shopify-app/auth
@@ -18,9 +14,34 @@ import {
 export async function GET(request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
+  const userId = headerList.get('x-user-id')
+  const userRole = headerList.get('x-user-role')
+
+  console.log('[shopify-oauth] GET /api/admin/shopify-app/auth', {
+    tenantSlug,
+    userId,
+    userRole,
+    hasAuthHeader: !!headerList.get('authorization'),
+  })
 
   if (!tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
+    console.error('[shopify-oauth] Missing tenant context', {
+      userId,
+      userRole,
+      availableHeaders: Object.fromEntries(headerList.entries()),
+    })
+    return NextResponse.json(
+      {
+        error: 'Tenant not found',
+        debug: {
+          userId,
+          userRole,
+          message:
+            'No tenant context found. Super admins must select a tenant before connecting Shopify.',
+        },
+      },
+      { status: 400 }
+    )
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
@@ -78,13 +99,36 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
+  const userId = headerList.get('x-user-id')
+  const userRole = headerList.get('x-user-role')
+
+  console.log('[shopify-oauth] POST /api/admin/shopify-app/auth', {
+    tenantSlug,
+    userId,
+    userRole,
+  })
 
   if (!tenantSlug) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
+    console.error('[shopify-oauth] Missing tenant context', {
+      userId,
+      userRole,
+    })
+    return NextResponse.json(
+      {
+        error: 'Tenant not found',
+        debug: {
+          userId,
+          userRole,
+          message:
+            'No tenant context found. Super admins must select a tenant before connecting Shopify.',
+        },
+      },
+      { status: 400 }
+    )
   }
 
   try {
-    const body = await request.json() as { shop?: string }
+    const body = (await request.json()) as { shop?: string }
     const { shop: shopDomain } = body
 
     if (!shopDomain) {
@@ -109,15 +153,9 @@ export async function POST(request: Request) {
     console.error('[shopify-oauth] Auth initiation error:', error)
 
     if (error instanceof ShopifyError) {
-      return NextResponse.json(
-        { error: error.message, code: error.code },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })
     }
 
-    return NextResponse.json(
-      { error: 'Failed to initiate OAuth' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to initiate OAuth' }, { status: 500 })
   }
 }
