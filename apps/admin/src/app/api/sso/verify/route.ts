@@ -86,11 +86,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Create session
-    const { session, token: sessionToken } = await createSession(
-      userId,
-      orgId || null,
-      request
-    )
+    const { session } = await createSession(userId, orgId || null, request)
 
     // Generate JWT
     const jwt = await signJWT({
