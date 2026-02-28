@@ -109,17 +109,17 @@ describe('selectVariantSync', () => {
 
     for (let i = 0; i < total; i++) {
       const variant = selectVariantSync(`user_${i}`, salt, variants)
-      counts[variant]++
+      counts[variant] = (counts[variant] ?? 0) + 1
     }
 
     // Control should be ~50% (allow 10% variance)
-    const controlPercentage = (counts.control / total) * 100
+    const controlPercentage = ((counts.control ?? 0) / total) * 100
     expect(controlPercentage).toBeGreaterThan(40)
     expect(controlPercentage).toBeLessThan(60)
 
     // v2 and v3 should each be ~25%
-    const v2Percentage = (counts.v2 / total) * 100
-    const v3Percentage = (counts.v3 / total) * 100
+    const v2Percentage = ((counts.v2 ?? 0) / total) * 100
+    const v3Percentage = ((counts.v3 ?? 0) / total) * 100
     expect(v2Percentage).toBeGreaterThan(15)
     expect(v2Percentage).toBeLessThan(35)
     expect(v3Percentage).toBeGreaterThan(15)

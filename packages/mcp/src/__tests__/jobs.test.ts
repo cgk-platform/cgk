@@ -86,7 +86,7 @@ describe('Job Discovery Tools', () => {
       )
 
       expect(filtered).toHaveLength(1)
-      expect(filtered[0].name).toBe('order.created')
+      expect(filtered[0]?.name).toBe('order.created')
     })
   })
 
@@ -478,7 +478,7 @@ describe('Job Discovery Tools', () => {
       )
 
       expect(found).toHaveLength(1)
-      expect(found[0].name).toBe('payout.requested')
+      expect(found[0]?.name).toBe('payout.requested')
     })
   })
 

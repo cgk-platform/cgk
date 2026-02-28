@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import {
   describeTableTool,
   listTablesTool,
@@ -321,8 +321,8 @@ describe('Schema Introspection Tools', () => {
   describe('Error Prevention Scenarios', () => {
     it('prevents UUID to TEXT foreign key error', () => {
       // Scenario: Adding FK from tenant table to public table
-      const sourceType = 'text' // tenant table column
-      const targetType = 'uuid' // public.users.id
+      const sourceType: string = 'text' // tenant table column
+      const targetType: string = 'uuid' // public.users.id
 
       const compatible = sourceType === targetType
       expect(compatible).toBe(false)
