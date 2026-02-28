@@ -1,9 +1,26 @@
 {
-  "extends": "@cgk-platform/typescript-config/library.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "declaration": true,
+    "declarationMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
     "outDir": "dist",
-    "rootDir": "src",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+    "rootDir": "src"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
