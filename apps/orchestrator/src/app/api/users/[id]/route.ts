@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 /**
  * GET /api/users/[id] - Get user details
  */
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuth(request)
 
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     // Get user with memberships
     const userResult = await sql`
@@ -33,11 +33,11 @@ export async function GET(request: Request, { params }: { params: { id: string }
       WHERE u.id = ${id}
     `
 
-    if (userResult.rows.length === 0) {
+    const user = userResult.rows[0]
+
+    if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
-
-    const user = userResult.rows[0]
 
     // Get memberships
     const membershipsResult = await sql`
@@ -84,7 +84,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 /**
  * PATCH /api/users/[id] - Update user
  */
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuth(request)
 
@@ -92,7 +92,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 })
     }
 
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const { name, status, isSuperAdmin } = body
 
@@ -154,7 +154,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 /**
  * DELETE /api/users/[id] - Delete user
  */
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await requireAuth(request)
 
@@ -162,7 +162,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     // Soft delete - set status to deleted
     const result = await sql`

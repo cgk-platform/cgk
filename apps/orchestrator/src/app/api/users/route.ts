@@ -134,10 +134,11 @@ export async function POST(request: Request) {
     `
 
     let userId: string
+    const existingUserRow = existingUser.rows[0]
 
-    if (existingUser.rows.length > 0) {
+    if (existingUserRow) {
       // User exists - just add to organization
-      userId = existingUser.rows[0].id as string
+      userId = existingUserRow.id as string
 
       // Check if already a member
       const existingMembership = await sql`

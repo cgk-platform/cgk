@@ -10,7 +10,7 @@ import {
   DialogTitle,
   Input,
   Label,
-  Select,
+  RadixSelect,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -147,7 +147,7 @@ export function CreateUserModal({ open, onOpenChange, onSuccess }: CreateUserMod
 
           <div className="space-y-2">
             <Label htmlFor="organization">Organization (Tenant) *</Label>
-            <Select
+            <RadixSelect
               value={formData.organizationId}
               onValueChange={(value) => setFormData({ ...formData, organizationId: value })}
               disabled={loading || loadingOrgs}
@@ -162,12 +162,12 @@ export function CreateUserModal({ open, onOpenChange, onSuccess }: CreateUserMod
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+            </RadixSelect>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select
+            <RadixSelect
               value={formData.role}
               onValueChange={(value) => setFormData({ ...formData, role: value })}
               disabled={loading}
@@ -180,7 +180,7 @@ export function CreateUserModal({ open, onOpenChange, onSuccess }: CreateUserMod
                 <SelectItem value="editor">Editor</SelectItem>
                 <SelectItem value="viewer">Viewer</SelectItem>
               </SelectContent>
-            </Select>
+            </RadixSelect>
           </div>
 
           <div className="flex items-center space-x-2">

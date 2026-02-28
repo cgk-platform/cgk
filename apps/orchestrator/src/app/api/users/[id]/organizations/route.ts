@@ -7,7 +7,10 @@ export const dynamic = 'force-dynamic'
 /**
  * POST /api/users/[id]/organizations - Add user to organization (tenant)
  */
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
     const auth = await requireAuth(request)
 
@@ -15,7 +18,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 })
     }
 
-    const { id: userId } = params
+    const { id: userId } = await params
     const body = await request.json()
     const { organizationId, role = 'viewer' } = body
 
@@ -72,11 +75,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
 }
 
 /**
- * DELETE /api/users/[id]/organizations/[orgId] - Remove user from organization
+ * DELETE /api/users/[id]/organizations - Remove user from organization
+ * Expects organizationId as query parameter
  */
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string; orgId: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const auth = await requireAuth(request)
@@ -85,7 +89,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Super admin access required' }, { status: 403 })
     }
 
-    const { id: userId } = params
+    const { id: userId } = await params
     const { searchParams } = new URL(request.url)
     const organizationId = searchParams.get('organizationId')
 
