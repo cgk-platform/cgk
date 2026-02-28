@@ -71,10 +71,24 @@ class EdgeContextStorage<T> {
     this.contextMap.set(sym, value)
 
     try {
-      return callback()
+      const result = callback()
+
+      // Handle async callbacks (Promises)
+      if (result instanceof Promise) {
+        return result.finally(() => {
+          this.contextMap.delete(sym)
+          this.currentSymbol = previousSymbol
+        }) as R
+      }
+
+      // Synchronous callbacks
+      return result
     } finally {
-      this.contextMap.delete(sym)
-      this.currentSymbol = previousSymbol
+      // Only cleanup for sync callbacks
+      if (!(callback() instanceof Promise)) {
+        this.contextMap.delete(sym)
+        this.currentSymbol = previousSymbol
+      }
     }
   }
 
