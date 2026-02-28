@@ -23,7 +23,7 @@ The `.claude/` directory contains three distinct types of development assets:
 
 ---
 
-## 1. Executable Skills (15 Total)
+## 1. Executable Skills (16 Total)
 
 Skills are organized by tier based on impact and frequency of use.
 
@@ -652,6 +652,47 @@ logger.error('Failed to create order', { error })
 **Time Saved**: 15-30 minutes per audit (prevent deployment issues)
 
 **Documentation**: [.claude/skills/vercel-config-auditor/README.md](./skills/vercel-config-auditor/README.md)
+
+---
+
+### 1.16 db-schema-inspector
+
+**Purpose**: Quick database schema inspection for production debugging (tenant schemas, table columns, migration status).
+
+**Invocation**:
+```bash
+/db-schema-inspector [--table <name>] [--column <name>] [--tenant <slug>] [--list-tenants] [--migration-status]
+
+# Examples
+/db-schema-inspector  # List all tenant schemas
+/db-schema-inspector --table orders  # Check orders table columns
+/db-schema-inspector --table orders --column total_cents  # Verify specific column exists
+/db-schema-inspector --migration-status  # Check applied migrations
+```
+
+**Key Features**:
+- ✅ Auto-finds DATABASE_URL from apps/.env.local files
+- ✅ Lists all tenant schemas (tenant_*)
+- ✅ Inspects table columns (name, type, nullable)
+- ✅ Verifies specific columns exist (e.g., total_cents vs total_amount)
+- ✅ Checks migration status (applied vs pending)
+- ✅ Fast production debugging (uses psql directly)
+
+**When to Use**:
+- Production errors about missing columns
+- Verifying migrations have been applied
+- Checking schema vs code mismatches
+- Quick production database inspection
+- Validating foreign key types (UUID vs TEXT)
+
+**Prerequisites**:
+- `psql` installed (`brew install postgresql`)
+- DATABASE_URL in apps/.env.local
+- Access to production database
+
+**Time Saved**: 5-15 minutes per schema verification (faster than manual SQL)
+
+**Documentation**: [.claude/skills/db-schema-inspector/README.md](./skills/db-schema-inspector/README.md)
 
 ---
 
