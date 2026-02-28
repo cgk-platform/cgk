@@ -129,7 +129,10 @@ export async function switchTenantContext(
   const orgs: OrgContext[] = orgsResult.rows.map((r) => ({
     id: (r as Record<string, unknown>).id as string,
     slug: (r as Record<string, unknown>).slug as string,
-    role: user.role === 'super_admin' ? 'super_admin' : ((r as Record<string, unknown>).role as UserRole),
+    role:
+      user.role === 'super_admin'
+        ? 'super_admin'
+        : ((r as Record<string, unknown>).role as UserRole),
   }))
 
   const tenantId = row.id as string
@@ -145,6 +148,13 @@ export async function switchTenantContext(
       SET last_active_at = NOW()
       WHERE user_id = ${userId}
         AND organization_id = ${tenantId}
+    `
+  } else {
+    // For super admins, save last_tenant_slug to super_admin_sessions
+    await sql`
+      UPDATE public.super_admin_sessions
+      SET last_tenant_slug = ${targetTenantSlug}
+      WHERE id = ${sessionId}
     `
   }
 
@@ -339,10 +349,7 @@ export async function getDefaultTenant(userId: string): Promise<TenantContext | 
  * @param userId - User ID
  * @param tenantId - Tenant ID
  */
-export async function updateMembershipActivity(
-  userId: string,
-  tenantId: string
-): Promise<void> {
+export async function updateMembershipActivity(userId: string, tenantId: string): Promise<void> {
   await sql`
     UPDATE public.user_organizations
     SET last_active_at = NOW()
@@ -373,6 +380,29 @@ export async function shouldShowWelcomeModal(userId: string): Promise<boolean> {
 
   // Show welcome modal if user has multiple tenants but no default set
   return tenantCount > 1 && defaultCount === 0
+}
+
+/**
+ * Get last-used tenant for super admin session
+ *
+ * @param sessionId - Super admin session ID
+ * @returns Last tenant slug or null
+ */
+export async function getLastTenantForSuperAdmin(sessionId: string): Promise<string | null> {
+  const result = await sql`
+    SELECT last_tenant_slug
+    FROM public.super_admin_sessions
+    WHERE id = ${sessionId}
+      AND last_tenant_slug IS NOT NULL
+    LIMIT 1
+  `
+
+  if (result.rows.length === 0) {
+    return null
+  }
+
+  const row = result.rows[0] as { last_tenant_slug: string | null }
+  return row.last_tenant_slug
 }
 
 /**

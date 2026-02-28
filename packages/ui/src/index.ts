@@ -17,13 +17,27 @@ export * from './tokens/animation'
 // Utilities
 // ============================================================================
 export { cn } from './utils/cn'
-export { formatCurrency, formatPercent, formatNumber, formatCompact, formatBytes } from './utils/format'
+export {
+  formatCurrency,
+  formatPercent,
+  formatNumber,
+  formatCompact,
+  formatBytes,
+} from './utils/format'
 
 // ============================================================================
 // Component Primitives
 // ============================================================================
 export { Button, buttonVariants, type ButtonProps } from './components/button'
-export { Card, CardHeader, CardContent, CardFooter, CardTitle, CardDescription, type CardProps } from './components/card'
+export {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  type CardProps,
+} from './components/card'
 export { Input, type InputProps } from './components/input'
 export { Label, type LabelProps } from './components/label'
 export { Select, SelectOption, selectVariants, type SelectProps } from './components/select'
@@ -59,7 +73,13 @@ export { Progress } from './components/progress'
 // ============================================================================
 // Feedback Components
 // ============================================================================
-export { Alert, AlertTitle, AlertDescription, alertVariants, type AlertProps } from './components/alert'
+export {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  alertVariants,
+  type AlertProps,
+} from './components/alert'
 export { Badge, badgeVariants, type BadgeProps } from './components/badge'
 export { Spinner, spinnerVariants, type SpinnerProps } from './components/spinner'
 export {
@@ -241,6 +261,15 @@ export {
   TenantSwitcher,
   type TenantSwitcherProps,
 } from './components/tenant-switcher'
+
+// Super Admin Tenant Selection
+export {
+  SuperAdminTenantSelector,
+  type SuperAdminTenantSelectorProps,
+  type SuperAdminTenant,
+} from './components/super-admin-tenant-selector'
+
+export { TenantContextBadge, type TenantContextBadgeProps } from './components/tenant-context-badge'
 
 // Types
 export type { VariantProps } from 'class-variance-authority'

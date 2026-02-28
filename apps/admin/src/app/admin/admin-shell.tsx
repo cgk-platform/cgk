@@ -42,23 +42,17 @@ export function AdminShell({ tenant, user, impersonationInfo, children }: AdminS
         </div>
 
         {/* Mobile navigation */}
-        <MobileNav
-          open={mobileNavOpen}
-          onClose={closeMobileNav}
-          tenant={tenant}
-          user={user}
-        />
+        <MobileNav open={mobileNavOpen} onClose={closeMobileNav} tenant={tenant} user={user} />
 
         {/* Main content */}
         <div className="flex flex-1 flex-col lg:pl-64">
           <Header
             tenantName={tenant.name}
+            userRole={user.role}
             onMenuToggle={() => setMobileNavOpen(true)}
           />
           <main className="flex-1 p-4 lg:p-6 xl:p-8">
-            <div className="mx-auto max-w-7xl animate-fade-up">
-              {children}
-            </div>
+            <div className="mx-auto max-w-7xl animate-fade-up">{children}</div>
           </main>
         </div>
       </div>

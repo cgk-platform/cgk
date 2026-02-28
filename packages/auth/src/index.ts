@@ -40,12 +40,7 @@ export {
 } from './cookies'
 
 // Auth middleware
-export {
-  authMiddleware,
-  composeMiddleware,
-  hasRole,
-  requireRole,
-} from './middleware'
+export { authMiddleware, composeMiddleware, hasRole, requireRole } from './middleware'
 
 // Context utilities
 export {
@@ -108,11 +103,7 @@ export {
   updateMemberRole,
 } from './team'
 
-export type {
-  TeamAuditEntry,
-  TeamInvitation,
-  TeamMember,
-} from './team'
+export type { TeamAuditEntry, TeamInvitation, TeamMember } from './team'
 
 // User Admin utilities (super admin only)
 export {
@@ -196,6 +187,7 @@ export type {
 // Tenant context switching
 export {
   getDefaultTenant,
+  getLastTenantForSuperAdmin,
   getUserTenants,
   setDefaultTenant,
   shouldShowWelcomeModal,
@@ -204,10 +196,7 @@ export {
   updateMembershipActivity,
 } from './tenant-context'
 
-export type {
-  SwitchTenantResult,
-  TenantContext,
-} from './tenant-context'
+export type { SwitchTenantResult, TenantContext } from './tenant-context'
 
 // Impersonation utilities
 export {
@@ -243,18 +232,9 @@ export {
 } from './feature-flags'
 
 // SSO Token Management
-export {
-  cleanupSSOTokens,
-  generateSSOToken,
-  validateSSOToken,
-} from './sso'
+export { cleanupSSOTokens, generateSSOToken, validateSSOToken } from './sso'
 
-export type {
-  GenerateSSOTokenParams,
-  SSOToken,
-  TargetApp,
-  ValidateSSOTokenResult,
-} from './sso'
+export type { GenerateSSOTokenParams, SSOToken, TargetApp, ValidateSSOTokenResult } from './sso'
 
 // Types
 export type {

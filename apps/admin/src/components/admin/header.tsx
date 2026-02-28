@@ -1,6 +1,11 @@
 'use client'
 
-import { SimpleBreadcrumbs, type BreadcrumbItemData } from '@cgk-platform/ui'
+import {
+  SimpleBreadcrumbs,
+  type BreadcrumbItemData,
+  SuperAdminTenantSelector,
+  TenantContextBadge,
+} from '@cgk-platform/ui'
 import { Menu, Search, Bell, Command } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -9,12 +14,15 @@ import { TenantSwitcher, useTenantOptional } from '@cgk-platform/ui'
 
 interface HeaderProps {
   tenantName: string
+  userRole: string
   onMenuToggle: () => void
 }
 
-export function Header({ tenantName, onMenuToggle }: HeaderProps) {
+export function Header({ tenantName, userRole, onMenuToggle }: HeaderProps) {
   const tenantContext = useTenantOptional()
   const hasMultipleTenants = tenantContext?.hasMultipleTenants ?? false
+  const currentTenant = tenantContext?.currentTenant
+  const isSuperAdmin = userRole === 'super_admin'
   const pathname = usePathname()
   const breadcrumbItems = buildBreadcrumbItems(pathname)
 
@@ -46,10 +54,12 @@ export function Header({ tenantName, onMenuToggle }: HeaderProps) {
         </h1>
       </div>
 
-      <div className="flex-1 hidden md:block" />
+      <div className="hidden flex-1 md:block" />
 
-      {/* Tenant switcher or static tenant name */}
-      {hasMultipleTenants ? (
+      {/* Super Admin Tenant Selector or Regular Tenant Switcher */}
+      {isSuperAdmin ? (
+        <SuperAdminTenantSelector currentTenantSlug={currentTenant?.slug || null} />
+      ) : hasMultipleTenants ? (
         <TenantSwitcher variant="compact" />
       ) : (
         <span className="hidden text-sm text-muted-foreground lg:block">{tenantName}</span>
@@ -73,6 +83,11 @@ export function Header({ tenantName, onMenuToggle }: HeaderProps) {
         {/* Notification dot - uncomment when notifications are implemented */}
         {/* <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-gold ring-2 ring-background" /> */}
       </button>
+
+      {/* Tenant Context Badge - Only shown for super admins with active context */}
+      {isSuperAdmin && currentTenant && (
+        <TenantContextBadge tenantName={currentTenant.name} tenantSlug={currentTenant.slug} />
+      )}
     </header>
   )
 }
@@ -133,7 +148,8 @@ function buildBreadcrumbItems(pathname: string): BreadcrumbItemData[] {
   for (let i = startIndex; i < segments.length; i++) {
     const segment = segments[i]!
     const href = '/' + segments.slice(0, i + 1).join('/')
-    const label = LABEL_MAP[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
+    const label =
+      LABEL_MAP[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
     items.push({ label, href })
   }
 
