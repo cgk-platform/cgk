@@ -47,12 +47,23 @@ const nextConfig = {
     'bcryptjs',
     'mux-node',
     '@mux/mux-node',
+    // Additional server-only packages (helps Webpack, less critical with Turbopack)
+    '@cgk-platform/communications',
+    '@cgk-platform/support',
+    '@cgk-platform/integrations',
+    '@cgk-platform/scheduling',
   ],
 
-  webpack: (config, { isServer, webpack }) => {
-    // Memory optimization: reduce parallelism to prevent OOM
-    config.parallelism = 1
+  experimental: {
+    // Reduces webpack memory usage by ~30%
+    webpackMemoryOptimizations: true,
+  },
 
+  // lucide-react is pre-optimized by default in Next.js 13.5+
+  // Add other heavy packages if needed
+  optimizePackageImports: ['date-fns'],
+
+  webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       // Client components transitively reach @slack/web-api through the chain:
       // video-card.tsx → @cgk-platform/video → integrations → jobs →

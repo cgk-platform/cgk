@@ -7,6 +7,7 @@ settings:
 overrides:
   '@types/react': ^19.0.0
   '@types/react-dom': ^19.0.0
+  lucide-react: 0.469.0
 
 importers:
 
@@ -124,7 +125,7 @@ importers:
         specifier: ^1.5.0
         version: 1.6.15
       lucide-react:
-        specifier: ^0.469.0
+        specifier: 0.469.0
         version: 0.469.0(react@19.2.4)
       next:
         specifier: ^15.2.0
@@ -194,8 +195,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       lucide-react:
-        specifier: ^0.468.0
-        version: 0.468.0(react@19.2.4)
+        specifier: 0.469.0
+        version: 0.469.0(react@19.2.4)
       next:
         specifier: ^15.2.0
         version: 15.5.12(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -291,7 +292,7 @@ importers:
         specifier: ^5.2.0
         version: 5.10.0
       lucide-react:
-        specifier: ^0.469.0
+        specifier: 0.469.0
         version: 0.469.0(react@19.2.4)
       next:
         specifier: ^15.2.0
@@ -388,7 +389,7 @@ importers:
         specifier: ^5.2.0
         version: 5.10.0
       lucide-react:
-        specifier: ^0.469.0
+        specifier: 0.469.0
         version: 0.469.0(react@19.2.4)
       nanoid:
         specifier: ^5.1.5
@@ -540,8 +541,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/video
       lucide-react:
-        specifier: ^0.468.0
-        version: 0.468.0(react@19.2.4)
+        specifier: 0.469.0
+        version: 0.469.0(react@19.2.4)
       next:
         specifier: ^15.2.0
         version: 15.5.12(@opentelemetry/api@1.9.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -713,7 +714,7 @@ importers:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.4)
       lucide-react:
-        specifier: ^0.469.0
+        specifier: 0.469.0
         version: 0.469.0(react@19.2.4)
       next:
         specifier: ^15.2.0
@@ -1782,8 +1783,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       lucide-react:
-        specifier: ^0.563.0
-        version: 0.563.0(react@19.2.4)
+        specifier: 0.469.0
+        version: 0.469.0(react@19.2.4)
       sonner:
         specifier: ^1.7.4
         version: 1.7.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -8597,18 +8598,8 @@ packages:
     resolution: {integrity: sha512-jumlc0BIUrS3qJGgIkWZsyfAM7NCWiBcCDhnd+3NNM5KbBmLTgHVfWBcg6W+rLUsIpzpERPsvwUP7CckAQSOoA==}
     engines: {node: '>=12'}
 
-  lucide-react@0.468.0:
-    resolution: {integrity: sha512-6koYRhnM2N0GGZIdXzSeiNwguv1gt/FAjZOiPl76roBi3xKEXa4WmfpxgQwTTL4KipXjefrnf3oV4IsYhi4JFA==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
-
   lucide-react@0.469.0:
     resolution: {integrity: sha512-28vvUnnKQ/dBwiCQtwJw7QauYnE7yd2Cyp4tTTJpvglX4EMpbflcdBgrgToX2j71B3YvugK/NH3BGUk+E/p/Fw==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
-  lucide-react@0.563.0:
-    resolution: {integrity: sha512-8dXPB2GI4dI8jV4MgUDGBeLdGk8ekfqVZ0BdLcrRzocGgG75ltNEmWS+gE7uokKF/0oSUuczNDT+g9hFJ23FkA==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -18715,15 +18706,7 @@ snapshots:
 
   lru-cache@7.18.3: {}
 
-  lucide-react@0.468.0(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-
   lucide-react@0.469.0(react@19.2.4):
-    dependencies:
-      react: 19.2.4
-
-  lucide-react@0.563.0(react@19.2.4):
     dependencies:
       react: 19.2.4
 
