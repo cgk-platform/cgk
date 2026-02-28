@@ -1,6 +1,6 @@
-import { sql } from '@vercel/postgres'
 import { requireAuth } from '@cgk-platform/auth'
 // import { sendEmail } from '@cgk-platform/communications' // TODO: Implement email sending via queue
+import { sql } from '@vercel/postgres'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'

@@ -1,5 +1,5 @@
-import { sql } from '@vercel/postgres'
 import { requireAuth } from '@cgk-platform/auth'
+import { sql } from '@vercel/postgres'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'

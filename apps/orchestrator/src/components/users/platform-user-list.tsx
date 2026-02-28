@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import Link from 'next/link'
 import { Button, Card, CardContent, CardHeader } from '@cgk-platform/ui'
+import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
 
 import { CreateUserButton } from './create-user-modal'
 import { UserAvatar } from './user-avatar'
