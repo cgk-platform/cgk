@@ -31,6 +31,7 @@ export default function BrandDetailPage() {
   const [brand, setBrand] = useState<BrandSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isGeneratingToken, setIsGeneratingToken] = useState(false)
 
   // Fetch brand details
   const fetchBrand = useCallback(async () => {
@@ -63,6 +64,49 @@ export default function BrandDetailPage() {
   useEffect(() => {
     fetchBrand()
   }, [fetchBrand])
+
+  // Generate SSO token and open app
+  const openAppWithSSO = async (
+    targetApp: 'admin' | 'storefront',
+    tenantSlug: string
+  ) => {
+    setIsGeneratingToken(true)
+    try {
+      // Generate SSO token
+      const response = await fetch('/api/sso/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ targetApp, tenantSlug }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to generate SSO token')
+      }
+
+      const data = (await response.json()) as { token: string }
+
+      // Construct SSO URL
+      const baseUrl =
+        targetApp === 'admin'
+          ? process.env.NEXT_PUBLIC_ADMIN_URL
+          : process.env.NEXT_PUBLIC_STOREFRONT_URL
+
+      if (!baseUrl) {
+        console.error(`${targetApp.toUpperCase()}_URL not configured`)
+        return
+      }
+
+      const ssoUrl = `${baseUrl}/api/sso/verify?token=${data.token}&redirect=/`
+
+      // Open in new tab
+      window.open(ssoUrl, '_blank')
+    } catch (err) {
+      console.error('Failed to generate SSO token:', err)
+      alert('Failed to open app. Please try again.')
+    } finally {
+      setIsGeneratingToken(false)
+    }
+  }
 
   if (isLoading) {
     return <BrandDetailSkeleton />
@@ -206,16 +250,8 @@ export default function BrandDetailPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                // Open admin portal for this brand
-                // In production, use custom domain or pass tenant context
-                const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL
-                if (!adminUrl) {
-                  console.error('NEXT_PUBLIC_ADMIN_URL not configured')
-                  return
-                }
-                window.open(`${adminUrl}?tenant=${brand.slug}`, '_blank')
-              }}
+              onClick={() => openAppWithSSO('admin', brand.slug)}
+              disabled={isGeneratingToken}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
               Open Admin
@@ -223,15 +259,8 @@ export default function BrandDetailPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                // Open storefront for this brand
-                const storefrontUrl = process.env.NEXT_PUBLIC_STOREFRONT_URL
-                if (!storefrontUrl) {
-                  console.error('NEXT_PUBLIC_STOREFRONT_URL not configured')
-                  return
-                }
-                window.open(`${storefrontUrl}?tenant=${brand.slug}`, '_blank')
-              }}
+              onClick={() => openAppWithSSO('storefront', brand.slug)}
+              disabled={isGeneratingToken}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
               Open Storefront

@@ -242,6 +242,20 @@ export {
   withFeatureFlag,
 } from './feature-flags'
 
+// SSO Token Management
+export {
+  cleanupSSOTokens,
+  generateSSOToken,
+  validateSSOToken,
+} from './sso'
+
+export type {
+  GenerateSSOTokenParams,
+  SSOToken,
+  TargetApp,
+  ValidateSSOTokenResult,
+} from './sso'
+
 // Types
 export type {
   AuthContext,
