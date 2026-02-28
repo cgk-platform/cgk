@@ -35,6 +35,7 @@ import { setupJobsCommand } from './commands/setup-jobs.js'
 import { setupCommand, setupDatabaseCommand } from './commands/setup.js'
 import { tenantExportCommand } from './commands/tenant-export.js'
 import { tenantImportCommand } from './commands/tenant-import.js'
+import { tenantHealthCommand } from './commands/tenant-health.js'
 import { createTenantCommand, listTenantsCommand } from './commands/tenant.js'
 import { updateCommand } from './commands/update.js'
 
@@ -59,6 +60,7 @@ program.addCommand(createTenantCommand)
 program.addCommand(listTenantsCommand)
 program.addCommand(tenantExportCommand)
 program.addCommand(tenantImportCommand)
+program.addCommand(tenantHealthCommand)
 program.addCommand(checkUpdatesCommand)
 program.addCommand(updateCommand)
 program.addCommand(changelogCommand)
