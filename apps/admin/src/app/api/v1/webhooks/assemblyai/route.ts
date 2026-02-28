@@ -23,7 +23,7 @@ import {
   getTranscriptionProvider,
   saveTranscriptionResult,
   failTranscription,
-} from '@cgk-platform/video'
+} from '@cgk-platform/video/server'
 
 interface AssemblyAIWebhookBody {
   transcript_id: string

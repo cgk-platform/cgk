@@ -9,6 +9,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    },
     "./transcription": {
       "types": "./dist/transcription/index.d.ts",
       "import": "./dist/transcription/index.js"
@@ -30,6 +34,7 @@
       "import": "./dist/player/index.js"
     }
   },
+  "sideEffects": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [

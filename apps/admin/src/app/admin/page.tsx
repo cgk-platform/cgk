@@ -75,7 +75,7 @@ async function getRevenueMetrics(): Promise<KpiData> {
   return withTenant(tenantSlug, async () => {
     const ordersResult = await sql`
       SELECT
-        COALESCE(SUM(CASE WHEN created_at >= date_trunc('month', NOW()) THEN total_amount ELSE 0 END), 0) as revenue_mtd,
+        COALESCE(SUM(CASE WHEN created_at >= date_trunc('month', NOW()) THEN total_cents ELSE 0 END), 0) as revenue_mtd,
         COUNT(CASE WHEN created_at >= CURRENT_DATE THEN 1 END) as orders_today
       FROM orders
     `

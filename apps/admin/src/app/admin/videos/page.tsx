@@ -7,7 +7,8 @@
  */
 
 import { withTenant } from '@cgk-platform/db'
-import { getAllFolders, getVideos, type VideoStatus } from '@cgk-platform/video'
+import { getAllFolders, getVideos } from '@cgk-platform/video/server'
+import type { VideoStatus } from '@cgk-platform/video'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 

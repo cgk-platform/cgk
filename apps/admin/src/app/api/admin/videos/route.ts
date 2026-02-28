@@ -12,7 +12,7 @@ import {
   getVideos,
   createVideo,
   createDirectUpload,
-} from '@cgk-platform/video'
+} from '@cgk-platform/video/server'
 import type { VideoStatus, CreateVideoInput } from '@cgk-platform/video'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'

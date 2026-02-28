@@ -3,6 +3,7 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
   entry: [
     'src/index.ts',
+    'src/server.ts',
     'src/transcription/index.ts',
     'src/ai/index.ts',
     'src/creator-tools/index.ts',
@@ -15,5 +16,5 @@ export default defineConfig({
   sourcemap: true,
   splitting: false,
   treeshake: true,
-  external: ['@cgk-platform/core', '@cgk-platform/db', '@anthropic-ai/sdk', '@mux/mux-node'],
+  external: ['@cgk-platform/core', '@cgk-platform/db', '@cgk-platform/integrations', '@anthropic-ai/sdk', '@mux/mux-node'],
 })

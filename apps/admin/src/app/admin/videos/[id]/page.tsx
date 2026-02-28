@@ -15,7 +15,7 @@ import { withTenant } from '@cgk-platform/db'
 import {
   getVideo,
   getVideoAnalytics,
-} from '@cgk-platform/video'
+} from '@cgk-platform/video/server'
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 import { ArrowLeft, Edit, Share2, Trash2 } from 'lucide-react'
 import { headers } from 'next/headers'

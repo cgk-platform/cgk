@@ -14,7 +14,7 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { withTenant, sql } from '@cgk-platform/db'
 import { sendJob } from '@cgk-platform/jobs'
-import { resetTranscription } from '@cgk-platform/video'
+import { resetTranscription } from '@cgk-platform/video/server'
 
 interface VideoRow {
   id: string

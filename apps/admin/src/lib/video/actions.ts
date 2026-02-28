@@ -12,10 +12,8 @@ import {
   updateFolder,
   deleteFolder,
   createDirectUpload,
-  type CreateVideoInput,
-  type UpdateVideoInput,
-  type CreateFolderInput,
-} from '@cgk-platform/video'
+} from '@cgk-platform/video/server'
+import type { CreateVideoInput, UpdateVideoInput, CreateFolderInput } from '@cgk-platform/video'
 import { headers } from 'next/headers'
 
 /**

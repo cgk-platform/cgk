@@ -18,8 +18,8 @@ import {
   parseWebhookPayload,
   processWebhookEvent,
   updateVideoStatus,
-  getThumbnailUrl,
-} from '@cgk-platform/video'
+} from '@cgk-platform/video/server'
+import { getThumbnailUrl } from '@cgk-platform/video'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {

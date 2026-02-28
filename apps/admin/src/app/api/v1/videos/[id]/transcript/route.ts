@@ -20,7 +20,7 @@ import {
   getCaptionContentType,
   getCaptionExtension,
   type CaptionFormat,
-} from '@cgk-platform/video'
+} from '@cgk-platform/video/server'
 
 export async function GET(
   request: Request,

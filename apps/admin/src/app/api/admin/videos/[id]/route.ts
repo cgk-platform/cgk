@@ -14,8 +14,8 @@ import {
   updateVideo,
   deleteVideo,
   deleteAsset,
-  type UpdateVideoInput,
-} from '@cgk-platform/video'
+} from '@cgk-platform/video/server'
+import type { UpdateVideoInput } from '@cgk-platform/video'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
