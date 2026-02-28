@@ -2,6 +2,7 @@ import { withTenant, sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { Suspense } from 'react'
 
+// Force rebuild to clear Vercel cache - 2026-02-28
 import { ActivityFeed, ActivityFeedSkeleton, type ActivityItem } from '@/components/admin/dashboard/activity-feed'
 import { Escalations, EscalationsSkeleton, type EscalationData } from '@/components/admin/dashboard/escalations'
 import { KpiCards, KpiCardsSkeleton, type KpiData } from '@/components/admin/dashboard/kpi-cards'
