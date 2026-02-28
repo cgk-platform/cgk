@@ -5,18 +5,17 @@
  * for cross-app authentication (orchestrator → admin/storefront)
  */
 
-import { NextRequest } from 'next/server'
-import { POST } from '../generate/route'
-
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-// Mock dependencies
 vi.mock('@cgk-platform/auth', () => ({
   generateSSOToken: vi.fn(),
   requireAuth: vi.fn(),
 }))
 
 import { generateSSOToken, requireAuth } from '@cgk-platform/auth'
+import { NextRequest } from 'next/server'
+
+import { POST } from '../generate/route'
 
 const mockGenerateSSOToken = vi.mocked(generateSSOToken)
 const mockRequireAuth = vi.mocked(requireAuth)
