@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { UserAvatar } from './user-avatar'
 import { UserSearchBar } from './user-search-bar'
 import { SuperAdminBadge, UserStatusBadge } from './user-status-badge'
+import { CreateUserButton } from './create-user-modal'
 
 type UserStatus = 'active' | 'disabled' | 'pending_verification' | 'invited' | 'all'
 
@@ -146,6 +147,7 @@ export function PlatformUserList() {
               {total} users across all tenants
             </p>
           </div>
+          <CreateUserButton onSuccess={fetchUsers} />
         </div>
 
         <div className="mt-4 flex flex-col gap-3 sm:flex-row">

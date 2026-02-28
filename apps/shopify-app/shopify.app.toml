@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "6bdb14a850b3220eaa2c8decb420bb8c"
+client_id = "6b75b94700f2422d53d5f4f920d76e45"
 name = "CGK Platform"
 application_url = "https://shopify.dev/apps/default-app-home"
 embedded = true
@@ -8,7 +8,7 @@ embedded = true
 [build]
 automatically_update_urls_on_dev = true
 include_config_on_deploy = true
-dev_store_url = "cgk-unlimited.myshopify.com"
+dev_store_url = "meliusly.myshopify.com"
 
 # Webhooks use 2026-04 for latest features. Extensions use 2026-01 (their own
 # api_version in each extension's shopify.extension.toml). This is intentional —
@@ -34,7 +34,11 @@ api_version = "2026-04"
   uri = "/webhooks/orders/updated"
 
 [access_scopes]
+# Admin API scopes for backend operations
 scopes = "write_pixels,read_customer_events,read_orders,write_orders,read_customers,write_customers,read_draft_orders,write_draft_orders,read_products,write_products,read_discounts,write_discounts,read_price_rules,write_price_rules,read_inventory,write_inventory,read_fulfillments,write_fulfillments,read_shipping,write_shipping,read_gift_cards,write_gift_cards,read_content,write_content,read_themes,read_locales,read_markets,read_reports,read_analytics,read_checkouts,write_checkouts,read_product_listings,read_publications,read_locations,read_merchant_managed_fulfillment_orders,write_merchant_managed_fulfillment_orders,read_third_party_fulfillment_orders,write_third_party_fulfillment_orders,read_assigned_fulfillment_orders,write_assigned_fulfillment_orders,read_files,write_files,read_delivery_customizations,write_delivery_customizations,read_cart_transforms,write_cart_transforms"
+
+# Storefront API scopes for headless storefront (public access)
+use_legacy_install_flow = false
 
 [auth]
 redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]

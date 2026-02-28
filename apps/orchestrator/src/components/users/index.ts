@@ -1,3 +1,4 @@
+export { CreateUserButton, CreateUserModal } from './create-user-modal'
 export { DisableUserModal } from './disable-user-modal'
 export { PlatformUserList } from './platform-user-list'
 export { UserActivityFeed } from './user-activity-feed'

@@ -118,6 +118,78 @@ npx @cgk-platform/cli doctor           # Check configuration
 
 ---
 
+## 🚨 CRITICAL: Shopify App Architecture (MUST READ)
+
+**SHOPIFY DEPRECATED CUSTOM APPS CREATED IN ADMIN** - As of 2024-2026, Shopify no longer allows creating "custom apps" directly in the Shopify Admin dashboard. This is a common source of confusion.
+
+### The ONLY Way to Create Shopify Apps Now:
+
+**Apps MUST be created in Shopify Partners Dashboard** (https://partners.shopify.com):
+1. Create app in Partners dashboard
+2. Deploy app to hosting (Vercel, etc.)
+3. Install app to stores via OAuth flow
+
+### CGK Platform Shopify App (Already Exists!)
+
+**CRITICAL**: We already have a Shopify app installed and working:
+- **App Name**: "CGK Platform"
+- **Location**: `apps/shopify-app/` (Remix app)
+- **Status**: Installed and active
+- **Shop**: meliusly.myshopify.com
+- **Multi-Tenant**: Uses `public.shopify_app_installations` for shop-to-tenant mapping
+
+### Admin API vs Storefront API (IMPORTANT DISTINCTION)
+
+| API Type | Purpose | Authentication | Usage |
+|----------|---------|----------------|-------|
+| **Admin API** | Backend operations (orders, webhooks, inventory) | OAuth access token (from app installation) | CGK Platform app ✅ HAS THIS |
+| **Storefront API** | Public product data for headless storefronts | Public Storefront Access Token | Need to CREATE using Admin API |
+
+### Getting Storefront Access Token (Use Existing App!)
+
+**DO NOT** try to create a new app in Shopify Admin - it won't work!
+
+**CORRECT APPROACH** - Use existing app's Admin API to create Storefront token:
+
+```typescript
+// Use Admin API mutation to create Storefront Access Token
+const mutation = `
+  mutation {
+    storefrontAccessTokenCreate(input: {
+      title: "Meliusly Headless Storefront"
+    }) {
+      storefrontAccessToken {
+        accessToken
+        title
+      }
+    }
+  }
+`
+```
+
+**Steps:**
+1. Use existing CGK Platform app's Admin API token (already in database)
+2. Call `storefrontAccessTokenCreate` GraphQL mutation
+3. Store resulting token in database
+4. Use for headless storefront product fetching
+
+### When User Asks to "Create an App in Shopify"
+
+**STOP** - Clarify what they actually need:
+- ❌ **New app in Partners?** - We already have CGK Platform app
+- ❌ **Custom app in Admin?** - Deprecated, doesn't exist anymore
+- ✅ **Storefront Access Token?** - Create via Admin API mutation using existing app
+- ✅ **New app for different purpose?** - Must go through Partners dashboard
+
+### References
+
+- Existing app config: `apps/shopify-app/shopify.app.toml`
+- Admin API client: `@cgk-platform/shopify` (createAdminClient)
+- Storefront API client: `@cgk-platform/shopify` (createStorefrontClient)
+- Multi-tenant resolution: `packages/shopify/src/app/tenant-resolution.ts`
+
+---
+
 ## Tech Stack (February 2026)
 
 | Core | Version | Notes |

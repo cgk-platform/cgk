@@ -18,3 +18,4 @@ target/
 extensions/*/target/
 Cargo.lock
 .env*.local
+.env.production
