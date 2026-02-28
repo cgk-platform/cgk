@@ -979,6 +979,60 @@ All portal apps MUST have:
 
 ## Environment Variables Strategy
 
+### Two-File Pattern (MANDATORY)
+
+**Every app MUST have both:**
+
+| File | Purpose | Git Status | Source of Truth |
+|------|---------|------------|-----------------|
+| `.env.example` | Documentation with placeholders | ✅ **Committed** | Template for new developers |
+| `.env.local` | Actual working values | ❌ **Gitignored** | Vercel (synced via `vercel env pull`) |
+
+**CRITICAL Rules:**
+1. **`.env.example`** - Documented placeholders, NO real secrets, committed to git
+2. **`.env.local`** - Real values, synced from Vercel, NEVER committed
+3. **`.env.production`** - **NEVER CREATE THIS FILE** - production vars only in Vercel
+
+### .env.example Format
+
+```bash
+# CGK Platform - App Name
+# =====================
+
+# ===================
+# DATABASE
+# ===================
+# Neon PostgreSQL connection (get from Vercel project settings)
+DATABASE_URL=postgresql://user:password@host/db?sslmode=require
+
+# ===================
+# AUTHENTICATION
+# ===================
+# JWT secret for token signing (generate with: openssl rand -hex 32)
+JWT_SECRET=your-64-character-hex-string-here
+
+# ===================
+# SHOPIFY (shopify-app only)
+# ===================
+# From Shopify Partners Dashboard -> Client credentials
+SHOPIFY_CLIENT_ID=your-client-id
+SHOPIFY_CLIENT_SECRET=shpss_your-secret-here
+
+# Token encryption key (generate with: openssl rand -hex 32)
+SHOPIFY_TOKEN_ENCRYPTION_KEY=your-64-character-hex-string
+
+# Webhook secret (same as SHOPIFY_CLIENT_SECRET)
+SHOPIFY_WEBHOOK_SECRET=shpss_your-secret-here
+```
+
+**Guidelines for .env.example:**
+- Add **clear comments** explaining what each var is for
+- Include **generation commands** for secrets (e.g., `openssl rand -hex 32`)
+- Use **descriptive placeholders** (e.g., `your-client-id` not `xxx`)
+- Group vars by **category** with headers (Database, Auth, Integrations, etc.)
+- Indicate **which apps need which vars** (e.g., "shopify-app only")
+- **Keep in sync** across all apps - update ALL .env.example files when adding new vars
+
 ### 🚨 CRITICAL: NEVER Create .env.production Files
 
 **RULE: Production environment variables ONLY exist in Vercel, NEVER in git.**
@@ -989,7 +1043,7 @@ touch .env.production
 echo "DATABASE_URL=..." > .env.production
 
 # ✅ CORRECT - Add to Vercel via CLI or dashboard
-vercel env add DATABASE_URL production
+vercel env add DATABASE_URL production --scope cgk-linens-88e79683
 # OR: Vercel Dashboard → Settings → Environment Variables
 ```
 
@@ -1033,21 +1087,36 @@ Next.js only loads env files from the directory where `next dev` runs (each app 
 
 ### Workflow (PRIORITY ORDER)
 
-**PRIORITY 1: Work with the user to set env vars properly**
-- Ask the user for the actual values
-- Help them add to Vercel using the CLI commands below
-- Pull to local with `pnpm env:pull`
+**When adding a NEW environment variable:**
 
-**PRIORITY 2: Document in `.env.example` as backup**
-- Add commented placeholders to `apps/<app>/.env.example` for any new vars
-- Include a comment explaining what the var is for
-- Keep all per-app `.env.example` files in sync
+1. **Get the actual value from user** - Don't proceed without it
+2. **Add to Vercel** (source of truth):
+   ```bash
+   cd apps/<app-name>
+   vercel env add VAR_NAME production --scope cgk-linens-88e79683
+   vercel env add VAR_NAME preview --scope cgk-linens-88e79683
+   vercel env add VAR_NAME development --scope cgk-linens-88e79683
+   ```
+3. **Pull to local** to update `.env.local`:
+   ```bash
+   cd apps/<app-name>
+   vercel env pull .env.local --scope cgk-linens-88e79683
+   ```
+4. **Document in `.env.example`** - CRITICAL:
+   ```bash
+   # Add to apps/<app-name>/.env.example
+   # ===== NEW SECTION (if needed) =====
+   # Description of what this var does and where to get it
+   VAR_NAME=placeholder-value-here
+   ```
+5. **Update ALL apps' .env.example files** if the var is shared (e.g., DATABASE_URL)
 
-**Production vars** (no prefix):
-1. Work with user to get the actual value
-2. Add to Vercel (source of truth) using CLI commands
-3. Run `pnpm env:pull` to sync to all apps
-4. Document in `apps/<app>/.env.example` with comment
+**CRITICAL**: `.env.example` files are for **future developers**. Always keep them:
+- ✅ Up to date with all required vars
+- ✅ Well-commented with clear explanations
+- ✅ Synced across apps (shared vars like DATABASE_URL)
+- ✅ Using placeholders, NEVER real secrets
+- ✅ Committed to git
 
 **Local-only vars** (`LOCAL_*`, `DEBUG_*`, `TEST_*`):
 1. Add directly to `apps/<app>/.env.development.local`
