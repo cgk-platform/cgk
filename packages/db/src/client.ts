@@ -85,6 +85,7 @@ function queryToTemplateArgs(
 export const sql: typeof vercelSql = new Proxy(vercelSql, {
   apply(_target, _thisArg, args: unknown[]) {
     const schema = tenantSchemaStore.getStore()
+    console.log('[SQL] Schema from context store:', schema || 'NONE - will query public schema!')
     if (schema) {
       const neonSql = getNeonSql()
       const strings = args[0] as TemplateStringsArray
