@@ -164,23 +164,50 @@ See `.claude/session-handoffs/` for 44 existing handoff examples.
 
 The platform has two types of Claude-invocable resources:
 
-### Executable Skills (User-Invocable)
+### Executable Skills (15 Total)
 
 Located in `.claude/skills/`, these have `index.js` and are invoked via `/skill-name`:
 
-| Skill | Purpose | Usage |
-|-------|---------|-------|
-| `/meliusly-figma-audit` | Audit Figma designs against CGK design system | Design consistency checks |
-| `/tenant-isolation-validator` | Validate tenant isolation patterns | Pre-commit validation |
-| `/sql-pattern-enforcer` | Enforce @vercel/postgres patterns | SQL query validation |
-| `/env-var-workflow` | Guided environment variable setup | Env var management |
-| `/plan-mode-enforcer` | Require planning for complex tasks | Workflow enforcement |
+#### Tier 1: Critical Automation (3 skills)
+| Skill | Purpose | Annual Time Saved |
+|-------|---------|-------------------|
+| `/api-route-scaffolder` | Generate Next.js API routes | 1,040-2,080 hrs |
+| `/deployment-readiness-checker` | Pre-deployment validation (9 checks) | 160-320 hrs |
+| `/encryption-keys-manager` | Automated key rotation | 16-40 hrs |
+
+#### Tier 2: Developer Experience (3 skills)
+| Skill | Purpose | Annual Time Saved |
+|-------|---------|-------------------|
+| `/tenant-provisioner` | Automated tenant onboarding | 45-90 min per tenant |
+| `/todo-tracker` | GitHub issue creation from TODOs | 30-60 min per sprint |
+| `/env-var-workflow` | Guided env var setup | 10-20 min per var |
+
+#### Tier 3: Quality & Maintenance (4 skills)
+| Skill | Purpose | Use Case |
+|-------|---------|----------|
+| `/type-cast-auditor` | Fix TypeScript cast patterns | Phase 8: 806 violations |
+| `/permission-auditor` | Validate auth patterns | Security audits |
+| `/structured-logging-converter` | Convert to structured logs | Phase 8: 707 console calls |
+| `/migration-impact-analyzer` | Analyze migration risks | Pre-deployment |
+
+#### Tier 4: Existing Skills (5 skills)
+| Skill | Purpose | Use Case |
+|-------|---------|----------|
+| `/meliusly-figma-audit` | Figma design validation | Storefront dev |
+| `/tenant-isolation-validator` | Tenant isolation patterns | Pre-commit |
+| `/sql-pattern-enforcer` | SQL pattern validation | Database code |
+| `/plan-mode-enforcer` | Require planning | Workflow enforcement |
+| `/vercel-config-auditor` | Env var consistency | Weekly audits |
 
 **Invocation Pattern**:
 ```typescript
 // Invoke via Skill tool
 Skill({ skill: 'tenant-isolation-validator', args: '--fix --path apps/admin' })
+Skill({ skill: 'api-route-scaffolder', args: 'orders --methods GET,POST' })
+Skill({ skill: 'deployment-readiness-checker', args: '--app admin' })
 ```
+
+**Full Documentation**: See [.claude/SKILL-REGISTRY.md](.claude/SKILL-REGISTRY.md) for comprehensive skill catalog.
 
 ### Knowledge Bases (Agent Reference Docs)
 

@@ -482,6 +482,55 @@ Read file_path="~/.claude/projects/-Users-holdenthemic-Documents-cgk/[session-id
 
 ---
 
+## Automated Context Monitoring
+
+**Warning Thresholds**:
+
+Claude Code CLI shows token usage after each turn (e.g., "Token usage: 101094/200000"). Agents should monitor this and take action at these thresholds:
+
+| Token Count | Warning Level | Action Required |
+|-------------|---------------|-----------------|
+| **120k** | ⚠️ Early Warning | Start planning handoff - you have ~15-20 turns left |
+| **140k** | ⚠️ Urgent Warning | Create handoff in next 1-2 turns - approaching limit |
+| **150k** | 🚨 Critical Limit | MUST create handoff before continuing work |
+| **180k** | 🔴 Hard Limit | Quality degradation begins - session MUST end |
+
+**Proactive Handoff Triggers**:
+
+At 120k tokens, agents should:
+1. Assess remaining work complexity
+2. If >5 turns estimated, create handoff now
+3. Otherwise, continue but monitor at every turn
+
+At 140k tokens, agents should:
+1. Complete current task
+2. Create handoff document immediately
+3. Do NOT start new tasks
+
+At 150k tokens, agents MUST:
+1. Stop all work immediately
+2. Create comprehensive handoff document
+3. End session (start fresh session for next work)
+
+**Example Warning Messages**:
+
+```
+Context usage: 122,000/200,000 tokens (61%)
+⚠️  Approaching context soft limit (150k). Consider creating handoff document if >5 turns of work remaining.
+
+Context usage: 142,000/200,000 tokens (71%)
+⚠️  URGENT: Near context limit. Create handoff in next 1-2 turns. Do not start new major tasks.
+
+Context usage: 151,000/200,000 tokens (75%)
+🚨 CRITICAL: Context limit exceeded. MUST create handoff and end session immediately.
+```
+
+**Implementation**:
+
+Agents monitor token usage shown by Claude Code CLI and proactively suggest handoffs when thresholds are reached. This prevents hitting the hard limit and ensures clean transitions.
+
+---
+
 ## Best Practices
 
 ### DO: Proactive Handoffs
@@ -490,6 +539,7 @@ Read file_path="~/.claude/projects/-Users-holdenthemic-Documents-cgk/[session-id
 ✅ **Summarize critical state** (env vars, schema changes, decisions)
 ✅ **List modified files** with line counts
 ✅ **Track costs** in every handoff
+✅ **Monitor token usage** after every turn (use CLI output)
 
 ### DON'T: Context Waste
 
@@ -497,6 +547,7 @@ Read file_path="~/.claude/projects/-Users-holdenthemic-Documents-cgk/[session-id
 ❌ **Don't continue session past 150k tokens** (quality degrades)
 ❌ **Don't switch agents without handoff** (context loss)
 ❌ **Don't ignore cost tracking** (budget overruns)
+❌ **Don't ignore token warnings** (creates rushed handoffs)
 
 ---
 

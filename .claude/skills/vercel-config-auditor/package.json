@@ -1,0 +1,19 @@
+{
+  "name": "@cgk-skills/vercel-config-auditor",
+  "version": "1.0.0",
+  "description": "Validates Vercel project configuration consistency",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": ["vercel", "configuration", "validation", "env-vars", "cgk"],
+  "author": "CGK Platform Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  }
+}

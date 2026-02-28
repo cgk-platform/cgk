@@ -221,6 +221,29 @@ Claude:
 
 **NEVER** skip this step for non-trivial work.
 
+### Auto-Invocation Pattern
+
+This skill is **proactively invoked** by Claude agents at the start of every session before implementation work begins. It is NOT optional.
+
+**CLAUDE.md Mandate** (lines 18-36):
+
+> **CRITICAL REQUIREMENT**: At the start of EVERY Claude session, you MUST enter plan mode before doing any implementation work.
+
+**Agent Workflow**:
+1. User provides request
+2. Agent analyzes request (or invokes `/plan-mode-enforcer` for complex requests)
+3. If plan required → invoke `EnterPlanMode` immediately
+4. If exempt → proceed with work (still read files before editing)
+
+**Integration with CLAUDE.md**:
+
+This skill enforces the planning workflow mandated in CLAUDE.md. It provides:
+- **Complexity analysis** - Estimates file count, detects architectural indicators
+- **Decision logic** - Applies exemption rules (trivial fixes, research, user skip)
+- **Blocking enforcement** - Prevents implementation without approved plan
+
+See [CLAUDE.md#EnterPlanMode](../../../CLAUDE.md#-mandatory-always-enter-plan-mode-first) for full planning requirements.
+
 ---
 
 ## Return Values

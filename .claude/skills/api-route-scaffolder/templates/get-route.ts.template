@@ -1,0 +1,84 @@
+/**
+ * {{ROUTE_DESCRIPTION}}
+ *
+ * @route GET {{ROUTE_PATH}}
+ * @permission {{PERMISSION}}
+ */
+
+import { NextResponse } from 'next/server'
+import { requireAuth, checkPermissionOrRespond, type AuthContext } from '@cgk-platform/auth'
+import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export async function GET(request: Request) {
+  // Authentication
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch (error) {
+    logger.warn('Unauthorized access attempt', {
+      path: '{{ROUTE_PATH}}',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Permission check
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    auth.tenantId || '',
+    '{{PERMISSION}}'
+  )
+  if (permissionDenied) return permissionDenied
+
+  try {
+    // Query parameters
+    const { searchParams } = new URL(request.url)
+    // TODO: Extract query parameters as needed
+    // const page = parseInt(searchParams.get('page') || '1', 10)
+    // const limit = parseInt(searchParams.get('limit') || '50', 10)
+
+    // Fetch data with tenant isolation
+    const data = await withTenant(auth.tenantId || '', async () => {
+      return sql`
+        -- TODO: Replace with your query
+        SELECT * FROM {{TABLE_NAME}}
+        ORDER BY created_at DESC
+        LIMIT 50
+      `
+    })
+
+    logger.info('{{ROUTE_NAME}} fetched successfully', {
+      requestId: crypto.randomUUID(),
+      tenantId: auth.tenantId,
+      userId: auth.userId,
+      resultCount: data.rows.length
+    })
+
+    return NextResponse.json({
+      data: data.rows,
+      meta: {
+        count: data.rows.length
+      }
+    })
+  } catch (error) {
+    logger.error('Error fetching {{ROUTE_NAME}}', {
+      requestId: crypto.randomUUID(),
+      tenantId: auth.tenantId,
+      userId: auth.userId,
+      error: error instanceof Error ? {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      } : { message: String(error) }
+    })
+
+    return NextResponse.json(
+      { error: 'Failed to fetch {{ROUTE_NAME}}' },
+      { status: 500 }
+    )
+  }
+}

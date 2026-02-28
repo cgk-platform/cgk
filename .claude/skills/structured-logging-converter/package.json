@@ -1,0 +1,22 @@
+{
+  "name": "@cgk-skills/structured-logging-converter",
+  "version": "1.0.0",
+  "description": "Converts console.error to structured logging",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": ["logging", "observability", "code-transformation", "cgk"],
+  "author": "CGK Platform Team",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "^10.3.10"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  }
+}

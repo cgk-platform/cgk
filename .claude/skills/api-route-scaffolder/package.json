@@ -1,0 +1,25 @@
+{
+  "name": "@cgk-skills/api-route-scaffolder",
+  "version": "1.0.0",
+  "description": "Interactive scaffolder for Next.js API routes with best practices",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "api-routes",
+    "scaffolder",
+    "next.js",
+    "code-generation",
+    "cgk"
+  ],
+  "author": "CGK Platform Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  }
+}

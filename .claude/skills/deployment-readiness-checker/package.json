@@ -1,0 +1,28 @@
+{
+  "name": "@cgk-skills/deployment-readiness-checker",
+  "version": "1.0.0",
+  "description": "Pre-deployment validation to prevent deployment failures",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "deployment",
+    "validation",
+    "ci-cd",
+    "pre-deployment",
+    "cgk"
+  ],
+  "author": "CGK Platform Team",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "^10.3.10"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  }
+}

@@ -315,15 +315,66 @@ Example:
 
 [How to know this work is complete]
 
-Example:
-Implementation complete when:
-- [ ] All Priority 1 tasks finished
-- [ ] All tests pass (`pnpm test`)
-- [ ] No type errors (`pnpm turbo typecheck`)
-- [ ] No lint errors (`pnpm turbo lint`)
-- [ ] No tenant isolation violations (`pnpm validate:tenant-isolation`)
-- [ ] Documentation updated
-- [ ] Code reviewed and approved
+**CRITICAL**: Work is NOT complete until ALL applicable Definition of Done criteria are met.
+
+Reference: [DEFINITION-OF-DONE.md](../.claude/DEFINITION-OF-DONE.md)
+
+### Code Quality Gates ✅
+- [ ] `pnpm turbo typecheck --filter=[app]` - PASSED
+  ```
+  Expected output: ✓ Typecheck completed successfully (no errors)
+  ```
+
+- [ ] `pnpm turbo lint --filter=[app]` - PASSED
+  ```
+  Expected output: ✓ Lint completed successfully (no errors)
+  ```
+
+- [ ] `pnpm validate:tenant-isolation --path apps/[app]` - PASSED
+  ```
+  Expected output: ✓ No tenant isolation violations found
+  ```
+
+- [ ] `bash scripts/validate-migration.sh` - PASSED (if migrations changed)
+  ```
+  Expected output: ✓ Migration validation passed
+  ```
+
+- [ ] `bash scripts/verify-env-vars.sh` - PASSED (if env vars changed)
+  ```
+  Expected output: ✓ All .env.example files in sync
+  ```
+
+### Testing Requirements ✅
+- [ ] `pnpm test --filter=[app]` - All tests passing
+- [ ] Integration tests passed (if applicable)
+- [ ] Manual smoke test completed successfully
+- [ ] Browser console has no critical errors
+
+### Documentation Complete ✅
+- [ ] CLAUDE.md updated (if patterns changed)
+- [ ] ADR created (if architectural decision made)
+- [ ] README updated (if feature added)
+- [ ] Code comments added (complex logic only)
+
+### Deployment Ready ✅
+- [ ] Environment variables added to Vercel (production, preview, development)
+- [ ] Environment variables documented in .env.example (all apps if shared)
+- [ ] Database migrations tested (dry-run + actual)
+- [ ] No hardcoded secrets or credentials
+- [ ] Vercel config correct (team scope, framework)
+- [ ] Git working tree clean
+
+### Handoff Complete ✅
+- [ ] This handoff document created
+- [ ] Modified files listed with line counts
+- [ ] Next steps prioritized (Priority 1/2/3)
+- [ ] Cost tracked (tokens, cost, budget status)
+- [ ] Verification command outputs included above
+
+**Status**: [✅ COMPLETE / 🔴 BLOCKED / 🔄 IN_PROGRESS]
+
+If BLOCKED, document blockers in "Outstanding Issues" section above.
 
 ---
 

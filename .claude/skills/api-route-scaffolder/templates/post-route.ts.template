@@ -1,0 +1,99 @@
+/**
+ * {{ROUTE_DESCRIPTION}}
+ *
+ * @route POST {{ROUTE_PATH}}
+ * @permission {{PERMISSION}}
+ */
+
+import { NextResponse } from 'next/server'
+import { requireAuth, checkPermissionOrRespond, type AuthContext } from '@cgk-platform/auth'
+import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
+export async function POST(request: Request) {
+  // Authentication
+  let auth: AuthContext
+  try {
+    auth = await requireAuth(request)
+  } catch (error) {
+    logger.warn('Unauthorized access attempt', {
+      path: '{{ROUTE_PATH}}',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    })
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Permission check
+  const permissionDenied = await checkPermissionOrRespond(
+    auth.userId,
+    auth.tenantId || '',
+    '{{PERMISSION}}'
+  )
+  if (permissionDenied) return permissionDenied
+
+  try {
+    // Parse request body
+    const body = await request.json()
+
+    // TODO: Add validation
+    // if (!body.field) {
+    //   return NextResponse.json(
+    //     { error: 'Missing required field: field' },
+    //     { status: 400 }
+    //   )
+    // }
+
+    // Create/update data with tenant isolation
+    const result = await withTenant(auth.tenantId || '', async () => {
+      return sql`
+        -- TODO: Replace with your mutation
+        INSERT INTO {{TABLE_NAME}} (
+          id,
+          -- Add your fields here
+          created_at
+        ) VALUES (
+          gen_random_uuid(),
+          -- Add your values here
+          NOW()
+        )
+        RETURNING *
+      `
+    })
+
+    const row = result.rows[0]
+    if (!row) {
+      throw new Error('Failed to create {{ROUTE_NAME}}')
+    }
+
+    logger.info('{{ROUTE_NAME}} created successfully', {
+      requestId: crypto.randomUUID(),
+      tenantId: auth.tenantId,
+      userId: auth.userId,
+      resourceId: row.id
+    })
+
+    return NextResponse.json({
+      data: row,
+      message: '{{ROUTE_NAME}} created successfully'
+    }, { status: 201 })
+  } catch (error) {
+    logger.error('Error creating {{ROUTE_NAME}}', {
+      requestId: crypto.randomUUID(),
+      tenantId: auth.tenantId,
+      userId: auth.userId,
+      error: error instanceof Error ? {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      } : { message: String(error) }
+    })
+
+    return NextResponse.json(
+      { error: 'Failed to create {{ROUTE_NAME}}' },
+      { status: 500 }
+    )
+  }
+}

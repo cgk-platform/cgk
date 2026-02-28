@@ -1,0 +1,19 @@
+{
+  "name": "@cgk-skills/migration-impact-analyzer",
+  "version": "1.0.0",
+  "description": "Pre-migration analysis and validation",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": ["database", "migrations", "analysis", "risk-assessment", "cgk"],
+  "author": "CGK Platform Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  }
+}

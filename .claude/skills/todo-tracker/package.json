@@ -1,0 +1,22 @@
+{
+  "name": "@cgk-skills/todo-tracker",
+  "version": "1.0.0",
+  "description": "Automated TODO management across the codebase",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": ["todo", "tracking", "technical-debt", "github-issues", "cgk"],
+  "author": "CGK Platform Team",
+  "license": "MIT",
+  "dependencies": {
+    "glob": "^10.3.10"
+  },
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  }
+}
