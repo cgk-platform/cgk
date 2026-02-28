@@ -935,6 +935,31 @@ All portal apps MUST have:
 
 ## Environment Variables Strategy
 
+### 🚨 CRITICAL: NEVER Create .env.production Files
+
+**RULE: Production environment variables ONLY exist in Vercel, NEVER in git.**
+
+```bash
+# ❌ NEVER DO THIS - .env.production should NOT exist
+touch .env.production
+echo "DATABASE_URL=..." > .env.production
+
+# ✅ CORRECT - Add to Vercel via CLI or dashboard
+vercel env add DATABASE_URL production
+# OR: Vercel Dashboard → Settings → Environment Variables
+```
+
+**Why:**
+- `.env.production` files are a security risk (secrets in git)
+- Vercel is the single source of truth for production vars
+- `.env.local` is synced FROM Vercel (read-only on dev machines)
+
+**What files ARE allowed:**
+- `.env.example` ✅ (documentation, no real values, committed to git)
+- `.env.local` ✅ (synced from Vercel, gitignored)
+- `.env.development.local` ✅ (local dev only, gitignored)
+- `.env.production` ❌ **NEVER - DELETE IF YOU SEE IT**
+
 ### How It Works
 
 Next.js loads env files in this priority order (later = higher priority):
