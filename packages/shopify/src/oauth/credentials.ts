@@ -104,13 +104,12 @@ export async function getShopifyCredentials(
  * @param tenantId - Tenant ID
  * @returns True if connected
  */
-export async function isShopifyConnected(tenantId: string): Promise<boolean> {
-  const result = await withTenant(tenantId, async () => {
+export async function isShopifyConnected(tenantSlug: string): Promise<boolean> {
+  const result = await withTenant(tenantSlug, async () => {
     return sql`
       SELECT 1
       FROM shopify_connections
-      WHERE tenant_id = ${tenantId}
-      AND status = 'active'
+      WHERE status = 'active'
       AND access_token_encrypted IS NOT NULL
       LIMIT 1
     `
@@ -126,9 +125,9 @@ export async function isShopifyConnected(tenantId: string): Promise<boolean> {
  * @returns Connection details or null if not connected
  */
 export async function getShopifyConnection(
-  tenantId: string
+  tenantSlug: string
 ): Promise<ShopifyConnection | null> {
-  const result = await withTenant(tenantId, async () => {
+  const result = await withTenant(tenantSlug, async () => {
     return sql`
       SELECT
         id,
@@ -148,8 +147,7 @@ export async function getShopifyConnection(
         installed_at,
         updated_at
       FROM shopify_connections
-      WHERE tenant_id = ${tenantId}
-      AND status != 'disconnected'
+      WHERE status != 'disconnected'
       LIMIT 1
     `
   })
