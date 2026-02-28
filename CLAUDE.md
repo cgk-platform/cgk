@@ -119,9 +119,56 @@ pnpm test                     # Run all tests
 pnpm test:e2e                 # Run Playwright E2E tests
 
 # Database
-npx @cgk-platform/cli migrate          # Run migrations
-npx @cgk-platform/cli doctor           # Check configuration
+npx @cgk-platform/cli migrate                # Run migrations
+npx @cgk-platform/cli migrate:auto           # Auto-run missing migrations on existing tenants
+npx @cgk-platform/cli migrate:auto --tenant meliusly  # Migrate specific tenant
+npx @cgk-platform/cli doctor                 # Check configuration
 ```
+
+**CRITICAL: Auto-Migration System**
+
+New migrations added to the codebase do NOT automatically apply to existing tenants. You MUST run `migrate:auto` after adding new migration files:
+
+```bash
+# After adding new migrations, run this to update all existing tenants
+npx @cgk-platform/cli migrate:auto
+
+# Check what would be migrated (dry run)
+npx @cgk-platform/cli migrate:auto --dry-run
+
+# Migrate specific tenant only
+npx @cgk-platform/cli migrate:auto --tenant meliusly
+```
+
+---
+
+## 🔑 Environment Variables Location (CRITICAL)
+
+**WHERE TO FIND ENV VARS**: All environment variables are stored in **`apps/*/. env.local`** files, NOT in the root or packages/ directories.
+
+```bash
+# Each app has its own .env.local with all necessary credentials
+apps/admin/.env.local              # Admin portal env vars (includes DATABASE_URL)
+apps/storefront/.env.local         # Storefront env vars
+apps/creator-portal/.env.local     # Creator portal env vars
+apps/orchestrator/.env.local       # Orchestrator env vars
+apps/shopify-app/.env.local        # Shopify app env vars
+apps/contractor-portal/.env.local  # Contractor portal env vars
+
+# To use database connection in Node scripts:
+cd apps/admin && node -e "require('dotenv').config({path:'.env.local'}); console.log(process.env.POSTGRES_URL)"
+
+# Or export env vars for CLI commands:
+export $(cat apps/admin/.env.local | grep POSTGRES_URL | xargs) && npx @cgk-platform/cli migrate
+```
+
+**NEVER** look for env vars in:
+- ❌ Root directory (.env files)
+- ❌ packages/db/ directory
+- ❌ packages/*/ directories
+
+**ALWAYS** look in:
+- ✅ apps/*/. env.local files
 
 ---
 

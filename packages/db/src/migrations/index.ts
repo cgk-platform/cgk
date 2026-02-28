@@ -22,3 +22,11 @@ export {
   runTenantMigrations,
   tenantSchemaExists,
 } from './runner.js'
+
+// Auto-migration
+export {
+  autoMigrateAllTenants,
+  autoMigrateTenant,
+  checkAndMigrate,
+  hasPendingMigrations,
+} from './auto-migrate.js'

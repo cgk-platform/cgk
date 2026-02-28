@@ -11,6 +11,7 @@
  * - setup:jobs        : Setup background jobs provider
  * - migrate           : Run database migrations
  * - migrate:create    : Create a new migration file
+ * - migrate:auto      : Auto-run missing migrations on existing tenants
  * - tenant:create     : Create a new tenant
  * - tenant:list       : List all tenants
  * - tenant:export     : Export tenant data to SQL file
@@ -29,6 +30,7 @@ import { doctorCommand } from './commands/doctor.js'
 import { initCommand } from './commands/init.js'
 import { migrateCreateCommand } from './commands/migrate-create.js'
 import { migrateCommand } from './commands/migrate.js'
+import { migrateAutoCommand } from './commands/migrate-auto.js'
 import { setupJobsCommand } from './commands/setup-jobs.js'
 import { setupCommand, setupDatabaseCommand } from './commands/setup.js'
 import { tenantExportCommand } from './commands/tenant-export.js'
@@ -52,6 +54,7 @@ program.addCommand(setupDatabaseCommand)
 program.addCommand(setupJobsCommand)
 program.addCommand(migrateCommand)
 program.addCommand(migrateCreateCommand)
+program.addCommand(migrateAutoCommand)
 program.addCommand(createTenantCommand)
 program.addCommand(listTenantsCommand)
 program.addCommand(tenantExportCommand)
