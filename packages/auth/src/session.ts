@@ -38,6 +38,17 @@ export async function createSession(
   orgId: string | null,
   req?: Request
 ): Promise<SessionCreateResult> {
+  // Check if user is super admin - super admins should have null orgId
+  const userResult = await sql`
+    SELECT role FROM public.users WHERE id = ${userId}
+  `
+  const user = userResult.rows[0] as { role: string } | undefined
+
+  // Force null orgId for super admins (they access all tenants)
+  if (user?.role === 'super_admin') {
+    orgId = null
+  }
+
   const token = nanoid(SESSION_TOKEN_LENGTH)
   const tokenHash = await sha256(token)
 

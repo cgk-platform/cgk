@@ -123,19 +123,38 @@ async function getAuthContextFromHeaders(req: Request): Promise<AuthContext> {
 
   const user = userResult.rows[0] as { id: string; email: string; role: UserRole }
 
-  // Get user's organizations
-  const orgsResult = await sql`
-    SELECT uo.role, o.id, o.slug
-    FROM public.user_organizations uo
-    JOIN public.organizations o ON o.id = uo.organization_id
-    WHERE uo.user_id = ${userId}
-  `
+  // Determine effective role (super_admin always takes precedence)
+  const effectiveRole = user.role === 'super_admin' ? 'super_admin' : (role || user.role)
 
-  const orgs: OrgContext[] = orgsResult.rows.map((row) => ({
-    id: row.id as string,
-    slug: row.slug as string,
-    role: row.role as UserRole,
-  }))
+  // Get organizations based on role
+  let orgs: OrgContext[]
+  if (user.role === 'super_admin') {
+    // Super admins get ALL organizations
+    const orgsResult = await sql`
+      SELECT id, slug
+      FROM public.organizations
+      WHERE status != 'deleted'
+      ORDER BY name ASC
+    `
+    orgs = orgsResult.rows.map((row) => ({
+      id: row.id as string,
+      slug: row.slug as string,
+      role: 'super_admin' as UserRole,
+    }))
+  } else {
+    // Regular users get only their memberships
+    const orgsResult = await sql`
+      SELECT uo.role, o.id, o.slug
+      FROM public.user_organizations uo
+      JOIN public.organizations o ON o.id = uo.organization_id
+      WHERE uo.user_id = ${userId}
+    `
+    orgs = orgsResult.rows.map((row) => ({
+      id: row.id as string,
+      slug: row.slug as string,
+      role: row.role as UserRole,
+    }))
+  }
 
   return {
     userId,
@@ -143,7 +162,7 @@ async function getAuthContextFromHeaders(req: Request): Promise<AuthContext> {
     sessionId,
     tenantId: tenantId || null,
     tenantSlug: tenantSlug || null,
-    role: role || user.role,
+    role: effectiveRole,
     orgs,
   }
 }

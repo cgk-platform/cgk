@@ -63,30 +63,52 @@ export async function POST(request: Request) {
     // Update last login
     await updateUserLastLogin(userId)
 
-    // Get user's organizations
-    const orgs = await getUserOrganizations(userId)
-
-    // Determine current org context
-    // Priority: invite org > first org > null (super admin)
+    // Get user's organizations (handle super admins specially)
+    let orgs
     let currentOrgId: string | null = null
     let currentOrgSlug: string | null = null
     let currentRole = user.role
 
-    if (verification.orgId) {
-      currentOrgId = verification.orgId
-      const org = orgs.find((o) => o.id === verification.orgId)
-      currentOrgSlug = org?.slug || null
-      currentRole = org?.role || user.role
-    } else if (orgs.length > 0) {
-      const firstOrg = orgs[0]
-      if (firstOrg) {
-        currentOrgId = firstOrg.id
-        currentOrgSlug = firstOrg.slug
-        currentRole = firstOrg.role
+    if (user.role === 'super_admin') {
+      // Super admins get ALL organizations
+      const { sql: sqlClient } = await import('@cgk-platform/db')
+      const orgsResult = await sqlClient`
+        SELECT id, slug
+        FROM public.organizations
+        WHERE status != 'deleted'
+        ORDER BY name ASC
+      `
+      orgs = orgsResult.rows.map((row: any) => ({
+        id: row.id as string,
+        slug: row.slug as string,
+        role: 'super_admin' as const,
+      }))
+      // Super admins have no default org (can access any)
+      currentOrgId = null
+      currentOrgSlug = null
+      currentRole = 'super_admin'
+    } else {
+      // Regular users get their memberships
+      orgs = await getUserOrganizations(userId)
+
+      // Determine current org context
+      // Priority: invite org > first org > null
+      if (verification.orgId) {
+        currentOrgId = verification.orgId
+        const org = orgs.find((o) => o.id === verification.orgId)
+        currentOrgSlug = org?.slug || null
+        currentRole = org?.role || user.role
+      } else if (orgs.length > 0) {
+        const firstOrg = orgs[0]
+        if (firstOrg) {
+          currentOrgId = firstOrg.id
+          currentOrgSlug = firstOrg.slug
+          currentRole = firstOrg.role
+        }
       }
     }
 
-    // Create session
+    // Create session (will auto-set orgId to null for super admins)
     const { session } = await createSession(userId, currentOrgId, request)
 
     // Create JWT
