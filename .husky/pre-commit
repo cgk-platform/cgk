@@ -1,0 +1,7 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit validations..."
+pnpm lint-staged
+
+echo "✅ All validations passed"

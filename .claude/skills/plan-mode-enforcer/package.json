@@ -1,0 +1,24 @@
+{
+  "name": "@cgk-skills/plan-mode-enforcer",
+  "version": "1.0.0",
+  "description": "Detects tasks requiring EnterPlanMode before implementation",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "keywords": [
+    "plan-mode",
+    "planning",
+    "complexity-analysis",
+    "cgk"
+  ],
+  "author": "CGK Platform Team",
+  "license": "MIT",
+  "devDependencies": {
+    "vitest": "^3.0.0",
+    "@vitest/coverage-v8": "^3.0.0"
+  }
+}

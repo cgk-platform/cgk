@@ -1,0 +1,29 @@
+# CGK Platform - Example App
+# =====================
+
+# ===================
+# DATABASE
+# ===================
+# Neon PostgreSQL connection
+DATABASE_URL=postgresql://user:password@host/db?sslmode=require
+POSTGRES_URL=postgresql://user:password@host/db?sslmode=require
+
+# ===================
+# AUTHENTICATION
+# ===================
+# JWT secret for token signing
+JWT_SECRET=your-64-character-hex-string-here
+SESSION_SECRET=your-session-secret-here
+
+# ===================
+# SHOPIFY
+# ===================
+# From Shopify Partners Dashboard
+SHOPIFY_CLIENT_ID=your-client-id
+SHOPIFY_CLIENT_SECRET=shpss_your-secret-here
+
+# ===================
+# STRIPE
+# ===================
+STRIPE_SECRET_KEY=sk_test_xxx
+STRIPE_PUBLISHABLE_KEY=pk_test_xxx

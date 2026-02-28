@@ -118,6 +118,142 @@ npx @cgk-platform/cli doctor           # Check configuration
 
 ---
 
+## Agent Coordination
+
+The CGK platform uses specialized Claude agents for different types of work. Full orchestration guide at `.claude/AGENT-COORDINATION.md`.
+
+### Quick Reference Matrix
+
+| Task Type | Agent | Model | When to Use |
+|-----------|-------|-------|-------------|
+| **Architecture planning** | architect | opus-4.5 | Multi-component designs, ADRs, migrations |
+| **Production coding** | implementer | sonnet-4.5 | Feature implementation, bug fixes |
+| **Security review** | reviewer | opus-4.5 | Code audits, tenant isolation checks |
+| **Debugging** | debugger | sonnet-4.5 | Root cause analysis, error investigation |
+| **Exploration** | researcher or Explore | haiku | Fast codebase searches, doc lookup |
+| **Test writing** | tester | sonnet-4.5 | Unit/integration/E2E tests |
+| **Refactoring** | refactorer | sonnet-4.5 | Large-scale restructuring |
+
+### Model Selection (Cost Optimization)
+
+| Model | Cost (Input/Output per MTok) | Best For |
+|-------|------------------------------|----------|
+| **Opus 4.5** | $15 / $75 | Critical decisions, security reviews, complex architecture |
+| **Sonnet 4.5** | $3 / $15 | Production code, debugging, testing |
+| **Haiku** | $0.25 / $1.25 | Exploration, doc lookup, simple queries |
+
+**Cost Example**: Phase 8 audit with 15 parallel haiku agents (~$30, 1 hour) vs 1 sequential opus agent (~$300, 8 hours) = 10x cost savings + 8x time savings.
+
+### Coordination Patterns
+
+1. **Sequential Handoff**: Tasks with dependencies (architect → implementer → tester → reviewer)
+2. **Parallel Execution**: Independent tasks (15 agents auditing different files simultaneously)
+3. **Escalation**: Start cheap (haiku), escalate to opus only if needed
+4. **Background Execution**: Long-running tasks that don't block other work
+
+**CRITICAL**: Session handoffs required when:
+- Context exceeds 150k tokens
+- Switching agent types (opus → sonnet)
+- Reaching phase milestones
+
+See `.claude/session-handoffs/` for 44 existing handoff examples.
+
+---
+
+## Skills System
+
+The platform has two types of Claude-invocable resources:
+
+### Executable Skills (User-Invocable)
+
+Located in `.claude/skills/`, these have `index.js` and are invoked via `/skill-name`:
+
+| Skill | Purpose | Usage |
+|-------|---------|-------|
+| `/meliusly-figma-audit` | Audit Figma designs against CGK design system | Design consistency checks |
+| `/tenant-isolation-validator` | Validate tenant isolation patterns | Pre-commit validation |
+| `/sql-pattern-enforcer` | Enforce @vercel/postgres patterns | SQL query validation |
+| `/env-var-workflow` | Guided environment variable setup | Env var management |
+| `/plan-mode-enforcer` | Require planning for complex tasks | Workflow enforcement |
+
+**Invocation Pattern**:
+```typescript
+// Invoke via Skill tool
+Skill({ skill: 'tenant-isolation-validator', args: '--fix --path apps/admin' })
+```
+
+### Knowledge Bases (Agent Reference Docs)
+
+Located in `.claude/knowledge-bases/`, these are README-only references:
+
+| Knowledge Base | Content | When to Reference |
+|----------------|---------|-------------------|
+| `database-migration-patterns/` | SQL best practices, ID type patterns | Writing migrations |
+| `payment-processing-patterns/` | Stripe Connect, Wise integration | Payment features |
+| `shopify-api-guide/` | Shopify Admin/Storefront API | Shopify integration |
+| `figma-design-system/` | Meliusly design tokens, components | Storefront design |
+
+**Reference Pattern**:
+```typescript
+// Agents read directly (no /command invocation)
+Read('.claude/knowledge-bases/database-migration-patterns/README.md')
+```
+
+---
+
+## Pre-Commit Validations
+
+The platform has automated validations that run before every commit. These prevent critical errors from reaching production.
+
+### Validation Scripts
+
+Located in `scripts/`:
+
+| Script | Purpose | Checks |
+|--------|---------|--------|
+| `validate-tenant-context.ts` | Tenant isolation enforcement | SQL without withTenant(), cache without createTenantCache(), jobs missing tenantId |
+| `validate-migration.sh` | Migration file validation | ID type mismatches, missing IF NOT EXISTS, pgvector syntax |
+| `verify-env-vars.sh` | Environment variable sync | .env.example consistency across apps |
+
+### Manual Validation Commands
+
+```bash
+# Validate tenant isolation
+pnpm validate:tenant-isolation
+
+# Validate migrations
+bash scripts/validate-migration.sh
+
+# Verify environment variables
+bash scripts/verify-env-vars.sh
+
+# Run all validations
+pnpm validate:all
+```
+
+### Bypassing Validations (NOT RECOMMENDED)
+
+```bash
+# Skip pre-commit hooks (CI will still enforce)
+git commit --no-verify -m "message"
+```
+
+**WARNING**: CI enforces all validations. Bypassing locally will cause PR failures.
+
+### Auto-Fix Support
+
+Some validators support auto-fixing violations:
+
+```bash
+# Fix tenant isolation violations
+pnpm validate:tenant-isolation --fix
+
+# Fix specific path
+pnpm validate:tenant-isolation --fix --path apps/admin
+```
+
+---
+
 ## Vercel Team Configuration
 
 **CRITICAL**: All CGK apps are deployed under a single Vercel team. NEVER create new Vercel projects without explicit user confirmation.
@@ -1453,6 +1589,37 @@ All planning docs are in:
 | TODOs | Create tracking issue or fix now |
 | Duplicate code (3+) | Extract to shared utility |
 | Hardcoded values | Move to config/env |
+
+---
+
+## References
+
+### Agent Coordination & Skills
+- [.claude/AGENT-COORDINATION.md](.claude/AGENT-COORDINATION.md) - Agent orchestration patterns
+- [.claude/MODEL-SELECTION.md](.claude/MODEL-SELECTION.md) - Cost optimization strategies
+- [.claude/CONTEXT-MGMT.md](.claude/CONTEXT-MGMT.md) - Session management
+- [.claude/SESSION-HANDOFF-TEMPLATE.md](.claude/SESSION-HANDOFF-TEMPLATE.md) - Handoff document template
+- [.claude/SKILL-REGISTRY.md](.claude/SKILL-REGISTRY.md) - All skills and knowledge bases
+- [.claude/session-handoffs/](.claude/session-handoffs/) - 44 existing handoff examples
+
+### Architecture Decision Records
+- [.claude/adrs/001-schema-per-tenant.md](.claude/adrs/001-schema-per-tenant.md) - Multi-tenancy architecture
+- [.claude/adrs/002-custom-jwt-auth.md](.claude/adrs/002-custom-jwt-auth.md) - Custom JWT vs Clerk
+- [.claude/adrs/003-husky-hooks-vs-eslint.md](.claude/adrs/003-husky-hooks-vs-eslint.md) - Validation approach
+- [.claude/adrs/004-skill-architecture-separation.md](.claude/adrs/004-skill-architecture-separation.md) - Skills vs knowledge bases
+- [.claude/adrs/005-model-assignment-strategy.md](.claude/adrs/005-model-assignment-strategy.md) - Opus/Sonnet/Haiku strategy
+- [.claude/adrs/template.md](.claude/adrs/template.md) - ADR template for new decisions
+
+### Knowledge Bases
+- [.claude/knowledge-bases/database-migration-patterns/](.claude/knowledge-bases/database-migration-patterns/) - SQL best practices
+- [.claude/knowledge-bases/payment-processing-patterns/](.claude/knowledge-bases/payment-processing-patterns/) - Stripe + Wise integration
+- [.claude/knowledge-bases/shopify-api-guide/](.claude/knowledge-bases/shopify-api-guide/) - Shopify Admin/Storefront API
+- [.claude/knowledge-bases/figma-design-system/](.claude/knowledge-bases/figma-design-system/) - Meliusly design tokens
+
+### Validation Scripts
+- [scripts/validate-tenant-context.ts](scripts/validate-tenant-context.ts) - Tenant isolation validator
+- [scripts/validate-migration.sh](scripts/validate-migration.sh) - Migration file validator
+- [scripts/verify-env-vars.sh](scripts/verify-env-vars.sh) - Environment variable sync checker
 
 ---
 
