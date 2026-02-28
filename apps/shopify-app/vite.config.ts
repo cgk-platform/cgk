@@ -64,8 +64,18 @@ export default defineConfig({
   ],
   build: {
     assetsInlineLimit: 0,
+    rollupOptions: {
+      external: [
+        "@shopify/shopify-api/adapters/web-api",
+        "@shopify/shopify-api/rest/admin",
+        "@shopify/shopify-api",
+      ],
+    },
   },
   optimizeDeps: {
     include: ["@shopify/app-bridge-react", "@shopify/polaris"],
+  },
+  ssr: {
+    noExternal: ["@shopify/app-bridge-react", "@shopify/polaris"],
   },
 }) satisfies UserConfig;
