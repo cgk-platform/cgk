@@ -1,10 +1,12 @@
-import { AsyncLocalStorage } from 'node:async_hooks'
-
 import { neon, type NeonQueryFunction } from '@neondatabase/serverless'
 import { sql as vercelSql, type VercelPool } from '@vercel/postgres'
 
+import { createRuntimeContext } from './runtime-context.js'
+
 /**
- * Async-local store for the current tenant schema name.
+ * Runtime-agnostic store for the current tenant schema name.
+ * Works in both Node.js and Edge runtimes.
+ *
  * When set (inside withTenant), all sql calls automatically
  * use a Neon HTTP transaction to SET LOCAL search_path before
  * the actual query, ensuring correct tenant isolation.
@@ -15,7 +17,7 @@ import { sql as vercelSql, type VercelPool } from '@vercel/postgres'
  * into a prepared statement"). The transaction approach bundles
  * SET LOCAL search_path + query in a single HTTP request.
  */
-export const tenantSchemaStore = new AsyncLocalStorage<string>()
+export const tenantSchemaStore = createRuntimeContext<string>()
 
 /**
  * Cached neon() function for tenant queries.
