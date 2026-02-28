@@ -118,6 +118,50 @@ npx @cgk-platform/cli doctor           # Check configuration
 
 ---
 
+## Vercel Team Configuration
+
+**CRITICAL**: All CGK apps are deployed under a single Vercel team. NEVER create new Vercel projects without explicit user confirmation.
+
+**Team Details:**
+- **Team ID**: `cgk-linens-88e79683`
+- **Team Name**: CGK Linens
+- **Scope Flag**: `--scope cgk-linens-88e79683`
+
+**Existing Vercel Projects:**
+| Project Name | App Directory | Production URL |
+|--------------|---------------|----------------|
+| `cgk-admin` | `apps/admin/` | cgk-admin-cgk-linens-88e79683.vercel.app |
+| `cgk-storefront` | `apps/storefront/` | cgk-storefront.vercel.app |
+| `cgk-shopify-app` | `apps/shopify-app/` | cgk-shopify-app-cgk-linens-88e79683.vercel.app |
+| `cgk-orchestrator` | `apps/orchestrator/` | cgk-orchestrator-cgk-linens-88e79683.vercel.app |
+| `cgk-creator-portal` | `apps/creator-portal/` | cgk-creator-portal.vercel.app |
+| `cgk-contractor-portal` | `apps/contractor-portal/` | cgk-contractor-portal-cgk-linens-88e79683.vercel.app |
+| `cgk-mcp-server` | `apps/mcp-server/` | cgk-mcp-server.vercel.app |
+
+**Working with Vercel CLI:**
+```bash
+# List all projects
+vercel project ls --scope cgk-linens-88e79683
+
+# Add environment variable to a project
+cd apps/<app-name>
+vercel env add VAR_NAME production --scope cgk-linens-88e79683
+vercel env add VAR_NAME preview --scope cgk-linens-88e79683
+vercel env add VAR_NAME development --scope cgk-linens-88e79683
+
+# Pull environment variables
+cd apps/<app-name>
+vercel env pull .env.local --scope cgk-linens-88e79683
+```
+
+**IMPORTANT RULES:**
+1. **NEVER create new Vercel projects** unless explicitly confirmed by user
+2. **ALL apps already exist** except `meliusly-storefront` (to be created in Phase 1F)
+3. **ALWAYS use `--scope cgk-linens-88e79683`** with Vercel CLI commands
+4. When updating env vars, update for ALL environments: production, preview, development
+
+---
+
 ## 🚨 CRITICAL: Shopify App Architecture (MUST READ)
 
 **SHOPIFY DEPRECATED CUSTOM APPS CREATED IN ADMIN** - As of 2024-2026, Shopify no longer allows creating "custom apps" directly in the Shopify Admin dashboard. This is a common source of confusion.

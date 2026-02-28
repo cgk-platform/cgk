@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server'
 import { sql } from '@vercel/postgres'
 import { requireAuth } from '@cgk-platform/auth'
-import { sendEmail } from '@cgk-platform/communications'
+// import { sendEmail } from '@cgk-platform/communications' // TODO: Implement email sending via queue
+import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -173,16 +173,18 @@ export async function POST(request: Request) {
         const org = await sql`SELECT name, slug FROM public.organizations WHERE id = ${organizationId}`
         const orgName = org.rows[0]?.name || 'CGK Platform'
 
-        await sendEmail({
-          to: email,
-          subject: `You've been invited to ${orgName}`,
-          html: `
-            <p>Hi ${name || 'there'},</p>
-            <p>You've been invited to join <strong>${orgName}</strong> on CGK Platform.</p>
-            <p>Click the link below to set up your account:</p>
-            <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/auth/signup?email=${encodeURIComponent(email)}">Accept Invitation</a></p>
-          `,
-        })
+        // TODO: Implement email sending via queue system
+        // await sendEmail({
+        //   to: email,
+        //   subject: `You've been invited to ${orgName}`,
+        //   html: `
+        //     <p>Hi ${name || 'there'},</p>
+        //     <p>You've been invited to join <strong>${orgName}</strong> on CGK Platform.</p>
+        //     <p>Click the link below to set up your account:</p>
+        //     <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/auth/signup?email=${encodeURIComponent(email)}">Accept Invitation</a></p>
+        //   `,
+        // })
+        console.log(`TODO: Send invitation email to ${email} for ${orgName}`)
       } catch (emailError) {
         console.error('Failed to send invitation email:', emailError)
         // Don't fail the whole operation if email fails

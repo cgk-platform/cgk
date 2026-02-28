@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { UserPlus, Loader2 } from 'lucide-react'
 import {
   Button,
   Dialog,
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@cgk-platform/ui'
-import { UserPlus, Loader2 } from 'lucide-react'
 
 interface Organization {
   id: string
