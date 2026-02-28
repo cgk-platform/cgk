@@ -73,25 +73,8 @@ interface CheckoutData {
   }
 }
 
-register(({ analytics, browser, init, settings }: {
-  analytics: {
-    subscribe: (event: string, callback: (event: { data: { checkout?: CheckoutData } }) => void | Promise<void>) => void
-  }
-  browser: {
-    cookie: {
-      get: (name: string) => Promise<string | null>
-      set: (name: string, value: string) => Promise<void>
-    }
-  }
-  init: {
-    data: {
-      cart?: {
-        attributes?: CartAttribute[]
-      }
-    }
-  }
-  settings: PixelSettings
-}) => {
+register((api) => {
+  const { analytics, browser, init, settings } = api
   // Configuration from extension settings
   const GA4_MEASUREMENT_ID = settings.ga4_measurement_id
   const GA4_API_SECRET = settings.ga4_api_secret
@@ -312,13 +295,13 @@ register(({ analytics, browser, init, settings }: {
 
   // Initialize from cart if available
   if (init.data.cart) {
-    extractSessionData({ attributes: init.data.cart.attributes })
+    extractSessionData({ attributes: (init.data.cart as any).attributes })
     debugLog('Initialized from cart data')
   }
 
   // Checkout Started
   analytics.subscribe('checkout_started', async (event) => {
-    const checkout = event.data.checkout
+    const checkout = (event as any).data.checkout as CheckoutData | undefined
     extractSessionData(checkout)
 
     const value = parseFloat(checkout?.totalPrice?.amount || '0')
@@ -342,7 +325,7 @@ register(({ analytics, browser, init, settings }: {
 
   // Shipping Info Submitted
   analytics.subscribe('checkout_shipping_info_submitted', async (event) => {
-    const checkout = event.data.checkout
+    const checkout = (event as any).data.checkout as CheckoutData | undefined
     extractSessionData(checkout)
 
     const value = parseFloat(checkout?.totalPrice?.amount || '0')
@@ -362,7 +345,7 @@ register(({ analytics, browser, init, settings }: {
 
   // Payment Info Submitted
   analytics.subscribe('payment_info_submitted', async (event) => {
-    const checkout = event.data.checkout
+    const checkout = (event as any).data.checkout as CheckoutData | undefined
     extractSessionData(checkout)
 
     const value = parseFloat(checkout?.totalPrice?.amount || '0')
@@ -386,7 +369,7 @@ register(({ analytics, browser, init, settings }: {
 
   // Purchase Complete
   analytics.subscribe('checkout_completed', async (event) => {
-    const checkout = event.data.checkout
+    const checkout = (event as any).data.checkout as CheckoutData | undefined
     extractSessionData(checkout)
 
     const value = parseFloat(checkout?.totalPrice?.amount || '0')
