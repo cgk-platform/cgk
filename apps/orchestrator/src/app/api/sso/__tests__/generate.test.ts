@@ -5,9 +5,10 @@
  * for cross-app authentication (orchestrator → admin/storefront)
  */
 
-import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
 import { POST } from '../generate/route'
+
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 
 // Mock dependencies
 vi.mock('@cgk-platform/auth', () => ({
@@ -35,9 +36,7 @@ describe('/api/sso/generate', () => {
         tenantId: 'org_789',
         tenantSlug: 'rawdog',
         role: 'owner',
-        orgs: [
-          { id: 'org_789', slug: 'rawdog', role: 'owner' },
-        ],
+        orgs: [{ id: 'org_789', slug: 'rawdog', role: 'owner' }],
       })
 
       // Mock token generation
@@ -139,9 +138,7 @@ describe('/api/sso/generate', () => {
         tenantId: 'org_789',
         tenantSlug: 'rawdog',
         role: 'owner',
-        orgs: [
-          { id: 'org_789', slug: 'rawdog', role: 'owner' },
-        ],
+        orgs: [{ id: 'org_789', slug: 'rawdog', role: 'owner' }],
       })
 
       const request = new NextRequest('http://localhost:3000/api/sso/generate', {
@@ -194,7 +191,13 @@ describe('/api/sso/generate', () => {
     })
 
     it('should validate all target app options', async () => {
-      const validApps = ['admin', 'storefront', 'creator-portal', 'contractor-portal', 'orchestrator']
+      const validApps = [
+        'admin',
+        'storefront',
+        'creator-portal',
+        'contractor-portal',
+        'orchestrator',
+      ]
 
       for (const app of validApps) {
         vi.clearAllMocks()
@@ -355,9 +358,7 @@ describe('/api/sso/generate', () => {
         tenantId: 'org_789',
         tenantSlug: 'rawdog',
         role: 'owner',
-        orgs: [
-          { id: 'org_789', slug: 'rawdog', role: 'owner' },
-        ],
+        orgs: [{ id: 'org_789', slug: 'rawdog', role: 'owner' }],
       })
 
       const request = new NextRequest('http://localhost:3000/api/sso/generate', {
