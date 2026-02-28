@@ -50,6 +50,9 @@ const nextConfig = {
   ],
 
   webpack: (config, { isServer, webpack }) => {
+    // Memory optimization: reduce parallelism to prevent OOM
+    config.parallelism = 1
+
     if (!isServer) {
       // Client components transitively reach @slack/web-api through the chain:
       // video-card.tsx → @cgk-platform/video → integrations → jobs →
@@ -76,6 +79,32 @@ const nextConfig = {
         stream: false,
         'stream/web': false,
         tls: false,
+      }
+
+      // Optimize chunks to reduce memory usage
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20,
+            },
+            // CGK packages chunk
+            cgk: {
+              name: 'cgk',
+              chunks: 'all',
+              test: /@cgk-platform/,
+              priority: 10,
+            },
+          },
+        },
       }
     }
     return config
