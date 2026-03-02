@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Manrope } from 'next/font/google'
+import { RootLayout } from '@/components/layout/RootLayout'
 import './globals.css'
 
 const manrope = Manrope({
@@ -38,10 +39,12 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={manrope.variable}>
-      <body className="font-manrope text-meliusly-dark bg-white antialiased">{children}</body>
+      <body className="font-manrope text-meliusly-dark bg-white antialiased">
+        <RootLayout>{children}</RootLayout>
+      </body>
     </html>
   )
 }

@@ -1,25 +1,20 @@
-import { createStorefrontClient, type StorefrontClient } from '@cgk-platform/shopify'
-
-if (!process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN) {
-  throw new Error('NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN is required')
-}
-
-if (!process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN) {
-  console.warn('⚠️  SHOPIFY_STOREFRONT_ACCESS_TOKEN not set. Storefront API calls will fail.')
-  console.warn('Generate token via Admin API mutation:')
-  console.warn(
-    'mutation { storefrontAccessTokenCreate(input: { title: "Meliusly Storefront" }) { storefrontAccessToken { accessToken } } }'
-  )
-}
-
 /**
- * Shopify Storefront API client for Meliusly
+ * Shopify client exports - Database-driven multi-tenant approach
+ *
+ * IMPORTANT: Shopify credentials are NO LONGER hardcoded as environment variables.
+ * Instead, they are fetched from the database based on tenant context.
+ *
+ * Use getShopifyClientForTenant() with a tenant ID to get a configured client.
  */
-export const storefront: StorefrontClient = createStorefrontClient({
-  storeDomain: process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN,
-  storefrontAccessToken: process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || '',
-  apiVersion: process.env.SHOPIFY_API_VERSION || '2026-01',
-})
+
+export {
+  getShopifyClientForTenant,
+  getShopifyInstallation,
+  isShopifyConnected,
+  getShopDomain,
+} from './shopify-from-database'
+
+export { resolveTenantFromDomain, getTenantIdFromDomain } from './tenant-resolution'
 
 /**
  * Storefront GraphQL queries
