@@ -249,14 +249,21 @@ export async function handleOAuthCallback(
  *
  * Marks the connection as disconnected and clears credentials.
  *
- * @param tenantId - Tenant ID
+ * @param tenantSlug - Tenant slug (e.g., 'meliusly')
  * @param shop - Shop domain (optional, disconnects all if not provided)
  */
 export async function disconnectStore(
-  tenantId: string,
+  tenantSlug: string,
   shop?: string
 ): Promise<void> {
-  await withTenant(tenantId, async () => {
+  // Look up tenant UUID from slug (public schema query - no withTenant needed)
+  const tenantResult = await sql`SELECT id FROM public.organizations WHERE slug = ${tenantSlug}`
+  if (tenantResult.rows.length === 0) {
+    throw new ShopifyError('INVALID_STATE', `Tenant ${tenantSlug} not found`)
+  }
+  const tenantId = (tenantResult.rows[0] as { id: string }).id
+
+  await withTenant(tenantSlug, async () => {
     if (shop) {
       await sql`
         UPDATE shopify_connections
