@@ -74,7 +74,6 @@ export async function GET(request: Request) {
     // Initiate OAuth flow - stores state in database with encryption
     const authUrl = await initiateOAuth({
       tenantId, // UUID for database
-      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })
@@ -153,7 +152,6 @@ export async function POST(request: Request) {
 
     const authUrl = await initiateOAuth({
       tenantId, // UUID for database
-      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })

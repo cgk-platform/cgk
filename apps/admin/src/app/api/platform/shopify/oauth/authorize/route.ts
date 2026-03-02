@@ -3,11 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
-import {
-  initiateOAuth,
-  normalizeShopDomain,
-  ShopifyError,
-} from '@cgk-platform/shopify'
+import { initiateOAuth, normalizeShopDomain, ShopifyError } from '@cgk-platform/shopify'
 
 /**
  * GET /api/platform/shopify/oauth/authorize?shop=example.myshopify.com
@@ -48,7 +44,6 @@ export async function GET(request: Request) {
 
     const authUrl = await initiateOAuth({
       tenantId, // UUID for database
-      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })
@@ -58,16 +53,10 @@ export async function GET(request: Request) {
     console.error('[shopify-oauth] Platform OAuth error:', error)
 
     if (error instanceof ShopifyError) {
-      return NextResponse.json(
-        { error: error.message, code: error.code },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })
     }
 
-    return NextResponse.json(
-      { error: 'Failed to initiate Shopify OAuth' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to initiate Shopify OAuth' }, { status: 500 })
   }
 }
 
@@ -109,7 +98,6 @@ export async function POST(request: Request) {
 
     const authUrl = await initiateOAuth({
       tenantId, // UUID for database
-      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })
@@ -119,15 +107,9 @@ export async function POST(request: Request) {
     console.error('[shopify-oauth] Platform OAuth error:', error)
 
     if (error instanceof ShopifyError) {
-      return NextResponse.json(
-        { error: error.message, code: error.code },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })
     }
 
-    return NextResponse.json(
-      { error: 'Failed to initiate Shopify OAuth' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to initiate Shopify OAuth' }, { status: 500 })
   }
 }

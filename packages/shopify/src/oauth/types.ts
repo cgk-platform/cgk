@@ -7,7 +7,6 @@
  */
 export interface OAuthInitiateParams {
   tenantId: string // UUID for database
-  tenantSlug: string // Slug for withTenant()
   shop: string
   redirectUri: string
 }

@@ -2,7 +2,7 @@
  * Shopify OAuth initiation
  */
 
-import { sql, withTenant } from '@cgk-platform/db'
+import { sql } from '@cgk-platform/db'
 
 import { generateSecureToken } from './encryption.js'
 import { ShopifyError } from './errors.js'
@@ -59,7 +59,6 @@ function buildShopifyAuthUrl(params: {
  * ```ts
  * const authUrl = await initiateOAuth({
  *   tenantId: 'uuid-here',
- *   tenantSlug: 'rawdog',
  *   shop: 'my-store.myshopify.com',
  *   redirectUri: 'https://admin.example.com/api/shopify/oauth/callback',
  * })
@@ -68,7 +67,7 @@ function buildShopifyAuthUrl(params: {
  * ```
  */
 export async function initiateOAuth(params: OAuthInitiateParams): Promise<string> {
-  const { tenantId, tenantSlug, shop: rawShop, redirectUri } = params
+  const { tenantId, shop: rawShop, redirectUri } = params
 
   // Normalize and validate shop domain
   const shop = normalizeShopDomain(rawShop)
