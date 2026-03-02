@@ -87,7 +87,7 @@ export default async function AllCollectionsPage() {
           </nav>
 
           {/* Title */}
-          <h1 className="mb-4 text-center text-[32px] leading-tight font-semibold text-[#161F2B] lg:text-[40px]">
+          <h1 className="mb-4 text-center text-[32px] leading-[1.3] font-semibold text-[#161F2B] lg:text-[40px]">
             All Products
           </h1>
 

@@ -151,7 +151,7 @@ export function Footer() {
       {/* Bottom Bar */}
       <div className="relative flex items-center justify-between border-t border-white/10 px-[50px] pt-[20px] pb-[30px]">
         <div className="flex-1">
-          <p className="font-gibson text-[13px] leading-[1.55] tracking-[0.26px] text-white">
+          <p className="font-manrope text-[13px] leading-[1.55] tracking-[0.26px] text-white">
             © 2026 Meliusly | Powered by Shopify
           </p>
         </div>

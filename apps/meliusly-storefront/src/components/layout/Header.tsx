@@ -38,7 +38,7 @@ export function Header({ cartItemCount = 0, onMobileMenuToggle, onCartClick }: H
           <img
             src="/assets/69bb33a6f2ea1403b208fab9c38e49c39bcb12bf.png"
             alt="Meliusly"
-            className="h-[28px] w-[123px] object-cover"
+            className="h-[32px] w-auto object-cover"
           />
         </Link>
 

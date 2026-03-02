@@ -64,7 +64,7 @@ export default function Hero() {
             </div>
 
             {/* Main Headline */}
-            <h1 className="font-manrope mb-[30px] text-[40px] leading-[1.3] font-semibold tracking-tight text-white">
+            <h1 className="font-manrope mb-[30px] text-[40px] leading-[1.3] font-semibold text-white">
               Fix Sagging Furniture with Durable Support Solutions
             </h1>
 

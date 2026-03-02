@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveTenantFromDomain } from '@/lib/tenant-resolution'
 import { getShopifyClientForTenant } from '@/lib/shopify-from-database'
+import { getMockProductsSimplified } from '@/lib/mock-products'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -114,9 +115,10 @@ export async function GET(request: NextRequest) {
       })
     } catch (shopifyError) {
       // If Shopify connection fails, return mock data for development
-      console.warn('Shopify connection not available, using mock data:', shopifyError)
+      console.warn('⚠️  Shopify connection not available, using mock data:', shopifyError)
+      console.log('🎨 Demo Mode: Displaying mock products with real images')
 
-      const mockProducts = generateMockProducts(first)
+      const mockProducts = getMockProductsSimplified(first)
 
       return NextResponse.json({
         success: true,
@@ -127,6 +129,7 @@ export async function GET(request: NextRequest) {
           name: tenant.name,
         },
         mock: true,
+        message: 'Demo mode - using mock product data',
       })
     }
   } catch (error) {
@@ -140,57 +143,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-/**
- * Generate mock products for development when Shopify is not connected
- */
-function generateMockProducts(count: number) {
-  const products = []
-  const productNames = [
-    'SleepSaver Pro',
-    'Classic Sleeper',
-    'Flex Sleeper',
-    'Premium Support Board',
-    'Comfort Plus',
-    'Elite Sleeper',
-    'Standard Support',
-    'Deluxe Support Board',
-  ]
-
-  for (let i = 0; i < Math.min(count, productNames.length); i++) {
-    const name = productNames[i]
-    const handle = name.toLowerCase().replace(/\s+/g, '-')
-    const basePrice = 99.99 + i * 20
-    const hasDiscount = i % 3 === 0
-
-    products.push({
-      id: `gid://shopify/Product/mock-${i + 1}`,
-      title: name,
-      handle,
-      description: `Premium sofa bed support solution - ${name}`,
-      priceRange: {
-        minVariantPrice: {
-          amount: basePrice.toString(),
-          currencyCode: 'USD',
-        },
-      },
-      compareAtPriceRange: hasDiscount
-        ? {
-            minVariantPrice: {
-              amount: (basePrice * 1.2).toString(),
-              currencyCode: 'USD',
-            },
-          }
-        : null,
-      featuredImage: {
-        url: `https://placehold.co/800x800/F6F6F6/0268A0?text=${encodeURIComponent(name)}`,
-        altText: name,
-        width: 800,
-        height: 800,
-      },
-    })
-  }
-
-  return products
 }

@@ -49,7 +49,7 @@ function TrustBadgeItem({ badge }: { badge: TrustBadge }) {
     <div className="group flex cursor-default items-center gap-6 text-left">
       {/* Icon with refined hover interaction */}
       <div className="transition-all duration-300 group-hover:-translate-y-1 group-hover:drop-shadow-[0_4px_12px_rgba(255,255,255,0.25)]">
-        <Icon className="h-10 w-10 flex-shrink-0 text-white" strokeWidth={1.5} />
+        <Icon className="h-10 w-10 flex-shrink-0 text-white" strokeWidth={2} />
       </div>
 
       {/* Typography with Manrope font family */}

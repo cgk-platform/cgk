@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveTenantFromDomain } from '@/lib/tenant-resolution'
 import { getShopifyClientForTenant } from '@/lib/shopify-from-database'
+import { getMockProductByHandle } from '@/lib/mock-products'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -28,98 +29,129 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const host = request.headers.get('host')
     const tenant = await resolveTenantFromDomain(host)
 
-    // Get Shopify client with database credentials
-    const shopify = await getShopifyClientForTenant(tenant.id)
+    try {
+      // Get Shopify client with database credentials
+      const shopify = await getShopifyClientForTenant(tenant.id)
 
-    // Fetch product from Shopify
-    const result = (await shopify.query(
-      `
-      query getProduct($handle: String!) {
-        product(handle: $handle) {
-          id
-          title
-          handle
-          description
-          descriptionHtml
-          priceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          compareAtPriceRange {
-            minVariantPrice {
-              amount
-              currencyCode
-            }
-          }
-          featuredImage {
-            url
-            altText
-            width
-            height
-          }
-          images(first: 10) {
-            edges {
-              node {
-                url
-                altText
-                width
-                height
-              }
-            }
-          }
-          variants(first: 20) {
-            edges {
-              node {
-                id
-                title
-                availableForSale
-                price {
-                  amount
-                  currencyCode
-                }
-                compareAtPrice {
-                  amount
-                  currencyCode
-                }
-                selectedOptions {
-                  name
-                  value
-                }
-              }
-            }
-          }
-          options {
+      // Fetch product from Shopify
+      const result = (await shopify.query(
+        `
+        query getProduct($handle: String!) {
+          product(handle: $handle) {
             id
-            name
-            values
+            title
+            handle
+            description
+            descriptionHtml
+            priceRange {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+            compareAtPriceRange {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+            featuredImage {
+              url
+              altText
+              width
+              height
+            }
+            images(first: 10) {
+              edges {
+                node {
+                  url
+                  altText
+                  width
+                  height
+                }
+              }
+            }
+            variants(first: 20) {
+              edges {
+                node {
+                  id
+                  title
+                  availableForSale
+                  price {
+                    amount
+                    currencyCode
+                  }
+                  compareAtPrice {
+                    amount
+                    currencyCode
+                  }
+                  selectedOptions {
+                    name
+                    value
+                  }
+                }
+              }
+            }
+            options {
+              id
+              name
+              values
+            }
           }
         }
+      `,
+        { handle }
+      )) as { product: unknown }
+
+      if (!result.product) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Product not found',
+          },
+          { status: 404 }
+        )
       }
-    `,
-      { handle }
-    )) as { product: unknown }
 
-    if (!result.product) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Product not found',
+      return NextResponse.json({
+        success: true,
+        data: result.product,
+        tenant: {
+          id: tenant.id,
+          slug: tenant.slug,
+          name: tenant.name,
         },
-        { status: 404 }
-      )
-    }
+      })
+    } catch (shopifyError) {
+      // If Shopify connection fails, try mock data
+      console.warn('⚠️  Shopify connection not available, trying mock data:', shopifyError)
 
-    return NextResponse.json({
-      success: true,
-      data: result.product,
-      tenant: {
-        id: tenant.id,
-        slug: tenant.slug,
-        name: tenant.name,
-      },
-    })
+      const mockProduct = getMockProductByHandle(handle)
+
+      if (!mockProduct) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Product not found',
+          },
+          { status: 404 }
+        )
+      }
+
+      console.log(`🎨 Demo Mode: Displaying mock product "${mockProduct.title}"`)
+
+      return NextResponse.json({
+        success: true,
+        data: mockProduct,
+        tenant: {
+          id: tenant.id,
+          slug: tenant.slug,
+          name: tenant.name,
+        },
+        mock: true,
+        message: 'Demo mode - using mock product data',
+      })
+    }
   } catch (error) {
     console.error('Failed to fetch product:', error)
 
