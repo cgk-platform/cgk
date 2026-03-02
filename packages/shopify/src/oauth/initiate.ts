@@ -61,7 +61,8 @@ function buildShopifyAuthUrl(params: {
  * @example
  * ```ts
  * const authUrl = await initiateOAuth({
- *   tenantId: 'rawdog',
+ *   tenantId: 'uuid-here',
+ *   tenantSlug: 'rawdog',
  *   shop: 'my-store.myshopify.com',
  *   redirectUri: 'https://admin.example.com/api/shopify/oauth/callback',
  * })
@@ -70,7 +71,7 @@ function buildShopifyAuthUrl(params: {
  * ```
  */
 export async function initiateOAuth(params: OAuthInitiateParams): Promise<string> {
-  const { tenantId, shop: rawShop, redirectUri } = params
+  const { tenantId, tenantSlug, shop: rawShop, redirectUri } = params
 
   // Normalize and validate shop domain
   const shop = normalizeShopDomain(rawShop)
@@ -81,7 +82,7 @@ export async function initiateOAuth(params: OAuthInitiateParams): Promise<string
   const nonce = generateSecureToken(16)
 
   // Store OAuth state for callback verification
-  await withTenant(tenantId, async () => {
+  await withTenant(tenantSlug, async () => {
     // Clean up any expired states first
     await sql`
       DELETE FROM shopify_oauth_states

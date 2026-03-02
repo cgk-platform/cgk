@@ -21,8 +21,9 @@ import {
 export async function GET(request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
+  const tenantId = headerList.get('x-tenant-id')
 
-  if (!tenantSlug) {
+  if (!tenantSlug || !tenantId) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
@@ -46,7 +47,8 @@ export async function GET(request: Request) {
     const redirectUri = `${appUrl}/api/admin/shopify-app/callback`
 
     const authUrl = await initiateOAuth({
-      tenantId: tenantSlug,
+      tenantId, // UUID for database
+      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })
@@ -79,8 +81,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
+  const tenantId = headerList.get('x-tenant-id')
 
-  if (!tenantSlug) {
+  if (!tenantSlug || !tenantId) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
@@ -105,7 +108,8 @@ export async function POST(request: Request) {
     const redirectUri = `${appUrl}/api/admin/shopify-app/callback`
 
     const authUrl = await initiateOAuth({
-      tenantId: tenantSlug,
+      tenantId, // UUID for database
+      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })

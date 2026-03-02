@@ -14,18 +14,22 @@ import { initiateOAuth, normalizeShopDomain, ShopifyError } from '@cgk-platform/
 export async function GET(request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
+  const tenantId = headerList.get('x-tenant-id')
   const userId = headerList.get('x-user-id')
   const userRole = headerList.get('x-user-role')
 
   console.log('[shopify-oauth] GET /api/admin/shopify-app/auth', {
     tenantSlug,
+    tenantId,
     userId,
     userRole,
     hasAuthHeader: !!headerList.get('authorization'),
   })
 
-  if (!tenantSlug) {
+  if (!tenantSlug || !tenantId) {
     console.error('[shopify-oauth] Missing tenant context', {
+      tenantSlug,
+      tenantId,
       userId,
       userRole,
       availableHeaders: Object.fromEntries(headerList.entries()),
@@ -69,7 +73,8 @@ export async function GET(request: Request) {
 
     // Initiate OAuth flow - stores state in database with encryption
     const authUrl = await initiateOAuth({
-      tenantId: tenantSlug,
+      tenantId, // UUID for database
+      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })
@@ -99,17 +104,21 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
+  const tenantId = headerList.get('x-tenant-id')
   const userId = headerList.get('x-user-id')
   const userRole = headerList.get('x-user-role')
 
   console.log('[shopify-oauth] POST /api/admin/shopify-app/auth', {
     tenantSlug,
+    tenantId,
     userId,
     userRole,
   })
 
-  if (!tenantSlug) {
+  if (!tenantSlug || !tenantId) {
     console.error('[shopify-oauth] Missing tenant context', {
+      tenantSlug,
+      tenantId,
       userId,
       userRole,
     })
@@ -143,7 +152,8 @@ export async function POST(request: Request) {
     const redirectUri = `${appUrl}/api/admin/shopify-app/callback`
 
     const authUrl = await initiateOAuth({
-      tenantId: tenantSlug,
+      tenantId, // UUID for database
+      tenantSlug, // Slug for withTenant()
       shop: normalizedShop,
       redirectUri,
     })
