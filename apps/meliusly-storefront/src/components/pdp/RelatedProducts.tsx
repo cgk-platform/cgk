@@ -174,40 +174,6 @@ export default function RelatedProducts({ products, currentProductId }: RelatedP
   return (
     <>
       {/* CSS Animation Keyframes */}
-      <style jsx global>{`
-        @keyframes fadeInScale {
-          from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: -1000px 0;
-          }
-          100% {
-            background-position: 1000px 0;
-          }
-        }
-
-        .shimmer-line {
-          background: linear-gradient(
-            90deg,
-            transparent 0%,
-            rgba(2, 104, 160, 0.1) 25%,
-            rgba(2, 104, 160, 0.2) 50%,
-            rgba(2, 104, 160, 0.1) 75%,
-            transparent 100%
-          );
-          background-size: 1000px 100%;
-          animation: shimmer 3s infinite linear;
-        }
-      `}</style>
 
       <section className="relative w-full overflow-hidden bg-gradient-to-b from-white to-[#F8FAFB] py-12 md:py-20">
         {/* Decorative background elements */}

@@ -160,50 +160,34 @@ export default async function ProductGrid() {
   }
 
   return (
-    <>
-      {/* CSS Animation Keyframes */}
-      <style jsx global>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-
-      <section className="bg-white px-6 py-16 lg:px-8">
-        <div className="mx-auto max-w-[1440px]">
-          {/* Section Header */}
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-4xl font-semibold text-[#161F2B] md:text-5xl">
-              Our Best Sellers
-            </h2>
-            <div className="mx-auto h-1 w-20 rounded-full bg-[#0268A0]"></div>
-          </div>
-
-          {/* Product Grid */}
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 lg:gap-8">
-            {products.slice(0, 8).map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
-          </div>
-
-          {/* Shop All Link */}
-          <div className="mt-12 text-center">
-            <Link
-              href="/collections/all"
-              className="inline-flex items-center gap-2 rounded-full bg-[#0268A0] px-8 py-3 text-base font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-[#015580] hover:shadow-lg"
-            >
-              Shop All Products
-              <ArrowRight className="h-5 w-5" strokeWidth={2.5} />
-            </Link>
-          </div>
+    <section className="bg-white px-6 py-16 lg:px-8">
+      <div className="mx-auto max-w-[1440px]">
+        {/* Section Header */}
+        <div className="mb-12 text-center">
+          <h2 className="mb-4 text-4xl font-semibold text-[#161F2B] md:text-5xl">
+            Our Best Sellers
+          </h2>
+          <div className="mx-auto h-1 w-20 rounded-full bg-[#0268A0]"></div>
         </div>
-      </section>
-    </>
+
+        {/* Product Grid */}
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 lg:gap-8">
+          {products.slice(0, 8).map((product, index) => (
+            <ProductCard key={product.id} product={product} index={index} />
+          ))}
+        </div>
+
+        {/* Shop All Link */}
+        <div className="mt-12 text-center">
+          <Link
+            href="/collections/all"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0268A0] px-8 py-3 text-base font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-[#015580] hover:shadow-lg"
+          >
+            Shop All Products
+            <ArrowRight className="h-5 w-5" strokeWidth={2.5} />
+          </Link>
+        </div>
+      </div>
+    </section>
   )
 }
