@@ -83,10 +83,16 @@ export async function initiateOAuth(params: OAuthInitiateParams): Promise<string
 
   // Store OAuth state for callback verification
   await withTenant(tenantSlug, async () => {
-    // Clean up any expired states first
+    // Clean up any expired states
     await sql`
       DELETE FROM shopify_oauth_states
       WHERE expires_at < NOW()
+    `
+
+    // Delete any existing states for this shop (allows retries)
+    await sql`
+      DELETE FROM shopify_oauth_states
+      WHERE shop = ${shop}
     `
 
     // Insert new state
