@@ -9,11 +9,7 @@ import { sql, withTenant, createTenantCache } from '@cgk-platform/db'
 import { decryptToken } from './encryption.js'
 import { ShopifyError } from './errors.js'
 import { validateScopes } from './scopes.js'
-import type {
-  ShopifyCredentials,
-  ShopifyConnection,
-  ConnectionHealthCheck,
-} from './types.js'
+import type { ShopifyCredentials, ShopifyConnection, ConnectionHealthCheck } from './types.js'
 
 /** Credential cache TTL in seconds */
 const CREDENTIAL_CACHE_TTL = 60
@@ -24,22 +20,20 @@ const CREDENTIAL_CACHE_TTL = 60
  * Retrieves and decrypts Shopify credentials, with caching
  * to reduce database load.
  *
- * @param tenantId - Tenant ID
+ * @param tenantId - Tenant ID (UUID)
  * @returns Decrypted Shopify credentials
  * @throws ShopifyError if not connected
  *
  * @example
  * ```ts
- * const credentials = await getShopifyCredentials('rawdog')
+ * const credentials = await getShopifyCredentials('5cb87b13-3b13-4400-9542-53c8b8d12cb8')
  * const client = createAdminClient({
  *   storeDomain: credentials.shop,
  *   adminAccessToken: credentials.accessToken,
  * })
  * ```
  */
-export async function getShopifyCredentials(
-  tenantId: string
-): Promise<ShopifyCredentials> {
+export async function getShopifyCredentials(tenantId: string): Promise<ShopifyCredentials> {
   const cache = createTenantCache(tenantId)
   const cacheKey = 'shopify:credentials'
 
@@ -49,8 +43,15 @@ export async function getShopifyCredentials(
     return cached
   }
 
+  // Convert tenant UUID to slug (withTenant requires slug, not UUID)
+  const tenantResult = await sql`SELECT slug FROM public.organizations WHERE id = ${tenantId}`
+  if (tenantResult.rows.length === 0) {
+    throw new ShopifyError('NOT_CONNECTED', `Tenant ${tenantId} not found`)
+  }
+  const tenantSlug = (tenantResult.rows[0] as { slug: string }).slug
+
   // Query database
-  const result = await withTenant(tenantId, async () => {
+  const result = await withTenant(tenantSlug, async () => {
     return sql`
       SELECT
         shop,
@@ -67,10 +68,7 @@ export async function getShopifyCredentials(
   })
 
   if (result.rows.length === 0) {
-    throw new ShopifyError(
-      'NOT_CONNECTED',
-      'Shopify not connected for this tenant'
-    )
+    throw new ShopifyError('NOT_CONNECTED', 'Shopify not connected for this tenant')
   }
 
   const row = result.rows[0] as {
@@ -85,9 +83,7 @@ export async function getShopifyCredentials(
   const credentials: ShopifyCredentials = {
     shop: row.shop,
     accessToken: decryptToken(row.access_token_encrypted),
-    webhookSecret: row.webhook_secret_encrypted
-      ? decryptToken(row.webhook_secret_encrypted)
-      : null,
+    webhookSecret: row.webhook_secret_encrypted ? decryptToken(row.webhook_secret_encrypted) : null,
     scopes: row.scopes,
     apiVersion: row.api_version,
   }
@@ -124,9 +120,7 @@ export async function isShopifyConnected(tenantSlug: string): Promise<boolean> {
  * @param tenantId - Tenant ID
  * @returns Connection details or null if not connected
  */
-export async function getShopifyConnection(
-  tenantSlug: string
-): Promise<ShopifyConnection | null> {
+export async function getShopifyConnection(tenantSlug: string): Promise<ShopifyConnection | null> {
   const result = await withTenant(tenantSlug, async () => {
     return sql`
       SELECT
@@ -203,9 +197,7 @@ export async function getShopifyConnection(
  * @param tenantId - Tenant ID
  * @returns Connection health check result
  */
-export async function checkConnectionHealth(
-  tenantId: string
-): Promise<ConnectionHealthCheck> {
+export async function checkConnectionHealth(tenantId: string): Promise<ConnectionHealthCheck> {
   const connection = await getShopifyConnection(tenantId)
 
   if (!connection) {
@@ -259,10 +251,17 @@ export async function checkConnectionHealth(
 /**
  * Update last webhook timestamp
  *
- * @param tenantId - Tenant ID
+ * @param tenantId - Tenant ID (UUID)
  */
 export async function updateLastWebhookAt(tenantId: string): Promise<void> {
-  await withTenant(tenantId, async () => {
+  // Convert tenant UUID to slug (withTenant requires slug, not UUID)
+  const tenantResult = await sql`SELECT slug FROM public.organizations WHERE id = ${tenantId}`
+  if (tenantResult.rows.length === 0) {
+    return // Tenant not found, skip update
+  }
+  const tenantSlug = (tenantResult.rows[0] as { slug: string }).slug
+
+  await withTenant(tenantSlug, async () => {
     await sql`
       UPDATE shopify_connections
       SET last_webhook_at = NOW()
@@ -274,10 +273,17 @@ export async function updateLastWebhookAt(tenantId: string): Promise<void> {
 /**
  * Update last sync timestamp
  *
- * @param tenantId - Tenant ID
+ * @param tenantId - Tenant ID (UUID)
  */
 export async function updateLastSyncAt(tenantId: string): Promise<void> {
-  await withTenant(tenantId, async () => {
+  // Convert tenant UUID to slug (withTenant requires slug, not UUID)
+  const tenantResult = await sql`SELECT slug FROM public.organizations WHERE id = ${tenantId}`
+  if (tenantResult.rows.length === 0) {
+    return // Tenant not found, skip update
+  }
+  const tenantSlug = (tenantResult.rows[0] as { slug: string }).slug
+
+  await withTenant(tenantSlug, async () => {
     await sql`
       UPDATE shopify_connections
       SET last_sync_at = NOW()
