@@ -54,8 +54,6 @@ export async function resolveTenantFromDomain(host: string | null): Promise<Tena
     SELECT id, name, slug, settings
     FROM public.organizations
     WHERE slug = ${tenantSlug}
-    AND type = 'tenant'
-    AND deleted_at IS NULL
     LIMIT 1
   `
 
