@@ -190,7 +190,7 @@ export async function handleOAuthCallback(
   // Look up tenant slug from tenant ID (withTenant requires slug, not UUID)
   const tenantResult = await sql`SELECT slug FROM public.organizations WHERE id = ${tenantId}`
   if (tenantResult.rows.length === 0) {
-    throw new ShopifyError('INVALID_TENANT', `Tenant ${tenantId} not found`)
+    throw new ShopifyError('INVALID_STATE', `Tenant ${tenantId} not found`)
   }
   const tenantSlug = (tenantResult.rows[0] as { slug: string }).slug
 
