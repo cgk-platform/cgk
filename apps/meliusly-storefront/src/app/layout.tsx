@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   },
   description: 'Built for Comfort, Designed to Last',
   keywords: ['sofa bed', 'support board', 'mattress support', 'furniture'],
+  icons: {
+    icon: '/favicon.svg',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
