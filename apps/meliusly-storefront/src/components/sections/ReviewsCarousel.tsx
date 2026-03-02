@@ -26,7 +26,7 @@ const REVIEWS: Review[] = [
     location: 'BOSTON, MA',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.webp',
+    productImage: '/assets/1999d17781910171cf6dde28f216fd3ae2cbf140.png',
   },
   {
     id: 2,
@@ -37,7 +37,7 @@ const REVIEWS: Review[] = [
     location: 'UNITED STATES',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.webp',
+    productImage: '/assets/59fe895c4ab7345b86ad05d56a8db7bb2e0f6805.png',
   },
   {
     id: 3,
@@ -48,7 +48,7 @@ const REVIEWS: Review[] = [
     location: 'UNITED STATES',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.webp',
+    productImage: '/assets/69b399f82525ef9b2ecf067bba71854ff7938b38.png',
   },
   {
     id: 4,
@@ -59,7 +59,7 @@ const REVIEWS: Review[] = [
     location: 'NEW YORK, NY',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.webp',
+    productImage: '/assets/a28acc41a10b22191c628d308f2881ef6af428fb.png',
   },
   {
     id: 5,
@@ -70,7 +70,7 @@ const REVIEWS: Review[] = [
     location: 'CHICAGO, IL',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.webp',
+    productImage: '/assets/1999d17781910171cf6dde28f216fd3ae2cbf140.png',
   },
   {
     id: 6,
@@ -81,7 +81,7 @@ const REVIEWS: Review[] = [
     location: 'SAN FRANCISCO, CA',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.webp',
+    productImage: '/assets/59fe895c4ab7345b86ad05d56a8db7bb2e0f6805.png',
   },
 ]
 
@@ -211,8 +211,8 @@ function ReviewCard({ review }: { review: Review }) {
           className="object-cover"
           onError={(e) => {
             const target = e.currentTarget
-            if (target.src !== '/assets/product-display.webp') {
-              target.src = '/assets/product-display.webp'
+            if (target.src !== '/assets/1999d17781910171cf6dde28f216fd3ae2cbf140.png') {
+              target.src = '/assets/1999d17781910171cf6dde28f216fd3ae2cbf140.png'
             }
           }}
         />

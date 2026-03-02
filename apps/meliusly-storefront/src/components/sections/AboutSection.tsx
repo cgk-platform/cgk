@@ -40,11 +40,14 @@ export function AboutSection() {
             }`}
             style={{ transitionDelay: '100ms' }}
           >
-            <div className="bg-meliusly-lightGray relative aspect-[4/5] w-full overflow-hidden rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] lg:aspect-[3/4]">
-              {/* Placeholder for founders image */}
-              <div className="text-meliusly-grayText flex h-full w-full items-center justify-center">
-                <p className="text-sm">Founders Image</p>
-              </div>
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] lg:aspect-[3/4]">
+              <Image
+                src="/assets/0372b2f3a42a5b31888165419086fb7f4eebd305.png"
+                alt="Meliusly founders - engineer couple"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
             </div>
           </div>
 
