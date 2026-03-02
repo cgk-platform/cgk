@@ -187,7 +187,14 @@ export async function handleOAuthCallback(
   // Store the connection in tenant schema
   const apiVersion = getApiVersion()
 
-  await withTenant(tenantId, async () => {
+  // Look up tenant slug from tenant ID (withTenant requires slug, not UUID)
+  const tenantResult = await sql`SELECT slug FROM public.organizations WHERE id = ${tenantId}`
+  if (tenantResult.rows.length === 0) {
+    throw new ShopifyError('INVALID_TENANT', `Tenant ${tenantId} not found`)
+  }
+  const tenantSlug = (tenantResult.rows[0] as { slug: string }).slug
+
+  await withTenant(tenantSlug, async () => {
     await sql`
       INSERT INTO shopify_connections (
         tenant_id,
