@@ -17,10 +17,7 @@ function getShopifyClientId(): string {
   const clientId = process.env.SHOPIFY_CLIENT_ID
 
   if (!clientId) {
-    throw new ShopifyError(
-      'MISSING_CONFIG',
-      'SHOPIFY_CLIENT_ID environment variable is required'
-    )
+    throw new ShopifyError('MISSING_CONFIG', 'SHOPIFY_CLIENT_ID environment variable is required')
   }
 
   return clientId
@@ -81,40 +78,40 @@ export async function initiateOAuth(params: OAuthInitiateParams): Promise<string
   const state = generateSecureToken(32)
   const nonce = generateSecureToken(16)
 
-  // Store OAuth state for callback verification
-  await withTenant(tenantSlug, async () => {
-    // Clean up any expired states
-    await sql`
-      DELETE FROM shopify_oauth_states
-      WHERE expires_at < NOW()
-    `
+  // Store OAuth state for callback verification in PUBLIC schema
+  // (must be public because callback needs to look up state before knowing tenant)
 
-    // Delete any existing states for this shop (allows retries)
-    await sql`
-      DELETE FROM shopify_oauth_states
-      WHERE shop = ${shop}
-    `
+  // Clean up any expired states
+  await sql`
+    DELETE FROM public.shopify_oauth_states
+    WHERE expires_at < NOW()
+  `
 
-    // Insert new state
-    await sql`
-      INSERT INTO shopify_oauth_states (
-        tenant_id,
-        shop,
-        state,
-        nonce,
-        redirect_uri,
-        expires_at
-      )
-      VALUES (
-        ${tenantId},
-        ${shop},
-        ${state},
-        ${nonce},
-        ${redirectUri},
-        NOW() + INTERVAL '10 minutes'
-      )
-    `
-  })
+  // Delete any existing states for this shop (allows retries)
+  await sql`
+    DELETE FROM public.shopify_oauth_states
+    WHERE shop = ${shop}
+  `
+
+  // Insert new state
+  await sql`
+    INSERT INTO public.shopify_oauth_states (
+      tenant_id,
+      shop,
+      state,
+      nonce,
+      redirect_uri,
+      expires_at
+    )
+    VALUES (
+      ${tenantId},
+      ${shop},
+      ${state},
+      ${nonce},
+      ${redirectUri},
+      NOW() + INTERVAL '10 minutes'
+    )
+  `
 
   // Build authorization URL
   const authUrl = buildShopifyAuthUrl({
@@ -142,7 +139,7 @@ export async function getOAuthState(state: string): Promise<{
 } | null> {
   const result = await sql`
     SELECT tenant_id, shop, nonce, redirect_uri
-    FROM shopify_oauth_states
+    FROM public.shopify_oauth_states
     WHERE state = ${state}
     AND expires_at > NOW()
   `
@@ -173,7 +170,7 @@ export async function getOAuthState(state: string): Promise<{
  */
 export async function deleteOAuthState(state: string): Promise<void> {
   await sql`
-    DELETE FROM shopify_oauth_states
+    DELETE FROM public.shopify_oauth_states
     WHERE state = ${state}
   `
 }
