@@ -26,7 +26,7 @@ const REVIEWS: Review[] = [
     location: 'BOSTON, MA',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/images/review-product-1.jpg',
+    productImage: '/assets/product-display.png',
   },
   {
     id: 2,
@@ -37,7 +37,7 @@ const REVIEWS: Review[] = [
     location: 'UNITED STATES',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/images/review-product-2.jpg',
+    productImage: '/assets/product-display.png',
   },
   {
     id: 3,
@@ -48,7 +48,7 @@ const REVIEWS: Review[] = [
     location: 'UNITED STATES',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/images/review-product-3.jpg',
+    productImage: '/assets/product-display.png',
   },
   {
     id: 4,
@@ -59,7 +59,7 @@ const REVIEWS: Review[] = [
     location: 'NEW YORK, NY',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/images/review-product-1.jpg',
+    productImage: '/assets/product-display.png',
   },
   {
     id: 5,
@@ -70,7 +70,7 @@ const REVIEWS: Review[] = [
     location: 'CHICAGO, IL',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/images/review-product-2.jpg',
+    productImage: '/assets/product-display.png',
   },
   {
     id: 6,
@@ -81,7 +81,7 @@ const REVIEWS: Review[] = [
     location: 'SAN FRANCISCO, CA',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/images/review-product-3.jpg',
+    productImage: '/assets/product-display.png',
   },
 ]
 

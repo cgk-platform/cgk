@@ -120,9 +120,13 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                       : 'ring-1 ring-[#E5E7EB] hover:ring-[#0268A0]'
                   }`}
                 >
-                  <div className="flex h-full w-full items-center justify-center bg-[#F6F6F6]">
-                    <span className="text-xs text-[#161F2B]/30">Image {index + 1}</span>
-                  </div>
+                  <Image
+                    src={image.url}
+                    alt={image.altText || `Product thumbnail ${index + 1}`}
+                    fill
+                    sizes="90px"
+                    className="object-cover"
+                  />
                 </button>
               ))}
               <div className="pointer-events-none absolute bottom-0 h-12 w-[90px] bg-gradient-to-t from-white to-transparent" />
@@ -130,9 +134,16 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
 
             {/* Main Image */}
             <div className="relative h-[650px] w-[650px] overflow-hidden rounded-2xl bg-[#F6F6F6]">
-              <div className="flex h-full w-full items-center justify-center">
-                <span className="text-lg text-[#161F2B]/30">Main Product Image</span>
-              </div>
+              {product.images[selectedImageIndex] && (
+                <Image
+                  src={product.images[selectedImageIndex].url}
+                  alt={product.images[selectedImageIndex].altText || product.title}
+                  fill
+                  sizes="650px"
+                  className="object-cover"
+                  priority
+                />
+              )}
 
               {/* Best Seller Badge */}
               <div className="absolute top-6 left-0 flex items-center">
