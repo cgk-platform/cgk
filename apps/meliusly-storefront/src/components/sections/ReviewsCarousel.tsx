@@ -203,12 +203,19 @@ function ReviewCard({ review }: { review: Review }) {
     <div className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm transition-shadow duration-300 hover:shadow-md">
       {/* Product Image */}
       <div className="relative aspect-[4/3] w-full bg-[#F6F6F6]">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="p-8 text-center text-[#777777]/40">
-            <p className="text-sm font-medium">Product Image</p>
-            <p className="mt-2 text-xs">{review.productImage}</p>
-          </div>
-        </div>
+        <Image
+          src={review.productImage}
+          alt={review.productName}
+          fill
+          sizes="(max-width: 768px) 100vw, 33vw"
+          className="object-cover"
+          onError={(e) => {
+            const target = e.currentTarget
+            if (target.src !== '/assets/product-display.webp') {
+              target.src = '/assets/product-display.webp'
+            }
+          }}
+        />
       </div>
 
       {/* Review Content */}

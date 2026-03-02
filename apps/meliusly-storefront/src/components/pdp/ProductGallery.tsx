@@ -121,11 +121,17 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
                   }`}
                 >
                   <Image
-                    src={image.url}
-                    alt={image.altText || `Product thumbnail ${index + 1}`}
+                    src={image?.url || '/assets/product-display.webp'}
+                    alt={image?.altText || `Product thumbnail ${index + 1}`}
                     fill
                     sizes="90px"
                     className="object-cover"
+                    onError={(e) => {
+                      const target = e.currentTarget
+                      if (target.src !== '/assets/product-display.webp') {
+                        target.src = '/assets/product-display.webp'
+                      }
+                    }}
                   />
                 </button>
               ))}
@@ -134,16 +140,20 @@ export default function ProductGallery({ product }: ProductGalleryProps) {
 
             {/* Main Image */}
             <div className="relative h-[650px] w-[650px] overflow-hidden rounded-2xl bg-[#F6F6F6]">
-              {product.images[selectedImageIndex] && (
-                <Image
-                  src={product.images[selectedImageIndex].url}
-                  alt={product.images[selectedImageIndex].altText || product.title}
-                  fill
-                  sizes="650px"
-                  className="object-cover"
-                  priority
-                />
-              )}
+              <Image
+                src={product.images[selectedImageIndex]?.url || '/assets/product-display.webp'}
+                alt={product.images[selectedImageIndex]?.altText || product.title}
+                fill
+                sizes="650px"
+                className="object-cover"
+                priority
+                onError={(e) => {
+                  const target = e.currentTarget
+                  if (target.src !== '/assets/product-display.webp') {
+                    target.src = '/assets/product-display.webp'
+                  }
+                }}
+              />
 
               {/* Best Seller Badge */}
               <div className="absolute top-6 left-0 flex items-center">

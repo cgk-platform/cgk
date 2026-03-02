@@ -77,23 +77,21 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
           {/* Decorative accent line */}
           <div className="from-meliusly-primary to-meliusly-accent absolute top-0 left-0 z-10 h-1 w-0 bg-gradient-to-r transition-all duration-500 group-hover:w-full" />
 
-          {product.featuredImage ? (
-            <Image
-              src={product.featuredImage.url}
-              alt={product.featuredImage.altText || product.title}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-              loading={index < 4 ? 'eager' : 'lazy'}
-              priority={index < 4}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <span className="font-manrope text-meliusly-dark/20 text-sm font-medium">
-                No image
-              </span>
-            </div>
-          )}
+          <Image
+            src={product.featuredImage?.url || '/assets/product-display.webp'}
+            alt={product.featuredImage?.altText || product.title}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
+            loading={index < 4 ? 'eager' : 'lazy'}
+            priority={index < 4}
+            onError={(e) => {
+              const target = e.currentTarget
+              if (target.src !== '/assets/product-display.webp') {
+                target.src = '/assets/product-display.webp'
+              }
+            }}
+          />
 
           {/* Discount Badge */}
           {hasDiscount && (

@@ -105,21 +105,21 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
       <article className="h-full overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
         {/* Product Image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-[#F6F6F6]">
-          {product.featuredImage ? (
-            <Image
-              src={product.featuredImage.url}
-              alt={product.featuredImage.altText || product.title}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              loading={index < 4 ? 'eager' : 'lazy'}
-              priority={index < 4}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[#161F2B]/20">
-              <span className="font-manrope text-sm font-medium">No image</span>
-            </div>
-          )}
+          <Image
+            src={product.featuredImage?.url || '/assets/product-display.webp'}
+            alt={product.featuredImage?.altText || product.title}
+            fill
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            loading={index < 4 ? 'eager' : 'lazy'}
+            priority={index < 4}
+            onError={(e) => {
+              const target = e.currentTarget
+              if (target.src !== '/assets/product-display.webp') {
+                target.src = '/assets/product-display.webp'
+              }
+            }}
+          />
         </div>
 
         {/* Product Info */}
