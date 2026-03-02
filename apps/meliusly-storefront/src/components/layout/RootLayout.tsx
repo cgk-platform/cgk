@@ -13,6 +13,7 @@ import { MobileNav } from './MobileNav'
 import { Footer } from './Footer'
 import { CartDrawer } from '@/components/cart'
 import { CartProvider, useCart } from '@/lib/cart/CartContext'
+import { DemoModeBadge } from '@/components/DemoModeBadge'
 
 interface RootLayoutProps {
   children: React.ReactNode
@@ -38,6 +39,8 @@ function RootLayoutContent({ children }: RootLayoutProps) {
       <main className="min-h-screen">{children}</main>
 
       <Footer />
+
+      <DemoModeBadge />
     </>
   )
 }
