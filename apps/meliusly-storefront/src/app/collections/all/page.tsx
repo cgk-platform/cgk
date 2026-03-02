@@ -21,6 +21,8 @@ interface Product {
   featuredImage: {
     url: string
     altText: string | null
+    width: number
+    height: number
   }
 }
 

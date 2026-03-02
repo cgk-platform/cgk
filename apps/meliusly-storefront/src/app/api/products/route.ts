@@ -97,6 +97,8 @@ export async function GET(request: NextRequest) {
     products.forEach((product: any) => {
       if (!product.featuredImage?.url) {
         console.warn(`Product "${product.title}" is missing featuredImage`)
+      } else {
+        console.log(`Product "${product.title}" has image: ${product.featuredImage.url}`)
       }
     })
 
