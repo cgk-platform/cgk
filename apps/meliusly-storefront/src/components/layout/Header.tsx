@@ -15,9 +15,10 @@ import { Search, ShoppingCart, Menu } from 'lucide-react'
 interface HeaderProps {
   cartItemCount?: number
   onMobileMenuToggle?: () => void
+  onCartClick?: () => void
 }
 
-export function Header({ cartItemCount = 0, onMobileMenuToggle }: HeaderProps) {
+export function Header({ cartItemCount = 0, onMobileMenuToggle, onCartClick }: HeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
@@ -101,8 +102,8 @@ export function Header({ cartItemCount = 0, onMobileMenuToggle }: HeaderProps) {
           </button>
 
           {/* Cart with Badge */}
-          <Link
-            href="/cart"
+          <button
+            onClick={onCartClick}
             className="hover:bg-meliusly-gray/10 relative flex items-center justify-center rounded-full p-2 transition-colors"
             aria-label={`Cart (${cartItemCount} items)`}
           >
@@ -112,7 +113,7 @@ export function Header({ cartItemCount = 0, onMobileMenuToggle }: HeaderProps) {
                 {cartItemCount > 99 ? '99+' : cartItemCount}
               </span>
             )}
-          </Link>
+          </button>
         </div>
       </div>
     </header>
