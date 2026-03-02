@@ -70,26 +70,55 @@ export default async function AllCollectionsPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <div className="bg-[#f3fafe] px-6 py-16 lg:px-12">
+      {/* Collections Band - Figma 1:4176 */}
+      <div className="bg-[#F6F6F6] px-6 py-12 lg:px-12 lg:py-16">
         <div className="mx-auto max-w-[1440px]">
-          <h1 className="mb-4 text-center text-4xl font-semibold text-[#161f2b] lg:text-5xl">
+          {/* Breadcrumb */}
+          <nav className="mb-6 text-sm">
+            <ol className="flex items-center gap-2 text-[#777777]">
+              <li>
+                <Link href="/" className="hover:text-[#0268A0]">
+                  Home
+                </Link>
+              </li>
+              <li>/</li>
+              <li className="text-[#161F2B]">All Products</li>
+            </ol>
+          </nav>
+
+          {/* Title */}
+          <h1 className="mb-4 text-center text-[32px] leading-tight font-semibold text-[#161F2B] lg:text-[40px]">
             All Products
           </h1>
-          <p className="mx-auto max-w-2xl text-center text-lg text-[#777777]">
+
+          {/* Description */}
+          <p className="mx-auto max-w-2xl text-center text-[16px] leading-relaxed font-medium text-[#777777] lg:text-[18px]">
             Browse our complete collection of premium sofa bed support solutions
           </p>
         </div>
       </div>
 
-      {/* Products Grid */}
-      <div className="px-6 py-16 lg:px-12">
+      {/* Filter Bar - Figma 1:4178 */}
+      <div className="border-b border-[#E5E5E5] bg-white px-6 py-4 lg:px-12">
         <div className="mx-auto max-w-[1440px]">
-          <div className="mb-8 flex items-center justify-between">
-            <p className="text-lg text-[#777777]">{products.length} products</p>
-          </div>
+          <div className="flex items-center justify-between">
+            {/* Product Count */}
+            <p className="text-[14px] font-medium text-[#777777] lg:text-[16px]">
+              {products.length} {products.length === 1 ? 'product' : 'products'}
+            </p>
 
-          <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+            {/* Sort (placeholder for future implementation) */}
+            <div className="text-[14px] font-medium text-[#777777] lg:text-[16px]">
+              Sort: <span className="text-[#0268A0]">Best Selling</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Grid - Figma 1:4182 */}
+      <div className="px-6 py-12 lg:px-12 lg:py-16">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-8">
             {products.map((product) => {
               const currentPrice = formatPrice(
                 product.priceRange.minVariantPrice.amount,
@@ -130,25 +159,27 @@ export default async function AllCollectionsPage() {
                     </div>
 
                     {/* Product Info */}
-                    <div className="p-4">
-                      <h3 className="mb-2 line-clamp-2 min-h-[3rem] text-base font-semibold text-[#161F2B]">
+                    <div className="p-4 lg:p-6">
+                      <h3 className="mb-2 line-clamp-2 min-h-[3rem] text-[14px] leading-snug font-semibold text-[#161F2B] lg:text-[16px]">
                         {product.title}
                       </h3>
 
                       {/* Price */}
                       <div className="mb-3 flex items-baseline gap-2">
-                        <span className="text-xl font-bold text-[#0268A0]">{currentPrice}</span>
+                        <span className="text-[18px] font-bold text-[#0268A0] lg:text-[20px]">
+                          {currentPrice}
+                        </span>
                         {hasDiscount && (
-                          <span className="text-sm font-medium text-[#777777] line-through">
+                          <span className="text-[14px] font-medium text-[#777777] line-through lg:text-[16px]">
                             {compareAtPrice}
                           </span>
                         )}
                       </div>
 
                       {/* CTA */}
-                      <div className="flex items-center justify-between text-sm font-semibold text-[#0268A0]">
+                      <div className="flex items-center justify-between text-[13px] font-semibold text-[#0268A0] lg:text-[14px]">
                         <span>View Details</span>
-                        <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+                        <ArrowRight className="h-4 w-4 lg:h-5 lg:w-5" strokeWidth={2.5} />
                       </div>
                     </div>
                   </article>
@@ -156,6 +187,15 @@ export default async function AllCollectionsPage() {
               )
             })}
           </div>
+
+          {/* Empty State */}
+          {products.length === 0 && (
+            <div className="py-24 text-center">
+              <p className="text-[16px] font-medium text-[#777777] lg:text-[18px]">
+                No products found.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </main>

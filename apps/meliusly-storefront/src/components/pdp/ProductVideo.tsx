@@ -12,7 +12,7 @@ interface ProductVideoProps {
 
 export function ProductVideo({
   videoUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-  thumbnailUrl = '/meliusly/a50abb42e4b9cb50927483938df0865ace304bfe.png',
+  thumbnailUrl = '/meliusly/a50abb42e4b9cb50927483938df0865ace304bfe.webp',
   title = 'Watch Installation',
 }: ProductVideoProps) {
   const [isPlaying, setIsPlaying] = useState(false)

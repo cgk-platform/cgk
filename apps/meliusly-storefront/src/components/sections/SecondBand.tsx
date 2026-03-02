@@ -8,7 +8,7 @@ export function SecondBand() {
       {/* Background Image */}
       <div className="absolute top-1/2 left-1/2 h-[456px] w-[1460px] -translate-x-1/2 -translate-y-1/2 opacity-24">
         <Image
-          src="/assets/grey-gold-living-room.png"
+          src="/assets/grey-gold-living-room.webp"
           alt="Living Room Background"
           fill
           className="object-cover"
@@ -19,7 +19,7 @@ export function SecondBand() {
       <div className="absolute top-[89px] left-[282px] flex content-stretch items-center gap-[83px]">
         {/* Product Image */}
         <div className="relative h-[116px] w-[113px] shrink-0">
-          <Image src="/assets/product-display.png" alt="Product" fill className="object-contain" />
+          <Image src="/assets/product-display.webp" alt="Product" fill className="object-contain" />
         </div>
 
         {/* Divider Line */}

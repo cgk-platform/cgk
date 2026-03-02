@@ -12,6 +12,11 @@ const nextConfig = {
         hostname: '**.myshopify.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        pathname: '/**',
+      },
     ],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,

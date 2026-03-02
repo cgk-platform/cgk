@@ -258,7 +258,7 @@ export default function ProductFeatures() {
           <div className="order-first w-full md:order-last md:w-[542px] md:shrink-0">
             <div className="bg-meliusly-lightBlue relative aspect-[542/562] w-full overflow-hidden rounded-2xl md:rounded-[16px]">
               <Image
-                src="/figma-assets/3be6a96ee43da53d1c2f9eb4155835b4d37baa48.png"
+                src="/figma-assets/3be6a96ee43da53d1c2f9eb4155835b4d37baa48.webp"
                 alt="SleepSaver product layers showing plywood core and fabric layers"
                 fill
                 className="object-cover"

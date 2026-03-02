@@ -102,7 +102,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
         opacity: 0,
       }}
     >
-      <article className="h-full overflow-hidden rounded-lg bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
+      <article className="h-full overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_-10px_rgba(0,0,0,0.15)]">
         {/* Product Image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-[#F6F6F6]">
           {product.featuredImage ? (
@@ -117,29 +117,31 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-[#161F2B]/20">
-              <span className="text-sm font-medium">No image</span>
+              <span className="font-manrope text-sm font-medium">No image</span>
             </div>
           )}
         </div>
 
         {/* Product Info */}
         <div className="p-5">
-          <h3 className="mb-3 line-clamp-2 min-h-[3.5rem] text-lg font-semibold text-[#161F2B] transition-colors duration-200 group-hover:text-[#0268A0]">
+          <h3 className="font-manrope mb-3 line-clamp-2 min-h-[3.5rem] text-[18px] leading-[1.3] font-semibold text-[#161F2B] transition-colors duration-200 group-hover:text-[#0268A0]">
             {product.title}
           </h3>
 
           {/* Price */}
           <div className="mb-4 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-[#0268A0]">{currentPrice}</span>
+            <span className="font-manrope text-[24px] font-bold text-[#0268A0]">
+              {currentPrice}
+            </span>
             {hasDiscount && (
-              <span className="text-lg font-medium text-[#777777] line-through">
+              <span className="font-manrope text-[18px] font-medium text-[#777777] line-through">
                 {compareAtPrice}
               </span>
             )}
           </div>
 
           {/* CTA Button */}
-          <div className="flex items-center justify-between text-sm font-semibold tracking-wide text-[#0268A0]">
+          <div className="font-manrope flex items-center justify-between text-[14px] font-semibold tracking-wide text-[#0268A0]">
             <span>View Details</span>
             <ArrowRight
               className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
@@ -164,7 +166,7 @@ export default async function ProductGrid() {
       <div className="mx-auto max-w-[1440px]">
         {/* Section Header */}
         <div className="mb-12 text-center">
-          <h2 className="mb-4 text-4xl font-semibold text-[#161F2B] md:text-5xl">
+          <h2 className="font-manrope mb-4 text-[32px] leading-[1.3] font-semibold text-[#161F2B] md:text-[40px]">
             Our Best Sellers
           </h2>
           <div className="mx-auto h-1 w-20 rounded-full bg-[#0268A0]"></div>
@@ -181,7 +183,7 @@ export default async function ProductGrid() {
         <div className="mt-12 text-center">
           <Link
             href="/collections/all"
-            className="inline-flex items-center gap-2 rounded-full bg-[#0268A0] px-8 py-3 text-base font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-[#015580] hover:shadow-lg"
+            className="font-manrope inline-flex items-center gap-2 rounded-lg bg-[#0268A0] px-8 py-3 text-[16px] font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-[#015580] hover:shadow-lg"
           >
             Shop All Products
             <ArrowRight className="h-5 w-5" strokeWidth={2.5} />

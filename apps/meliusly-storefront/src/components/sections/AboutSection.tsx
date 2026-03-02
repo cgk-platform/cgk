@@ -51,7 +51,7 @@ export function AboutSection() {
           {/* Content Column */}
           <div className="flex flex-col justify-center space-y-6 lg:space-y-8">
             <h2
-              className={`font-manrope text-[28px] leading-[32px] font-semibold tracking-[-0.02em] text-[#161F2B] transition-all duration-700 ease-out lg:text-[32px] lg:leading-[36px] ${
+              className={`font-manrope text-[28px] leading-[1.3] font-semibold tracking-[-0.02em] text-[#161F2B] transition-all duration-700 ease-out lg:text-[32px] ${
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2.5 opacity-0'
               }`}
               style={{ transitionDelay: '300ms' }}
@@ -61,7 +61,7 @@ export function AboutSection() {
 
             <div className="space-y-5">
               <p
-                className={`font-manrope text-base leading-[1.6] font-medium tracking-[0.01em] text-[#4A5568] transition-all duration-700 ease-out ${
+                className={`font-manrope text-[16px] leading-[1.6] font-medium tracking-[0.01em] text-[#777777] transition-all duration-700 ease-out ${
                   isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2.5 opacity-0'
                 }`}
                 style={{ transitionDelay: '500ms' }}
@@ -71,7 +71,7 @@ export function AboutSection() {
               </p>
 
               <p
-                className={`font-manrope text-base leading-[1.6] font-medium tracking-[0.01em] text-[#4A5568] transition-all duration-700 ease-out ${
+                className={`font-manrope text-[16px] leading-[1.6] font-medium tracking-[0.01em] text-[#777777] transition-all duration-700 ease-out ${
                   isVisible ? 'translate-y-0 opacity-100' : 'translate-y-2.5 opacity-0'
                 }`}
                 style={{ transitionDelay: '700ms' }}
@@ -90,7 +90,7 @@ export function AboutSection() {
             >
               <Link
                 href="/about"
-                className="font-manrope inline-flex items-center justify-center rounded-full bg-[#0268A0] px-8 py-3.5 text-base font-semibold text-white transition-all duration-300 hover:bg-[#015A8C] hover:shadow-lg hover:shadow-[#0268A0]/20 active:scale-[0.98]"
+                className="font-manrope inline-flex items-center justify-center rounded-lg bg-[#0268A0] px-8 py-3.5 text-[16px] font-semibold text-white transition-all duration-300 hover:bg-[#015A8C] hover:shadow-lg hover:shadow-[#0268A0]/20 active:scale-[0.98]"
               >
                 Read Our Story
               </Link>

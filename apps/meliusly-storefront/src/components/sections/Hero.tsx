@@ -15,7 +15,7 @@ export default function Hero() {
   }, [])
 
   return (
-    <section className="relative h-[600px] w-full overflow-hidden lg:h-[700px]">
+    <section className="relative h-[700px] w-full overflow-hidden">
       {/* Background Images - Desktop/Mobile responsive */}
       <div className="absolute inset-0">
         {/* Desktop Image */}
@@ -64,24 +64,24 @@ export default function Hero() {
             </div>
 
             {/* Main Headline */}
-            <h1 className="font-manrope mb-4 text-4xl leading-[1.3] font-semibold tracking-tight text-white lg:text-5xl">
+            <h1 className="font-manrope mb-[30px] text-[40px] leading-[1.3] font-semibold tracking-tight text-white">
               Fix Sagging Furniture with Durable Support Solutions
             </h1>
 
             {/* Subheadline */}
-            <p className="font-manrope mb-8 max-w-[560px] text-lg leading-[1.5] font-medium text-white lg:text-[22px]">
+            <p className="font-manrope mb-[40px] max-w-[560px] text-[16px] leading-[1.6] font-medium tracking-[-0.16px] text-white">
               Restore comfort and stability to sofas, sleeper sofas, and bed without replacing them.
             </p>
 
             {/* CTA Button */}
-            <div className="space-y-3">
+            <div className="flex flex-col gap-[15px]">
               <Link
                 href="/collections/all"
-                className="bg-meliusly-primary hover:bg-meliusly-primary/90 font-manrope inline-block rounded-full px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl"
+                className="font-manrope inline-flex h-[56px] w-[328px] items-center justify-center rounded-lg bg-[#0268A0] px-6 py-[21px] text-[16px] leading-[1.2] font-semibold text-white capitalize shadow-lg transition-all duration-300 hover:scale-105 hover:bg-[#015580] hover:shadow-xl"
               >
                 Shop All Support Solutions
               </Link>
-              <p className="font-manrope ml-1 text-sm font-normal text-white">
+              <p className="font-manrope text-center text-[14px] leading-[1.6] font-medium tracking-[-0.14px] text-white">
                 Free shipping on all orders
               </p>
             </div>

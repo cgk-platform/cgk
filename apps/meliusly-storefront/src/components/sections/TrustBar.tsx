@@ -1,5 +1,5 @@
 import React from 'react'
-import { ShieldCheck, Shield, Ruler, Flag } from 'lucide-react'
+import { Users, Star, Wrench, FileText } from 'lucide-react'
 
 interface TrustBadge {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
@@ -9,44 +9,34 @@ interface TrustBadge {
 
 const trustBadges: TrustBadge[] = [
   {
-    icon: ShieldCheck,
-    title: 'Built to Last',
-    subtitle: 'Premium materials',
+    icon: Users,
+    title: 'Over 500,000',
+    subtitle: 'Happy Customers',
   },
   {
-    icon: Shield,
-    title: 'Protected',
-    subtitle: 'Lifetime warranty',
+    icon: Star,
+    title: 'Over 8,000',
+    subtitle: '5-Star Reviews',
   },
   {
-    icon: Ruler,
-    title: 'Perfect Fit',
-    subtitle: 'Custom sizes',
+    icon: Wrench,
+    title: 'Engineered',
+    subtitle: 'and Designed in USA',
   },
   {
-    icon: Flag,
-    title: 'Made in USA',
-    subtitle: 'Quality craftsmanship',
+    icon: FileText,
+    title: 'Featured',
+    subtitle: 'in New York Times Wirecutter',
   },
 ]
 
 export function TrustBar() {
   return (
-    <section className="flex h-[121px] items-center justify-center bg-[#2E3F56] px-4">
-      <div className="w-full max-w-7xl">
-        {/* Desktop: Horizontal with dividers */}
-        <div className="hidden md:grid md:grid-cols-4 md:divide-x md:divide-white/20">
-          {trustBadges.map((badge, index) => (
-            <TrustBadgeItem key={index} badge={badge} />
-          ))}
-        </div>
-
-        {/* Mobile: 2x2 Grid, no dividers */}
-        <div className="grid grid-cols-2 gap-6 md:hidden">
-          {trustBadges.map((badge, index) => (
-            <TrustBadgeItem key={index} badge={badge} />
-          ))}
-        </div>
+    <section className="flex h-[121px] items-center justify-center bg-[#2E3F56] px-4 sm:px-8 md:px-20">
+      <div className="flex w-full max-w-[1440px] items-center justify-center gap-12 md:gap-20">
+        {trustBadges.map((badge, index) => (
+          <TrustBadgeItem key={index} badge={badge} />
+        ))}
       </div>
     </section>
   )
@@ -56,17 +46,21 @@ function TrustBadgeItem({ badge }: { badge: TrustBadge }) {
   const Icon = badge.icon
 
   return (
-    <div className="group flex cursor-default flex-col items-center justify-center px-4 text-center md:px-6">
+    <div className="group flex cursor-default items-center gap-6 text-left">
       {/* Icon with refined hover interaction */}
-      <div className="mb-3 transition-all duration-300 group-hover:-translate-y-1 group-hover:drop-shadow-[0_4px_12px_rgba(255,255,255,0.25)]">
-        <Icon className="h-8 w-8 text-white" strokeWidth={1.5} />
+      <div className="transition-all duration-300 group-hover:-translate-y-1 group-hover:drop-shadow-[0_4px_12px_rgba(255,255,255,0.25)]">
+        <Icon className="h-10 w-10 flex-shrink-0 text-white" strokeWidth={1.5} />
       </div>
 
       {/* Typography with Manrope font family */}
-      <h3 className="mb-1 text-base leading-tight font-semibold tracking-wide text-white">
-        {badge.title}
-      </h3>
-      <p className="text-[13px] leading-snug font-medium text-white/90">{badge.subtitle}</p>
+      <div className="flex flex-col gap-4">
+        <h3 className="font-manrope text-[18px] leading-[1.3] font-semibold text-[#F6F6F6] capitalize">
+          {badge.title}
+        </h3>
+        <p className="font-manrope text-[16px] leading-[1.6] font-medium tracking-[-0.16px] text-[#F6F6F6]">
+          {badge.subtitle}
+        </p>
+      </div>
     </div>
   )
 }

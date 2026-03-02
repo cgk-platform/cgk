@@ -47,7 +47,7 @@ export default function ProductDimensions() {
             <div className="relative w-full max-w-[650px]">
               {/* Main diagram image */}
               <img
-                src="/pdp/40cd43d73d1d40e2a44583ef2df6d28b73c7a8f4.png"
+                src="/pdp/40cd43d73d1d40e2a44583ef2df6d28b73c7a8f4.webp"
                 alt="3D isometric view of sofa bed mattress showing Twin (35×64), Full (46×64), and Queen (54×64) size measurements"
                 className="h-auto w-full"
                 loading="eager"

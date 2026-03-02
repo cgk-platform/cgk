@@ -30,11 +30,11 @@ export default function ProductPage() {
 
 ## Props
 
-| Prop           | Type     | Default                                                    | Description                                      |
-| -------------- | -------- | ---------------------------------------------------------- | ------------------------------------------------ |
-| `videoUrl`     | `string` | `'https://www.youtube.com/embed/dQw4w9WgXcQ'`              | YouTube/Vimeo embed URL or self-hosted video URL |
-| `thumbnailUrl` | `string` | `'/meliusly/a50abb42e4b9cb50927483938df0865ace304bfe.png'` | Path to video thumbnail image                    |
-| `title`        | `string` | `'Watch Installation'`                                     | Text displayed on the play button                |
+| Prop           | Type     | Default                                                     | Description                                      |
+| -------------- | -------- | ----------------------------------------------------------- | ------------------------------------------------ |
+| `videoUrl`     | `string` | `'https://www.youtube.com/embed/dQw4w9WgXcQ'`               | YouTube/Vimeo embed URL or self-hosted video URL |
+| `thumbnailUrl` | `string` | `'/meliusly/a50abb42e4b9cb50927483938df0865ace304bfe.webp'` | Path to video thumbnail image                    |
+| `title`        | `string` | `'Watch Installation'`                                      | Text displayed on the play button                |
 
 ## Design Specifications
 

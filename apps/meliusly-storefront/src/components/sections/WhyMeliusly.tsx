@@ -38,7 +38,7 @@ export function WhyMeliusly() {
     <section className="bg-[#F8F9FA] px-4 py-16 md:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl">
         {/* Section Heading */}
-        <h2 className="font-manrope text-meliusly-dark mb-12 text-center text-[32px] leading-tight font-semibold md:mb-16 md:text-[40px]">
+        <h2 className="font-manrope mb-12 text-center text-[32px] leading-tight font-semibold text-[#161F2B] md:mb-16 md:text-[40px]">
           Why Choose Meliusly
         </h2>
 
@@ -53,23 +53,23 @@ export function WhyMeliusly() {
               >
                 {/* Icon Container */}
                 <div className="mb-6 flex items-center justify-center">
-                  <div className="bg-meliusly-primary/10 group-hover:bg-meliusly-primary/15 flex h-16 w-16 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110">
-                    <Icon className="text-meliusly-primary h-8 w-8" strokeWidth={1.5} />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#0268A0]/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-[#0268A0]/15">
+                    <Icon className="h-8 w-8 text-[#0268A0]" strokeWidth={1.5} />
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="text-center">
-                  <h3 className="font-manrope text-meliusly-dark mb-3 text-[20px] leading-tight font-semibold">
+                  <h3 className="font-manrope mb-3 text-[20px] leading-tight font-semibold text-[#161F2B]">
                     {feature.title}
                   </h3>
-                  <p className="font-manrope text-meliusly-grayText text-[16px] leading-relaxed">
+                  <p className="font-manrope text-[16px] leading-relaxed text-[#777777]">
                     {feature.description}
                   </p>
                 </div>
 
                 {/* Subtle hover effect accent */}
-                <div className="from-meliusly-primary to-meliusly-primary/60 absolute bottom-0 left-0 h-1 w-full scale-x-0 bg-gradient-to-r transition-transform duration-300 group-hover:scale-x-100" />
+                <div className="absolute bottom-0 left-0 h-1 w-full scale-x-0 bg-gradient-to-r from-[#0268A0] to-[#0268A0]/60 transition-transform duration-300 group-hover:scale-x-100" />
               </div>
             )
           })}

@@ -32,7 +32,7 @@ export function TraitsBar() {
                   className="h-6 w-6 flex-shrink-0 text-[#0268A0] transition-transform duration-300 group-hover:scale-110"
                   strokeWidth={1.75}
                 />
-                <span className="text-[13px] leading-tight font-medium tracking-wide whitespace-nowrap text-[#161F2B]">
+                <span className="font-manrope text-[13px] leading-tight font-medium tracking-wide whitespace-nowrap text-[#161F2B]">
                   {trait.text}
                 </span>
               </div>

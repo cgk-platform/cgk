@@ -25,60 +25,62 @@ export async function GET(request: NextRequest) {
     const host = request.headers.get('host')
     const tenant = await resolveTenantFromDomain(host)
 
-    // Get Shopify client with database credentials
-    const shopify = await getShopifyClientForTenant(tenant.id)
-
     // Parse query parameters
     const searchParams = request.nextUrl.searchParams
     const first = parseInt(searchParams.get('first') || '8', 10)
     const sortKey = searchParams.get('sortKey') || 'BEST_SELLING'
 
-    // Fetch products from Shopify
-    const result = (await shopify.query(
-      `
-      query getProducts($first: Int!, $sortKey: ProductCollectionSortKeys) {
-        products(first: $first, sortKey: $sortKey) {
-          edges {
-            node {
-              id
-              title
-              handle
-              description
-              priceRange {
-                minVariantPrice {
-                  amount
-                  currencyCode
-                }
-              }
-              compareAtPriceRange {
-                minVariantPrice {
-                  amount
-                  currencyCode
-                }
-              }
-              featuredImage {
-                url
-                altText
-                width
-                height
-              }
-              images(first: 5) {
-                edges {
-                  node {
-                    url
-                    altText
+    try {
+      // Get Shopify client with database credentials
+      const shopify = await getShopifyClientForTenant(tenant.id)
+
+      // Fetch products from Shopify
+      const result = (await shopify.query(
+        `
+        query getProducts($first: Int!, $sortKey: ProductCollectionSortKeys) {
+          products(first: $first, sortKey: $sortKey) {
+            edges {
+              node {
+                id
+                title
+                handle
+                description
+                priceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
                   }
                 }
-              }
-              variants(first: 10) {
-                edges {
-                  node {
-                    id
-                    title
-                    availableForSale
-                    price {
-                      amount
-                      currencyCode
+                compareAtPriceRange {
+                  minVariantPrice {
+                    amount
+                    currencyCode
+                  }
+                }
+                featuredImage {
+                  url
+                  altText
+                  width
+                  height
+                }
+                images(first: 5) {
+                  edges {
+                    node {
+                      url
+                      altText
+                    }
+                  }
+                }
+                variants(first: 10) {
+                  edges {
+                    node {
+                      id
+                      title
+                      availableForSale
+                      price {
+                        amount
+                        currencyCode
+                      }
                     }
                   }
                 }
@@ -86,31 +88,47 @@ export async function GET(request: NextRequest) {
             }
           }
         }
-      }
-    `,
-      { first, sortKey }
-    )) as { products: { edges: Array<{ node: unknown }> } }
+      `,
+        { first, sortKey }
+      )) as { products: { edges: Array<{ node: unknown }> } }
 
-    const products = result.products.edges.map((edge) => edge.node)
+      const products = result.products.edges.map((edge) => edge.node)
 
-    // Log image URLs for debugging
-    products.forEach((product: any) => {
-      if (!product.featuredImage?.url) {
-        console.warn(`Product "${product.title}" is missing featuredImage`)
-      } else {
-        console.log(`Product "${product.title}" has image: ${product.featuredImage.url}`)
-      }
-    })
+      // Log image URLs for debugging
+      products.forEach((product: any) => {
+        if (!product.featuredImage?.url) {
+          console.warn(`Product "${product.title}" is missing featuredImage`)
+        } else {
+          console.log(`Product "${product.title}" has image: ${product.featuredImage.url}`)
+        }
+      })
 
-    return NextResponse.json({
-      success: true,
-      data: products,
-      tenant: {
-        id: tenant.id,
-        slug: tenant.slug,
-        name: tenant.name,
-      },
-    })
+      return NextResponse.json({
+        success: true,
+        data: products,
+        tenant: {
+          id: tenant.id,
+          slug: tenant.slug,
+          name: tenant.name,
+        },
+      })
+    } catch (shopifyError) {
+      // If Shopify connection fails, return mock data for development
+      console.warn('Shopify connection not available, using mock data:', shopifyError)
+
+      const mockProducts = generateMockProducts(first)
+
+      return NextResponse.json({
+        success: true,
+        data: mockProducts,
+        tenant: {
+          id: tenant.id,
+          slug: tenant.slug,
+          name: tenant.name,
+        },
+        mock: true,
+      })
+    }
   } catch (error) {
     console.error('Failed to fetch products:', error)
 
@@ -122,4 +140,57 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+/**
+ * Generate mock products for development when Shopify is not connected
+ */
+function generateMockProducts(count: number) {
+  const products = []
+  const productNames = [
+    'SleepSaver Pro',
+    'Classic Sleeper',
+    'Flex Sleeper',
+    'Premium Support Board',
+    'Comfort Plus',
+    'Elite Sleeper',
+    'Standard Support',
+    'Deluxe Support Board',
+  ]
+
+  for (let i = 0; i < Math.min(count, productNames.length); i++) {
+    const name = productNames[i]
+    const handle = name.toLowerCase().replace(/\s+/g, '-')
+    const basePrice = 99.99 + i * 20
+    const hasDiscount = i % 3 === 0
+
+    products.push({
+      id: `gid://shopify/Product/mock-${i + 1}`,
+      title: name,
+      handle,
+      description: `Premium sofa bed support solution - ${name}`,
+      priceRange: {
+        minVariantPrice: {
+          amount: basePrice.toString(),
+          currencyCode: 'USD',
+        },
+      },
+      compareAtPriceRange: hasDiscount
+        ? {
+            minVariantPrice: {
+              amount: (basePrice * 1.2).toString(),
+              currencyCode: 'USD',
+            },
+          }
+        : null,
+      featuredImage: {
+        url: `https://placehold.co/800x800/F6F6F6/0268A0?text=${encodeURIComponent(name)}`,
+        altText: name,
+        width: 800,
+        height: 800,
+      },
+    })
+  }
+
+  return products
 }

@@ -174,7 +174,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@1.21.7)
+        version: 9.39.2(jiti@2.6.1)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
@@ -238,7 +238,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@2.6.1)
+        version: 9.39.2(jiti@1.21.7)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
@@ -543,6 +543,9 @@ importers:
       postcss:
         specifier: ^8.4.49
         version: 8.5.6
+      sharp:
+        specifier: ^0.33.5
+        version: 0.33.5
       tailwindcss:
         specifier: ^4.0.0
         version: 4.1.18

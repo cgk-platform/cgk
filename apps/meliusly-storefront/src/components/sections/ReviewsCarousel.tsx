@@ -26,7 +26,7 @@ const REVIEWS: Review[] = [
     location: 'BOSTON, MA',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.png',
+    productImage: '/assets/product-display.webp',
   },
   {
     id: 2,
@@ -37,7 +37,7 @@ const REVIEWS: Review[] = [
     location: 'UNITED STATES',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.png',
+    productImage: '/assets/product-display.webp',
   },
   {
     id: 3,
@@ -48,7 +48,7 @@ const REVIEWS: Review[] = [
     location: 'UNITED STATES',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.png',
+    productImage: '/assets/product-display.webp',
   },
   {
     id: 4,
@@ -59,7 +59,7 @@ const REVIEWS: Review[] = [
     location: 'NEW YORK, NY',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.png',
+    productImage: '/assets/product-display.webp',
   },
   {
     id: 5,
@@ -70,7 +70,7 @@ const REVIEWS: Review[] = [
     location: 'CHICAGO, IL',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.png',
+    productImage: '/assets/product-display.webp',
   },
   {
     id: 6,
@@ -81,7 +81,7 @@ const REVIEWS: Review[] = [
     location: 'SAN FRANCISCO, CA',
     verified: true,
     productName: 'SLEEPERSAVER SOFA BED SUPPORT BOARD',
-    productImage: '/assets/product-display.png',
+    productImage: '/assets/product-display.webp',
   },
 ]
 
@@ -117,17 +117,17 @@ export function ReviewsCarousel() {
   }, [currentSlide])
 
   return (
-    <section className="bg-meliusly-lightGray relative overflow-hidden py-16 md:py-24">
+    <section className="relative overflow-hidden bg-[#F6F6F6] py-16 md:py-24">
       <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
         <div className="mb-12 text-center md:mb-16">
-          <p className="text-meliusly-blue mb-3 text-xs font-semibold tracking-[0.15em] uppercase md:mb-4 md:text-sm">
+          <p className="mb-3 text-xs font-semibold tracking-[0.15em] text-[#0268A0] uppercase md:mb-4 md:text-sm">
             OVER XX,XXX+ 5-STAR REVIEWS
           </p>
-          <h2 className="font-manrope text-meliusly-dark mb-3 text-3xl leading-tight font-semibold md:mb-4 md:text-[40px]">
+          <h2 className="font-manrope mb-3 text-3xl leading-tight font-semibold text-[#161F2B] md:mb-4 md:text-[40px]">
             But Don't Take Our Word For It
           </h2>
-          <p className="text-meliusly-grayText mx-auto max-w-2xl text-base md:text-lg">
+          <p className="mx-auto max-w-2xl text-base text-[#777777] md:text-lg">
             Join over 500,000 customers who have restored their comfort.
           </p>
         </div>
@@ -161,19 +161,19 @@ export function ReviewsCarousel() {
           <button
             onClick={prevSlide}
             disabled={isAnimating}
-            className="hover:bg-meliusly-lightGray group absolute top-1/2 left-0 z-10 flex h-12 w-12 -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 md:h-14 md:w-14 md:-translate-x-12 lg:-translate-x-16"
+            className="group absolute top-1/2 left-0 z-10 flex h-12 w-12 -translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg transition-all duration-300 hover:bg-[#F6F6F6] disabled:cursor-not-allowed disabled:opacity-50 md:h-14 md:w-14 md:-translate-x-12 lg:-translate-x-16"
             aria-label="Previous reviews"
           >
-            <ChevronLeft className="text-meliusly-dark h-6 w-6 transition-transform group-hover:scale-110" />
+            <ChevronLeft className="h-6 w-6 text-[#161F2B] transition-transform group-hover:scale-110" />
           </button>
 
           <button
             onClick={nextSlide}
             disabled={isAnimating}
-            className="hover:bg-meliusly-lightGray group absolute top-1/2 right-0 z-10 flex h-12 w-12 translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 md:h-14 md:w-14 md:translate-x-12 lg:translate-x-16"
+            className="group absolute top-1/2 right-0 z-10 flex h-12 w-12 translate-x-4 -translate-y-1/2 items-center justify-center rounded-full bg-white shadow-lg transition-all duration-300 hover:bg-[#F6F6F6] disabled:cursor-not-allowed disabled:opacity-50 md:h-14 md:w-14 md:translate-x-12 lg:translate-x-16"
             aria-label="Next reviews"
           >
-            <ChevronRight className="text-meliusly-dark h-6 w-6 transition-transform group-hover:scale-110" />
+            <ChevronRight className="h-6 w-6 text-[#161F2B] transition-transform group-hover:scale-110" />
           </button>
         </div>
 
@@ -186,8 +186,8 @@ export function ReviewsCarousel() {
               disabled={isAnimating}
               className={`rounded-full transition-all duration-300 ${
                 currentSlide === index
-                  ? 'bg-meliusly-blue h-2 w-8'
-                  : 'bg-meliusly-gray/30 hover:bg-meliusly-gray/50 h-2 w-2'
+                  ? 'h-2 w-8 bg-[#0268A0]'
+                  : 'h-2 w-2 bg-[#777777]/30 hover:bg-[#777777]/50'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -202,9 +202,9 @@ function ReviewCard({ review }: { review: Review }) {
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-lg bg-white shadow-sm transition-shadow duration-300 hover:shadow-md">
       {/* Product Image */}
-      <div className="bg-meliusly-lightGray relative aspect-[4/3] w-full">
+      <div className="relative aspect-[4/3] w-full bg-[#F6F6F6]">
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-meliusly-gray/40 p-8 text-center">
+          <div className="p-8 text-center text-[#777777]/40">
             <p className="text-sm font-medium">Product Image</p>
             <p className="mt-2 text-xs">{review.productImage}</p>
           </div>
@@ -216,33 +216,31 @@ function ReviewCard({ review }: { review: Review }) {
         {/* Star Rating */}
         <div className="mb-4 flex items-center gap-1">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Star key={i} className="fill-meliusly-gold text-meliusly-gold h-4 w-4" />
+            <Star key={i} className="h-4 w-4 fill-[#FFB81C] text-[#FFB81C]" />
           ))}
         </div>
 
         {/* Review Title */}
-        <h3 className="font-manrope text-meliusly-dark mb-3 text-xl leading-tight font-semibold md:text-2xl">
+        <h3 className="font-manrope mb-3 text-xl leading-tight font-semibold text-[#161F2B] md:text-2xl">
           {review.title}
         </h3>
 
         {/* Review Text */}
-        <p className="font-manrope text-meliusly-dark mb-6 flex-1 text-base leading-[1.6]">
+        <p className="font-manrope mb-6 flex-1 text-base leading-[1.6] text-[#161F2B]">
           {review.text}
         </p>
 
         {/* Attribution */}
-        <div className="border-meliusly-gray/10 flex items-center justify-between border-t pt-4">
+        <div className="flex items-center justify-between border-t border-[#777777]/10 pt-4">
           <div className="flex items-center gap-2">
-            <span className="font-manrope text-meliusly-dark text-sm font-semibold">
-              {review.name}
-            </span>
+            <span className="font-manrope text-sm font-semibold text-[#161F2B]">{review.name}</span>
             {review.verified && (
               <svg
                 width="16"
                 height="16"
                 viewBox="0 0 16 16"
                 fill="none"
-                className="text-meliusly-blue"
+                className="text-[#0268A0]"
               >
                 <path
                   d="M8 0L9.79611 6.20389L16 8L9.79611 9.79611L8 16L6.20389 9.79611L0 8L6.20389 6.20389L8 0Z"
@@ -251,14 +249,14 @@ function ReviewCard({ review }: { review: Review }) {
               </svg>
             )}
           </div>
-          <span className="font-manrope text-meliusly-grayText text-sm">{review.location}</span>
+          <span className="font-manrope text-sm text-[#777777]">{review.location}</span>
         </div>
 
         {/* Product Link */}
-        <div className="border-meliusly-gray/10 mt-6 border-t pt-6">
+        <div className="mt-6 border-t border-[#777777]/10 pt-6">
           <a
             href="#"
-            className="text-meliusly-blue group flex items-center gap-2 text-sm font-semibold tracking-wide uppercase transition-all duration-300 hover:gap-3"
+            className="group flex items-center gap-2 text-sm font-semibold tracking-wide text-[#0268A0] uppercase transition-all duration-300 hover:gap-3"
           >
             <span className="h-6 w-6 flex-shrink-0">
               <svg viewBox="0 0 24 24" fill="none" className="h-full w-full">

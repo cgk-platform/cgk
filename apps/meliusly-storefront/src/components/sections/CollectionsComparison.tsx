@@ -7,7 +7,7 @@ import { Check } from 'lucide-react'
 const products = [
   {
     name: 'SleeperSaver Sofa Bed Support Board',
-    image: '/assets/sleepersaver-thumb.png',
+    image: '/assets/sleepersaver-thumb.webp',
     price: '$109.99',
     badge: 'best seller',
     features: {
@@ -22,7 +22,7 @@ const products = [
   },
   {
     name: 'Classic Sleeper Sofa Support Board',
-    image: '/assets/classic-sleeper-thumb.png',
+    image: '/assets/classic-sleeper-thumb.webp',
     price: '$69.99',
     features: {
       recommended: 'Maximum firmness',
@@ -36,7 +36,7 @@ const products = [
   },
   {
     name: 'Flex Sleeper Sofa Support Board',
-    image: '/assets/flex-sleeper-thumb.png',
+    image: '/assets/flex-sleeper-thumb.webp',
     price: '$69.99',
     features: {
       recommended: 'Comfort with flexibility & pressure relief',

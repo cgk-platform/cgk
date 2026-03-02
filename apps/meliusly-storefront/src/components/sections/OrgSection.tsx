@@ -34,7 +34,7 @@ export function OrgSection() {
             {/* Forest Background */}
             <div className="absolute inset-0 scale-105 transition-transform duration-700 group-hover:scale-100">
               <Image
-                src="/assets/fc9c1dda33746ffd4dd8848120f45d450a1b35b8.png"
+                src="/assets/fc9c1dda33746ffd4dd8848120f45d450a1b35b8.webp"
                 alt="Forest background"
                 fill
                 className="object-cover object-center"
