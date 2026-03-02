@@ -6,6 +6,7 @@
  */
 
 import { sql } from '@vercel/postgres'
+import { withTenant } from '@cgk-platform/db'
 import { createStorefrontClient, type StorefrontClient } from '@cgk-platform/shopify'
 import { decryptToken } from '@cgk-platform/shopify'
 
@@ -23,21 +24,30 @@ export interface ShopifyInstallation {
 /**
  * Get Shopify installation for tenant
  *
- * @param tenantId - Tenant organization ID
+ * @param tenantId - Tenant organization ID (UUID)
  * @returns Shopify installation record
  * @throws Error if no installation found
  */
 export async function getShopifyInstallation(tenantId: string): Promise<ShopifyInstallation> {
-  // Query shopify_connections table
-  const result = await sql`
-    SELECT id, shop, access_token_encrypted, storefront_api_token_encrypted,
-           tenant_id, status, installed_at, updated_at
-    FROM public.shopify_connections
-    WHERE tenant_id = ${tenantId}
-    AND status = 'active'
-    ORDER BY installed_at DESC
-    LIMIT 1
-  `
+  // Convert tenant UUID to slug (withTenant requires slug, not UUID)
+  const tenantResult = await sql`SELECT slug FROM public.organizations WHERE id = ${tenantId}`
+  if (tenantResult.rows.length === 0) {
+    throw new Error(`Tenant not found: ${tenantId}`)
+  }
+  const tenantSlug = (tenantResult.rows[0] as { slug: string }).slug
+
+  // Query shopify_connections table in tenant schema
+  const result = await withTenant(tenantSlug, async () => {
+    return sql`
+      SELECT id, shop, access_token_encrypted, storefront_api_token_encrypted,
+             tenant_id, status, installed_at, updated_at
+      FROM shopify_connections
+      WHERE tenant_id = ${tenantId}
+      AND status = 'active'
+      ORDER BY installed_at DESC
+      LIMIT 1
+    `
+  })
 
   if (result.rows.length === 0) {
     throw new Error(`No Shopify connection found for tenant: ${tenantId}`)
