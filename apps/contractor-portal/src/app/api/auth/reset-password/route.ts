@@ -1,13 +1,10 @@
 export const dynamic = 'force-dynamic'
 
-import { headers } from 'next/headers'
 import { sql, withTenant } from '@cgk-platform/db'
+import { headers } from 'next/headers'
 
 import { hashPassword } from '@/lib/auth/password'
-import {
-  markPasswordResetTokenUsed,
-  verifyPasswordResetToken,
-} from '@/lib/auth/password-reset'
+import { markPasswordResetTokenUsed, verifyPasswordResetToken } from '@/lib/auth/password-reset'
 import { revokeAllContractorSessions } from '@/lib/auth/session'
 
 /**
@@ -25,25 +22,16 @@ export async function POST(req: Request): Promise<Response> {
 
   const { email, token, password } = body
   if (!email || !token || !password) {
-    return Response.json(
-      { error: 'Email, token, and password are required' },
-      { status: 400 }
-    )
+    return Response.json({ error: 'Email, token, and password are required' }, { status: 400 })
   }
 
   if (password.length < 8) {
-    return Response.json(
-      { error: 'Password must be at least 8 characters' },
-      { status: 400 }
-    )
+    return Response.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
   }
 
   // Resolve tenant
   const headerList = await headers()
-  const tenantSlug =
-    body.tenantSlug ||
-    headerList.get('x-tenant-slug') ||
-    process.env.TENANT_SLUG
+  const tenantSlug = body.tenantSlug || headerList.get('x-tenant-slug') || process.env.TENANT_SLUG
 
   if (!tenantSlug) {
     return Response.json({ error: 'Tenant context is required' }, { status: 400 })

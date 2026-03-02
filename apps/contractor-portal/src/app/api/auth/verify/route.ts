@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { headers } from 'next/headers'
 import { sql, withTenant } from '@cgk-platform/db'
+import { headers } from 'next/headers'
 
 import { getTenantBySlug } from '@/lib/auth/authenticate'
 import { getSetCookieHeader } from '@/lib/auth/cookies'
@@ -24,18 +24,12 @@ export async function POST(req: Request): Promise<Response> {
 
   const { email, token } = body
   if (!email || !token) {
-    return Response.json(
-      { error: 'Email and token are required' },
-      { status: 400 }
-    )
+    return Response.json({ error: 'Email and token are required' }, { status: 400 })
   }
 
   // Resolve tenant
   const headerList = await headers()
-  const tenantSlug =
-    body.tenantSlug ||
-    headerList.get('x-tenant-slug') ||
-    process.env.TENANT_SLUG
+  const tenantSlug = body.tenantSlug || headerList.get('x-tenant-slug') || process.env.TENANT_SLUG
 
   if (!tenantSlug) {
     return Response.json({ error: 'Tenant context is required' }, { status: 400 })
@@ -50,10 +44,7 @@ export async function POST(req: Request): Promise<Response> {
     // Verify magic link
     const result = await verifyContractorMagicLink(email, token, tenantSlug)
     if (!result.contractorId) {
-      return Response.json(
-        { error: 'No contractor account found for this email' },
-        { status: 404 }
-      )
+      return Response.json({ error: 'No contractor account found for this email' }, { status: 404 })
     }
 
     // Get contractor details
