@@ -1,7 +1,7 @@
 import { Diamond, Lightbulb, Settings, Flag } from 'lucide-react'
 
 interface Feature {
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>
   title: string
   description: string
 }

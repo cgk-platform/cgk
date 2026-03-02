@@ -1,0 +1,5 @@
+export { InstallationGuide } from './InstallationGuide'
+export { default as ProductDimensions } from './ProductDimensions'
+export { default as ProductFeatures } from './ProductFeatures'
+export { PressAwards } from './PressAwards'
+export { ProductVideo } from './ProductVideo'

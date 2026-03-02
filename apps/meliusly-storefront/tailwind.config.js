@@ -16,6 +16,7 @@ const config: Config = {
           dark: '#161F2B',         // Navy
           secondary: '#6ABFEF',    // Light Blue
           accent: '#0268A0',       // Same as primary
+          lightBlue: '#F3FAFE',    // Light Blue background
           gray: {
             50: '#F9FAFB',
             100: '#F3F4F6',

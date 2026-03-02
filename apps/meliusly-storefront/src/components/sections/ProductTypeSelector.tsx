@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 
 interface ProductCategory {
@@ -73,20 +72,14 @@ export function ProductTypeSelector() {
 
       <div className="relative container mx-auto px-4 md:px-6">
         {/* Section Heading */}
-        <motion.div
-          className="mb-12 text-center md:mb-16"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        >
+        <div className="animate-fade-in-up mb-12 text-center md:mb-16">
           <h2 className="font-manrope text-meliusly-dark mb-3 text-3xl leading-tight font-semibold tracking-tight md:text-[40px]">
             Find your Support Solution
           </h2>
           <p className="font-manrope mx-auto max-w-2xl text-base text-gray-600 md:text-lg">
             Explore our range of premium furniture support systems designed for lasting comfort
           </p>
-        </motion.div>
+        </div>
 
         {/* Tab Selector */}
         <div className="mb-16">
@@ -94,85 +87,58 @@ export function ProductTypeSelector() {
             {/* Tab Container */}
             <div className="relative flex flex-wrap justify-center gap-2 pb-1 md:gap-1">
               {categories.map((category, index) => (
-                <motion.button
+                <button
                   key={category.id}
-                  ref={(el) => {
+                  ref={(el: HTMLButtonElement | null) => {
                     tabRefs.current[category.id] = el
                   }}
                   onClick={() => setActiveTab(category.id)}
-                  className={`font-manrope relative px-5 py-3.5 text-sm font-semibold transition-all duration-300 ease-out md:px-7 md:py-4 md:text-base ${
+                  className={`font-manrope relative px-5 py-3.5 text-sm font-semibold transition-all duration-300 ease-out hover:scale-[1.02] active:scale-[0.98] md:px-7 md:py-4 md:text-base ${
                     activeTab === category.id
                       ? 'text-meliusly-primary'
                       : 'text-meliusly-dark hover:text-meliusly-primary/80'
-                  } `}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{
-                    delay: index * 0.05,
-                    duration: 0.4,
-                    ease: [0.22, 1, 0.36, 1],
+                  }`}
+                  style={{
+                    animation: `fadeInUp 0.4s ease-out ${index * 0.05}s both`,
                   }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                 >
                   {category.label}
 
                   {/* Hover background effect */}
-                  <motion.div
-                    className="bg-meliusly-primary/5 absolute inset-0 -z-10 rounded-lg"
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                </motion.button>
+                  <div className="bg-meliusly-primary/5 absolute inset-0 -z-10 rounded-lg opacity-0 transition-opacity duration-200 hover:opacity-100" />
+                </button>
               ))}
 
               {/* Animated underline */}
-              <motion.div
-                className="from-meliusly-primary via-meliusly-primary to-meliusly-primary/70 absolute bottom-0 h-[3px] rounded-full bg-gradient-to-r"
-                animate={{
-                  left: underlineStyle.left,
-                  width: underlineStyle.width,
-                }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 380,
-                  damping: 38,
-                  mass: 0.8,
+              <div
+                className="from-meliusly-primary via-meliusly-primary to-meliusly-primary/70 absolute bottom-0 h-[3px] rounded-full bg-gradient-to-r transition-all duration-500 ease-out"
+                style={{
+                  left: `${underlineStyle.left}px`,
+                  width: `${underlineStyle.width}px`,
                 }}
               />
             </div>
           </div>
 
           {/* Active Category Description */}
-          <AnimatePresence mode="wait">
-            <motion.div
+          <div className="mt-8 text-center">
+            <p
               key={activeTab}
-              className="mt-8 text-center"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="font-manrope animate-fade-in mx-auto max-w-xl text-base text-gray-600"
             >
-              <p className="font-manrope mx-auto max-w-xl text-base text-gray-600">
-                {activeCategory?.description}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+              {activeCategory?.description}
+            </p>
+          </div>
         </div>
 
         {/* Product Grid Placeholder - This would connect to actual product data */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
           {[1, 2, 3].map((item, index) => (
-            <motion.div
+            <div
               key={`${activeTab}-${item}`}
-              className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                delay: index * 0.1,
-                duration: 0.5,
-                ease: [0.22, 1, 0.36, 1],
+              className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 transition-all duration-500 hover:-translate-y-2 hover:shadow-xl"
+              style={{
+                animation: `fadeInScale 0.5s ease-out ${index * 0.1}s both`,
               }}
             >
               {/* Product card content would go here */}
@@ -190,18 +156,12 @@ export function ProductTypeSelector() {
                   Shop Now
                 </Link>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* View All Link */}
-        <motion.div
-          className="mt-12 text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-        >
+        <div className="animate-fade-in mt-12 text-center" style={{ animationDelay: '0.4s' }}>
           <Link
             href={activeCategory?.href || '/collections/all'}
             className="font-manrope text-meliusly-primary hover:text-meliusly-primary/80 group inline-flex items-center gap-2 text-base font-semibold transition-colors"
@@ -221,8 +181,49 @@ export function ProductTypeSelector() {
               />
             </svg>
           </Link>
-        </motion.div>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes fadeInScale {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .animate-fade-in-up {
+          animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out both;
+        }
+      `}</style>
     </section>
   )
 }
