@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd ../.. && pnpm turbo build --filter=@cgk-platform/shopify-app",
+  "buildCommand": "cd ../.. && pnpm turbo build --filter='...@cgk-platform/shopify-app'",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
   "framework": null
 }
