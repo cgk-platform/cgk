@@ -1,32 +1,7 @@
-'use client'
-
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-
-interface Product {
-  id: string
-  title: string
-  handle: string
-  priceRange: {
-    minVariantPrice: {
-      amount: string
-      currencyCode: string
-    }
-  }
-  compareAtPriceRange?: {
-    minVariantPrice: {
-      amount: string
-      currencyCode: string
-    }
-  }
-  featuredImage: {
-    url: string
-    altText: string | null
-    width: number
-    height: number
-  }
-}
+import { ProductCard } from '@/components/sections/ProductCard'
+import type { Product } from '@/components/sections/ProductGrid'
 
 interface ProductsResponse {
   success: boolean
@@ -121,73 +96,9 @@ export default async function AllCollectionsPage() {
       <div className="px-6 py-12 lg:px-12 lg:py-16">
         <div className="mx-auto max-w-[1440px]">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 lg:gap-8">
-            {products.map((product) => {
-              const currentPrice = formatPrice(
-                product.priceRange.minVariantPrice.amount,
-                product.priceRange.minVariantPrice.currencyCode
-              )
-
-              const compareAtPrice = product.compareAtPriceRange?.minVariantPrice
-                ? formatPrice(
-                    product.compareAtPriceRange.minVariantPrice.amount,
-                    product.compareAtPriceRange.minVariantPrice.currencyCode
-                  )
-                : null
-
-              const hasDiscount =
-                compareAtPrice &&
-                product.compareAtPriceRange &&
-                parseFloat(product.compareAtPriceRange.minVariantPrice.amount) >
-                  parseFloat(product.priceRange.minVariantPrice.amount)
-
-              return (
-                <Link key={product.id} href={`/products/${product.handle}`} className="group block">
-                  <article className="h-full overflow-hidden rounded-lg bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                    {/* Product Image */}
-                    <div className="relative aspect-square overflow-hidden bg-[#F6F6F6]">
-                      <Image
-                        src={product.featuredImage?.url || '/assets/product-display.webp'}
-                        alt={product.featuredImage?.altText || product.title}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          const target = e.currentTarget
-                          if (target.src !== '/assets/product-display.webp') {
-                            target.src = '/assets/product-display.webp'
-                          }
-                        }}
-                      />
-                    </div>
-
-                    {/* Product Info */}
-                    <div className="p-4 lg:p-6">
-                      <h3 className="mb-2 line-clamp-2 min-h-[3rem] text-[14px] leading-snug font-semibold text-[#161F2B] lg:text-[16px]">
-                        {product.title}
-                      </h3>
-
-                      {/* Price */}
-                      <div className="mb-3 flex items-baseline gap-2">
-                        <span className="text-[18px] font-bold text-[#0268A0] lg:text-[20px]">
-                          {currentPrice}
-                        </span>
-                        {hasDiscount && (
-                          <span className="text-[14px] font-medium text-[#777777] line-through lg:text-[16px]">
-                            {compareAtPrice}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* CTA */}
-                      <div className="flex items-center justify-between text-[13px] font-semibold text-[#0268A0] lg:text-[14px]">
-                        <span>View Details</span>
-                        <ArrowRight className="h-4 w-4 lg:h-5 lg:w-5" strokeWidth={2.5} />
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              )
-            })}
+            {products.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
+            ))}
           </div>
 
           {/* Empty State */}

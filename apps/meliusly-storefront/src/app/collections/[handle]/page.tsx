@@ -1,33 +1,7 @@
-'use client'
-
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
-import { use } from 'react'
-
-interface Product {
-  id: string
-  title: string
-  handle: string
-  priceRange: {
-    minVariantPrice: {
-      amount: string
-      currencyCode: string
-    }
-  }
-  compareAtPriceRange?: {
-    minVariantPrice: {
-      amount: string
-      currencyCode: string
-    }
-  }
-  featuredImage: {
-    url: string
-    altText: string | null
-    width: number
-    height: number
-  }
-}
+import { ProductCard } from '@/components/sections/ProductCard'
+import type { Product } from '@/components/sections/ProductGrid'
 
 interface ProductsResponse {
   success: boolean
@@ -89,17 +63,9 @@ function formatCollectionTitle(handle: string): string {
     .join(' ')
 }
 
-function formatPrice(amount: string, currencyCode: string): string {
-  const price = parseFloat(amount)
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currencyCode,
-  }).format(price)
-}
-
-export default function CollectionPage({ params }: { params: Promise<{ handle: string }> }) {
-  const resolvedParams = use(params)
-  const { products, collection } = use(fetchCollectionProducts(resolvedParams.handle))
+export default async function CollectionPage({ params }: { params: Promise<{ handle: string }> }) {
+  const { handle } = await params
+  const { products, collection } = await fetchCollectionProducts(handle)
 
   return (
     <main className="min-h-screen bg-white">
@@ -153,75 +119,9 @@ export default function CollectionPage({ params }: { params: Promise<{ handle: s
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-              {products.map((product) => {
-                const currentPrice = formatPrice(
-                  product.priceRange.minVariantPrice.amount,
-                  product.priceRange.minVariantPrice.currencyCode
-                )
-
-                const compareAtPrice = product.compareAtPriceRange?.minVariantPrice
-                  ? formatPrice(
-                      product.compareAtPriceRange.minVariantPrice.amount,
-                      product.compareAtPriceRange.minVariantPrice.currencyCode
-                    )
-                  : null
-
-                const hasDiscount =
-                  compareAtPrice &&
-                  product.compareAtPriceRange &&
-                  parseFloat(product.compareAtPriceRange.minVariantPrice.amount) >
-                    parseFloat(product.priceRange.minVariantPrice.amount)
-
-                return (
-                  <Link
-                    key={product.id}
-                    href={`/products/${product.handle}`}
-                    className="group block"
-                  >
-                    <article className="h-full overflow-hidden rounded-lg bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                      {/* Product Image */}
-                      <div className="relative aspect-square overflow-hidden bg-[#F6F6F6]">
-                        <Image
-                          src={product.featuredImage?.url || '/assets/product-display.webp'}
-                          alt={product.featuredImage?.altText || product.title}
-                          fill
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          onError={(e) => {
-                            const target = e.currentTarget
-                            if (target.src !== '/assets/product-display.webp') {
-                              target.src = '/assets/product-display.webp'
-                            }
-                          }}
-                        />
-                      </div>
-
-                      {/* Product Info */}
-                      <div className="p-4">
-                        <h3 className="mb-2 line-clamp-2 min-h-[3rem] text-base font-semibold text-[#161F2B]">
-                          {product.title}
-                        </h3>
-
-                        {/* Price */}
-                        <div className="mb-3 flex items-baseline gap-2">
-                          <span className="text-xl font-bold text-[#0268A0]">{currentPrice}</span>
-                          {hasDiscount && (
-                            <span className="text-sm font-medium text-[#777777] line-through">
-                              {compareAtPrice}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* CTA */}
-                        <div className="flex items-center justify-between text-sm font-semibold text-[#0268A0]">
-                          <span>View Details</span>
-                          <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
-                        </div>
-                      </div>
-                    </article>
-                  </Link>
-                )
-              })}
+              {products.map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} />
+              ))}
             </div>
           )}
         </div>
