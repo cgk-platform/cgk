@@ -4,7 +4,7 @@ import { X, Minus, Plus, Trash2, Lock, ChevronRight, Package } from 'lucide-reac
 import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/lib/cart'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -41,6 +41,47 @@ const productCategories = [
 
 export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const { cart, updateQuantity, removeItem, isLoading } = useCart()
+  const [isCheckingOut, setIsCheckingOut] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+
+  // Handle checkout
+  const handleCheckout = async () => {
+    if (!cart || cart.items.length === 0) return
+
+    setIsCheckingOut(true)
+    setCheckoutError(null)
+
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cart.items.map((item) => ({
+            variantId: item.variantId,
+            quantity: item.quantity,
+          })),
+        }),
+      })
+
+      const data = (await response.json()) as {
+        success: boolean
+        checkoutUrl?: string
+        error?: string
+      }
+
+      if (data.success && data.checkoutUrl) {
+        // Redirect to Shopify checkout
+        window.location.href = data.checkoutUrl
+      } else {
+        setCheckoutError(data.error || 'Failed to create checkout')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      setCheckoutError('Failed to create checkout. Please try again.')
+    } finally {
+      setIsCheckingOut(false)
+    }
+  }
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
@@ -323,15 +364,31 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </span>
               </div>
 
+              {/* Error Message */}
+              {checkoutError && (
+                <div className="mb-3 rounded-lg bg-red-50 px-4 py-3 text-center">
+                  <p className="font-manrope text-[13px] text-red-600">{checkoutError}</p>
+                </div>
+              )}
+
               {/* Secure Checkout Button */}
-              <Link
-                href="/checkout"
-                onClick={onClose}
-                className="font-manrope mb-3 flex items-center justify-center gap-2 rounded-lg bg-[#0268A0] py-4 text-[16px] font-semibold text-white transition-colors hover:bg-[#015580]"
+              <button
+                onClick={handleCheckout}
+                disabled={isCheckingOut}
+                className="font-manrope mb-3 flex w-full items-center justify-center gap-2 rounded-lg bg-[#0268A0] py-4 text-[16px] font-semibold text-white transition-colors hover:bg-[#015580] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Lock className="h-4 w-4" strokeWidth={2.5} />
-                Secure Checkout
-              </Link>
+                {isCheckingOut ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-4 w-4" strokeWidth={2.5} />
+                    Secure Checkout
+                  </>
+                )}
+              </button>
 
               {/* Google Pay Button */}
               <button className="font-manrope flex w-full items-center justify-center gap-2 rounded-lg bg-black py-4 text-[16px] font-semibold text-white transition-colors hover:bg-black/90">
