@@ -5,13 +5,18 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.shopify.com',
+        pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: '*.myshopify.com',
+        hostname: '**.myshopify.com',
+        pathname: '/**',
       },
     ],
     formats: ['image/avif', 'image/webp'],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Enable Turbopack for faster development
   experimental: {

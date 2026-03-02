@@ -12,7 +12,8 @@ module.exports = {
       colors: {
         meliusly: {
           primary: '#0268A0',      // Blue
-          dark: '#161F2B',         // Navy
+          dark: '#161F2B',         // Navy (also used as darkest bg)
+          darkest: '#161F2B',      // Footer background
           secondary: '#6ABFEF',    // Light Blue
           accent: '#0268A0',       // Same as primary
           lightBlue: '#F3FAFE',    // Light Blue background

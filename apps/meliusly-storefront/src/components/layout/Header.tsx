@@ -4,13 +4,13 @@
  * Header Component
  *
  * Main navigation header for Meliusly storefront.
- * Features: Logo, nav links, search, cart with badge.
- * Sticky on scroll, responsive with mobile drawer toggle.
+ * Exact match to Figma design 1:269 (Nav component).
+ * Features: Announcement bar, logo, nav links with dropdowns, search, user, cart icons.
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { Search, ShoppingCart, Menu } from 'lucide-react'
+import { Search, ShoppingCart, User, ChevronDown, Menu } from 'lucide-react'
 
 interface HeaderProps {
   cartItemCount?: number
@@ -19,103 +19,102 @@ interface HeaderProps {
 }
 
 export function Header({ cartItemCount = 0, onMobileMenuToggle, onCartClick }: HeaderProps) {
-  const [isScrolled, setIsScrolled] = useState(false)
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0)
-    }
-
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
   return (
-    <header
-      className={`sticky top-0 z-50 border-b bg-white transition-shadow ${
-        isScrolled ? 'shadow-md' : 'border-meliusly-gray/20'
-      }`}
-    >
-      <div className="mx-auto flex h-[108px] max-w-[1440px] items-center justify-between px-6 lg:px-12">
-        {/* Mobile Menu Button */}
-        <button
-          onClick={onMobileMenuToggle}
-          className="flex items-center lg:hidden"
-          aria-label="Open menu"
-        >
-          <Menu className="text-meliusly-dark h-6 w-6" />
-        </button>
+    <header className="w-full">
+      {/* Announcement Bar */}
+      <div className="flex h-[36px] items-center justify-center bg-[#0268a0]">
+        <p className="font-manrope text-[13px] leading-[1.15] font-bold tracking-[0.26px] text-white uppercase">
+          FREE Shipping on all orders
+        </p>
+      </div>
 
+      {/* Main Navigation */}
+      <div className="flex h-[72px] items-center justify-between bg-white px-[50px] py-[16px]">
         {/* Logo */}
-        <Link href="/" className="flex items-center">
+        <Link
+          href="/"
+          className="relative flex h-[34px] w-[128px] items-center justify-center overflow-hidden"
+        >
           <img
-            src="/meliusly/logo/logo.svg"
+            src="/assets/69bb33a6f2ea1403b208fab9c38e49c39bcb12bf.png"
             alt="Meliusly"
-            className="h-10 w-auto"
-            width={160}
-            height={40}
+            className="h-[28px] w-[123px] object-cover"
           />
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-8 lg:flex">
-          <Link
-            href="/"
-            className="font-manrope text-meliusly-dark hover:text-meliusly-primary text-[15px] font-semibold transition-colors"
-          >
-            Home
-          </Link>
-          <Link
-            href="/collections/all"
-            className="font-manrope text-meliusly-dark hover:text-meliusly-primary text-[15px] font-semibold transition-colors"
-          >
-            Shop
-          </Link>
-          <Link
-            href="/how-it-works"
-            className="font-manrope text-meliusly-dark hover:text-meliusly-primary text-[15px] font-semibold transition-colors"
-          >
-            How It Works
-          </Link>
-          <Link
-            href="/about"
-            className="font-manrope text-meliusly-dark hover:text-meliusly-primary text-[15px] font-semibold transition-colors"
-          >
-            About
-          </Link>
-          <Link
-            href="/contact"
-            className="font-manrope text-meliusly-dark hover:text-meliusly-primary text-[15px] font-semibold transition-colors"
-          >
-            Contact
-          </Link>
+        {/* Navigation Links */}
+        <nav className="hidden items-center gap-[32px] lg:flex">
+          <NavLink href="/collections/sofa-support" label="Sofa Support" />
+          <NavLink href="/collections/sleeper-sofa-support" label="Sleeper Sofa Support" />
+          <NavLink href="/collections/bed-support" label="Bed Support" />
+          <NavLink href="/guides" label="Product Guides" />
+          <NavLink href="/help" label="Help" />
         </nav>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-4">
+        {/* Right Icons */}
+        <div className="flex items-center gap-[24px]">
           {/* Search */}
           <button
-            className="hover:bg-meliusly-gray/10 flex items-center justify-center rounded-full p-2 transition-colors"
+            className="hidden size-[24px] items-center justify-center transition-opacity hover:opacity-70 lg:flex"
             aria-label="Search"
           >
-            <Search className="text-meliusly-dark h-5 w-5" />
+            <Search className="size-[24px] text-[#161f2b]" strokeWidth={1.5} />
           </button>
 
-          {/* Cart with Badge */}
+          {/* User Account */}
+          <button
+            className="hidden size-[24px] items-center justify-center transition-opacity hover:opacity-70 lg:flex"
+            aria-label="Account"
+          >
+            <User className="size-[24px] text-[#161f2b]" strokeWidth={1.5} />
+          </button>
+
+          {/* Cart */}
           <button
             onClick={onCartClick}
-            className="hover:bg-meliusly-gray/10 relative flex items-center justify-center rounded-full p-2 transition-colors"
+            className="relative flex size-[24px] items-center justify-center transition-opacity hover:opacity-70"
             aria-label={`Cart (${cartItemCount} items)`}
           >
-            <ShoppingCart className="text-meliusly-dark h-5 w-5" />
+            <ShoppingCart className="size-[24px] text-[#161f2b]" strokeWidth={1.5} />
             {cartItemCount > 0 && (
-              <span className="bg-meliusly-primary absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold text-white">
+              <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#0268a0] px-1 text-[10px] font-semibold text-white">
                 {cartItemCount > 99 ? '99+' : cartItemCount}
               </span>
             )}
           </button>
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={onMobileMenuToggle}
+            className="flex size-[24px] items-center justify-center transition-opacity hover:opacity-70 lg:hidden"
+            aria-label="Menu"
+          >
+            <Menu className="size-[24px] text-[#161f2b]" strokeWidth={1.5} />
+          </button>
         </div>
       </div>
     </header>
+  )
+}
+
+interface NavLinkProps {
+  href: string
+  label: string
+  hasDropdown?: boolean
+}
+
+function NavLink({ href, label, hasDropdown = true }: NavLinkProps) {
+  return (
+    <Link href={href} className="group flex items-center gap-[9px]">
+      <span className="font-manrope text-[14px] leading-[1.2] font-semibold text-[#161f2b] capitalize transition-colors group-hover:text-[#0268a0]">
+        {label}
+      </span>
+      {hasDropdown && (
+        <ChevronDown
+          className="h-[5px] w-[10px] text-[#161f2b] transition-colors group-hover:text-[#0268a0]"
+          strokeWidth={2}
+        />
+      )}
+    </Link>
   )
 }

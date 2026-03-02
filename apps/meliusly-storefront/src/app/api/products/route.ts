@@ -91,9 +91,18 @@ export async function GET(request: NextRequest) {
       { first, sortKey }
     )) as { products: { edges: Array<{ node: unknown }> } }
 
+    const products = result.products.edges.map((edge) => edge.node)
+
+    // Log image URLs for debugging
+    products.forEach((product: any) => {
+      if (!product.featuredImage?.url) {
+        console.warn(`Product "${product.title}" is missing featuredImage`)
+      }
+    })
+
     return NextResponse.json({
       success: true,
-      data: result.products.edges.map((edge) => edge.node),
+      data: products,
       tenant: {
         id: tenant.id,
         slug: tenant.slug,
