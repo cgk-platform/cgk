@@ -41,7 +41,12 @@ scopes = "write_pixels,read_customer_events,read_orders,write_orders,read_custom
 use_legacy_install_flow = false
 
 [auth]
-redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
+redirect_urls = [
+  "https://cgk-admin.vercel.app/api/admin/shopify-app/callback",
+  "https://cgk-orchestrator-cgk-linens-88e79683.vercel.app/api/admin/shopify-app/callback",
+  "http://localhost:3200/api/admin/shopify-app/callback",
+  "http://localhost:3100/api/admin/shopify-app/callback"
+]
 
 [pos]
 embedded = false
