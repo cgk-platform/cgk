@@ -23,6 +23,7 @@ export interface Tenant {
 const DOMAIN_TENANT_MAP: Record<string, string> = {
   'meliusly.com': 'meliusly',
   'www.meliusly.com': 'meliusly',
+  'cgk-meliusly-storefront.vercel.app': 'meliusly', // Vercel deployment
   'localhost:3300': 'meliusly', // Local development
   localhost: 'meliusly', // Alternative local
 }
