@@ -48,3 +48,7 @@ apps/shopify-app/extensions/delivery-customization/schema.graphql
 
 # Theme reference (downloaded Liquid theme for conversion)
 theme-reference/
+
+# Never commit production secrets
+.env.production
+apps/*/.env.production
