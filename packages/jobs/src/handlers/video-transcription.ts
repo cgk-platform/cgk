@@ -11,7 +11,6 @@
  * @ai-required Always include tenantId in payloads
  */
 
-
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
 import { logger } from '@cgk-platform/logging'
@@ -49,11 +48,15 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
     }
 
     if (!videoId || !playbackId) {
-      return { success: false, error: { message: 'videoId and playbackId required', retryable: false } }
+      return {
+        success: false,
+        error: { message: 'videoId and playbackId required', retryable: false },
+      }
     }
 
     try {
-      const { getTranscriptionProvider, startTranscription, getVideoTranscription } = await import('@cgk-platform/video/transcription')
+      const { getTranscriptionProvider, startTranscription, getVideoTranscription } =
+        await import('@cgk-platform/video/transcription')
       const { getTenantAssemblyAIClient } = await import('@cgk-platform/integrations')
 
       // Check if AssemblyAI is configured for tenant
@@ -87,7 +90,9 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       // Save job ID to database
       await startTranscription(tenantId, videoId, transcriptionJob.id)
 
-      logger.info(`[video/transcription] Started transcription for videoId=${videoId} jobId=${transcriptionJob.id}`)
+      logger.info(
+        `[video/transcription] Started transcription for videoId=${videoId} jobId=${transcriptionJob.id}`
+      )
 
       return {
         success: true,
@@ -95,7 +100,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[video/transcription] Error for videoId=${videoId}:`, message)
+      logger.error(`[video/transcription] Error for videoId=${videoId}:`, new Error(message))
       return {
         success: false,
         error: { message, retryable: true },
@@ -121,7 +126,10 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
     }
 
     if (!videoId || !transcript) {
-      return { success: false, error: { message: 'videoId and transcript required', retryable: false } }
+      return {
+        success: false,
+        error: { message: 'videoId and transcript required', retryable: false },
+      }
     }
 
     try {
@@ -141,7 +149,8 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
       // Truncate transcript if too long (max ~8000 words for context)
       const maxWords = 8000
       const words = transcript.split(/\s+/)
-      const truncatedTranscript = words.length > maxWords ? words.slice(0, maxWords).join(' ') + '...' : transcript
+      const truncatedTranscript =
+        words.length > maxWords ? words.slice(0, maxWords).join(' ') + '...' : transcript
 
       // Generate title
       const titleResponse = await anthropic.createMessage({
@@ -208,7 +217,10 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[video/ai-content-generation] Error for videoId=${videoId}:`, message)
+      logger.error(
+        `[video/ai-content-generation] Error for videoId=${videoId}:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },
@@ -235,7 +247,8 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
     }
 
     try {
-      const { getVideosPendingTranscription, saveTranscriptionResult, failTranscription } = await import('@cgk-platform/video/transcription')
+      const { getVideosPendingTranscription, saveTranscriptionResult, failTranscription } =
+        await import('@cgk-platform/video/transcription')
       const { getTenantAssemblyAIClient } = await import('@cgk-platform/integrations')
 
       // Check if AssemblyAI is configured for tenant
@@ -263,31 +276,44 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
 
           if (result.status === 'completed' && result.text) {
             // Save completed transcription
-            const words = (result.words || []).map((w: { text: string; start: number; end: number; confidence: number }) => ({
-              text: w.text,
-              startMs: w.start,
-              endMs: w.end,
-              confidence: w.confidence,
-            }))
+            const words = (result.words || []).map(
+              (w: { text: string; start: number; end: number; confidence: number }) => ({
+                text: w.text,
+                startMs: w.start,
+                endMs: w.end,
+                confidence: w.confidence,
+              })
+            )
             await saveTranscriptionResult(tenantId, video.id, result.text, words, [])
             updated++
-            logger.info(`[video/transcription-sync] Completed transcription for videoId=${video.id}`)
+            logger.info(
+              `[video/transcription-sync] Completed transcription for videoId=${video.id}`
+            )
           } else if (result.status === 'error') {
             // Mark as failed
-            await failTranscription(tenantId, video.id, result.error || 'Unknown transcription error')
+            await failTranscription(
+              tenantId,
+              video.id,
+              result.error || 'Unknown transcription error'
+            )
             updated++
-            logger.info(`[video/transcription-sync] Failed transcription for videoId=${video.id}: ${result.error}`)
+            logger.info(
+              `[video/transcription-sync] Failed transcription for videoId=${video.id}: ${result.error}`
+            )
           }
           // If still processing, leave as-is
         } catch (pollError) {
+          const err = pollError instanceof Error ? pollError : new Error(String(pollError))
           logger.error(
             `[video/transcription-sync] Error polling job ${video.transcriptionJobId}:`,
-            pollError instanceof Error ? pollError.message : 'Unknown error'
+            err
           )
         }
       }
 
-      logger.info(`[video/transcription-sync] tenantId=${tenantId} checked=${pendingVideos.length} updated=${updated}`)
+      logger.info(
+        `[video/transcription-sync] tenantId=${tenantId} checked=${pendingVideos.length} updated=${updated}`
+      )
 
       return {
         success: true,
@@ -295,7 +321,7 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[video/transcription-sync] Error for tenantId=${tenantId}:`, message)
+      logger.error(`[video/transcription-sync] Error for tenantId=${tenantId}:`, new Error(message))
       return {
         success: false,
         error: { message, retryable: true },

@@ -55,7 +55,7 @@ Return only valid JSON array:`
       }))
       .filter((t) => t.text.length > 0)
   } catch {
-    logger.error('[AI Tasks] Failed to parse tasks response:', response)
+    logger.error('[AI Tasks] Failed to parse tasks response:', new Error(response))
     return []
   }
 }
@@ -112,7 +112,7 @@ Return only valid JSON array:`
       }))
       .filter((t) => t.text.length > 0)
   } catch {
-    logger.error('[AI Tasks] Failed to parse tasks response:', response)
+    logger.error('[AI Tasks] Failed to parse tasks response:', new Error(response))
     return []
   }
 }
@@ -120,9 +120,7 @@ Return only valid JSON array:`
 /**
  * Categorize tasks by type
  */
-export async function categorizeTask(
-  taskText: string
-): Promise<{
+export async function categorizeTask(taskText: string): Promise<{
   category: 'follow-up' | 'decision' | 'research' | 'communication' | 'other'
   priority: 'high' | 'medium' | 'low'
 }> {

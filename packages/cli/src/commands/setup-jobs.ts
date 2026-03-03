@@ -14,6 +14,7 @@ import { Command } from 'commander'
 import * as fs from 'fs-extra'
 import inquirer from 'inquirer'
 import ora from 'ora'
+import { logger } from '@cgk-platform/logging'
 
 interface ProviderChoice {
   name: string
@@ -161,8 +162,7 @@ async function configureTriggerDev(
   logger.info('')
 
   // Check for existing API key
-  const existingKey =
-    process.env.TRIGGER_SECRET_KEY || process.env.TRIGGER_DEV_SECRET_KEY
+  const existingKey = process.env.TRIGGER_SECRET_KEY || process.env.TRIGGER_DEV_SECRET_KEY
 
   if (existingKey && !skipEnv) {
     logger.info(chalk.green('  ✓ TRIGGER_SECRET_KEY is already set'))
@@ -191,12 +191,8 @@ async function configureTriggerDev(
   ])
 
   if (!hasKey) {
-    logger.info(
-      chalk.yellow('\n  ⚠ Please get your API key and run setup:jobs again')
-    )
-    logger.info(
-      chalk.dim('    Or manually add TRIGGER_SECRET_KEY to your .env.local')
-    )
+    logger.info(chalk.yellow('\n  ⚠ Please get your API key and run setup:jobs again'))
+    logger.info(chalk.dim('    Or manually add TRIGGER_SECRET_KEY to your .env.local'))
     return
   }
 
@@ -241,10 +237,7 @@ async function configureTriggerDev(
 /**
  * Configure Inngest
  */
-async function configureInngest(
-  spinner: ReturnType<typeof ora>,
-  skipEnv?: boolean
-): Promise<void> {
+async function configureInngest(spinner: ReturnType<typeof ora>, skipEnv?: boolean): Promise<void> {
   logger.info('')
   logger.info(chalk.dim('  Inngest is an event-driven alternative with'))
   logger.info(chalk.dim('  step functions for complex workflows.'))
@@ -281,9 +274,7 @@ async function configureInngest(
 
   if (!hasKeys) {
     logger.info(chalk.yellow('\n  ⚠ Please get your keys and run setup:jobs again'))
-    logger.info(
-      chalk.dim('    Or manually add INNGEST_EVENT_KEY to your .env.local')
-    )
+    logger.info(chalk.dim('    Or manually add INNGEST_EVENT_KEY to your .env.local'))
     return
   }
 
@@ -298,8 +289,7 @@ async function configureInngest(
       type: 'password',
       name: 'signingKey',
       message: 'Enter your Inngest Signing Key:',
-      validate: (input: string) =>
-        input.length > 0 || 'Signing key is required',
+      validate: (input: string) => input.length > 0 || 'Signing key is required',
     },
   ])
 
@@ -337,9 +327,7 @@ async function configureLocal(spinner: ReturnType<typeof ora>): Promise<void> {
   spinner.succeed('Local provider configured')
 
   logger.info('')
-  logger.info(
-    chalk.yellow('  Remember to switch to Trigger.dev or Inngest for production!')
-  )
+  logger.info(chalk.yellow('  Remember to switch to Trigger.dev or Inngest for production!'))
 }
 
 /**

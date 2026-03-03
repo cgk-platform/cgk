@@ -73,7 +73,9 @@ export async function getFeedback(feedbackId: string): Promise<AgentFeedback | n
   const result = await sql`
     SELECT * FROM agent_feedback WHERE id = ${feedbackId}
   `
-  return result.rows[0] ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AgentFeedback) : null
+  return result.rows[0]
+    ? (toCamelCase(result.rows[0] as Record<string, unknown>) as unknown as AgentFeedback)
+    : null
 }
 
 /**
@@ -113,7 +115,9 @@ export async function listFeedback(
   `
 
   const result = await sql.query(query, values)
-  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback)
+  return result.rows.map(
+    (row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback
+  )
 }
 
 /**
@@ -125,7 +129,9 @@ export async function getUnprocessedFeedback(agentId: string): Promise<AgentFeed
     WHERE agent_id = ${agentId} AND processed = false
     ORDER BY created_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback)
+  return result.rows.map(
+    (row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback
+  )
 }
 
 /**
@@ -195,7 +201,10 @@ export async function processAllFeedback(agentId: string): Promise<number> {
       processed++
     } catch (error) {
       // Continue processing other feedback
-      logger.error(`Failed to process feedback ${feedback.id}:`, error)
+      logger.error(
+        `Failed to process feedback ${feedback.id}:`,
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 
@@ -267,5 +276,7 @@ export async function getFeedbackByConversation(
     WHERE agent_id = ${agentId} AND conversation_id = ${conversationId}
     ORDER BY created_at ASC
   `
-  return result.rows.map((row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback)
+  return result.rows.map(
+    (row) => toCamelCase(row as Record<string, unknown>) as unknown as AgentFeedback
+  )
 }

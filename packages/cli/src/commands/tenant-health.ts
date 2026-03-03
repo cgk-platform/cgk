@@ -10,7 +10,8 @@ export const tenantHealthCommand = new Command('tenant:health')
     try {
       await tenantHealthCheck(slug, { verbose: options.verbose })
     } catch (error) {
-      logger.error('Health check failed:', error)
+      const err = error instanceof Error ? error : new Error(String(error))
+      logger.error('Health check failed:', err)
       process.exit(1)
     }
   })

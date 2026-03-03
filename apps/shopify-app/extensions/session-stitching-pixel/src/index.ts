@@ -96,7 +96,11 @@ register((api) => {
    */
   function debugLog(message: string, data?: unknown): void {
     if (DEBUG_MODE) {
-      logger.info(`[CGK Pixel] ${message}`, data ?? '')
+      const context =
+        data && typeof data === 'object' && !Array.isArray(data)
+          ? (data as Record<string, unknown>)
+          : ({ data } as Record<string, unknown>)
+      logger.info(`[CGK Pixel] ${message}`, context)
     }
   }
 
@@ -130,7 +134,7 @@ register((api) => {
       ga4SessionId,
       metaFbp,
       metaFbc,
-      metaExternalId
+      metaExternalId,
     })
   }
 
@@ -141,10 +145,7 @@ register((api) => {
   /**
    * Sends an event to GA4 via Measurement Protocol
    */
-  async function sendGA4Event(
-    eventName: string,
-    params: Record<string, unknown>
-  ): Promise<void> {
+  async function sendGA4Event(eventName: string, params: Record<string, unknown>): Promise<void> {
     if (!ga4ClientId || !GA4_API_SECRET || !GA4_MEASUREMENT_ID) {
       debugLog('GA4 skipped - missing configuration')
       return
@@ -152,15 +153,17 @@ register((api) => {
 
     const payload = {
       client_id: ga4ClientId,
-      events: [{
-        name: eventName,
-        params: {
-          ...params,
-          session_id: ga4SessionId,
-          engagement_time_msec: 100,
-          event_source: 'cgk_pixel',
-        }
-      }]
+      events: [
+        {
+          name: eventName,
+          params: {
+            ...params,
+            session_id: ga4SessionId,
+            engagement_time_msec: 100,
+            event_source: 'cgk_pixel',
+          },
+        },
+      ],
     }
 
     debugLog(`Sending GA4 event: ${eventName}`, payload)
@@ -176,7 +179,10 @@ register((api) => {
       )
       debugLog(`GA4 event sent: ${eventName}`)
     } catch (error) {
-      logger.error('[CGK Pixel] GA4 error:', error)
+      logger.error(
+        '[CGK Pixel] GA4 error:',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 
@@ -191,7 +197,7 @@ register((api) => {
     const msgBuffer = new TextEncoder().encode(message.toLowerCase().trim())
     const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer)
     return Array.from(new Uint8Array(hashBuffer))
-      .map(b => b.toString(16).padStart(2, '0'))
+      .map((b) => b.toString(16).padStart(2, '0'))
       .join('')
   }
 
@@ -219,14 +225,16 @@ register((api) => {
     if (checkout?.email) userData.em = [await sha256(checkout.email)]
 
     const payload = {
-      data: [{
-        event_name: eventName,
-        event_time: Math.floor(Date.now() / 1000),
-        event_id: eventId,
-        action_source: 'website',
-        user_data: userData,
-        custom_data: customData,
-      }],
+      data: [
+        {
+          event_name: eventName,
+          event_time: Math.floor(Date.now() / 1000),
+          event_id: eventId,
+          action_source: 'website',
+          user_data: userData,
+          custom_data: customData,
+        },
+      ],
       access_token: META_ACCESS_TOKEN,
     }
 
@@ -241,7 +249,10 @@ register((api) => {
       })
       debugLog(`Meta event sent: ${eventName}`)
     } catch (error) {
-      logger.error('[CGK Pixel] Meta error:', error)
+      logger.error(
+        '[CGK Pixel] Meta error:',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 
@@ -286,7 +297,10 @@ register((api) => {
         keepalive: true,
       })
     } catch (error) {
-      logger.error('[CGK Pixel] Platform API error:', error)
+      logger.error(
+        '[CGK Pixel] Platform API error:',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 
@@ -376,7 +390,8 @@ register((api) => {
     const value = parseFloat(checkout?.totalPrice?.amount || '0')
     const tax = parseFloat(checkout?.totalTax?.amount || '0')
     const shipping = parseFloat(checkout?.shippingLine?.price?.amount || '0')
-    const transactionId = checkout?.order?.id?.replace('gid://shopify/Order/', '') || checkout?.token
+    const transactionId =
+      checkout?.order?.id?.replace('gid://shopify/Order/', '') || checkout?.token
 
     await Promise.all([
       sendGA4Event('purchase', {
@@ -425,8 +440,8 @@ register((api) => {
    * Formats content IDs for Meta CAPI
    */
   function formatContentIds(lineItems: LineItem[]): string[] {
-    return lineItems.map(item =>
-      `shopify_${item.variant?.product?.id || 'unknown'}_${item.variant?.id || 'unknown'}`
+    return lineItems.map(
+      (item) => `shopify_${item.variant?.product?.id || 'unknown'}_${item.variant?.id || 'unknown'}`
     )
   }
 

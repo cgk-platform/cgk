@@ -28,7 +28,6 @@ export const migrateAutoCommand = new Command('migrate:auto')
 
         spinner.succeed()
 
-        logger.info()
         logger.info(chalk.bold('Migration Results:'))
         logger.info(chalk.green(`  Applied: ${result.applied}`))
         if (result.errors > 0) {
@@ -36,7 +35,6 @@ export const migrateAutoCommand = new Command('migrate:auto')
         }
 
         if (options.dryRun) {
-          logger.info()
           logger.info(chalk.yellow('  (Dry run - no changes made)'))
         }
       } else {
@@ -49,7 +47,6 @@ export const migrateAutoCommand = new Command('migrate:auto')
 
         spinner.succeed()
 
-        logger.info()
         logger.info(chalk.bold('Migration Summary:'))
         logger.info(`  Total tenants: ${result.total}`)
         logger.info(chalk.green(`  Succeeded: ${result.succeeded}`))
@@ -58,11 +55,9 @@ export const migrateAutoCommand = new Command('migrate:auto')
         }
 
         if (options.dryRun) {
-          logger.info()
           logger.info(chalk.yellow('  (Dry run - no changes made)'))
         }
 
-        logger.info()
         logger.info(chalk.bold('Details:'))
         result.details.forEach((detail) => {
           if (detail.applied > 0 || detail.errors > 0) {
@@ -76,7 +71,6 @@ export const migrateAutoCommand = new Command('migrate:auto')
       }
     } catch (error) {
       spinner.fail()
-      logger.error()
       logger.error(chalk.red('Auto-migration failed:'))
       logger.error(chalk.red(error instanceof Error ? error.message : String(error)))
       process.exit(1)

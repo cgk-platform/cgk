@@ -39,11 +39,7 @@ interface InngestConfig {
  * Create an Inngest job provider
  */
 export function createInngestProvider(config: InngestConfig): JobProvider {
-  const {
-    eventKey,
-    signingKey,
-    baseUrl = 'https://inn.gs',
-  } = config
+  const { eventKey, signingKey, baseUrl = 'https://inn.gs' } = config
 
   const handlers = new Map<string, JobHandler<unknown, unknown>>()
 
@@ -96,7 +92,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
       throw new Error(`[InngestProvider] API error ${response.status}: ${error}`)
     }
 
-    const result = await response.json() as { ids: string[] }
+    const result = (await response.json()) as { ids: string[] }
     return result
   }
 
@@ -111,9 +107,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
     ): Promise<SendResult> {
       // For development without Inngest configured
       if (!isConfigured()) {
-        logger.warn(
-          `[InngestProvider] Not configured - job ${event as string} will be logged only`
-        )
+        logger.warn(`[InngestProvider] Not configured - job ${event as string} will be logged only`)
         const id = options?.idempotencyKey ?? createJobId()
         logger.info(`[InngestProvider] Would send:`, {
           event,
@@ -127,11 +121,9 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
         const result = await sendEvent(event as string, payload, options)
         return { id: result.ids[0] ?? createJobId(), accepted: true }
       } catch (error) {
-        logger.error(
-          `[InngestProvider] Failed to send ${event as string}:`,
-          error
-        )
-        throw error
+        const err = error instanceof Error ? error : new Error(String(error))
+        logger.error(`[InngestProvider] Failed to send ${event as string}:`, err)
+        throw err
       }
     },
 
@@ -188,7 +180,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
           throw new Error(`API error ${response.status}`)
         }
 
-        const result = await response.json() as { ids: string[] }
+        const result = (await response.json()) as { ids: string[] }
 
         return {
           queued: events.length,
@@ -281,14 +273,17 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
           return { status: 'completed' as const }
         }
 
-        const result = await response.json() as {
+        const result = (await response.json()) as {
           status: string
           started_at?: string
           ended_at?: string
           output?: { error?: string }
         }
 
-        const statusMap: Record<string, 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'> = {
+        const statusMap: Record<
+          string,
+          'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+        > = {
           Scheduled: 'pending',
           Running: 'running',
           Completed: 'completed',
@@ -307,10 +302,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
       }
     },
 
-    registerHandler<E extends keyof JobEvents>(
-      event: E,
-      handler: JobHandler<JobEvents[E]>
-    ): void {
+    registerHandler<E extends keyof JobEvents>(event: E, handler: JobHandler<JobEvents[E]>): void {
       // In development/local mode, handlers are registered here
       // In production, handlers are defined using createFunction()
       handlers.set(event as string, handler as JobHandler<unknown, unknown>)

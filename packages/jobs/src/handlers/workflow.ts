@@ -58,7 +58,10 @@ export const processScheduledActionsJob = defineJob<ProcessScheduledActionsPaylo
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[workflow/process-scheduled-actions] tenantId=${tenantId} error:`, message)
+      logger.error(
+        `[workflow/process-scheduled-actions] tenantId=${tenantId} error:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },
@@ -101,7 +104,9 @@ export const checkTimeElapsedTriggersJob = defineJob<CheckTimeElapsedTriggersPay
       const entities = await getEntitiesForTimeElapsedCheck(tenantId, entityType)
 
       if (entities.length === 0) {
-        logger.info(`[workflow/check-time-elapsed-triggers] tenantId=${tenantId} no entities to check`)
+        logger.info(
+          `[workflow/check-time-elapsed-triggers] tenantId=${tenantId} no entities to check`
+        )
         return { success: true, data: { checked: 0, triggered: 0 } }
       }
 
@@ -117,7 +122,10 @@ export const checkTimeElapsedTriggersJob = defineJob<CheckTimeElapsedTriggersPay
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[workflow/check-time-elapsed-triggers] tenantId=${tenantId} error:`, message)
+      logger.error(
+        `[workflow/check-time-elapsed-triggers] tenantId=${tenantId} error:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },
@@ -135,13 +143,15 @@ export const checkTimeElapsedTriggersJob = defineJob<CheckTimeElapsedTriggersPay
 async function getEntitiesForTimeElapsedCheck(
   tenantId: string,
   entityType?: string
-): Promise<Array<{
-  entityType: string
-  entityId: string
-  status: string
-  statusChangedAt: Date
-  entity: Record<string, unknown>
-}>> {
+): Promise<
+  Array<{
+    entityType: string
+    entityId: string
+    status: string
+    statusChangedAt: Date
+    entity: Record<string, unknown>
+  }>
+> {
   return withTenant(tenantId, async () => {
     const entities: Array<{
       entityType: string
@@ -279,7 +289,10 @@ export const cleanupExecutionLogsJob = defineJob<CleanupExecutionLogsPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[workflow/cleanup-execution-logs] tenantId=${tenantId} error:`, message)
+      logger.error(
+        `[workflow/cleanup-execution-logs] tenantId=${tenantId} error:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },
@@ -315,7 +328,9 @@ export const processSnoozedThreadsJob = defineJob<ProcessSnoozedThreadsPayload>(
       // Unsnooze threads that are past their snooze date
       const unsnoozedCount = await unsnoozeThreads(tenantId)
 
-      logger.info(`[workflow/process-snoozed-threads] tenantId=${tenantId} unsnoozed=${unsnoozedCount}`)
+      logger.info(
+        `[workflow/process-snoozed-threads] tenantId=${tenantId} unsnoozed=${unsnoozedCount}`
+      )
 
       return {
         success: true,
@@ -323,7 +338,10 @@ export const processSnoozedThreadsJob = defineJob<ProcessSnoozedThreadsPayload>(
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[workflow/process-snoozed-threads] tenantId=${tenantId} error:`, message)
+      logger.error(
+        `[workflow/process-snoozed-threads] tenantId=${tenantId} error:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },

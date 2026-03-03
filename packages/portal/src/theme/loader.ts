@@ -109,7 +109,10 @@ export async function loadThemeFromDatabase(tenantSlug: string): Promise<PortalT
     return mergeWithDefaults({ tenantId: tenantSlug })
   } catch (error) {
     // Log error but return defaults to prevent blocking
-    logger.error(`Failed to load theme for tenant ${tenantSlug}:`, error)
+    logger.error(
+      `Failed to load theme for tenant ${tenantSlug}:`,
+      error instanceof Error ? error : new Error(String(error))
+    )
     return mergeWithDefaults({ tenantId: tenantSlug })
   }
 }
@@ -174,7 +177,10 @@ export async function loadThemeForSSR(tenantSlug: string): Promise<PortalThemeCo
     await cache.set(cacheKey, defaultConfig, { ttl: THEME_CACHE_TTL })
     return defaultConfig
   } catch (error) {
-    logger.error(`Failed to load theme for SSR (tenant: ${tenantSlug}):`, error)
+    logger.error(
+      `Failed to load theme for SSR (tenant: ${tenantSlug}):`,
+      error instanceof Error ? error : new Error(String(error))
+    )
     return mergeWithDefaults({ tenantId: tenantSlug })
   }
 }

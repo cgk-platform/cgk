@@ -31,10 +31,7 @@ export interface ClassifiedError extends Error {
 /**
  * Middleware function type
  */
-export type Middleware<T, R = void> = (
-  ctx: JobContext<T>,
-  next: () => Promise<R>
-) => Promise<R>
+export type Middleware<T, R = void> = (ctx: JobContext<T>, next: () => Promise<R>) => Promise<R>
 
 /**
  * Compose multiple middleware into a single function
@@ -113,46 +110,28 @@ export function withLogging<T, R = void>(): Middleware<T, R> {
     const start = Date.now()
     const tenantId = (ctx.payload as TenantEvent<unknown>).tenantId ?? 'unknown'
 
-    logger.info(
-      `[Job:${ctx.name}] Starting`,
-      JSON.stringify({
-        id: ctx.id,
-        tenantId,
-        attempt: ctx.attempt,
-        maxAttempts: ctx.maxAttempts,
-      })
-    )
+    logger.info(`[Job:${ctx.name}] Starting`, {
+      id: ctx.id,
+      tenantId,
+      attempt: ctx.attempt,
+      maxAttempts: ctx.maxAttempts,
+    } as Record<string, unknown>)
 
     try {
       const result = await next()
       const duration = Date.now() - start
 
-      logger.info(
-        `[Job:${ctx.name}] Completed`,
-        JSON.stringify({
-          id: ctx.id,
-          tenantId,
-          duration: `${duration}ms`,
-        })
-      )
+      logger.info(`[Job:${ctx.name}] Completed`, {
+        id: ctx.id,
+        tenantId,
+        duration: `${duration}ms`,
+      } as Record<string, unknown>)
 
       return result
     } catch (error) {
-      const duration = Date.now() - start
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
 
-      logger.error(
-        `[Job:${ctx.name}] Failed`,
-        JSON.stringify({
-          id: ctx.id,
-          tenantId,
-          duration: `${duration}ms`,
-          error: errorMessage,
-          attempt: ctx.attempt,
-          maxAttempts: ctx.maxAttempts,
-        })
-      )
+      logger.error(`[Job:${ctx.name}] Failed`, new Error(errorMessage))
 
       throw error
     }
@@ -198,9 +177,7 @@ export function withErrorClassification<T, R = void>(): Middleware<T, R> {
  */
 export function classifyError(error: unknown): ClassifiedError {
   const err =
-    error instanceof Error
-      ? error
-      : new Error(typeof error === 'string' ? error : 'Unknown error')
+    error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Unknown error')
 
   const classified = err as ClassifiedError
 
@@ -348,12 +325,10 @@ export function withTimeout<T, R = void>(timeoutMs: number): Middleware<T, R> {
  * Rate limiting middleware
  * Limits job execution rate
  */
-export function withRateLimit<T, R = void>(
-  limiter: {
-    acquire: () => Promise<void>
-    release: () => void
-  }
-): Middleware<T, R> {
+export function withRateLimit<T, R = void>(limiter: {
+  acquire: () => Promise<void>
+  release: () => void
+}): Middleware<T, R> {
   return async (_ctx: JobContext<T>, next: () => Promise<R>): Promise<R> => {
     await limiter.acquire()
     try {
@@ -405,10 +380,7 @@ export function createRateLimiter(
 
   return {
     async acquire(): Promise<void> {
-      if (
-        currentConcurrent < maxConcurrent &&
-        executionsInInterval < maxPerInterval
-      ) {
+      if (currentConcurrent < maxConcurrent && executionsInInterval < maxPerInterval) {
         currentConcurrent++
         executionsInInterval++
         return
@@ -430,20 +402,14 @@ export function createRateLimiter(
  * Create a handler with standard middleware applied
  * Includes: logging, timing, error classification, tenant context
  */
-export function createJobHandler<
-  T extends TenantEvent<unknown>,
-  R = void,
->(
+export function createJobHandler<T extends TenantEvent<unknown>, R = void>(
   handler: JobHandler<T, R>,
   options?: {
     timeout?: number
     skipTenantContext?: boolean
   }
 ): JobHandler<T, R> {
-  const middlewares: Middleware<T, R>[] = [
-    withLogging<T, R>(),
-    withErrorClassification<T, R>(),
-  ]
+  const middlewares: Middleware<T, R>[] = [withLogging<T, R>(), withErrorClassification<T, R>()]
 
   if (options?.timeout) {
     middlewares.push(withTimeout<T, R>(options.timeout))

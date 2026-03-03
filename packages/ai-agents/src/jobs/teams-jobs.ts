@@ -37,7 +37,10 @@ export async function syncOrgChartJob(tenantId: string): Promise<{
 
     return { success: true, result }
   } catch (error) {
-    logger.error('Org chart sync job failed:', error)
+    logger.error(
+      'Org chart sync job failed:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -64,7 +67,10 @@ export async function decayFamiliarityJob(tenantId: string): Promise<{
 
     return { success: true, decayedCount }
   } catch (error) {
-    logger.error('Familiarity decay job failed:', error)
+    logger.error(
+      'Familiarity decay job failed:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -104,7 +110,10 @@ export async function cleanupHandoffsJob(
 
     return { success: true, ...result }
   } catch (error) {
-    logger.error('Handoff cleanup job failed:', error)
+    logger.error(
+      'Handoff cleanup job failed:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

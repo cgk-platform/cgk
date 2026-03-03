@@ -170,7 +170,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         )
       }
     } catch (err) {
-      logger.error(`[BundleWebhook] Error syncing bundle order for ${group.bundleId}:`, err)
+      logger.error(
+        `[BundleWebhook] Error syncing bundle order for ${group.bundleId}:`,
+        err instanceof Error ? err : new Error(String(err))
+      )
     }
   }
 

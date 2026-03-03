@@ -8,12 +8,7 @@
 import { useState, useCallback } from 'react'
 import type { ActionFunctionArgs, LoaderFunctionArgs } from '@remix-run/node'
 import { json, redirect } from '@remix-run/node'
-import {
-  useLoaderData,
-  useSubmit,
-  useNavigation,
-  useActionData,
-} from '@remix-run/react'
+import { useLoaderData, useSubmit, useNavigation, useActionData } from '@remix-run/react'
 import {
   Page,
   Layout,
@@ -206,7 +201,8 @@ export async function action({ request, params }: ActionFunctionArgs) {
     if (detectedId) {
       data.functionId = detectedId
     } else {
-      errors.functionId = 'Function ID is required. Deploy the bundle-order-discount extension first.'
+      errors.functionId =
+        'Function ID is required. Deploy the bundle-order-discount extension first.'
     }
   }
 
@@ -261,7 +257,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const organizationId = await getOrganizationIdForShop(session.shop)
 
   if (!organizationId) {
-    logger.warn(`[BundleSync] Shop ${session.shop} not registered with any tenant — skipping platform sync`)
+    logger.warn(
+      `[BundleSync] Shop ${session.shop} not registered with any tenant — skipping platform sync`
+    )
     return json({ saved: true, bundleTitle: data.title })
   }
 
@@ -310,22 +308,22 @@ export async function action({ request, params }: ActionFunctionArgs) {
       } else {
         const bundleConfigId = bundle.bundleId
         if (bundleConfigId) {
-          await fetch(
-            `${platformApiUrl}/api/admin/bundles/${bundleConfigId}`,
-            {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                'x-tenant-slug': tenantSlug,
-                Authorization: `Bearer ${platformApiKey}`,
-              },
-              body: JSON.stringify(platformPayload),
-            }
-          )
+          await fetch(`${platformApiUrl}/api/admin/bundles/${bundleConfigId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-tenant-slug': tenantSlug,
+              Authorization: `Bearer ${platformApiKey}`,
+            },
+            body: JSON.stringify(platformPayload),
+          })
         }
       }
     } catch (err) {
-      logger.error('[BundleSync] Failed to sync to platform:', err)
+      logger.error(
+        '[BundleSync] Failed to sync to platform:',
+        err instanceof Error ? err : new Error(String(err))
+      )
     }
   }
 
@@ -341,7 +339,11 @@ export default function BundleEdit() {
     functionAutoDetected,
     freeGiftProducts: initialFreeGiftProducts,
   } = useLoaderData<typeof loader>()
-  const actionData = useActionData<{ errors?: ActionErrors; saved?: boolean; bundleTitle?: string }>()
+  const actionData = useActionData<{
+    errors?: ActionErrors
+    saved?: boolean
+    bundleTitle?: string
+  }>()
   const submit = useSubmit()
   const navigation = useNavigation()
   const shopify = useAppBridge()
@@ -353,7 +355,7 @@ export default function BundleEdit() {
     initialBundle.discountType
   )
   const [tiers, setTiers] = useState<TierConfig[]>(
-    initialBundle.tiers.map(t => ({
+    initialBundle.tiers.map((t) => ({
       ...t,
       freeGiftVariantIds: t.freeGiftVariantIds ?? [],
     }))
@@ -388,39 +390,31 @@ export default function BundleEdit() {
   const handleTierChange = useCallback(
     (index: number, field: 'count' | 'discount' | 'label', value: string) => {
       if (field === 'label') {
-        setTiers(
-          tiers.map((tier, i) =>
-            i === index ? { ...tier, label: value } : tier
-          )
-        )
+        setTiers(tiers.map((tier, i) => (i === index ? { ...tier, label: value } : tier)))
         return
       }
       const num = parseFloat(value)
       if (isNaN(num)) return
-      setTiers(
-        tiers.map((tier, i) =>
-          i === index ? { ...tier, [field]: num } : tier
-        )
-      )
+      setTiers(tiers.map((tier, i) => (i === index ? { ...tier, [field]: num } : tier)))
     },
     [tiers]
   )
 
-  const handleSelectTierGifts = useCallback(async (tierIndex: number) => {
-    try {
-      const selected = await shopify.resourcePicker({
-        type: 'product',
-        multiple: true,
-        action: 'select',
-        filter: {
-          variants: true,
-        },
-      })
+  const handleSelectTierGifts = useCallback(
+    async (tierIndex: number) => {
+      try {
+        const selected = await shopify.resourcePicker({
+          type: 'product',
+          multiple: true,
+          action: 'select',
+          filter: {
+            variants: true,
+          },
+        })
 
-      if (!selected || selected.length === 0) return
+        if (!selected || selected.length === 0) return
 
-      const newProducts: FreeGiftProduct[] = selected.flatMap(
-        (product: unknown) => {
+        const newProducts: FreeGiftProduct[] = selected.flatMap((product: unknown) => {
           const p = product as Record<string, unknown>
           const variants = p.variants as Array<Record<string, unknown>> | undefined
           const variant = variants?.[0]
@@ -434,36 +428,46 @@ export default function BundleEdit() {
               imageUrl: (images?.[0]?.originalSrc as unknown as string) ?? null,
             },
           ]
-        }
-      )
+        })
 
-      // Update display info lookup
-      const newInfo = { ...giftProductInfo }
-      newProducts.forEach(p => { newInfo[p.variantId] = p })
-      setGiftProductInfo(newInfo)
+        // Update display info lookup
+        const newInfo = { ...giftProductInfo }
+        newProducts.forEach((p) => {
+          newInfo[p.variantId] = p
+        })
+        setGiftProductInfo(newInfo)
 
-      // Add to this tier's freeGiftVariantIds (dedupe)
-      const tier = tiers[tierIndex]
-      const existingIds = new Set(tier.freeGiftVariantIds || [])
-      const newIds = newProducts.map(p => p.variantId).filter(id => !existingIds.has(id))
+        // Add to this tier's freeGiftVariantIds (dedupe)
+        const tier = tiers[tierIndex]
+        const existingIds = new Set(tier.freeGiftVariantIds || [])
+        const newIds = newProducts.map((p) => p.variantId).filter((id) => !existingIds.has(id))
 
-      setTiers(tiers.map((t, i) =>
-        i === tierIndex
-          ? { ...t, freeGiftVariantIds: [...(t.freeGiftVariantIds || []), ...newIds] }
-          : t
-      ))
-    } catch {
-      // User cancelled the picker
-    }
-  }, [shopify, tiers, giftProductInfo])
+        setTiers(
+          tiers.map((t, i) =>
+            i === tierIndex
+              ? { ...t, freeGiftVariantIds: [...(t.freeGiftVariantIds || []), ...newIds] }
+              : t
+          )
+        )
+      } catch {
+        // User cancelled the picker
+      }
+    },
+    [shopify, tiers, giftProductInfo]
+  )
 
   const handleRemoveTierGift = useCallback(
     (tierIndex: number, variantId: string) => {
-      setTiers(tiers.map((t, i) =>
-        i === tierIndex
-          ? { ...t, freeGiftVariantIds: (t.freeGiftVariantIds || []).filter(id => id !== variantId) }
-          : t
-      ))
+      setTiers(
+        tiers.map((t, i) =>
+          i === tierIndex
+            ? {
+                ...t,
+                freeGiftVariantIds: (t.freeGiftVariantIds || []).filter((id) => id !== variantId),
+              }
+            : t
+        )
+      )
     },
     [tiers]
   )
@@ -529,10 +533,7 @@ export default function BundleEdit() {
     }
 
     const formData = new FormData()
-    formData.set(
-      'bundleData',
-      JSON.stringify({ title, bundle, functionId })
-    )
+    formData.set('bundleData', JSON.stringify({ title, bundle, functionId }))
     submit(formData, { method: 'post' })
   }, [validate, title, bundleId, discountType, tiers, functionId, submit])
 
@@ -555,17 +556,13 @@ export default function BundleEdit() {
       <Layout>
         {errors.server && (
           <Layout.Section>
-            <Banner tone="critical">
-              {errors.server}
-            </Banner>
+            <Banner tone="critical">{errors.server}</Banner>
           </Layout.Section>
         )}
 
         {Object.keys(errors).filter((k) => k !== 'server').length > 0 && (
           <Layout.Section>
-            <Banner tone="critical">
-              Please fix the errors below before saving.
-            </Banner>
+            <Banner tone="critical">Please fix the errors below before saving.</Banner>
           </Layout.Section>
         )}
 
@@ -574,12 +571,11 @@ export default function BundleEdit() {
             <Banner tone="success">
               <BlockStack gap="200">
                 <Text as="p" variant="bodyMd">
-                  Bundle discount &ldquo;{actionData.bundleTitle}&rdquo; saved
-                  successfully.
+                  Bundle discount &ldquo;{actionData.bundleTitle}&rdquo; saved successfully.
                 </Text>
                 <Text as="p" variant="bodyMd">
-                  Next step: Add the Bundle Builder block to your theme. Open the
-                  theme editor and add it to a product page or custom section.
+                  Next step: Add the Bundle Builder block to your theme. Open the theme editor and
+                  add it to a product page or custom section.
                 </Text>
                 <InlineStack gap="200">
                   <Button url="/app">Back to bundles</Button>
@@ -621,13 +617,11 @@ export default function BundleEdit() {
                     { label: 'Fixed amount off', value: 'fixed' },
                   ]}
                   value={discountType}
-                  onChange={(val) =>
-                    setDiscountType(val as 'percentage' | 'fixed')
-                  }
+                  onChange={(val) => setDiscountType(val as 'percentage' | 'fixed')}
                   disabled={isSubmitting}
                 />
-                {isNew && (
-                  functionAutoDetected ? (
+                {isNew &&
+                  (functionAutoDetected ? (
                     <Banner tone="info">
                       <Text as="p" variant="bodyMd">
                         Bundle discount function auto-detected:{' '}
@@ -643,8 +637,7 @@ export default function BundleEdit() {
                       <Banner tone="warning">
                         <Text as="p" variant="bodyMd">
                           No deployed bundle discount function found. Deploy the
-                          bundle-order-discount extension first, then paste the
-                          Function ID below.
+                          bundle-order-discount extension first, then paste the Function ID below.
                         </Text>
                       </Banner>
                       <TextField
@@ -658,8 +651,7 @@ export default function BundleEdit() {
                         disabled={isSubmitting}
                       />
                     </BlockStack>
-                  )
-                )}
+                  ))}
               </FormLayout>
             </BlockStack>
           </Card>
@@ -680,13 +672,11 @@ export default function BundleEdit() {
                 </Button>
               </InlineStack>
 
-              {errors.tiers && (
-                <Banner tone="critical">{errors.tiers}</Banner>
-              )}
+              {errors.tiers && <Banner tone="critical">{errors.tiers}</Banner>}
 
               <Text as="p" variant="bodyMd" tone="subdued">
-                Define discount amounts based on how many items are in the
-                bundle. Tiers are auto-sorted by item count ascending.
+                Define discount amounts based on how many items are in the bundle. Tiers are
+                auto-sorted by item count ascending.
               </Text>
 
               {tiers.map((tier, index) => (
@@ -700,9 +690,7 @@ export default function BundleEdit() {
                             label={`Tier ${index + 1} — Items`}
                             type="number"
                             value={String(tier.count)}
-                            onChange={(val) =>
-                              handleTierChange(index, 'count', val)
-                            }
+                            onChange={(val) => handleTierChange(index, 'count', val)}
                             autoComplete="off"
                             min={1}
                             error={errors[`tier_${index}_count`]}
@@ -711,21 +699,13 @@ export default function BundleEdit() {
                         </Box>
                         <Box minWidth="120px">
                           <TextField
-                            label={
-                              discountType === 'percentage'
-                                ? 'Discount %'
-                                : 'Discount amount'
-                            }
+                            label={discountType === 'percentage' ? 'Discount %' : 'Discount amount'}
                             type="number"
                             value={String(tier.discount)}
-                            onChange={(val) =>
-                              handleTierChange(index, 'discount', val)
-                            }
+                            onChange={(val) => handleTierChange(index, 'discount', val)}
                             autoComplete="off"
                             min={0}
-                            suffix={
-                              discountType === 'percentage' ? '%' : undefined
-                            }
+                            suffix={discountType === 'percentage' ? '%' : undefined}
                             error={errors[`tier_${index}_discount`]}
                             disabled={isSubmitting}
                           />
@@ -734,9 +714,7 @@ export default function BundleEdit() {
                           <TextField
                             label="Label (optional)"
                             value={tier.label || ''}
-                            onChange={(val) =>
-                              handleTierChange(index, 'label', val)
-                            }
+                            onChange={(val) => handleTierChange(index, 'label', val)}
                             autoComplete="off"
                             placeholder="e.g. Gold Tier"
                             disabled={isSubmitting}
@@ -775,11 +753,7 @@ export default function BundleEdit() {
                               {(tier.freeGiftVariantIds || []).map((variantId) => {
                                 const product = giftProductInfo[variantId]
                                 return (
-                                  <InlineStack
-                                    key={variantId}
-                                    gap="200"
-                                    blockAlign="center"
-                                  >
+                                  <InlineStack key={variantId} gap="200" blockAlign="center">
                                     <Thumbnail
                                       source={product?.imageUrl ?? ''}
                                       alt={product?.productTitle ?? variantId}
@@ -789,11 +763,12 @@ export default function BundleEdit() {
                                       <Text as="span" variant="bodySm" fontWeight="semibold">
                                         {product?.productTitle ?? 'Unknown'}
                                       </Text>
-                                      {product?.variantTitle && product.variantTitle !== 'Default Title' && (
-                                        <Text as="span" variant="bodySm" tone="subdued">
-                                          {product.variantTitle}
-                                        </Text>
-                                      )}
+                                      {product?.variantTitle &&
+                                        product.variantTitle !== 'Default Title' && (
+                                          <Text as="span" variant="bodySm" tone="subdued">
+                                            {product.variantTitle}
+                                          </Text>
+                                        )}
                                     </BlockStack>
                                     <Button
                                       variant="plain"
@@ -809,8 +784,8 @@ export default function BundleEdit() {
                             </InlineStack>
                           ) : (
                             <Text as="p" variant="bodySm" tone="subdued">
-                              No free gifts. Customers qualifying for this tier
-                              won&apos;t receive a gift.
+                              No free gifts. Customers qualifying for this tier won&apos;t receive a
+                              gift.
                             </Text>
                           )}
                         </BlockStack>
@@ -859,8 +834,8 @@ export default function BundleEdit() {
                   <Divider />
                   <Text as="p" variant="bodyMd">
                     {allTierGiftIds.length} free gift
-                    {allTierGiftIds.length !== 1 ? 's' : ''} configured across tiers
-                    (cumulative — customers unlock gifts as they reach each tier).
+                    {allTierGiftIds.length !== 1 ? 's' : ''} configured across tiers (cumulative —
+                    customers unlock gifts as they reach each tier).
                   </Text>
                 </>
               )}

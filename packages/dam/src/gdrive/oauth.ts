@@ -36,20 +36,13 @@ const SCOPES = [
  * Create OAuth2 client
  */
 export function createOAuth2Client(config: OAuthConfig): Auth.OAuth2Client {
-  return new google.auth.OAuth2(
-    config.clientId,
-    config.clientSecret,
-    config.redirectUri
-  )
+  return new google.auth.OAuth2(config.clientId, config.clientSecret, config.redirectUri)
 }
 
 /**
  * Generate authorization URL for Google Drive OAuth
  */
-export function generateAuthorizationUrl(
-  config: OAuthConfig,
-  state: OAuthState
-): string {
+export function generateAuthorizationUrl(config: OAuthConfig, state: OAuthState): string {
   const oauth2Client = createOAuth2Client(config)
 
   return oauth2Client.generateAuthUrl({
@@ -108,17 +101,17 @@ export async function refreshAccessToken(
 /**
  * Revoke OAuth tokens
  */
-export async function revokeTokens(
-  config: OAuthConfig,
-  accessToken: string
-): Promise<void> {
+export async function revokeTokens(config: OAuthConfig, accessToken: string): Promise<void> {
   const oauth2Client = createOAuth2Client(config)
   oauth2Client.setCredentials({ access_token: accessToken })
 
   try {
     await oauth2Client.revokeToken(accessToken)
   } catch (error) {
-    logger.error('Failed to revoke token:', error)
+    logger.error(
+      'Failed to revoke token',
+      error instanceof Error ? error : new Error(String(error))
+    )
     // Token may already be revoked, continue anyway
   }
 }

@@ -554,11 +554,12 @@ export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload
         },
       }
     } catch (error) {
-      logger.error(`[commerce.productBatchSync] Error:`, error)
+      const err = error instanceof Error ? error : new Error(String(error))
+      logger.error(`[commerce.productBatchSync] Error:`, err)
       return {
         success: false,
         error: {
-          message: error instanceof Error ? error.message : 'Product batch sync failed',
+          message: err.message,
           code: 'SYNC_ERROR',
           retryable: true,
         },

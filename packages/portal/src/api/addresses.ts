@@ -133,7 +133,10 @@ export async function getAddresses(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    logger.error('Failed to get addresses:', result.errors)
+    logger.error(
+      'Failed to get addresses:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return []
   }
 

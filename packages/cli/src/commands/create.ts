@@ -5,7 +5,7 @@ import { Command } from 'commander'
 import fs from 'fs-extra'
 import inquirer from 'inquirer'
 import ora from 'ora'
-
+import { logger } from '@cgk-platform/logging'
 
 export const createCommand = new Command('create')
   .description('Create a new CGK brand site')
@@ -49,9 +49,7 @@ export const createCommand = new Command('create')
     // Validate template
     const validTemplates = ['basic', 'full', 'storefront-only']
     if (!validTemplates.includes(options.template)) {
-      logger.info(
-        chalk.red(`Invalid template. Choose from: ${validTemplates.join(', ')}`)
-      )
+      logger.info(chalk.red(`Invalid template. Choose from: ${validTemplates.join(', ')}`))
       process.exit(1)
     }
 
@@ -59,13 +57,7 @@ export const createCommand = new Command('create')
 
     try {
       // Copy template
-      const templateDir = path.join(
-        import.meta.dirname,
-        '..',
-        '..',
-        'templates',
-        options.template
-      )
+      const templateDir = path.join(import.meta.dirname, '..', '..', 'templates', options.template)
 
       if (await fs.pathExists(templateDir)) {
         await fs.copy(templateDir, targetDir)
@@ -88,7 +80,7 @@ export const createCommand = new Command('create')
         const { exec } = await import('child_process')
         const { promisify } = await import('util')
         const execAsync = promisify(exec)
-        
+
         try {
           await execAsync('pnpm install', { cwd: targetDir })
           spinner.succeed('Dependencies installed')
@@ -113,11 +105,7 @@ export const createCommand = new Command('create')
     }
   })
 
-async function createBasicStructure(
-  dir: string,
-  slug: string,
-  name: string
-): Promise<void> {
+async function createBasicStructure(dir: string, slug: string, name: string): Promise<void> {
   // Create package.json
   const pkg = {
     name: slug,
@@ -178,7 +166,6 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: '${name}',
-import { logger } from '@cgk-platform/logging'
   description: 'Powered by CGK',
 }
 
@@ -233,11 +220,7 @@ export default function RootLayout({
   )
 }
 
-async function createPlatformConfig(
-  dir: string,
-  slug: string,
-  name: string
-): Promise<void> {
+async function createPlatformConfig(dir: string, slug: string, name: string): Promise<void> {
   const config = `import { defineConfig } from '@cgk-platform/core'
 
 export default defineConfig({

@@ -30,13 +30,16 @@ export const generateCallSummariesJob = defineJob({
     }
 
     try {
-      const { listVoiceCalls, updateVoiceCall, getFullTranscriptText } = await import('@cgk-platform/ai-agents/voice')
+      const { listVoiceCalls, updateVoiceCall, getFullTranscriptText } =
+        await import('@cgk-platform/ai-agents/voice')
       const { getTenantAnthropicClient } = await import('@cgk-platform/integrations')
 
       // Check if Anthropic is configured
       const anthropic = await getTenantAnthropicClient(tenantId)
       if (!anthropic) {
-        logger.info(`[ai-agents/generate-call-summaries] Anthropic not configured for tenant ${tenantId}`)
+        logger.info(
+          `[ai-agents/generate-call-summaries] Anthropic not configured for tenant ${tenantId}`
+        )
         return { success: true, data: { skipped: 'Anthropic not configured' } }
       }
 
@@ -46,7 +49,9 @@ export const generateCallSummariesJob = defineJob({
         limit: 20,
       })
 
-      const callsNeedingSummary = calls.filter((c) => !c.summary && c.durationSeconds && c.durationSeconds > 30)
+      const callsNeedingSummary = calls.filter(
+        (c) => !c.summary && c.durationSeconds && c.durationSeconds > 30
+      )
 
       if (callsNeedingSummary.length === 0) {
         return { success: true, data: { processed: 0 } }
@@ -82,14 +87,17 @@ export const generateCallSummariesJob = defineJob({
             summarized++
           }
         } catch (callError) {
+          const err = callError instanceof Error ? callError : new Error(String(callError))
           logger.error(
             `[ai-agents/generate-call-summaries] Error summarizing call ${call.id}:`,
-            callError instanceof Error ? callError.message : 'Unknown error'
+            err
           )
         }
       }
 
-      logger.info(`[ai-agents/generate-call-summaries] tenantId=${tenantId} summarized=${summarized}`)
+      logger.info(
+        `[ai-agents/generate-call-summaries] tenantId=${tenantId} summarized=${summarized}`
+      )
 
       return {
         success: true,
@@ -97,7 +105,10 @@ export const generateCallSummariesJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[ai-agents/generate-call-summaries] tenantId=${tenantId} error:`, message)
+      logger.error(
+        `[ai-agents/generate-call-summaries] tenantId=${tenantId} error:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },
@@ -180,7 +191,10 @@ export const cleanupOldRecordingsJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[ai-agents/cleanup-old-recordings] tenantId=${tenantId} error:`, message)
+      logger.error(
+        `[ai-agents/cleanup-old-recordings] tenantId=${tenantId} error:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },
@@ -238,10 +252,8 @@ export const syncRetellAgentsJob = defineJob({
           logger.info(`[ai-agents/sync-retell-agents] Would sync agent ${agent.id} (${agent.name})`)
           synced++
         } catch (agentError) {
-          logger.error(
-            `[ai-agents/sync-retell-agents] Error syncing agent ${agent.id}:`,
-            agentError instanceof Error ? agentError.message : 'Unknown error'
-          )
+          const err = agentError instanceof Error ? agentError : new Error(String(agentError))
+          logger.error(`[ai-agents/sync-retell-agents] Error syncing agent ${agent.id}:`, err)
         }
       }
 
@@ -253,7 +265,7 @@ export const syncRetellAgentsJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[ai-agents/sync-retell-agents] tenantId=${tenantId} error:`, message)
+      logger.error(`[ai-agents/sync-retell-agents] tenantId=${tenantId} error:`, new Error(message))
       return {
         success: false,
         error: { message, retryable: true },
@@ -362,7 +374,10 @@ export const processVoiceUsageJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[ai-agents/process-voice-usage] tenantId=${tenantId} error:`, message)
+      logger.error(
+        `[ai-agents/process-voice-usage] tenantId=${tenantId} error:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },

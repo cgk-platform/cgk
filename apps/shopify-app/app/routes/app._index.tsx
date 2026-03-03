@@ -51,7 +51,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     return json({ discounts, error: null })
   } catch (err) {
-    logger.error('[BundleBuilder] Failed to load discounts:', err)
+    logger.error(
+      '[BundleBuilder] Failed to load discounts:',
+      err instanceof Error ? err : new Error(String(err))
+    )
     return json({
       discounts: [],
       error: 'Failed to load bundle discounts. Please try refreshing the page.',
@@ -122,8 +125,8 @@ export default function BundlesIndex() {
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
                 <p>
-                  Set up discount tiers, free gifts, and pricing rules for your
-                  bundle builder. Discounts are enforced server-side at checkout.
+                  Set up discount tiers, free gifts, and pricing rules for your bundle builder.
+                  Discounts are enforced server-side at checkout.
                 </p>
               </EmptyState>
             </Card>
@@ -135,20 +138,19 @@ export default function BundlesIndex() {
                   How it works
                 </Text>
                 <Text as="p" variant="bodyMd">
-                  1. Create a bundle discount with tier rules (e.g., 10% off for
-                  2 items, 15% for 3, 20% for 4+).
+                  1. Create a bundle discount with tier rules (e.g., 10% off for 2 items, 15% for 3,
+                  20% for 4+).
                 </Text>
                 <Text as="p" variant="bodyMd">
-                  2. Add the Bundle Builder block to any page in the theme
-                  editor.
+                  2. Add the Bundle Builder block to any page in the theme editor.
                 </Text>
                 <Text as="p" variant="bodyMd">
-                  3. Customers build their bundle on the storefront. The
-                  discount function enforces the tier pricing at checkout.
+                  3. Customers build their bundle on the storefront. The discount function enforces
+                  the tier pricing at checkout.
                 </Text>
                 <Text as="p" variant="bodyMd">
-                  4. Optionally, the Cart Transform merges bundle items into a
-                  single line in the cart for a cleaner experience.
+                  4. Optionally, the Cart Transform merges bundle items into a single line in the
+                  cart for a cleaner experience.
                 </Text>
               </BlockStack>
             </Card>
@@ -158,19 +160,14 @@ export default function BundlesIndex() {
     )
   }
 
-  const rows = discounts.map((discount: typeof discounts[number]) => [
+  const rows = discounts.map((discount: (typeof discounts)[number]) => [
     discount.title,
-    <Badge
-      key={discount.id}
-      tone={discount.status === 'ACTIVE' ? 'success' : undefined}
-    >
+    <Badge key={discount.id} tone={discount.status === 'ACTIVE' ? 'success' : undefined}>
       {discount.status}
     </Badge>,
     String(discount.bundleCount),
     <InlineStack key={discount.id} gap="200">
-      <Button url={`/app/bundles/${encodeURIComponent(discount.id)}`}>
-        Edit
-      </Button>
+      <Button url={`/app/bundles/${encodeURIComponent(discount.id)}`}>Edit</Button>
       <Button
         variant="plain"
         tone="critical"
@@ -213,8 +210,8 @@ export default function BundlesIndex() {
         )}
         <Layout.Section>
           <Banner tone="info">
-            Bundle discounts are enforced server-side by a Shopify Function.
-            Changes here update the discount metafield configuration.
+            Bundle discounts are enforced server-side by a Shopify Function. Changes here update the
+            discount metafield configuration.
           </Banner>
         </Layout.Section>
         <Layout.Section>

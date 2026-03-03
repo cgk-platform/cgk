@@ -66,10 +66,7 @@ export function setMessageProcessor(processor: MessageProcessor): void {
 /**
  * Handle incoming Slack events
  */
-export async function handleSlackEvent(
-  tenantId: string,
-  event: SlackEvent
-): Promise<void> {
+export async function handleSlackEvent(tenantId: string, event: SlackEvent): Promise<void> {
   // Get tenant's Slack config
   const config = await getSlackConfig()
   if (!config?.enabled) {
@@ -111,10 +108,7 @@ export async function handleSlackEvent(
 /**
  * Handle regular messages
  */
-async function handleMessage(
-  ctx: SlackEventContext,
-  event: SlackMessageEvent
-): Promise<void> {
+async function handleMessage(ctx: SlackEventContext, event: SlackMessageEvent): Promise<void> {
   // Skip bot messages
   if (event.bot_id) return
 
@@ -207,7 +201,10 @@ async function handleMessage(
       conversationId: conversation.id,
     })
   } catch (error) {
-    logger.error('[slack] Error processing message:', error)
+    logger.error(
+      '[slack] Error processing message:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     await ctx.client.addReaction(event.channel, event.ts, 'x').catch((reactionError) => {
       logger.debug('[slack] Failed to add error reaction:', reactionError)
     })
@@ -218,10 +215,7 @@ async function handleMessage(
 /**
  * Handle @mentions
  */
-async function handleMention(
-  ctx: SlackEventContext,
-  event: SlackMentionEvent
-): Promise<void> {
+async function handleMention(ctx: SlackEventContext, event: SlackMentionEvent): Promise<void> {
   // Determine which agent was mentioned
   const agentId = await determineAgent(ctx, event.channel, event.user)
   if (!agentId) {
@@ -302,7 +296,10 @@ async function handleMention(
       conversationId: conversation.id,
     })
   } catch (error) {
-    logger.error('[slack] Error handling mention:', error)
+    logger.error(
+      '[slack] Error handling mention:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     throw error
   }
 }
@@ -310,10 +307,7 @@ async function handleMention(
 /**
  * Handle app home opened events
  */
-async function handleAppHomeOpened(
-  ctx: SlackEventContext,
-  event: SlackEvent
-): Promise<void> {
+async function handleAppHomeOpened(ctx: SlackEventContext, event: SlackEvent): Promise<void> {
   const userId = event.user as string
   if (!userId) return
 
@@ -419,7 +413,9 @@ async function resolveSlackUser(
           association?.associationMethod || (userInfo.profile.email ? 'auto' : undefined),
       })
     } catch (error) {
-      logger.warn('[slack] Failed to fetch user info:', error)
+      logger.warn('[slack] Failed to fetch user info:', {
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -454,7 +450,9 @@ export async function buildConversationContext(
       }
     }
   } catch (error) {
-    logger.warn('[slack] Failed to build conversation context:', error)
+    logger.warn('[slack] Failed to build conversation context:', {
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
 
   return messages

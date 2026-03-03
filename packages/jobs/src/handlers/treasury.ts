@@ -131,7 +131,9 @@ export const treasurySendApprovalEmailJob = defineJob<TreasurySendApprovalEmailP
         `
       })
 
-      logger.info(`[treasury/send-approval-email] Sent approval email for request ${requestId} to ${treasurer.email}`)
+      logger.info(
+        `[treasury/send-approval-email] Sent approval email for request ${requestId} to ${treasurer.email}`
+      )
 
       return {
         success: true,
@@ -139,7 +141,10 @@ export const treasurySendApprovalEmailJob = defineJob<TreasurySendApprovalEmailP
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[treasury/send-approval-email] Error for request ${requestId}:`, message)
+      logger.error(
+        `[treasury/send-approval-email] Error for request ${requestId}:`,
+        new Error(message)
+      )
       return {
         success: false,
         error: { message, retryable: true },
@@ -238,11 +243,16 @@ export const treasuryAutoSendApprovedJob = defineJob<TreasuryAutoSendApprovedPay
           const errorMessage = reqError instanceof Error ? reqError.message : 'Unknown error'
           await markRequestFailed(tenantId, request.id as string, errorMessage)
           failed++
-          logger.error(`[treasury/auto-send-approved] Failed to process request ${request.id}:`, errorMessage)
+          logger.error(
+            `[treasury/auto-send-approved] Failed to process request ${request.id}:`,
+            new Error(errorMessage)
+          )
         }
       }
 
-      logger.info(`[treasury/auto-send-approved] tenantId=${tenantId} processed=${processed} failed=${failed}`)
+      logger.info(
+        `[treasury/auto-send-approved] tenantId=${tenantId} processed=${processed} failed=${failed}`
+      )
 
       return {
         success: true,
@@ -250,7 +260,7 @@ export const treasuryAutoSendApprovedJob = defineJob<TreasuryAutoSendApprovedPay
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[treasury/auto-send-approved] tenantId=${tenantId} error:`, message)
+      logger.error(`[treasury/auto-send-approved] tenantId=${tenantId} error:`, new Error(message))
       return {
         success: false,
         error: { message, retryable: true },
@@ -260,7 +270,11 @@ export const treasuryAutoSendApprovedJob = defineJob<TreasuryAutoSendApprovedPay
   retry: { maxAttempts: 2, backoff: 'fixed', initialDelay: 10000 },
 })
 
-async function markRequestFailed(tenantId: string, requestId: string, reason: string): Promise<void> {
+async function markRequestFailed(
+  tenantId: string,
+  requestId: string,
+  reason: string
+): Promise<void> {
   await withTenant(tenantId, async () => {
     await sql`
       UPDATE draw_requests
@@ -341,14 +355,14 @@ export const treasurySyncTopupStatusesJob = defineJob<TreasurySyncTopupStatusesP
             synced++
           }
         } catch (topupError) {
-          logger.error(
-            `[treasury/sync-topup-statuses] Error syncing topup ${topup.id}:`,
-            topupError instanceof Error ? topupError.message : 'Unknown error'
-          )
+          const err = topupError instanceof Error ? topupError : new Error(String(topupError))
+          logger.error(`[treasury/sync-topup-statuses] Error syncing topup ${topup.id}:`, err)
         }
       }
 
-      logger.info(`[treasury/sync-topup-statuses] tenantId=${tenantId} checked=${topups.length} synced=${synced}`)
+      logger.info(
+        `[treasury/sync-topup-statuses] tenantId=${tenantId} checked=${topups.length} synced=${synced}`
+      )
 
       return {
         success: true,
@@ -356,7 +370,7 @@ export const treasurySyncTopupStatusesJob = defineJob<TreasurySyncTopupStatusesP
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[treasury/sync-topup-statuses] tenantId=${tenantId} error:`, message)
+      logger.error(`[treasury/sync-topup-statuses] tenantId=${tenantId} error:`, new Error(message))
       return {
         success: false,
         error: { message, retryable: true },
@@ -379,7 +393,8 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
     }
 
     try {
-      const { getTenantStripeClient, getTenantResendClient } = await import('@cgk-platform/integrations')
+      const { getTenantStripeClient, getTenantResendClient } =
+        await import('@cgk-platform/integrations')
 
       // Get Stripe client
       const stripe = await getTenantStripeClient(tenantId)
@@ -393,10 +408,12 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
         const result = await sql`
           SELECT * FROM treasury_config LIMIT 1
         `
-        return result.rows[0] as {
-          low_balance_threshold_cents: number
-          alert_email: string
-        } | undefined
+        return result.rows[0] as
+          | {
+              low_balance_threshold_cents: number
+              alert_email: string
+            }
+          | undefined
       })
 
       const threshold = config?.low_balance_threshold_cents || 100000 // Default $1000
@@ -459,7 +476,7 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      logger.error(`[treasury/low-balance-alert] tenantId=${tenantId} error:`, message)
+      logger.error(`[treasury/low-balance-alert] tenantId=${tenantId} error:`, new Error(message))
       return {
         success: false,
         error: { message, retryable: true },

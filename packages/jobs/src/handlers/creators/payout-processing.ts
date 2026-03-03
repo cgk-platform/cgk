@@ -484,12 +484,15 @@ export const checkPaymentsBecomeAvailableJob = defineJob<
  * await redis.setex(key, 86400, JSON.stringify(result))
  * ```
  */
-const idempotencyStore = new Map<string, {
-  status: 'initiated' | 'pending' | 'completed' | 'failed'
-  payoutId: string
-  transferId?: string
-  processedAt: Date
-}>()
+const idempotencyStore = new Map<
+  string,
+  {
+    status: 'initiated' | 'pending' | 'completed' | 'failed'
+    payoutId: string
+    transferId?: string
+    processedAt: Date
+  }
+>()
 
 /**
  * Check if a payout has already been processed
@@ -630,12 +633,13 @@ export const processInternationalPayoutJob = defineJob<
       // Record failure for idempotency
       recordIdempotency(idempotencyKey, payoutId, 'failed')
 
-      logger.error(`[processInternationalPayout] Failed for payout ${payoutId}:`, error)
+      const err = error instanceof Error ? error : new Error(String(error))
+      logger.error(`[processInternationalPayout] Failed for payout ${payoutId}:`, err)
 
       return {
         success: false,
         error: {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: err.message,
           retryable: true,
         },
       }
@@ -729,8 +733,15 @@ export const processDomesticPayoutJob = defineJob<
   handler: async (
     job: Job<TenantEvent<DomesticPayoutPayload>>
   ): Promise<JobResult<PayoutOrchestrationResult>> => {
-    const { tenantId, payoutId, creatorId, amount, currency, stripeConnectAccountId, idempotencyKey } =
-      job.payload
+    const {
+      tenantId,
+      payoutId,
+      creatorId,
+      amount,
+      currency,
+      stripeConnectAccountId,
+      idempotencyKey,
+    } = job.payload
 
     if (!tenantId) {
       return {
@@ -811,12 +822,13 @@ export const processDomesticPayoutJob = defineJob<
       // Record failure for idempotency
       recordIdempotency(idempotencyKey, payoutId, 'failed')
 
-      logger.error(`[processDomesticPayout] Failed for payout ${payoutId}:`, error)
+      const err = error instanceof Error ? error : new Error(String(error))
+      logger.error(`[processDomesticPayout] Failed for payout ${payoutId}:`, err)
 
       return {
         success: false,
         error: {
-          message: error instanceof Error ? error.message : 'Unknown error',
+          message: err.message,
           retryable: true,
         },
       }
@@ -938,10 +950,7 @@ export const onTopupSucceededJob = defineJob<
  * Ensures all payouts are reflected in the expense tracking system
  * for unified P&L reporting
  */
-export const dailyExpenseSyncJob = defineJob<
-  TenantEvent<ExpenseSyncPayload>,
-  ExpenseSyncResult
->({
+export const dailyExpenseSyncJob = defineJob<TenantEvent<ExpenseSyncPayload>, ExpenseSyncResult>({
   name: 'payout.dailyExpenseSync',
   handler: async (
     job: Job<TenantEvent<ExpenseSyncPayload>>
@@ -955,10 +964,11 @@ export const dailyExpenseSyncJob = defineJob<
       }
     }
 
-    logger.info(
-      `[dailyExpenseSync] Syncing expenses for tenant ${tenantId}`,
-      { payoutId, startDate, endDate }
-    )
+    logger.info(`[dailyExpenseSync] Syncing expenses for tenant ${tenantId}`, {
+      payoutId,
+      startDate,
+      endDate,
+    })
 
     // Implementation would:
     // 1. Query completed payouts not yet synced to expenses

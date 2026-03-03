@@ -23,9 +23,7 @@ export interface ImageDimensions {
  * Extract metadata from an image buffer
  * Uses sharp for image processing
  */
-export async function extractImageMetadata(
-  buffer: Buffer
-): Promise<ExtractedMetadata> {
+export async function extractImageMetadata(buffer: Buffer): Promise<ExtractedMetadata> {
   // Dynamic import to handle environments where sharp isn't available
   const sharp = await import('sharp').catch(() => null)
 
@@ -58,7 +56,10 @@ export async function extractImageMetadata(
 
     return result
   } catch (error) {
-    logger.error('Failed to extract image metadata:', error)
+    logger.error(
+      'Failed to extract image metadata',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {}
   }
 }

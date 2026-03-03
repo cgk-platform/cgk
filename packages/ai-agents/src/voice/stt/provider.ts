@@ -53,7 +53,9 @@ export async function transcribeWithFallback(
     return await primaryProvider.transcribeFile(audioUrl, options)
   } catch (error) {
     if (fallbackProvider) {
-      logger.warn(`Primary STT provider ${primaryProvider.name} failed, using fallback:`, error)
+      logger.warn(`Primary STT provider ${primaryProvider.name} failed, using fallback`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
       return await fallbackProvider.transcribeFile(audioUrl, options)
     }
     throw error

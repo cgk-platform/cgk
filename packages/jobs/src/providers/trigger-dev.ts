@@ -39,11 +39,7 @@ interface TriggerDevConfig {
  * Create a Trigger.dev job provider
  */
 export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider {
-  const {
-    apiUrl = 'https://api.trigger.dev',
-    projectRef,
-    secretKey,
-  } = config
+  const { apiUrl = 'https://api.trigger.dev', projectRef, secretKey } = config
 
   const handlers = new Map<string, JobHandler<unknown, unknown>>()
 
@@ -57,11 +53,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
   /**
    * Make API request to Trigger.dev
    */
-  async function apiRequest<T>(
-    method: string,
-    path: string,
-    body?: unknown
-  ): Promise<T> {
+  async function apiRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
     if (!secretKey) {
       throw new Error(
         '[TriggerDevProvider] Not configured. Set TRIGGER_SECRET_KEY environment variable.'
@@ -82,9 +74,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
 
     if (!response.ok) {
       const error = await response.text()
-      throw new Error(
-        `[TriggerDevProvider] API error ${response.status}: ${error}`
-      )
+      throw new Error(`[TriggerDevProvider] API error ${response.status}: ${error}`)
     }
 
     return response.json() as Promise<T>
@@ -161,11 +151,9 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
         const result = await triggerTask(event as string, payload, options)
         return { id: result.id, accepted: true }
       } catch (error) {
-        logger.error(
-          `[TriggerDevProvider] Failed to send ${event as string}:`,
-          error
-        )
-        throw error
+        const err = error instanceof Error ? error : new Error(String(error))
+        logger.error(`[TriggerDevProvider] Failed to send ${event as string}:`, err)
+        throw err
       }
     },
 
@@ -188,8 +176,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
           const result = await this.send(event, payload, options)
           return { index, success: true, id: result.id }
         } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error)
+          const errorMessage = error instanceof Error ? error.message : String(error)
           return { index, success: false, error: errorMessage }
         }
       })
@@ -232,14 +219,10 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
           status: string
           output?: R
           error?: { message: string }
-        }>(
-          'POST',
-          `/api/v1/tasks/${normalizedTaskId}/trigger-and-poll`,
-          {
-            payload,
-            timeout: timeout ?? 30000,
-          }
-        )
+        }>('POST', `/api/v1/tasks/${normalizedTaskId}/trigger-and-poll`, {
+          payload,
+          timeout: timeout ?? 30000,
+        })
 
         if (result.status === 'COMPLETED') {
           return { success: true, data: result.output }
@@ -250,8 +233,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
           error: result.error ?? { message: `Task ${result.status}` },
         }
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : String(error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
         return {
           success: false,
           error: { message: errorMessage },
@@ -286,7 +268,10 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
           error?: { message: string }
         }>('GET', `/api/v1/runs/${runId}`)
 
-        const statusMap: Record<string, 'pending' | 'running' | 'completed' | 'failed' | 'cancelled'> = {
+        const statusMap: Record<
+          string,
+          'pending' | 'running' | 'completed' | 'failed' | 'cancelled'
+        > = {
           PENDING: 'pending',
           QUEUED: 'pending',
           EXECUTING: 'running',
@@ -298,9 +283,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
         return {
           status: statusMap[result.status] ?? 'completed',
           startedAt: result.startedAt ? new Date(result.startedAt) : undefined,
-          completedAt: result.completedAt
-            ? new Date(result.completedAt)
-            : undefined,
+          completedAt: result.completedAt ? new Date(result.completedAt) : undefined,
           error: result.error?.message,
         }
       } catch {
@@ -308,10 +291,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
       }
     },
 
-    registerHandler<E extends keyof JobEvents>(
-      event: E,
-      handler: JobHandler<JobEvents[E]>
-    ): void {
+    registerHandler<E extends keyof JobEvents>(event: E, handler: JobHandler<JobEvents[E]>): void {
       // In development/local mode, handlers are registered here
       // In production, handlers are defined using @trigger.dev/sdk task()
       handlers.set(event as string, handler as JobHandler<unknown, unknown>)
@@ -363,11 +343,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
 export function defineTriggerTask<E extends keyof JobEvents>(
   event: E,
   options: {
-    handler: (ctx: {
-      id: string
-      payload: JobEvents[E]
-      attempt: number
-    }) => Promise<void>
+    handler: (ctx: { id: string; payload: JobEvents[E]; attempt: number }) => Promise<void>
     retry?: {
       maxAttempts?: number
       factor?: number

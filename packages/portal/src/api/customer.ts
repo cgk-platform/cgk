@@ -73,7 +73,10 @@ export async function getCustomer(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    logger.error('Failed to get customer:', result.errors)
+    logger.error(
+      'Failed to get customer:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return null
   }
 
@@ -124,7 +127,10 @@ export async function updateCustomer(
   })
 
   if (result.errors?.length) {
-    logger.error('Failed to update customer:', result.errors)
+    logger.error(
+      'Failed to update customer:',
+      new Error(result.errors.map((e) => e.message).join(', '))
+    )
     return {
       customer: null,
       errors: result.errors.map((e) => ({ field: null, message: e.message })),

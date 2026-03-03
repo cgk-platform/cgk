@@ -43,7 +43,11 @@ export function processJobs(config: ProcessorConfig): JobProcessor {
 
           if (!handler) {
             logger.error(`No handler registered for job: ${job.name}`)
-            await config.queue.acknowledge(job.id, 'failed', new Error(`No handler for job: ${job.name}`))
+            await config.queue.acknowledge(
+              job.id,
+              'failed',
+              new Error(`No handler for job: ${job.name}`)
+            )
             return
           }
 
@@ -66,7 +70,8 @@ export function processJobs(config: ProcessorConfig): JobProcessor {
         })
       )
     } catch (error) {
-      logger.error('Error polling for jobs:', error)
+      const err = error instanceof Error ? error : new Error(String(error))
+      logger.error('Error polling for jobs:', err)
     }
 
     // Schedule next poll

@@ -113,11 +113,11 @@ export class SMSIntegration {
       )
 
       if (!response.ok) {
-        const error = await response.json() as { message?: string; code?: number }
+        const error = (await response.json()) as { message?: string; code?: number }
         throw new Error(error.message || `Twilio error: ${response.status}`)
       }
 
-      const result = await response.json() as {
+      const result = (await response.json()) as {
         sid: string
         status: string
         error_code?: number
@@ -125,11 +125,7 @@ export class SMSIntegration {
       }
 
       // Get or create conversation
-      const conv = await getOrCreateSMSConversation(
-        params.agentId,
-        fromNumber,
-        params.to
-      )
+      const conv = await getOrCreateSMSConversation(params.agentId, fromNumber, params.to)
 
       // Record message
       await createSMSMessage({
@@ -155,7 +151,10 @@ export class SMSIntegration {
 
       return { success: true, messageSid: result.sid, status: result.status }
     } catch (error) {
-      logger.error('[sms] Failed to send SMS:', error)
+      logger.error(
+        '[sms] Failed to send SMS:',
+        error instanceof Error ? error : new Error(String(error))
+      )
 
       await logAction({
         agentId: params.agentId,
@@ -192,16 +191,12 @@ export class SMSIntegration {
     )
     const agentId = phoneConfig?.agentId || config.defaultAgentId
     if (!agentId) {
-      logger.info('[sms] No agent configured for phone number:', webhook.To)
+      logger.info('[sms] No agent configured for phone number', { phone: webhook.To })
       return { processed: false }
     }
 
     // Get or create conversation
-    const conversation = await getOrCreateSMSConversation(
-      agentId,
-      webhook.To,
-      webhook.From
-    )
+    const conversation = await getOrCreateSMSConversation(agentId, webhook.To, webhook.From)
 
     // Check for opt-out keywords
     const optOutKeywords = ['stop', 'unsubscribe', 'cancel', 'quit', 'end']
@@ -330,10 +325,7 @@ export class SMSIntegration {
       .update(paramString, 'utf8')
       .digest('base64')
 
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    )
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
   }
 }
 
@@ -487,9 +479,7 @@ function extractMediaUrls(webhook: TwilioWebhookPayload): string[] {
 /**
  * Map Twilio status to our status
  */
-function mapTwilioStatus(
-  status: string
-): 'delivered' | 'failed' | 'undelivered' {
+function mapTwilioStatus(status: string): 'delivered' | 'failed' | 'undelivered' {
   switch (status.toLowerCase()) {
     case 'delivered':
       return 'delivered'
@@ -513,9 +503,6 @@ export function generateEmptyTwiML(): string {
  * Generate TwiML response with message
  */
 export function generateMessageTwiML(message: string): string {
-  const escaped = message
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
+  const escaped = message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   return `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escaped}</Message></Response>`
 }

@@ -137,7 +137,7 @@ export async function createOrganization(data: BasicInfoData): Promise<{
 
   logger.info('Organization created', { id: org.id, slug: org.slug })
 
-  return org
+  return org as unknown as { id: string; slug: string }
 }
 
 /**

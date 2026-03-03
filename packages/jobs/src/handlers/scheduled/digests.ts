@@ -126,7 +126,7 @@ export const adminDailyDigestJob = defineJob<TenantEvent<AdminDailyDigestPayload
     }
 
     // Would query these from the database
-    logger.info(`[Digest] Admin digest metrics:`, metrics)
+    logger.info(`[Digest] Admin digest metrics:`, metrics as unknown as Record<string, unknown>)
 
     // Would send email here via email.send job
     const recipientList = recipients || []

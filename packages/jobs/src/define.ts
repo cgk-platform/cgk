@@ -5,9 +5,7 @@
 import type { Job, JobResult, JobOptions, RetryConfig } from './types'
 import { logger } from '@cgk-platform/logging'
 
-export type JobHandler<T = unknown, R = unknown> = (
-  job: Job<T>
-) => Promise<JobResult<R>>
+export type JobHandler<T = unknown, R = unknown> = (job: Job<T>) => Promise<JobResult<R>>
 
 export interface JobDefinition<T = unknown, R = unknown> {
   name: string
@@ -40,7 +38,7 @@ export const exampleJobs = {
     name: 'send-email',
     handler: async (job) => {
       // TODO: Implement email sending
-      logger.info('Sending email:', job.payload)
+      logger.info('Sending email:', job.payload as unknown as Record<string, unknown> | undefined)
       return { success: true }
     },
     retry: { maxAttempts: 3 },
@@ -50,7 +48,10 @@ export const exampleJobs = {
     name: 'sync-inventory',
     handler: async (job) => {
       // TODO: Implement inventory sync
-      logger.info('Syncing inventory:', job.payload)
+      logger.info(
+        'Syncing inventory:',
+        job.payload as unknown as Record<string, unknown> | undefined
+      )
       return { success: true }
     },
     retry: { maxAttempts: 5, backoff: 'exponential' },

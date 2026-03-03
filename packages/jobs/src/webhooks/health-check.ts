@@ -40,13 +40,14 @@ function getWebhookBaseUrl(): string {
  * Then for each tenant, use getShopifyCredentials() which handles decryption.
  */
 async function loadActiveTenantsWithShopify(tenantIds?: string[]): Promise<TenantWebhookInfo[]> {
-  const orgsRes = tenantIds && tenantIds.length > 0
-    ? await sql`
+  const orgsRes =
+    tenantIds && tenantIds.length > 0
+      ? await sql`
         SELECT slug FROM public.organizations
         WHERE status = 'active'
           AND slug = ANY(${`{${tenantIds.join(',')}}`}::text[])
       `
-    : await sql`
+      : await sql`
         SELECT slug FROM public.organizations
         WHERE status = 'active'
       `
@@ -131,21 +132,30 @@ export const webhookHealthCheckJob = defineJob<{ tenantIds?: string[] }>({
         )
 
         if (syncResult.added.length > 0) {
-          logger.info(`[webhooks/health-check] Re-registered ${syncResult.added.length} webhooks for ${tenant.shop}:`, syncResult.added)
+          logger.info(
+            `[webhooks/health-check] Re-registered ${syncResult.added.length} webhooks for ${tenant.shop}:`,
+            { webhooks: syncResult.added }
+          )
           webhooksReRegistered += syncResult.added.length
         }
 
         if (syncResult.errors.length > 0) {
           for (const e of syncResult.errors) {
-            errors.push({ tenantId: tenant.tenantId, shop: tenant.shop, error: `${e.topic}: ${e.error}` })
+            errors.push({
+              tenantId: tenant.tenantId,
+              shop: tenant.shop,
+              error: `${e.topic}: ${e.error}`,
+            })
           }
         }
 
-        logger.info(`[webhooks/health-check] ${tenant.shop}: +${syncResult.added.length} added, ${syncResult.unchanged.length} ok, ${syncResult.errors.length} errors`)
+        logger.info(
+          `[webhooks/health-check] ${tenant.shop}: +${syncResult.added.length} added, ${syncResult.unchanged.length} ok, ${syncResult.errors.length} errors`
+        )
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err)
-        logger.error(`[webhooks/health-check] Error checking ${tenant.shop}:`, err)
-        errors.push({ tenantId: tenant.tenantId, shop: tenant.shop, error: message })
+        const error = err instanceof Error ? err : new Error(String(err))
+        logger.error(`[webhooks/health-check] Error checking ${tenant.shop}:`, error)
+        errors.push({ tenantId: tenant.tenantId, shop: tenant.shop, error: error.message })
       }
     }
 
@@ -200,7 +210,8 @@ export const cleanupOldWebhookEventsJob = defineJob<{
         })
         totalDeleted += result
       } catch (err) {
-        logger.error(`[webhooks/cleanup-old-events] Error cleaning ${tenant.tenantId}:`, err)
+        const error = err instanceof Error ? err : new Error(String(err))
+        logger.error(`[webhooks/cleanup-old-events] Error cleaning ${tenant.tenantId}:`, error)
       }
     }
 

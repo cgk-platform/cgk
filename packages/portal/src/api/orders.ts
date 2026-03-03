@@ -172,7 +172,10 @@ export async function getOrders(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    logger.error('Failed to get orders:', result.errors)
+    logger.error(
+      'Failed to get orders:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return {
       orders: [],
       pageInfo: {
@@ -250,7 +253,10 @@ export async function getOrder(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    logger.error('Failed to get order:', result.errors)
+    logger.error(
+      'Failed to get order:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return null
   }
 

@@ -120,11 +120,7 @@ export async function getCustomerSession(): Promise<CustomerSessionData | null> 
 
   // Check if tokens need refresh
   if (expiresAt - now < TOKEN_REFRESH_BUFFER) {
-    const refreshed = await refreshSession(
-      sessionId,
-      row.tenant_id,
-      row.refresh_token_encrypted
-    )
+    const refreshed = await refreshSession(sessionId, row.tenant_id, row.refresh_token_encrypted)
     if (!refreshed) {
       // Refresh failed, session is invalid
       await deleteSession(sessionId)
@@ -220,7 +216,10 @@ async function refreshSession(
       },
     }
   } catch (error) {
-    logger.error('Failed to refresh session:', error)
+    logger.error(
+      'Failed to refresh session:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }

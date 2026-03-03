@@ -138,7 +138,10 @@ export async function sendAgentEmail(
 
     return { success: true, messageId: result.id }
   } catch (error) {
-    logger.error('[email] Failed to send email:', error)
+    logger.error(
+      '[email] Failed to send email:',
+      error instanceof Error ? error : new Error(String(error))
+    )
 
     await logAction({
       agentId: params.agentId,
@@ -177,7 +180,7 @@ export async function handleAgentInboundEmail(
   }
 
   if (!agentId) {
-    logger.info('[email] No agent found for email:', email.to)
+    logger.info('[email] No agent found for email', { email: email.to })
     return { processed: false, error: 'No agent configured for this email address' }
   }
 
@@ -382,21 +385,23 @@ function formatEmailResponse(text: string): string {
  * Extract plain text from HTML email body
  */
 export function extractTextFromHtml(html: string): string {
-  return html
-    // Remove style and script tags
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    // Convert br and p tags to newlines
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    // Remove all other tags
-    .replace(/<[^>]+>/g, '')
-    // Decode HTML entities
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    // Trim whitespace
-    .trim()
+  return (
+    html
+      // Remove style and script tags
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      // Convert br and p tags to newlines
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      // Remove all other tags
+      .replace(/<[^>]+>/g, '')
+      // Decode HTML entities
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      // Trim whitespace
+      .trim()
+  )
 }

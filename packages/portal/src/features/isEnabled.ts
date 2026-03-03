@@ -88,7 +88,7 @@ export async function getPortalFeatures(tenantId: string): Promise<PortalFeature
 
     return features
   } catch (error) {
-    logger.warn('Failed to load feature flags:', error)
+    logger.warn('Failed to load feature flags:', error as Record<string, unknown> | undefined)
     return DEFAULT_FEATURES
   }
 }

@@ -10,7 +10,10 @@ import type { TenantApiService } from '../types.js'
 import { logger } from '@cgk-platform/logging'
 
 // Credential cache
-const credentialCache = new Map<string, { credentials: { apiKey: string; apiSecret: string | null }; timestamp: number }>()
+const credentialCache = new Map<
+  string,
+  { credentials: { apiKey: string; apiSecret: string | null }; timestamp: number }
+>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
 function getCacheKey(tenantId: string, service: TenantApiService): string {
@@ -48,12 +51,20 @@ async function getCredentials(
 export interface MuxClient {
   video: {
     assets: {
-      create: (params: { input: { url: string }[]; playback_policy?: string[] }) => Promise<{ id: string; playback_ids?: { id: string }[] }>
-      retrieve: (assetId: string) => Promise<{ id: string; status: string; playback_ids?: { id: string }[] }>
+      create: (params: {
+        input: { url: string }[]
+        playback_policy?: string[]
+      }) => Promise<{ id: string; playback_ids?: { id: string }[] }>
+      retrieve: (
+        assetId: string
+      ) => Promise<{ id: string; status: string; playback_ids?: { id: string }[] }>
       delete: (assetId: string) => Promise<void>
     }
     uploads: {
-      create: (params: { new_asset_settings: Record<string, unknown>; cors_origin?: string }) => Promise<{ url: string; id: string }>
+      create: (params: {
+        new_asset_settings: Record<string, unknown>
+        cors_origin?: string
+      }) => Promise<{ url: string; id: string }>
     }
   }
 }
@@ -115,14 +126,19 @@ const ASSEMBLYAI_BASE = 'https://api.assemblyai.com/v2'
 /**
  * Get an AssemblyAI client for a tenant
  */
-export async function getTenantAssemblyAIClient(tenantId: string): Promise<AssemblyAIClient | null> {
+export async function getTenantAssemblyAIClient(
+  tenantId: string
+): Promise<AssemblyAIClient | null> {
   const apiKey = await getTenantApiKey(tenantId, 'assemblyai')
   if (!apiKey) return null
 
   return {
     apiKey,
 
-    async transcribe(audioUrl: string, options?: AssemblyAITranscribeOptions): Promise<AssemblyAITranscript> {
+    async transcribe(
+      audioUrl: string,
+      options?: AssemblyAITranscribeOptions
+    ): Promise<AssemblyAITranscript> {
       const response = await fetch(`${ASSEMBLYAI_BASE}/transcript`, {
         method: 'POST',
         headers: {
@@ -285,7 +301,10 @@ export async function getTenantOpenAIClient(tenantId: string): Promise<OpenAICli
       return response.json() as Promise<OpenAIChatCompletion>
     },
 
-    async createEmbedding(input: string | string[], model = 'text-embedding-3-small'): Promise<OpenAIEmbedding> {
+    async createEmbedding(
+      input: string | string[],
+      model = 'text-embedding-3-small'
+    ): Promise<OpenAIEmbedding> {
       const response = await fetch(`${OPENAI_BASE}/embeddings`, {
         method: 'POST',
         headers: {
@@ -489,7 +508,10 @@ export async function checkEasyPostTrackingStatus(
       trackingUrl: tracker.public_url || undefined,
     }
   } catch (error) {
-    logger.error('[easypost] Tracking error:', error instanceof Error ? error.message : error)
+    logger.error(
+      '[easypost] Tracking error',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       delivered: false,
       inTransit: false,

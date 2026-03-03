@@ -81,7 +81,10 @@ export async function generateImageThumbnail(
       height: outputMetadata.height || opts.height,
     }
   } catch (error) {
-    logger.error('Failed to generate image thumbnail:', error)
+    logger.error(
+      'Failed to generate image thumbnail',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }
@@ -119,7 +122,8 @@ export async function generateVideoPlaceholder(
       </svg>
     `
 
-    const outputBuffer = await sharp.default(Buffer.from(svg))
+    const outputBuffer = await sharp
+      .default(Buffer.from(svg))
       .webp({ quality: opts.quality })
       .toBuffer()
 
@@ -130,7 +134,10 @@ export async function generateVideoPlaceholder(
       height: opts.height,
     }
   } catch (error) {
-    logger.error('Failed to generate video placeholder:', error)
+    logger.error(
+      'Failed to generate video placeholder',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }
@@ -171,7 +178,8 @@ export async function generateAudioPlaceholder(
       </svg>
     `
 
-    const outputBuffer = await sharp.default(Buffer.from(svg))
+    const outputBuffer = await sharp
+      .default(Buffer.from(svg))
       .webp({ quality: opts.quality })
       .toBuffer()
 
@@ -182,7 +190,10 @@ export async function generateAudioPlaceholder(
       height: opts.height,
     }
   } catch (error) {
-    logger.error('Failed to generate audio placeholder:', error)
+    logger.error(
+      'Failed to generate audio placeholder',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }
@@ -235,7 +246,8 @@ export async function generateDocumentPlaceholder(
       </svg>
     `
 
-    const outputBuffer = await sharp.default(Buffer.from(svg))
+    const outputBuffer = await sharp
+      .default(Buffer.from(svg))
       .webp({ quality: opts.quality })
       .toBuffer()
 
@@ -246,7 +258,10 @@ export async function generateDocumentPlaceholder(
       height: opts.height,
     }
   } catch (error) {
-    logger.error('Failed to generate document placeholder:', error)
+    logger.error(
+      'Failed to generate document placeholder',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }

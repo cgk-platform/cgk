@@ -105,7 +105,7 @@ export function createJobClient(config: JobClientConfig): JobClient {
 
   function log(message: string, data?: unknown): void {
     if (debug) {
-      logger.info(`[JobClient] ${message}`, data ?? '')
+      logger.info(`[JobClient] ${message}`, (data ?? {}) as Record<string, unknown>)
     }
   }
 
@@ -249,8 +249,7 @@ function getConfigFromEnv(): JobClientConfig {
     return {
       provider: 'trigger.dev',
       triggerDev: {
-        secretKey:
-          process.env.TRIGGER_SECRET_KEY || process.env.TRIGGER_DEV_SECRET_KEY,
+        secretKey: process.env.TRIGGER_SECRET_KEY || process.env.TRIGGER_DEV_SECRET_KEY,
         projectRef: process.env.TRIGGER_PROJECT_REF,
         apiUrl: process.env.TRIGGER_API_URL,
       },

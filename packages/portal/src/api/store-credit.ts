@@ -86,7 +86,10 @@ export async function getStoreCreditAccounts(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    logger.error('Failed to get store credit:', result.errors)
+    logger.error(
+      'Failed to get store credit:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return []
   }
 
@@ -134,17 +137,16 @@ export async function getStoreCreditTransactions(
 }> {
   const { first = 20 } = options
 
-  const result = await customerQuery<StoreCreditTransactionsResponse>(
-    tenantId,
-    accessToken,
-    {
-      query: GET_STORE_CREDIT_WITH_TRANSACTIONS_QUERY,
-      variables: { first },
-    }
-  )
+  const result = await customerQuery<StoreCreditTransactionsResponse>(tenantId, accessToken, {
+    query: GET_STORE_CREDIT_WITH_TRANSACTIONS_QUERY,
+    variables: { first },
+  })
 
   if (result.errors?.length || !result.data?.customer) {
-    logger.error('Failed to get store credit transactions:', result.errors)
+    logger.error(
+      'Failed to get store credit transactions:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return { accounts: [], transactions: [] }
   }
 
@@ -170,9 +172,7 @@ export async function getStoreCreditTransactions(
   }
 
   // Sort transactions by date descending
-  transactions.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  )
+  transactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
   return { accounts, transactions }
 }
@@ -194,23 +194,16 @@ function mapTransactionType(type: string): StoreCreditTransaction['type'] {
 /**
  * Generate transaction description
  */
-function getTransactionDescription(
-  type: string,
-  orderReference: string | null
-): string {
+function getTransactionDescription(type: string, orderReference: string | null): string {
   switch (type) {
     case 'CREDIT':
       return 'Store credit added'
     case 'DEBIT':
-      return orderReference
-        ? `Used on order ${orderReference}`
-        : 'Store credit used'
+      return orderReference ? `Used on order ${orderReference}` : 'Store credit used'
     case 'EXPIRATION':
       return 'Store credit expired'
     case 'REFUND':
-      return orderReference
-        ? `Refund from order ${orderReference}`
-        : 'Refund credit'
+      return orderReference ? `Refund from order ${orderReference}` : 'Refund credit'
     case 'ADJUSTMENT':
       return 'Balance adjustment'
     default:

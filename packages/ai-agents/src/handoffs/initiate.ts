@@ -11,19 +11,13 @@ import {
   listPendingHandoffs,
 } from '../db/handoffs-queries.js'
 import { getAgentById } from '../db/queries.js'
-import type {
-  AgentHandoff,
-  AgentHandoffWithAgents,
-  InitiateHandoffInput,
-} from '../types/teams.js'
+import type { AgentHandoff, AgentHandoffWithAgents, InitiateHandoffInput } from '../types/teams.js'
 import { logger } from '@cgk-platform/logging'
 
 /**
  * Initiate a handoff from one agent to another
  */
-export async function initiateHandoff(
-  input: InitiateHandoffInput
-): Promise<AgentHandoff> {
+export async function initiateHandoff(input: InitiateHandoffInput): Promise<AgentHandoff> {
   // Verify from agent exists
   const fromAgent = await getAgentById(input.fromAgentId)
   if (!fromAgent) {
@@ -101,7 +95,10 @@ export async function initiateAndNotifyHandoff(
       notificationSent: true,
     }
   } catch (error) {
-    logger.error('Failed to send handoff notification:', error)
+    logger.error(
+      'Failed to send handoff notification:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       handoff,
       notificationSent: false,
@@ -112,9 +109,7 @@ export async function initiateAndNotifyHandoff(
 /**
  * Get pending handoffs for an agent
  */
-export async function getPendingHandoffs(
-  agentId: string
-): Promise<AgentHandoffWithAgents[]> {
+export async function getPendingHandoffs(agentId: string): Promise<AgentHandoffWithAgents[]> {
   return listPendingHandoffs(agentId)
 }
 
@@ -166,10 +161,7 @@ export async function suggestHandoffAgents(
       const topicLower = topic.toLowerCase()
       for (const membership of agent.teamMemberships) {
         for (const spec of membership.specializations) {
-          if (
-            spec.toLowerCase().includes(topicLower) ||
-            topicLower.includes(spec.toLowerCase())
-          ) {
+          if (spec.toLowerCase().includes(topicLower) || topicLower.includes(spec.toLowerCase())) {
             suggestions.push({
               agentId: agent.id,
               agentName: agent.displayName,

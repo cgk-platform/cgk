@@ -32,7 +32,7 @@ async function importPublicKey(pemKey: string): Promise<CryptoKey> {
     .replace(/-----END PUBLIC KEY-----/g, '')
     .replace(/\s/g, '')
 
-  const binaryKey = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0))
+  const binaryKey = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0))
 
   return crypto.subtle.importKey(
     'spki',
@@ -69,7 +69,7 @@ export async function verifyWiseWebhook(
     const cryptoKey = await importPublicKey(publicKey)
 
     // Decode the base64 signature
-    const signatureBytes = Uint8Array.from(atob(signature), c => c.charCodeAt(0))
+    const signatureBytes = Uint8Array.from(atob(signature), (c) => c.charCodeAt(0))
 
     // Encode the body as UTF-8
     const encoder = new TextEncoder()
@@ -86,7 +86,10 @@ export async function verifyWiseWebhook(
     return isValid
   } catch (error) {
     // Log error but don't expose details (could be attack attempt)
-    logger.error('[Wise Webhook] Signature verification failed:', error)
+    logger.error(
+      '[Wise Webhook] Signature verification failed',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return false
   }
 }
@@ -95,11 +98,7 @@ export async function verifyWiseWebhook(
  * Synchronous verification fallback for Node.js environments
  * (When Edge Runtime is not available)
  */
-export function verifyWiseWebhookSync(
-  body: string,
-  signature: string,
-  publicKey: string
-): boolean {
+export function verifyWiseWebhookSync(body: string, signature: string, publicKey: string): boolean {
   try {
     // Dynamic import to avoid Edge Runtime issues
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -110,7 +109,10 @@ export function verifyWiseWebhookSync(
 
     return verifier.verify(publicKey, signature, 'base64')
   } catch (error) {
-    logger.error('[Wise Webhook] Sync verification failed:', error)
+    logger.error(
+      '[Wise Webhook] Sync verification failed',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return false
   }
 }

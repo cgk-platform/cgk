@@ -95,7 +95,7 @@ async function getContentOverrides(tenantId: string): Promise<Map<ContentKey, st
     return overrides
   } catch (error) {
     // If table doesn't exist or query fails, return empty overrides
-    logger.warn('Failed to load content overrides:', error)
+    logger.warn('Failed to load content overrides:', error as Record<string, unknown> | undefined)
     return new Map()
   }
 }
@@ -112,10 +112,7 @@ export function clearContentCache(tenantId: string): void {
 /**
  * Interpolate variables into a content string
  */
-export function interpolate(
-  template: string,
-  variables: Record<string, string | number>
-): string {
+export function interpolate(template: string, variables: Record<string, string | number>): string {
   let result = template
   for (const [key, value] of Object.entries(variables)) {
     result = result.replace(new RegExp(`{{${key}}}`, 'g'), String(value))

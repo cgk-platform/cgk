@@ -256,7 +256,10 @@ export async function getSubscriptions(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    logger.error('Failed to get subscriptions:', result.errors)
+    logger.error(
+      'Failed to get subscriptions:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return {
       subscriptions: [],
       pageInfo: {
@@ -285,7 +288,9 @@ export async function getSubscription(
 ): Promise<CustomerSubscription | null> {
   const result = await customerQuery<{
     customer: {
-      subscriptionContract: SubscriptionsResponse['customer']['subscriptionContracts']['nodes'][0] | null
+      subscriptionContract:
+        | SubscriptionsResponse['customer']['subscriptionContracts']['nodes'][0]
+        | null
     }
   }>(tenantId, accessToken, {
     query: GET_SUBSCRIPTION_QUERY,
@@ -293,7 +298,10 @@ export async function getSubscription(
   })
 
   if (result.errors?.length || !result.data?.customer?.subscriptionContract) {
-    logger.error('Failed to get subscription:', result.errors)
+    logger.error(
+      'Failed to get subscription:',
+      result.errors ? new Error(result.errors.map((e) => e.message).join(', ')) : undefined
+    )
     return null
   }
 
@@ -308,14 +316,10 @@ export async function pauseSubscription(
   accessToken: string,
   subscriptionId: string
 ): Promise<{ success: boolean; errors: UserError[] }> {
-  const result = await customerMutation<SubscriptionActionResponse>(
-    tenantId,
-    accessToken,
-    {
-      query: PAUSE_SUBSCRIPTION_MUTATION,
-      variables: { id: subscriptionId },
-    }
-  )
+  const result = await customerMutation<SubscriptionActionResponse>(tenantId, accessToken, {
+    query: PAUSE_SUBSCRIPTION_MUTATION,
+    variables: { id: subscriptionId },
+  })
 
   if (result.errors?.length) {
     return {
@@ -340,14 +344,10 @@ export async function resumeSubscription(
   accessToken: string,
   subscriptionId: string
 ): Promise<{ success: boolean; errors: UserError[] }> {
-  const result = await customerMutation<SubscriptionActionResponse>(
-    tenantId,
-    accessToken,
-    {
-      query: RESUME_SUBSCRIPTION_MUTATION,
-      variables: { id: subscriptionId },
-    }
-  )
+  const result = await customerMutation<SubscriptionActionResponse>(tenantId, accessToken, {
+    query: RESUME_SUBSCRIPTION_MUTATION,
+    variables: { id: subscriptionId },
+  })
 
   if (result.errors?.length) {
     return {
@@ -373,14 +373,10 @@ export async function skipNextDelivery(
   subscriptionId: string,
   billingCycleIndex: number = 0
 ): Promise<{ success: boolean; errors: UserError[] }> {
-  const result = await customerMutation<SubscriptionActionResponse>(
-    tenantId,
-    accessToken,
-    {
-      query: SKIP_DELIVERY_MUTATION,
-      variables: { contractId: subscriptionId, billingCycleIndex },
-    }
-  )
+  const result = await customerMutation<SubscriptionActionResponse>(tenantId, accessToken, {
+    query: SKIP_DELIVERY_MUTATION,
+    variables: { contractId: subscriptionId, billingCycleIndex },
+  })
 
   if (result.errors?.length) {
     return {
@@ -406,14 +402,10 @@ export async function cancelSubscription(
   subscriptionId: string,
   _reason?: string
 ): Promise<{ success: boolean; errors: UserError[] }> {
-  const result = await customerMutation<SubscriptionActionResponse>(
-    tenantId,
-    accessToken,
-    {
-      query: CANCEL_SUBSCRIPTION_MUTATION,
-      variables: { id: subscriptionId },
-    }
-  )
+  const result = await customerMutation<SubscriptionActionResponse>(tenantId, accessToken, {
+    query: CANCEL_SUBSCRIPTION_MUTATION,
+    variables: { id: subscriptionId },
+  })
 
   if (result.errors?.length) {
     return {

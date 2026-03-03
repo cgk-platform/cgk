@@ -5,13 +5,7 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 
-import type {
-  AIDraft,
-  Message,
-  MessageChannel,
-  SendMessageInput,
-  SenderType,
-} from './types'
+import type { AIDraft, Message, MessageChannel, SendMessageInput, SenderType } from './types'
 import { logger } from '@cgk-platform/logging'
 
 // ============================================================
@@ -58,10 +52,7 @@ export async function getMessages(
 /**
  * Get a single message by ID
  */
-export async function getMessage(
-  tenantId: string,
-  messageId: string
-): Promise<Message | null> {
+export async function getMessage(tenantId: string, messageId: string): Promise<Message | null> {
   return withTenant(tenantId, async () => {
     const result = await sql`
       SELECT * FROM inbox_messages WHERE id = ${messageId}
@@ -108,12 +99,7 @@ export async function sendMessage(
     const message = mapMessageFromDb(row as Record<string, unknown>)
 
     // Update thread's last message info
-    await updateThreadLastMessage(
-      tenantId,
-      threadId,
-      'team_member',
-      input.body.substring(0, 100)
-    )
+    await updateThreadLastMessage(tenantId, threadId, 'team_member', input.body.substring(0, 100))
 
     // Queue for actual sending via communications package
     await queueMessageForDelivery(tenantId, message, input.channel)
@@ -237,10 +223,7 @@ export async function updateMessageStatus(
 /**
  * Generate AI draft for a thread
  */
-export async function generateDraft(
-  tenantId: string,
-  threadId: string
-): Promise<AIDraft> {
+export async function generateDraft(tenantId: string, threadId: string): Promise<AIDraft> {
   return withTenant(tenantId, async () => {
     // Get thread and recent messages for context
     const threadResult = await sql`
@@ -318,12 +301,10 @@ export async function generateDraft(
         confidence = 0.92
       } else if (openai) {
         // Use OpenAI
-        const conversationHistory = context.messages
-          .slice(-5)
-          .map((m) => ({
-            role: m.direction === 'inbound' ? 'user' as const : 'assistant' as const,
-            content: m.body as string,
-          }))
+        const conversationHistory = context.messages.slice(-5).map((m) => ({
+          role: m.direction === 'inbound' ? ('user' as const) : ('assistant' as const),
+          content: m.body as string,
+        }))
 
         const response = await openai.createChatCompletion({
           model: 'gpt-4o',
@@ -352,7 +333,10 @@ export async function generateDraft(
       }
     } catch (aiError) {
       // AI generation failed - fall back to template
-      logger.error('[inbox] AI draft generation failed:', aiError)
+      logger.error(
+        '[inbox] AI draft generation failed',
+        aiError instanceof Error ? aiError : new Error(String(aiError))
+      )
       draftBody = generateSimpleDraft(context)
     }
 
@@ -386,10 +370,7 @@ export async function generateDraft(
 /**
  * Get pending AI draft for a thread
  */
-export async function getPendingDraft(
-  tenantId: string,
-  threadId: string
-): Promise<AIDraft | null> {
+export async function getPendingDraft(tenantId: string, threadId: string): Promise<AIDraft | null> {
   return withTenant(tenantId, async () => {
     const result = await sql`
       SELECT * FROM inbox_ai_drafts
@@ -649,8 +630,6 @@ function mapDraftFromDb(row: Record<string, unknown>): AIDraft {
     editedContent: row.edited_content as string | null,
     generatedAt: new Date(row.generated_at as string),
     actionedAt: row.actioned_at ? new Date(row.actioned_at as string) : null,
-    actionedBy: row.actioned_by
-      ? { id: row.actioned_by as string, name: '' }
-      : null,
+    actionedBy: row.actioned_by ? { id: row.actioned_by as string, name: '' } : null,
   }
 }

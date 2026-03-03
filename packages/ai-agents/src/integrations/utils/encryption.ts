@@ -109,7 +109,10 @@ export function safeDecrypt(encryptedBase64: string | null | undefined): string 
   try {
     return decrypt(encryptedBase64)
   } catch (error) {
-    logger.error('[encryption] Failed to decrypt value:', error)
+    logger.error(
+      '[encryption] Failed to decrypt value:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }

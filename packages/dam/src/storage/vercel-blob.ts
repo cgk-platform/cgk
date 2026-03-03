@@ -57,7 +57,10 @@ export class VercelBlobStorage implements IStorageProvider {
       await del(url, { token: this.token })
       return true
     } catch (error) {
-      logger.error('Failed to delete blob:', error)
+      logger.error(
+        'Failed to delete blob',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return false
     }
   }

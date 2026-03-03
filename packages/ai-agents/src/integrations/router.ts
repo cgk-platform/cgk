@@ -63,7 +63,10 @@ export async function routeEvent(
         return { success: false, error: `Unknown channel: ${channel}` }
     }
   } catch (error) {
-    logger.error(`[router] Error routing ${channel}/${eventType}:`, error)
+    logger.error(
+      `[router] Error routing ${channel}/${eventType}:`,
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -290,7 +293,7 @@ export async function determineAgentForEvent(
 
     case 'google_calendar': {
       // Calendar is always per-agent
-      return eventData.agentId as string || null
+      return (eventData.agentId as string) || null
     }
 
     default:

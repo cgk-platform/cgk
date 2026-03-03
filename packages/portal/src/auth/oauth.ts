@@ -62,7 +62,10 @@ export async function getCustomerOAuthConfig(
       scopes: row.customer_oauth_scopes || ['openid', 'email', 'customer-account-api:full'],
     }
   } catch (error) {
-    logger.error('Failed to get customer OAuth config:', error)
+    logger.error(
+      'Failed to get customer OAuth config:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }
@@ -77,7 +80,7 @@ export async function initiateShopifyLogin(
 ): Promise<{ authorizationUrl: string; state: string } | null> {
   const config = await getCustomerOAuthConfig(tenantId)
   if (!config) {
-    logger.error('No OAuth configuration found for tenant:', tenantId)
+    logger.error('No OAuth configuration found for tenant:', new Error(tenantId))
     return null
   }
 
@@ -145,7 +148,7 @@ export async function handleShopifyCallback(
 
   const config = await getCustomerOAuthConfig(stateData.tenantId)
   if (!config) {
-    logger.error('No OAuth config found for tenant:', stateData.tenantId)
+    logger.error('No OAuth config found for tenant:', new Error(stateData.tenantId))
     return null
   }
 
@@ -170,7 +173,7 @@ export async function handleShopifyCallback(
 
   if (!tokenResponse.ok) {
     const error = await tokenResponse.text()
-    logger.error('Token exchange failed:', error)
+    logger.error('Token exchange failed:', new Error(error))
     return null
   }
 
@@ -234,7 +237,7 @@ export async function refreshCustomerToken(
   })
 
   if (!response.ok) {
-    logger.error('Token refresh failed:', await response.text())
+    logger.error('Token refresh failed:', new Error(await response.text()))
     return null
   }
 
@@ -287,7 +290,7 @@ async function getCustomerFromToken(
   })
 
   if (!response.ok) {
-    logger.error('Customer query failed:', await response.text())
+    logger.error('Customer query failed:', new Error(await response.text()))
     return null
   }
 
@@ -305,7 +308,10 @@ async function getCustomerFromToken(
   }
 
   if (result.errors?.length) {
-    logger.error('Customer query errors:', result.errors)
+    logger.error(
+      'Customer query errors:',
+      new Error(result.errors.map((e) => e.message).join(', '))
+    )
     return null
   }
 

@@ -110,12 +110,14 @@ export class GoogleCalendarClient {
   /**
    * List upcoming events
    */
-  async listUpcomingEvents(options: {
-    calendarId?: string
-    maxResults?: number
-    timeMin?: Date
-    timeMax?: Date
-  } = {}): Promise<AgentCalendarEvent[]> {
+  async listUpcomingEvents(
+    options: {
+      calendarId?: string
+      maxResults?: number
+      timeMin?: Date
+      timeMax?: Date
+    } = {}
+  ): Promise<AgentCalendarEvent[]> {
     const calendarId = options.calendarId || 'primary'
     const timeMin = (options.timeMin || new Date()).toISOString()
 
@@ -199,11 +201,7 @@ export class GoogleCalendarClient {
     const endpoint = `/calendars/${encodeURIComponent(calendarId)}/events`
     const queryParams = params.addMeet ? '?conferenceDataVersion=1' : ''
 
-    const response = await this.api<GoogleCalendarEvent>(
-      'POST',
-      `${endpoint}${queryParams}`,
-      body
-    )
+    const response = await this.api<GoogleCalendarEvent>('POST', `${endpoint}${queryParams}`, body)
 
     // Log action
     await logAction({
@@ -294,7 +292,10 @@ export class GoogleCalendarClient {
   /**
    * Set up a calendar watch for push notifications
    */
-  async setupWatch(webhookUrl: string, calendarId: string = 'primary'): Promise<{
+  async setupWatch(
+    webhookUrl: string,
+    calendarId: string = 'primary'
+  ): Promise<{
     channelId: string
     resourceId: string
     expiration: Date
@@ -314,15 +315,12 @@ export class GoogleCalendarClient {
     })
 
     const expirationTs = parseInt(response.expiration, 10)
-    const expirationDate = new Date(Number.isNaN(expirationTs) ? Date.now() + 86400000 : expirationTs)
+    const expirationDate = new Date(
+      Number.isNaN(expirationTs) ? Date.now() + 86400000 : expirationTs
+    )
 
     // Store watch info
-    await updateAgentGoogleOAuthWatch(
-      this.agentId,
-      channelId,
-      response.resourceId,
-      expirationDate
-    )
+    await updateAgentGoogleOAuthWatch(this.agentId, channelId, response.resourceId, expirationDate)
 
     return {
       channelId,
@@ -342,7 +340,9 @@ export class GoogleCalendarClient {
       })
     } catch (error) {
       // Ignore errors - channel may have already expired
-      logger.warn('[google] Failed to stop watch:', error)
+      logger.warn('[google] Failed to stop watch:', {
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -431,7 +431,7 @@ export async function completeGoogleOAuth(
   const userInfo = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   })
-  const user = await userInfo.json() as { email: string; id: string }
+  const user = (await userInfo.json()) as { email: string; id: string }
 
   // Calculate token expiry
   const tokenExpiry = new Date(Date.now() + tokens.expires_in * 1000)
@@ -484,11 +484,12 @@ export async function refreshGoogleTokens(
     })
 
     if (!response.ok) {
-      logger.error('[google] Token refresh failed:', await response.text())
+      const errorText = await response.text()
+      logger.error('[google] Token refresh failed', new Error(errorText))
       return null
     }
 
-    const tokens = await response.json() as GoogleTokens
+    const tokens = (await response.json()) as GoogleTokens
     const tokenExpiry = new Date(Date.now() + tokens.expires_in * 1000)
 
     // Update stored tokens
@@ -501,7 +502,10 @@ export async function refreshGoogleTokens(
 
     return { accessToken: tokens.access_token }
   } catch (error) {
-    logger.error('[google] Token refresh error:', error)
+    logger.error(
+      '[google] Token refresh error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }
@@ -509,10 +513,7 @@ export async function refreshGoogleTokens(
 /**
  * Handle Google Calendar webhook notification
  */
-export async function handleCalendarWebhook(
-  channelId: string,
-  _resourceId: string
-): Promise<void> {
+export async function handleCalendarWebhook(channelId: string, _resourceId: string): Promise<void> {
   // Find agent by channel ID
   const oauth = await getGoogleOAuthByChannelId(channelId)
   if (!oauth) {
@@ -557,7 +558,9 @@ export async function getGoogleCalendarStatus(agentId: string): Promise<{
   return {
     connected: true,
     email: oauth.googleEmail,
-    watchActive: Boolean(oauth.watchChannelId && oauth.watchExpiration && oauth.watchExpiration > new Date()),
+    watchActive: Boolean(
+      oauth.watchChannelId && oauth.watchExpiration && oauth.watchExpiration > new Date()
+    ),
     watchExpires: oauth.watchExpiration || undefined,
   }
 }
@@ -611,9 +614,7 @@ function mapGoogleEventToAgentEvent(
   // Extract meet link
   let meetLink: string | null = event.hangoutLink || null
   if (!meetLink && event.conferenceData?.entryPoints) {
-    const videoEntry = event.conferenceData.entryPoints.find(
-      (e) => e.entryPointType === 'video'
-    )
+    const videoEntry = event.conferenceData.entryPoints.find((e) => e.entryPointType === 'video')
     meetLink = videoEntry?.uri || null
   }
 

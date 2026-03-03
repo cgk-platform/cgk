@@ -98,7 +98,7 @@ async function getTenantAdminEmails(tenantId: string): Promise<string[]> {
     LIMIT 3
   `
 
-  return result.rows.map(row => (row as { email: string }).email)
+  return result.rows.map((row) => (row as { email: string }).email)
 }
 
 /**
@@ -113,19 +113,20 @@ async function notifyTokenRefreshFailed(
 
   // Always log the failure
   logger.error(
-    `[token-refresh] Failed to refresh ${provider} token for tenant ${tenantId}:`,
-    errorMessage
+    `[token-refresh] Failed to refresh ${provider} token for tenant ${tenantId}`,
+    error instanceof Error ? error : new Error(errorMessage)
   )
 
   try {
     // Get tenant's Resend client (dynamic import to avoid circular deps)
-    const { getTenantResendClient, getTenantResendSenderConfig } = await import(
-      '../tenant-credentials/clients/resend.js'
-    )
+    const { getTenantResendClient, getTenantResendSenderConfig } =
+      await import('../tenant-credentials/clients/resend.js')
 
     const resend = await getTenantResendClient(tenantId)
     if (!resend) {
-      logger.warn(`[token-refresh] Cannot send notification - Resend not configured for ${tenantId}`)
+      logger.warn(
+        `[token-refresh] Cannot send notification - Resend not configured for ${tenantId}`
+      )
       return
     }
 
@@ -173,12 +174,14 @@ async function notifyTokenRefreshFailed(
       `,
     })
 
-    logger.info(`[token-refresh] Sent failure notification to ${adminEmails.join(', ')} for ${tenantId}`)
+    logger.info(
+      `[token-refresh] Sent failure notification to ${adminEmails.join(', ')} for ${tenantId}`
+    )
   } catch (emailError) {
     // Don't let email failures break the job
     logger.error(
-      `[token-refresh] Failed to send notification email for ${tenantId}:`,
-      emailError instanceof Error ? emailError.message : emailError
+      `[token-refresh] Failed to send notification email for ${tenantId}`,
+      emailError instanceof Error ? emailError : new Error(String(emailError))
     )
   }
 }
@@ -197,9 +200,7 @@ export const refreshExpiringTokensJob = defineJob({
   handler: async () => {
     const expiringConnections = await getExpiringConnections()
 
-    logger.info(
-      `[token-refresh] Found ${expiringConnections.length} tokens to refresh`
-    )
+    logger.info(`[token-refresh] Found ${expiringConnections.length} tokens to refresh`)
 
     const results = {
       total: expiringConnections.length,
@@ -244,8 +245,7 @@ export const refreshExpiringTokensJob = defineJob({
         }
       } catch (error) {
         results.failed++
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error'
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
         results.errors.push({
           tenantId: connection.tenantId,
           provider: connection.provider,
@@ -253,21 +253,15 @@ export const refreshExpiringTokensJob = defineJob({
         })
 
         logger.error(
-          `[token-refresh] Failed to refresh ${connection.provider} token for tenant ${connection.tenantId}:`,
-          error
+          `[token-refresh] Failed to refresh ${connection.provider} token for tenant ${connection.tenantId}`,
+          error instanceof Error ? error : new Error(String(error))
         )
 
-        await notifyTokenRefreshFailed(
-          connection.tenantId,
-          connection.provider,
-          error
-        )
+        await notifyTokenRefreshFailed(connection.tenantId, connection.provider, error)
       }
     }
 
-    logger.info(
-      `[token-refresh] Completed: ${results.success} success, ${results.failed} failed`
-    )
+    logger.info(`[token-refresh] Completed: ${results.success} success, ${results.failed} failed`)
 
     return {
       success: results.failed === 0,

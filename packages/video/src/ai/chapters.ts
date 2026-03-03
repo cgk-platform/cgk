@@ -67,7 +67,7 @@ JSON array only:`
       summary: enhanced[index]?.summary || original.summary,
     }))
   } catch {
-    logger.error('[AI Chapters] Failed to parse enhanced chapters:', response)
+    logger.error('[AI Chapters] Failed to parse enhanced chapters:', new Error(response))
     return chapters
   }
 }
@@ -123,7 +123,7 @@ JSON array only:`
       }))
       .filter((c) => c.headline.length > 0)
   } catch {
-    logger.error('[AI Chapters] Failed to parse generated chapters:', response)
+    logger.error('[AI Chapters] Failed to parse generated chapters:', new Error(response))
     return []
   }
 }

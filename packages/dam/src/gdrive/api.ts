@@ -5,7 +5,12 @@
 
 import { google, type drive_v3 } from 'googleapis'
 
-import { createOAuth2Client, type OAuthConfig, isTokenExpired, refreshAccessToken } from './oauth.js'
+import {
+  createOAuth2Client,
+  type OAuthConfig,
+  isTokenExpired,
+  refreshAccessToken,
+} from './oauth.js'
 import { decryptToken, encryptToken } from './tokens.js'
 import type { GDriveConnection } from '../types.js'
 import { logger } from '@cgk-platform/logging'
@@ -91,7 +96,8 @@ export async function listFiles(
 ): Promise<DriveListResult> {
   const response = await drive.files.list({
     q: `'${folderId}' in parents and trashed = false`,
-    fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, parents, webContentLink, thumbnailLink)',
+    fields:
+      'nextPageToken, files(id, name, mimeType, size, modifiedTime, parents, webContentLink, thumbnailLink)',
     pageSize,
     pageToken,
     orderBy: 'modifiedTime desc',
@@ -152,10 +158,7 @@ export async function listFilesRecursively(
 /**
  * Get file metadata
  */
-export async function getFile(
-  drive: drive_v3.Drive,
-  fileId: string
-): Promise<DriveFile | null> {
+export async function getFile(drive: drive_v3.Drive, fileId: string): Promise<DriveFile | null> {
   try {
     const response = await drive.files.get({
       fileId,
@@ -174,7 +177,7 @@ export async function getFile(
       thumbnailLink: f.thumbnailLink || undefined,
     }
   } catch (error) {
-    logger.error('Failed to get file:', error)
+    logger.error('Failed to get file', error instanceof Error ? error : new Error(String(error)))
     return null
   }
 }
@@ -182,14 +185,8 @@ export async function getFile(
 /**
  * Download file content
  */
-export async function downloadFile(
-  drive: drive_v3.Drive,
-  fileId: string
-): Promise<Buffer> {
-  const response = await drive.files.get(
-    { fileId, alt: 'media' },
-    { responseType: 'arraybuffer' }
-  )
+export async function downloadFile(drive: drive_v3.Drive, fileId: string): Promise<Buffer> {
+  const response = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'arraybuffer' })
 
   return Buffer.from(response.data as ArrayBuffer)
 }
@@ -197,9 +194,7 @@ export async function downloadFile(
 /**
  * Get the start page token for change tracking
  */
-export async function getStartPageToken(
-  drive: drive_v3.Drive
-): Promise<string> {
+export async function getStartPageToken(drive: drive_v3.Drive): Promise<string> {
   const response = await drive.changes.getStartPageToken({})
   return response.data.startPageToken!
 }
@@ -214,7 +209,8 @@ export async function listChanges(
 ): Promise<DriveChangesResult> {
   const response = await drive.changes.list({
     pageToken,
-    fields: 'newStartPageToken, nextPageToken, changes(type, removed, fileId, file(id, name, mimeType, size, modifiedTime, parents))',
+    fields:
+      'newStartPageToken, nextPageToken, changes(type, removed, fileId, file(id, name, mimeType, size, modifiedTime, parents))',
     spaces: 'drive',
     includeRemoved: true,
   })

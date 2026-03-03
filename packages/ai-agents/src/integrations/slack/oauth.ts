@@ -101,7 +101,7 @@ export async function exchangeSlackOAuthCode(
     throw new Error(`Slack OAuth error: ${response.status} ${response.statusText}`)
   }
 
-  const result = await response.json() as SlackOAuthResult
+  const result = (await response.json()) as SlackOAuthResult
 
   if (!result.ok) {
     throw new Error(`Slack OAuth error: ${result.error}`)
@@ -165,10 +165,13 @@ export async function revokeSlackTokens(botToken: string): Promise<boolean> {
       },
     })
 
-    const result = await response.json() as { ok: boolean }
+    const result = (await response.json()) as { ok: boolean }
     return result.ok
   } catch (error) {
-    logger.error('[slack] Failed to revoke tokens:', error)
+    logger.error(
+      '[slack] Failed to revoke tokens:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return false
   }
 }
@@ -191,7 +194,7 @@ export async function testSlackConnection(botToken: string): Promise<{
       },
     })
 
-    const result = await response.json() as {
+    const result = (await response.json()) as {
       ok: boolean
       team?: string
       user?: string
@@ -212,11 +215,7 @@ export async function testSlackConnection(botToken: string): Promise<{
  */
 export async function isSlackConfigured(): Promise<boolean> {
   const config = await getSlackConfig()
-  return Boolean(
-    config?.enabled &&
-      config.slackBotTokenEncrypted &&
-      config.slackTeamId
-  )
+  return Boolean(config?.enabled && config.slackBotTokenEncrypted && config.slackTeamId)
 }
 
 /**

@@ -211,7 +211,8 @@ export const subscriptionDailyBillingJob = defineJob<TenantEvent<SubscriptionDai
         await markProcessed(idempotencyKey, result)
       } catch (error) {
         failed++
-        logger.error(`[Billing] Failed to process ${subscriptionId}:`, error)
+        const err = error instanceof Error ? error : new Error(String(error))
+        logger.error(`[Billing] Failed to process ${subscriptionId}:`, err)
       }
     }
 
@@ -278,7 +279,9 @@ export const subscriptionBatchBillingJob = defineJob<TenantEvent<SubscriptionBat
   handler: async (job) => {
     const { tenantId, subscriptionIds, batchId } = job.payload
 
-    logger.info(`[Billing] Processing batch ${batchId} with ${subscriptionIds.length} subscriptions`)
+    logger.info(
+      `[Billing] Processing batch ${batchId} with ${subscriptionIds.length} subscriptions`
+    )
 
     const today = new Date()
     let processed = 0

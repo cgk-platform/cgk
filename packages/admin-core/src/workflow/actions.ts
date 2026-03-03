@@ -11,12 +11,7 @@
 import { sql, withTenant } from '@cgk-platform/db'
 import type { SlackBlock } from '@cgk-platform/slack'
 
-import type {
-  Action,
-  ActionResult,
-  ExecutionContext,
-  ScheduleFollowupConfig,
-} from './types'
+import type { Action, ActionResult, ExecutionContext, ScheduleFollowupConfig } from './types'
 import { logger } from '@cgk-platform/logging'
 
 // ============================================================
@@ -306,11 +301,7 @@ async function executeSlackNotify(
       } as unknown as { type: 'section'; text: { type: 'mrkdwn'; text: string } })
 
       // Send the message
-      const response = await client.postMessage(
-        channel,
-        blocks as SlackBlock[],
-        fullMessage
-      )
+      const response = await client.postMessage(channel, blocks as SlackBlock[], fullMessage)
 
       slackResult = {
         success: response.ok,
@@ -322,7 +313,10 @@ async function executeSlackNotify(
       slackResult = { success: false, error: 'Slack not configured' }
     }
   } catch (error) {
-    logger.error('[Workflow] Slack notification error:', error)
+    logger.error(
+      '[Workflow] Slack notification error',
+      error instanceof Error ? error : new Error(String(error))
+    )
     slackResult = {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -427,7 +421,8 @@ async function executeScheduleFollowup(
 ): Promise<ActionResult> {
   const config = action.config as unknown as ScheduleFollowupConfig
 
-  const delayMs = ((config.delayHours || 0) * 60 * 60 + (config.delayDays || 0) * 24 * 60 * 60) * 1000
+  const delayMs =
+    ((config.delayHours || 0) * 60 * 60 + (config.delayDays || 0) * 24 * 60 * 60) * 1000
   const scheduledFor = new Date(Date.now() + delayMs)
 
   await withTenant(context.tenantId, async () => {
@@ -527,10 +522,7 @@ async function executeUpdateField(
   }
 }
 
-async function executeCreateTask(
-  action: Action,
-  context: ExecutionContext
-): Promise<ActionResult> {
+async function executeCreateTask(action: Action, context: ExecutionContext): Promise<ActionResult> {
   const config = action.config as {
     title?: string
     description?: string
@@ -594,10 +586,7 @@ async function executeCreateTask(
   }
 }
 
-async function executeAssignTo(
-  action: Action,
-  context: ExecutionContext
-): Promise<ActionResult> {
+async function executeAssignTo(action: Action, context: ExecutionContext): Promise<ActionResult> {
   const config = action.config as {
     userId?: string
     role?: string
@@ -634,10 +623,7 @@ async function executeAssignTo(
   }
 }
 
-async function executeWebhook(
-  action: Action,
-  context: ExecutionContext
-): Promise<ActionResult> {
+async function executeWebhook(action: Action, context: ExecutionContext): Promise<ActionResult> {
   const config = action.config as {
     url?: string
     method?: string
@@ -822,7 +808,8 @@ function formatDate(date: unknown): string {
 }
 
 function buildAdminUrl(context: ExecutionContext): string {
-  const baseUrl = process.env.ADMIN_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
+  const baseUrl =
+    process.env.ADMIN_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL || ''
   return `${baseUrl}/${context.entityType}s/${context.entityId}`
 }
 
@@ -846,7 +833,11 @@ export function escapeHtml(str: string): string {
 /**
  * Update entity status - uses explicit queries per entity type for type safety
  */
-async function updateEntityStatus(entityType: string, entityId: string, newStatus: string): Promise<void> {
+async function updateEntityStatus(
+  entityType: string,
+  entityId: string,
+  newStatus: string
+): Promise<void> {
   switch (entityType) {
     case 'project':
       await sql`UPDATE projects SET status = ${newStatus}, updated_at = NOW() WHERE id = ${entityId}`
@@ -912,7 +903,11 @@ async function updateEntityMetadata(
 /**
  * Update entity assignment
  */
-async function updateEntityAssignment(entityType: string, entityId: string, assigneeId: string): Promise<void> {
+async function updateEntityAssignment(
+  entityType: string,
+  entityId: string,
+  assigneeId: string
+): Promise<void> {
   switch (entityType) {
     case 'project':
       await sql`UPDATE projects SET assigned_to = ${assigneeId}, assigned_at = NOW(), updated_at = NOW() WHERE id = ${entityId}`

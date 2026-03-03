@@ -46,7 +46,9 @@ export async function generateSpeechWithFallback(
     return await primaryProvider.generateSpeech(text, options)
   } catch (error) {
     if (fallbackProvider) {
-      logger.warn(`Primary TTS provider ${primaryProvider.name} failed, using fallback:`, error)
+      logger.warn(`Primary TTS provider ${primaryProvider.name} failed, using fallback`, {
+        error: error instanceof Error ? error.message : String(error),
+      })
       return await fallbackProvider.generateSpeech(text, options)
     }
     throw error
