@@ -26,19 +26,13 @@ export async function POST(request: Request) {
 
     const { email, token } = body as { email?: string; token?: string }
     if (!email || !token) {
-      return Response.json(
-        { error: 'Email and token are required' },
-        { status: 400 }
-      )
+      return Response.json({ error: 'Email and token are required' }, { status: 400 })
     }
 
     // Verify the magic link
     const result = await verifyMagicLink(email, token)
     if (!result.userId) {
-      return Response.json(
-        { error: 'No account found for this email' },
-        { status: 404 }
-      )
+      return Response.json({ error: 'No account found for this email' }, { status: 404 })
     }
 
     // Get user details
@@ -58,9 +52,9 @@ export async function POST(request: Request) {
         WHERE status IN ('active', 'onboarding', 'suspended')
         ORDER BY name ASC
       `
-      orgs = orgsResult.rows.map((row: any) => ({
-        id: row.id as string,
-        slug: row.slug as string,
+      orgs = orgsResult.rows.map((row: { id: string; slug: string }) => ({
+        id: row.id,
+        slug: row.slug,
         role: 'super_admin' as const,
       }))
     } else {
@@ -69,16 +63,11 @@ export async function POST(request: Request) {
     }
 
     if (orgs.length === 0) {
-      return Response.json(
-        { error: 'No organizations found for this account' },
-        { status: 403 }
-      )
+      return Response.json({ error: 'No organizations found for this account' }, { status: 403 })
     }
 
     // Use the first org (or the one from magic link if specified)
-    const targetOrg = result.orgId
-      ? orgs.find((o) => o.id === result.orgId) || orgs[0]!
-      : orgs[0]!
+    const targetOrg = result.orgId ? orgs.find((o) => o.id === result.orgId) || orgs[0]! : orgs[0]!
 
     // Create session
     const { session } = await createSession(user.id, targetOrg.id, request)

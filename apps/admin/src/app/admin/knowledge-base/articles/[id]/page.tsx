@@ -2,16 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import {
-  AlertCircle,
-  ArrowLeft,
-  Check,
-  Eye,
-  EyeOff,
-  RefreshCw,
-  Save,
-  Trash2,
-} from 'lucide-react'
+import { AlertCircle, ArrowLeft, Check, Eye, EyeOff, RefreshCw, Save, Trash2 } from 'lucide-react'
 import {
   Alert,
   AlertDescription,
@@ -70,6 +61,7 @@ export default function ArticleEditorPage() {
     if (!isNew) {
       loadArticle()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [articleId])
 
   async function loadCategories() {
@@ -209,9 +201,7 @@ export default function ArticleEditorPage() {
             {article.viewCount !== undefined && !isNew && (
               <p className="text-sm text-muted-foreground">
                 {article.viewCount} views · {article.helpfulCount || 0} helpful · Updated{' '}
-                {article.updatedAt
-                  ? new Date(article.updatedAt).toLocaleDateString()
-                  : 'never'}
+                {article.updatedAt ? new Date(article.updatedAt).toLocaleDateString() : 'never'}
               </p>
             )}
           </div>
@@ -219,11 +209,7 @@ export default function ArticleEditorPage() {
         <div className="flex items-center gap-2">
           {!isNew && (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleTogglePublish}
-              >
+              <Button variant="outline" size="sm" onClick={handleTogglePublish}>
                 {article.isPublished ? (
                   <>
                     <EyeOff className="mr-1.5 h-3.5 w-3.5" />
