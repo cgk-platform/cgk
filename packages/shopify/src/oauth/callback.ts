@@ -17,10 +17,7 @@ function getShopifyClientId(): string {
   const clientId = process.env.SHOPIFY_CLIENT_ID
 
   if (!clientId) {
-    throw new ShopifyError(
-      'MISSING_CONFIG',
-      'SHOPIFY_CLIENT_ID environment variable is required'
-    )
+    throw new ShopifyError('MISSING_CONFIG', 'SHOPIFY_CLIENT_ID environment variable is required')
   }
 
   return clientId
@@ -83,13 +80,10 @@ async function exchangeCodeForToken(params: {
     )
   }
 
-  const data = await response.json() as OAuthTokenResponse
+  const data = (await response.json()) as OAuthTokenResponse
 
   if (!data.access_token) {
-    throw new ShopifyError(
-      'TOKEN_EXCHANGE_FAILED',
-      'No access token in response'
-    )
+    throw new ShopifyError('TOKEN_EXCHANGE_FAILED', 'No access token in response')
   }
 
   return data
@@ -138,20 +132,14 @@ export async function handleOAuthCallback(
   // Verify HMAC signature
   const clientSecret = getShopifyClientSecret()
   if (!verifyOAuthHmac(verifyParams, hmac, clientSecret)) {
-    throw new ShopifyError(
-      'INVALID_HMAC',
-      'OAuth signature verification failed'
-    )
+    throw new ShopifyError('INVALID_HMAC', 'OAuth signature verification failed')
   }
 
   // Lookup and validate state
   const oauthState = await getOAuthState(state)
 
   if (!oauthState) {
-    throw new ShopifyError(
-      'INVALID_STATE',
-      'OAuth state expired or invalid'
-    )
+    throw new ShopifyError('INVALID_STATE', 'OAuth state expired or invalid')
   }
 
   const { tenantId, shop: expectedShop } = oauthState
@@ -238,6 +226,73 @@ export async function handleOAuthCallback(
     shopifyAppId: null, // Shopify doesn't provide this in OAuth response
   })
 
+  // Create Storefront Access Token for headless storefront
+  try {
+    const storefrontTokenResponse = await fetch(
+      `https://${shop}/admin/api/${apiVersion}/graphql.json`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Access-Token': tokenResponse.access_token,
+        },
+        body: JSON.stringify({
+          query: `
+          mutation {
+            storefrontAccessTokenCreate(input: {
+              title: "CGK Headless Storefront"
+            }) {
+              storefrontAccessToken {
+                accessToken
+                title
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }
+        `,
+        }),
+      }
+    )
+
+    if (storefrontTokenResponse.ok) {
+      const storefrontResult = (await storefrontTokenResponse.json()) as {
+        data?: {
+          storefrontAccessTokenCreate?: {
+            storefrontAccessToken?: { accessToken: string; title: string }
+            userErrors?: Array<{ field: string[]; message: string }>
+          }
+        }
+      }
+
+      if (storefrontResult.data?.storefrontAccessTokenCreate?.storefrontAccessToken) {
+        const storefrontToken =
+          storefrontResult.data.storefrontAccessTokenCreate.storefrontAccessToken.accessToken
+        const storefrontTokenEncrypted = encryptToken(storefrontToken)
+
+        // Save Storefront token to database
+        await withTenant(tenantSlug, async () => {
+          await sql`
+            UPDATE shopify_connections
+            SET storefront_api_token_encrypted = ${storefrontTokenEncrypted},
+                updated_at = NOW()
+            WHERE tenant_id = ${tenantId} AND shop = ${shop}
+          `
+        })
+      } else if (storefrontResult.data?.storefrontAccessTokenCreate?.userErrors?.length) {
+        console.error(
+          'Storefront token creation errors:',
+          storefrontResult.data.storefrontAccessTokenCreate.userErrors
+        )
+      }
+    }
+  } catch (error) {
+    // Don't fail OAuth callback if storefront token creation fails
+    console.error('Failed to create Storefront Access Token:', error)
+  }
+
   // Clean up OAuth state
   await deleteOAuthState(state)
 
@@ -252,10 +307,7 @@ export async function handleOAuthCallback(
  * @param tenantSlug - Tenant slug (e.g., 'meliusly')
  * @param shop - Shop domain (optional, disconnects all if not provided)
  */
-export async function disconnectStore(
-  tenantSlug: string,
-  shop?: string
-): Promise<void> {
+export async function disconnectStore(tenantSlug: string, shop?: string): Promise<void> {
   // Look up tenant UUID from slug (public schema query - no withTenant needed)
   const tenantResult = await sql`SELECT id FROM public.organizations WHERE slug = ${tenantSlug}`
   if (tenantResult.rows.length === 0) {
@@ -263,9 +315,10 @@ export async function disconnectStore(
   }
   const tenantId = (tenantResult.rows[0] as { id: string }).id
 
-  await withTenant(tenantSlug, async () => {
-    if (shop) {
-      await sql`
+  // Update connection status in tenant schema
+  if (shop) {
+    await withTenant(tenantSlug, async () => {
+      return sql`
         UPDATE shopify_connections
         SET
           status = 'disconnected',
@@ -276,8 +329,10 @@ export async function disconnectStore(
         WHERE tenant_id = ${tenantId}
         AND shop = ${shop}
       `
-    } else {
-      await sql`
+    })
+  } else {
+    await withTenant(tenantSlug, async () => {
+      return sql`
         UPDATE shopify_connections
         SET
           status = 'disconnected',
@@ -287,6 +342,6 @@ export async function disconnectStore(
           updated_at = NOW()
         WHERE tenant_id = ${tenantId}
       `
-    }
-  })
+    })
+  }
 }
