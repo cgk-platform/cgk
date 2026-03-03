@@ -52,11 +52,14 @@ export async function POST(request: Request) {
         WHERE status IN ('active', 'onboarding', 'suspended')
         ORDER BY name ASC
       `
-      orgs = orgsResult.rows.map((row: { id: string; slug: string }) => ({
-        id: row.id,
-        slug: row.slug,
-        role: 'super_admin' as const,
-      }))
+      orgs = orgsResult.rows.map((row) => {
+        const r = row as { id: string; slug: string }
+        return {
+          id: r.id,
+          slug: r.slug,
+          role: 'super_admin' as const,
+        }
+      })
     } else {
       // Regular users get their memberships
       orgs = await getUserOrganizations(user.id)
