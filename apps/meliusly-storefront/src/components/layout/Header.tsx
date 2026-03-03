@@ -5,12 +5,27 @@
  *
  * Main navigation header for Meliusly storefront.
  * Exact match to Figma design 1:269 (Nav component).
- * Features: Announcement bar, logo, nav links with dropdowns, search, user, cart icons.
+ * Features: Announcement bar, logo, nav links with mega menu dropdowns, search, user, cart icons.
  */
 
-import { useState } from 'react'
 import Link from 'next/link'
-import { Search, ShoppingCart, User, ChevronDown, Menu } from 'lucide-react'
+import { Search, ShoppingCart, User, Menu } from 'lucide-react'
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink,
+} from '@cgk-platform/ui'
+import { MegaMenuProductCard } from '@/components/navigation/MegaMenuProductCard'
+import {
+  sofaSupportProducts,
+  sleeperSofaSupportProducts,
+  bedSupportProducts,
+  productGuidesLinks,
+  helpLinks,
+} from '@/lib/sample-mega-menu-data'
 
 interface HeaderProps {
   cartItemCount?: number
@@ -42,14 +57,104 @@ export function Header({ cartItemCount = 0, onMobileMenuToggle, onCartClick }: H
           />
         </Link>
 
-        {/* Navigation Links */}
-        <nav className="hidden items-center gap-[32px] lg:flex">
-          <NavLink href="/collections/sofa-support" label="Sofa Support" />
-          <NavLink href="/collections/sleeper-sofa-support" label="Sleeper Sofa Support" />
-          <NavLink href="/collections/bed-support" label="Bed Support" />
-          <NavLink href="/guides" label="Product Guides" />
-          <NavLink href="/help" label="Help" />
-        </nav>
+        {/* Navigation Menu with Mega Dropdowns */}
+        <NavigationMenu className="hidden lg:flex">
+          <NavigationMenuList className="gap-[32px]">
+            {/* Sofa Support */}
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="font-manrope h-auto bg-transparent px-0 py-0 text-[14px] leading-[1.2] font-semibold text-[#161f2b] hover:bg-transparent hover:text-[#0268a0] data-[active]:bg-transparent data-[state=open]:bg-transparent">
+                Sofa Support
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div className="w-screen max-w-6xl p-6">
+                  <div className="grid grid-cols-3 gap-6">
+                    {sofaSupportProducts.map((product) => (
+                      <MegaMenuProductCard key={product.handle} product={product} />
+                    ))}
+                  </div>
+                </div>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* Sleeper Sofa Support */}
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="font-manrope h-auto bg-transparent px-0 py-0 text-[14px] leading-[1.2] font-semibold text-[#161f2b] hover:bg-transparent hover:text-[#0268a0] data-[active]:bg-transparent data-[state=open]:bg-transparent">
+                Sleeper Sofa Support
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div className="w-screen max-w-6xl p-6">
+                  <div className="grid grid-cols-3 gap-6">
+                    {sleeperSofaSupportProducts.map((product) => (
+                      <MegaMenuProductCard key={product.handle} product={product} />
+                    ))}
+                  </div>
+                </div>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* Bed Support */}
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="font-manrope h-auto bg-transparent px-0 py-0 text-[14px] leading-[1.2] font-semibold text-[#161f2b] hover:bg-transparent hover:text-[#0268a0] data-[active]:bg-transparent data-[state=open]:bg-transparent">
+                Bed Support
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div className="w-screen max-w-6xl p-6">
+                  <div className="grid grid-cols-3 gap-6">
+                    {bedSupportProducts.map((product) => (
+                      <MegaMenuProductCard key={product.handle} product={product} />
+                    ))}
+                  </div>
+                </div>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* Product Guides */}
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="font-manrope h-auto bg-transparent px-0 py-0 text-[14px] leading-[1.2] font-semibold text-[#161f2b] hover:bg-transparent hover:text-[#0268a0] data-[active]:bg-transparent data-[state=open]:bg-transparent">
+                Product Guides
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div className="w-80 p-4">
+                  <div className="space-y-2">
+                    {productGuidesLinks.map((link) => (
+                      <NavigationMenuLink key={link.href} asChild>
+                        <Link
+                          href={link.href}
+                          className="font-manrope block rounded-md px-4 py-3 text-sm font-medium text-[#161f2b] transition-colors hover:bg-gray-50 hover:text-[#0268a0]"
+                        >
+                          {link.title}
+                        </Link>
+                      </NavigationMenuLink>
+                    ))}
+                  </div>
+                </div>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+
+            {/* Help */}
+            <NavigationMenuItem>
+              <NavigationMenuTrigger className="font-manrope h-auto bg-transparent px-0 py-0 text-[14px] leading-[1.2] font-semibold text-[#161f2b] hover:bg-transparent hover:text-[#0268a0] data-[active]:bg-transparent data-[state=open]:bg-transparent">
+                Help
+              </NavigationMenuTrigger>
+              <NavigationMenuContent>
+                <div className="w-80 p-4">
+                  <div className="space-y-2">
+                    {helpLinks.map((link) => (
+                      <NavigationMenuLink key={link.href} asChild>
+                        <Link
+                          href={link.href}
+                          className="font-manrope block rounded-md px-4 py-3 text-sm font-medium text-[#161f2b] transition-colors hover:bg-gray-50 hover:text-[#0268a0]"
+                        >
+                          {link.title}
+                        </Link>
+                      </NavigationMenuLink>
+                    ))}
+                  </div>
+                </div>
+              </NavigationMenuContent>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
 
         {/* Right Icons */}
         <div className="flex items-center gap-[24px]">
@@ -94,27 +199,5 @@ export function Header({ cartItemCount = 0, onMobileMenuToggle, onCartClick }: H
         </div>
       </div>
     </header>
-  )
-}
-
-interface NavLinkProps {
-  href: string
-  label: string
-  hasDropdown?: boolean
-}
-
-function NavLink({ href, label, hasDropdown = true }: NavLinkProps) {
-  return (
-    <Link href={href} className="group flex items-center gap-[9px]">
-      <span className="font-manrope text-[14px] leading-[1.2] font-semibold text-[#161f2b] capitalize transition-colors group-hover:text-[#0268a0]">
-        {label}
-      </span>
-      {hasDropdown && (
-        <ChevronDown
-          className="h-[5px] w-[10px] text-[#161f2b] transition-colors group-hover:text-[#0268a0]"
-          strokeWidth={2}
-        />
-      )}
-    </Link>
   )
 }

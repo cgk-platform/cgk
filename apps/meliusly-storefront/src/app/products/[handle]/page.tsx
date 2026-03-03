@@ -13,6 +13,7 @@ import ComparisonTable from '@/components/pdp/ComparisonTable'
 import ExtendedReviews from '@/components/pdp/ExtendedReviews'
 import RelatedProducts from '@/components/pdp/RelatedProducts'
 import { TraitsBar } from '@/components/sections/TraitsBar'
+import { ProductSelectorGuide, ProductSelectorTabs } from '@/components/products'
 
 interface Product {
   id: string
@@ -200,8 +201,29 @@ export default async function ProductDetailPage({ params }: PageProps) {
   // Extract variants
   const variants = product.variants.edges.map((edge) => edge.node)
 
+  // Define tabs for product details
+  const productTabs = [
+    {
+      title: 'Benefits',
+      content: '<p>Premium materials and construction for lasting durability.</p>',
+    },
+    { title: 'Features', content: '<p>Advanced design for maximum support and comfort.</p>' },
+    { title: 'Reviews', content: '<p>Rated 4.8/5 stars by hundreds of satisfied customers.</p>' },
+    { title: 'Dimensions', content: '<p>Custom sizing available to fit your exact needs.</p>' },
+    {
+      title: 'Installation',
+      content: '<p>Easy installation with included hardware and instructions.</p>',
+    },
+    { title: 'Video', content: '<p>Watch our installation video for step-by-step guidance.</p>' },
+  ]
+
   return (
     <div className="bg-white">
+      {/* Product Selector Guide */}
+      <div className="container mx-auto max-w-7xl px-4 py-8">
+        <ProductSelectorGuide />
+      </div>
+
       {/* Product Gallery & Info Section */}
       <ProductGallery
         product={{
@@ -218,6 +240,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
       {/* Traits Bar */}
       <TraitsBar />
+
+      {/* Product Tabs Section */}
+      <div className="container mx-auto max-w-7xl px-4 py-12">
+        <ProductSelectorTabs tabs={productTabs} />
+      </div>
 
       {/* Product Benefits */}
       <ProductBenefits />
