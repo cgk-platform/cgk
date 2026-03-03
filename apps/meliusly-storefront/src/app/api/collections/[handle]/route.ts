@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { getTenantIdFromDomain } from '@/lib/tenant-resolution'
 import { getShopifyClientForTenant } from '@/lib/shopify-from-database'
-import { getMockProducts } from '@/lib/mock-products'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -70,18 +69,18 @@ export async function GET(request: Request, context: RouteContext) {
     const tenantId = await getTenantIdFromDomain(host)
 
     if (!tenantId) {
-      console.warn(`[collections] No tenant found for host: ${host}`)
-      return fallbackToMockProducts(handle)
+      return NextResponse.json(
+        {
+          success: false,
+          error: `No tenant found for host: ${host}`,
+          data: [],
+        },
+        { status: 404 }
+      )
     }
 
     // Get Shopify client for this tenant
-    let shopify
-    try {
-      shopify = await getShopifyClientForTenant(tenantId)
-    } catch (error) {
-      console.warn(`[collections] Shopify not connected for tenant ${tenantId}:`, error)
-      return fallbackToMockProducts(handle)
-    }
+    const shopify = await getShopifyClientForTenant(tenantId)
 
     // Fetch collection from Shopify
     const response = (await shopify.query(COLLECTION_PRODUCTS_QUERY, { handle })) as {
@@ -112,7 +111,14 @@ export async function GET(request: Request, context: RouteContext) {
 
     if (!response.data?.collection) {
       console.warn(`[collections] Collection "${handle}" not found in Shopify`)
-      return fallbackToMockProducts(handle)
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Collection "${handle}" not found`,
+          data: [],
+        },
+        { status: 404 }
+      )
     }
 
     const collection = response.data.collection
@@ -163,61 +169,4 @@ export async function GET(request: Request, context: RouteContext) {
       { status: 500 }
     )
   }
-}
-
-// Fallback to mock products if Shopify unavailable
-function fallbackToMockProducts(handle: string) {
-  const COLLECTION_FILTERS: Record<
-    string,
-    { title: string; description: string; filter: (product: any) => boolean }
-  > = {
-    'sofa-support': {
-      title: 'Sofa Support',
-      description: 'Premium support solutions for sofas and chairs',
-      filter: (p) =>
-        p.title.toLowerCase().includes('sofa') || p.title.toLowerCase().includes('chair'),
-    },
-    'sleeper-sofa-support': {
-      title: 'Sleeper Sofa Support',
-      description: 'Specialized support boards for sleeper sofas',
-      filter: (p) => p.title.toLowerCase().includes('sleeper'),
-    },
-    'bed-support': {
-      title: 'Bed Support',
-      description: 'Support solutions for beds and mattresses',
-      filter: (p) =>
-        p.title.toLowerCase().includes('bed') || p.title.toLowerCase().includes('elite'),
-    },
-    all: {
-      title: 'All Products',
-      description: 'Browse our complete collection',
-      filter: () => true,
-    },
-  }
-
-  const collectionConfig = COLLECTION_FILTERS[handle] ||
-    COLLECTION_FILTERS['all'] || {
-      title: handle
-        .split('-')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' '),
-      description: '',
-      filter: () => true,
-    }
-
-  const allProducts = getMockProducts()
-  const filteredProducts = allProducts.filter(collectionConfig.filter)
-
-  console.log(`📦 [Mock] Collection "${handle}": ${filteredProducts.length} products (fallback)`)
-
-  return NextResponse.json({
-    success: true,
-    data: filteredProducts,
-    collection: {
-      title: collectionConfig.title,
-      description: collectionConfig.description,
-    },
-    source: 'mock',
-    message: 'Using mock data - Shopify not connected',
-  })
 }

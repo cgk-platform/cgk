@@ -8,7 +8,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveTenantFromDomain } from '@/lib/tenant-resolution'
 import { getShopifyClientForTenant } from '@/lib/shopify-from-database'
-import { getMockProductsSimplified } from '@/lib/mock-products'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -31,57 +30,55 @@ export async function GET(request: NextRequest) {
     const first = parseInt(searchParams.get('first') || '8', 10)
     const sortKey = searchParams.get('sortKey') || 'BEST_SELLING'
 
-    try {
-      // Get Shopify client with database credentials
-      const shopify = await getShopifyClientForTenant(tenant.id)
+    // Get Shopify client with database credentials
+    const shopify = await getShopifyClientForTenant(tenant.id)
 
-      // Fetch products from Shopify
-      const result = (await shopify.query(
-        `
-        query getProducts($first: Int!, $sortKey: ProductCollectionSortKeys) {
-          products(first: $first, sortKey: $sortKey) {
-            edges {
-              node {
-                id
-                title
-                handle
-                description
-                priceRange {
-                  minVariantPrice {
-                    amount
-                    currencyCode
+    // Fetch products from Shopify
+    const result = (await shopify.query(
+      `
+      query getProducts($first: Int!, $sortKey: ProductCollectionSortKeys) {
+        products(first: $first, sortKey: $sortKey) {
+          edges {
+            node {
+              id
+              title
+              handle
+              description
+              priceRange {
+                minVariantPrice {
+                  amount
+                  currencyCode
+                }
+              }
+              compareAtPriceRange {
+                minVariantPrice {
+                  amount
+                  currencyCode
+                }
+              }
+              featuredImage {
+                url
+                altText
+                width
+                height
+              }
+              images(first: 10) {
+                edges {
+                  node {
+                    url
+                    altText
                   }
                 }
-                compareAtPriceRange {
-                  minVariantPrice {
-                    amount
-                    currencyCode
-                  }
-                }
-                featuredImage {
-                  url
-                  altText
-                  width
-                  height
-                }
-                images(first: 5) {
-                  edges {
-                    node {
-                      url
-                      altText
-                    }
-                  }
-                }
-                variants(first: 10) {
-                  edges {
-                    node {
-                      id
-                      title
-                      availableForSale
-                      price {
-                        amount
-                        currencyCode
-                      }
+              }
+              variants(first: 10) {
+                edges {
+                  node {
+                    id
+                    title
+                    availableForSale
+                    price {
+                      amount
+                      currencyCode
                     }
                   }
                 }
@@ -89,49 +86,30 @@ export async function GET(request: NextRequest) {
             }
           }
         }
-      `,
-        { first, sortKey }
-      )) as { products: { edges: Array<{ node: unknown }> } }
+      }
+    `,
+      { first, sortKey }
+    )) as { products: { edges: Array<{ node: unknown }> } }
 
-      const products = result.products.edges.map((edge) => edge.node)
+    const products = result.products.edges.map((edge) => edge.node)
 
-      // Log image URLs for debugging
-      products.forEach((product: any) => {
-        if (!product.featuredImage?.url) {
-          console.warn(`Product "${product.title}" is missing featuredImage`)
-        } else {
-          console.log(`Product "${product.title}" has image: ${product.featuredImage.url}`)
-        }
-      })
+    // Log image URLs for debugging
+    products.forEach((product: any) => {
+      console.log(
+        `📦 ${product.title}: ${product.images?.edges?.length || 0} images (featured: ${product.featuredImage?.url ? 'YES' : 'NO'})`
+      )
+    })
 
-      return NextResponse.json({
-        success: true,
-        data: products,
-        tenant: {
-          id: tenant.id,
-          slug: tenant.slug,
-          name: tenant.name,
-        },
-      })
-    } catch (shopifyError) {
-      // If Shopify connection fails, return mock data for development
-      console.warn('⚠️  Shopify connection not available, using mock data:', shopifyError)
-      console.log('🎨 Demo Mode: Displaying mock products with real images')
-
-      const mockProducts = getMockProductsSimplified(first)
-
-      return NextResponse.json({
-        success: true,
-        data: mockProducts,
-        tenant: {
-          id: tenant.id,
-          slug: tenant.slug,
-          name: tenant.name,
-        },
-        mock: true,
-        message: 'Demo mode - using mock product data',
-      })
-    }
+    return NextResponse.json({
+      success: true,
+      data: products,
+      tenant: {
+        id: tenant.id,
+        slug: tenant.slug,
+        name: tenant.name,
+      },
+      source: 'shopify',
+    })
   } catch (error) {
     console.error('Failed to fetch products:', error)
 
