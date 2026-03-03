@@ -17,6 +17,7 @@ import {
   Menu,
   MessageSquare,
   Puzzle,
+  Radio,
   Settings,
   Terminal,
   X,
