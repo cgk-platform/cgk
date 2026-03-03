@@ -23,13 +23,11 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  // Externalize WebSocket packages that cause Turbopack build errors
+  // Externalize WebSocket packages that cause build errors
   // These are optional dependencies of @shopify/hydrogen-react that aren't needed in production
   serverExternalPackages: ['ws', 'bufferutil', 'utf-8-validate'],
-  // Enable Turbopack for faster development
-  experimental: {
-    turbo: {},
-  },
+  // Turbopack disabled due to incompatibility with dynamic requires in ws package
+  // Falling back to webpack bundler which handles serverExternalPackages correctly
 }
 
 module.exports = nextConfig
