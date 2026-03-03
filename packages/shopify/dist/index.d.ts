@@ -1012,6 +1012,25 @@ declare function disconnectStore(tenantSlug: string, shop?: string): Promise<voi
  */
 
 /**
+ * Get Shopify credentials by tenant slug
+ *
+ * Convenience wrapper that converts tenant slug to UUID before fetching credentials.
+ *
+ * @param tenantSlug - Tenant slug
+ * @returns Decrypted Shopify credentials
+ * @throws ShopifyError if tenant not found or not connected
+ *
+ * @example
+ * ```ts
+ * const credentials = await getShopifyCredentialsBySlug('meliusly')
+ * const client = createAdminClient({
+ *   storeDomain: credentials.shop,
+ *   adminAccessToken: credentials.accessToken,
+ * })
+ * ```
+ */
+declare function getShopifyCredentialsBySlug(tenantSlug: string): Promise<ShopifyCredentials>;
+/**
  * Get Shopify credentials for a tenant
  *
  * Retrieves and decrypts Shopify credentials, with caching
@@ -1050,10 +1069,10 @@ declare function getShopifyConnection(tenantSlug: string): Promise<ShopifyConnec
  *
  * Verifies the connection is active and token is valid.
  *
- * @param tenantId - Tenant ID
+ * @param tenantSlug - Tenant slug
  * @returns Connection health check result
  */
-declare function checkConnectionHealth(tenantId: string): Promise<ConnectionHealthCheck>;
+declare function checkConnectionHealth(tenantSlug: string): Promise<ConnectionHealthCheck>;
 /**
  * Update last webhook timestamp
  *
@@ -1264,4 +1283,4 @@ declare function listAllInstallations(filters?: {
     organizationSlug: string;
 }>>;
 
-export { type AdminClient, type AdminConfig, type CartBuyerIdentityInput, type CartLineInput, type CollectionProductsParams, type ConnectionHealthCheck, type ConnectionStatus, DEFAULT_API_VERSION, type HydrogenClientConfig, type ListCollectionsParams, type ListCustomersParams, type ListOrdersParams, type ListProductsParams, type MetafieldIdentifier, type OAuthCallbackParams, type OAuthInitiateParams, type OAuthStateRecord, type OAuthTokenResponse, PLATFORM_SCOPES, type PlatformScope, type PredictiveSearchParams, type ProductFilter, type RecordInstallationParams, type SearchFilter, type SearchParams, type ShopInfo, type ShopInstallation, type ShopPolicies, type ShopPolicy, type ShopifyAddress, type ShopifyArticle, type ShopifyBlog, type ShopifyCart, type ShopifyCartDiscountAllocation, type ShopifyCartDiscountCode, type ShopifyCartUserError, type ShopifyCollection, type ShopifyConfig, type ShopifyConnection, type ShopifyCredentials, type ShopifyCustomer, ShopifyError, type ShopifyErrorCode, type ShopifyImage, type ShopifyLineItem, type ShopifyMenu, type ShopifyMenuItem, type ShopifyMetafield, type ShopifyMoney, type ShopifyOrder, type ShopifyPageInfo, type ShopifyProduct, type ShopifyProductConnection, type ShopifyProductFilter, type ShopifySearchFilter, type ShopifyVariant, type StorefrontClient, type StorefrontConfig, WEBHOOK_TOPICS, type WebhookHandler, type WebhookPayload, type WebhookRegistration, type WebhookTopic, addCartLines, adminGetProduct, adminListProducts, adminQuery, applyCartDiscountCodes, checkConnectionHealth, clearCredentialsCache, createAdminClient, createCart, createHydrogenClient, createStorefrontClient, decryptToken, deleteOAuthState, disconnectStore, encryptToken, generateSecureToken, getArticleByHandle, getBlogArticles, getCart, getCollectionByHandle, getCollectionMetafield, getCollectionProducts, getCustomer, getCustomerOrders, getMenu, getOAuthState, getOrder, getOrganizationIdForShop, getOrganizationShops, getProductByHandle, getProductById, getProductMetafields, getProductRecommendations, getScopesString, getShop, getShopInstallation, getShopPolicies, getShopifyConnection, getShopifyCredentials, getTenantIdForShop, handleOAuthCallback, handleWebhook, initAdmin, initStorefront, initiateOAuth, isShopActive, isShopifyConnected, isValidOAuthTimestamp, isValidShopDomain, listAllInstallations, listCollections, listCustomers, listOrders, listProducts, normalizeShopDomain, normalizeStoreDomain, onWebhook, parseWebhook, predictiveSearch, reactivateShopInstallation, recordShopInstallation, recordShopUninstallation, registerWebhooks, removeCartDiscountCodes, removeCartLines, searchProducts, storefrontQuery, suspendShopInstallation, unregisterWebhooks, updateCartAttributes, updateCartBuyerIdentity, updateCartLines, updateLastSyncAt, updateLastWebhookAt, validateScopes, validateShopDomain, verifyOAuthHmac, verifyWebhook, verifyWebhookHmac };
+export { type AdminClient, type AdminConfig, type CartBuyerIdentityInput, type CartLineInput, type CollectionProductsParams, type ConnectionHealthCheck, type ConnectionStatus, DEFAULT_API_VERSION, type HydrogenClientConfig, type ListCollectionsParams, type ListCustomersParams, type ListOrdersParams, type ListProductsParams, type MetafieldIdentifier, type OAuthCallbackParams, type OAuthInitiateParams, type OAuthStateRecord, type OAuthTokenResponse, PLATFORM_SCOPES, type PlatformScope, type PredictiveSearchParams, type ProductFilter, type RecordInstallationParams, type SearchFilter, type SearchParams, type ShopInfo, type ShopInstallation, type ShopPolicies, type ShopPolicy, type ShopifyAddress, type ShopifyArticle, type ShopifyBlog, type ShopifyCart, type ShopifyCartDiscountAllocation, type ShopifyCartDiscountCode, type ShopifyCartUserError, type ShopifyCollection, type ShopifyConfig, type ShopifyConnection, type ShopifyCredentials, type ShopifyCustomer, ShopifyError, type ShopifyErrorCode, type ShopifyImage, type ShopifyLineItem, type ShopifyMenu, type ShopifyMenuItem, type ShopifyMetafield, type ShopifyMoney, type ShopifyOrder, type ShopifyPageInfo, type ShopifyProduct, type ShopifyProductConnection, type ShopifyProductFilter, type ShopifySearchFilter, type ShopifyVariant, type StorefrontClient, type StorefrontConfig, WEBHOOK_TOPICS, type WebhookHandler, type WebhookPayload, type WebhookRegistration, type WebhookTopic, addCartLines, adminGetProduct, adminListProducts, adminQuery, applyCartDiscountCodes, checkConnectionHealth, clearCredentialsCache, createAdminClient, createCart, createHydrogenClient, createStorefrontClient, decryptToken, deleteOAuthState, disconnectStore, encryptToken, generateSecureToken, getArticleByHandle, getBlogArticles, getCart, getCollectionByHandle, getCollectionMetafield, getCollectionProducts, getCustomer, getCustomerOrders, getMenu, getOAuthState, getOrder, getOrganizationIdForShop, getOrganizationShops, getProductByHandle, getProductById, getProductMetafields, getProductRecommendations, getScopesString, getShop, getShopInstallation, getShopPolicies, getShopifyConnection, getShopifyCredentials, getShopifyCredentialsBySlug, getTenantIdForShop, handleOAuthCallback, handleWebhook, initAdmin, initStorefront, initiateOAuth, isShopActive, isShopifyConnected, isValidOAuthTimestamp, isValidShopDomain, listAllInstallations, listCollections, listCustomers, listOrders, listProducts, normalizeShopDomain, normalizeStoreDomain, onWebhook, parseWebhook, predictiveSearch, reactivateShopInstallation, recordShopInstallation, recordShopUninstallation, registerWebhooks, removeCartDiscountCodes, removeCartLines, searchProducts, storefrontQuery, suspendShopInstallation, unregisterWebhooks, updateCartAttributes, updateCartBuyerIdentity, updateCartLines, updateLastSyncAt, updateLastWebhookAt, validateScopes, validateShopDomain, verifyOAuthHmac, verifyWebhook, verifyWebhookHmac };

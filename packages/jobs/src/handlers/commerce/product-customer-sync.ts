@@ -38,6 +38,9 @@ import type {
   TenantEvent,
 } from '../../events'
 import type { JobResult } from '../../types'
+// @ts-expect-error - tsup bundling creates single-line .d.ts that TS can't parse properly
+import { getShopifyCredentialsBySlug, createAdminClient } from '@cgk-platform/shopify'
+import { sql, withTenant } from '@cgk-platform/db'
 
 // ---------------------------------------------------------------------------
 // Job Payloads
@@ -138,7 +141,14 @@ const BATCH_SYNC_RETRY = {
 export const productSyncJob = defineJob<TenantEvent<ProductSyncFromShopifyPayload>>({
   name: 'commerce.productSync',
   handler: async (job): Promise<JobResult> => {
-    const { tenantId, productId, shopifyProductId, fullSync = false, cursor, limit = 50 } = job.payload
+    const {
+      tenantId,
+      productId,
+      shopifyProductId,
+      fullSync = false,
+      cursor,
+      limit = 50,
+    } = job.payload
 
     if (!tenantId) {
       return {
@@ -196,7 +206,7 @@ export const productSyncJob = defineJob<TenantEvent<ProductSyncFromShopifyPayloa
 export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload>>({
   name: 'commerce.productBatchSync',
   handler: async (job): Promise<JobResult> => {
-    const { tenantId, productIds, shopifyProductIds, collectionId, updatedSince } = job.payload
+    const { tenantId, productIds, shopifyProductIds, collectionId } = job.payload
 
     if (!tenantId) {
       return {
@@ -209,32 +219,349 @@ export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload
       }
     }
 
-    console.log(`[commerce.productBatchSync] Batch syncing products`, {
+    console.log(`[commerce.productBatchSync] Starting sync`, {
       tenantId,
-      productCount: productIds?.length || shopifyProductIds?.length || 'all',
+      productIds: productIds?.length,
+      shopifyProductIds: shopifyProductIds?.length,
       collectionId,
-      updatedSince,
       jobId: job.id,
     })
 
-    // Implementation steps:
-    // 1. Build query based on parameters:
-    //    - By IDs
-    //    - By collection
-    //    - By updated date
-    // 2. Fetch products in batches
-    // 3. Queue individual product sync jobs for each
-    // 4. Track progress
+    try {
+      // 1. Get Shopify credentials for tenant
+      // Convert tenantId (UUID) to slug
+      const tenantResult = await sql`SELECT slug FROM public.organizations WHERE id = ${tenantId}`
+      if (tenantResult.rows.length === 0) {
+        throw new Error(`Tenant ${tenantId} not found`)
+      }
+      const tenantSlug = (tenantResult.rows[0] as { slug: string }).slug
 
-    return {
-      success: true,
-      data: {
-        tenantId,
-        productsQueued: 0,
-        collectionId,
-        updatedSince,
-        queuedAt: new Date().toISOString(),
-      },
+      const credentials = await getShopifyCredentialsBySlug(tenantSlug)
+
+      // 2. Create Admin API client
+      const admin = createAdminClient({
+        storeDomain: credentials.shop,
+        adminAccessToken: credentials.accessToken,
+        apiVersion: credentials.apiVersion,
+      })
+
+      // 3. Fetch products from Shopify
+      const query = `
+        query GetProducts($first: Int!, $after: String) {
+          products(first: $first, after: $after) {
+            edges {
+              node {
+                id
+                legacyResourceId
+                title
+                handle
+                description
+                descriptionHtml
+                vendor
+                productType
+                tags
+                status
+                totalInventory
+                createdAt
+                updatedAt
+                publishedAt
+                seo {
+                  title
+                  description
+                }
+                featuredImage {
+                  id
+                  url
+                  altText
+                  width
+                  height
+                }
+                images(first: 20) {
+                  edges {
+                    node {
+                      id
+                      url
+                      altText
+                      width
+                      height
+                    }
+                  }
+                }
+                variants(first: 100) {
+                  edges {
+                    node {
+                      id
+                      title
+                      sku
+                      price
+                      compareAtPrice
+                      inventoryQuantity
+                      availableForSale
+                      selectedOptions {
+                        name
+                        value
+                      }
+                    }
+                  }
+                }
+                options {
+                  id
+                  name
+                  values
+                }
+              }
+            }
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+          }
+        }
+      `
+
+      interface ProductNode {
+        id: string
+        legacyResourceId: string
+        title: string
+        handle: string
+        description: string
+        descriptionHtml: string
+        vendor: string
+        productType: string
+        tags: string[]
+        status: 'ACTIVE' | 'DRAFT' | 'ARCHIVED'
+        totalInventory: number
+        createdAt: string
+        updatedAt: string
+        publishedAt: string | null
+        seo: { title: string | null; description: string | null }
+        featuredImage: {
+          id: string
+          url: string
+          altText: string | null
+          width: number
+          height: number
+        } | null
+        images: {
+          edges: Array<{
+            node: { id: string; url: string; altText: string | null; width: number; height: number }
+          }>
+        }
+        variants: {
+          edges: Array<{
+            node: {
+              id: string
+              title: string
+              sku: string
+              price: string
+              compareAtPrice: string | null
+              inventoryQuantity: number
+              availableForSale: boolean
+              selectedOptions: Array<{ name: string; value: string }>
+            }
+          }>
+        }
+        options: Array<{ id: string; name: string; values: string[] }>
+      }
+
+      interface ProductsResponse {
+        products: {
+          edges: Array<{ node: ProductNode }>
+          pageInfo: { hasNextPage: boolean; endCursor: string | null }
+        }
+      }
+
+      const result = (await admin.query(query, { first: 250, after: null })) as ProductsResponse
+
+      const products = result.products.edges.map((edge: { node: ProductNode }) => edge.node)
+      console.log(`[commerce.productBatchSync] Fetched ${products.length} products from Shopify`)
+
+      // 4. Transform and insert into database
+      let productsSynced = 0
+      let variantsSynced = 0
+
+      await withTenant(tenantSlug, async () => {
+        for (const product of products) {
+          // Convert price from string to cents
+          const minPrice =
+            product.variants.edges.length > 0
+              ? Math.min(
+                  ...product.variants.edges.map(
+                    (v: { node: { price: string } }) => parseFloat(v.node.price) * 100
+                  )
+                )
+              : 0
+
+          // Map status
+          const status =
+            product.status === 'ACTIVE'
+              ? 'active'
+              : product.status === 'DRAFT'
+                ? 'draft'
+                : 'archived'
+
+          // Prepare JSONB data
+          const images = product.images.edges.map(
+            (e: {
+              node: {
+                id: string
+                url: string
+                altText: string | null
+                width: number
+                height: number
+              }
+            }) => ({
+              id: e.node.id,
+              url: e.node.url,
+              altText: e.node.altText,
+              width: e.node.width,
+              height: e.node.height,
+            })
+          )
+
+          const variants = product.variants.edges.map(
+            (e: {
+              node: {
+                id: string
+                title: string
+                sku: string
+                price: string
+                compareAtPrice: string | null
+                inventoryQuantity: number
+                availableForSale: boolean
+                selectedOptions: Array<{ name: string; value: string }>
+              }
+            }) => ({
+              id: e.node.id,
+              title: e.node.title,
+              sku: e.node.sku,
+              price_cents: Math.round(parseFloat(e.node.price) * 100),
+              compare_at_price_cents: e.node.compareAtPrice
+                ? Math.round(parseFloat(e.node.compareAtPrice) * 100)
+                : null,
+              inventory_quantity: e.node.inventoryQuantity,
+              available_for_sale: e.node.availableForSale,
+              selected_options: e.node.selectedOptions,
+            })
+          )
+
+          const options = product.options.map(
+            (o: { id: string; name: string; values: string[] }) => ({
+              id: o.id,
+              name: o.name,
+              values: o.values,
+            })
+          )
+
+          // Format tags array for PostgreSQL
+          const tagsArray = `{${product.tags.map((t: string) => `"${t.replace(/"/g, '\\"')}"`).join(',')}}`
+
+          // Upsert product (within withTenant() block)
+          await sql`
+            INSERT INTO products (
+              id,
+              shopify_product_id,
+              shopify_gid,
+              title,
+              handle,
+              description,
+              description_html,
+              vendor,
+              product_type,
+              status,
+              tags,
+              price_cents,
+              currency,
+              inventory_quantity,
+              featured_image_url,
+              images,
+              variants,
+              options,
+              seo_title,
+              seo_description,
+              published_at,
+              synced_at,
+              created_at,
+              updated_at
+            ) VALUES (
+              ${product.handle || product.legacyResourceId},
+              ${product.legacyResourceId},
+              ${product.id},
+              ${product.title},
+              ${product.handle},
+              ${product.description},
+              ${product.descriptionHtml},
+              ${product.vendor},
+              ${product.productType},
+              ${status}::product_status,
+              ${tagsArray}::TEXT[],
+              ${minPrice},
+              'USD',
+              ${product.totalInventory},
+              ${product.featuredImage?.url || null},
+              ${JSON.stringify(images)}::JSONB,
+              ${JSON.stringify(variants)}::JSONB,
+              ${JSON.stringify(options)}::JSONB,
+              ${product.seo.title},
+              ${product.seo.description},
+              ${product.publishedAt ? new Date(product.publishedAt).toISOString() : null},
+              NOW(),
+              ${product.createdAt},
+              ${product.updatedAt}
+            )
+            ON CONFLICT (shopify_product_id) DO UPDATE SET
+              shopify_gid = EXCLUDED.shopify_gid,
+              title = EXCLUDED.title,
+              handle = EXCLUDED.handle,
+              description = EXCLUDED.description,
+              description_html = EXCLUDED.description_html,
+              vendor = EXCLUDED.vendor,
+              product_type = EXCLUDED.product_type,
+              status = EXCLUDED.status,
+              tags = ${tagsArray}::TEXT[],
+              price_cents = EXCLUDED.price_cents,
+              inventory_quantity = EXCLUDED.inventory_quantity,
+              featured_image_url = EXCLUDED.featured_image_url,
+              images = EXCLUDED.images,
+              variants = EXCLUDED.variants,
+              options = EXCLUDED.options,
+              seo_title = EXCLUDED.seo_title,
+              seo_description = EXCLUDED.seo_description,
+              published_at = EXCLUDED.published_at,
+              synced_at = NOW(),
+              updated_at = EXCLUDED.updated_at
+          `
+
+          productsSynced++
+          variantsSynced += variants.length
+        }
+      })
+
+      console.log(
+        `[commerce.productBatchSync] Synced ${productsSynced} products, ${variantsSynced} variants`
+      )
+
+      return {
+        success: true,
+        data: {
+          tenantId,
+          productsSynced,
+          variantsSynced,
+          hasMore: result.products.pageInfo.hasNextPage,
+          nextCursor: result.products.pageInfo.endCursor,
+          syncedAt: new Date().toISOString(),
+        },
+      }
+    } catch (error) {
+      console.error(`[commerce.productBatchSync] Error:`, error)
+      return {
+        success: false,
+        error: {
+          message: error instanceof Error ? error.message : 'Product batch sync failed',
+          code: 'SYNC_ERROR',
+          retryable: true,
+        },
+      }
     }
   },
   retry: BATCH_SYNC_RETRY,
@@ -294,7 +621,14 @@ export const handleProductSyncJob = defineJob<TenantEvent<ProductSyncPayload>>({
 export const customerSyncJob = defineJob<TenantEvent<CustomerSyncFromShopifyPayload>>({
   name: 'commerce.customerSync',
   handler: async (job): Promise<JobResult> => {
-    const { tenantId, customerId, shopifyCustomerId, fullSync = false, cursor, limit = 100 } = job.payload
+    const {
+      tenantId,
+      customerId,
+      shopifyCustomerId,
+      fullSync = false,
+      cursor,
+      limit = 100,
+    } = job.payload
 
     if (!tenantId) {
       return {

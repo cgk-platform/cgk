@@ -11351,6 +11351,18 @@ async function handleOAuthCallback(params) {
   } catch (error) {
     console.error("Failed to create Storefront Access Token:", error);
   }
+  try {
+    const { tasks } = await import("./v3-KVKFRKMI.js");
+    await tasks.trigger("commerce-product-batch-sync", {
+      tenantId
+    });
+    await tasks.trigger("commerce-collection-sync", {
+      tenantId
+    });
+    console.log(`Product sync triggered for tenant ${tenantId}`);
+  } catch (error) {
+    console.error("Failed to trigger product sync:", error);
+  }
   await deleteOAuthState(state);
   return { tenantId, shop };
 }
@@ -11393,6 +11405,16 @@ async function disconnectStore(tenantSlug, shop) {
 // src/oauth/credentials.ts
 import { sql as sql4, withTenant as withTenant2, createTenantCache } from "@cgk-platform/db";
 var CREDENTIAL_CACHE_TTL = 60;
+async function getShopifyCredentialsBySlug(tenantSlug) {
+  const tenantResult = await sql4`
+    SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
+  `;
+  if (tenantResult.rows.length === 0) {
+    throw new ShopifyError("NOT_CONNECTED", `Tenant ${tenantSlug} not found`);
+  }
+  const tenantId = tenantResult.rows[0].id;
+  return getShopifyCredentials(tenantId);
+}
 async function getShopifyCredentials(tenantId) {
   const cache = createTenantCache(tenantId);
   const cacheKey = "shopify:credentials";
@@ -11494,8 +11516,8 @@ async function getShopifyConnection(tenantSlug) {
     updatedAt: new Date(row.updated_at)
   };
 }
-async function checkConnectionHealth(tenantId) {
-  const connection = await getShopifyConnection(tenantId);
+async function checkConnectionHealth(tenantSlug) {
+  const connection = await getShopifyConnection(tenantSlug);
   if (!connection) {
     return {
       isConnected: false,
@@ -11510,6 +11532,13 @@ async function checkConnectionHealth(tenantId) {
   }
   let tokenValid = false;
   try {
+    const tenantResult = await sql4`
+      SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
+    `;
+    if (tenantResult.rows.length === 0) {
+      throw new ShopifyError("NOT_CONNECTED", `Tenant ${tenantSlug} not found`);
+    }
+    const tenantId = tenantResult.rows[0].id;
     const credentials = await getShopifyCredentials(tenantId);
     const response = await fetch(
       `https://${credentials.shop}/admin/api/${credentials.apiVersion}/shop.json`,
@@ -11769,6 +11798,7 @@ export {
   getShopPolicies,
   getShopifyConnection,
   getShopifyCredentials,
+  getShopifyCredentialsBySlug,
   getTenantIdForShop,
   handleOAuthCallback,
   handleWebhook,
