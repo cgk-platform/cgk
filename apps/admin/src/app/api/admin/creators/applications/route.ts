@@ -51,7 +51,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    logger.error('Error fetching applications:', error)
+    logger.error('Error fetching applications:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch applications' },
       { status: 500 }

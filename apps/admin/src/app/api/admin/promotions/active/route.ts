@@ -26,7 +26,7 @@ export async function GET() {
       isActive: !!promotion,
     })
   } catch (error) {
-    logger.error('Error fetching active promotion:', error)
+    logger.error('Error fetching active promotion:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch active promotion' },
       { status: 500 },

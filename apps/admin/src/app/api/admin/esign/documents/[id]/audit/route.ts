@@ -100,7 +100,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       summary,
     })
   } catch (error) {
-    logger.error('Error fetching document audit:', error)
+    logger.error('Error fetching document audit:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch audit trail' },
       { status: 500 }

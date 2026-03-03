@@ -67,7 +67,7 @@ export async function POST(
       message: `User added to ${orgCheck.rows[0]?.name}`,
     })
   } catch (error) {
-    logger.error('Failed to add user to organization:', error)
+    logger.error('Failed to add user to organization:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to add user to organization' },
       { status: 500 }
@@ -117,7 +117,7 @@ export async function DELETE(
       message: 'User removed from organization',
     })
   } catch (error) {
-    logger.error('Failed to remove user from organization:', error)
+    logger.error('Failed to remove user from organization:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to remove user from organization' },
       { status: 500 }

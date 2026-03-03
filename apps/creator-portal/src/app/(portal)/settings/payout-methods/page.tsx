@@ -9,7 +9,6 @@
 import { Suspense, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { logger } from '@cgk-platform/logging'
 
 function PayoutMethodsLoading(): React.JSX.Element {
   return (
@@ -111,7 +110,7 @@ function PayoutMethodsContent(): React.JSX.Element {
       setHasStripeConnect(data.hasStripeConnect)
       setIncompleteStripeSetup(data.incompleteStripeSetup)
     } catch (err) {
-      logger.error('Error loading methods:', err)
+      console.error('Error loading methods:', err)
       setErrorMessage('Failed to load payment methods')
     } finally {
       setLoading(false)
@@ -157,7 +156,7 @@ function PayoutMethodsContent(): React.JSX.Element {
         await loadMethods()
       }
     } catch (err) {
-      logger.error('Error starting onboarding:', err)
+      console.error('Error starting onboarding:', err)
       setErrorMessage(err instanceof Error ? err.message : 'Failed to start Stripe setup')
     } finally {
       setStartingOnboarding(false)
@@ -181,7 +180,7 @@ function PayoutMethodsContent(): React.JSX.Element {
       setTimeout(() => setSuccessMessage(null), 3000)
       await loadMethods()
     } catch (err) {
-      logger.error('Error setting default:', err)
+      console.error('Error setting default:', err)
       setErrorMessage('Failed to update default method')
     } finally {
       setSettingDefault(null)
@@ -202,7 +201,7 @@ function PayoutMethodsContent(): React.JSX.Element {
       setTimeout(() => setSuccessMessage(null), 3000)
       await loadMethods()
     } catch (err) {
-      logger.error('Error removing method:', err)
+      console.error('Error removing method:', err)
       setErrorMessage('Failed to remove payment method')
     }
   }

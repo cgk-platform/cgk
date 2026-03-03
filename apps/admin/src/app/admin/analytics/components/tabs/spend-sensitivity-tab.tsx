@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, Badge } from '@cgk-platform/ui'
 
 import type { DateRange, SpendSensitivityData } from '@/lib/analytics'
 import { formatCurrency, formatPercent } from '@/lib/format'
-import { logger } from '@cgk-platform/logging'
 
 interface SpendSensitivityTabProps {
   dateRange: DateRange
@@ -28,7 +27,7 @@ export function SpendSensitivityTab({ dateRange }: SpendSensitivityTabProps) {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        logger.error('Failed to fetch spend sensitivity:', error)
+        console.error('Failed to fetch spend sensitivity:', error)
       } finally {
         setLoading(false)
       }

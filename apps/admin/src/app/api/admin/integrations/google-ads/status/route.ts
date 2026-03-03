@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     const status = await getIntegrationStatus(tenantId, 'google_ads')
     return Response.json(status)
   } catch (error) {
-    logger.error('Failed to get Google Ads status:', error)
+    logger.error('Failed to get Google Ads status:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get status' },
       { status: 500 }

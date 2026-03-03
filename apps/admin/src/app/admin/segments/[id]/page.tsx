@@ -8,7 +8,6 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { formatDate, formatMoney, formatNumber } from '@/lib/format'
 import { RFM_SEGMENT_INFO, type RfmSegmentType } from '@/lib/segments/types'
-import { logger } from '@cgk-platform/logging'
 
 interface SegmentCustomer {
   id: string
@@ -61,7 +60,7 @@ export default function SegmentDetailPage() {
         setCurrentPage(page)
       }
     } catch (error) {
-      logger.error('Failed to fetch segment customers:', error)
+      console.error('Failed to fetch segment customers:', error)
     } finally {
       setIsLoading(false)
     }

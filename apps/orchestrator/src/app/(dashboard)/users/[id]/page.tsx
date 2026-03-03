@@ -13,7 +13,6 @@ import {
   UserDetailCard,
   UserMembershipsTable,
 } from '../../../../components/users'
-import { logger } from '@cgk-platform/logging'
 
 interface UserMembership {
   tenantId: string
@@ -334,7 +333,7 @@ export default function UserDetailPage(): React.JSX.Element {
           // In production, this would redirect to the tenant admin portal
           const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL
           if (!adminUrl) {
-            logger.error('NEXT_PUBLIC_ADMIN_URL not configured')
+            console.error('NEXT_PUBLIC_ADMIN_URL not configured')
             return
           }
           // Note: tenant parameter is intentionally unused - URL comes from env

@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    logger.error('Error fetching promo codes:', error)
+    logger.error('Error fetching promo codes:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch promo codes' },
       { status: 500 },
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     const promoCode = await createPromoCodeMetadata(tenantSlug, body)
     return NextResponse.json({ promoCode }, { status: 201 })
   } catch (error) {
-    logger.error('Error creating promo code:', error)
+    logger.error('Error creating promo code:', error instanceof Error ? error : new Error(String(error)))
     if (error instanceof Error && error.message.includes('unique')) {
       return NextResponse.json(
         { error: 'A promo code with this code already exists' },

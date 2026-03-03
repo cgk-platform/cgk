@@ -64,7 +64,7 @@ export async function POST(
       expiresAt: session.expiresAt,
     })
   } catch (error) {
-    logger.error('Error starting in-person session:', error)
+    logger.error('Error starting in-person session:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to start in-person signing session' },
       { status: 500 }

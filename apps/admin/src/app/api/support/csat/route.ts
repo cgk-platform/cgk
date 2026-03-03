@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
       expiresAt: survey.expiresAt,
     })
   } catch (error) {
-    logger.error('[support/csat] GET error:', error)
+    logger.error('[support/csat] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch survey' },
       { status: 500 }
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       message: 'Thank you for your feedback!',
     })
   } catch (error) {
-    logger.error('[support/csat] POST error:', error)
+    logger.error('[support/csat] POST error:', error instanceof Error ? error : new Error(String(error)))
 
     const errorMessage = error instanceof Error ? error.message : 'Failed to submit response'
 

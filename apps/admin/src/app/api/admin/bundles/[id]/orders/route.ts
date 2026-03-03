@@ -83,7 +83,7 @@ export async function POST(
     const row = result.rows[0] as Record<string, unknown> | undefined
     return NextResponse.json({ success: true, id: row?.id ?? null }, { status: 201 })
   } catch (error) {
-    logger.error('Error recording bundle order:', error)
+    logger.error('Error recording bundle order:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to record bundle order' }, { status: 500 })
   }
 }
@@ -122,7 +122,7 @@ export async function GET(
     const totalCount = (countResult.rows[0] as Record<string, unknown> | undefined)?.total ?? 0
     return NextResponse.json({ orders: result.rows, totalCount, limit, offset })
   } catch (error) {
-    logger.error('Error fetching bundle orders:', error)
+    logger.error('Error fetching bundle orders:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch bundle orders' }, { status: 500 })
   }
 }

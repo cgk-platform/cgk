@@ -57,7 +57,7 @@ export async function POST(request: Request) {
       canListChannels: testResult.canListChannels,
     })
   } catch (error) {
-    logger.error('Failed to test Slack connection:', error)
+    logger.error('Failed to test Slack connection:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

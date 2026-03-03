@@ -41,7 +41,7 @@ export async function POST(request: Request) {
       error: result.error,
     })
   } catch (error) {
-    logger.error('Failed to test platform Slack connection:', error)
+    logger.error('Failed to test platform Slack connection:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

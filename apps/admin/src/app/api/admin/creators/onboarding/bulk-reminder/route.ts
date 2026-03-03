@@ -119,7 +119,7 @@ export async function POST(request: Request) {
       errors: errors.length > 0 ? errors : undefined,
     })
   } catch (error) {
-    logger.error('Error sending bulk reminders:', error)
+    logger.error('Error sending bulk reminders:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to send reminders' },
       { status: 500 }

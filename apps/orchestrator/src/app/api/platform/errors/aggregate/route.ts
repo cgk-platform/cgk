@@ -176,7 +176,7 @@ export async function GET(request: Request) {
       since,
     })
   } catch (error) {
-    logger.error('Get error aggregates error:', error)
+    logger.error('Get error aggregates error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get error aggregates' }, { status: 500 })
   }
 }

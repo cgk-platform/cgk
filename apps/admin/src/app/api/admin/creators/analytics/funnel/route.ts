@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const funnel = await getApplicationFunnel(tenantSlug, period)
     return NextResponse.json(funnel)
   } catch (error) {
-    logger.error('Error fetching application funnel:', error)
+    logger.error('Error fetching application funnel:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch funnel analytics' },
       { status: 500 }

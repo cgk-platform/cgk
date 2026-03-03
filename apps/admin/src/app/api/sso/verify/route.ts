@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
 
     return response
   } catch (error) {
-    logger.error('SSO verification failed:', error)
+    logger.error('SSO verification failed:', error instanceof Error ? error : new Error(String(error)))
 
     // Redirect to login with error
     const loginUrl = new URL('/login', request.url)

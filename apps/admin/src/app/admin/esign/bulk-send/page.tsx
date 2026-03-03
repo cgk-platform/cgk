@@ -38,7 +38,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type { EsignTemplate } from '@/lib/esign/types'
-import { logger } from '@cgk-platform/logging'
 
 interface Recipient {
   id: string
@@ -80,7 +79,7 @@ export default function BulkSendWizardPage() {
           setTemplates(data.templates)
         }
       } catch (err) {
-        logger.error('Failed to load templates:', err)
+        console.error('Failed to load templates:', err)
       } finally {
         setIsLoadingTemplates(false)
       }

@@ -160,7 +160,7 @@ export async function POST(request: Request) {
       syncedAt: new Date().toISOString(),
     })
   } catch (error) {
-    logger.error('[gift-cards/products/sync] Error:', error)
+    logger.error('[gift-cards/products/sync] Error:', error instanceof Error ? error : new Error(String(error)))
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     if (errorMessage.includes('NOT_CONNECTED')) {

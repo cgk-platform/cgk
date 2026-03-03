@@ -40,7 +40,7 @@ export async function GET(request: Request): Promise<Response> {
       total: alerts.length,
     })
   } catch (error) {
-    logger.error('Failed to fetch alerts:', error)
+    logger.error('Failed to fetch alerts:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch alerts' }, { status: 500 })
   }
 }
@@ -103,7 +103,7 @@ export async function POST(request: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Failed to create alert:', error)
+    logger.error('Failed to create alert:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to create alert' }, { status: 500 })
   }
 }

@@ -125,7 +125,7 @@ export async function POST(
       resultUrl,
     })
   } catch (error) {
-    logger.error('[privacy/process] POST error:', error)
+    logger.error('[privacy/process] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to process request' },
       { status: 500 }

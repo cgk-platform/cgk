@@ -108,7 +108,7 @@ export async function GET(req: Request): Promise<Response> {
       pendingRequirements: accountStatus.pendingRequirements,
     })
   } catch (error) {
-    logger.error('Error fetching Stripe account status:', error)
+    logger.error('Error fetching Stripe account status:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch account status' }, { status: 500 })
   }
 }
@@ -250,7 +250,7 @@ export async function POST(req: Request): Promise<Response> {
       methodId,
     })
   } catch (error) {
-    logger.error('Error starting Stripe onboarding:', error)
+    logger.error('Error starting Stripe onboarding:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to start onboarding' }, { status: 500 })
   }
 }

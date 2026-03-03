@@ -97,7 +97,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    logger.error('Verify error:', error)
+    logger.error('Verify error:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Verification failed'
     return Response.json({ error: message }, { status: 401 })
   }

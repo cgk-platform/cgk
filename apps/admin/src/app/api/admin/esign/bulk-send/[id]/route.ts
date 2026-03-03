@@ -31,7 +31,7 @@ export async function GET(
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching bulk send:', error)
+    logger.error('Error fetching bulk send:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch bulk send' },
       { status: 500 }
@@ -68,7 +68,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
   } catch (error) {
-    logger.error('Error with bulk send action:', error)
+    logger.error('Error with bulk send action:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to perform action' },
       { status: 500 }

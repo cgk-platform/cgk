@@ -142,7 +142,7 @@ export async function GET(req: Request): Promise<Response> {
       isDefault: false,
     })
   } catch (error) {
-    logger.error('Error fetching brand preferences:', error)
+    logger.error('Error fetching brand preferences:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch preferences' }, { status: 500 })
   }
 }
@@ -255,7 +255,7 @@ export async function PUT(req: Request): Promise<Response> {
       profileCompletenessPercent,
     })
   } catch (error) {
-    logger.error('Error updating brand preferences:', error)
+    logger.error('Error updating brand preferences:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update preferences' }, { status: 500 })
   }
 }

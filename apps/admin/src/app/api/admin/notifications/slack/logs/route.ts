@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ logs })
   } catch (error) {
-    logger.error('Failed to get Slack logs:', error)
+    logger.error('Failed to get Slack logs:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get logs' },
       { status: 500 },

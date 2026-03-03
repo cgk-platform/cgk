@@ -133,7 +133,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     })
   } catch (error) {
     // Table might not exist - create a simulated response
-    logger.error('Failed to create return request:', error)
+    logger.error('Failed to create return request:', error instanceof Error ? error : new Error(String(error)))
   }
 
   const response: ReturnRequestResponse = {

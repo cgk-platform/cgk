@@ -70,7 +70,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       documentStatus: document.status,
     })
   } catch (error) {
-    logger.error('Error getting download URL:', error)
+    logger.error('Error getting download URL:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get download URL' },
       { status: 500 }

@@ -41,7 +41,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, accountId, accountName: account.name })
   } catch (error) {
-    logger.error('Failed to select Meta ad account:', error)
+    logger.error('Failed to select Meta ad account:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to select account' },
       { status: 500 }

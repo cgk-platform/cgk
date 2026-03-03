@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
       isOnline,
     })
   } catch (error) {
-    logger.error('[support/chat/widget-config] GET error:', error)
+    logger.error('[support/chat/widget-config] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch config' },
       { status: 500 }

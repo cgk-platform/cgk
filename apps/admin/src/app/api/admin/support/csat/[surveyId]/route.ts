@@ -43,7 +43,7 @@ export async function GET(
 
     return NextResponse.json({ survey })
   } catch (error) {
-    logger.error('[csat/survey] GET error:', error)
+    logger.error('[csat/survey] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch survey' },
       { status: 500 }

@@ -107,7 +107,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       message: 'User has been disabled and all sessions have been revoked',
     })
   } catch (error) {
-    logger.error('Disable user error:', error)
+    logger.error('Disable user error:', error instanceof Error ? error : new Error(String(error)))
 
     if (error instanceof Error) {
       if (error.message.includes('last super admin')) {

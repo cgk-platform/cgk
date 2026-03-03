@@ -22,7 +22,7 @@ export async function GET() {
     const config = await getOnboardingConfig(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('Error fetching onboarding config:', error)
+    logger.error('Error fetching onboarding config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch onboarding config' },
       { status: 500 }
@@ -44,7 +44,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true, config })
   } catch (error) {
-    logger.error('Error updating onboarding config:', error)
+    logger.error('Error updating onboarding config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update onboarding config' },
       { status: 500 }

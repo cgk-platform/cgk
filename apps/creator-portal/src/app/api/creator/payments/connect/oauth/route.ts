@@ -110,7 +110,7 @@ export async function GET(req: Request): Promise<Response> {
       methodId,
     })
   } catch (error) {
-    logger.error('Error generating OAuth URL:', error)
+    logger.error('Error generating OAuth URL:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to generate OAuth URL' }, { status: 500 })
   }
 }

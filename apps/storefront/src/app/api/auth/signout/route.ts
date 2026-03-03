@@ -24,7 +24,7 @@ export async function POST() {
         `
       })
     } catch (error) {
-      logger.error('Failed to revoke session:', error)
+      logger.error('Failed to revoke session:', error instanceof Error ? error : new Error(String(error)))
     }
   }
 

@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('[slack-notifications/test] POST error:', error)
+    logger.error('[slack-notifications/test] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to send test notification' }, { status: 500 })
   }
 }

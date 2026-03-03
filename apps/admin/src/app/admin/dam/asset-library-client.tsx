@@ -15,7 +15,6 @@ import {
   SearchBar,
   type SearchFilters,
 } from '@/components/admin/dam'
-import { logger } from '@cgk-platform/logging'
 
 interface AssetLibraryClientProps {
   initialAssets: AssetRow[]
@@ -126,7 +125,7 @@ export function AssetLibraryClient({
         }
       }
     } catch (error) {
-      logger.error('Failed to toggle favorite:', error)
+      console.error('Failed to toggle favorite:', error)
     }
   }, [assets, selectedAsset])
 
@@ -147,7 +146,7 @@ export function AssetLibraryClient({
         }
       }
     } catch (error) {
-      logger.error('Failed to delete asset:', error)
+      console.error('Failed to delete asset:', error)
     }
   }, [selectedAsset])
 
@@ -173,7 +172,7 @@ export function AssetLibraryClient({
         setSelectedIds(new Set())
       }
     } catch (error) {
-      logger.error('Bulk operation failed:', error)
+      console.error('Bulk operation failed:', error)
     } finally {
       setIsLoading(false)
     }
@@ -196,7 +195,7 @@ export function AssetLibraryClient({
         setSelectedAsset(asset)
       }
     } catch (error) {
-      logger.error('Failed to save asset:', error)
+      console.error('Failed to save asset:', error)
     }
   }, [selectedAsset])
 

@@ -69,7 +69,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Error fetching creator settings:', error)
+    logger.error('Error fetching creator settings:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch settings' }, { status: 500 })
   }
 }
@@ -183,7 +183,7 @@ export async function PATCH(req: Request): Promise<Response> {
       message: 'Profile updated successfully',
     })
   } catch (error) {
-    logger.error('Error updating creator settings:', error)
+    logger.error('Error updating creator settings:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update settings' }, { status: 500 })
   }
 }

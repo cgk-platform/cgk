@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Pagination } from '@/components/commerce/pagination'
 import { formatDate } from '@/lib/format'
 import type { Survey, SurveyResponse } from '@/lib/surveys'
-import { logger } from '@cgk-platform/logging'
 
 export default function ResponsesPage() {
   const params = useParams()
@@ -58,7 +57,7 @@ export default function ResponsesPage() {
         setPagination(responsesData.pagination)
       }
     } catch (error) {
-      logger.error('Failed to fetch data:', error)
+      console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
@@ -78,7 +77,7 @@ export default function ResponsesPage() {
         setSelectedResponse(data.response)
       }
     } catch (error) {
-      logger.error('Failed to fetch response detail:', error)
+      console.error('Failed to fetch response detail:', error)
     }
   }
 
@@ -139,7 +138,7 @@ export default function ResponsesPage() {
       a.click()
       URL.revokeObjectURL(url)
     } catch (error) {
-      logger.error('Failed to export responses:', error)
+      console.error('Failed to export responses:', error)
     }
   }
 

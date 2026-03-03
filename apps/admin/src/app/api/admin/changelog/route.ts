@@ -47,7 +47,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    logger.error('Failed to fetch changelog:', error)
+    logger.error('Failed to fetch changelog:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch changelog' }, { status: 500 })
   }
 }

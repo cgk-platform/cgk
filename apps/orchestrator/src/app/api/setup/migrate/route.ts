@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    logger.error('Migration failed:', error)
+    logger.error('Migration failed:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

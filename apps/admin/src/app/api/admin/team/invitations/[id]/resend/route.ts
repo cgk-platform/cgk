@@ -55,7 +55,7 @@ export async function POST(
       message: `Invitation resent to ${invitation.email}`,
     })
   } catch (error) {
-    logger.error('Error resending invitation:', error)
+    logger.error('Error resending invitation:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to resend invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -115,7 +115,7 @@ async function sendResendInvitationEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    logger.error('Failed to send invitation email:', error)
+    logger.error('Failed to send invitation email:', error instanceof Error ? error : new Error(String(error)))
     throw new Error('Failed to send invitation email')
   }
 }

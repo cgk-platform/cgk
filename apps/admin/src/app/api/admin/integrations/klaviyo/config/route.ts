@@ -51,7 +51,7 @@ export async function GET() {
       })),
     })
   } catch (error) {
-    logger.error('Failed to fetch Klaviyo sync configs:', error)
+    logger.error('Failed to fetch Klaviyo sync configs:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch configurations' }, { status: 500 })
   }
 }
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       hasApiKey: config.api_key_set,
     })
   } catch (error) {
-    logger.error('Failed to create Klaviyo sync config:', error)
+    logger.error('Failed to create Klaviyo sync config:', error instanceof Error ? error : new Error(String(error)))
 
     // Handle unique constraint violation
     if (error instanceof Error && error.message.includes('unique')) {
@@ -180,7 +180,7 @@ export async function PATCH(req: Request) {
       hasApiKey: config.api_key_set,
     })
   } catch (error) {
-    logger.error('Failed to update Klaviyo sync config:', error)
+    logger.error('Failed to update Klaviyo sync config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update configuration' }, { status: 500 })
   }
 }
@@ -211,7 +211,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Failed to delete Klaviyo sync config:', error)
+    logger.error('Failed to delete Klaviyo sync config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to delete configuration' }, { status: 500 })
   }
 }

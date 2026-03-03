@@ -4,7 +4,6 @@ import { Badge, Button, Card, CardContent, CardHeader, cn, Input, Select, Select
 import { AlertCircle, CheckCircle, Clock, ExternalLink, RefreshCw, Search } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface PlatformError {
   id: string
@@ -70,7 +69,7 @@ export default function ErrorsPage() {
         setStats(data.stats)
       }
     } catch (error) {
-      logger.error('Failed to fetch errors:', error)
+      console.error('Failed to fetch errors:', error)
     } finally {
       setLoading(false)
     }
@@ -90,7 +89,7 @@ export default function ErrorsPage() {
         )
       }
     } catch (error) {
-      logger.error('Failed to fetch tenants:', error)
+      console.error('Failed to fetch tenants:', error)
     }
   }, [])
 
@@ -112,7 +111,7 @@ export default function ErrorsPage() {
         await fetchErrors()
       }
     } catch (error) {
-      logger.error('Failed to update error:', error)
+      console.error('Failed to update error:', error)
     } finally {
       setActionLoading(null)
     }

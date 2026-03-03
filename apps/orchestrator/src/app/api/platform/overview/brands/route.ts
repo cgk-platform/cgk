@@ -172,7 +172,7 @@ export async function GET(request: Request): Promise<Response> {
 
     return Response.json(response)
   } catch (error) {
-    logger.error('Failed to fetch brands:', error)
+    logger.error('Failed to fetch brands:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch brands' }, { status: 500 })
   }
 }

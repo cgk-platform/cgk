@@ -115,7 +115,7 @@ export async function GET(req: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Failed to fetch segment customers:', error)
+    logger.error('Failed to fetch segment customers:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch segment customers' }, { status: 500 })
   }
 }

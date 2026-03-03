@@ -118,7 +118,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('[ci-ingest] Error:', error)
+    logger.error('[ci-ingest] Error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Ingest failed' }, { status: 500 })
   }
 }
@@ -219,7 +219,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 })
   } catch (error) {
-    logger.error(`[ci-${action}] Error:`, error)
+    logger.error(`[ci-${action}] Error:`, error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: `Failed to process ${action}` }, { status: 500 })
   }
 }

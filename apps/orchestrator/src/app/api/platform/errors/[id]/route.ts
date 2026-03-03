@@ -101,7 +101,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return Response.json({ error })
   } catch (error) {
-    logger.error('Get error detail error:', error)
+    logger.error('Get error detail error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get error details' }, { status: 500 })
   }
 }
@@ -200,7 +200,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Update error status error:', error)
+    logger.error('Update error status error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update error' }, { status: 500 })
   }
 }

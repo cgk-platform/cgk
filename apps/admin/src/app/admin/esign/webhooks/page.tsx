@@ -19,7 +19,6 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { EsignWebhook, EsignWebhookEvent } from '@/lib/esign/types'
-import { logger } from '@cgk-platform/logging'
 
 const WEBHOOK_EVENTS: Array<{ event: EsignWebhookEvent; label: string; description: string }> = [
   { event: 'document.sent', label: 'Document Sent', description: 'When a document is sent for signing' },
@@ -48,7 +47,7 @@ export default function WebhooksPage() {
         setWebhooks(data.webhooks)
       }
     } catch (error) {
-      logger.error('Failed to fetch webhooks:', error)
+      console.error('Failed to fetch webhooks:', error)
     } finally {
       setIsLoading(false)
     }
@@ -299,7 +298,7 @@ function WebhookCard({
       })
       onUpdate()
     } catch {
-      logger.error('Failed to toggle webhook')
+      console.error('Failed to toggle webhook')
     }
   }
 
@@ -312,7 +311,7 @@ function WebhookCard({
       })
       onUpdate()
     } catch {
-      logger.error('Failed to delete webhook')
+      console.error('Failed to delete webhook')
     }
   }
 

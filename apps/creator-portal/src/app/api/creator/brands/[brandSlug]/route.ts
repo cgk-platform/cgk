@@ -202,7 +202,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
 
     return Response.json({ brand: brandDetail })
   } catch (error) {
-    logger.error('Error fetching brand detail:', error)
+    logger.error('Error fetching brand detail:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch brand details' }, { status: 500 })
   }
 }

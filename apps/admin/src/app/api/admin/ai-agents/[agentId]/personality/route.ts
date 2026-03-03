@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ personality })
   } catch (error) {
-    logger.error('Error fetching personality:', error)
+    logger.error('Error fetching personality:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch personality' }, { status: 500 })
   }
 }
@@ -131,7 +131,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ personality })
   } catch (error) {
-    logger.error('Error updating personality:', error)
+    logger.error('Error updating personality:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update personality' }, { status: 500 })
   }
 }
@@ -185,7 +185,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error generating preview:', error)
+    logger.error('Error generating preview:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to generate preview' }, { status: 500 })
   }
 }

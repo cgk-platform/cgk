@@ -174,7 +174,7 @@ export async function POST(req: Request): Promise<Response> {
 
     return Response.json(summary)
   } catch (error) {
-    logger.error('Error generating annual summary:', error)
+    logger.error('Error generating annual summary:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to generate annual summary' }, { status: 500 })
   }
 }

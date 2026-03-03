@@ -49,7 +49,7 @@ export async function POST() {
 
     return response
   } catch (error) {
-    logger.error('End impersonation error:', error)
+    logger.error('End impersonation error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to end impersonation session' },
       { status: 500 }

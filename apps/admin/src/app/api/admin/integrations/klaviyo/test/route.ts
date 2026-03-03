@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     const isValid = await testKlaviyoConnection(tenantId)
     return Response.json({ connected: isValid })
   } catch (error) {
-    logger.error('Failed to test Klaviyo connection:', error)
+    logger.error('Failed to test Klaviyo connection:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ connected: false })
   }
 }

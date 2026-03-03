@@ -122,7 +122,7 @@ export async function POST(
       }
     }
   } catch (error) {
-    logger.error(`Failed to verify ${service} credentials:`, error)
+    logger.error(`Failed to verify ${service} credentials:`, error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       {
         valid: false,

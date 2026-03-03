@@ -131,7 +131,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(mapRowToAddress(address))
   } catch (error) {
-    logger.error('Failed to update address:', error)
+    logger.error('Failed to update address:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update address' }, { status: 500 })
   }
 }
@@ -199,7 +199,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    logger.error('Failed to delete address:', error)
+    logger.error('Failed to delete address:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 })
   }
 }

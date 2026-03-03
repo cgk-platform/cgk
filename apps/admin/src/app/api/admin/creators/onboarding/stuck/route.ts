@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ creators, minDays })
   } catch (error) {
-    logger.error('Error fetching stuck creators:', error)
+    logger.error('Error fetching stuck creators:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch stuck creators' },
       { status: 500 }

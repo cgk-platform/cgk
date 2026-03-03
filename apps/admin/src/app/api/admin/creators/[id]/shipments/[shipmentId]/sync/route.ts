@@ -59,7 +59,7 @@ export async function POST(
       message: 'Sync complete (simulated)',
     })
   } catch (error) {
-    logger.error('[shipments/[shipmentId]/sync] POST error:', error)
+    logger.error('[shipments/[shipmentId]/sync] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to sync shipment' }, { status: 500 })
   }
 }

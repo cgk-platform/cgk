@@ -44,7 +44,7 @@ export async function POST(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ test: updatedTest })
   } catch (error) {
-    logger.error('Error starting A/B test:', error)
+    logger.error('Error starting A/B test:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to start A/B test' },
       { status: 500 }

@@ -74,7 +74,7 @@ export async function POST(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Magic link error:', error)
+    logger.error('Magic link error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to send magic link' }, { status: 500 })
   }
 }

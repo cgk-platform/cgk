@@ -39,7 +39,7 @@ export async function GET() {
 
     return NextResponse.json({ settings })
   } catch (error) {
-    logger.error('Failed to fetch recovery settings:', error)
+    logger.error('Failed to fetch recovery settings:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch recovery settings' },
       { status: 500 },
@@ -113,7 +113,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ settings })
   } catch (error) {
-    logger.error('Failed to update recovery settings:', error)
+    logger.error('Failed to update recovery settings:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update recovery settings' },
       { status: 500 },

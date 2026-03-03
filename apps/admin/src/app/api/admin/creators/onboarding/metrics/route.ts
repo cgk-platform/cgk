@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    logger.error('Error fetching onboarding metrics:', error)
+    logger.error('Error fetching onboarding metrics:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch onboarding metrics' },
       { status: 500 }

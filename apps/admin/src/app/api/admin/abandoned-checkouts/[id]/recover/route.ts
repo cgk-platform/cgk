@@ -119,7 +119,7 @@ export async function POST(
       emailId: result.email.id,
     })
   } catch (error) {
-    logger.error('Failed to trigger recovery:', error)
+    logger.error('Failed to trigger recovery:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to trigger recovery email' },
       { status: 500 },

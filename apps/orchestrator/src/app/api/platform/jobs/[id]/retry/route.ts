@@ -103,7 +103,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, message: 'Job queued for retry' })
   } catch (error) {
-    logger.error('Retry job error:', error)
+    logger.error('Retry job error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to retry job' }, { status: 500 })
   }
 }

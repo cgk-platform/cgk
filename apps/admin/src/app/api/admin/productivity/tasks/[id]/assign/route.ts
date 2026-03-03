@@ -48,7 +48,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ task })
   } catch (error) {
-    logger.error('Error assigning task:', error)
+    logger.error('Error assigning task:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to assign task' }, { status: 500 })
   }
 }

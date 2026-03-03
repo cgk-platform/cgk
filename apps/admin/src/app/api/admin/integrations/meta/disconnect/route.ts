@@ -19,7 +19,7 @@ export async function DELETE(req: Request) {
     await disconnectMeta(tenantId)
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Failed to disconnect Meta:', error)
+    logger.error('Failed to disconnect Meta:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to disconnect' },
       { status: 500 }

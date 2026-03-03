@@ -58,7 +58,7 @@ export async function GET(
       isOverdue: isRequestOverdue(request),
     })
   } catch (error) {
-    logger.error('[privacy/request] GET error:', error)
+    logger.error('[privacy/request] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch request' },
       { status: 500 }
@@ -143,7 +143,7 @@ export async function PATCH(
       isOverdue: isRequestOverdue(request),
     })
   } catch (error) {
-    logger.error('[privacy/request] PATCH error:', error)
+    logger.error('[privacy/request] PATCH error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update request' },
       { status: 500 }

@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    logger.error('Error fetching bundles:', error)
+    logger.error('Error fetching bundles:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch bundles' }, { status: 500 })
   }
 }
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     const bundle = await createBundle(auth.tenantSlug, body, auth.userId ?? undefined)
     return NextResponse.json({ bundle }, { status: 201 })
   } catch (error) {
-    logger.error('Error creating bundle:', error)
+    logger.error('Error creating bundle:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to create bundle' }, { status: 500 })
   }
 }

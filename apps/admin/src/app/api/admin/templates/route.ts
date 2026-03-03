@@ -82,7 +82,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(library)
   } catch (error) {
-    logger.error('Error fetching template library:', error)
+    logger.error('Error fetching template library:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch template library' },
       { status: 500 }

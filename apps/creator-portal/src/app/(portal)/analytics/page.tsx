@@ -12,7 +12,6 @@ import {
   TaxSummaryCard,
   type PeriodOption,
 } from '@/components/analytics'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * API response types
@@ -247,7 +246,7 @@ export default function AnalyticsPage(): React.JSX.Element {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
     } catch (err) {
-      logger.error('Export error:', err)
+      console.error('Export error:', err)
       alert('Failed to export transactions. Please try again.')
     }
   }
@@ -280,7 +279,7 @@ export default function AnalyticsPage(): React.JSX.Element {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
     } catch (err) {
-      logger.error('Export error:', err)
+      console.error('Export error:', err)
       alert('Failed to generate annual summary. Please try again.')
     }
   }

@@ -226,7 +226,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Failed to add IP to allowlist:', error)
+    logger.error('Failed to add IP to allowlist:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to add IP to allowlist' },
       { status: 500 }

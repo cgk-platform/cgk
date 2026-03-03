@@ -41,7 +41,7 @@ export async function GET(
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Error fetching webhook deliveries:', error)
+    logger.error('Error fetching webhook deliveries:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch deliveries' },
       { status: 500 }

@@ -29,7 +29,7 @@ export async function GET() {
 
     return Response.json({ filters, creators })
   } catch (error) {
-    logger.error('Saved filters error:', error)
+    logger.error('Saved filters error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch saved filters' },
       { status: 500 }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true, filter })
   } catch (error) {
-    logger.error('Saved filter create error:', error)
+    logger.error('Saved filter create error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to create saved filter' },
       { status: 500 }

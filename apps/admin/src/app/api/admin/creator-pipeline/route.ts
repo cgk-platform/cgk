@@ -76,7 +76,7 @@ export async function GET(request: Request) {
       limit,
     })
   } catch (error) {
-    logger.error('Pipeline projects error:', error)
+    logger.error('Pipeline projects error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch pipeline projects' },
       { status: 500 }

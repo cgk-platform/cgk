@@ -161,7 +161,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Get webhooks error:', error)
+    logger.error('Get webhooks error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get webhooks' }, { status: 500 })
   }
 }

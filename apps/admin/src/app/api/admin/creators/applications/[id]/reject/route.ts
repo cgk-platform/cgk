@@ -87,7 +87,7 @@ export async function POST(
       notificationSent,
     })
   } catch (error) {
-    logger.error('Error rejecting application:', error)
+    logger.error('Error rejecting application:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to reject application' },
       { status: 500 }

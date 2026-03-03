@@ -250,7 +250,7 @@ export async function GET(request: Request) {
       ipAllowlist,
     })
   } catch (error) {
-    logger.error('Failed to fetch settings:', error)
+    logger.error('Failed to fetch settings:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch settings' },
       { status: 500 }
@@ -295,7 +295,7 @@ export async function PUT(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Failed to save settings:', error)
+    logger.error('Failed to save settings:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to save settings' },
       { status: 500 }

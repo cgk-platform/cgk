@@ -56,7 +56,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    logger.error('Failed to load portal theme:', error)
+    logger.error('Failed to load portal theme:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to load theme configuration' },
       { status: 500 }
@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    logger.error('Failed to update portal theme:', error)
+    logger.error('Failed to update portal theme:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update theme configuration' },
       { status: 500 }
@@ -178,7 +178,7 @@ export async function DELETE(_request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    logger.error('Failed to reset portal theme:', error)
+    logger.error('Failed to reset portal theme:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to reset theme configuration' },
       { status: 500 }

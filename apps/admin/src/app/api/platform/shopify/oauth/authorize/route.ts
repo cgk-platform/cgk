@@ -51,7 +51,7 @@ export async function GET(request: Request) {
 
     return NextResponse.redirect(authUrl)
   } catch (error) {
-    logger.error('[shopify-oauth] Platform OAuth error:', error)
+    logger.error('[shopify-oauth] Platform OAuth error:', error instanceof Error ? error : new Error(String(error)))
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ authUrl })
   } catch (error) {
-    logger.error('[shopify-oauth] Platform OAuth error:', error)
+    logger.error('[shopify-oauth] Platform OAuth error:', error instanceof Error ? error : new Error(String(error)))
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })

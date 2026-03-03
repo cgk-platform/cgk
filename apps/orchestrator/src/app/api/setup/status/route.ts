@@ -16,7 +16,7 @@ export async function GET() {
     const status = await getSetupStatus()
     return NextResponse.json(status)
   } catch (error) {
-    logger.error('Failed to get setup status:', error)
+    logger.error('Failed to get setup status:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         isConfigured: false,

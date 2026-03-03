@@ -230,7 +230,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(ticket)
   } catch (error) {
-    logger.error('Failed to add reply:', error)
+    logger.error('Failed to add reply:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to add reply' }, { status: 500 })
   }
 }

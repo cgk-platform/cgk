@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const configs = await getAllSLAConfigs(tenantId)
     return NextResponse.json(configs)
   } catch (error) {
-    logger.error('Error fetching SLA configs:', error)
+    logger.error('Error fetching SLA configs:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch SLA configurations' },
       { status: 500 }
@@ -116,7 +116,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(config)
   } catch (error) {
-    logger.error('Error updating SLA config:', error)
+    logger.error('Error updating SLA config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update SLA configuration' },
       { status: 500 }

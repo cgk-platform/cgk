@@ -112,7 +112,7 @@ export async function POST(
       errors: result.errors,
     })
   } catch (error) {
-    logger.error('[email-queues] bulk error:', error)
+    logger.error('[email-queues] bulk error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Bulk action failed' },
       { status: 500 }

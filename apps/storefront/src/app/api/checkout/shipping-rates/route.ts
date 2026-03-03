@@ -229,7 +229,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       cartSubtotal: subtotalCents / 100,
     })
   } catch (error) {
-    logger.error('[shipping-rates] Error:', error)
+    logger.error('[shipping-rates] Error:', error instanceof Error ? error : new Error(String(error)))
 
     // Return fallback rates on error
     return NextResponse.json({

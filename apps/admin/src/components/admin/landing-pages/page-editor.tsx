@@ -13,7 +13,6 @@ import { PageSettings } from './page-settings'
 import { SEOEditor } from './seo-editor'
 
 import type { LandingPage, Block, BlockType } from '@/lib/landing-pages/types'
-import { logger } from '@cgk-platform/logging'
 
 interface PageEditorProps {
   page: LandingPage
@@ -103,7 +102,7 @@ export function PageEditor({ page: initialPage }: PageEditorProps) {
       setHasChanges(false)
       router.refresh()
     } catch (err) {
-      logger.error('Failed to save:', err)
+      console.error('Failed to save:', err)
     } finally {
       setSaving(false)
     }

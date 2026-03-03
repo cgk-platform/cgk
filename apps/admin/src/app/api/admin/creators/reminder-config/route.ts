@@ -26,7 +26,7 @@ export async function GET() {
     const config = await getReminderConfigOrDefault(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('[reminder-config] GET error:', error)
+    logger.error('[reminder-config] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch configuration' }, { status: 500 })
   }
 }
@@ -127,7 +127,7 @@ export async function PATCH(request: Request) {
     const config = await upsertReminderConfig(tenantSlug, body)
     return NextResponse.json({ success: true, config })
   } catch (error) {
-    logger.error('[reminder-config] PATCH error:', error)
+    logger.error('[reminder-config] PATCH error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 })
   }
 }

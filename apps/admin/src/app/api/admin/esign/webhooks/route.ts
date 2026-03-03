@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ webhooks: maskedWebhooks })
   } catch (error) {
-    logger.error('Error fetching webhooks:', error)
+    logger.error('Error fetching webhooks:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch webhooks' },
       { status: 500 }
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Error creating webhook:', error)
+    logger.error('Error creating webhook:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create webhook' },
       { status: 500 }

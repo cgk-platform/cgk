@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, updated })
   } catch (error) {
-    logger.error('Error updating sample statuses:', error)
+    logger.error('Error updating sample statuses:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update sample statuses' },
       { status: 500 }

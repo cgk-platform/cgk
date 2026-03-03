@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       }
     )
   } catch (error) {
-    logger.error('Failed to fetch cart:', error)
+    logger.error('Failed to fetch cart:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ success: false, error: 'Failed to fetch cart' }, { status: 500 })
   }
 }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       }
     )
   } catch (error) {
-    logger.error('Failed to save cart:', error)
+    logger.error('Failed to save cart:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ success: false, error: 'Failed to save cart' }, { status: 500 })
   }
 }
@@ -94,7 +94,7 @@ export async function DELETE(request: NextRequest) {
       }
     )
   } catch (error) {
-    logger.error('Failed to clear cart:', error)
+    logger.error('Failed to clear cart:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ success: false, error: 'Failed to clear cart' }, { status: 500 })
   }
 }

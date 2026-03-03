@@ -46,7 +46,7 @@ export async function GET() {
 
     return NextResponse.json({ channels })
   } catch (error) {
-    logger.error('Failed to list Slack channels:', error)
+    logger.error('Failed to list Slack channels:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to list channels' },
       { status: 500 },

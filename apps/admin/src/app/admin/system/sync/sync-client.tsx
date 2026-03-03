@@ -21,7 +21,6 @@ import {
 import { useCallback, useEffect, useState, useTransition } from 'react'
 
 import type { SyncOperationType, SyncOperationStatus } from '@/lib/admin-utilities/types'
-import { logger } from '@cgk-platform/logging'
 
 interface SyncOperation {
   type: SyncOperationType
@@ -208,7 +207,7 @@ export function SyncClient() {
           })
         }
       } catch (error) {
-        logger.error('Failed to run all operations:', error)
+        console.error('Failed to run all operations:', error)
       }
     })
   }, [])

@@ -260,7 +260,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    logger.error('Feed generation error:', error)
+    logger.error('Feed generation error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Feed generation failed' },
       { status: 500 }

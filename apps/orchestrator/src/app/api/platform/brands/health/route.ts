@@ -279,7 +279,7 @@ export async function GET(request: Request) {
       checkedAt: new Date().toISOString(),
     })
   } catch (error) {
-    logger.error('Get brand health error:', error)
+    logger.error('Get brand health error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get brand health data' }, { status: 500 })
   }
 }

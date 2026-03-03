@@ -18,7 +18,6 @@ import type {
   IncrementalityExperiment,
   IncrementalityPlatform,
 } from '@/lib/attribution'
-import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // Create Experiment Modal
@@ -593,7 +592,7 @@ export default function IncrementalityPage() {
       const data = await response.json()
       setExperiments(data.experiments ?? [])
     } catch (error) {
-      logger.error('Failed to fetch experiments:', error)
+      console.error('Failed to fetch experiments:', error)
     } finally {
       setIsLoading(false)
     }
@@ -605,7 +604,7 @@ export default function IncrementalityPage() {
       const data = await response.json()
       setSelectedExperiment(data.experiment ?? null)
     } catch (error) {
-      logger.error('Failed to fetch experiment detail:', error)
+      console.error('Failed to fetch experiment detail:', error)
     }
   }, [])
 
@@ -626,7 +625,7 @@ export default function IncrementalityPage() {
         fetchExperiments()
       }
     } catch (error) {
-      logger.error('Failed to create experiment:', error)
+      console.error('Failed to create experiment:', error)
     } finally {
       setIsCreating(false)
     }
@@ -640,7 +639,7 @@ export default function IncrementalityPage() {
       })
       fetchExperiments()
     } catch (error) {
-      logger.error('Failed to delete experiment:', error)
+      console.error('Failed to delete experiment:', error)
     }
   }
 
@@ -659,7 +658,7 @@ export default function IncrementalityPage() {
         fetchExperimentDetail(id)
       }
     } catch (error) {
-      logger.error('Failed to update experiment status:', error)
+      console.error('Failed to update experiment status:', error)
     }
   }
 

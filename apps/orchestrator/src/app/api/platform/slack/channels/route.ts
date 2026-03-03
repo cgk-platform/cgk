@@ -29,7 +29,7 @@ export async function GET() {
       mentionErrors: workspace.mentionErrors,
     })
   } catch (error) {
-    logger.error('Failed to get platform Slack channels:', error)
+    logger.error('Failed to get platform Slack channels:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get channels' },
       { status: 500 },
@@ -75,7 +75,7 @@ export async function PUT(request: Request) {
       mentionErrors: workspace.mentionErrors,
     })
   } catch (error) {
-    logger.error('Failed to update platform Slack channels:', error)
+    logger.error('Failed to update platform Slack channels:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update channels' },
       { status: 500 },

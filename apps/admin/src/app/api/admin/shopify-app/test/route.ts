@@ -74,7 +74,7 @@ export async function POST() {
       lastSyncAt: health.lastSyncAt?.toISOString(),
     })
   } catch (error) {
-    logger.error('[shopify-test] Error:', error)
+    logger.error('[shopify-test] Error:', error instanceof Error ? error : new Error(String(error)))
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({

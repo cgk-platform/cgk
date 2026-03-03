@@ -51,7 +51,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ tenants })
   } catch (error) {
-    logger.error('Failed to fetch tenants:', error)
+    logger.error('Failed to fetch tenants:', error instanceof Error ? error : new Error(String(error)))
 
     if ((error as Error).name === 'AuthenticationError') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

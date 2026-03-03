@@ -63,7 +63,7 @@ export async function GET(
       messages,
     })
   } catch (error) {
-    logger.error('[chat/session] GET error:', error)
+    logger.error('[chat/session] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch session' },
       { status: 500 }
@@ -123,7 +123,7 @@ export async function POST(
 
     return NextResponse.json({ message })
   } catch (error) {
-    logger.error('[chat/session] POST error:', error)
+    logger.error('[chat/session] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to send message' },
       { status: 500 }
@@ -167,7 +167,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('[chat/session] DELETE error:', error)
+    logger.error('[chat/session] DELETE error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to end session' },
       { status: 500 }

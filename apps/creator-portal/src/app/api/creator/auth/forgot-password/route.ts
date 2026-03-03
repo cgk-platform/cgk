@@ -97,7 +97,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    logger.error('Forgot password error:', error)
+    logger.error('Forgot password error:', error instanceof Error ? error : new Error(String(error)))
 
     // Still return success to prevent enumeration
     return Response.json(

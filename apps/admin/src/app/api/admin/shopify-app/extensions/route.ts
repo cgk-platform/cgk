@@ -210,7 +210,7 @@ export async function GET(request: Request): Promise<NextResponse<ExtensionsResp
       extensions,
     })
   } catch (error) {
-    logger.error('Failed to fetch extension status:', error)
+    logger.error('Failed to fetch extension status:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         connected: false,

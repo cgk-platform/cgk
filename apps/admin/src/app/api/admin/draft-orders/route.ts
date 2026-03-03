@@ -121,7 +121,7 @@ export async function POST(request: Request) {
       draftOrder: result.draftOrder,
     })
   } catch (error) {
-    logger.error('Failed to create draft order:', error)
+    logger.error('Failed to create draft order:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create draft order' },
       { status: 500 },

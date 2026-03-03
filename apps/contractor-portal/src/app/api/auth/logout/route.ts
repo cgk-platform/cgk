@@ -30,7 +30,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    logger.error('Logout error:', error)
+    logger.error('Logout error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { success: true },
       {

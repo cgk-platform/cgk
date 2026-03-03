@@ -118,7 +118,7 @@ export async function PATCH(
       step: stepProgress,
     })
   } catch (error) {
-    logger.error('Error updating onboarding step:', error)
+    logger.error('Error updating onboarding step:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update onboarding step' },
       { status: 500 }

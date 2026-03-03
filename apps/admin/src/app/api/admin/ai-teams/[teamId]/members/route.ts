@@ -47,7 +47,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ members })
   } catch (error) {
-    logger.error('Error fetching team members:', error)
+    logger.error('Error fetching team members:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 })
   }
 }
@@ -101,7 +101,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ member }, { status: 201 })
   } catch (error) {
-    logger.error('Error adding team member:', error)
+    logger.error('Error adding team member:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to add team member'
     return NextResponse.json({ error: message }, { status: 500 })
   }

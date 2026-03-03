@@ -130,7 +130,7 @@ export async function POST(request: Request) {
 
     return setAuthCookie(response, jwt)
   } catch (error) {
-    logger.error('Verify error:', error)
+    logger.error('Verify error:', error instanceof Error ? error : new Error(String(error)))
 
     if (error instanceof Error && error.message === 'Invalid or expired magic link') {
       return Response.json({ error: 'Invalid or expired magic link' }, { status: 400 })

@@ -80,7 +80,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Error fetching withdrawals:', error)
+    logger.error('Error fetching withdrawals:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch withdrawals' }, { status: 500 })
   }
 }
@@ -159,7 +159,7 @@ export async function POST(req: Request): Promise<Response> {
         : `Withdrawal of $${(withdrawal.amountCents / 100).toFixed(2)} is being processed.`,
     })
   } catch (error) {
-    logger.error('Error creating withdrawal:', error)
+    logger.error('Error creating withdrawal:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to create withdrawal' }, { status: 500 })
   }
 }

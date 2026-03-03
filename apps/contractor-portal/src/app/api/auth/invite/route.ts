@@ -106,7 +106,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Invitation redemption error:', error)
+    logger.error('Invitation redemption error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to redeem invitation' }, { status: 500 })
   }
 }
@@ -225,7 +225,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    logger.error('Invitation completion error:', error)
+    logger.error('Invitation completion error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to complete invitation' }, { status: 500 })
   }
 }

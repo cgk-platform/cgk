@@ -108,7 +108,7 @@ export async function GET(req: NextRequest) {
       stats,
     })
   } catch (error) {
-    logger.error('[chat] GET error:', error)
+    logger.error('[chat] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch chat sessions' },
       { status: 500 }

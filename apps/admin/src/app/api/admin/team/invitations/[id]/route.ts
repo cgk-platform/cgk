@@ -52,7 +52,7 @@ export async function GET(
 
     return NextResponse.json({ invitation })
   } catch (error) {
-    logger.error('Error fetching invitation:', error)
+    logger.error('Error fetching invitation:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch invitation' },
       { status: 500 }
@@ -101,7 +101,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error revoking invitation:', error)
+    logger.error('Error revoking invitation:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to revoke invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }

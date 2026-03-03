@@ -92,7 +92,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Session error:', error)
+    logger.error('Session error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to get session' },
       { status: 500 }
@@ -135,7 +135,7 @@ export async function DELETE(request: Request) {
       message: 'All sessions revoked',
     })
   } catch (error) {
-    logger.error('Revoke sessions error:', error)
+    logger.error('Revoke sessions error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to revoke sessions' },
       { status: 500 }

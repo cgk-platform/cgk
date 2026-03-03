@@ -94,7 +94,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
       variantId: item.variant_id,
     })
   } catch (error) {
-    logger.error('Failed to move item to cart:', error)
+    logger.error('Failed to move item to cart:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to move item' }, { status: 500 })
   }
 }

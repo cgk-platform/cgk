@@ -66,7 +66,7 @@ export async function GET(req: Request) {
       offset,
     })
   } catch (error) {
-    logger.error('Error fetching payment requests:', error)
+    logger.error('Error fetching payment requests:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch payment requests' },
       { status: 500 }
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    logger.error('Error creating payment request:', error)
+    logger.error('Error creating payment request:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to create payment request' },
       { status: 500 }

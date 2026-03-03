@@ -7,7 +7,6 @@ import {
   SlackConfigSkeleton,
 } from '@/components/surveys'
 import type { SurveySlackConfig, UpdateSlackConfigInput } from '@/lib/surveys'
-import { logger } from '@cgk-platform/logging'
 
 export default function SurveySlackSettingsPage() {
   const [config, setConfig] = useState<SurveySlackConfig | null>(null)
@@ -20,7 +19,7 @@ export default function SurveySlackSettingsPage() {
       const data = await response.json()
       setConfig(data.config)
     } catch (error) {
-      logger.error('Failed to fetch Slack config:', error)
+      console.error('Failed to fetch Slack config:', error)
     } finally {
       setLoading(false)
     }

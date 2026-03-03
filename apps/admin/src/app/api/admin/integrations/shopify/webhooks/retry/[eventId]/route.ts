@@ -87,7 +87,7 @@ export async function POST(
       })
     }
   } catch (error) {
-    logger.error('[API] Failed to retry webhook:', error)
+    logger.error('[API] Failed to retry webhook:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to retry webhook' },
       { status: 500 }

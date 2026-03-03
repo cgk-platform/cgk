@@ -7,7 +7,6 @@ import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import type { BrandSummary } from '../../../../../types/platform'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * Brand settings page
@@ -51,7 +50,7 @@ export default function BrandSettingsPage() {
         setError('Failed to fetch brand')
       }
     } catch (err) {
-      logger.error('Failed to fetch brand:', err)
+      console.error('Failed to fetch brand:', err)
       setError('Failed to fetch brand')
     } finally {
       setIsLoading(false)
@@ -84,7 +83,7 @@ export default function BrandSettingsPage() {
       // Refresh brand data
       await fetchBrand()
     } catch (err) {
-      logger.error('Failed to save:', err)
+      console.error('Failed to save:', err)
       setError(err instanceof Error ? err.message : 'Failed to save settings')
     } finally {
       setIsSaving(false)

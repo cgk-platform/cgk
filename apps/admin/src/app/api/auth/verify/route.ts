@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     return setAuthCookie(response, jwt)
   } catch (error) {
-    logger.error('Verify error:', error)
+    logger.error('Verify error:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Verification failed'
     return Response.json({ error: message }, { status: 401 })
   }

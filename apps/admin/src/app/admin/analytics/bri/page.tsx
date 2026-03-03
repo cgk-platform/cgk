@@ -7,7 +7,6 @@ import type { BRIAnalyticsData, DateRange } from '@/lib/analytics'
 import { formatNumber, formatPercent } from '@/lib/format'
 
 import { DateRangePicker } from '../components/date-range-picker'
-import { logger } from '@cgk-platform/logging'
 
 export default function BRIAnalyticsPage() {
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -31,7 +30,7 @@ export default function BRIAnalyticsPage() {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        logger.error('Failed to fetch BRI analytics:', error)
+        console.error('Failed to fetch BRI analytics:', error)
       } finally {
         setLoading(false)
       }

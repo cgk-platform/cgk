@@ -125,7 +125,7 @@ export async function POST(
       entry: updatedEntry,
     })
   } catch (error) {
-    logger.error('[email-queues] retry error:', error)
+    logger.error('[email-queues] retry error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to retry entry' },
       { status: 500 }

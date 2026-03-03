@@ -56,7 +56,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ member })
   } catch (error) {
-    logger.error('Error updating team member:', error)
+    logger.error('Error updating team member:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to update team member'
     return NextResponse.json({ error: message }, { status: 500 })
   }
@@ -103,7 +103,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error removing team member:', error)
+    logger.error('Error removing team member:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to remove team member'
     return NextResponse.json({ error: message }, { status: 500 })
   }

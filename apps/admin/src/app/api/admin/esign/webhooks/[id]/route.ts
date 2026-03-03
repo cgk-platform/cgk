@@ -42,7 +42,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    logger.error('Error fetching webhook:', error)
+    logger.error('Error fetching webhook:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch webhook' },
       { status: 500 }
@@ -104,7 +104,7 @@ export async function PATCH(
       },
     })
   } catch (error) {
-    logger.error('Error updating webhook:', error)
+    logger.error('Error updating webhook:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update webhook' },
       { status: 500 }
@@ -131,7 +131,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting webhook:', error)
+    logger.error('Error deleting webhook:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to delete webhook' },
       { status: 500 }

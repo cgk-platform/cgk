@@ -113,7 +113,7 @@ export async function POST(request: Request) {
       })
     }
   } catch (error) {
-    logger.error('[reminder-config/test] POST error:', error)
+    logger.error('[reminder-config/test] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to test reminder' }, { status: 500 })
   }
 }

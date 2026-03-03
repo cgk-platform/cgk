@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(ticket)
   } catch (error) {
-    logger.error('Error fetching ticket:', error)
+    logger.error('Error fetching ticket:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch ticket' },
       { status: 500 }
@@ -91,7 +91,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: message }, { status: 400 })
     }
 
-    logger.error('Error updating ticket:', error)
+    logger.error('Error updating ticket:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update ticket' },
       { status: 500 }

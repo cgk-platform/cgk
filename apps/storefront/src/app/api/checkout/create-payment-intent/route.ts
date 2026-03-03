@@ -199,7 +199,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       currency: cartData.currency,
     })
   } catch (error) {
-    logger.error('[create-payment-intent] Error:', error)
+    logger.error('[create-payment-intent] Error:', error instanceof Error ? error : new Error(String(error)))
 
     // Handle Stripe-specific errors
     if (error && typeof error === 'object' && 'type' in error) {

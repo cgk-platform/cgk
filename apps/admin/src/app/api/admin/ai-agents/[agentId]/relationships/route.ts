@@ -51,7 +51,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ relationships, stats, insights })
   } catch (error) {
-    logger.error('Error fetching agent relationships:', error)
+    logger.error('Error fetching agent relationships:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch relationships' }, { status: 500 })
   }
 }

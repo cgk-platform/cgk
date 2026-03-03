@@ -97,7 +97,7 @@ export async function POST(req: Request) {
       submissionId: submission.id,
     })
   } catch (error) {
-    logger.error('Failed to create submission:', error)
+    logger.error('Failed to create submission:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to submit' }, { status: 500 })
   }
 }

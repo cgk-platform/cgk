@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     const leaderboard = await getPerformanceLeaderboard(tenantSlug, metric, period, limit)
     return NextResponse.json(leaderboard)
   } catch (error) {
-    logger.error('Error fetching performance leaderboard:', error)
+    logger.error('Error fetching performance leaderboard:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch performance data' },
       { status: 500 }

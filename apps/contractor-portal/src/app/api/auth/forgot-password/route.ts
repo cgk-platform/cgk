@@ -68,7 +68,7 @@ export async function POST(req: Request): Promise<Response> {
     // Always return success for anti-enumeration
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Forgot password error:', error)
+    logger.error('Forgot password error:', error instanceof Error ? error : new Error(String(error)))
     // Still return success for anti-enumeration
     return Response.json({ success: true })
   }

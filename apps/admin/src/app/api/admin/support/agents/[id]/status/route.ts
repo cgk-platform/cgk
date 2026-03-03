@@ -56,7 +56,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     await updateAgentStatus(tenantId, id, input.isOnline)
     return NextResponse.json({ success: true, isOnline: input.isOnline })
   } catch (error) {
-    logger.error('Error updating agent status:', error)
+    logger.error('Error updating agent status:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update agent status' },
       { status: 500 }

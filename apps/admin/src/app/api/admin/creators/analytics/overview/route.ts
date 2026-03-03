@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const kpis = await getCreatorOverviewKPIs(tenantSlug, period)
     return NextResponse.json({ kpis, period })
   } catch (error) {
-    logger.error('Error fetching creator overview KPIs:', error)
+    logger.error('Error fetching creator overview KPIs:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },
       { status: 500 }

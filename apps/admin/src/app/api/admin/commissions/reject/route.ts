@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, rejected })
   } catch (error) {
-    logger.error('Error rejecting commissions:', error)
+    logger.error('Error rejecting commissions:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to reject commissions' },
       { status: 500 }

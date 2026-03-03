@@ -98,7 +98,7 @@ export async function POST() {
         WHERE integration_type = 'meta-ads'
       `
     } catch (error) {
-      logger.error('Meta Ads sync error:', error)
+      logger.error('Meta Ads sync error:', error instanceof Error ? error : new Error(String(error)))
       await sql`
         UPDATE integration_credentials
         SET

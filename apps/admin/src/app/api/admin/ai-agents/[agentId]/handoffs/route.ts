@@ -47,7 +47,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ handoffs })
   } catch (error) {
-    logger.error('Error fetching agent handoffs:', error)
+    logger.error('Error fetching agent handoffs:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch handoffs' }, { status: 500 })
   }
 }
@@ -115,7 +115,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ handoff }, { status: 201 })
   } catch (error) {
-    logger.error('Error initiating handoff:', error)
+    logger.error('Error initiating handoff:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to initiate handoff'
     return NextResponse.json({ error: message }, { status: 500 })
   }

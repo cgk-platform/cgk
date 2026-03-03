@@ -29,7 +29,7 @@ export async function GET(req: Request): Promise<Response> {
 
   // Handle OAuth errors
   if (error) {
-    logger.error('Stripe OAuth error:', error, errorDescription)
+    logger.error('Stripe OAuth error', new Error(error), { errorDescription })
     return redirect('/creator/settings/payout-methods?error=oauth_failed')
   }
 

@@ -64,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ handoff: result.handoff, context: result.context })
   } catch (error) {
-    logger.error('Error accepting handoff:', error)
+    logger.error('Error accepting handoff:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to accept handoff'
     return NextResponse.json({ error: message }, { status: 500 })
   }

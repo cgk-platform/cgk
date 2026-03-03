@@ -18,7 +18,7 @@ export async function GET() {
     const health = await getCreatorHealth(tenantSlug)
     return NextResponse.json(health)
   } catch (error) {
-    logger.error('Error fetching creator health:', error)
+    logger.error('Error fetching creator health:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch health data' },
       { status: 500 }

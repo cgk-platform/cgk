@@ -20,7 +20,6 @@ import type {
   AttributionBreakdown,
   SurveyResponse,
 } from '@/lib/surveys'
-import { logger } from '@cgk-platform/logging'
 
 interface AnalyticsData {
   survey: Survey
@@ -61,7 +60,7 @@ export default function SurveyAnalyticsPage() {
         recentResponses: responsesData.responses || [],
       })
     } catch (error) {
-      logger.error('Failed to fetch analytics:', error)
+      console.error('Failed to fetch analytics:', error)
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -85,7 +84,7 @@ export default function SurveyAnalyticsPage() {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
     } catch (error) {
-      logger.error('Export failed:', error)
+      console.error('Export failed:', error)
     }
   }
 

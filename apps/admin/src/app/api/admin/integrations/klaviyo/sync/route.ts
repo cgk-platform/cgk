@@ -47,7 +47,7 @@ export async function GET() {
 
     return NextResponse.json({ syncConfigs })
   } catch (error) {
-    logger.error('Failed to fetch Klaviyo sync configs:', error)
+    logger.error('Failed to fetch Klaviyo sync configs:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch sync configurations' }, { status: 500 })
   }
 }
@@ -175,7 +175,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Failed to sync to Klaviyo:', error)
+    logger.error('Failed to sync to Klaviyo:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to sync to Klaviyo' }, { status: 500 })
   }
 }

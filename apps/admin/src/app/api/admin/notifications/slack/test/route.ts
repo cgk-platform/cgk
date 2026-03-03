@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       error: result.error,
     })
   } catch (error) {
-    logger.error('Failed to send test notification:', error)
+    logger.error('Failed to send test notification:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to send test notification' },
       { status: 500 },

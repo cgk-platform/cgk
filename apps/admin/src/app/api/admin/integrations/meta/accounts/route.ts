@@ -30,7 +30,7 @@ export async function GET(req: Request) {
       selectedName: connection.selectedAdAccountName,
     })
   } catch (error) {
-    logger.error('Failed to get Meta ad accounts:', error)
+    logger.error('Failed to get Meta ad accounts:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get accounts' },
       { status: 500 }

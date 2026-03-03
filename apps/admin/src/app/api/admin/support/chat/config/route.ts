@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       isOnline,
     })
   } catch (error) {
-    logger.error('[chat/config] GET error:', error)
+    logger.error('[chat/config] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch config' },
       { status: 500 }
@@ -114,7 +114,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('[chat/config] PATCH error:', error)
+    logger.error('[chat/config] PATCH error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update config' },
       { status: 500 }

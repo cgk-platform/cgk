@@ -132,7 +132,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ products })
   } catch (error) {
-    logger.error('[products/available] GET error:', error)
+    logger.error('[products/available] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
   }
 }

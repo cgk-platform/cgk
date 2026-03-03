@@ -34,7 +34,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const shipments = await getCreatorShipments(tenantSlug, creatorId)
     return NextResponse.json({ shipments })
   } catch (error) {
-    logger.error('[shipments] GET error:', error)
+    logger.error('[shipments] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch shipments' }, { status: 500 })
   }
 }
@@ -275,7 +275,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       shopifyOrderNumber: orderNumber,
     })
   } catch (error) {
-    logger.error('[shipments] POST error:', error)
+    logger.error('[shipments] POST error:', error instanceof Error ? error : new Error(String(error)))
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     // Handle Shopify-specific errors

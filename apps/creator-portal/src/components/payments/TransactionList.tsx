@@ -7,7 +7,6 @@
  */
 
 import { useEffect, useState, useCallback } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 type TransactionType =
   | 'commission_pending'
@@ -92,7 +91,7 @@ export default function TransactionList({ brandId }: TransactionListProps): Reac
       }
       setPagination(data.pagination)
     } catch (err) {
-      logger.error('Error loading transactions:', err)
+      console.error('Error loading transactions:', err)
     } finally {
       setLoading(false)
     }

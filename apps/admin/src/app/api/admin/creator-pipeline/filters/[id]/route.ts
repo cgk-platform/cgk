@@ -33,7 +33,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Saved filter delete error:', error)
+    logger.error('Saved filter delete error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to delete saved filter' },
       { status: 500 }

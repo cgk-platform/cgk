@@ -66,7 +66,7 @@ export async function POST() {
       },
     })
   } catch (error) {
-    logger.error('[shopify-refresh] Error:', error)
+    logger.error('[shopify-refresh] Error:', error instanceof Error ? error : new Error(String(error)))
 
     if (error instanceof ShopifyError) {
       return NextResponse.json(

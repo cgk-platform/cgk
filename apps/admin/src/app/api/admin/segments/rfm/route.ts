@@ -112,7 +112,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Failed to fetch RFM data:', error)
+    logger.error('Failed to fetch RFM data:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch RFM data' }, { status: 500 })
   }
 }
@@ -185,7 +185,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Failed to calculate RFM:', error)
+    logger.error('Failed to calculate RFM:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to calculate RFM segments' }, { status: 500 })
   }
 }

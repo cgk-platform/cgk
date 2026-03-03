@@ -23,7 +23,7 @@ export async function GET() {
     const stats = await getPipelineStats(tenantSlug)
     return Response.json(stats)
   } catch (error) {
-    logger.error('Pipeline stats error:', error)
+    logger.error('Pipeline stats error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch pipeline stats' },
       { status: 500 }

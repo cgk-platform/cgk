@@ -65,7 +65,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Error fetching invitations:', error)
+    logger.error('Error fetching invitations:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch invitations' },
       { status: 500 }
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
       message: `Invitation sent to ${body.email}`,
     })
   } catch (error) {
-    logger.error('Error creating invitation:', error)
+    logger.error('Error creating invitation:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to create invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -227,7 +227,7 @@ async function sendTeamInvitationEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    logger.error('Failed to send invitation email:', error)
+    logger.error('Failed to send invitation email:', error instanceof Error ? error : new Error(String(error)))
     throw new Error('Failed to send invitation email')
   }
 }

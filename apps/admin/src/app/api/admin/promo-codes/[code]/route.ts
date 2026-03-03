@@ -53,7 +53,7 @@ export async function GET(request: Request, context: RouteContext) {
 
     return NextResponse.json(response)
   } catch (error) {
-    logger.error('Error fetching promo code:', error)
+    logger.error('Error fetching promo code:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch promo code' },
       { status: 500 },
@@ -90,7 +90,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return NextResponse.json({ promoCode })
   } catch (error) {
-    logger.error('Error updating promo code:', error)
+    logger.error('Error updating promo code:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update promo code' },
       { status: 500 },
@@ -120,7 +120,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting promo code:', error)
+    logger.error('Error deleting promo code:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to delete promo code' },
       { status: 500 },

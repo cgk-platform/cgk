@@ -60,7 +60,7 @@ export async function GET(
 
     return NextResponse.json({ template: result.rows[0] })
   } catch (error) {
-    logger.error('Failed to get Slack template:', error)
+    logger.error('Failed to get Slack template:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get template' },
       { status: 500 },
@@ -141,7 +141,7 @@ export async function PUT(
 
     return NextResponse.json({ template: result.rows[0] })
   } catch (error) {
-    logger.error('Failed to update Slack template:', error)
+    logger.error('Failed to update Slack template:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update template' },
       { status: 500 },

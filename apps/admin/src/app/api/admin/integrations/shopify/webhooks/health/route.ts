@@ -51,7 +51,7 @@ export async function GET(req: Request): Promise<Response> {
       eventsByTopic,
     })
   } catch (error) {
-    logger.error('[API] Failed to get webhook health:', error)
+    logger.error('[API] Failed to get webhook health:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to get webhook health' },
       { status: 500 }

@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       errors: result.errors.length > 0 ? result.errors : undefined,
     })
   } catch (error) {
-    logger.error('Bulk status update error:', error)
+    logger.error('Bulk status update error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to update project statuses' },
       { status: 500 }

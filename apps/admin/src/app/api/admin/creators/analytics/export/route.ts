@@ -173,7 +173,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Error exporting analytics:', error)
+    logger.error('Error exporting analytics:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to export analytics' },
       { status: 500 }

@@ -121,7 +121,7 @@ export async function GET(
       lastCheckedAt: new Date().toISOString(),
     })
   } catch (error) {
-    logger.error('Error polling messages:', error)
+    logger.error('Error polling messages:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to poll messages' }, { status: 500 })
   }
 }

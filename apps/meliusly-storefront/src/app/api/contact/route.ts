@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       message: 'Contact form submitted successfully',
     })
   } catch (error) {
-    logger.error('Contact form error:', error)
+    logger.error('Contact form error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

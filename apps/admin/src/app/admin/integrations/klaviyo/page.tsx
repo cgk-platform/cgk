@@ -16,7 +16,6 @@ import {
   TestConnectionResult,
 } from '@/components/integrations'
 import type { KlaviyoStatus } from '@/lib/integrations/types'
-import { logger } from '@cgk-platform/logging'
 
 export default function KlaviyoPage() {
   const [status, setStatus] = useState<KlaviyoStatus | null>(null)
@@ -40,7 +39,7 @@ export default function KlaviyoPage() {
         if (data.emailListId) setEmailListId(data.emailListId)
       }
     } catch (error) {
-      logger.error('Failed to fetch Klaviyo status:', error)
+      console.error('Failed to fetch Klaviyo status:', error)
     } finally {
       setLoading(false)
     }
@@ -99,7 +98,7 @@ export default function KlaviyoPage() {
         await fetchStatus()
       }
     } catch (error) {
-      logger.error('Failed to connect:', error)
+      console.error('Failed to connect:', error)
     } finally {
       setSaving(false)
     }
@@ -121,7 +120,7 @@ export default function KlaviyoPage() {
         })
       }
     } catch (error) {
-      logger.error('Failed to disconnect:', error)
+      console.error('Failed to disconnect:', error)
     }
   }
 

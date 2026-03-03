@@ -105,7 +105,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    logger.error('Error updating Stripe account:', error)
+    logger.error('Error updating Stripe account:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to update Stripe account' },
       { status: 500 }

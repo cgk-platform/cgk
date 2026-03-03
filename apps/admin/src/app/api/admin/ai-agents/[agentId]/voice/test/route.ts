@@ -78,7 +78,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       { status: 400 }
     )
   } catch (error) {
-    logger.error('Error testing voice config:', error)
+    logger.error('Error testing voice config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to test voice configuration' }, { status: 500 })
   }
 }

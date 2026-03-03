@@ -29,7 +29,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ fields })
   } catch (error) {
-    logger.error('Error fetching template fields:', error)
+    logger.error('Error fetching template fields:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch template fields' },
       { status: 500 }
@@ -106,7 +106,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ fields: savedFields })
   } catch (error) {
-    logger.error('Error saving template fields:', error)
+    logger.error('Error saving template fields:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to save template fields' },
       { status: 500 }

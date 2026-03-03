@@ -113,7 +113,7 @@ export async function GET(req: Request): Promise<Response> {
       defaultMethodId: methods.find((m) => m.isDefault)?.id,
     })
   } catch (error) {
-    logger.error('Error fetching payment methods:', error)
+    logger.error('Error fetching payment methods:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch payment methods' }, { status: 500 })
   }
 }
@@ -174,7 +174,7 @@ export async function PATCH(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Error setting default payment method:', error)
+    logger.error('Error setting default payment method:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update payment method' }, { status: 500 })
   }
 }
@@ -235,7 +235,7 @@ export async function DELETE(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Error removing payment method:', error)
+    logger.error('Error removing payment method:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to remove payment method' }, { status: 500 })
   }
 }

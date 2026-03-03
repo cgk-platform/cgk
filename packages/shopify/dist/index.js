@@ -11344,14 +11344,12 @@ async function handleOAuthCallback(params) {
           `;
         });
       } else if (storefrontResult.data?.storefrontAccessTokenCreate?.userErrors?.length) {
-        logger3.error(
-          "Storefront token creation errors:",
-          storefrontResult.data.storefrontAccessTokenCreate.userErrors
-        );
+        const errors = storefrontResult.data.storefrontAccessTokenCreate.userErrors;
+        logger3.error("Storefront token creation errors:", new Error(JSON.stringify(errors)));
       }
     }
   } catch (error) {
-    logger3.error("Failed to create Storefront Access Token:", error);
+    logger3.error("Failed to create Storefront Access Token:", error instanceof Error ? error : void 0);
   }
   try {
     const { tasks } = await import("./v3-KVKFRKMI.js");
@@ -11363,7 +11361,7 @@ async function handleOAuthCallback(params) {
     });
     logger3.info(`Product sync triggered for tenant ${tenantId}`);
   } catch (error) {
-    logger3.error("Failed to trigger product sync:", error);
+    logger3.error("Failed to trigger product sync", error instanceof Error ? error : new Error(String(error)));
   }
   await deleteOAuthState(state);
   return { tenantId, shop };
@@ -11683,8 +11681,8 @@ async function handleWebhook(request) {
       await handler(tenantId, payload);
     } catch (error) {
       logger4.error(
-        `[shopify-webhook] Handler error for ${topic}:`,
-        error instanceof Error ? error.message : error
+        `[shopify-webhook] Handler error for ${topic}`,
+        error instanceof Error ? error : new Error(String(error))
       );
     }
   });

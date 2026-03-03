@@ -87,7 +87,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         })
       }
     } catch (error) {
-      logger.error('Failed to get/create default wishlist:', error)
+      logger.error('Failed to get/create default wishlist:', error instanceof Error ? error : new Error(String(error)))
       return NextResponse.json({ error: 'Failed to process wishlist' }, { status: 500 })
     }
   }
@@ -253,7 +253,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(item)
   } catch (error) {
-    logger.error('Failed to add item to wishlist:', error)
+    logger.error('Failed to add item to wishlist:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to add item' }, { status: 500 })
   }
 }

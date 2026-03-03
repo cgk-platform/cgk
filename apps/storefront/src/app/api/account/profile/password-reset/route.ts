@@ -63,7 +63,7 @@ export async function POST() {
       message: 'Password reset email sent. Please check your inbox.',
     })
   } catch (error) {
-    logger.error('Failed to initiate password reset:', error)
+    logger.error('Failed to initiate password reset:', error instanceof Error ? error : new Error(String(error)))
 
     // Even if the table doesn't exist, return success for security
     // (don't reveal whether the operation actually happened)

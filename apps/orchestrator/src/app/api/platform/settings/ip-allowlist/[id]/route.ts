@@ -161,7 +161,7 @@ export async function PATCH(
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Failed to update IP allowlist entry:', error)
+    logger.error('Failed to update IP allowlist entry:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to update IP allowlist entry' },
       { status: 500 }
@@ -222,7 +222,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Failed to delete IP allowlist entry:', error)
+    logger.error('Failed to delete IP allowlist entry:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to delete IP allowlist entry' },
       { status: 500 }

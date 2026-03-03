@@ -157,7 +157,7 @@ export async function GET() {
 
     return NextResponse.json(wishlists)
   } catch (error) {
-    logger.error('Failed to get wishlists:', error)
+    logger.error('Failed to get wishlists:', error instanceof Error ? error : new Error(String(error)))
     // Return empty array if tables don't exist
     return NextResponse.json([])
   }
@@ -208,7 +208,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(mapRowToWishlist(wishlist, []))
   } catch (error) {
-    logger.error('Failed to create wishlist:', error)
+    logger.error('Failed to create wishlist:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to create wishlist' }, { status: 500 })
   }
 }

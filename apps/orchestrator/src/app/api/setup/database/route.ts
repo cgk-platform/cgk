@@ -45,7 +45,7 @@ export async function POST() {
       },
     })
   } catch (error) {
-    logger.error('Database connection test failed:', error)
+    logger.error('Database connection test failed:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

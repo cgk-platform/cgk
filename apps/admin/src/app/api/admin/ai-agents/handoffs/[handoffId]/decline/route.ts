@@ -64,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ handoff })
   } catch (error) {
-    logger.error('Error declining handoff:', error)
+    logger.error('Error declining handoff:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to decline handoff'
     return NextResponse.json({ error: message }, { status: 500 })
   }

@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ alerts })
   } catch (error) {
-    logger.error('Failed to get platform alerts:', error)
+    logger.error('Failed to get platform alerts:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get alerts' },
       { status: 500 },

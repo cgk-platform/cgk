@@ -109,7 +109,7 @@ export async function POST(request: Request) {
       }
     )
   } catch (error) {
-    logger.error('Signup error:', error)
+    logger.error('Signup error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Registration failed' }, { status: 500 })
   }
 }

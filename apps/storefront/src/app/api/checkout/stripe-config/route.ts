@@ -37,7 +37,7 @@ export async function GET() {
       publishableKey: stripeConfig.publishableKey,
     })
   } catch (error) {
-    logger.error('[stripe-config] Error:', error)
+    logger.error('[stripe-config] Error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get Stripe configuration' },
       { status: 500 }

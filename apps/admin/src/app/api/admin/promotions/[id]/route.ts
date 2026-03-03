@@ -38,7 +38,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ promotion })
   } catch (error) {
-    logger.error('Error fetching promotion:', error)
+    logger.error('Error fetching promotion:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch promotion' },
       { status: 500 },
@@ -109,7 +109,7 @@ export async function PUT(request: Request, context: RouteContext) {
         : [],
     })
   } catch (error) {
-    logger.error('Error updating promotion:', error)
+    logger.error('Error updating promotion:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update promotion' },
       { status: 500 },
@@ -139,7 +139,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting promotion:', error)
+    logger.error('Error deleting promotion:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to delete promotion' },
       { status: 500 },

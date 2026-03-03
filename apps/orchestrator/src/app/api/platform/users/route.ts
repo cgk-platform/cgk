@@ -93,12 +93,12 @@ export async function GET(request: Request) {
         resultCount: result.total,
       },
     }).catch((error) => {
-      logger.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error instanceof Error ? error : new Error(String(error)))
     })
 
     return Response.json(result)
   } catch (error) {
-    logger.error('List users error:', error)
+    logger.error('List users error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to list users' }, { status: 500 })
   }
 }

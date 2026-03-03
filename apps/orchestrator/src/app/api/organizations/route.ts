@@ -63,7 +63,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Failed to fetch organizations:', error)
+    logger.error('Failed to fetch organizations:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 })
   }
 }

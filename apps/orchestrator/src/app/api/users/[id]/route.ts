@@ -77,7 +77,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       })),
     })
   } catch (error) {
-    logger.error('Failed to fetch user:', error)
+    logger.error('Failed to fetch user:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 })
   }
 }
@@ -144,7 +144,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       user: result.rows[0],
     })
   } catch (error) {
-    logger.error('Failed to update user:', error)
+    logger.error('Failed to update user:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update user' },
       { status: 500 }
@@ -188,7 +188,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       message: 'User deleted successfully',
     })
   } catch (error) {
-    logger.error('Failed to delete user:', error)
+    logger.error('Failed to delete user:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to delete user' },
       { status: 500 }

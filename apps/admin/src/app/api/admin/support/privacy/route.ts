@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
       stats,
     })
   } catch (error) {
-    logger.error('[privacy] GET error:', error)
+    logger.error('[privacy] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch privacy requests' },
       { status: 500 }
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ request }, { status: 201 })
   } catch (error) {
-    logger.error('[privacy] POST error:', error)
+    logger.error('[privacy] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create privacy request' },
       { status: 500 }

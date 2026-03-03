@@ -24,7 +24,7 @@ export async function GET() {
     const triggers = await getPipelineTriggers(tenantSlug)
     return Response.json({ triggers })
   } catch (error) {
-    logger.error('Pipeline triggers error:', error)
+    logger.error('Pipeline triggers error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch pipeline triggers' },
       { status: 500 }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true, trigger })
   } catch (error) {
-    logger.error('Pipeline trigger create error:', error)
+    logger.error('Pipeline trigger create error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to create pipeline trigger' },
       { status: 500 }

@@ -43,7 +43,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ voices, provider })
   } catch (error) {
-    logger.error('Error fetching voices:', error)
+    logger.error('Error fetching voices:', error instanceof Error ? error : new Error(String(error)))
     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch voices'
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }

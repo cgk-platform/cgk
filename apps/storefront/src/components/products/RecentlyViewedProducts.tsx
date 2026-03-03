@@ -12,7 +12,6 @@ import { cn } from '@cgk-platform/ui'
 import { useCallback, useEffect, useState } from 'react'
 
 import { ProductCard } from './ProductCard'
-import { logger } from '@cgk-platform/logging'
 
 const STORAGE_KEY = 'cgk_recently_viewed'
 const MAX_ITEMS = 12
@@ -66,7 +65,7 @@ export function RecentlyViewedProducts({
         const fetchedProducts = await fetchProductsAction(handles)
         setProducts(fetchedProducts)
       } catch (error) {
-        logger.error('Failed to fetch recently viewed products:', error)
+        console.error('Failed to fetch recently viewed products:', error)
       } finally {
         setIsLoading(false)
       }
@@ -134,7 +133,7 @@ export function useRecentlyViewed() {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
       } catch (error) {
-        logger.error('Failed to save recently viewed:', error)
+        console.error('Failed to save recently viewed:', error)
       }
     },
     []
@@ -145,7 +144,7 @@ export function useRecentlyViewed() {
     try {
       localStorage.removeItem(STORAGE_KEY)
     } catch (error) {
-      logger.error('Failed to clear recently viewed:', error)
+      console.error('Failed to clear recently viewed:', error)
     }
   }, [])
 

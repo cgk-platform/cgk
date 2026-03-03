@@ -59,7 +59,7 @@ export async function GET(request: Request) {
       current,
     })
   } catch (error) {
-    logger.error('Tenants fetch error:', error)
+    logger.error('Tenants fetch error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch tenants' },
       { status: 500 }

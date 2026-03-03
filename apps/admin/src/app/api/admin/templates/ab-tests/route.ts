@@ -22,7 +22,7 @@ export async function GET() {
     const tests = await getTemplateABTests(tenantSlug)
     return NextResponse.json({ tests })
   } catch (error) {
-    logger.error('Error fetching template A/B tests:', error)
+    logger.error('Error fetching template A/B tests:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch template A/B tests' },
       { status: 500 }
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    logger.error('Error creating template A/B test:', error)
+    logger.error('Error creating template A/B test:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create template A/B test' },
       { status: 500 }

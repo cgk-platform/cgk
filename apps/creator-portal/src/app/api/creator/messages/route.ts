@@ -105,7 +105,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Error fetching conversations:', error)
+    logger.error('Error fetching conversations:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch messages' }, { status: 500 })
   }
 }

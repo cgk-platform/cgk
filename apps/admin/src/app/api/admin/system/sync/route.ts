@@ -242,7 +242,7 @@ export async function GET(req: Request) {
 
       return NextResponse.json({ previews })
     } catch (error) {
-      logger.error('Failed to get sync previews:', error)
+      logger.error('Failed to get sync previews:', error instanceof Error ? error : new Error(String(error)))
       return NextResponse.json({ error: 'Failed to get previews' }, { status: 500 })
     }
   }
@@ -251,7 +251,7 @@ export async function GET(req: Request) {
     const preview = await getOperationPreview(tenantId, operationType)
     return NextResponse.json({ preview })
   } catch (error) {
-    logger.error('Failed to get sync preview:', error)
+    logger.error('Failed to get sync preview:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to get preview' }, { status: 500 })
   }
 }
@@ -337,7 +337,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ results })
   } catch (error) {
-    logger.error('Failed to run sync operation:', error)
+    logger.error('Failed to run sync operation:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to run sync' }, { status: 500 })
   }
 }

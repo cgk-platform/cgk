@@ -5,7 +5,6 @@ import { X, Loader2, AlertTriangle } from 'lucide-react'
 import { useState, useCallback, useEffect } from 'react'
 
 import { CREATOR_STATUSES, CREATOR_TIERS, type CreatorStatus, type CreatorTier } from '@/lib/creators/types'
-import { logger } from '@cgk-platform/logging'
 
 interface BulkActionModalProps {
   action: string
@@ -35,7 +34,7 @@ export function BulkActionModal({ action, creatorIds, onClose, onSuccess }: Bulk
       .then((data) => setAvailableTags(data.tags || []))
       .catch((error) => {
         // Non-critical: tags are optional, just log the error
-        logger.warn('[bulk-action-modal] Failed to load tags:', error)
+        console.warn('[bulk-action-modal] Failed to load tags:', error)
       })
   }, [])
 

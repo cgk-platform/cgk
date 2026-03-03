@@ -120,7 +120,7 @@ export async function GET(request: Request) {
       total: superAdmins.length,
     })
   } catch (error) {
-    logger.error('List super admins error:', error)
+    logger.error('List super admins error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to list super admins' },
       { status: 500 }
@@ -261,7 +261,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Create super admin error:', error)
+    logger.error('Create super admin error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to create super admin' },
       { status: 500 }
@@ -457,7 +457,7 @@ export async function PATCH(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Update super admin error:', error)
+    logger.error('Update super admin error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to update super admin' },
       { status: 500 }

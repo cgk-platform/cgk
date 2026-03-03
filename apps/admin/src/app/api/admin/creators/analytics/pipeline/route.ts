@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const pipeline = await getPipelineAnalytics(tenantSlug, period)
     return NextResponse.json(pipeline)
   } catch (error) {
-    logger.error('Error fetching pipeline analytics:', error)
+    logger.error('Error fetching pipeline analytics:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch pipeline data' },
       { status: 500 }

@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ authUrl })
   } catch (error) {
-    logger.error('Failed to generate auth URL:', error)
+    logger.error('Failed to generate auth URL:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Google Drive integration not configured' },
       { status: 500 }

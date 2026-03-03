@@ -205,7 +205,7 @@ export async function POST(req: Request) {
       },
     })
   } catch (error) {
-    logger.error('Error uploading attachment:', error)
+    logger.error('Error uploading attachment:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to upload attachment' },
       { status: 500 }

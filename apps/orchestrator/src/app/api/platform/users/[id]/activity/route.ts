@@ -72,7 +72,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         resultCount: activity.length,
       },
     }).catch((error) => {
-      logger.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error instanceof Error ? error : new Error(String(error)))
     })
 
     return Response.json({
@@ -82,7 +82,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       count: activity.length,
     })
   } catch (error) {
-    logger.error('Get user activity error:', error)
+    logger.error('Get user activity error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get user activity' }, { status: 500 })
   }
 }

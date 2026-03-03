@@ -40,7 +40,6 @@ import type {
   DashboardDateRange,
   WidgetType,
 } from '@/lib/attribution'
-import { logger } from '@cgk-platform/logging'
 
 const DATE_RANGE_OPTIONS: { value: DashboardDateRange; label: string }[] = [
   { value: 'last_7d', label: 'Last 7 Days' },
@@ -88,7 +87,7 @@ export default function DashboardsPage() {
       setDashboards(data.dashboards)
     } catch (err) {
       setError('Failed to load dashboards')
-      logger.error(err)
+      console.error(err)
     } finally {
       setIsLoading(false)
     }

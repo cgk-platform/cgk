@@ -17,7 +17,6 @@ import { WishlistCard } from '@/components/account/WishlistCard'
 import { moveToCart, removeFromWishlist, shareWishlist } from '@/lib/account/api'
 import { getContent, interpolateContent } from '@/lib/account/content'
 import type { PortalContentStrings, Wishlist } from '@/lib/account/types'
-import { logger } from '@cgk-platform/logging'
 
 interface WishlistClientProps {
   wishlist: Wishlist
@@ -38,7 +37,7 @@ export function WishlistClient({ wishlist, content }: WishlistClientProps) {
       await removeFromWishlist(wishlist.id, itemId)
       router.refresh()
     } catch (error) {
-      logger.error('Failed to remove item:', error)
+      console.error('Failed to remove item:', error)
     } finally {
       setRemovingIds((prev) => {
         const next = new Set(prev)
@@ -54,7 +53,7 @@ export function WishlistClient({ wishlist, content }: WishlistClientProps) {
       await moveToCart(wishlist.id, itemId)
       router.refresh()
     } catch (error) {
-      logger.error('Failed to move to cart:', error)
+      console.error('Failed to move to cart:', error)
     } finally {
       setMovingToCartIds((prev) => {
         const next = new Set(prev)
@@ -70,7 +69,7 @@ export function WishlistClient({ wishlist, content }: WishlistClientProps) {
       setShareUrl(result.shareUrl)
       setShowShareModal(true)
     } catch (error) {
-      logger.error('Failed to share wishlist:', error)
+      console.error('Failed to share wishlist:', error)
     }
   }
 

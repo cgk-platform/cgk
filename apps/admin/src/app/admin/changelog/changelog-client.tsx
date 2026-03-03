@@ -22,7 +22,6 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 
 import type { ChangelogEntry, ChangelogStats, ChangeSource } from '@/lib/admin-utilities/types'
-import { logger } from '@cgk-platform/logging'
 
 const SOURCE_CONFIG: Record<
   ChangeSource,
@@ -83,7 +82,7 @@ export function ChangelogClient() {
         setStats(data.stats)
       }
     } catch (error) {
-      logger.error('Failed to fetch changelog:', error)
+      console.error('Failed to fetch changelog:', error)
     } finally {
       setIsLoading(false)
     }

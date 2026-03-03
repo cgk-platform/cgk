@@ -55,7 +55,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ handoffs, stats })
   } catch (error) {
-    logger.error('Error fetching handoffs:', error)
+    logger.error('Error fetching handoffs:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch handoffs' }, { status: 500 })
   }
 }

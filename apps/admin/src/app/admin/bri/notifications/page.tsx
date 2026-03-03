@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardHeader, Input, Switch, Badge } from '@cgk-platform/ui'
 import { Bell, Save, Slack, Mail, Phone, CheckCircle2, XCircle } from 'lucide-react'
-import { logger } from '@cgk-platform/logging'
 
 const NOTIFICATION_EVENTS = [
   { id: 'project_created', label: 'Project Created', group: 'projects' },
@@ -84,7 +83,7 @@ export default function NotificationsPage() {
         }
       }
     } catch (error) {
-      logger.error('Failed to fetch:', error)
+      console.error('Failed to fetch:', error)
     } finally {
       setLoading(false)
     }
@@ -105,7 +104,7 @@ export default function NotificationsPage() {
         }),
       })
     } catch (error) {
-      logger.error('Failed to save:', error)
+      console.error('Failed to save:', error)
     } finally {
       setSaving(false)
     }

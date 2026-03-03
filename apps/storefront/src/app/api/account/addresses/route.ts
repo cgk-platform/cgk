@@ -242,7 +242,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(mapRowToAddress(address))
   } catch (error) {
-    logger.error('Failed to create address:', error)
+    logger.error('Failed to create address:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to create address' }, { status: 500 })
   }
 }

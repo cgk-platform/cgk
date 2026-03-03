@@ -122,7 +122,7 @@ async function validateClient(
 
     return { valid: true, tenantId: client.tenant_slug }
   } catch (error) {
-    logger.error('OAuth client validation error:', error)
+    logger.error('OAuth client validation error:', error instanceof Error ? error : new Error(String(error)))
     return { valid: false, error: 'server_error' }
   }
 }
@@ -169,7 +169,7 @@ async function storeAuthRequest(params: {
     `
     return true
   } catch (error) {
-    logger.error('Failed to store auth request:', error)
+    logger.error('Failed to store auth request:', error instanceof Error ? error : new Error(String(error)))
     return false
   }
 }
@@ -535,7 +535,7 @@ export async function POST(request: Request): Promise<Response> {
 
     return NextResponse.json({ redirect_uri: redirectUrl.toString() })
   } catch (error) {
-    logger.error('OAuth authorize POST error:', error)
+    logger.error('OAuth authorize POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'server_error', error_description: 'Internal server error' },
       { status: 500 }

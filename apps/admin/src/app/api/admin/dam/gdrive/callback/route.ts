@@ -20,7 +20,7 @@ export async function GET(request: Request) {
 
   // Handle OAuth errors
   if (error) {
-    logger.error('OAuth error:', error)
+    logger.error('OAuth error:', error instanceof Error ? error : new Error(String(error)))
     return redirect('/admin/dam/gdrive?error=oauth_denied')
   }
 
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
 
     return redirect(returnUrl || `/admin/dam/gdrive?success=connected&connection=${(connection as GDriveConnection).id}`)
   } catch (error) {
-    logger.error('OAuth callback error:', error)
+    logger.error('OAuth callback error:', error instanceof Error ? error : new Error(String(error)))
     return redirect('/admin/dam/gdrive?error=callback_failed')
   }
 }

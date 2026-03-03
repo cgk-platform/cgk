@@ -19,7 +19,7 @@ export async function DELETE(req: Request) {
     await disconnectTikTok(tenantId)
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Failed to disconnect TikTok:', error)
+    logger.error('Failed to disconnect TikTok:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to disconnect' },
       { status: 500 }

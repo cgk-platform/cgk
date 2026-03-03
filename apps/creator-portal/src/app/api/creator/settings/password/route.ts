@@ -116,7 +116,7 @@ export async function POST(req: Request): Promise<Response> {
       message: 'Password changed successfully',
     })
   } catch (error) {
-    logger.error('Error changing password:', error)
+    logger.error('Error changing password:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to change password' }, { status: 500 })
   }
 }

@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       smsListId: connection.smsListId,
     })
   } catch (error) {
-    logger.error('Failed to get Klaviyo lists:', error)
+    logger.error('Failed to get Klaviyo lists:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get lists' },
       { status: 500 }
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     const lists = await refreshKlaviyoLists(tenantId)
     return Response.json({ lists })
   } catch (error) {
-    logger.error('Failed to refresh Klaviyo lists:', error)
+    logger.error('Failed to refresh Klaviyo lists:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to refresh lists' },
       { status: 500 }
@@ -81,7 +81,7 @@ export async function PUT(req: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Failed to update Klaviyo lists:', error)
+    logger.error('Failed to update Klaviyo lists:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to update lists' },
       { status: 500 }

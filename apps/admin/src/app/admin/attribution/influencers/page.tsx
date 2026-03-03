@@ -35,7 +35,6 @@ import type {
   Influencer,
   InfluencerCreate,
 } from '@/lib/attribution'
-import { logger } from '@cgk-platform/logging'
 
 export default function InfluencersPage() {
   const [influencers, setInfluencers] = useState<Influencer[]>([])
@@ -85,7 +84,7 @@ export default function InfluencersPage() {
       setTotal(data.total)
     } catch (err) {
       setError('Failed to load influencers')
-      logger.error(err)
+      console.error(err)
     } finally {
       setIsLoading(false)
     }

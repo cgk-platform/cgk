@@ -144,7 +144,7 @@ export async function POST(request: Request) {
       { status: 200 }
     )
   } catch (error) {
-    logger.error('Video editor sync error:', error)
+    logger.error('Video editor sync error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Sync failed' },
       { status: 500 }

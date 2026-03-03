@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import type { SupportAgent } from '@cgk-platform/support'
 
 import { AgentList } from '@/components/support/agent-list'
-import { logger } from '@cgk-platform/logging'
 
 interface AgentListClientWrapperProps {
   agents: SupportAgent[]
@@ -31,7 +30,7 @@ export function AgentListClientWrapper({ agents }: AgentListClientWrapperProps) 
 
       router.refresh()
     } catch (error) {
-      logger.error('Error deleting agent:', error)
+      console.error('Error deleting agent:', error)
       alert('Failed to delete agent')
     }
   }
@@ -51,7 +50,7 @@ export function AgentListClientWrapper({ agents }: AgentListClientWrapperProps) 
 
       router.refresh()
     } catch (error) {
-      logger.error('Error updating agent:', error)
+      console.error('Error updating agent:', error)
       alert('Failed to update agent')
     }
   }

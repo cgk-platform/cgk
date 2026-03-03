@@ -37,7 +37,7 @@ export async function GET(
 
     return NextResponse.json({ report })
   } catch (error) {
-    logger.error('Failed to get Slack report:', error)
+    logger.error('Failed to get Slack report:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get report' },
       { status: 500 },
@@ -100,7 +100,7 @@ export async function PUT(
 
     return NextResponse.json({ report })
   } catch (error) {
-    logger.error('Failed to update Slack report:', error)
+    logger.error('Failed to update Slack report:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update report' },
       { status: 500 },
@@ -133,7 +133,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Failed to delete Slack report:', error)
+    logger.error('Failed to delete Slack report:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to delete report' },
       { status: 500 },

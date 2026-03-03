@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Button, Input } from '@cgk-platform/ui'
 import { Loader2, Save } from 'lucide-react'
 import type { SLAConfig, TicketPriority } from '@cgk-platform/support'
-import { logger } from '@cgk-platform/logging'
 
 interface SLASettingsClientProps {
   initialConfigs: SLAConfig[]
@@ -87,7 +86,7 @@ export function SLASettingsClient({ initialConfigs }: SLASettingsClientProps) {
       }
       setSaved(true)
     } catch (error) {
-      logger.error('Failed to save SLA configs:', error)
+      console.error('Failed to save SLA configs:', error)
       alert('Failed to save settings')
     } finally {
       setSaving(false)

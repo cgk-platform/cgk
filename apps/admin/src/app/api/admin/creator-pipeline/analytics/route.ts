@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     const analytics = await getPipelineAnalytics(tenantSlug, period)
     return Response.json(analytics)
   } catch (error) {
-    logger.error('Pipeline analytics error:', error)
+    logger.error('Pipeline analytics error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch pipeline analytics' },
       { status: 500 }

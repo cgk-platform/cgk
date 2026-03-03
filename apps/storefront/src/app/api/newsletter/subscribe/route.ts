@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Successfully subscribed to newsletter' })
   } catch (error) {
-    logger.error('Newsletter subscription error:', error)
+    logger.error('Newsletter subscription error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to subscribe. Please try again later.' },
       { status: 500 }

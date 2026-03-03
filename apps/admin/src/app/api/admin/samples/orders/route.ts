@@ -70,7 +70,7 @@ export async function GET(req: Request) {
       totalPages: Math.ceil(result.totalCount / limit),
     })
   } catch (error) {
-    logger.error('Failed to fetch sample orders:', error)
+    logger.error('Failed to fetch sample orders:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch sample orders' }, { status: 500 })
   }
 }

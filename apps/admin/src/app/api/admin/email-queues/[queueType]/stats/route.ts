@@ -122,7 +122,7 @@ export async function GET(
 
     return NextResponse.json(response)
   } catch (error) {
-    logger.error('[email-queues] stats error:', error)
+    logger.error('[email-queues] stats error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch stats' },
       { status: 500 }

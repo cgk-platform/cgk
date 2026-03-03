@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, Badge } from '@cgk-platform/ui'
 
 import type { DateRange, PlatformData } from '@/lib/analytics'
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format'
-import { logger } from '@cgk-platform/logging'
 
 interface PlatformDataTabProps {
   dateRange: DateRange
@@ -28,7 +27,7 @@ export function PlatformDataTab({ dateRange }: PlatformDataTabProps) {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        logger.error('Failed to fetch platform data:', error)
+        console.error('Failed to fetch platform data:', error)
       } finally {
         setLoading(false)
       }

@@ -54,7 +54,7 @@ export async function GET(req: Request) {
       offset,
     })
   } catch (error) {
-    logger.error('Error fetching transactions:', error)
+    logger.error('Error fetching transactions:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch transactions' },
       { status: 500 }

@@ -54,7 +54,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(report)
   } catch (error) {
-    logger.error('Error fetching report:', error)
+    logger.error('Error fetching report:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch report' },
       { status: 500 }

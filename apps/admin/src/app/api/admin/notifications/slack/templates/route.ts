@@ -50,7 +50,7 @@ export async function GET() {
 
     return NextResponse.json({ templates: result.rows })
   } catch (error) {
-    logger.error('Failed to get Slack templates:', error)
+    logger.error('Failed to get Slack templates:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get templates' },
       { status: 500 },

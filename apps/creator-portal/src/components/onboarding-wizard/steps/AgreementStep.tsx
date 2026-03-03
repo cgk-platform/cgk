@@ -4,7 +4,6 @@ import { cn } from '@cgk-platform/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { AgreementData, AgreementDocument } from '../../../lib/onboarding-wizard/types'
-import { logger } from '@cgk-platform/logging'
 
 interface AgreementStepProps {
   data: AgreementData
@@ -64,11 +63,11 @@ export function AgreementStep({
             onChangeRef.current({ ...dataRef.current, agreements: initialAgreements })
           }
         } else {
-          logger.error('Failed to fetch agreement documents')
+          console.error('Failed to fetch agreement documents')
           setDocuments([])
         }
       } catch (error) {
-        logger.error('Error fetching agreement documents:', error)
+        console.error('Error fetching agreement documents:', error)
         setDocuments([])
       }
     }

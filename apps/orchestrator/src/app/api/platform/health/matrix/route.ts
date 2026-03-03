@@ -187,7 +187,7 @@ export async function GET(request: Request) {
       checkedAt: new Date().toISOString(),
     })
   } catch (error) {
-    logger.error('Get health matrix error:', error)
+    logger.error('Get health matrix error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get health matrix' }, { status: 500 })
   }
 }
@@ -247,7 +247,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Update health matrix error:', error)
+    logger.error('Update health matrix error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update health' }, { status: 500 })
   }
 }

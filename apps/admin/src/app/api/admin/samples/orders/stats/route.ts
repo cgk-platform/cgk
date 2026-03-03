@@ -39,7 +39,7 @@ export async function GET() {
       },
     })
   } catch (error) {
-    logger.error('Failed to fetch sample stats:', error)
+    logger.error('Failed to fetch sample stats:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch sample stats' }, { status: 500 })
   }
 }

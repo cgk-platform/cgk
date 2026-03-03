@@ -124,7 +124,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
 
     return NextResponse.json(mapRowToAddress(address))
   } catch (error) {
-    logger.error('Failed to set default address:', error)
+    logger.error('Failed to set default address:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to set default address' }, { status: 500 })
   }
 }

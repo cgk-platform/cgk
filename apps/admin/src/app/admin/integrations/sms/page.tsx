@@ -18,7 +18,6 @@ import { useEffect, useState } from 'react'
 
 import { ConnectionStatusBadge, SecureApiKeyInput, TestConnectionResult } from '@/components/integrations'
 import type { SmsConsentStats } from '@/lib/integrations/types'
-import { logger } from '@cgk-platform/logging'
 
 interface SmsStatus {
   connected: boolean
@@ -48,7 +47,7 @@ export default function SmsPage() {
         setStatus(data)
       }
     } catch (error) {
-      logger.error('Failed to fetch SMS status:', error)
+      console.error('Failed to fetch SMS status:', error)
     } finally {
       setLoading(false)
     }
@@ -72,7 +71,7 @@ export default function SmsPage() {
         await fetchStatus()
       }
     } catch (error) {
-      logger.error('Failed to save API key:', error)
+      console.error('Failed to save API key:', error)
     } finally {
       setSaving(false)
     }

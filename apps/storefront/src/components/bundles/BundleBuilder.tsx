@@ -25,7 +25,6 @@ import type {
   BundleTier,
   BundleTheme,
 } from './types'
-import { logger } from '@cgk-platform/logging'
 
 interface BundleBuilderProps {
   /** Products available for this bundle */
@@ -335,7 +334,7 @@ export function BundleBuilder({
       setButtonState('success')
       if (config.cartRedirect) window.location.href = '/cart'
     } catch (err) {
-      logger.error('[BundleBuilder] Cart error:', err)
+      console.error('[BundleBuilder] Cart error:', err)
       setButtonState('error')
     }
   }, [buttonState, canAddToCart, selectedProducts, config, totalItems, activeTier, onAddToCart])

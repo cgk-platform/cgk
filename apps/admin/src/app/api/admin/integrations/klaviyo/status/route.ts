@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     const status = await getIntegrationStatus(tenantId, 'klaviyo')
     return Response.json(status)
   } catch (error) {
-    logger.error('Failed to get Klaviyo status:', error)
+    logger.error('Failed to get Klaviyo status:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get status' },
       { status: 500 }

@@ -147,7 +147,7 @@ export async function GET(request: Request) {
       new URL('/admin/integrations/meta-ads?success=connected', appUrl)
     )
   } catch (error) {
-    logger.error('Meta OAuth error:', error)
+    logger.error('Meta OAuth error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.redirect(
       new URL('/admin/integrations/meta-ads?error=oauth_failed', appUrl)
     )

@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': result.contentType },
     })
   } catch (error) {
-    logger.error('Error handling incoming SMS webhook:', error)
+    logger.error('Error handling incoming SMS webhook:', error instanceof Error ? error : new Error(String(error)))
     // Still return valid TwiML even on error
     return createTwimlResponse()
   }

@@ -76,7 +76,7 @@ export async function GET(req: Request) {
       stats,
     })
   } catch (error) {
-    logger.error('Error fetching projects:', error)
+    logger.error('Error fetching projects:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch projects' },
       { status: 500 }

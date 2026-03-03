@@ -140,7 +140,7 @@ export async function POST(request: Request) {
       projectId,
     })
   } catch (error) {
-    logger.error('Video editor upload error:', error)
+    logger.error('Video editor upload error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

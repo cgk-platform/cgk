@@ -73,7 +73,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching voice calls:', error)
+    logger.error('Error fetching voice calls:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch voice calls' }, { status: 500 })
   }
 }

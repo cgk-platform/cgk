@@ -20,7 +20,6 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 
 import { formatMoney } from '@/lib/cart/types'
 import { StripeProvider, PaymentForm } from '@/components/checkout'
-import { logger } from '@cgk-platform/logging'
 
 type CheckoutStep = 'contact' | 'shipping' | 'delivery' | 'payment' | 'review'
 
@@ -99,7 +98,7 @@ export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: C
       setClientSecret(data.clientSecret)
       setPaymentIntentId(data.paymentIntentId)
     } catch (err) {
-      logger.error('Failed to create payment intent:', err)
+      console.error('Failed to create payment intent:', err)
       setPaymentError(err instanceof Error ? err.message : 'Failed to initialize payment')
     } finally {
       setIsCreatingPaymentIntent(false)
@@ -152,7 +151,7 @@ export function CheckoutContent({ cart, tenantSlug: _tenantSlug, tenantName }: C
       // Redirect to order confirmation
       router.push(data.redirectUrl ?? `/order-confirmation/${data.orderId}`)
     } catch (err) {
-      logger.error('Failed to place order:', err)
+      console.error('Failed to place order:', err)
       setPaymentError(err instanceof Error ? err.message : 'Failed to place order')
       setIsPlacingOrder(false)
     }
@@ -567,7 +566,7 @@ function DeliveryStep({ formData, onComplete, onBack, setFormData, cartId }: Del
 
         if (data.error) {
           // Non-fatal error, we still have rates
-          logger.warn('[DeliveryStep] Warning:', data.error)
+          console.warn('[DeliveryStep] Warning:', data.error)
         }
 
         // Auto-select first rate if none selected
@@ -583,7 +582,7 @@ function DeliveryStep({ formData, onComplete, onBack, setFormData, cartId }: Del
           }
         }
       } catch (err) {
-        logger.error('[DeliveryStep] Error fetching shipping rates:', err)
+        console.error('[DeliveryStep] Error fetching shipping rates:', err)
         setError('Unable to load shipping options. Please try again.')
 
         // Fallback to free shipping if rates fail

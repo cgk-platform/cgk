@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       message: 'Magic link sent to your email',
     })
   } catch (error) {
-    logger.error('Login error:', error)
+    logger.error('Login error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to send magic link' },
       { status: 500 }

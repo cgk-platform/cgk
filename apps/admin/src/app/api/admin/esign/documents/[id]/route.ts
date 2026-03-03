@@ -35,7 +35,7 @@ export async function GET(
       auditLog,
     })
   } catch (error) {
-    logger.error('Error fetching document:', error)
+    logger.error('Error fetching document:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch document' },
       { status: 500 }

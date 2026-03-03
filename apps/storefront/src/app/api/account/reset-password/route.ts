@@ -105,7 +105,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Reset password error:', error)
+    logger.error('Reset password error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Password reset failed. Please try again.' },
       { status: 500 }

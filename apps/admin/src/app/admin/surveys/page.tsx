@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Pagination } from '@/components/commerce/pagination'
 import { formatDate } from '@/lib/format'
 import type { Survey, SurveyStatus } from '@/lib/surveys'
-import { logger } from '@cgk-platform/logging'
 
 const STATUS_TABS = [
   { label: 'All', value: 'all' },
@@ -60,7 +59,7 @@ export default function SurveysPage() {
         setPagination(data.pagination)
       }
     } catch (error) {
-      logger.error('Failed to fetch surveys:', error)
+      console.error('Failed to fetch surveys:', error)
     } finally {
       setLoading(false)
     }
@@ -84,7 +83,7 @@ export default function SurveysPage() {
         router.push(`/admin/surveys/${data.survey.id}`)
       }
     } catch (error) {
-      logger.error('Failed to duplicate survey:', error)
+      console.error('Failed to duplicate survey:', error)
     }
   }
 
@@ -97,7 +96,7 @@ export default function SurveysPage() {
       })
       fetchSurveys()
     } catch (error) {
-      logger.error('Failed to archive survey:', error)
+      console.error('Failed to archive survey:', error)
     }
   }
 
@@ -108,7 +107,7 @@ export default function SurveysPage() {
       await fetch(`/api/admin/surveys/${surveyId}`, { method: 'DELETE' })
       fetchSurveys()
     } catch (error) {
-      logger.error('Failed to delete survey:', error)
+      console.error('Failed to delete survey:', error)
     }
   }
 

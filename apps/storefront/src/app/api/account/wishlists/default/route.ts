@@ -140,7 +140,7 @@ export async function GET() {
 
     return NextResponse.json(wishlist)
   } catch (error) {
-    logger.error('Failed to get default wishlist:', error)
+    logger.error('Failed to get default wishlist:', error instanceof Error ? error : new Error(String(error)))
     // Return empty wishlist if tables don't exist
     return NextResponse.json({
       id: 'default',

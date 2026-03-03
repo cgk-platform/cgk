@@ -63,7 +63,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(totalCount / limit),
     })
   } catch (error) {
-    logger.error('Error fetching tasks:', error)
+    logger.error('Error fetching tasks:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch tasks' }, { status: 500 })
   }
 }
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ task }, { status: 201 })
   } catch (error) {
-    logger.error('Error creating task:', error)
+    logger.error('Error creating task:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to create task' }, { status: 500 })
   }
 }

@@ -52,7 +52,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching autonomy settings:', error)
+    logger.error('Error fetching autonomy settings:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch autonomy settings' }, { status: 500 })
   }
 }
@@ -105,7 +105,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ settings })
   } catch (error) {
-    logger.error('Error updating autonomy settings:', error)
+    logger.error('Error updating autonomy settings:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update autonomy settings' }, { status: 500 })
   }
 }

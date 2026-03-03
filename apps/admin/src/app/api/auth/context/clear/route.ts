@@ -103,7 +103,7 @@ export async function POST(request: Request) {
       return Response.json({ error: error.message }, { status: 403 })
     }
 
-    logger.error('Clear tenant context error:', error)
+    logger.error('Clear tenant context error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to clear tenant context' }, { status: 500 })
   }
 }

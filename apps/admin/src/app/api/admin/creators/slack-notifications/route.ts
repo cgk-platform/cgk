@@ -26,7 +26,7 @@ export async function GET() {
     const config = await getSlackNotificationConfig(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('[slack-notifications] GET error:', error)
+    logger.error('[slack-notifications] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch configuration' }, { status: 500 })
   }
 }
@@ -58,7 +58,7 @@ export async function PATCH(request: Request) {
     await saveSlackNotificationConfig(tenantSlug, body.config)
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('[slack-notifications] PATCH error:', error)
+    logger.error('[slack-notifications] PATCH error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 })
   }
 }

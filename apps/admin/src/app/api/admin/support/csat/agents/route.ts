@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ scores })
   } catch (error) {
-    logger.error('[csat/agents] GET error:', error)
+    logger.error('[csat/agents] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch agent scores' },
       { status: 500 }

@@ -2,7 +2,6 @@
 
 import { Button, Card, CardContent, Input, Label, Spinner } from '@cgk-platform/ui'
 import { useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface AddDomainModalProps {
   open: boolean
@@ -40,7 +39,7 @@ export function AddDomainModal({ open, onClose, onSuccess }: AddDomainModalProps
       }
 
       if (data.warning) {
-        logger.warn(data.warning)
+        console.warn(data.warning)
       }
 
       setDomain('')

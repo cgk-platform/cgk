@@ -79,7 +79,7 @@ export async function GET(request: Request): Promise<Response> {
       cached: false,
     })
   } catch (error) {
-    logger.error('Failed to fetch platform analytics:', error)
+    logger.error('Failed to fetch platform analytics:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch platform analytics' }, { status: 500 })
   }
 }

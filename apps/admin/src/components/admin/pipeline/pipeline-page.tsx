@@ -37,7 +37,6 @@ import { StageConfigModal } from './stage-config-modal'
 import { StatsBar } from './stats-bar'
 import { TableView } from './table-view'
 import { TriggerConfigModal } from './trigger-config-modal'
-import { logger } from '@cgk-platform/logging'
 
 interface PipelinePageProps {
   initialProjects: PipelineProject[]
@@ -87,7 +86,7 @@ export function PipelinePage({
           setCreators(data.creators || [])
         }
       } catch (error) {
-        logger.error('Failed to fetch filters data:', error)
+        console.error('Failed to fetch filters data:', error)
       }
     }
     fetchFiltersData()
@@ -121,7 +120,7 @@ export function PipelinePage({
           setStats(data.stats)
         }
       } catch (error) {
-        logger.error('Failed to fetch projects:', error)
+        console.error('Failed to fetch projects:', error)
       }
     })
   }, [filters])
@@ -200,7 +199,7 @@ export function PipelinePage({
             router.refresh()
           }
         } catch (error) {
-          logger.error('Failed to update status:', error)
+          console.error('Failed to update status:', error)
         }
       })
     },
@@ -222,7 +221,7 @@ export function PipelinePage({
             router.refresh()
           }
         } catch (error) {
-          logger.error('Failed to update due date:', error)
+          console.error('Failed to update due date:', error)
         }
       })
     },
@@ -244,7 +243,7 @@ export function PipelinePage({
           setSavedFilters((prev) => [data.filter, ...prev])
         }
       } catch (error) {
-        logger.error('Failed to save filter:', error)
+        console.error('Failed to save filter:', error)
       }
     },
     [filters]
@@ -266,7 +265,7 @@ export function PipelinePage({
         setSavedFilters((prev) => prev.filter((f) => f.id !== filterId))
       }
     } catch (error) {
-      logger.error('Failed to delete filter:', error)
+      console.error('Failed to delete filter:', error)
     }
   }, [])
 
@@ -284,7 +283,7 @@ export function PipelinePage({
           setConfig((prev) => ({ ...prev, ...updates }))
         }
       } catch (error) {
-        logger.error('Failed to save config:', error)
+        console.error('Failed to save config:', error)
         throw error
       }
     },
@@ -307,7 +306,7 @@ export function PipelinePage({
           throw new Error('Failed to save trigger')
         }
       } catch (error) {
-        logger.error('Failed to save trigger:', error)
+        console.error('Failed to save trigger:', error)
         throw error
       }
     },

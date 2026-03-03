@@ -64,7 +64,7 @@ export async function GET(request: Request) {
       tenants,
     })
   } catch (error) {
-    logger.error('Context fetch error:', error)
+    logger.error('Context fetch error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch context' },
       { status: 500 }

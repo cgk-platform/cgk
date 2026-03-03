@@ -23,7 +23,6 @@ import { useCallback, useState, useTransition } from 'react'
 import { GalleryStats } from './gallery-stats'
 
 import type { UGCGalleryStats, UGCSubmission, UGCSubmissionStatus } from '@/lib/admin-utilities/types'
-import { logger } from '@cgk-platform/logging'
 
 interface GalleryClientProps {
   initialSubmissions: UGCSubmission[]
@@ -71,7 +70,7 @@ export function GalleryClient({ initialSubmissions }: GalleryClientProps) {
             }
           }
         } catch (error) {
-          logger.error('Failed to moderate submission:', error)
+          console.error('Failed to moderate submission:', error)
         }
       })
     },
@@ -92,7 +91,7 @@ export function GalleryClient({ initialSubmissions }: GalleryClientProps) {
           setSelectedSubmission(null)
         }
       } catch (error) {
-        logger.error('Failed to delete submission:', error)
+        console.error('Failed to delete submission:', error)
       }
     })
   }, [])

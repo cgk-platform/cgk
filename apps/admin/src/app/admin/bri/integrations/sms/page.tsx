@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button, Card, CardContent, CardHeader, Input } from '@cgk-platform/ui'
 import { ArrowLeft, Save, Phone, Send, ExternalLink } from 'lucide-react'
-import { logger } from '@cgk-platform/logging'
 
 export default function SmsConfigPage() {
   const [config, setConfig] = useState({
@@ -27,7 +26,7 @@ export default function SmsConfigPage() {
         body: JSON.stringify(config),
       })
     } catch (error) {
-      logger.error('Failed to save SMS config:', error)
+      console.error('Failed to save SMS config:', error)
     } finally {
       setSaving(false)
     }
@@ -43,7 +42,7 @@ export default function SmsConfigPage() {
         body: JSON.stringify({ phoneNumber: testPhone }),
       })
     } catch (error) {
-      logger.error('Failed to send test SMS:', error)
+      console.error('Failed to send test SMS:', error)
     } finally {
       setTesting(false)
     }

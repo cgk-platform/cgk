@@ -59,7 +59,7 @@ export async function GET(
       resultUrl: request.status === 'completed' ? request.resultUrl : null,
     })
   } catch (error) {
-    logger.error('[support/privacy/request] GET error:', error)
+    logger.error('[support/privacy/request] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch request' },
       { status: 500 }

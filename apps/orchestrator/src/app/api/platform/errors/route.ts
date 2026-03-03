@@ -211,7 +211,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Get platform errors error:', error)
+    logger.error('Get platform errors error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get errors' }, { status: 500 })
   }
 }
@@ -276,7 +276,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true, errorId })
   } catch (error) {
-    logger.error('Create platform error error:', error)
+    logger.error('Create platform error error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to create error' }, { status: 500 })
   }
 }

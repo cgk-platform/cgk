@@ -63,7 +63,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ calls })
   } catch (error) {
-    logger.error('Error fetching voice calls:', error)
+    logger.error('Error fetching voice calls:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch voice calls' }, { status: 500 })
   }
 }
@@ -144,7 +144,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ call })
   } catch (error) {
-    logger.error('Error initiating voice call:', error)
+    logger.error('Error initiating voice call:', error instanceof Error ? error : new Error(String(error)))
     const errorMessage = error instanceof Error ? error.message : 'Failed to initiate voice call'
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }

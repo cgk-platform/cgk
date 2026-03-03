@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle, Input } from '@cgk-platform/ui'
 
 import type { ConsentRecord, ConsentType } from '@cgk-platform/support'
-import { logger } from '@cgk-platform/logging'
 
 export default function ConsentBrowserPage() {
   const [records, setRecords] = useState<ConsentRecord[]>([])
@@ -29,7 +28,7 @@ export default function ConsentBrowserPage() {
           setRecords(data.records)
         }
       } catch (error) {
-        logger.error('Failed to fetch consent records:', error)
+        console.error('Failed to fetch consent records:', error)
       } finally {
         setLoading(false)
       }

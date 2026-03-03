@@ -95,7 +95,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, message: 'Webhook queued for redelivery' })
   } catch (error) {
-    logger.error('Redeliver webhook error:', error)
+    logger.error('Redeliver webhook error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to redeliver webhook' }, { status: 500 })
   }
 }

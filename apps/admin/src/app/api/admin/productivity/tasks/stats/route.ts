@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ stats })
   } catch (error) {
-    logger.error('Error fetching task stats:', error)
+    logger.error('Error fetching task stats:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch task statistics' }, { status: 500 })
   }
 }

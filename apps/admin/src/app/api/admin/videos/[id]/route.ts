@@ -124,7 +124,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     try {
       await deleteAsset(existingVideo.muxAssetId)
     } catch (error) {
-      logger.error('Failed to delete Mux asset:', error)
+      logger.error('Failed to delete Mux asset:', error instanceof Error ? error : new Error(String(error)))
       // Continue with soft delete even if Mux deletion fails
     }
   }

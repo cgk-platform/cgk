@@ -13,7 +13,6 @@ import { useCallback, useState } from 'react'
 
 import { loadMoreCollectionProducts } from '@/lib/collections/actions'
 import { ProductGrid } from '@/components/products'
-import { logger } from '@cgk-platform/logging'
 
 interface LoadMoreButtonProps {
   handle: string
@@ -49,7 +48,7 @@ export function LoadMoreButton({
       setCursor(result.endCursor ?? undefined)
       setHasMore(result.hasNextPage)
     } catch (err) {
-      logger.error('[LoadMore] Failed to load products:', err)
+      console.error('[LoadMore] Failed to load products:', err)
     } finally {
       setIsLoading(false)
     }

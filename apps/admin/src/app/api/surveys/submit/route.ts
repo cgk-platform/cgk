@@ -100,7 +100,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     // Still return success to not disrupt checkout experience
     return NextResponse.json({ success: true, warning: 'Response may not have been saved' }, { headers })
   } catch (error) {
-    logger.error('[Survey Submit] Error:', error)
+    logger.error('[Survey Submit] Error:', error instanceof Error ? error : new Error(String(error)))
 
     // Return success anyway to not break checkout
     return NextResponse.json(

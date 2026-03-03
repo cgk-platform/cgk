@@ -134,7 +134,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Failed to create admin:', error)
+    logger.error('Failed to create admin:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

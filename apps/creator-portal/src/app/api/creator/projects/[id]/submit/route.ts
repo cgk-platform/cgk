@@ -54,7 +54,7 @@ export async function POST(req: Request, { params }: RouteParams): Promise<Respo
       message: 'Project submitted successfully',
     })
   } catch (error) {
-    logger.error('Error submitting project:', error)
+    logger.error('Error submitting project:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to submit project'
     return Response.json({ error: message }, { status: 400 })
   }

@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     const statuses = await getAllIntegrationStatuses(tenantId)
     return Response.json({ integrations: statuses })
   } catch (error) {
-    logger.error('Failed to get integration statuses:', error)
+    logger.error('Failed to get integration statuses:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get statuses' },
       { status: 500 }

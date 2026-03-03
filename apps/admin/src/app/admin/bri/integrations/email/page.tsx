@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Button, Card, CardContent, CardHeader, Input } from '@cgk-platform/ui'
 import { ArrowLeft, Save, Mail, Send, ExternalLink } from 'lucide-react'
-import { logger } from '@cgk-platform/logging'
 
 export default function EmailConfigPage() {
   const [config, setConfig] = useState({
@@ -24,7 +23,7 @@ export default function EmailConfigPage() {
         body: JSON.stringify(config),
       })
     } catch (error) {
-      logger.error('Failed to save email config:', error)
+      console.error('Failed to save email config:', error)
     } finally {
       setSaving(false)
     }
@@ -39,7 +38,7 @@ export default function EmailConfigPage() {
         body: JSON.stringify({ email: testEmail || undefined }),
       })
     } catch (error) {
-      logger.error('Failed to send test email:', error)
+      console.error('Failed to send test email:', error)
     } finally {
       setTesting(false)
     }

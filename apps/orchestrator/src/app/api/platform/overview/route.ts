@@ -53,7 +53,7 @@ export async function GET(request: Request): Promise<Response> {
       cached: false,
     })
   } catch (error) {
-    logger.error('Failed to fetch platform KPIs:', error)
+    logger.error('Failed to fetch platform KPIs:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch platform KPIs' }, { status: 500 })
   }
 }

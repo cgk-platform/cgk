@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       activeSessions: sessions.length,
     })
   } catch (error) {
-    logger.error('Session check error:', error)
+    logger.error('Session check error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Invalid session' }, { status: 401 })
   }
 }
@@ -67,7 +67,7 @@ export async function DELETE(request: Request) {
     const response = Response.json({ success: true })
     return clearAuthCookie(response)
   } catch (error) {
-    logger.error('Session revoke error:', error)
+    logger.error('Session revoke error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to revoke sessions' }, { status: 500 })
   }
 }

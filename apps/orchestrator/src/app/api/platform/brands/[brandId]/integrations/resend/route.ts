@@ -78,7 +78,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    logger.error('Get Resend config error:', error)
+    logger.error('Get Resend config error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to get Resend configuration' }, { status: 500 })
   }
 }
@@ -142,7 +142,7 @@ export async function POST(
       verification,
     })
   } catch (error) {
-    logger.error('Save Resend config error:', error)
+    logger.error('Save Resend config error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to save Resend configuration' }, { status: 500 })
   }
 }
@@ -177,7 +177,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Delete Resend config error:', error)
+    logger.error('Delete Resend config error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to delete Resend configuration' }, { status: 500 })
   }
 }

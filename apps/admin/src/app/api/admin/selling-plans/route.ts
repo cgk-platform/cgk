@@ -55,7 +55,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    logger.error('Error fetching selling plans:', error)
+    logger.error('Error fetching selling plans:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch selling plans' },
       { status: 500 },
@@ -116,7 +116,7 @@ export async function POST(request: Request) {
     const sellingPlan = await createSellingPlan(tenantSlug, body)
     return NextResponse.json({ sellingPlan }, { status: 201 })
   } catch (error) {
-    logger.error('Error creating selling plan:', error)
+    logger.error('Error creating selling plan:', error instanceof Error ? error : new Error(String(error)))
     if (error instanceof Error && error.message.includes('unique')) {
       return NextResponse.json(
         { error: 'A selling plan with this name already exists' },

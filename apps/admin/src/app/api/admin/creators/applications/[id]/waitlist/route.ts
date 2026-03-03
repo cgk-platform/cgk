@@ -33,7 +33,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error waitlisting application:', error)
+    logger.error('Error waitlisting application:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to waitlist application' },
       { status: 500 }

@@ -33,7 +33,7 @@ export async function GET(
 
     return NextResponse.json({ bundle, stats })
   } catch (error) {
-    logger.error('Error fetching bundle:', error)
+    logger.error('Error fetching bundle:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch bundle' }, { status: 500 })
   }
 }
@@ -71,7 +71,7 @@ export async function PATCH(
 
     return NextResponse.json({ bundle })
   } catch (error) {
-    logger.error('Error updating bundle:', error)
+    logger.error('Error updating bundle:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update bundle' }, { status: 500 })
   }
 }
@@ -97,7 +97,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting bundle:', error)
+    logger.error('Error deleting bundle:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to delete bundle' }, { status: 500 })
   }
 }

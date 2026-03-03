@@ -44,7 +44,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Error fetching bulk sends:', error)
+    logger.error('Error fetching bulk sends:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch bulk sends' },
       { status: 500 }
@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       bulkSend,
     })
   } catch (error) {
-    logger.error('Error creating bulk send:', error)
+    logger.error('Error creating bulk send:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create bulk send' },
       { status: 500 }

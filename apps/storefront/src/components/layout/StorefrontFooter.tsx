@@ -4,7 +4,6 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Facebook, Instagram, Twitter, Mail } from 'lucide-react'
 import { Input, Button } from '@cgk-platform/ui'
-import { logger } from '@cgk-platform/logging'
 
 interface FooterLink {
   label: string
@@ -95,7 +94,7 @@ export function StorefrontFooter() {
         setSubmitStatus('error')
       }
     } catch (error) {
-      logger.error('Newsletter subscription error:', error)
+      console.error('Newsletter subscription error:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)

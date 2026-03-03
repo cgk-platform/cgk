@@ -49,7 +49,7 @@ export async function POST() {
       message: 'Product sync triggered. This may take a few minutes.',
     })
   } catch (error) {
-    logger.error('[shopify-sync] Error:', error)
+    logger.error('[shopify-sync] Error:', error instanceof Error ? error : new Error(String(error)))
 
     return NextResponse.json(
       {

@@ -56,7 +56,7 @@ export async function GET(req: Request, { params }: RouteParams) {
       },
     })
   } catch (error) {
-    logger.error('Error fetching tax form:', error)
+    logger.error('Error fetching tax form:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch tax form' },
       { status: 500 }

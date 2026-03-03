@@ -59,7 +59,7 @@ export async function GET(
       rating: isCompleted ? survey.rating : undefined,
     })
   } catch (error) {
-    logger.error('[support/csat/survey] GET error:', error)
+    logger.error('[support/csat/survey] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch survey' },
       { status: 500 }

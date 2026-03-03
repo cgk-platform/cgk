@@ -104,7 +104,7 @@ export async function GET(
       messages,
     })
   } catch (error) {
-    logger.error('Error fetching messages:', error)
+    logger.error('Error fetching messages:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch messages' }, { status: 500 })
   }
 }
@@ -189,7 +189,7 @@ export async function POST(
       },
     })
   } catch (error) {
-    logger.error('Error sending message:', error)
+    logger.error('Error sending message:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to send message' }, { status: 500 })
   }
 }

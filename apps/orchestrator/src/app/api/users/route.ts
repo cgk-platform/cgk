@@ -103,7 +103,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Failed to fetch users:', error)
+    logger.error('Failed to fetch users:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
   }
 }
@@ -197,7 +197,7 @@ export async function POST(request: Request) {
       message: sendInvite ? 'User created and invitation sent' : 'User created successfully',
     })
   } catch (error) {
-    logger.error('Failed to create user:', error)
+    logger.error('Failed to create user:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create user' },
       { status: 500 }

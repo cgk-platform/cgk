@@ -40,7 +40,7 @@ export async function GET(req: Request, context: RouteContext) {
 
     return NextResponse.json({ submission })
   } catch (error) {
-    logger.error('Failed to fetch submission:', error)
+    logger.error('Failed to fetch submission:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch submission' }, { status: 500 })
   }
 }
@@ -93,7 +93,7 @@ export async function PATCH(req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true, submission })
   } catch (error) {
-    logger.error('Failed to update submission:', error)
+    logger.error('Failed to update submission:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
   }
 }
@@ -134,7 +134,7 @@ export async function DELETE(req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Failed to delete submission:', error)
+    logger.error('Failed to delete submission:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to delete submission' }, { status: 500 })
   }
 }

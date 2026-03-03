@@ -5,7 +5,6 @@ import { Calendar, Clock, Trash2 } from 'lucide-react'
 
 import { Button } from '@cgk-platform/ui'
 import { cn } from '@cgk-platform/ui'
-import { logger } from '@cgk-platform/logging'
 
 interface ScheduledAction {
   id: string
@@ -35,7 +34,7 @@ export default function ScheduledActionsPage() {
       const data = await res.json()
       setActions(data.actions || [])
     } catch (error) {
-      logger.error('Failed to fetch actions:', error)
+      console.error('Failed to fetch actions:', error)
     } finally {
       setLoading(false)
     }
@@ -56,7 +55,7 @@ export default function ScheduledActionsPage() {
       })
       fetchActions()
     } catch (error) {
-      logger.error('Failed to cancel:', error)
+      console.error('Failed to cancel:', error)
     }
   }
 

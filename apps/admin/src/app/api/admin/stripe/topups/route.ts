@@ -35,7 +35,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ topups, stats })
   } catch (error) {
-    logger.error('Failed to fetch top-ups:', error)
+    logger.error('Failed to fetch top-ups:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch top-ups' }, { status: 500 })
   }
 }

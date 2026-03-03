@@ -146,7 +146,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ asset }, { status: 201 })
   } catch (error) {
-    logger.error('Upload error:', error)
+    logger.error('Upload error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

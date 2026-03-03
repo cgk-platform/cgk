@@ -65,7 +65,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ relationship, preferences, context })
   } catch (error) {
-    logger.error('Error fetching relationship:', error)
+    logger.error('Error fetching relationship:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch relationship' }, { status: 500 })
   }
 }
@@ -124,7 +124,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ relationship })
   } catch (error) {
-    logger.error('Error updating relationship:', error)
+    logger.error('Error updating relationship:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update relationship' }, { status: 500 })
   }
 }

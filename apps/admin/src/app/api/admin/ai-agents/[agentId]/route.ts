@@ -58,7 +58,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching AI agent:', error)
+    logger.error('Error fetching AI agent:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch AI agent' }, { status: 500 })
   }
 }
@@ -123,7 +123,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ agent })
   } catch (error) {
-    logger.error('Error updating AI agent:', error)
+    logger.error('Error updating AI agent:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update AI agent' }, { status: 500 })
   }
 }
@@ -168,7 +168,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error retiring AI agent:', error)
+    logger.error('Error retiring AI agent:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to retire AI agent' }, { status: 500 })
   }
 }

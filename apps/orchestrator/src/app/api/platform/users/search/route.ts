@@ -66,7 +66,7 @@ export async function GET(request: Request) {
         resultCount: users.length,
       },
     }).catch((error) => {
-      logger.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error instanceof Error ? error : new Error(String(error)))
     })
 
     return Response.json({
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
       count: users.length,
     })
   } catch (error) {
-    logger.error('Search users error:', error)
+    logger.error('Search users error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to search users' }, { status: 500 })
   }
 }

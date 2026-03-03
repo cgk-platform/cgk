@@ -6,7 +6,6 @@ import { useEffect, useState, useCallback, Suspense } from 'react'
 
 import { DataQualityDashboard, DataQualitySkeleton } from '@/components/attribution'
 import type { DataQualityMetrics } from '@/lib/attribution'
-import { logger } from '@cgk-platform/logging'
 
 function DataQualityContent() {
   const [metrics, setMetrics] = useState<DataQualityMetrics | null>(null)
@@ -25,7 +24,7 @@ function DataQualityContent() {
       const data = await response.json()
       setMetrics(data.metrics)
     } catch (error) {
-      logger.error('Failed to fetch data quality metrics:', error)
+      console.error('Failed to fetch data quality metrics:', error)
     } finally {
       setIsLoading(false)
       setIsRefreshing(false)

@@ -197,7 +197,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error(`[Webhook] Error processing ${webhookTopic}:`, error)
+    logger.error(`[Webhook] Error processing ${webhookTopic}:`, error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Processing failed' },
       { status: 500 },

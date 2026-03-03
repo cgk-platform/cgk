@@ -60,7 +60,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Error fetching signing requests:', error)
+    logger.error('Error fetching signing requests:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch signing requests' }, { status: 500 })
   }
 }

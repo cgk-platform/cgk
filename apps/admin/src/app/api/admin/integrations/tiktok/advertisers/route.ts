@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       selectedName: connection.selectedAdvertiserName,
     })
   } catch (error) {
-    logger.error('Failed to get TikTok advertisers:', error)
+    logger.error('Failed to get TikTok advertisers:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get advertisers' },
       { status: 500 }

@@ -70,7 +70,7 @@ export async function GET(req: Request) {
       offset,
     })
   } catch (error) {
-    logger.error('Error fetching withdrawals:', error)
+    logger.error('Error fetching withdrawals:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch withdrawals' },
       { status: 500 }
@@ -142,7 +142,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    logger.error('Error creating withdrawal:', error)
+    logger.error('Error creating withdrawal:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to create withdrawal' },
       { status: 500 }

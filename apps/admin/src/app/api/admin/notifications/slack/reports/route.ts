@@ -27,7 +27,7 @@ export async function GET() {
     const reports = await getReports(tenantSlug)
     return NextResponse.json({ reports })
   } catch (error) {
-    logger.error('Failed to get Slack reports:', error)
+    logger.error('Failed to get Slack reports:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get reports' },
       { status: 500 },
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ report }, { status: 201 })
   } catch (error) {
-    logger.error('Failed to create Slack report:', error)
+    logger.error('Failed to create Slack report:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create report' },
       { status: 500 },

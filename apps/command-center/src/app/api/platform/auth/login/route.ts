@@ -94,7 +94,7 @@ export async function POST(request: Request) {
     })
     return setAuthCookie(response, jwt)
   } catch (error) {
-    logger.error('Login error:', error)
+    logger.error('Login error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Login failed' }, { status: 500 })
   }
 }

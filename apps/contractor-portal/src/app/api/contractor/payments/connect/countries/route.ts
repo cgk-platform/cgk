@@ -29,7 +29,7 @@ export async function GET(req: Request) {
       countries,
     })
   } catch (error) {
-    logger.error('Error fetching countries:', error)
+    logger.error('Error fetching countries:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch countries' },
       { status: 500 }

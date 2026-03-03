@@ -42,7 +42,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ teams })
   } catch (error) {
-    logger.error('Error fetching AI teams:', error)
+    logger.error('Error fetching AI teams:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch AI teams' }, { status: 500 })
   }
 }
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ team }, { status: 201 })
   } catch (error) {
-    logger.error('Error creating AI team:', error)
+    logger.error('Error creating AI team:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to create AI team'
     return NextResponse.json({ error: message }, { status: 500 })
   }

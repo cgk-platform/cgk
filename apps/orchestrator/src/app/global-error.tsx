@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 export default function GlobalError({
   error,
@@ -11,7 +10,8 @@ export default function GlobalError({
   reset: () => void
 }) {
   useEffect(() => {
-    logger.error('Global error:', error)
+    // Client-side error logging
+    console.error('Global error:', error)
   }, [error])
 
   return (

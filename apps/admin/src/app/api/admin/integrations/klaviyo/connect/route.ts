@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     return Response.json(result)
   } catch (error) {
-    logger.error('Failed to connect Klaviyo:', error)
+    logger.error('Failed to connect Klaviyo:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to connect' },
       { status: 500 }

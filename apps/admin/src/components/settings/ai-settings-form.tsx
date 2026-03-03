@@ -15,7 +15,6 @@ import {
 } from './form-elements'
 
 import type { AISettings, AISettingsUpdate } from '@/lib/settings/types'
-import { logger } from '@cgk-platform/logging'
 
 interface AISettingsFormProps {
   initialSettings?: AISettings | null
@@ -85,7 +84,7 @@ export function AISettingsForm({ initialSettings }: AISettingsFormProps) {
         .then((data) => setUsage(data.usage))
         .catch((error) => {
           // Non-critical: usage data is supplementary
-          logger.warn('[ai-settings] Failed to load usage data:', error)
+          console.warn('[ai-settings] Failed to load usage data:', error)
         })
     }
   }, [initialSettings, fetchSettings])

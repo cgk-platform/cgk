@@ -44,7 +44,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('Error fetching voice config:', error)
+    logger.error('Error fetching voice config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch voice configuration' }, { status: 500 })
   }
 }
@@ -95,7 +95,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('Error creating voice config:', error)
+    logger.error('Error creating voice config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to create voice configuration' }, { status: 500 })
   }
 }
@@ -147,7 +147,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('Error updating voice config:', error)
+    logger.error('Error updating voice config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update voice configuration' }, { status: 500 })
   }
 }

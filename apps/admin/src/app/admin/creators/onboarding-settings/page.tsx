@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react'
 
 import type { OnboardingConfig, OnboardingStep } from '@/lib/creators-admin-ops/types'
 import { DEFAULT_ONBOARDING_STEPS } from '@/lib/creators-admin-ops/types'
-import { logger } from '@cgk-platform/logging'
 
 export default function OnboardingSettingsPage() {
   const [, setConfig] = useState<OnboardingConfig | null>(null)
@@ -36,7 +35,7 @@ export default function OnboardingSettingsPage() {
         setLoading(false)
       })
       .catch((error) => {
-        logger.error('[onboarding-settings] Failed to load settings:', error)
+        console.error('[onboarding-settings] Failed to load settings:', error)
         setLoading(false)
       })
   }, [])

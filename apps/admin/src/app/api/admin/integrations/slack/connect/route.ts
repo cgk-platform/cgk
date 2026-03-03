@@ -46,7 +46,7 @@ export async function POST(_request: Request) {
       state: serializedState,
     })
   } catch (error) {
-    logger.error('Failed to initiate Slack OAuth:', error)
+    logger.error('Failed to initiate Slack OAuth:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to initiate Slack connection' },
       { status: 500 },

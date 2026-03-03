@@ -44,7 +44,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, customerId, customerName })
   } catch (error) {
-    logger.error('Failed to select Google Ads customer:', error)
+    logger.error('Failed to select Google Ads customer:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to select customer' },
       { status: 500 }

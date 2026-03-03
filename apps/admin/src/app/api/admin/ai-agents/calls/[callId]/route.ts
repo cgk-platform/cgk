@@ -65,7 +65,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching voice call:', error)
+    logger.error('Error fetching voice call:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch voice call' }, { status: 500 })
   }
 }

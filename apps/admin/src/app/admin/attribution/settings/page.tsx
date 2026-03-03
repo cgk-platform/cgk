@@ -14,7 +14,6 @@ import {
   type AttributionMode,
   type FairingSyncInterval,
 } from '@/lib/attribution'
-import { logger } from '@cgk-platform/logging'
 
 export default function AttributionSettingsPage() {
   const [settings, setSettings] = useState<AttributionSettings | null>(null)
@@ -32,7 +31,7 @@ export default function AttributionSettingsPage() {
       setSettings(data.settings)
     } catch (err) {
       setError('Failed to load settings')
-      logger.error(err)
+      console.error(err)
     } finally {
       setIsLoading(false)
     }
@@ -79,7 +78,7 @@ export default function AttributionSettingsPage() {
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
       setError('Failed to save settings')
-      logger.error(err)
+      console.error(err)
     } finally {
       setIsSaving(false)
     }

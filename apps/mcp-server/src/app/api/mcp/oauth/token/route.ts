@@ -155,7 +155,7 @@ async function validateClientCredentials(
 
     return { valid: true, organizationId: client.organization_id }
   } catch (error) {
-    logger.error('Client validation error:', error)
+    logger.error('Client validation error:', error instanceof Error ? error : new Error(String(error)))
     return { valid: false, error: 'server_error' }
   }
 }
@@ -608,7 +608,7 @@ export async function POST(request: Request): Promise<Response> {
         return createErrorResponse('unsupported_grant_type', `Unknown grant type: ${params.grant_type}`)
     }
   } catch (error) {
-    logger.error('OAuth token error:', error)
+    logger.error('OAuth token error:', error instanceof Error ? error : new Error(String(error)))
     return createErrorResponse('server_error', 'Internal server error', 500)
   }
 }

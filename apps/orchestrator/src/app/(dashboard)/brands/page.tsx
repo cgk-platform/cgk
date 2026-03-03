@@ -7,7 +7,6 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { BrandsGrid } from '../../../components/dashboard/brands-grid'
 import type { PaginatedBrands } from '../../../types/platform'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * Brands list page
@@ -49,7 +48,7 @@ export default function BrandsPage() {
           setBrands(result)
         }
       } catch (error) {
-        logger.error('Failed to fetch brands:', error)
+        console.error('Failed to fetch brands:', error)
       } finally {
         setIsLoading(false)
       }

@@ -21,7 +21,6 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useAttribution } from '@/components/attribution'
 import type { AIInsightsData, Anomaly, Recommendation, Trend } from '@/lib/attribution'
-import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // Executive Summary Component
@@ -409,7 +408,7 @@ export default function AIInsightsPage() {
       setInsights(data.insights ?? null)
       setIsCached(data.cached ?? false)
     } catch (error) {
-      logger.error('Failed to fetch AI insights:', error)
+      console.error('Failed to fetch AI insights:', error)
     } finally {
       setIsLoading(false)
     }
@@ -427,7 +426,7 @@ export default function AIInsightsPage() {
       setInsights(data.insights ?? null)
       setIsCached(false)
     } catch (error) {
-      logger.error('Failed to regenerate insights:', error)
+      console.error('Failed to regenerate insights:', error)
     } finally {
       setIsRegenerating(false)
     }

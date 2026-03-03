@@ -77,7 +77,7 @@ export async function GET(req: Request) {
       configuredInDashboard: sources.length > 0,
     })
   } catch (error) {
-    logger.error('Failed to fetch funding sources:', error)
+    logger.error('Failed to fetch funding sources:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch funding sources' }, { status: 500 })
   }
 }
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, settings })
   } catch (error) {
-    logger.error('Failed to update funding source settings:', error)
+    logger.error('Failed to update funding source settings:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 })
   }
 }

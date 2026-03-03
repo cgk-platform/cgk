@@ -99,7 +99,7 @@ export async function POST(
       }
     }
   } catch (error) {
-    logger.error(`Failed to save ${service} credentials:`, error)
+    logger.error(`Failed to save ${service} credentials:`, error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to save credentials' },
       { status: 500 }
@@ -147,7 +147,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error(`Failed to delete ${service} credentials:`, error)
+    logger.error(`Failed to delete ${service} credentials:`, error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to delete credentials' },
       { status: 500 }

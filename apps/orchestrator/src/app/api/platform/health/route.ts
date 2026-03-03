@@ -268,7 +268,7 @@ export async function GET(request: Request): Promise<Response> {
       responseTimeMs: Date.now() - startTime,
     })
   } catch (error) {
-    logger.error('Health check failed:', error)
+    logger.error('Health check failed:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       {
         status: 'critical',

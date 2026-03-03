@@ -37,7 +37,7 @@ export async function PATCH(
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Pipeline trigger update error:', error)
+    logger.error('Pipeline trigger update error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to update pipeline trigger' },
       { status: 500 }
@@ -67,7 +67,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Pipeline trigger delete error:', error)
+    logger.error('Pipeline trigger delete error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to delete pipeline trigger' },
       { status: 500 }

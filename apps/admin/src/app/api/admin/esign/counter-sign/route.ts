@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ documents })
   } catch (error) {
-    logger.error('Error fetching counter-sign queue:', error)
+    logger.error('Error fetching counter-sign queue:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch counter-sign queue' },
       { status: 500 }
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error counter-signing:', error)
+    logger.error('Error counter-signing:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to counter-sign document' },
       { status: 500 }

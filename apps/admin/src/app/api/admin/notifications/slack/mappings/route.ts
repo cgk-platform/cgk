@@ -48,7 +48,7 @@ export async function GET() {
 
     return NextResponse.json({ mappings: result.rows })
   } catch (error) {
-    logger.error('Failed to get Slack mappings:', error)
+    logger.error('Failed to get Slack mappings:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to get mappings' },
       { status: 500 },
@@ -121,7 +121,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Failed to update Slack mappings:', error)
+    logger.error('Failed to update Slack mappings:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update mappings' },
       { status: 500 },

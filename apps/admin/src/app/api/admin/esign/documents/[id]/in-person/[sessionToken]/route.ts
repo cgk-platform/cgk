@@ -76,7 +76,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    logger.error('Error fetching in-person session:', error)
+    logger.error('Error fetching in-person session:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch session' },
       { status: 500 }
@@ -128,7 +128,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error completing in-person signing:', error)
+    logger.error('Error completing in-person signing:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to complete signing' },
       { status: 500 }

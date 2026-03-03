@@ -85,7 +85,7 @@ export async function POST() {
       lastSyncAt: new Date().toISOString(),
     })
   } catch (error) {
-    logger.error('[finance/cogs/sync] Error triggering sync:', error)
+    logger.error('[finance/cogs/sync] Error triggering sync:', error instanceof Error ? error : new Error(String(error)))
 
     // Still update timestamp and log even if job trigger fails
     // This handles cases where Trigger.dev is not configured

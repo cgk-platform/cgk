@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       isOnline,
     })
   } catch (error) {
-    logger.error('[support/chat] GET error:', error)
+    logger.error('[support/chat] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch config' },
       { status: 500 }
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
       offlineMessage: !isOnline ? config.offlineMessage : null,
     }, { status: 201 })
   } catch (error) {
-    logger.error('[support/chat] POST error:', error)
+    logger.error('[support/chat] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to start chat' },
       { status: 500 }

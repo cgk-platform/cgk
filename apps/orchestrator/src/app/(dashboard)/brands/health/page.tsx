@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown'
 
@@ -87,7 +86,7 @@ export default function BrandsHealthPage() {
         setError('Failed to fetch health data')
       }
     } catch (err) {
-      logger.error('Failed to fetch brand health:', err)
+      console.error('Failed to fetch brand health:', err)
       setError('Failed to fetch health data')
     } finally {
       setLoading(false)

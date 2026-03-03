@@ -145,7 +145,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       isDefault: false,
     })
   } catch (error) {
-    logger.error('Error fetching brand preferences:', error)
+    logger.error('Error fetching brand preferences:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch preferences' }, { status: 500 })
   }
 }
@@ -276,7 +276,7 @@ export async function PATCH(req: Request, { params }: RouteParams): Promise<Resp
       message: 'Preferences updated successfully',
     })
   } catch (error) {
-    logger.error('Error updating brand preferences:', error)
+    logger.error('Error updating brand preferences:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update preferences' }, { status: 500 })
   }
 }

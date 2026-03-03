@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       expiresIn: 300, // 5 minutes in seconds
     })
   } catch (error) {
-    logger.error('Failed to generate SSO token:', error)
+    logger.error('Failed to generate SSO token:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to generate SSO token' },
       { status: 500 }

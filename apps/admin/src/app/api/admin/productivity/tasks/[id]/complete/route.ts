@@ -41,7 +41,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ task })
   } catch (error) {
-    logger.error('Error completing task:', error)
+    logger.error('Error completing task:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to complete task' }, { status: 500 })
   }
 }

@@ -69,7 +69,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    logger.error('Failed to remove item from wishlist:', error)
+    logger.error('Failed to remove item from wishlist:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to remove item' }, { status: 500 })
   }
 }

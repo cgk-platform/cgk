@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     return clearAuthCookie(response)
   } catch (error) {
-    logger.error('Logout error:', error)
+    logger.error('Logout error:', error instanceof Error ? error : new Error(String(error)))
 
     // Still clear the cookie even if there's an error
     const response = Response.json({

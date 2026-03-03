@@ -49,7 +49,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ withdrawals })
   } catch (error) {
-    logger.error('Failed to fetch pending withdrawals:', error)
+    logger.error('Failed to fetch pending withdrawals:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch withdrawals' }, { status: 500 })
   }
 }

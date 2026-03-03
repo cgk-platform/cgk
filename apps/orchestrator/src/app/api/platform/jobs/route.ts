@@ -164,7 +164,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Get platform jobs error:', error)
+    logger.error('Get platform jobs error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get jobs' }, { status: 500 })
   }
 }
@@ -224,7 +224,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Create platform job error:', error)
+    logger.error('Create platform job error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to create job' }, { status: 500 })
   }
 }

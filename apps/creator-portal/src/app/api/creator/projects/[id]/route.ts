@@ -54,7 +54,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       canEdit: canEditProject(project),
     })
   } catch (error) {
-    logger.error('Error fetching project:', error)
+    logger.error('Error fetching project:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch project' }, { status: 500 })
   }
 }
@@ -106,7 +106,7 @@ export async function PATCH(req: Request, { params }: RouteParams): Promise<Resp
 
     return Response.json({ project })
   } catch (error) {
-    logger.error('Error updating project:', error)
+    logger.error('Error updating project:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to update project'
     return Response.json({ error: message }, { status: 400 })
   }

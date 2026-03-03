@@ -35,7 +35,7 @@ export async function GET(
 
     return NextResponse.json({ shipment })
   } catch (error) {
-    logger.error('[shipments/[shipmentId]] GET error:', error)
+    logger.error('[shipments/[shipmentId]] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch shipment' }, { status: 500 })
   }
 }
@@ -98,7 +98,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, shipment })
   } catch (error) {
-    logger.error('[shipments/[shipmentId]] PATCH error:', error)
+    logger.error('[shipments/[shipmentId]] PATCH error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update shipment' }, { status: 500 })
   }
 }

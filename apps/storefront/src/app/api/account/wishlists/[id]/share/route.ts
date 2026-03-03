@@ -97,7 +97,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(response)
   } catch (error) {
-    logger.error('Failed to share wishlist:', error)
+    logger.error('Failed to share wishlist:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to share wishlist' }, { status: 500 })
   }
 }

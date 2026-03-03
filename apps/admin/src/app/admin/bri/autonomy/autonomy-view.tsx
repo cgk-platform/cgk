@@ -13,7 +13,6 @@ import {
 } from 'lucide-react'
 
 import type { AutonomySettings, ActionAutonomy, AutonomyLevel } from '@/lib/bri/types'
-import { logger } from '@cgk-platform/logging'
 
 interface AutonomyViewProps {
   tenantSlug: string
@@ -90,10 +89,10 @@ export function AutonomyView({ initialData }: AutonomyViewProps) {
         body: JSON.stringify({ settings, actions }),
       })
       if (!response.ok) {
-        logger.error('Failed to save')
+        console.error('Failed to save')
       }
     } catch (error) {
-      logger.error('Failed to save autonomy settings:', error)
+      console.error('Failed to save autonomy settings:', error)
     } finally {
       setSaving(false)
     }

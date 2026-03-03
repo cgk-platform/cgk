@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 
 import type { DateRange, UnitEconomicsData } from '@/lib/analytics'
 import { formatCurrency, formatPercent } from '@/lib/format'
-import { logger } from '@cgk-platform/logging'
 
 interface UnitEconomicsTabProps {
   dateRange: DateRange
@@ -28,7 +27,7 @@ export function UnitEconomicsTab({ dateRange }: UnitEconomicsTabProps) {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        logger.error('Failed to fetch unit economics:', error)
+        console.error('Failed to fetch unit economics:', error)
       } finally {
         setLoading(false)
       }

@@ -51,7 +51,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ result })
   } catch (error) {
-    logger.error('Error syncing org chart:', error)
+    logger.error('Error syncing org chart:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to sync org chart' }, { status: 500 })
   }
 }

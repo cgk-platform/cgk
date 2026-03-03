@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   try {
     payload = parseWebhookPayload(body)
   } catch (error) {
-    logger.error('[Mux Webhook] Failed to parse payload:', error)
+    logger.error('[Mux Webhook] Failed to parse payload:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
     },
 
     onAssetErrored: async (assetId: string, error: string) => {
-      logger.error('[Mux Webhook] Asset errored:', assetId, error)
+      logger.error('[Mux Webhook] Asset errored:', assetId, error instanceof Error ? error : new Error(String(error)))
 
       // Find video by asset ID
       const result = await sql`
@@ -192,7 +192,7 @@ export async function POST(request: Request) {
     },
 
     onUploadErrored: async (uploadId: string, error: string) => {
-      logger.error('[Mux Webhook] Upload errored:', uploadId, error)
+      logger.error('[Mux Webhook] Upload errored:', uploadId, error instanceof Error ? error : new Error(String(error)))
 
       // Find video by upload ID
       const result = await sql`

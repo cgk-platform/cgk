@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(stats)
   } catch (error) {
-    logger.error('Error fetching stats:', error)
+    logger.error('Error fetching stats:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch statistics' },
       { status: 500 }

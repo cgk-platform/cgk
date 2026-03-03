@@ -53,7 +53,7 @@ export async function DELETE(
       message: 'Session revoked successfully',
     })
   } catch (error) {
-    logger.error('Error revoking session:', error)
+    logger.error('Error revoking session:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to revoke session' }, { status: 500 })
   }
 }

@@ -196,7 +196,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       redirectUrl: `/order-confirmation/${orderId}`,
     })
   } catch (error) {
-    logger.error('[confirm-order] Error:', error)
+    logger.error('[confirm-order] Error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create order' },
       { status: 500 }

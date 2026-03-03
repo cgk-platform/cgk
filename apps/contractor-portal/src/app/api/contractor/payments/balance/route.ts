@@ -34,7 +34,7 @@ export async function GET(req: Request) {
       },
     })
   } catch (error) {
-    logger.error('Error fetching balance:', error)
+    logger.error('Error fetching balance:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch balance' },
       { status: 500 }

@@ -6,7 +6,6 @@ import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import { UserAvatar } from '../../../../../components/users'
-import { logger } from '@cgk-platform/logging'
 
 interface UserActivityEntry {
   id: string
@@ -136,7 +135,7 @@ export default function UserActivityPage(): React.JSX.Element {
       setPage(nextPage)
       setHasMore(data.activity.length === 50)
     } catch (err) {
-      logger.error('Failed to load more:', err)
+      console.error('Failed to load more:', err)
     } finally {
       setLoadingMore(false)
     }

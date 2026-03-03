@@ -43,7 +43,7 @@ export async function GET(
       stats,
     })
   } catch (error) {
-    logger.error('Error fetching template:', error)
+    logger.error('Error fetching template:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch template' },
       { status: 500 }
@@ -94,7 +94,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
   } catch (error) {
-    logger.error('Error with template action:', error)
+    logger.error('Error with template action:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to perform action' },
       { status: 500 }
@@ -121,7 +121,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error archiving template:', error)
+    logger.error('Error archiving template:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to archive template' },
       { status: 500 }

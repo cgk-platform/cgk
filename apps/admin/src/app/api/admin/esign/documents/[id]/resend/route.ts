@@ -42,7 +42,7 @@ export async function POST(
 
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error resending document:', error)
+    logger.error('Error resending document:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to resend document' },
       { status: 500 }

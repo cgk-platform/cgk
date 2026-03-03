@@ -64,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     await assignTicket(tenantId, ticketId, input.agentId, auth.userId, auth.email)
     return NextResponse.json({ success: true, agentId: input.agentId })
   } catch (error) {
-    logger.error('Error assigning ticket:', error)
+    logger.error('Error assigning ticket:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to assign ticket' },
       { status: 500 }
@@ -96,7 +96,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     await unassignTicket(tenantId, ticketId, auth.userId, auth.email)
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error unassigning ticket:', error)
+    logger.error('Error unassigning ticket:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to unassign ticket' },
       { status: 500 }

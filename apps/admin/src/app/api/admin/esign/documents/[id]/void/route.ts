@@ -39,7 +39,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error voiding document:', error)
+    logger.error('Error voiding document:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to void document' },
       { status: 500 }

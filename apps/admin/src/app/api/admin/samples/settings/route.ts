@@ -50,7 +50,7 @@ export async function GET() {
       updatedAt: config.updated_at,
     })
   } catch (error) {
-    logger.error('Failed to fetch samples config:', error)
+    logger.error('Failed to fetch samples config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch samples config' }, { status: 500 })
   }
 }
@@ -117,7 +117,7 @@ export async function PATCH(req: Request) {
       updatedAt: config.updated_at,
     })
   } catch (error) {
-    logger.error('Failed to update samples config:', error)
+    logger.error('Failed to update samples config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update samples config' }, { status: 500 })
   }
 }

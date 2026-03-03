@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const config = await getCommissionConfig(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('Error fetching commission config:', error)
+    logger.error('Error fetching commission config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch commission config' },
       { status: 500 }
@@ -71,7 +71,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true, config })
   } catch (error) {
-    logger.error('Error updating commission config:', error)
+    logger.error('Error updating commission config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update commission config' },
       { status: 500 }

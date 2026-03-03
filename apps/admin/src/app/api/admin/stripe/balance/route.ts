@@ -61,7 +61,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(balance)
   } catch (error) {
-    logger.error('Failed to fetch Stripe balance:', error)
+    logger.error('Failed to fetch Stripe balance:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch balance' }, { status: 500 })
   }
 }
@@ -140,7 +140,7 @@ export async function POST(req: Request) {
       },
     })
   } catch (error) {
-    logger.error('Failed to create top-up:', error)
+    logger.error('Failed to create top-up:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to create top-up' }, { status: 500 })
   }
 }

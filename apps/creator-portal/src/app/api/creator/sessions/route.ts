@@ -43,7 +43,7 @@ export async function GET(req: Request): Promise<Response> {
       })),
     })
   } catch (error) {
-    logger.error('Error fetching sessions:', error)
+    logger.error('Error fetching sessions:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch sessions' }, { status: 500 })
   }
 }
@@ -73,7 +73,7 @@ export async function DELETE(req: Request): Promise<Response> {
       revokedCount,
     })
   } catch (error) {
-    logger.error('Error revoking sessions:', error)
+    logger.error('Error revoking sessions:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to revoke sessions' }, { status: 500 })
   }
 }

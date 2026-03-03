@@ -58,7 +58,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    logger.error('Error updating A/B test:', error)
+    logger.error('Error updating A/B test:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update A/B test' },
       { status: 500 }
@@ -89,7 +89,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting A/B test:', error)
+    logger.error('Error deleting A/B test:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to delete A/B test' },
       { status: 500 }

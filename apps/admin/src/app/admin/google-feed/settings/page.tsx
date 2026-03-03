@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface GoogleFeedSettings {
   id: string
@@ -112,7 +111,7 @@ export default function GoogleFeedSettingsPage() {
           }
         }
       } catch (error) {
-        logger.error('Failed to load settings:', error)
+        console.error('Failed to load settings:', error)
       } finally {
         setLoading(false)
       }
@@ -137,7 +136,7 @@ export default function GoogleFeedSettingsPage() {
         setSettings(updatedSettings)
       }
     } catch (error) {
-      logger.error('Failed to save:', error)
+      console.error('Failed to save:', error)
     } finally {
       setSaving(false)
     }

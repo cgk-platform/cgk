@@ -56,7 +56,7 @@ export async function GET(req: Request) {
         : null,
     })
   } catch (error) {
-    logger.error('Error fetching tax info:', error)
+    logger.error('Error fetching tax info:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch tax info' },
       { status: 500 }
@@ -211,7 +211,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    logger.error('Error submitting W-9:', error)
+    logger.error('Error submitting W-9:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to submit W-9' },
       { status: 500 }

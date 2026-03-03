@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react'
 import { SEONav } from '@/components/admin/seo/SEONav'
 import { SchemaValidation, SchemaValidationSummary } from '@/components/admin/seo/SchemaValidation'
 import type { SchemaValidationResult } from '@/lib/seo/types'
-import { logger } from '@cgk-platform/logging'
 
 export default function SchemaPage() {
   const [results, setResults] = useState<SchemaValidationResult[]>([])
@@ -40,7 +39,7 @@ export default function SchemaPage() {
           setResults(resultsData.results)
         }
       } catch (err) {
-        logger.error('Failed to fetch schema validation:', err)
+        console.error('Failed to fetch schema validation:', err)
       } finally {
         setIsLoading(false)
       }

@@ -60,7 +60,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('[support/chat/read] POST error:', error)
+    logger.error('[support/chat/read] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to mark messages as read' },
       { status: 500 }

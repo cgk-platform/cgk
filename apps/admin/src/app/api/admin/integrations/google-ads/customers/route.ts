@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       selectedName: connection.selectedCustomerName,
     })
   } catch (error) {
-    logger.error('Failed to get Google Ads customers:', error)
+    logger.error('Failed to get Google Ads customers:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get customers' },
       { status: 500 }

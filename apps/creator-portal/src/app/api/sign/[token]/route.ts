@@ -110,7 +110,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       hasExistingSignature: !!session.existingSignature,
     })
   } catch (error) {
-    logger.error('Error fetching signing session:', error)
+    logger.error('Error fetching signing session:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to load document' }, { status: 500 })
   }
 }
@@ -159,7 +159,7 @@ export async function POST(req: Request, { params }: RouteParams): Promise<Respo
       document: result.document,
     })
   } catch (error) {
-    logger.error('Error signing document:', error)
+    logger.error('Error signing document:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to sign document'
     return Response.json({ error: message }, { status: 500 })
   }
@@ -200,7 +200,7 @@ export async function DELETE(req: Request, { params }: RouteParams): Promise<Res
       message: 'Document declined',
     })
   } catch (error) {
-    logger.error('Error declining document:', error)
+    logger.error('Error declining document:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to decline document'
     return Response.json({ error: message }, { status: 500 })
   }

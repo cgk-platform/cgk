@@ -63,7 +63,7 @@ export async function DELETE() {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Failed to disconnect Slack:', error)
+    logger.error('Failed to disconnect Slack:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to disconnect Slack' },
       { status: 500 },

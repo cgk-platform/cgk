@@ -3,7 +3,6 @@
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface ProductData {
   product: {
@@ -104,7 +103,7 @@ export default function GoogleFeedProductDetailPage() {
           })
         }
       } catch (error) {
-        logger.error('Failed to load product:', error)
+        console.error('Failed to load product:', error)
       } finally {
         setLoading(false)
       }
@@ -125,7 +124,7 @@ export default function GoogleFeedProductDetailPage() {
         setData((prev) => prev ? { ...prev, feedData: updated.feedProduct } : null)
       }
     } catch (error) {
-      logger.error('Failed to save:', error)
+      console.error('Failed to save:', error)
     } finally {
       setSaving(false)
     }
@@ -140,7 +139,7 @@ export default function GoogleFeedProductDetailPage() {
       })
       window.location.reload()
     } catch (error) {
-      logger.error('Failed to exclude:', error)
+      console.error('Failed to exclude:', error)
     }
   }
 
@@ -151,7 +150,7 @@ export default function GoogleFeedProductDetailPage() {
       })
       window.location.reload()
     } catch (error) {
-      logger.error('Failed to include:', error)
+      console.error('Failed to include:', error)
     }
   }
 

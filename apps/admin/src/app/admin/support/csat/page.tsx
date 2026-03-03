@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@cgk-platform/ui'
 
 import type { AgentCSATScore, CSATMetrics } from '@cgk-platform/support'
-import { logger } from '@cgk-platform/logging'
 
 export default function CSATDashboardPage() {
   const [metrics, setMetrics] = useState<CSATMetrics | null>(null)
@@ -31,7 +30,7 @@ export default function CSATDashboardPage() {
           setAgentScores(data.scores)
         }
       } catch (error) {
-        logger.error('Failed to fetch CSAT data:', error)
+        console.error('Failed to fetch CSAT data:', error)
       } finally {
         setLoading(false)
       }

@@ -62,7 +62,7 @@ export async function POST(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Reset password error:', error)
+    logger.error('Reset password error:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Password reset failed'
     return Response.json({ error: message }, { status: 400 })
   }

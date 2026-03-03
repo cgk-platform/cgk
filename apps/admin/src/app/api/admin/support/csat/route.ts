@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       config,
     })
   } catch (error) {
-    logger.error('[csat] GET error:', error)
+    logger.error('[csat] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch CSAT metrics' },
       { status: 500 }
@@ -122,7 +122,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ config })
   } catch (error) {
-    logger.error('[csat] PATCH error:', error)
+    logger.error('[csat] PATCH error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update CSAT config' },
       { status: 500 }

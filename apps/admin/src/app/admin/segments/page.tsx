@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react'
 
 import { formatDate, formatNumber, formatPercent } from '@/lib/format'
 import { RFM_SEGMENT_INFO, type RfmSegmentType } from '@/lib/segments/types'
-import { logger } from '@cgk-platform/logging'
 
 interface RfmSegmentStat {
   segment: RfmSegmentType
@@ -78,7 +77,7 @@ export default function SegmentsPage() {
         setRfmDistribution(data)
       }
     } catch (error) {
-      logger.error('Failed to fetch segments:', error)
+      console.error('Failed to fetch segments:', error)
     } finally {
       setIsLoading(false)
     }
@@ -96,7 +95,7 @@ export default function SegmentsPage() {
         await fetchData()
       }
     } catch (error) {
-      logger.error('Failed to sync Shopify segments:', error)
+      console.error('Failed to sync Shopify segments:', error)
     } finally {
       setIsSyncing(false)
     }
@@ -114,7 +113,7 @@ export default function SegmentsPage() {
         await fetchData()
       }
     } catch (error) {
-      logger.error('Failed to calculate RFM:', error)
+      console.error('Failed to calculate RFM:', error)
     } finally {
       setIsCalculating(false)
     }

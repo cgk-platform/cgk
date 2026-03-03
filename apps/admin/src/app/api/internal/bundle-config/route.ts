@@ -135,7 +135,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('[bundle-config] Upsert failed:', error)
+    logger.error('[bundle-config] Upsert failed:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to save bundle config' },
       { status: 500 }

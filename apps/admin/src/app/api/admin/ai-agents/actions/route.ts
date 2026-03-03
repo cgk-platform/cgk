@@ -80,7 +80,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ actions })
   } catch (error) {
-    logger.error('Error fetching actions:', error)
+    logger.error('Error fetching actions:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch actions' }, { status: 500 })
   }
 }

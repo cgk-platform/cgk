@@ -93,7 +93,7 @@ export async function POST(
       entry: updatedEntry,
     })
   } catch (error) {
-    logger.error('[email-queues] skip error:', error)
+    logger.error('[email-queues] skip error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to skip entry' },
       { status: 500 }

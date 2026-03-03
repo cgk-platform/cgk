@@ -54,7 +54,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Error fetching templates:', error)
+    logger.error('Error fetching templates:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch templates' },
       { status: 500 }
@@ -92,7 +92,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ template }, { status: 201 })
   } catch (error) {
-    logger.error('Error creating template:', error)
+    logger.error('Error creating template:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create template' },
       { status: 500 }

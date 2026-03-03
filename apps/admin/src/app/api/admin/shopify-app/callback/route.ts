@@ -76,7 +76,7 @@ export async function GET(request: Request) {
       new URL('/admin/integrations/shopify-app?success=connected', appUrl)
     )
   } catch (error) {
-    logger.error('[shopify-oauth] Callback error:', error)
+    logger.error('[shopify-oauth] Callback error:', error instanceof Error ? error : new Error(String(error)))
 
     if (error instanceof ShopifyError) {
       return NextResponse.redirect(

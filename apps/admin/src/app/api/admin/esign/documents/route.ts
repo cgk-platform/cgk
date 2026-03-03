@@ -73,7 +73,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Error fetching documents:', error)
+    logger.error('Error fetching documents:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch documents' },
       { status: 500 }
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
       signersToNotify: result.signers_to_notify.map((s: { email: string }) => s.email),
     }, { status: 201 })
   } catch (error) {
-    logger.error('Error creating document:', error)
+    logger.error('Error creating document:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to create document'
     return NextResponse.json({ error: message }, { status: 500 })
   }

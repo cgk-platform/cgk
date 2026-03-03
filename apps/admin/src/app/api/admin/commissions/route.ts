@@ -65,7 +65,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    logger.error('Error fetching commissions:', error)
+    logger.error('Error fetching commissions:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch commissions' },
       { status: 500 }

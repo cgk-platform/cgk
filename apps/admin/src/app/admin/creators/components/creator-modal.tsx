@@ -6,7 +6,6 @@ import { useEffect, useState, useCallback } from 'react'
 
 import type { CreatorProfile, CreatorStatus, CreatorTier } from '@/lib/creators/types'
 import { CREATOR_STATUSES, CREATOR_TIERS } from '@/lib/creators/types'
-import { logger } from '@cgk-platform/logging'
 
 interface CreatorModalProps {
   mode: 'create' | 'edit'
@@ -66,7 +65,7 @@ export function CreatorModal({ mode, creatorId, onClose, onSuccess }: CreatorMod
           }
         })
         .catch((error) => {
-          logger.error('[creator-modal] Failed to load creator:', error)
+          console.error('[creator-modal] Failed to load creator:', error)
           setError('Failed to load creator')
         })
         .finally(() => setIsLoading(false))

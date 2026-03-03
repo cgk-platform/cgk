@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ chart, stats })
   } catch (error) {
-    logger.error('Error fetching org chart:', error)
+    logger.error('Error fetching org chart:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch org chart' }, { status: 500 })
   }
 }

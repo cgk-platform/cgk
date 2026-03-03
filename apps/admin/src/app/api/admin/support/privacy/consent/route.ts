@@ -93,7 +93,7 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    logger.error('[privacy/consent] GET error:', error)
+    logger.error('[privacy/consent] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch consent records' },
       { status: 500 }

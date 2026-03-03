@@ -111,7 +111,7 @@ export async function POST(request: Request) {
       csv,
     })
   } catch (error) {
-    logger.error('Error bulk creating promo codes:', error)
+    logger.error('Error bulk creating promo codes:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to bulk create promo codes' },
       { status: 500 },

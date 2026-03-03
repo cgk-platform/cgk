@@ -159,7 +159,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Error fetching dashboard data:', error)
+    logger.error('Error fetching dashboard data:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch dashboard data' }, { status: 500 })
   }
 }

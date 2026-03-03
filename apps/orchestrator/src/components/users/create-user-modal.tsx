@@ -18,7 +18,6 @@ import {
 } from '@cgk-platform/ui'
 import { UserPlus, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface Organization {
   id: string
@@ -62,7 +61,7 @@ export function CreateUserModal({ open, onOpenChange, onSuccess }: CreateUserMod
         setOrganizations(data.organizations || [])
       }
     } catch (err) {
-      logger.error('Failed to fetch organizations:', err)
+      console.error('Failed to fetch organizations:', err)
     } finally {
       setLoadingOrgs(false)
     }

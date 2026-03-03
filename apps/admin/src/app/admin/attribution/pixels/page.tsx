@@ -31,7 +31,6 @@ import {
 import { useEffect, useState, useCallback } from 'react'
 
 import type { PixelHealthMetrics, PixelEvent, MetaEMQMetrics, PixelPlatform } from '@/lib/attribution'
-import { logger } from '@cgk-platform/logging'
 
 interface PixelStats {
   health: PixelHealthMetrics[]
@@ -76,7 +75,7 @@ export default function PixelsPage() {
       setEventsTotal(eventsData.total)
     } catch (err) {
       setError('Failed to load pixel data')
-      logger.error(err)
+      console.error(err)
     } finally {
       setIsLoading(false)
     }

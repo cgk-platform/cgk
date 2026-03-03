@@ -48,7 +48,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ actionAutonomy })
   } catch (error) {
-    logger.error('Error fetching action autonomy:', error)
+    logger.error('Error fetching action autonomy:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch action autonomy' }, { status: 500 })
   }
 }
@@ -105,7 +105,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ actionAutonomy })
   } catch (error) {
-    logger.error('Error updating action autonomy:', error)
+    logger.error('Error updating action autonomy:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to update action autonomy' }, { status: 500 })
   }
 }

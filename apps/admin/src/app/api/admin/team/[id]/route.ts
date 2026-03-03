@@ -51,7 +51,7 @@ export async function GET(
 
     return NextResponse.json({ member })
   } catch (error) {
-    logger.error('Error fetching team member:', error)
+    logger.error('Error fetching team member:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch team member' },
       { status: 500 }
@@ -122,7 +122,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, role: body.role })
   } catch (error) {
-    logger.error('Error updating member role:', error)
+    logger.error('Error updating member role:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to update role'
     return NextResponse.json({ error: message }, { status: 500 })
   }
@@ -171,7 +171,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error removing team member:', error)
+    logger.error('Error removing team member:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to remove member'
     return NextResponse.json({ error: message }, { status: 500 })
   }

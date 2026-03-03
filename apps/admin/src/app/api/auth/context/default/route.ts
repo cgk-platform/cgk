@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       )
     }
 
-    logger.error('Set default tenant error:', error)
+    logger.error('Set default tenant error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to set default tenant' },
       { status: 500 }

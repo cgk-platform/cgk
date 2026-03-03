@@ -22,7 +22,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 
 import type { NavItem } from '../../types/platform'
-import { logger } from '@cgk-platform/logging'
 
 interface SidebarProps {
   /** Whether MFA is verified for current session */
@@ -141,7 +140,7 @@ export function Sidebar({ mfaVerified = false, userName, userEmail }: SidebarPro
       await fetch('/api/platform/auth/logout', { method: 'POST' })
       router.push('/login')
     } catch {
-      logger.error('Logout failed')
+      console.error('Logout failed')
     }
   }, [router])
 

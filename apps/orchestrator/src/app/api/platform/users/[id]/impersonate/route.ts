@@ -193,7 +193,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    logger.error('Start impersonation error:', error)
+    logger.error('Start impersonation error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to start impersonation' },
       { status: 500 }
@@ -237,7 +237,7 @@ export async function GET(request: Request, _params: RouteParams) {
 
     return Response.json({ sessions: enrichedSessions })
   } catch (error) {
-    logger.error('Get impersonation sessions error:', error)
+    logger.error('Get impersonation sessions error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to get impersonation sessions' },
       { status: 500 }
@@ -273,7 +273,7 @@ export async function DELETE(request: Request, _params: RouteParams) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('End impersonation error:', error)
+    logger.error('End impersonation error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to end impersonation' },
       { status: 500 }

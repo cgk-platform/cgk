@@ -39,7 +39,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     const result = await getComments(tenantId, ticketId, includeInternal, page, limit)
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching comments:', error)
+    logger.error('Error fetching comments:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch comments' },
       { status: 500 }
@@ -99,7 +99,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(comment, { status: 201 })
   } catch (error) {
-    logger.error('Error adding comment:', error)
+    logger.error('Error adding comment:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to add comment' },
       { status: 500 }

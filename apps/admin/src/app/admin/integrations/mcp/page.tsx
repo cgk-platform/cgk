@@ -19,7 +19,6 @@ import { useEffect, useState } from 'react'
 
 import { ConnectionStatusBadge } from '@/components/integrations'
 import type { McpApiKey, McpCapability } from '@/lib/integrations/types'
-import { logger } from '@cgk-platform/logging'
 
 const MCP_CAPABILITIES: McpCapability[] = [
   { id: 'blog', icon: '📝', title: 'Blog', description: 'Create & manage posts', toolCount: 5 },
@@ -59,7 +58,7 @@ export default function McpPage() {
         setStatus(data)
       }
     } catch (error) {
-      logger.error('Failed to fetch MCP status:', error)
+      console.error('Failed to fetch MCP status:', error)
     } finally {
       setLoading(false)
     }
@@ -87,7 +86,7 @@ export default function McpPage() {
         await fetchStatus()
       }
     } catch (error) {
-      logger.error('Failed to create key:', error)
+      console.error('Failed to create key:', error)
     } finally {
       setCreatingKey(false)
     }
@@ -102,7 +101,7 @@ export default function McpPage() {
       })
       await fetchStatus()
     } catch (error) {
-      logger.error('Failed to revoke key:', error)
+      console.error('Failed to revoke key:', error)
     }
   }
 

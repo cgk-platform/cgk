@@ -75,7 +75,7 @@ export async function POST(
 
     return NextResponse.json({ session: updatedSession })
   } catch (error) {
-    logger.error('[chat/assign] POST error:', error)
+    logger.error('[chat/assign] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to assign agent' },
       { status: 500 }

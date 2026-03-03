@@ -23,7 +23,6 @@ import {
   validateStep,
   type ValidationErrors,
 } from '../../lib/onboarding/validation'
-import { logger } from '@cgk-platform/logging'
 
 interface OnboardingFormProps {
   tenantSlug: string  // Used for future tenant-specific features
@@ -67,7 +66,7 @@ export function OnboardingForm({
           setSettings(data.settings)
         }
       } catch (error) {
-        logger.error('Failed to load settings:', error)
+        console.error('Failed to load settings:', error)
       }
     }
     loadSettings()
@@ -100,7 +99,7 @@ export function OnboardingForm({
             }
           }
         } catch (error) {
-          logger.error('Failed to check for draft:', error)
+          console.error('Failed to check for draft:', error)
         }
       }
 
@@ -139,7 +138,7 @@ export function OnboardingForm({
           setSaveStatus('error')
         }
       } catch (error) {
-        logger.error('Failed to save draft:', error)
+        console.error('Failed to save draft:', error)
         setSaveStatus('error')
       }
     }, 1500)
@@ -269,7 +268,7 @@ export function OnboardingForm({
         }
       }
     } catch (error) {
-      logger.error('Failed to submit application:', error)
+      console.error('Failed to submit application:', error)
       setErrors({ submit: 'An unexpected error occurred. Please try again.' })
     } finally {
       setIsSubmitting(false)

@@ -60,7 +60,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    logger.error('Error processing Retell webhook:', error)
+    logger.error('Error processing Retell webhook:', error instanceof Error ? error : new Error(String(error)))
     // Return 200 to prevent Retell from retrying
     // Log the error for investigation
     return NextResponse.json({ received: true, error: 'Processing failed' })

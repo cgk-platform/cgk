@@ -59,7 +59,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, request: sampleRequest })
   } catch (error) {
-    logger.error('Error updating sample request:', error)
+    logger.error('Error updating sample request:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update sample request' },
       { status: 500 }
@@ -91,7 +91,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting sample request:', error)
+    logger.error('Error deleting sample request:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to delete sample request' },
       { status: 500 }

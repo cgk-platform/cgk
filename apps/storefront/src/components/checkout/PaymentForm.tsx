@@ -6,7 +6,6 @@ import {
   useElements,
 } from '@stripe/react-stripe-js'
 import { useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface PaymentFormProps {
   onSuccess: () => void
@@ -65,7 +64,7 @@ export function PaymentForm({ onSuccess, onBack }: PaymentFormProps) {
       // Payment succeeded without redirect
       onSuccess()
     } catch (err) {
-      logger.error('Payment error:', err)
+      console.error('Payment error:', err)
       setError('An error occurred while processing your payment')
       setIsProcessing(false)
     }

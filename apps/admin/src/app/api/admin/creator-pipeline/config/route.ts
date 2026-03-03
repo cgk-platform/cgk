@@ -24,7 +24,7 @@ export async function GET() {
     const config = await getPipelineConfig(tenantSlug)
     return Response.json(config)
   } catch (error) {
-    logger.error('Pipeline config error:', error)
+    logger.error('Pipeline config error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch pipeline config' },
       { status: 500 }
@@ -51,7 +51,7 @@ export async function PATCH(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Pipeline config update error:', error)
+    logger.error('Pipeline config update error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to update pipeline config' },
       { status: 500 }

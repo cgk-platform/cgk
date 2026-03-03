@@ -69,7 +69,7 @@ export async function GET(request: Request): Promise<Response> {
             )
           )
         } catch (error) {
-          logger.error('Error polling for alerts:', error)
+          logger.error('Error polling for alerts:', error instanceof Error ? error : new Error(String(error)))
           controller.enqueue(
             encoder.encode(
               `event: error\ndata: ${JSON.stringify({ error: 'Failed to fetch alerts' })}\n\n`

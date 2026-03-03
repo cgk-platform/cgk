@@ -30,7 +30,7 @@ export async function GET(
 
     return NextResponse.json({ application })
   } catch (error) {
-    logger.error('Error fetching application:', error)
+    logger.error('Error fetching application:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch application' },
       { status: 500 }

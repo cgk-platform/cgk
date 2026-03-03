@@ -57,7 +57,7 @@ export async function GET(request: Request) {
     const result = await getTickets(tenantId, filters)
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching tickets:', error)
+    logger.error('Error fetching tickets:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch tickets' },
       { status: 500 }
@@ -129,7 +129,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(ticket, { status: 201 })
   } catch (error) {
-    logger.error('Error creating ticket:', error)
+    logger.error('Error creating ticket:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create ticket' },
       { status: 500 }

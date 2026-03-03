@@ -53,7 +53,7 @@ export async function PATCH(
 
     return Response.json({ success: true, project })
   } catch (error) {
-    logger.error('Status update error:', error)
+    logger.error('Status update error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to update project status' },
       { status: 500 }

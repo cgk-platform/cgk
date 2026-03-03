@@ -66,7 +66,7 @@ export async function GET(request: Request) {
       stats: result.stats,
     })
   } catch (error) {
-    logger.error('Failed to fetch abandoned checkouts:', error)
+    logger.error('Failed to fetch abandoned checkouts:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch abandoned checkouts' },
       { status: 500 },

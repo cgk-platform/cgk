@@ -5,7 +5,6 @@ import { Button, Card, CardContent, CardHeader, Select, SelectOption, cn } from 
 
 import type { PeriodType, PLBreakdown } from '@/lib/analytics'
 import { formatCurrency, formatPercent } from '@/lib/format'
-import { logger } from '@cgk-platform/logging'
 
 export default function PLBreakdownPage() {
   const [periodType, setPeriodType] = useState<PeriodType>('monthly')
@@ -26,7 +25,7 @@ export default function PLBreakdownPage() {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        logger.error('Failed to fetch P&L data:', error)
+        console.error('Failed to fetch P&L data:', error)
       } finally {
         setLoading(false)
       }

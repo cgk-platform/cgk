@@ -101,7 +101,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(taxStatus)
   } catch (error) {
-    logger.error('Error fetching tax status:', error)
+    logger.error('Error fetching tax status:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch tax status' },
       { status: 500 }
@@ -214,7 +214,7 @@ export async function POST(request: Request) {
       status: 'approved', // W-9 is approved immediately after validation
     })
   } catch (error) {
-    logger.error('Error saving W-9:', error)
+    logger.error('Error saving W-9:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to save W-9'
     return NextResponse.json({ error: message }, { status: 400 })
   }

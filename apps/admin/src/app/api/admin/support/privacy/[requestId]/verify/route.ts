@@ -67,7 +67,7 @@ export async function POST(
 
     return NextResponse.json({ request })
   } catch (error) {
-    logger.error('[privacy/verify] POST error:', error)
+    logger.error('[privacy/verify] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to verify request' },
       { status: 500 }

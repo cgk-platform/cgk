@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation'
 import { SEONav } from '@/components/admin/seo/SEONav'
 import { RedirectManager } from '@/components/admin/seo/RedirectManager'
 import type { SEORedirect, CreateRedirectInput, UpdateRedirectInput } from '@/lib/seo/types'
-import { logger } from '@cgk-platform/logging'
 
 export default function RedirectsPage() {
   const searchParams = useSearchParams()
@@ -32,7 +31,7 @@ export default function RedirectsPage() {
       setRedirects(data.redirects)
       setTotalCount(data.pagination.totalCount)
     } catch (err) {
-      logger.error('Failed to fetch redirects:', err)
+      console.error('Failed to fetch redirects:', err)
     } finally {
       setIsLoading(false)
     }

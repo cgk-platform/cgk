@@ -57,7 +57,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Error fetching team members:', error)
+    logger.error('Error fetching team members:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch team members' },
       { status: 500 }

@@ -109,7 +109,7 @@ export async function POST(request: Request) {
       }
     )
   } catch (error) {
-    logger.error('Signin error:', error)
+    logger.error('Signin error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Sign in failed' }, { status: 500 })
   }
 }

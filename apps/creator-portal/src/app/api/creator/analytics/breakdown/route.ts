@@ -212,7 +212,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Error fetching breakdown data:', error)
+    logger.error('Error fetching breakdown data', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch breakdown data' }, { status: 500 })
   }
 }

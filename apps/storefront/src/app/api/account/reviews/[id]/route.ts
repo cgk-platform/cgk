@@ -305,7 +305,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       status: existingReview.rows[0] ? 200 : 201,
     })
   } catch (error) {
-    logger.error('Failed to save review:', error)
+    logger.error('Failed to save review:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to save review' }, { status: 500 })
   }
 }

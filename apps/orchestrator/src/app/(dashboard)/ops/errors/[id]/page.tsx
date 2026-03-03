@@ -14,7 +14,6 @@ import {
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface ErrorMetadata {
   url?: string
@@ -88,7 +87,7 @@ export default function ErrorDetailPage() {
         setFetchError('Failed to fetch error details')
       }
     } catch (err) {
-      logger.error('Failed to fetch error:', err)
+      console.error('Failed to fetch error:', err)
       setFetchError('Failed to fetch error details')
     } finally {
       setIsLoading(false)
@@ -112,7 +111,7 @@ export default function ErrorDetailPage() {
         await fetchErrorDetail()
       }
     } catch (err) {
-      logger.error('Failed to update error:', err)
+      console.error('Failed to update error:', err)
     } finally {
       setActionLoading(false)
     }

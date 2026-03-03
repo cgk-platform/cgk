@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    logger.error('[csat/surveys] GET error:', error)
+    logger.error('[csat/surveys] GET error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch surveys' },
       { status: 500 }
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ survey }, { status: 201 })
   } catch (error) {
-    logger.error('[csat/surveys] POST error:', error)
+    logger.error('[csat/surveys] POST error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create survey' },
       { status: 500 }

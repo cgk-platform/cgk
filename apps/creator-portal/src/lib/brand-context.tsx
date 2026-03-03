@@ -10,7 +10,6 @@
 import * as React from 'react'
 
 import type { BrandMembership, MembershipStatus } from './types'
-import { logger } from '@cgk-platform/logging'
 
 // Cookie name for persisting selected brand
 const SELECTED_BRAND_COOKIE = 'cgk_creator_selected_brand'
@@ -166,7 +165,7 @@ export function BrandProvider({
         setError('Failed to fetch brands')
       }
     } catch (err) {
-      logger.error('Failed to fetch brands:', err)
+      console.error('Failed to fetch brands:', err)
       setError('Failed to fetch brands')
     } finally {
       setIsLoading(false)

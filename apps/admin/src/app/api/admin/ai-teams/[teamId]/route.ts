@@ -54,7 +54,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ team, members })
   } catch (error) {
-    logger.error('Error fetching AI team:', error)
+    logger.error('Error fetching AI team:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch AI team' }, { status: 500 })
   }
 }
@@ -101,7 +101,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ team })
   } catch (error) {
-    logger.error('Error updating AI team:', error)
+    logger.error('Error updating AI team:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to update AI team'
     return NextResponse.json({ error: message }, { status: 500 })
   }
@@ -148,7 +148,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting AI team:', error)
+    logger.error('Error deleting AI team:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to delete AI team' }, { status: 500 })
   }
 }

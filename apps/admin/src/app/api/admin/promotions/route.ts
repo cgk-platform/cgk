@@ -57,7 +57,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    logger.error('Error fetching promotions:', error)
+    logger.error('Error fetching promotions:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch promotions' },
       { status: 500 },
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
       { status: 201 },
     )
   } catch (error) {
-    logger.error('Error creating promotion:', error)
+    logger.error('Error creating promotion:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create promotion' },
       { status: 500 },

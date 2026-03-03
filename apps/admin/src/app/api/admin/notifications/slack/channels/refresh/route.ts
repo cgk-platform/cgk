@@ -40,7 +40,7 @@ export async function POST() {
 
     return NextResponse.json({ channels })
   } catch (error) {
-    logger.error('Failed to refresh Slack channels:', error)
+    logger.error('Failed to refresh Slack channels:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to refresh channels' },
       { status: 500 },

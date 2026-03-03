@@ -77,7 +77,7 @@ export async function GET(req: Request): Promise<Response> {
 
     return Response.json({ settings })
   } catch (error) {
-    logger.error('Error fetching notification settings:', error)
+    logger.error('Error fetching notification settings:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch settings' }, { status: 500 })
   }
 }
@@ -150,7 +150,7 @@ export async function PATCH(req: Request): Promise<Response> {
       message: 'Notification preferences saved',
     })
   } catch (error) {
-    logger.error('Error updating notification settings:', error)
+    logger.error('Error updating notification settings:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update settings' }, { status: 500 })
   }
 }

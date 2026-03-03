@@ -106,7 +106,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error sending reminder:', error)
+    logger.error('Error sending reminder:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to send reminder' },
       { status: 500 }

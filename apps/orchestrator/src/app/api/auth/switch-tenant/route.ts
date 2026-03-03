@@ -125,7 +125,7 @@ export async function POST(request: Request) {
 
     return setAuthCookie(response, jwt)
   } catch (error) {
-    logger.error('Switch tenant error:', error)
+    logger.error('Switch tenant error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to switch tenant' },
       { status: 500 }

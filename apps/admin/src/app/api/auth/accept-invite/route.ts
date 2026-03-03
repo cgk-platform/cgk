@@ -100,7 +100,7 @@ export async function POST(request: Request) {
 
     return response
   } catch (error) {
-    logger.error('Error accepting invitation:', error)
+    logger.error('Error accepting invitation:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to accept invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }

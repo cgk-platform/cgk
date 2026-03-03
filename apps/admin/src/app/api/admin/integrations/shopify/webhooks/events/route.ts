@@ -66,7 +66,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('[API] Failed to get webhook events:', error)
+    logger.error('[API] Failed to get webhook events:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to get webhook events' },
       { status: 500 }

@@ -64,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    logger.error('Error closing ticket:', error)
+    logger.error('Error closing ticket:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to close ticket' },
       { status: 500 }

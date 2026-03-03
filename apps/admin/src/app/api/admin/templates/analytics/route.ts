@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(analytics)
   } catch (error) {
-    logger.error('Error fetching template analytics:', error)
+    logger.error('Error fetching template analytics:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch template analytics' },
       { status: 500 }

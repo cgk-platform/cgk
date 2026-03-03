@@ -38,7 +38,7 @@ export async function GET(request: Request) {
       slaConfigs,
     })
   } catch (error) {
-    logger.error('Error fetching analytics:', error)
+    logger.error('Error fetching analytics:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },
       { status: 500 }

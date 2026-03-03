@@ -11,7 +11,6 @@ import {
   type FulfillmentStatus,
   type SampleType,
 } from '@/lib/samples/types'
-import { logger } from '@cgk-platform/logging'
 
 interface SampleOrder {
   orderId: string
@@ -91,7 +90,7 @@ export default function SamplesOrdersPage() {
         setCurrentPage(page)
       }
     } catch (error) {
-      logger.error('Failed to fetch samples:', error)
+      console.error('Failed to fetch samples:', error)
     } finally {
       setIsLoading(false)
     }
@@ -105,7 +104,7 @@ export default function SamplesOrdersPage() {
         setStats(data)
       }
     } catch (error) {
-      logger.error('Failed to fetch stats:', error)
+      console.error('Failed to fetch stats:', error)
     }
   }
 
@@ -117,7 +116,7 @@ export default function SamplesOrdersPage() {
         setConfig(data)
       }
     } catch (error) {
-      logger.error('Failed to fetch config:', error)
+      console.error('Failed to fetch config:', error)
     }
   }
 
@@ -162,7 +161,7 @@ export default function SamplesOrdersPage() {
         fetchStats()
       }
     } catch (error) {
-      logger.error('Failed to save settings:', error)
+      console.error('Failed to save settings:', error)
     } finally {
       setIsSavingSettings(false)
     }

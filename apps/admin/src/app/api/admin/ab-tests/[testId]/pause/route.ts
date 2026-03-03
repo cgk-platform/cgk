@@ -43,7 +43,7 @@ export async function POST(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ test: updatedTest })
   } catch (error) {
-    logger.error('Error pausing A/B test:', error)
+    logger.error('Error pausing A/B test:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to pause A/B test' },
       { status: 500 }

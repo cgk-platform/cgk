@@ -78,7 +78,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return Response.json({ job })
   } catch (error) {
-    logger.error('Get job detail error:', error)
+    logger.error('Get job detail error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get job details' }, { status: 500 })
   }
 }
@@ -156,7 +156,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Update job error:', error)
+    logger.error('Update job error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update job' }, { status: 500 })
   }
 }

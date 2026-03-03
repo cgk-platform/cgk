@@ -151,7 +151,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Get failed jobs error:', error)
+    logger.error('Get failed jobs error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get failed jobs' }, { status: 500 })
   }
 }

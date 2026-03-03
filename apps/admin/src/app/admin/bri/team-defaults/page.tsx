@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardHeader, Badge } from '@cgk-platform/ui'
 import { Users, Save, Star, DollarSign, Eye } from 'lucide-react'
-import { logger } from '@cgk-platform/logging'
 
 interface TeamMember {
   id: string
@@ -45,7 +44,7 @@ export default function TeamDefaultsPage() {
         }
       }
     } catch (error) {
-      logger.error('Failed to fetch data:', error)
+      console.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
@@ -60,7 +59,7 @@ export default function TeamDefaultsPage() {
         body: JSON.stringify(defaults),
       })
     } catch (error) {
-      logger.error('Failed to save defaults:', error)
+      console.error('Failed to save defaults:', error)
     } finally {
       setSaving(false)
     }

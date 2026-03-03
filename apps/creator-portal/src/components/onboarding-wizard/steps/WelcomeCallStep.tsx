@@ -4,7 +4,6 @@ import { cn } from '@cgk-platform/ui'
 import { useCallback, useEffect, useState } from 'react'
 
 import type { WelcomeCallData } from '../../../lib/onboarding-wizard/types'
-import { logger } from '@cgk-platform/logging'
 
 /** Time slot from scheduling API */
 interface WelcomeCallSlot {
@@ -68,7 +67,7 @@ export function WelcomeCallStep({
           setAvailableSlots(result.slots || [])
         }
       } catch (error) {
-        logger.error('Failed to load slots:', error)
+        console.error('Failed to load slots:', error)
       } finally {
         setIsLoadingSlots(false)
       }
@@ -116,7 +115,7 @@ export function WelcomeCallStep({
         })
       }
     } catch (error) {
-      logger.error('Failed to book call:', error)
+      console.error('Failed to book call:', error)
     } finally {
       setIsBooking(false)
     }

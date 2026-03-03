@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    logger.error('Failed to save config:', error)
+    logger.error('Failed to save config:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

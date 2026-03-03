@@ -49,7 +49,7 @@ export async function GET(req: Request): Promise<Response> {
 
     return Response.json({ exclusions })
   } catch (error) {
-    logger.error('Error fetching brand exclusions:', error)
+    logger.error('Error fetching brand exclusions:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch exclusions' }, { status: 500 })
   }
 }
@@ -133,7 +133,7 @@ export async function POST(req: Request): Promise<Response> {
       exclusion,
     })
   } catch (error) {
-    logger.error('Error adding brand exclusion:', error)
+    logger.error('Error adding brand exclusion:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to add exclusion' }, { status: 500 })
   }
 }

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Button, Card, CardContent, CardHeader, Badge, Input, Label, Select, SelectOption, Switch } from '@cgk-platform/ui'
 
 import type { AnalyticsSettings, TargetMetric } from '@/lib/analytics'
-import { logger } from '@cgk-platform/logging'
 
 export default function AnalyticsSettingsPage() {
   const [settings, setSettings] = useState<AnalyticsSettings | null>(null)
@@ -28,7 +27,7 @@ export default function AnalyticsSettingsPage() {
       setSettings(settingsJson.settings)
       setTargets(targetsJson.targets || [])
     } catch (error) {
-      logger.error('Failed to fetch settings:', error)
+      console.error('Failed to fetch settings:', error)
     } finally {
       setLoading(false)
     }
@@ -50,7 +49,7 @@ export default function AnalyticsSettingsPage() {
       })
       alert('Settings saved!')
     } catch (error) {
-      logger.error('Failed to save settings:', error)
+      console.error('Failed to save settings:', error)
     } finally {
       setSaving(false)
     }

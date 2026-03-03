@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { logger } from '@cgk-platform/logging'
 
 interface ImageStatus {
   productId: string
@@ -66,7 +65,7 @@ export default function GoogleFeedImagesPage() {
           setData(await res.json())
         }
       } catch (error) {
-        logger.error('Failed to load images:', error)
+        console.error('Failed to load images:', error)
       } finally {
         setLoading(false)
       }
@@ -97,7 +96,7 @@ export default function GoogleFeedImagesPage() {
         window.location.reload()
       }
     } catch (error) {
-      logger.error('Failed to optimize:', error)
+      console.error('Failed to optimize:', error)
     } finally {
       setOptimizing(false)
     }

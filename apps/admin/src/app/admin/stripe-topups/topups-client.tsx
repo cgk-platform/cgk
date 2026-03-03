@@ -26,7 +26,6 @@ import type {
   TopupStats,
   TopupStatus,
 } from '@/lib/admin-utilities/types'
-import { logger } from '@cgk-platform/logging'
 
 interface TopupsClientProps {
   initialTopups: StripeTopup[]
@@ -82,7 +81,7 @@ export function TopupsClient({
             setShowCreateModal(false)
           }
         } catch (error) {
-          logger.error('Failed to create top-up:', error)
+          console.error('Failed to create top-up:', error)
         }
       })
     },

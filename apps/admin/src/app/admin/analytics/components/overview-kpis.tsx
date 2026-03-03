@@ -5,7 +5,6 @@ import { cn } from '@cgk-platform/ui'
 
 import type { AnalyticsOverview, DateRange } from '@/lib/analytics'
 import { formatCurrency, formatNumber, formatPercent } from '@/lib/format'
-import { logger } from '@cgk-platform/logging'
 
 interface OverviewKPIsProps {
   dateRange: DateRange
@@ -58,7 +57,7 @@ export function OverviewKPIs({ dateRange }: OverviewKPIsProps) {
         const json = await res.json()
         setData(json.overview)
       } catch (error) {
-        logger.error('Failed to fetch overview:', error)
+        console.error('Failed to fetch overview:', error)
       } finally {
         setLoading(false)
       }

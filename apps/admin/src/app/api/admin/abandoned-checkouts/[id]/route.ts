@@ -50,7 +50,7 @@ export async function GET(
       emails: result.emails,
     })
   } catch (error) {
-    logger.error('Failed to fetch abandoned checkout:', error)
+    logger.error('Failed to fetch abandoned checkout:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch abandoned checkout' },
       { status: 500 },

@@ -84,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ tenantSlug: row.slug })
   } catch (error) {
-    logger.error('[domain-lookup] Error looking up domain:', error)
+    logger.error('[domain-lookup] Error looking up domain:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

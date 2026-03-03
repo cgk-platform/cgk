@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { useCallback, useState } from 'react'
 
 import type { BrandMembership } from '@/lib/types'
-import { logger } from '@cgk-platform/logging'
 
 interface BrandCardProps {
   membership: BrandMembership
@@ -85,7 +84,7 @@ export function BrandCard({ membership }: BrandCardProps): React.JSX.Element {
         setCodeCopied(true)
         setTimeout(() => setCodeCopied(false), 2000)
       } catch (err) {
-        logger.error('Failed to copy code:', err)
+        console.error('Failed to copy code:', err)
       }
     },
     [membership.discountCode]

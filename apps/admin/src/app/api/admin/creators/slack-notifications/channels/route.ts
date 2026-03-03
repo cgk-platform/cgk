@@ -52,7 +52,7 @@ export async function GET() {
 
     return NextResponse.json({ channels })
   } catch (error) {
-    logger.error('[slack-notifications/channels] GET error:', error)
+    logger.error('[slack-notifications/channels] GET error:', error instanceof Error ? error : new Error(String(error)))
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     // Handle specific Slack errors

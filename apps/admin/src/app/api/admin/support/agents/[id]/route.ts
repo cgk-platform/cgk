@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(agent)
   } catch (error) {
-    logger.error('Error fetching agent:', error)
+    logger.error('Error fetching agent:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch agent' },
       { status: 500 }
@@ -101,7 +101,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(agent)
   } catch (error) {
-    logger.error('Error updating agent:', error)
+    logger.error('Error updating agent:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to update agent' },
       { status: 500 }
@@ -143,7 +143,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error deleting agent:', error)
+    logger.error('Error deleting agent:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to delete agent' },
       { status: 500 }

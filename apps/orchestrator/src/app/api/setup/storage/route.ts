@@ -65,7 +65,7 @@ export async function POST() {
       { status: 400 }
     )
   } catch (error) {
-    logger.error('Storage connection test failed:', error)
+    logger.error('Storage connection test failed:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       {
         success: false,

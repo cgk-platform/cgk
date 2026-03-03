@@ -118,7 +118,7 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (error) {
-    logger.error('Clip ingest error:', error)
+    logger.error('Clip ingest error:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Ingest failed' },
       { status: 500 }

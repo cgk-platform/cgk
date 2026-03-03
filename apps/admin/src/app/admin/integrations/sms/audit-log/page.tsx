@@ -14,7 +14,6 @@ import Link from 'next/link'
 import { useCallback, useEffect, useState } from 'react'
 
 import type { SmsAuditLogEntry } from '@/lib/integrations/types'
-import { logger } from '@cgk-platform/logging'
 
 const PAGE_SIZE = 50
 
@@ -69,7 +68,7 @@ export default function SmsAuditLogPage() {
         setTotalPages(data.totalPages || 1)
       }
     } catch (error) {
-      logger.error('Failed to fetch audit log:', error)
+      console.error('Failed to fetch audit log:', error)
     } finally {
       setLoading(false)
     }
@@ -104,7 +103,7 @@ export default function SmsAuditLogPage() {
         window.URL.revokeObjectURL(url)
       }
     } catch (error) {
-      logger.error('Failed to export:', error)
+      console.error('Failed to export:', error)
     } finally {
       setExporting(false)
     }

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { cn } from '@cgk-platform/ui'
 import { ChevronDown, User, UserCheck, Users } from 'lucide-react'
 import type { SupportAgent } from '@cgk-platform/support'
-import { logger } from '@cgk-platform/logging'
 
 interface AgentSelectorProps {
   currentAgentId?: string | null
@@ -41,7 +40,7 @@ export function AgentSelector({
           }
         }
       } catch (error) {
-        logger.error('Failed to fetch agents:', error)
+        console.error('Failed to fetch agents:', error)
       } finally {
         setLoading(false)
       }

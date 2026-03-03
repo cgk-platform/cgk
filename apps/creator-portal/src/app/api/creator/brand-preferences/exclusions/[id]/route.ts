@@ -53,7 +53,7 @@ export async function DELETE(req: Request, { params }: RouteParams): Promise<Res
       message: 'Brand removed from exclusion list',
     })
   } catch (error) {
-    logger.error('Error removing brand exclusion:', error)
+    logger.error('Error removing brand exclusion:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to remove exclusion' }, { status: 500 })
   }
 }
@@ -106,7 +106,7 @@ export async function PATCH(req: Request, { params }: RouteParams): Promise<Resp
       message: 'Exclusion updated',
     })
   } catch (error) {
-    logger.error('Error updating brand exclusion:', error)
+    logger.error('Error updating brand exclusion:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to update exclusion' }, { status: 500 })
   }
 }

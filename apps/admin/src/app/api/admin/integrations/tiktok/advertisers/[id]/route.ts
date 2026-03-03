@@ -44,7 +44,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, advertiserId, advertiserName })
   } catch (error) {
-    logger.error('Failed to select TikTok advertiser:', error)
+    logger.error('Failed to select TikTok advertiser:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to select advertiser' },
       { status: 500 }

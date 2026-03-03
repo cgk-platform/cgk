@@ -101,7 +101,7 @@ export async function GET(req: Request): Promise<Response> {
       stats,
     })
   } catch (error) {
-    logger.error('Error fetching creator brands:', error)
+    logger.error('Error fetching creator brands:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to fetch brands' }, { status: 500 })
   }
 }

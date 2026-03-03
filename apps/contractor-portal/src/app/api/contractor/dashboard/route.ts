@@ -33,7 +33,7 @@ export async function GET(req: Request) {
       stats,
     })
   } catch (error) {
-    logger.error('Error fetching dashboard:', error)
+    logger.error('Error fetching dashboard:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch dashboard data' },
       { status: 500 }

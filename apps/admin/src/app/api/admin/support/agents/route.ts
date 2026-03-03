@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     const result = await getAgents(tenantId, filters)
     return NextResponse.json(result)
   } catch (error) {
-    logger.error('Error fetching agents:', error)
+    logger.error('Error fetching agents:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch agents' },
       { status: 500 }
@@ -113,7 +113,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(agent, { status: 201 })
   } catch (error) {
-    logger.error('Error creating agent:', error)
+    logger.error('Error creating agent:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create agent' },
       { status: 500 }

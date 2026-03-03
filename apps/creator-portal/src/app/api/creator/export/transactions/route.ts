@@ -134,7 +134,7 @@ export async function POST(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    logger.error('Error generating transaction CSV:', error)
+    logger.error('Error generating transaction CSV:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to generate CSV export' }, { status: 500 })
   }
 }

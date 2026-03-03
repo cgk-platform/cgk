@@ -77,7 +77,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       message: 'User has been re-enabled',
     })
   } catch (error) {
-    logger.error('Enable user error:', error)
+    logger.error('Enable user error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to enable user' }, { status: 500 })
   }
 }

@@ -114,7 +114,7 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': result.contentType },
     })
   } catch (error) {
-    logger.error('Error handling status webhook:', error)
+    logger.error('Error handling status webhook:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

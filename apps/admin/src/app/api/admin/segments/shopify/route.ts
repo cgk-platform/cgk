@@ -54,7 +54,7 @@ export async function GET(req: Request) {
       totalPages: Math.ceil(result.totalCount / limit),
     })
   } catch (error) {
-    logger.error('Failed to fetch Shopify segments:', error)
+    logger.error('Failed to fetch Shopify segments:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to fetch segments' }, { status: 500 })
   }
 }
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
       note: 'In production, this triggers a background job to fetch segments from Shopify Admin API.',
     })
   } catch (error) {
-    logger.error('Failed to sync Shopify segments:', error)
+    logger.error('Failed to sync Shopify segments:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json({ error: 'Failed to sync segments' }, { status: 500 })
   }
 }

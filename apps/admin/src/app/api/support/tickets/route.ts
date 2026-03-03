@@ -80,7 +80,7 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (error) {
-    logger.error('Error creating ticket from form:', error)
+    logger.error('Error creating ticket from form:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to submit support request. Please try again.' },
       { status: 500 }

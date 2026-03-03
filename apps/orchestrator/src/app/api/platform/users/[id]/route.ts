@@ -67,12 +67,12 @@ export async function GET(request: Request, { params }: RouteParams) {
         targetEmail: user.email,
       },
     }).catch((error) => {
-      logger.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error instanceof Error ? error : new Error(String(error)))
     })
 
     return Response.json({ user })
   } catch (error) {
-    logger.error('Get user error:', error)
+    logger.error('Get user error:', error instanceof Error ? error : new Error(String(error)))
     return Response.json({ error: 'Failed to get user details' }, { status: 500 })
   }
 }

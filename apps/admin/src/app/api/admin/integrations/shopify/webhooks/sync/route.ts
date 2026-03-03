@@ -69,7 +69,7 @@ export async function POST(req: Request): Promise<Response> {
         : 'All webhooks are in sync',
     })
   } catch (error) {
-    logger.error('[API] Failed to sync webhooks:', error)
+    logger.error('[API] Failed to sync webhooks:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to sync webhooks' },
       { status: 500 }

@@ -64,7 +64,7 @@ export async function GET() {
       installedAt: connection.installedAt.toISOString(),
     })
   } catch (error) {
-    logger.error('[shopify-status] Error fetching status:', error)
+    logger.error('[shopify-status] Error fetching status:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to fetch status' },
       { status: 500 }

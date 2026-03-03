@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 
 import type { PrivacyRequest, PrivacyRequestStatus, PrivacyRequestType } from '@cgk-platform/support'
-import { logger } from '@cgk-platform/logging'
 
 interface PrivacyStats {
   pending: number
@@ -39,7 +38,7 @@ export default function PrivacyRequestsPage() {
           setStats(data.stats)
         }
       } catch (error) {
-        logger.error('Failed to fetch privacy requests:', error)
+        console.error('Failed to fetch privacy requests:', error)
       } finally {
         setLoading(false)
       }

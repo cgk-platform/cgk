@@ -30,7 +30,7 @@ export async function POST(
       error: result.error,
     })
   } catch (error) {
-    logger.error('Failed to send Slack report:', error)
+    logger.error('Failed to send Slack report:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to send report' },
       { status: 500 },

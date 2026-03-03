@@ -90,7 +90,7 @@ export async function POST(req: Request, { params }: RouteParams) {
       },
     })
   } catch (error) {
-    logger.error('Error submitting work:', error)
+    logger.error('Error submitting work:', error instanceof Error ? error : new Error(String(error)))
     const message = error instanceof Error ? error.message : 'Failed to submit work'
     return Response.json(
       { error: message },

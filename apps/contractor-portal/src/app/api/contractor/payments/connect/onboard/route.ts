@@ -62,7 +62,7 @@ export async function GET(req: Request) {
       stripeRequirementsErrors: stripeMethod?.stripeRequirementsErrors || [],
     })
   } catch (error) {
-    logger.error('Error fetching onboarding progress:', error)
+    logger.error('Error fetching onboarding progress:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to fetch onboarding progress' },
       { status: 500 }
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    logger.error('Error creating Stripe account:', error)
+    logger.error('Error creating Stripe account:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: 'Failed to create Stripe account' },
       { status: 500 }

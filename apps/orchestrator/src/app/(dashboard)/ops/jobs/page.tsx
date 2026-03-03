@@ -3,7 +3,6 @@
 import { Badge, Button, Card, CardContent, CardHeader, cn, Select, SelectOption } from '@cgk-platform/ui'
 import { AlertCircle, CheckCircle, Clock, Loader2, Play, RefreshCw, XCircle } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 interface PlatformJob {
   id: string
@@ -62,7 +61,7 @@ export default function JobsPage() {
         }
       }
     } catch (error) {
-      logger.error('Failed to fetch jobs:', error)
+      console.error('Failed to fetch jobs:', error)
     } finally {
       setLoading(false)
     }
@@ -85,7 +84,7 @@ export default function JobsPage() {
         await fetchJobs()
       }
     } catch (error) {
-      logger.error('Failed to retry job:', error)
+      console.error('Failed to retry job:', error)
     } finally {
       setRetrying(null)
     }

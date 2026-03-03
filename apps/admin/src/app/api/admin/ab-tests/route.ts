@@ -122,7 +122,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    logger.error('Error creating A/B test:', error)
+    logger.error('Error creating A/B test:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to create A/B test' },
       { status: 500 }

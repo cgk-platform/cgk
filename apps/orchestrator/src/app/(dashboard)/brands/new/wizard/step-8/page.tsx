@@ -36,7 +36,6 @@ import {
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
 
 type InvitationRole = 'admin' | 'member'
 
@@ -93,7 +92,7 @@ function Step8Content() {
         setInvitations(existingInvitations)
       }
     } catch (err) {
-      logger.error('Failed to load invitations:', err)
+      console.error('Failed to load invitations:', err)
       setError('Failed to load invitations')
     } finally {
       setIsLoading(false)
@@ -178,7 +177,7 @@ function Step8Content() {
         }),
       })
     } catch (err) {
-      logger.error('Failed to save step:', err)
+      console.error('Failed to save step:', err)
     }
 
     router.push(`/brands/new/wizard/step-7?sessionId=${sessionId}`)
@@ -216,7 +215,7 @@ function Step8Content() {
 
       router.push(`/brands/new/wizard/step-9?sessionId=${sessionId}`)
     } catch (err) {
-      logger.error('Failed to save step:', err)
+      console.error('Failed to save step:', err)
       setError('Failed to save invitations')
     } finally {
       setIsSaving(false)
@@ -240,7 +239,7 @@ function Step8Content() {
         }),
       })
     } catch (err) {
-      logger.error('Failed to skip step:', err)
+      console.error('Failed to skip step:', err)
     }
 
     router.push(`/brands/new/wizard/step-9?sessionId=${sessionId}`)

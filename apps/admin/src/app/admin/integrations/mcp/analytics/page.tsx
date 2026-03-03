@@ -14,7 +14,6 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import type { McpAnalyticsSummary } from '@/lib/integrations/types'
-import { logger } from '@cgk-platform/logging'
 
 interface ToolUsage {
   name: string
@@ -62,7 +61,7 @@ export default function McpAnalyticsPage() {
           setData(result)
         }
       } catch (error) {
-        logger.error('Failed to fetch MCP analytics:', error)
+        console.error('Failed to fetch MCP analytics:', error)
       } finally {
         setLoading(false)
       }

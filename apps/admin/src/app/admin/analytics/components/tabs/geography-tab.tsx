@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
 
 import type { DateRange, GeographyData } from '@/lib/analytics'
 import { formatCurrency, formatNumber } from '@/lib/format'
-import { logger } from '@cgk-platform/logging'
 
 interface GeographyTabProps {
   dateRange: DateRange
@@ -28,7 +27,7 @@ export function GeographyTab({ dateRange }: GeographyTabProps) {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        logger.error('Failed to fetch geography data:', error)
+        console.error('Failed to fetch geography data:', error)
       } finally {
         setLoading(false)
       }

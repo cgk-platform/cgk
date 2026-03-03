@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { Button, Card, CardContent, CardHeader, Badge, Input, Label, Select, SelectOption, Switch } from '@cgk-platform/ui'
 
 import type { SlackAlert, SlackAlertType } from '@/lib/analytics'
-import { logger } from '@cgk-platform/logging'
 
 const ALERT_TYPES: { value: SlackAlertType; label: string; description: string }[] = [
   { value: 'revenue_daily', label: 'Daily Revenue Summary', description: 'Daily revenue summary at end of day' },
@@ -38,7 +37,7 @@ export function SlackNotificationsTab() {
       const json = await res.json()
       setAlerts(json.alerts || [])
     } catch (error) {
-      logger.error('Failed to fetch slack alerts:', error)
+      console.error('Failed to fetch slack alerts:', error)
     } finally {
       setLoading(false)
     }
@@ -55,7 +54,7 @@ export function SlackNotificationsTab() {
         prev.map((a) => (a.id === id ? { ...a, isEnabled } : a))
       )
     } catch (error) {
-      logger.error('Failed to toggle alert:', error)
+      console.error('Failed to toggle alert:', error)
     }
   }
 
@@ -66,7 +65,7 @@ export function SlackNotificationsTab() {
       })
       setAlerts((prev) => prev.filter((a) => a.id !== id))
     } catch (error) {
-      logger.error('Failed to delete alert:', error)
+      console.error('Failed to delete alert:', error)
     }
   }
 
@@ -80,7 +79,7 @@ export function SlackNotificationsTab() {
       const json = await res.json()
       alert(json.message || 'Test alert sent!')
     } catch (error) {
-      logger.error('Failed to send test alert:', error)
+      console.error('Failed to send test alert:', error)
     }
   }
 
@@ -222,7 +221,7 @@ function AddAlertForm({ onSave, onCancel }: AddAlertFormProps) {
       })
       onSave()
     } catch (error) {
-      logger.error('Failed to create alert:', error)
+      console.error('Failed to create alert:', error)
     } finally {
       setSaving(false)
     }

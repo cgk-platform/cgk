@@ -33,7 +33,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Failed to reset Slack template:', error)
+    logger.error('Failed to reset Slack template:', error instanceof Error ? error : new Error(String(error)))
     return NextResponse.json(
       { error: 'Failed to reset template' },
       { status: 500 },

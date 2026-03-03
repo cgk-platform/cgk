@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
     return Response.json({ authUrl, state })
   } catch (error) {
-    logger.error('Failed to start Google Ads OAuth:', error)
+    logger.error('Failed to start Google Ads OAuth:', error instanceof Error ? error : new Error(String(error)))
     return Response.json(
       { error: error instanceof Error ? error.message : 'OAuth initiation failed' },
       { status: 500 }

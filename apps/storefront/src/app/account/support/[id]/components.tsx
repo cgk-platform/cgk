@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation'
 import { useState, useRef, type FormEvent } from 'react'
 
 import { replyToTicket, closeTicket } from '@/lib/account/api'
-import { logger } from '@cgk-platform/logging'
 
 interface TicketReplyFormProps {
   ticketId: string
@@ -141,7 +140,7 @@ export function CloseTicketButton({ ticketId }: CloseTicketButtonProps) {
       await closeTicket(ticketId)
       router.refresh()
     } catch (err) {
-      logger.error('Failed to close ticket:', err)
+      console.error('Failed to close ticket:', err)
     } finally {
       setIsClosing(false)
       setShowConfirm(false)
