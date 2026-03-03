@@ -11,6 +11,7 @@ import {
   parseFormData,
   verifyTwilioSignature,
 } from '@cgk-platform/communications'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/webhooks/twilio/status
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
     }
 
     if (!authToken) {
-      console.error('[Twilio Status Webhook] No auth token available for verification')
+      logger.error('[Twilio Status Webhook] No auth token available for verification')
       return NextResponse.json(
         { error: 'Webhook verification not configured' },
         { status: 500 }
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     const webhookUrl = url.toString()
 
     if (!verifyTwilioSignature(authToken, signature, webhookUrl, body)) {
-      console.error('[Twilio Status Webhook] Invalid signature - request rejected')
+      logger.error('[Twilio Status Webhook] Invalid signature - request rejected')
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 403 }
@@ -85,7 +86,7 @@ export async function POST(request: Request) {
     })
 
     if (isDuplicate) {
-      console.log('[Twilio Status Webhook] Duplicate status update ignored:', idempotencyId)
+      logger.info('[Twilio Status Webhook] Duplicate status update ignored:', idempotencyId)
       return NextResponse.json({ status: 'duplicate_ignored' })
     }
 
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': result.contentType },
     })
   } catch (error) {
-    console.error('Error handling status webhook:', error)
+    logger.error('Error handling status webhook:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

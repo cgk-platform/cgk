@@ -20,6 +20,7 @@ import type {
   CalendarEventResult,
 } from '../types.js'
 import { encrypt, safeDecrypt } from '../utils/encryption.js'
+import { logger } from '@cgk-platform/logging'
 
 const GOOGLE_OAUTH_URL = 'https://oauth2.googleapis.com/token'
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
@@ -341,7 +342,7 @@ export class GoogleCalendarClient {
       })
     } catch (error) {
       // Ignore errors - channel may have already expired
-      console.warn('[google] Failed to stop watch:', error)
+      logger.warn('[google] Failed to stop watch:', error)
     }
   }
 
@@ -466,7 +467,7 @@ export async function refreshGoogleTokens(
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET
 
   if (!clientId || !clientSecret) {
-    console.error('[google] Missing Google OAuth credentials in environment')
+    logger.error('[google] Missing Google OAuth credentials in environment')
     return null
   }
 
@@ -483,7 +484,7 @@ export async function refreshGoogleTokens(
     })
 
     if (!response.ok) {
-      console.error('[google] Token refresh failed:', await response.text())
+      logger.error('[google] Token refresh failed:', await response.text())
       return null
     }
 
@@ -500,7 +501,7 @@ export async function refreshGoogleTokens(
 
     return { accessToken: tokens.access_token }
   } catch (error) {
-    console.error('[google] Token refresh error:', error)
+    logger.error('[google] Token refresh error:', error)
     return null
   }
 }
@@ -515,19 +516,19 @@ export async function handleCalendarWebhook(
   // Find agent by channel ID
   const oauth = await getGoogleOAuthByChannelId(channelId)
   if (!oauth) {
-    console.log(`[google] Unknown calendar watch channel: ${channelId}`)
+    logger.info(`[google] Unknown calendar watch channel: ${channelId}`)
     return
   }
 
   // Sync events
   const client = await GoogleCalendarClient.forAgent(oauth.agentId)
   if (!client) {
-    console.error(`[google] Failed to create client for agent: ${oauth.agentId}`)
+    logger.error(`[google] Failed to create client for agent: ${oauth.agentId}`)
     return
   }
 
   await client.syncEvents()
-  console.log(`[google] Synced calendar for agent: ${oauth.agentId}`)
+  logger.info(`[google] Synced calendar for agent: ${oauth.agentId}`)
 }
 
 /**

@@ -3,6 +3,7 @@
 import { Alert, AlertDescription, Button, cn, Label, Textarea } from '@cgk-platform/ui'
 import { AlertTriangle, Eye, Loader2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 interface Tenant {
   id: string
@@ -63,7 +64,7 @@ export function ImpersonateDialog({
         }
       }
     } catch {
-      console.error('Failed to fetch user tenants')
+      logger.error('Failed to fetch user tenants')
     } finally {
       setLoadingTenants(false)
     }

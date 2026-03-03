@@ -13,6 +13,7 @@
 import type { AttributionMLTrainingPayload } from './types'
 import { defineJob } from '../../define'
 import type { JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // ML TRAINING TYPES
@@ -95,7 +96,7 @@ async function loadTrainingData(
   labels: number[]
   sampleCount: number
 }> {
-  console.log(
+  logger.info(
     `[ML Training] Loading ${trainingDays} days of training data for tenant ${tenantId}`
   )
 
@@ -140,7 +141,7 @@ async function saveCheckpoint(
   _modelVersion: string,
   checkpoint: TrainingCheckpoint
 ): Promise<void> {
-  console.log(
+  logger.info(
     `[ML Training] Saving checkpoint at epoch ${checkpoint.epoch}, step ${checkpoint.step}`
   )
 
@@ -162,7 +163,7 @@ async function loadCheckpoint(
   _tenantId: string,
   modelVersion: string
 ): Promise<TrainingCheckpoint | null> {
-  console.log(
+  logger.info(
     `[ML Training] Checking for existing checkpoint for ${modelVersion}`
   )
 
@@ -232,7 +233,7 @@ async function saveTrainedModel(
   modelVersion: string,
   result: TrainingResult
 ): Promise<void> {
-  console.log(
+  logger.info(
     `[ML Training] Saving trained model ${modelVersion} with loss ${result.finalLoss}`
   )
 
@@ -296,10 +297,10 @@ export const attributionMLTrainingJob = defineJob<AttributionMLTrainingPayload>(
     // Checkpoint save interval (every 5 minutes)
     const checkpointIntervalMs = 5 * 60 * 1000
 
-    console.log(
+    logger.info(
       `[ML Training] Starting training for tenant ${tenantId}, model ${version}`
     )
-    console.log(
+    logger.info(
       `[ML Training] Training config: ${days} days, ${config.epochs} epochs`
     )
 
@@ -337,7 +338,7 @@ export const attributionMLTrainingJob = defineJob<AttributionMLTrainingPayload>(
     )
 
     if (sampleCount < 100) {
-      console.log(
+      logger.info(
         `[ML Training] Insufficient training data: ${sampleCount} samples`
       )
       return {
@@ -349,7 +350,7 @@ export const attributionMLTrainingJob = defineJob<AttributionMLTrainingPayload>(
       }
     }
 
-    console.log(
+    logger.info(
       `[ML Training] Loaded ${sampleCount} training samples`
     )
 
@@ -369,7 +370,7 @@ export const attributionMLTrainingJob = defineJob<AttributionMLTrainingPayload>(
 
       // Check for timeout approaching
       if (elapsed > timeoutWarningMs) {
-        console.log(
+        logger.info(
           `[ML Training] Approaching timeout, saving checkpoint at epoch ${epoch}`
         )
         checkpoint.epoch = epoch
@@ -417,21 +418,21 @@ export const attributionMLTrainingJob = defineJob<AttributionMLTrainingPayload>(
         checkpoint.epoch = epoch
         checkpoint.lastSaveTime = Date.now()
         await saveCheckpoint(tenantId, version, checkpoint)
-        console.log(
+        logger.info(
           `[ML Training] Checkpoint saved at epoch ${epoch}, loss: ${loss.toFixed(4)}`
         )
       }
 
       // Log progress every 10 epochs
       if (epoch % 10 === 0) {
-        console.log(
+        logger.info(
           `[ML Training] Epoch ${epoch}/${config.epochs}, loss: ${loss.toFixed(4)}`
         )
       }
     }
 
     // Step 6: Final validation
-    console.log(`[ML Training] Training complete, running final validation`)
+    logger.info(`[ML Training] Training complete, running final validation`)
     const metrics = await validateModel(validFeatures, validLabels, weights)
 
     // Step 7: Save trained model
@@ -450,7 +451,7 @@ export const attributionMLTrainingJob = defineJob<AttributionMLTrainingPayload>(
 
     await saveTrainedModel(tenantId, version, result)
 
-    console.log(
+    logger.info(
       `[ML Training] Model ${version} saved, accuracy: ${metrics.accuracy.toFixed(4)}`
     )
 

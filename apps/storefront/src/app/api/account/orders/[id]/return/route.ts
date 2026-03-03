@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { ReturnReason, ReturnRequestItem, ReturnRequestResponse, OrderStatus } from '@/lib/account/types'
+import { logger } from '@cgk-platform/logging'
 
 interface OrderRow {
   id: string
@@ -132,7 +133,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     })
   } catch (error) {
     // Table might not exist - create a simulated response
-    console.error('Failed to create return request:', error)
+    logger.error('Failed to create return request:', error)
   }
 
   const response: ReturnRequestResponse = {

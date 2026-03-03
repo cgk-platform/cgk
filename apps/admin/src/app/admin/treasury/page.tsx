@@ -20,6 +20,7 @@ import { getTreasurySummary, getLowBalanceAlerts } from '@/lib/treasury/db'
 import { getDrawRequests } from '@/lib/treasury/db/requests'
 import { getReceipts, getReceiptSummary } from '@/lib/treasury/db/receipts'
 import type { DrawRequestStatus, ReceiptStatus } from '@/lib/treasury/types'
+import { logger } from '@cgk-platform/logging'
 
 export default async function TreasuryPage() {
   return (
@@ -91,15 +92,15 @@ async function TreasuryDashboard() {
       getTreasurySummary(tenantSlug),
       getLowBalanceAlerts(tenantSlug),
       getDrawRequests(tenantSlug, { status: undefined }).catch((error) => {
-        console.error('[treasury] Failed to load draw requests:', error)
+        logger.error('[treasury] Failed to load draw requests:', error)
         return []
       }),
       getReceipts(tenantSlug, { limit: 5 }).catch((error) => {
-        console.error('[treasury] Failed to load receipts:', error)
+        logger.error('[treasury] Failed to load receipts:', error)
         return { receipts: [], totalCount: 0 }
       }),
       getReceiptSummary(tenantSlug).catch((error) => {
-        console.error('[treasury] Failed to load receipt summary:', error)
+        logger.error('[treasury] Failed to load receipt summary:', error)
         return {
           pending_count: 0,
           processed_count: 0,

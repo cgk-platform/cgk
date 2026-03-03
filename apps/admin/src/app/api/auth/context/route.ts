@@ -5,6 +5,7 @@ import {
   verifyJWT,
   type TenantContext,
 } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
       tenants,
     })
   } catch (error) {
-    console.error('Context fetch error:', error)
+    logger.error('Context fetch error:', error)
     return Response.json(
       { error: 'Failed to fetch context' },
       { status: 500 }

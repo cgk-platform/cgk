@@ -11,6 +11,7 @@ import {
 } from '@/lib/auth/middleware'
 import { getProjectById, updateProjectStatus } from '@/lib/projects'
 import type { ProjectStatus } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +64,7 @@ export async function GET(req: Request, { params }: RouteParams) {
       },
     })
   } catch (error) {
-    console.error('Error fetching project:', error)
+    logger.error('Error fetching project:', error)
     return Response.json(
       { error: 'Failed to fetch project' },
       { status: 500 }
@@ -107,7 +108,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
       },
     })
   } catch (error) {
-    console.error('Error updating project:', error)
+    logger.error('Error updating project:', error)
     const message = error instanceof Error ? error.message : 'Failed to update project'
     return Response.json(
       { error: message },

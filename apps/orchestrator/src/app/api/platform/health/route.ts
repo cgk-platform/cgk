@@ -24,6 +24,7 @@ import {
 } from '@cgk-platform/health'
 
 import type { SystemHealth } from '../../../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -267,7 +268,7 @@ export async function GET(request: Request): Promise<Response> {
       responseTimeMs: Date.now() - startTime,
     })
   } catch (error) {
-    console.error('Health check failed:', error)
+    logger.error('Health check failed:', error)
     return Response.json(
       {
         status: 'critical',

@@ -16,6 +16,7 @@ import {
   updateKlaviyoSyncConfig,
 } from '@/lib/segments/db'
 import type { KlaviyoSyncDirection } from '@/lib/segments/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -50,7 +51,7 @@ export async function GET() {
       })),
     })
   } catch (error) {
-    console.error('Failed to fetch Klaviyo sync configs:', error)
+    logger.error('Failed to fetch Klaviyo sync configs:', error)
     return NextResponse.json({ error: 'Failed to fetch configurations' }, { status: 500 })
   }
 }
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
       hasApiKey: config.api_key_set,
     })
   } catch (error) {
-    console.error('Failed to create Klaviyo sync config:', error)
+    logger.error('Failed to create Klaviyo sync config:', error)
 
     // Handle unique constraint violation
     if (error instanceof Error && error.message.includes('unique')) {
@@ -179,7 +180,7 @@ export async function PATCH(req: Request) {
       hasApiKey: config.api_key_set,
     })
   } catch (error) {
-    console.error('Failed to update Klaviyo sync config:', error)
+    logger.error('Failed to update Klaviyo sync config:', error)
     return NextResponse.json({ error: 'Failed to update configuration' }, { status: 500 })
   }
 }
@@ -210,7 +211,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete Klaviyo sync config:', error)
+    logger.error('Failed to delete Klaviyo sync config:', error)
     return NextResponse.json({ error: 'Failed to delete configuration' }, { status: 500 })
   }
 }

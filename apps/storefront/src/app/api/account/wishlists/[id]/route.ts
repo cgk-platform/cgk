@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { Wishlist, WishlistItem } from '@/lib/account/types'
+import { logger } from '@cgk-platform/logging'
 
 interface WishlistRow {
   id: string
@@ -130,7 +131,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
     return NextResponse.json(wishlist)
   } catch (error) {
-    console.error('Failed to get wishlist:', error)
+    logger.error('Failed to get wishlist:', error)
     return NextResponse.json({ error: 'Failed to get wishlist' }, { status: 500 })
   }
 }
@@ -192,7 +193,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error('Failed to delete wishlist:', error)
+    logger.error('Failed to delete wishlist:', error)
     return NextResponse.json({ error: 'Failed to delete wishlist' }, { status: 500 })
   }
 }

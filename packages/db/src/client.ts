@@ -2,6 +2,7 @@ import { neon, type NeonQueryFunction } from '@neondatabase/serverless'
 import { sql as vercelSql, type VercelPool } from '@vercel/postgres'
 
 import { createRuntimeContext } from './runtime-context.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Runtime-agnostic store for the current tenant schema name.
@@ -85,7 +86,7 @@ function queryToTemplateArgs(
 export const sql: typeof vercelSql = new Proxy(vercelSql, {
   apply(_target, _thisArg, args: unknown[]) {
     const schema = tenantSchemaStore.getStore()
-    console.log('[SQL] Schema from context store:', schema || 'NONE - will query public schema!')
+    logger.info('[SQL] Schema from context store', { schema: schema || 'public' })
     if (schema) {
       const neonSql = getNeonSql()
       const strings = args[0] as TemplateStringsArray

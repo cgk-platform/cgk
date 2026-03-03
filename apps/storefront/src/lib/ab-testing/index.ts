@@ -27,6 +27,7 @@ import type {
   ABVariant,
   GetAssignmentOptions,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 export * from './types'
 export { getHashBucket, getVariantIndex, isInTrafficAllocation, fnv1aHash } from './hash'
@@ -69,7 +70,7 @@ export async function getVariantAssignment(
 
     // If still no visitor ID, we cannot assign
     if (!visitorId) {
-      console.warn('No visitor ID available for A/B test assignment')
+      logger.warn('No visitor ID available for A/B test assignment')
       return null
     }
   }
@@ -126,7 +127,7 @@ export async function getVariantAssignment(
 
   // Persist to database (async, don't wait)
   persistAssignment(tenantSlug, assignment).catch((error) => {
-    console.error('Failed to persist A/B assignment:', error)
+    logger.error('Failed to persist A/B assignment:', error)
   })
 
   return { variant, isNew: true, test }

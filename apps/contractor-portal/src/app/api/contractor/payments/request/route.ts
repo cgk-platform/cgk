@@ -17,6 +17,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,7 +66,7 @@ export async function GET(req: Request) {
       offset,
     })
   } catch (error) {
-    console.error('Error fetching payment requests:', error)
+    logger.error('Error fetching payment requests:', error)
     return Response.json(
       { error: 'Failed to fetch payment requests' },
       { status: 500 }
@@ -142,7 +143,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error creating payment request:', error)
+    logger.error('Error creating payment request:', error)
     return Response.json(
       { error: 'Failed to create payment request' },
       { status: 500 }

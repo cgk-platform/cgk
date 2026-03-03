@@ -7,6 +7,7 @@ import { AlertFeed } from '../../components/dashboard/alert-feed'
 import { BrandsGrid } from '../../components/dashboard/brands-grid'
 import { PlatformKPIsGrid, SecondaryMetrics } from '../../components/dashboard/platform-kpis'
 import type { PaginatedBrands, PlatformAlert, PlatformKPIs } from '../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 // Refresh interval for KPIs (30 seconds)
 const KPI_REFRESH_INTERVAL = 30000
@@ -37,7 +38,7 @@ export default function OverviewPage() {
         setKpis(result.data)
       }
     } catch (error) {
-      console.error('Failed to fetch KPIs:', error)
+      logger.error('Failed to fetch KPIs:', error)
     } finally {
       setKpisLoading(false)
     }
@@ -53,7 +54,7 @@ export default function OverviewPage() {
         setBrands(result)
       }
     } catch (error) {
-      console.error('Failed to fetch brands:', error)
+      logger.error('Failed to fetch brands:', error)
     } finally {
       setBrandsLoading(false)
     }
@@ -68,7 +69,7 @@ export default function OverviewPage() {
         setAlerts(result.alerts)
       }
     } catch (error) {
-      console.error('Failed to fetch alerts:', error)
+      logger.error('Failed to fetch alerts:', error)
     }
   }, [])
 

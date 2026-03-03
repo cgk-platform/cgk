@@ -5,6 +5,7 @@ import { GripVertical, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 import type { StageConfig, PipelineConfig } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 interface StageConfigModalProps {
   config: PipelineConfig
@@ -39,7 +40,7 @@ export function StageConfigModal({
       await onSave({ stages, wipLimits })
       onClose()
     } catch (error) {
-      console.error('Failed to save config:', error)
+      logger.error('Failed to save config:', error)
     } finally {
       setIsSaving(false)
     }

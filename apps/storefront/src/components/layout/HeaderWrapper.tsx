@@ -12,6 +12,7 @@ import type { ShopifyMenuItem } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
 import { StorefrontHeader } from './StorefrontHeader'
 import type { MenuItem } from './MegaMenu'
+import { logger } from '@cgk-platform/logging'
 
 interface HeaderWrapperProps {
   storeName: string
@@ -42,7 +43,7 @@ export async function HeaderWrapper(props: HeaderWrapperProps) {
         menuItems = menu.items.map(mapMenuItem)
       }
     } catch (error) {
-      console.error('Failed to fetch navigation menu:', error)
+      logger.error('Failed to fetch navigation menu:', error)
     }
   }
 

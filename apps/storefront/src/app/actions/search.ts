@@ -9,6 +9,7 @@
 
 import { createStorefrontClient, predictiveSearch } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 export async function performPredictiveSearch(query: string) {
   const config = await getTenantConfig()
@@ -46,7 +47,7 @@ export async function performPredictiveSearch(query: string) {
       queries: results.queries,
     }
   } catch (error) {
-    console.error('Predictive search failed:', error)
+    logger.error('Predictive search failed:', error)
     return null
   }
 }

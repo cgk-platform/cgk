@@ -3,6 +3,7 @@
  */
 
 import type { Job, JobResult, JobOptions, RetryConfig } from './types'
+import { logger } from '@cgk-platform/logging'
 
 export type JobHandler<T = unknown, R = unknown> = (
   job: Job<T>
@@ -39,7 +40,7 @@ export const exampleJobs = {
     name: 'send-email',
     handler: async (job) => {
       // TODO: Implement email sending
-      console.log('Sending email:', job.payload)
+      logger.info('Sending email:', job.payload)
       return { success: true }
     },
     retry: { maxAttempts: 3 },
@@ -49,7 +50,7 @@ export const exampleJobs = {
     name: 'sync-inventory',
     handler: async (job) => {
       // TODO: Implement inventory sync
-      console.log('Syncing inventory:', job.payload)
+      logger.info('Syncing inventory:', job.payload)
       return { success: true }
     },
     retry: { maxAttempts: 5, backoff: 'exponential' },

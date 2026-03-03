@@ -8,6 +8,7 @@ import {
   sendContractorMagicLinkEmail,
 } from '@/lib/auth/magic-link'
 import { checkRateLimit, recordRateLimitAttempt, getClientIP } from '@/lib/auth/rate-limit'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/magic-link
@@ -73,7 +74,7 @@ export async function POST(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Magic link error:', error)
+    logger.error('Magic link error:', error)
     return Response.json({ error: 'Failed to send magic link' }, { status: 500 })
   }
 }

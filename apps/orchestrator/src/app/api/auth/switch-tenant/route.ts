@@ -9,6 +9,7 @@ import {
   verifyJWT,
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -124,7 +125,7 @@ export async function POST(request: Request) {
 
     return setAuthCookie(response, jwt)
   } catch (error) {
-    console.error('Switch tenant error:', error)
+    logger.error('Switch tenant error:', error)
     return Response.json(
       { error: 'Failed to switch tenant' },
       { status: 500 }

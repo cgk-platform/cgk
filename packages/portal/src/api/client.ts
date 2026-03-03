@@ -6,6 +6,7 @@
 
 import { sql } from '@cgk-platform/db'
 import type { GraphQLRequest, GraphQLResponse } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 const API_VERSION = '2025-01'
 
@@ -36,7 +37,7 @@ export async function getShopifyConfig(tenantId: string): Promise<ShopifyConfig 
       shopId: row.shopify_shop_id,
     }
   } catch (error) {
-    console.error('Failed to get Shopify config:', error)
+    logger.error('Failed to get Shopify config:', error)
     return null
   }
 }
@@ -72,7 +73,7 @@ export async function customerQuery<T>(
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('Customer API request failed:', response.status, errorText)
+      logger.error('Customer API request failed:', response.status, errorText)
       return {
         data: null,
         errors: [{ message: `API request failed: ${response.status}` }],
@@ -82,7 +83,7 @@ export async function customerQuery<T>(
     const result = (await response.json()) as GraphQLResponse<T>
     return result
   } catch (error) {
-    console.error('Customer API error:', error)
+    logger.error('Customer API error:', error)
     return {
       data: null,
       errors: [{ message: error instanceof Error ? error.message : 'Unknown error' }],

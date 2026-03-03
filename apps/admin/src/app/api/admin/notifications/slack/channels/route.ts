@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createTenantCache } from '@cgk-platform/db'
 import { getTenantWorkspace, SlackClient, type SlackChannel } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 const CHANNEL_CACHE_TTL = 300 // 5 minutes
 
@@ -45,7 +46,7 @@ export async function GET() {
 
     return NextResponse.json({ channels })
   } catch (error) {
-    console.error('Failed to list Slack channels:', error)
+    logger.error('Failed to list Slack channels:', error)
     return NextResponse.json(
       { error: 'Failed to list channels' },
       { status: 500 },

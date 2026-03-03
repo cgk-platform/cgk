@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 
 import { updateProjectStatus } from '@/lib/pipeline/db'
 import { VALID_TRANSITIONS, type ProjectStatus } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,7 +53,7 @@ export async function PATCH(
 
     return Response.json({ success: true, project })
   } catch (error) {
-    console.error('Status update error:', error)
+    logger.error('Status update error:', error)
     return Response.json(
       { error: 'Failed to update project status' },
       { status: 500 }

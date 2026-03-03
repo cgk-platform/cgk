@@ -1,6 +1,7 @@
 import { sql } from '@cgk-platform/db'
 
 import type { AlertPriority, AlertStatus, PlatformAlert } from '../../../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -39,7 +40,7 @@ export async function GET(request: Request): Promise<Response> {
       total: alerts.length,
     })
   } catch (error) {
-    console.error('Failed to fetch alerts:', error)
+    logger.error('Failed to fetch alerts:', error)
     return Response.json({ error: 'Failed to fetch alerts' }, { status: 500 })
   }
 }
@@ -102,7 +103,7 @@ export async function POST(request: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Failed to create alert:', error)
+    logger.error('Failed to create alert:', error)
     return Response.json({ error: 'Failed to create alert' }, { status: 500 })
   }
 }

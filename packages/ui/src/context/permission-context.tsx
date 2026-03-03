@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Permission context for React components
@@ -110,7 +111,7 @@ export function PermissionProvider({
         setPermissions(data.permissions || [])
       }
     } catch (error) {
-      console.error('Failed to fetch permissions:', error)
+      logger.error('Failed to fetch permissions', error instanceof Error ? error : new Error(String(error)))
     } finally {
       setIsLoading(false)
     }

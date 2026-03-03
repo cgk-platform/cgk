@@ -24,6 +24,7 @@ import type {
   WaitResult,
 } from '../provider'
 import { createJobId } from '../utils'
+import { logger } from '@cgk-platform/logging'
 
 interface InngestConfig {
   /** Event key for sending */
@@ -110,11 +111,11 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
     ): Promise<SendResult> {
       // For development without Inngest configured
       if (!isConfigured()) {
-        console.warn(
+        logger.warn(
           `[InngestProvider] Not configured - job ${event as string} will be logged only`
         )
         const id = options?.idempotencyKey ?? createJobId()
-        console.log(`[InngestProvider] Would send:`, {
+        logger.info(`[InngestProvider] Would send:`, {
           event,
           payload,
           options,
@@ -126,7 +127,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
         const result = await sendEvent(event as string, payload, options)
         return { id: result.ids[0] ?? createJobId(), accepted: true }
       } catch (error) {
-        console.error(
+        logger.error(
           `[InngestProvider] Failed to send ${event as string}:`,
           error
         )
@@ -229,7 +230,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
       // Inngest uses step functions for orchestration
       // triggerAndWait is achieved via step.invoke() inside a function
       // The REST API doesn't support synchronous waiting
-      console.warn(
+      logger.warn(
         '[InngestProvider] triggerAndWait not supported via API. ' +
           'Use step.invoke() inside an Inngest function for orchestration.'
       )
@@ -245,7 +246,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
 
     async cancel(runId: string): Promise<boolean> {
       if (!isConfigured() || !signingKey) {
-        console.warn('[InngestProvider] Cannot cancel - not fully configured')
+        logger.warn('[InngestProvider] Cannot cancel - not fully configured')
         return false
       }
 

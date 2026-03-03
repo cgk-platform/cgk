@@ -49,6 +49,7 @@ import type {
   TenantEvent,
 } from '../../events'
 import type { JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ---------------------------------------------------------------------------
 // Job Payloads
@@ -159,7 +160,7 @@ export const processReviewEmailQueueJob = defineJob<TenantEvent<ProcessReviewEma
       }
     }
 
-    console.log(`[commerce.processReviewEmailQueue] Processing queue`, {
+    logger.info(`[commerce.processReviewEmailQueue] Processing queue`, {
       tenantId,
       limit,
       dryRun,
@@ -225,7 +226,7 @@ export const reviewEmailAwaitingDeliveryJob = defineJob<TenantEvent<ReviewEmailA
       }
     }
 
-    console.log(`[commerce.reviewEmailAwaitingDelivery] Checking stale emails`, {
+    logger.info(`[commerce.reviewEmailAwaitingDelivery] Checking stale emails`, {
       tenantId,
       daysWaiting,
       jobId: job.id,
@@ -282,7 +283,7 @@ export const retryFailedReviewEmailsJob = defineJob<TenantEvent<RetryFailedRevie
       }
     }
 
-    console.log(`[commerce.retryFailedReviewEmails] Retrying failed emails`, {
+    logger.info(`[commerce.retryFailedReviewEmails] Retrying failed emails`, {
       tenantId,
       maxRetries,
       limit,
@@ -351,7 +352,7 @@ export const sendQueuedReviewEmailJob = defineJob<TenantEvent<SendQueuedReviewEm
       }
     }
 
-    console.log(`[commerce.sendQueuedReviewEmail] Sending email`, {
+    logger.info(`[commerce.sendQueuedReviewEmail] Sending email`, {
       tenantId,
       reviewEmailId,
       orderId,
@@ -412,7 +413,7 @@ export const scheduleFollowUpJob = defineJob<TenantEvent<ScheduleFollowUpPayload
       }
     }
 
-    console.log(`[commerce.scheduleFollowUp] Scheduling follow-up`, {
+    logger.info(`[commerce.scheduleFollowUp] Scheduling follow-up`, {
       tenantId,
       reviewEmailId,
       orderId,
@@ -469,7 +470,7 @@ export const handleReviewEmailQueuedJob = defineJob<TenantEvent<ReviewEmailQueue
       }
     }
 
-    console.log(`[commerce.handleReviewEmailQueued] Email queued`, {
+    logger.info(`[commerce.handleReviewEmailQueued] Email queued`, {
       tenantId,
       reviewEmailId,
       orderId,
@@ -524,7 +525,7 @@ export const handleReviewEmailSentJob = defineJob<TenantEvent<ReviewEmailSentPay
       }
     }
 
-    console.log(`[commerce.handleReviewEmailSent] Recording sent email`, {
+    logger.info(`[commerce.handleReviewEmailSent] Recording sent email`, {
       tenantId,
       reviewEmailId,
       messageId,
@@ -583,7 +584,7 @@ export const handleReviewModeratedJob = defineJob<TenantEvent<ReviewModeratedPay
 
     // Spam reviews don't receive notifications
     if (action === 'spam') {
-      console.log(`[commerce.handleReviewModerated] Skipping spam review notification`, {
+      logger.info(`[commerce.handleReviewModerated] Skipping spam review notification`, {
         tenantId,
         reviewId,
         jobId: job.id,
@@ -611,7 +612,7 @@ export const handleReviewModeratedJob = defineJob<TenantEvent<ReviewModeratedPay
       }
     }
 
-    console.log(`[commerce.handleReviewModerated] Sending moderation notification`, {
+    logger.info(`[commerce.handleReviewModerated] Sending moderation notification`, {
       tenantId,
       reviewId,
       action,
@@ -688,7 +689,7 @@ export const reviewEmailStatsJob = defineJob<TenantEvent<ReviewEmailStatsPayload
       }
     }
 
-    console.log(`[commerce.reviewEmailStats] Generating stats`, {
+    logger.info(`[commerce.reviewEmailStats] Generating stats`, {
       tenantId,
       startDate,
       endDate,

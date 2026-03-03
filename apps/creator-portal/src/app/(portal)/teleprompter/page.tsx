@@ -24,6 +24,7 @@ import {
   Gauge,
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 // Constants
 const STORAGE_KEY = 'cgk-teleprompter-script'
@@ -229,7 +230,7 @@ export default function TeleprompterPage(): React.JSX.Element {
       try {
         await containerRef.current.requestFullscreen()
       } catch (err) {
-        console.error('Failed to enter fullscreen:', err)
+        logger.error('Failed to enter fullscreen:', err)
       }
     } else {
       exitFullscreen()

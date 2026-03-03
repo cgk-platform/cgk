@@ -5,6 +5,7 @@ import { Command } from 'commander'
 import fs from 'fs-extra'
 import inquirer from 'inquirer'
 import ora from 'ora'
+import { logger } from '@cgk-platform/logging'
 
 
 export const initCommand = new Command('init')
@@ -12,12 +13,12 @@ export const initCommand = new Command('init')
   .action(async () => {
     const spinner = ora()
 
-    console.log(chalk.cyan('\n🔧 Initializing CGK in existing project...\n'))
+    logger.info(chalk.cyan('\n🔧 Initializing CGK in existing project...\n'))
 
     // Check if package.json exists
     const pkgPath = path.join(process.cwd(), 'package.json')
     if (!(await fs.pathExists(pkgPath))) {
-      console.log(
+      logger.info(
         chalk.red('No package.json found. Please run from project root.')
       )
       process.exit(1)
@@ -36,7 +37,7 @@ export const initCommand = new Command('init')
       ])
 
       if (!overwrite) {
-        console.log(chalk.yellow('Aborted.'))
+        logger.info(chalk.yellow('Aborted.'))
         process.exit(0)
       }
     }
@@ -114,9 +115,9 @@ export default defineConfig({
     await fs.writeJson(pkgPath, pkg, { spaces: 2 })
     spinner.succeed('Package.json updated')
 
-    console.log(chalk.green('\n✅ CGK initialized successfully!\n'))
-    console.log('Next steps:')
-    console.log(chalk.cyan('  pnpm install'))
-    console.log(chalk.cyan('  cgk setup'))
-    console.log('')
+    logger.info(chalk.green('\n✅ CGK initialized successfully!\n'))
+    logger.info('Next steps:')
+    logger.info(chalk.cyan('  pnpm install'))
+    logger.info(chalk.cyan('  cgk setup'))
+    logger.info('')
   })

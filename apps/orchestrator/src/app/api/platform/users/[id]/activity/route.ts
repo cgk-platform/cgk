@@ -1,4 +1,5 @@
 import { getUserActivityLog, logAuditAction } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -71,7 +72,7 @@ export async function GET(request: Request, { params }: RouteParams) {
         resultCount: activity.length,
       },
     }).catch((error) => {
-      console.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error)
     })
 
     return Response.json({
@@ -81,7 +82,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       count: activity.length,
     })
   } catch (error) {
-    console.error('Get user activity error:', error)
+    logger.error('Get user activity error:', error)
     return Response.json({ error: 'Failed to get user activity' }, { status: 500 })
   }
 }

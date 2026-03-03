@@ -13,6 +13,7 @@ import { cookies } from 'next/headers'
 import { requireCommerceProvider } from '../commerce'
 import { getTenantSlug } from '../tenant'
 import { buildCartAttributes, generateVisitorId, generateSessionId } from './attributes'
+import { logger } from '@cgk-platform/logging'
 
 function getCartCookieName(tenantSlug: string | null): string {
   return tenantSlug ? `${tenantSlug}_cart_id` : 'cgk_cart_id'
@@ -203,7 +204,7 @@ async function setCartAttributesInternal(
     return await commerce.cart.setAttributes(cartId, attributes)
   } catch (error) {
     // If setAttributes is not implemented, log and return current cart
-    console.warn('Cart attributes update not supported by provider:', error)
+    logger.warn('Cart attributes update not supported by provider:', error)
     const cart = await commerce.cart.get(cartId)
     if (!cart) {
       throw new Error(`Cart ${cartId} not found`)
@@ -268,7 +269,7 @@ export async function updateCartBuyerIdentity(email: string): Promise<Cart | nul
   } catch (error) {
     // Non-fatal: log and continue. A failed identity update should not
     // block the login flow.
-    console.warn('updateCartBuyerIdentity: failed to update buyer identity', error)
+    logger.warn('updateCartBuyerIdentity: failed to update buyer identity', error)
     return null
   }
 }
@@ -289,7 +290,7 @@ export async function updateCartNote(note: string): Promise<Cart | null> {
   try {
     return await setCartAttributesInternal(cart.id, [attribute])
   } catch (error) {
-    console.warn('updateCartNote: failed to update cart note', error)
+    logger.warn('updateCartNote: failed to update cart note', error)
     return null
   }
 }

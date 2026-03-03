@@ -1,4 +1,5 @@
 import { enableUser, logAuditAction } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,7 +77,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       message: 'User has been re-enabled',
     })
   } catch (error) {
-    console.error('Enable user error:', error)
+    logger.error('Enable user error:', error)
     return Response.json({ error: 'Failed to enable user' }, { status: 500 })
   }
 }

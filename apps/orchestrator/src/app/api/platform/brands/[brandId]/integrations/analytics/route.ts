@@ -6,6 +6,7 @@ import {
   type TenantApiService,
 } from '@cgk-platform/integrations'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,7 +69,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('Get analytics config error:', error)
+    logger.error('Get analytics config error:', error)
     return NextResponse.json({ error: 'Failed to get analytics configuration' }, { status: 500 })
   }
 }
@@ -159,7 +160,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'API key required for this service' }, { status: 400 })
   } catch (error) {
-    console.error('Save analytics config error:', error)
+    logger.error('Save analytics config error:', error)
     return NextResponse.json({ error: 'Failed to save analytics configuration' }, { status: 500 })
   }
 }
@@ -217,7 +218,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Delete analytics config error:', error)
+    logger.error('Delete analytics config error:', error)
     return NextResponse.json({ error: 'Failed to delete analytics configuration' }, { status: 500 })
   }
 }

@@ -20,6 +20,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,7 +56,7 @@ export async function GET(req: Request) {
         : null,
     })
   } catch (error) {
-    console.error('Error fetching tax info:', error)
+    logger.error('Error fetching tax info:', error)
     return Response.json(
       { error: 'Failed to fetch tax info' },
       { status: 500 }
@@ -210,7 +211,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error submitting W-9:', error)
+    logger.error('Error submitting W-9:', error)
     return Response.json(
       { error: 'Failed to submit W-9' },
       { status: 500 }

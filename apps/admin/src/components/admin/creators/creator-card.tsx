@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -45,10 +46,13 @@ export function CreatorCard({
     >
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
         {creator.avatar_url ? (
-          <img
+          <Image
             src={creator.avatar_url}
             alt={name}
-            className="h-10 w-10 rounded-full object-cover"
+            width={40}
+            height={40}
+            className="rounded-full object-cover"
+            unoptimized
           />
         ) : (
           initials
@@ -116,10 +120,13 @@ export function SortableCreatorCard({ creator }: { creator: Creator }) {
       </button>
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
         {creator.avatar_url ? (
-          <img
+          <Image
             src={creator.avatar_url}
             alt={name}
-            className="h-10 w-10 rounded-full object-cover"
+            width={40}
+            height={40}
+            className="rounded-full object-cover"
+            unoptimized
           />
         ) : (
           initials

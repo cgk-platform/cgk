@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getTaskComments, addTaskComment, type AddCommentInput } from '@/lib/productivity'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -35,7 +36,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ comments })
   } catch (error) {
-    console.error('Error fetching comments:', error)
+    logger.error('Error fetching comments:', error)
     return NextResponse.json({ error: 'Failed to fetch comments' }, { status: 500 })
   }
 }
@@ -77,7 +78,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ comment }, { status: 201 })
   } catch (error) {
-    console.error('Error adding comment:', error)
+    logger.error('Error adding comment:', error)
     return NextResponse.json({ error: 'Failed to add comment' }, { status: 500 })
   }
 }

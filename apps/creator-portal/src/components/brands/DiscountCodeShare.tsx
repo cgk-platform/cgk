@@ -2,6 +2,7 @@
 
 import { Badge, Button, Card, CardContent, formatCurrency } from '@cgk-platform/ui'
 import { useCallback, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 interface DiscountCodeShareProps {
   code: string
@@ -35,7 +36,7 @@ export function DiscountCodeShare({
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Failed to copy code:', err)
+      logger.error('Failed to copy code:', err)
     }
   }, [code])
 
@@ -47,7 +48,7 @@ export function DiscountCodeShare({
       setShareAction('link')
       setTimeout(() => setShareAction(null), 2000)
     } catch (err) {
-      console.error('Failed to copy link:', err)
+      logger.error('Failed to copy link:', err)
     }
   }, [shareLink])
 

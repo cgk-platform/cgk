@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, Badge } from '@cgk-platform/ui'
 
 import type { BurnRateData, DateRange } from '@/lib/analytics'
 import { formatCurrency, formatPercent } from '@/lib/format'
+import { logger } from '@cgk-platform/logging'
 
 interface BurnRateTabProps {
   dateRange: DateRange
@@ -27,7 +28,7 @@ export function BurnRateTab({ dateRange }: BurnRateTabProps) {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        console.error('Failed to fetch burn rate data:', error)
+        logger.error('Failed to fetch burn rate data:', error)
       } finally {
         setLoading(false)
       }

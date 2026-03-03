@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { SEONav } from '@/components/admin/seo/SEONav'
 import { SiteAuditResults } from '@/components/admin/seo/SiteAuditResults'
 import type { SEOAudit, AuditSummary } from '@/lib/seo/types'
+import { logger } from '@cgk-platform/logging'
 
 export default function AnalysisPage() {
   const [audit, setAudit] = useState<SEOAudit | null>(null)
@@ -35,7 +36,7 @@ export default function AnalysisPage() {
         setSummary(summaryData.summary)
       }
     } catch (err) {
-      console.error('Failed to fetch audit:', err)
+      logger.error('Failed to fetch audit:', err)
     } finally {
       setIsLoading(false)
     }
@@ -56,7 +57,7 @@ export default function AnalysisPage() {
       setAudit(data.audit)
       fetchAudit() // Refresh summary
     } catch (err) {
-      console.error('Audit failed:', err)
+      logger.error('Audit failed:', err)
     } finally {
       setIsRunning(false)
     }

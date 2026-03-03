@@ -12,6 +12,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // DIGEST PAYLOAD TYPES
@@ -90,7 +91,7 @@ export const adminDailyDigestJob = defineJob<TenantEvent<AdminDailyDigestPayload
   handler: async (job) => {
     const { tenantId, recipients } = job.payload
 
-    console.log(`[Digest] Generating admin daily digest for tenant ${tenantId}`)
+    logger.info(`[Digest] Generating admin daily digest for tenant ${tenantId}`)
 
     // Implementation would:
     // 1. Query yesterday's metrics from tenant schema
@@ -125,12 +126,12 @@ export const adminDailyDigestJob = defineJob<TenantEvent<AdminDailyDigestPayload
     }
 
     // Would query these from the database
-    console.log(`[Digest] Admin digest metrics:`, metrics)
+    logger.info(`[Digest] Admin digest metrics:`, metrics)
 
     // Would send email here via email.send job
     const recipientList = recipients || []
     if (recipientList.length === 0) {
-      console.log(`[Digest] No recipients configured for tenant ${tenantId}`)
+      logger.info(`[Digest] No recipients configured for tenant ${tenantId}`)
       return {
         success: true,
         data: {
@@ -142,7 +143,7 @@ export const adminDailyDigestJob = defineJob<TenantEvent<AdminDailyDigestPayload
         },
       }
     }
-    console.log(`[Digest] Sending to ${recipientList.length} recipients`)
+    logger.info(`[Digest] Sending to ${recipientList.length} recipients`)
 
     return {
       success: true,
@@ -175,7 +176,7 @@ export const atRiskProjectsAlertJob = defineJob<TenantEvent<AtRiskProjectsAlertP
   handler: async (job) => {
     const { tenantId, alertTime } = job.payload
 
-    console.log(`[Digest] Checking at-risk projects for tenant ${tenantId} (${alertTime})`)
+    logger.info(`[Digest] Checking at-risk projects for tenant ${tenantId} (${alertTime})`)
 
     // Implementation would:
     // 1. Query projects with risk indicators
@@ -199,13 +200,13 @@ export const atRiskProjectsAlertJob = defineJob<TenantEvent<AtRiskProjectsAlertP
     const criticalCount = atRiskProjects.filter((p) => p.riskLevel === 'critical').length
     const highCount = atRiskProjects.filter((p) => p.riskLevel === 'high').length
 
-    console.log(
+    logger.info(
       `[Digest] Found ${atRiskProjects.length} at-risk projects (${criticalCount} critical, ${highCount} high)`
     )
 
     // Would send Slack notification if any critical/high risk projects
     if (criticalCount > 0 || highCount > 0) {
-      console.log(`[Digest] Sending Slack alert for at-risk projects`)
+      logger.info(`[Digest] Sending Slack alert for at-risk projects`)
       // Would trigger slack.notify job
     }
 
@@ -243,7 +244,7 @@ export const creatorWeeklyDigestJob = defineJob<TenantEvent<CreatorWeeklyDigestP
   handler: async (job) => {
     const { tenantId, creatorId } = job.payload
 
-    console.log(`[Digest] Generating creator weekly digest for tenant ${tenantId}`)
+    logger.info(`[Digest] Generating creator weekly digest for tenant ${tenantId}`)
 
     // Implementation would:
     // 1. Get all active creators (or specific creator if creatorId provided)
@@ -260,12 +261,12 @@ export const creatorWeeklyDigestJob = defineJob<TenantEvent<CreatorWeeklyDigestP
 
     if (creatorId) {
       // Process single creator
-      console.log(`[Digest] Processing digest for creator ${creatorId}`)
+      logger.info(`[Digest] Processing digest for creator ${creatorId}`)
       creatorsProcessed = 1
     } else {
       // Process all active creators
       // Would query: SELECT id FROM creators WHERE status = 'active'
-      console.log(`[Digest] Processing digests for all active creators`)
+      logger.info(`[Digest] Processing digests for all active creators`)
       creatorsProcessed = 0 // Would be count from query
     }
 

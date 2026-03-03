@@ -8,6 +8,7 @@ import {
   verifyJWT,
 } from '@cgk-platform/auth'
 import type { OrgContext } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,7 +89,7 @@ export async function GET(request: Request) {
       activeSessions: sessions.length,
     })
   } catch (error) {
-    console.error('Session error:', error)
+    logger.error('Session error:', error)
     return Response.json(
       { error: 'Failed to get session' },
       { status: 500 }
@@ -131,7 +132,7 @@ export async function DELETE(request: Request) {
       message: 'All sessions revoked',
     })
   } catch (error) {
-    console.error('Revoke sessions error:', error)
+    logger.error('Revoke sessions error:', error)
     return Response.json(
       { error: 'Failed to revoke sessions' },
       { status: 500 }

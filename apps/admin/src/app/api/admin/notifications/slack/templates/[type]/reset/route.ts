@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/notifications/slack/templates/[type]/reset
@@ -32,7 +33,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to reset Slack template:', error)
+    logger.error('Failed to reset Slack template:', error)
     return NextResponse.json(
       { error: 'Failed to reset template' },
       { status: 500 },

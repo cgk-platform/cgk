@@ -3,6 +3,7 @@
  */
 
 import type { EventParams } from './types'
+import { logger } from '@cgk-platform/logging'
 
 export interface ServerEvent {
   name: string
@@ -31,7 +32,7 @@ export function configureServerAnalytics(config: ServerAnalyticsConfig): void {
  */
 export async function trackServerEvent(event: ServerEvent): Promise<void> {
   if (!serverConfig) {
-    console.warn('Server analytics not configured. Call configureServerAnalytics first.')
+    logger.warn('Server analytics not configured. Call configureServerAnalytics first.')
     return
   }
 
@@ -57,10 +58,10 @@ export async function trackServerEvent(event: ServerEvent): Promise<void> {
     )
 
     if (!response.ok) {
-      console.error('Server analytics error:', response.status, await response.text())
+      logger.error('Server analytics error', new Error(`Status ${response.status}: ${await response.text()}`))
     }
   } catch (error) {
-    console.error('Server analytics error:', error)
+    logger.error('Server analytics error', error instanceof Error ? error : new Error(String(error)))
   }
 }
 

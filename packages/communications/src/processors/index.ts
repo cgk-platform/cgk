@@ -18,7 +18,7 @@
  *
  * // Run every 5 minutes
  * const result = await runProcessor()
- * console.log(`Processed: ${result.processed}, Sent: ${result.sent}`)
+ * logger.info(`Processed: ${result.processed}, Sent: ${result.sent}`)
  * ```
  */
 

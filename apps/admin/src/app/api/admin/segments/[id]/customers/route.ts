@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 
 import { getCachedSegmentById, getRfmCustomers, getSegmentMembers } from '@/lib/segments/db'
 import { RFM_SEGMENT_INFO, type RfmSegmentType } from '@/lib/segments/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -114,7 +115,7 @@ export async function GET(req: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Failed to fetch segment customers:', error)
+    logger.error('Failed to fetch segment customers:', error)
     return NextResponse.json({ error: 'Failed to fetch segment customers' }, { status: 500 })
   }
 }

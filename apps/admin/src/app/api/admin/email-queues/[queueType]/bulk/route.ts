@@ -16,6 +16,7 @@ import {
   type BulkAction,
   type QueueType,
 } from '@cgk-platform/communications'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -111,7 +112,7 @@ export async function POST(
       errors: result.errors,
     })
   } catch (error) {
-    console.error('[email-queues] bulk error:', error)
+    logger.error('[email-queues] bulk error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Bulk action failed' },
       { status: 500 }

@@ -21,6 +21,7 @@ import type {
   CreatorRejectedPayload,
 } from '../../events'
 import type { Job, JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // PAYLOAD TYPES
@@ -173,7 +174,7 @@ export const processCreatorApplicationJob = defineJob<
     // - Creating pipeline entry
     // - Meta CAPI tracking
 
-    console.log(
+    logger.info(
       `[processCreatorApplication] Processing application ${applicationId} for ${name} in tenant ${tenantId}`,
       { source, utmParams }
     )
@@ -257,7 +258,7 @@ export const notifyAdminNewApplicationJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[notifyAdminNewApplication] Notifying admin of new application from ${creatorName} in tenant ${tenantId}`
     )
 
@@ -309,7 +310,7 @@ export const trackApplicationAnalyticsJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[trackApplicationAnalytics] Tracking ${event} for application ${applicationId} in tenant ${tenantId}`
     )
 
@@ -375,7 +376,7 @@ export const createPipelineEntryJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[createPipelineEntry] Creating pipeline entry for ${creatorName} at stage ${stage} in tenant ${tenantId}`
     )
 
@@ -430,7 +431,7 @@ export const processCreatorApprovalJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[processCreatorApproval] Processing approval for creator ${creatorId} in tenant ${tenantId}`,
       { approvedBy, tier, notes }
     )
@@ -521,7 +522,7 @@ export const processCreatorRejectionJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[processCreatorRejection] Processing rejection for creator ${creatorId} in tenant ${tenantId}`,
       { rejectedBy, reason, feedback, allowReapply }
     )
@@ -599,7 +600,7 @@ export const sendApprovalEmailJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[sendApprovalEmail] Sending approval email to ${name} (${email}) in tenant ${tenantId}`
     )
 
@@ -643,7 +644,7 @@ export const sendRejectionEmailJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[sendRejectionEmail] Sending rejection email to ${name} (${email}) in tenant ${tenantId}`,
       { reason, allowReapply }
     )
@@ -688,7 +689,7 @@ export const onCreatorAppliedJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onCreatorApplied] New application ${applicationId} from ${email} in tenant ${tenantId}`
     )
 
@@ -734,7 +735,7 @@ export const onCreatorApprovedJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onCreatorApproved] Creator ${creatorId} approved by ${approvedBy || 'system'} in tenant ${tenantId}`
     )
 
@@ -778,7 +779,7 @@ export const onCreatorRejectedJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onCreatorRejected] Creator ${creatorId} rejected in tenant ${tenantId}`,
       { reason }
     )

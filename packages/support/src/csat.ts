@@ -21,6 +21,7 @@ import type {
   CreateSurveyInput,
   SubmitSurveyResponseInput,
 } from './channel-types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================
 // SURVEY MANAGEMENT
@@ -286,7 +287,7 @@ export async function submitSurveyResponse(
 
     if (config?.alert_on_low_rating && data.rating <= (config.low_rating_threshold as number)) {
       // Could trigger an alert here or emit an event
-      console.warn(`[CSAT] Low rating alert: Survey ${surveyId} received rating ${data.rating}`)
+      logger.warn(`[CSAT] Low rating alert: Survey ${surveyId} received rating ${data.rating}`)
     }
 
     const row = result.rows[0] as Record<string, unknown> | undefined

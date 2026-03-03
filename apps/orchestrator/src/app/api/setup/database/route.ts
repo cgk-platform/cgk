@@ -1,5 +1,6 @@
 import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,7 +45,7 @@ export async function POST() {
       },
     })
   } catch (error) {
-    console.error('Database connection test failed:', error)
+    logger.error('Database connection test failed:', error)
     return NextResponse.json(
       {
         success: false,

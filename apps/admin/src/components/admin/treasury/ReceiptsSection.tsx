@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button } from '@cgk-platform/ui'
 import { Card, CardContent } from '@cgk-platform/ui'
 import { Input } from '@cgk-platform/ui'
@@ -219,11 +220,15 @@ function ReceiptCard({
           onClick={onPreview}
         >
           {receipt.file_type?.startsWith('image/') ? (
-            <img
-              src={receipt.file_url}
-              alt={receipt.file_name}
-              className="h-full w-full object-cover"
-            />
+            <div className="relative h-full w-full">
+              <Image
+                src={receipt.file_url}
+                alt={receipt.file_name}
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
           ) : (
             <FileText className="h-12 w-12 text-slate-400" />
           )}
@@ -525,11 +530,16 @@ function ReceiptPreviewModal({
         </button>
 
         {receipt.file_type?.startsWith('image/') ? (
-          <img
-            src={receipt.file_url}
-            alt={receipt.file_name}
-            className="max-h-[80vh] w-auto"
-          />
+          <div className="relative max-h-[80vh]">
+            <Image
+              src={receipt.file_url}
+              alt={receipt.file_name}
+              width={1200}
+              height={800}
+              className="max-h-[80vh] w-auto"
+              unoptimized
+            />
+          </div>
         ) : receipt.file_type === 'application/pdf' ? (
           <iframe
             src={receipt.file_url}

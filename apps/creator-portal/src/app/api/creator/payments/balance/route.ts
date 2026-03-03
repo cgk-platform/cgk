@@ -13,6 +13,7 @@ import {
 } from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,7 +71,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching balance:', error)
+    logger.error('Error fetching balance:', error)
     return Response.json({ error: 'Failed to fetch balance' }, { status: 500 })
   }
 }

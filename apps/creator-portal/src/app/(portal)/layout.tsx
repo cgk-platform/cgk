@@ -11,7 +11,6 @@ import {
   MonitorPlay,
   Settings,
   HelpCircle,
-  User,
   Menu,
   X,
   Building,

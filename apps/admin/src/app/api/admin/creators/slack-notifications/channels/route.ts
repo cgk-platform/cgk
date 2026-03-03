@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { getTenantWorkspace, SlackClient } from '@cgk-platform/slack'
 
 import type { SlackChannel } from '@/lib/creators/lifecycle-types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/creators/slack-notifications/channels
@@ -51,7 +52,7 @@ export async function GET() {
 
     return NextResponse.json({ channels })
   } catch (error) {
-    console.error('[slack-notifications/channels] GET error:', error)
+    logger.error('[slack-notifications/channels] GET error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     // Handle specific Slack errors

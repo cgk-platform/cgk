@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { withTenant } from '@cgk-platform/db'
 
 import { getArticles, createArticle, rowToArticleWithCategory } from '@/lib/knowledge-base/db'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
     )
     return NextResponse.json({ articles: result.rows.map(rowToArticleWithCategory), total: result.totalCount })
   } catch (err) {
-    console.error('[kb/articles] GET error:', err)
+    logger.error('[kb/articles] GET error:', err)
     return NextResponse.json({ error: 'Failed to load articles' }, { status: 500 })
   }
 }
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
     )
     return NextResponse.json({ article }, { status: 201 })
   } catch (err) {
-    console.error('[kb/articles] POST error:', err)
+    logger.error('[kb/articles] POST error:', err)
     return NextResponse.json({ error: 'Failed to create article' }, { status: 500 })
   }
 }

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 
 import type { CreativeIdea, CreativeIdeaType, CreativeIdeaStatus } from '@/lib/bri/types'
+import { logger } from '@cgk-platform/logging'
 
 interface CreativeIdeasViewProps {
   tenantSlug: string
@@ -131,7 +132,7 @@ export function CreativeIdeasView({ initialIdeas }: CreativeIdeasViewProps) {
         setIsCreating(false)
       }
     } catch (error) {
-      console.error('Failed to save idea:', error)
+      logger.error('Failed to save idea:', error)
     } finally {
       setSaving(false)
     }

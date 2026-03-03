@@ -19,6 +19,7 @@ import {
   expireOldSessions,
 } from './index'
 import type { EsignWebhookEvent, EsignWebhookPayload } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Local type definitions for job system (until @cgk-platform/jobs module resolution is fixed)
 interface Job<T = unknown> {
@@ -369,7 +370,7 @@ export const sendEsignReminders = defineJob({
       for (const row of result.rows) {
         try {
           // Note: Actual email sending would be implemented via communications package
-          console.log(`Would send reminder to ${row.signer_email} for document ${row.document_id}`)
+          logger.info(`Would send reminder to ${row.signer_email} for document ${row.document_id}`)
 
           // Update reminder tracking
           const reminderDays = 3 // Default
@@ -401,7 +402,7 @@ export const sendEsignReminders = defineJob({
 
           sentCount++
         } catch (error) {
-          console.error(`Failed to send reminder for document ${row.document_id}:`, error)
+          logger.error(`Failed to send reminder for document ${row.document_id}:`, error)
         }
       }
 
@@ -483,7 +484,7 @@ export const processScheduledBulkSends = defineJob({
     // For each scheduled bulk send, trigger the processing job
     // In real implementation, would use the job queue to enqueue each
     for (const bulkSend of bulkSends) {
-      console.log(`Would enqueue bulk send processing for ${bulkSend.id}`)
+      logger.info(`Would enqueue bulk send processing for ${bulkSend.id}`)
     }
 
     return {

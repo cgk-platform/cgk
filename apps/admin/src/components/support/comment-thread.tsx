@@ -5,6 +5,7 @@ import { Button, cn, Textarea } from '@cgk-platform/ui'
 import { MessageSquare, User, Bot, Lock, Send, Loader2 } from 'lucide-react'
 import type { TicketComment } from '@cgk-platform/support'
 import { InternalNoteBadge } from './internal-note-badge'
+import { logger } from '@cgk-platform/logging'
 
 interface CommentThreadProps {
   ticketId: string
@@ -64,7 +65,7 @@ export function CommentThread({
       setNewComment('')
       setIsInternal(false)
     } catch (error) {
-      console.error('Failed to add comment:', error)
+      logger.error('Failed to add comment:', error)
     } finally {
       setSubmitting(false)
     }

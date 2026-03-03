@@ -8,6 +8,7 @@
 import { sql, withTenant } from '@cgk-platform/db'
 
 import type { SentimentAlert, SentimentAnalysisResult, TicketPriority } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Sentiment thresholds for actions
 const THRESHOLDS = {
@@ -110,7 +111,9 @@ export async function analyzeSentiment(
     try {
       return await analyzeWithClaude(text)
     } catch (error) {
-      console.warn('Claude sentiment analysis failed, falling back to keywords:', error)
+      logger.warn('Claude sentiment analysis failed, falling back to keywords', {
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 

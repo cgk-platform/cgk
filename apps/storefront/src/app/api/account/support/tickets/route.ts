@@ -19,6 +19,7 @@ import type {
   TicketPriority,
   TicketStatus,
 } from '@/lib/account/types'
+import { logger } from '@cgk-platform/logging'
 
 interface TicketRow {
   id: string
@@ -353,7 +354,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(ticket, { status: 201 })
   } catch (error) {
-    console.error('Failed to create support ticket:', error)
+    logger.error('Failed to create support ticket:', error)
     return NextResponse.json(
       { error: 'Failed to create support ticket' },
       { status: 500 }

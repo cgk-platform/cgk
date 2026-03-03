@@ -9,6 +9,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
 import { submitProjectWork } from '@/lib/projects'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,7 +90,7 @@ export async function POST(req: Request, { params }: RouteParams) {
       },
     })
   } catch (error) {
-    console.error('Error submitting work:', error)
+    logger.error('Error submitting work:', error)
     const message = error instanceof Error ? error.message : 'Failed to submit work'
     return Response.json(
       { error: message },

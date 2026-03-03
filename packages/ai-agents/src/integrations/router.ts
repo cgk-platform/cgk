@@ -21,6 +21,7 @@ import type {
   SlackInteractionPayload,
   InboundEmail,
 } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 export interface EventRouterConfig {
   tenantId: string
@@ -62,7 +63,7 @@ export async function routeEvent(
         return { success: false, error: `Unknown channel: ${channel}` }
     }
   } catch (error) {
-    console.error(`[router] Error routing ${channel}/${eventType}:`, error)
+    logger.error(`[router] Error routing ${channel}/${eventType}:`, error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

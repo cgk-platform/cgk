@@ -6,6 +6,7 @@ import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 import { useAttribution, TimeRangePicker } from '@/components/attribution'
 import type { AttributionModel, ModelComparisonData } from '@/lib/attribution'
 import { ATTRIBUTION_MODELS } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const modelColors: Record<AttributionModel, string> = {
   first_touch: '#3b82f6',
@@ -286,7 +287,7 @@ export default function ModelComparisonPage() {
       const result = await response.json()
       setModels(result.models || [])
     } catch (error) {
-      console.error('Failed to fetch model comparison:', error)
+      logger.error('Failed to fetch model comparison:', error)
     } finally {
       setIsLoading(false)
     }

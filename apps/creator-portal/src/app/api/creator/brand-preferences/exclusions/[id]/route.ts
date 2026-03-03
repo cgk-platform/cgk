@@ -8,6 +8,7 @@
 import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,7 +53,7 @@ export async function DELETE(req: Request, { params }: RouteParams): Promise<Res
       message: 'Brand removed from exclusion list',
     })
   } catch (error) {
-    console.error('Error removing brand exclusion:', error)
+    logger.error('Error removing brand exclusion:', error)
     return Response.json({ error: 'Failed to remove exclusion' }, { status: 500 })
   }
 }
@@ -105,7 +106,7 @@ export async function PATCH(req: Request, { params }: RouteParams): Promise<Resp
       message: 'Exclusion updated',
     })
   } catch (error) {
-    console.error('Error updating brand exclusion:', error)
+    logger.error('Error updating brand exclusion:', error)
     return Response.json({ error: 'Failed to update exclusion' }, { status: 500 })
   }
 }

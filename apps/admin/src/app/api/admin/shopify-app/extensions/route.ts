@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server'
 import { requireAuth } from '@cgk-platform/auth'
 import type { AuthContext } from '@cgk-platform/auth'
 import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -209,7 +210,7 @@ export async function GET(request: Request): Promise<NextResponse<ExtensionsResp
       extensions,
     })
   } catch (error) {
-    console.error('Failed to fetch extension status:', error)
+    logger.error('Failed to fetch extension status:', error)
     return NextResponse.json(
       {
         connected: false,

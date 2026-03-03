@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { bulkUpdateSampleStatus } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   const headerList = await headers()
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, updated })
   } catch (error) {
-    console.error('Error updating sample statuses:', error)
+    logger.error('Error updating sample statuses:', error)
     return NextResponse.json(
       { error: 'Failed to update sample statuses' },
       { status: 500 }

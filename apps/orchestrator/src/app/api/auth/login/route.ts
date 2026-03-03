@@ -1,4 +1,5 @@
 import { createMagicLink, sendMagicLinkEmail, getUserByEmail } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
       message: 'Magic link sent to your email',
     })
   } catch (error) {
-    console.error('Login error:', error)
+    logger.error('Login error:', error)
     return Response.json(
       { error: 'Failed to send magic link' },
       { status: 500 }

@@ -17,6 +17,7 @@ import {
   setCachedAudit,
 } from '@/lib/seo/site-analyzer'
 import type { PageSEOAnalysis } from '@/lib/seo/types'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
       pageResults.push(analysis)
     } catch (err) {
       // Log error but continue with other pages
-      console.error(`Failed to analyze ${pagePath}:`, err)
+      logger.error(`Failed to analyze ${pagePath}:`, err)
     }
   }
 
@@ -167,7 +168,7 @@ async function fetchPageHtml(url: string): Promise<string> {
   } catch (err) {
     // Return minimal HTML for pages that can't be fetched
     // This allows the audit to continue with other pages
-    console.warn(`Could not fetch ${url}:`, err)
+    logger.warn(`Could not fetch ${url}:`, err)
     return `<!DOCTYPE html><html><head><title>Page Not Available</title></head><body></body></html>`
   }
 }

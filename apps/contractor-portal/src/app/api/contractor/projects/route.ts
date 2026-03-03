@@ -9,6 +9,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
 import { getContractorProjects, getProjectsByKanbanColumn, getContractorDashboardStats } from '@/lib/projects'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,7 +76,7 @@ export async function GET(req: Request) {
       stats,
     })
   } catch (error) {
-    console.error('Error fetching projects:', error)
+    logger.error('Error fetching projects:', error)
     return Response.json(
       { error: 'Failed to fetch projects' },
       { status: 500 }

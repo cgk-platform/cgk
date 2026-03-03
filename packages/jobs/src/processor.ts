@@ -5,6 +5,7 @@
 import type { JobDefinition, JobHandler } from './define'
 import type { JobQueue } from './queue'
 import type { Job, JobResult } from './types'
+import { logger } from '@cgk-platform/logging'
 
 export interface ProcessorConfig {
   queue: JobQueue
@@ -41,7 +42,7 @@ export function processJobs(config: ProcessorConfig): JobProcessor {
           const handler = handlers.get(job.name)
 
           if (!handler) {
-            console.error(`No handler registered for job: ${job.name}`)
+            logger.error(`No handler registered for job: ${job.name}`)
             await config.queue.acknowledge(job.id, 'failed', new Error(`No handler for job: ${job.name}`))
             return
           }
@@ -65,7 +66,7 @@ export function processJobs(config: ProcessorConfig): JobProcessor {
         })
       )
     } catch (error) {
-      console.error('Error polling for jobs:', error)
+      logger.error('Error polling for jobs:', error)
     }
 
     // Schedule next poll

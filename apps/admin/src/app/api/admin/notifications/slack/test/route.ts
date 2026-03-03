@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { sendTestNotification, type NotificationType } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/notifications/slack/test
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
       error: result.error,
     })
   } catch (error) {
-    console.error('Failed to send test notification:', error)
+    logger.error('Failed to send test notification:', error)
     return NextResponse.json(
       { error: 'Failed to send test notification' },
       { status: 500 },

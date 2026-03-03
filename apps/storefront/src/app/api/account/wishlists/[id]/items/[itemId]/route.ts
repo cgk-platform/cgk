@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { sql, withTenant } from '@cgk-platform/db'
 import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string; itemId: string }>
@@ -68,7 +69,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error('Failed to remove item from wishlist:', error)
+    logger.error('Failed to remove item from wishlist:', error)
     return NextResponse.json({ error: 'Failed to remove item' }, { status: 500 })
   }
 }

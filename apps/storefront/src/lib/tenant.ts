@@ -8,6 +8,7 @@ import { sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { cache } from 'react'
 import { decryptToken, looksEncrypted } from './crypto'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Tenant configuration for storefront
@@ -112,7 +113,7 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
           try {
             storefrontToken = await decryptToken(rawToken, encryptionKey)
           } catch (err) {
-            console.warn(
+            logger.warn(
               `[tenant] Failed to decrypt Shopify storefront token for "${slug}" — skipping Shopify config`,
               err,
             )
@@ -132,7 +133,7 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
 
     return config
   } catch (error) {
-    console.error('Failed to get tenant config:', error)
+    logger.error('Failed to get tenant config:', error)
     return null
   }
 })

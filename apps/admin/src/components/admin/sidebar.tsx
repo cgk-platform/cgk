@@ -41,10 +41,13 @@ export function Sidebar({ tenant, user }: SidebarProps) {
       {/* Tenant branding */}
       <div className="flex items-center gap-3 border-b border-border/50 px-5 py-5">
         {tenant.logo ? (
-          <img
+          <Image
             src={tenant.logo}
             alt={tenant.name}
-            className="h-9 w-9 rounded-lg object-cover ring-1 ring-border/50"
+            width={36}
+            height={36}
+            className="rounded-lg object-cover ring-1 ring-border/50"
+            unoptimized
           />
         ) : (
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-sm">

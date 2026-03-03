@@ -9,6 +9,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
 import { getContractorDashboardStats } from '@/lib/projects'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export async function GET(req: Request) {
       stats,
     })
   } catch (error) {
-    console.error('Error fetching dashboard:', error)
+    logger.error('Error fetching dashboard:', error)
     return Response.json(
       { error: 'Failed to fetch dashboard data' },
       { status: 500 }

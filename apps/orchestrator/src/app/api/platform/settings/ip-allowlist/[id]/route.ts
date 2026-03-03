@@ -5,6 +5,7 @@ import {
   verifyJWT,
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,7 +161,7 @@ export async function PATCH(
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Failed to update IP allowlist entry:', error)
+    logger.error('Failed to update IP allowlist entry:', error)
     return Response.json(
       { error: 'Failed to update IP allowlist entry' },
       { status: 500 }
@@ -221,7 +222,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete IP allowlist entry:', error)
+    logger.error('Failed to delete IP allowlist entry:', error)
     return Response.json(
       { error: 'Failed to delete IP allowlist entry' },
       { status: 500 }

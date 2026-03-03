@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getNotificationLogs, type NotificationType, type NotificationStatus } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/notifications/slack/logs
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ logs })
   } catch (error) {
-    console.error('Failed to get Slack logs:', error)
+    logger.error('Failed to get Slack logs:', error)
     return NextResponse.json(
       { error: 'Failed to get logs' },
       { status: 500 },

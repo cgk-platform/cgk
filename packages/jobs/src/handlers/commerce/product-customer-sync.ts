@@ -41,6 +41,7 @@ import type { JobResult } from '../../types'
 // @ts-expect-error - tsup bundling creates single-line .d.ts that TS can't parse properly
 import { getShopifyCredentialsBySlug, createAdminClient } from '@cgk-platform/shopify'
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 // ---------------------------------------------------------------------------
 // Job Payloads
@@ -161,7 +162,7 @@ export const productSyncJob = defineJob<TenantEvent<ProductSyncFromShopifyPayloa
       }
     }
 
-    console.log(`[commerce.productSync] Syncing product`, {
+    logger.info(`[commerce.productSync] Syncing product`, {
       tenantId,
       productId,
       shopifyProductId,
@@ -219,7 +220,7 @@ export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload
       }
     }
 
-    console.log(`[commerce.productBatchSync] Starting sync`, {
+    logger.info(`[commerce.productBatchSync] Starting sync`, {
       tenantId,
       productIds: productIds?.length,
       shopifyProductIds: shopifyProductIds?.length,
@@ -374,7 +375,7 @@ export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload
       const result = (await admin.query(query, { first: 250, after: null })) as ProductsResponse
 
       const products = result.products.edges.map((edge: { node: ProductNode }) => edge.node)
-      console.log(`[commerce.productBatchSync] Fetched ${products.length} products from Shopify`)
+      logger.info(`[commerce.productBatchSync] Fetched ${products.length} products from Shopify`)
 
       // 4. Transform and insert into database
       let productsSynced = 0
@@ -537,7 +538,7 @@ export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload
         }
       })
 
-      console.log(
+      logger.info(
         `[commerce.productBatchSync] Synced ${productsSynced} products, ${variantsSynced} variants`
       )
 
@@ -553,7 +554,7 @@ export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload
         },
       }
     } catch (error) {
-      console.error(`[commerce.productBatchSync] Error:`, error)
+      logger.error(`[commerce.productBatchSync] Error:`, error)
       return {
         success: false,
         error: {
@@ -586,7 +587,7 @@ export const handleProductSyncJob = defineJob<TenantEvent<ProductSyncPayload>>({
       }
     }
 
-    console.log(`[commerce.handleProductSync] Product sync requested`, {
+    logger.info(`[commerce.handleProductSync] Product sync requested`, {
       tenantId,
       productId,
       fullSync,
@@ -641,7 +642,7 @@ export const customerSyncJob = defineJob<TenantEvent<CustomerSyncFromShopifyPayl
       }
     }
 
-    console.log(`[commerce.customerSync] Syncing customer`, {
+    logger.info(`[commerce.customerSync] Syncing customer`, {
       tenantId,
       customerId,
       shopifyCustomerId,
@@ -698,7 +699,7 @@ export const customerBatchSyncJob = defineJob<TenantEvent<CustomerBatchSyncPaylo
       }
     }
 
-    console.log(`[commerce.customerBatchSync] Batch syncing customers`, {
+    logger.info(`[commerce.customerBatchSync] Batch syncing customers`, {
       tenantId,
       customerCount: customerIds?.length || shopifyCustomerIds?.length || 'all',
       createdSince,
@@ -745,7 +746,7 @@ export const handleCustomerCreatedJob = defineJob<TenantEvent<CustomerCreatedPay
       }
     }
 
-    console.log(`[commerce.handleCustomerCreated] New customer`, {
+    logger.info(`[commerce.handleCustomerCreated] New customer`, {
       tenantId,
       customerId,
       email,
@@ -792,7 +793,7 @@ export const handleCustomerUpdatedJob = defineJob<TenantEvent<CustomerUpdatedPay
       }
     }
 
-    console.log(`[commerce.handleCustomerUpdated] Customer updated`, {
+    logger.info(`[commerce.handleCustomerUpdated] Customer updated`, {
       tenantId,
       customerId,
       changes,
@@ -850,7 +851,7 @@ export const inventoryUpdateJob = defineJob<TenantEvent<InventoryUpdatePayload>>
       }
     }
 
-    console.log(`[commerce.inventoryUpdate] Updating inventory`, {
+    logger.info(`[commerce.inventoryUpdate] Updating inventory`, {
       tenantId,
       productId,
       variantId,
@@ -902,7 +903,7 @@ export const inventoryBatchSyncJob = defineJob<TenantEvent<InventoryBatchSyncPay
       }
     }
 
-    console.log(`[commerce.inventoryBatchSync] Batch syncing inventory`, {
+    logger.info(`[commerce.inventoryBatchSync] Batch syncing inventory`, {
       tenantId,
       locationId: locationId || 'all',
       fullSync,
@@ -951,7 +952,7 @@ export const handleInventorySyncJob = defineJob<TenantEvent<InventorySyncPayload
       }
     }
 
-    console.log(`[commerce.handleInventorySync] Inventory sync requested`, {
+    logger.info(`[commerce.handleInventorySync] Inventory sync requested`, {
       tenantId,
       productId,
       variantId,
@@ -998,7 +999,7 @@ export const collectionSyncJob = defineJob<TenantEvent<CollectionSyncPayload>>({
       }
     }
 
-    console.log(`[commerce.collectionSync] Syncing collection`, {
+    logger.info(`[commerce.collectionSync] Syncing collection`, {
       tenantId,
       collectionId,
       shopifyCollectionId,
@@ -1058,7 +1059,7 @@ export const collectionProductsSyncJob = defineJob<TenantEvent<CollectionProduct
       }
     }
 
-    console.log(`[commerce.collectionProductsSync] Syncing collection products`, {
+    logger.info(`[commerce.collectionProductsSync] Syncing collection products`, {
       tenantId,
       collectionId,
       shopifyCollectionId,

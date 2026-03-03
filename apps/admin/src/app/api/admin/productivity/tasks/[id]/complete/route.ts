@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { completeTask } from '@/lib/productivity'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -40,7 +41,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ task })
   } catch (error) {
-    console.error('Error completing task:', error)
+    logger.error('Error completing task:', error)
     return NextResponse.json({ error: 'Failed to complete task' }, { status: 500 })
   }
 }

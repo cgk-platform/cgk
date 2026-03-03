@@ -1,5 +1,6 @@
 import { Command } from 'commander'
 import { tenantHealthCheck } from './tenant-health-check.js'
+import { logger } from '@cgk-platform/logging'
 
 export const tenantHealthCommand = new Command('tenant:health')
   .description('Run health check on a tenant')
@@ -9,7 +10,7 @@ export const tenantHealthCommand = new Command('tenant:health')
     try {
       await tenantHealthCheck(slug, { verbose: options.verbose })
     } catch (error) {
-      console.error('Health check failed:', error)
+      logger.error('Health check failed:', error)
       process.exit(1)
     }
   })

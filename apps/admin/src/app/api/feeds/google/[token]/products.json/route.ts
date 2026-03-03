@@ -4,6 +4,7 @@ import { setTenantSchema, sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 
 import { generateGoogleFeed, type ShopifyProductData } from '@cgk-platform/commerce'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/feeds/google/[token]/products.json
@@ -256,7 +257,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('Feed generation error:', error)
+    logger.error('Feed generation error:', error)
     return NextResponse.json(
       { error: 'Feed generation failed' },
       { status: 500 }

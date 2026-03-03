@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getSamplesStats } from '@/lib/samples/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -38,7 +39,7 @@ export async function GET() {
       },
     })
   } catch (error) {
-    console.error('Failed to fetch sample stats:', error)
+    logger.error('Failed to fetch sample stats:', error)
     return NextResponse.json({ error: 'Failed to fetch sample stats' }, { status: 500 })
   }
 }

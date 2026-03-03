@@ -18,6 +18,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // SUBSCRIPTION PAYLOAD TYPES
@@ -132,7 +133,7 @@ function generateBillingIdempotencyKey(
  */
 async function checkIdempotency(key: string): Promise<boolean> {
   // In production: return redis.exists(key) > 0
-  console.log(`[Billing] Checking idempotency key: ${key}`)
+  logger.info(`[Billing] Checking idempotency key: ${key}`)
   return false
 }
 
@@ -142,7 +143,7 @@ async function checkIdempotency(key: string): Promise<boolean> {
  */
 async function markProcessed(key: string, _result: BillingResult): Promise<void> {
   // In production: redis.set(key, JSON.stringify(result), 'EX', 86400 * 7) // 7 days TTL
-  console.log(`[Billing] Marked as processed: ${key}`)
+  logger.info(`[Billing] Marked as processed: ${key}`)
 }
 
 // ============================================================
@@ -165,14 +166,14 @@ export const subscriptionDailyBillingJob = defineJob<TenantEvent<SubscriptionDai
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    console.log(
+    logger.info(
       `[Billing] Starting daily billing for tenant ${tenantId} (date: ${today.toISOString()})`
     )
 
     // Check if already processed today (unless forced)
     const dailyKey = `billing:daily:${tenantId}:${today.toISOString().split('T')[0]}`
     if (!force && (await checkIdempotency(dailyKey))) {
-      console.log(`[Billing] Already processed today, skipping`)
+      logger.info(`[Billing] Already processed today, skipping`)
       return { success: true, data: { skipped: true, reason: 'already_processed' } }
     }
 
@@ -191,7 +192,7 @@ export const subscriptionDailyBillingJob = defineJob<TenantEvent<SubscriptionDai
 
       // Check idempotency for each subscription
       if (await checkIdempotency(idempotencyKey)) {
-        console.log(`[Billing] Subscription ${subscriptionId} already billed, skipping`)
+        logger.info(`[Billing] Subscription ${subscriptionId} already billed, skipping`)
         continue
       }
 
@@ -210,7 +211,7 @@ export const subscriptionDailyBillingJob = defineJob<TenantEvent<SubscriptionDai
         await markProcessed(idempotencyKey, result)
       } catch (error) {
         failed++
-        console.error(`[Billing] Failed to process ${subscriptionId}:`, error)
+        logger.error(`[Billing] Failed to process ${subscriptionId}:`, error)
       }
     }
 
@@ -221,7 +222,7 @@ export const subscriptionDailyBillingJob = defineJob<TenantEvent<SubscriptionDai
       idempotencyKey: dailyKey,
     })
 
-    console.log(`[Billing] Daily billing complete: ${processed} processed, ${failed} failed`)
+    logger.info(`[Billing] Daily billing complete: ${processed} processed, ${failed} failed`)
 
     return {
       success: failed === 0,
@@ -250,11 +251,11 @@ export const subscriptionProcessBillingJob = defineJob<
   handler: async (job) => {
     const { tenantId, subscriptionId, idempotencyKey } = job.payload
 
-    console.log(`[Billing] Processing subscription ${subscriptionId}`)
+    logger.info(`[Billing] Processing subscription ${subscriptionId}`)
 
     // Check idempotency
     if (await checkIdempotency(idempotencyKey)) {
-      console.log(`[Billing] Already processed: ${idempotencyKey}`)
+      logger.info(`[Billing] Already processed: ${idempotencyKey}`)
       return { success: true, data: { skipped: true, idempotencyKey } }
     }
 
@@ -277,7 +278,7 @@ export const subscriptionBatchBillingJob = defineJob<TenantEvent<SubscriptionBat
   handler: async (job) => {
     const { tenantId, subscriptionIds, batchId } = job.payload
 
-    console.log(`[Billing] Processing batch ${batchId} with ${subscriptionIds.length} subscriptions`)
+    logger.info(`[Billing] Processing batch ${batchId} with ${subscriptionIds.length} subscriptions`)
 
     const today = new Date()
     let processed = 0
@@ -325,7 +326,7 @@ export const subscriptionRetryFailedJob = defineJob<TenantEvent<SubscriptionRetr
   handler: async (job) => {
     const { tenantId, subscriptionId, previousError: _previousError, attemptNumber } = job.payload
 
-    console.log(
+    logger.info(
       `[Billing] Retrying failed billing for ${subscriptionId} (attempt ${attemptNumber})`
     )
 
@@ -335,14 +336,14 @@ export const subscriptionRetryFailedJob = defineJob<TenantEvent<SubscriptionRetr
     const result = await processSubscriptionBilling(tenantId, subscriptionId, retryKey)
 
     if (result.success) {
-      console.log(`[Billing] Retry successful for ${subscriptionId}`)
+      logger.info(`[Billing] Retry successful for ${subscriptionId}`)
       // Update subscription status back to active
     } else {
-      console.log(`[Billing] Retry failed for ${subscriptionId}: ${result.error}`)
+      logger.info(`[Billing] Retry failed for ${subscriptionId}: ${result.error}`)
 
       // Check if max retries reached
       if (attemptNumber >= 3) {
-        console.log(`[Billing] Max retries reached, marking subscription as past_due`)
+        logger.info(`[Billing] Max retries reached, marking subscription as past_due`)
         // Would update subscription status to past_due and notify customer
       }
     }
@@ -367,7 +368,7 @@ export const subscriptionCatchupBillingJob = defineJob<
   handler: async (job) => {
     const { tenantId, billingDate, subscriptionIds } = job.payload
 
-    console.log(`[Billing] Running catchup billing for date ${billingDate.toISOString()}`)
+    logger.info(`[Billing] Running catchup billing for date ${billingDate.toISOString()}`)
 
     // Query subscriptions that were due on billing date
     const dueSubscriptions = subscriptionIds || []
@@ -379,7 +380,7 @@ export const subscriptionCatchupBillingJob = defineJob<
       const idempotencyKey = generateBillingIdempotencyKey(tenantId, subscriptionId, billingDate)
 
       if (await checkIdempotency(idempotencyKey)) {
-        console.log(`[Billing] Catchup: ${subscriptionId} already processed`)
+        logger.info(`[Billing] Catchup: ${subscriptionId} already processed`)
         continue
       }
 
@@ -420,7 +421,7 @@ export const subscriptionShadowValidationJob = defineJob<
   handler: async (job) => {
     const { tenantId, compareSystem } = job.payload
 
-    console.log(`[Billing] Running shadow validation against ${compareSystem}`)
+    logger.info(`[Billing] Running shadow validation against ${compareSystem}`)
 
     // Implementation would:
     // 1. Fetch all active subscriptions from our system
@@ -440,10 +441,10 @@ export const subscriptionShadowValidationJob = defineJob<
     }> = []
 
     if (discrepancies.length > 0) {
-      console.warn(`[Billing] Found ${discrepancies.length} discrepancies`)
+      logger.warn(`[Billing] Found ${discrepancies.length} discrepancies`)
       // Would trigger alert for manual review
     } else {
-      console.log(`[Billing] Shadow validation passed - no discrepancies`)
+      logger.info(`[Billing] Shadow validation passed - no discrepancies`)
     }
 
     return {
@@ -476,7 +477,7 @@ export const subscriptionAnalyticsSnapshotJob = defineJob<
     const { tenantId, snapshotDate } = job.payload
     const date = snapshotDate || new Date()
 
-    console.log(`[Billing] Generating analytics snapshot for ${date.toISOString().split('T')[0]}`)
+    logger.info(`[Billing] Generating analytics snapshot for ${date.toISOString().split('T')[0]}`)
 
     // Calculate metrics
     // Would query subscription data and compute:
@@ -496,7 +497,7 @@ export const subscriptionAnalyticsSnapshotJob = defineJob<
     // Store snapshot
     // Would insert into subscription_analytics_snapshots table
 
-    console.log(`[Billing] Snapshot: MRR=$${snapshot.mrr}, Active=${snapshot.activeSubscriptions}`)
+    logger.info(`[Billing] Snapshot: MRR=$${snapshot.mrr}, Active=${snapshot.activeSubscriptions}`)
 
     return {
       success: true,
@@ -522,7 +523,7 @@ export const subscriptionUpcomingReminderJob = defineJob<
   handler: async (job) => {
     const { tenantId, daysBeforeRenewal } = job.payload
 
-    console.log(
+    logger.info(
       `[Billing] Sending ${daysBeforeRenewal}-day renewal reminders for tenant ${tenantId}`
     )
 
@@ -542,7 +543,7 @@ export const subscriptionUpcomingReminderJob = defineJob<
     let sent = 0
 
     for (const renewal of upcomingRenewals) {
-      console.log(`[Billing] Sending reminder to ${renewal.email}`)
+      logger.info(`[Billing] Sending reminder to ${renewal.email}`)
       // Would trigger email.send job
       sent++
 
@@ -578,7 +579,7 @@ async function processSubscriptionBilling(
   subscriptionId: string,
   idempotencyKey: string
 ): Promise<BillingResult> {
-  console.log(`[Billing] Processing ${subscriptionId} with key ${idempotencyKey}`)
+  logger.info(`[Billing] Processing ${subscriptionId} with key ${idempotencyKey}`)
 
   // Implementation would:
   // 1. Get subscription details

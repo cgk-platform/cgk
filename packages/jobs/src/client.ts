@@ -21,6 +21,7 @@ import { validateTenantId } from './provider'
 import { createInngestProvider } from './providers/inngest'
 import { createLocalProvider } from './providers/local'
 import { createTriggerDevProvider } from './providers/trigger-dev'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Job client configuration
@@ -104,7 +105,7 @@ export function createJobClient(config: JobClientConfig): JobClient {
 
   function log(message: string, data?: unknown): void {
     if (debug) {
-      console.log(`[JobClient] ${message}`, data ?? '')
+      logger.info(`[JobClient] ${message}`, data ?? '')
     }
   }
 

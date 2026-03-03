@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
 
     // Log the contact form submission
     // TODO: Wire to tenant's email provider (Resend/SendGrid) when configured
-    console.log(`[Contact Form] From: ${name} <${email}>, Subject: ${subject || 'N/A'}`)
+    logger.info(`[Contact Form] From: ${name} <${email}>, Subject: ${subject || 'N/A'}`)
 
     return NextResponse.json({ success: true, message: 'Message sent successfully.' })
   } catch {

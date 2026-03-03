@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getTaskStats } from '@/lib/productivity'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/productivity/tasks/stats
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ stats })
   } catch (error) {
-    console.error('Error fetching task stats:', error)
+    logger.error('Error fetching task stats:', error)
     return NextResponse.json({ error: 'Failed to fetch task statistics' }, { status: 500 })
   }
 }

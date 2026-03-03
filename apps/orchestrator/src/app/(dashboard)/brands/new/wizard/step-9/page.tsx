@@ -27,6 +27,7 @@ import { Suspense, useCallback, useEffect, useState } from 'react'
 
 import { ChecklistIcon, ConfettiOverlay, NextActionCard } from './components'
 import { generateChecklist, generateConfettiPieces, type ConfettiPiece } from './utils'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Step 9: Launch / Complete
@@ -88,7 +89,7 @@ function Step9Content() {
         setIsLaunched(true)
       }
     } catch (err) {
-      console.error('Failed to load session:', err)
+      logger.error('Failed to load session:', err)
       setError('Failed to load session data')
     } finally {
       setIsLoading(false)
@@ -144,13 +145,13 @@ function Step9Content() {
 
       // Even if launch endpoint doesn't exist yet, mark as launched locally
       if (!launchResponse.ok) {
-        console.warn('Launch endpoint not available, continuing with local state')
+        logger.warn('Launch endpoint not available, continuing with local state')
       }
 
       setIsLaunched(true)
       triggerConfetti()
     } catch (err) {
-      console.error('Launch error:', err)
+      logger.error('Launch error:', err)
       setError('Failed to launch brand. Please try again.')
     } finally {
       setIsLaunching(false)
@@ -175,7 +176,7 @@ function Step9Content() {
         }),
       })
     } catch (err) {
-      console.error('Failed to save step:', err)
+      logger.error('Failed to save step:', err)
     }
 
     router.push(`/brands/new/wizard/step-8?sessionId=${sessionId}`)

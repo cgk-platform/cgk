@@ -17,6 +17,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -120,7 +121,7 @@ export async function POST(req: Request) {
   try {
     // Check for BLOB_READ_WRITE_TOKEN
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error('BLOB_READ_WRITE_TOKEN is not configured')
+      logger.error('BLOB_READ_WRITE_TOKEN is not configured')
       return Response.json(
         { error: 'File storage is not configured' },
         { status: 503 }
@@ -204,7 +205,7 @@ export async function POST(req: Request) {
       },
     })
   } catch (error) {
-    console.error('Error uploading attachment:', error)
+    logger.error('Error uploading attachment:', error)
     return Response.json(
       { error: 'Failed to upload attachment' },
       { status: 500 }

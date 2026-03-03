@@ -14,6 +14,7 @@ import {
   getAbandonedCheckout,
   getEmailsForCheckout,
 } from '@/lib/abandoned-checkouts/db'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(
   _request: Request,
@@ -49,7 +50,7 @@ export async function GET(
       emails: result.emails,
     })
   } catch (error) {
-    console.error('Failed to fetch abandoned checkout:', error)
+    logger.error('Failed to fetch abandoned checkout:', error)
     return NextResponse.json(
       { error: 'Failed to fetch abandoned checkout' },
       { status: 500 },

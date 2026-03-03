@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { approveCommissions } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   // Require authentication
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, approved })
   } catch (error) {
-    console.error('Error approving commissions:', error)
+    logger.error('Error approving commissions:', error)
     return NextResponse.json(
       { error: 'Failed to approve commissions' },
       { status: 500 }

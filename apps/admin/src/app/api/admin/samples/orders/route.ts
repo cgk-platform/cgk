@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 
 import { getSamples, mapFulfillmentStatus, mapSampleType } from '@/lib/samples/db'
 import type { FulfillmentStatus, SampleType } from '@/lib/samples/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -69,7 +70,7 @@ export async function GET(req: Request) {
       totalPages: Math.ceil(result.totalCount / limit),
     })
   } catch (error) {
-    console.error('Failed to fetch sample orders:', error)
+    logger.error('Failed to fetch sample orders:', error)
     return NextResponse.json({ error: 'Failed to fetch sample orders' }, { status: 500 })
   }
 }

@@ -1,6 +1,7 @@
 import { hashPassword } from '@cgk-platform/auth/node'
 import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -133,7 +134,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Failed to create admin:', error)
+    logger.error('Failed to create admin:', error)
     return NextResponse.json(
       {
         success: false,

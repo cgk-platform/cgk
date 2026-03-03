@@ -6,6 +6,7 @@
  */
 
 import type { EcommerceItem, PurchaseEventData, ViewItemListData } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Debug mode from env
 const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true'
@@ -30,7 +31,7 @@ function isTikTokPixelAvailable(): boolean {
   if (typeof window === 'undefined') return false
   if (!getTikTokPixelId()) {
     if (DEBUG_MODE) {
-      console.log('[TikTok Pixel] Not configured - no TikTok pixel ID found')
+      logger.info('[TikTok Pixel] Not configured - no TikTok pixel ID found')
     }
     return false
   }
@@ -42,7 +43,7 @@ function isTikTokPixelAvailable(): boolean {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    console.log(`[TikTok Pixel] ${message}`, data ?? '')
+    logger.info(`[TikTok Pixel] ${message}`, data ?? '')
   }
 }
 
@@ -64,7 +65,7 @@ function sendTikTokEvent(
     window.ttq.track(eventName, params, options)
     debugLog(`Sent ${eventName}`, params)
   } catch (error) {
-    console.error(`[TikTok Pixel] Error sending ${eventName}:`, error)
+    logger.error(`[TikTok Pixel] Error sending ${eventName}:`, error)
   }
 }
 

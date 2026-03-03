@@ -1,6 +1,7 @@
 import { sql } from '@cgk-platform/db'
 
 import type { PlatformAlert } from '../../../../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -68,7 +69,7 @@ export async function GET(request: Request): Promise<Response> {
             )
           )
         } catch (error) {
-          console.error('Error polling for alerts:', error)
+          logger.error('Error polling for alerts:', error)
           controller.enqueue(
             encoder.encode(
               `event: error\ndata: ${JSON.stringify({ error: 'Failed to fetch alerts' })}\n\n`

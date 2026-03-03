@@ -1,4 +1,5 @@
 import { getUserWithMemberships, logAuditAction } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,12 +67,12 @@ export async function GET(request: Request, { params }: RouteParams) {
         targetEmail: user.email,
       },
     }).catch((error) => {
-      console.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error)
     })
 
     return Response.json({ user })
   } catch (error) {
-    console.error('Get user error:', error)
+    logger.error('Get user error:', error)
     return Response.json({ error: 'Failed to get user details' }, { status: 500 })
   }
 }

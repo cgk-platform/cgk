@@ -8,6 +8,7 @@ import { sql } from '@cgk-platform/db'
 
 import { createFailureLearning } from './correction-detector.js'
 import type { AgentFeedback, CreateFeedbackInput, FeedbackType } from '../memory/types.js'
+import { logger } from '@cgk-platform/logging'
 
 // Helper to convert snake_case DB rows to camelCase
 function toCamelCase<T extends Record<string, unknown>>(row: T): Record<string, unknown> {
@@ -194,7 +195,7 @@ export async function processAllFeedback(agentId: string): Promise<number> {
       processed++
     } catch (error) {
       // Continue processing other feedback
-      console.error(`Failed to process feedback ${feedback.id}:`, error)
+      logger.error(`Failed to process feedback ${feedback.id}:`, error)
     }
   }
 

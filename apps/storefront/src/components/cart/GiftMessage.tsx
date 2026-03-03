@@ -11,6 +11,7 @@ import { cn } from '@cgk-platform/ui'
 import { useCallback, useState, useTransition } from 'react'
 
 import { updateCartNote } from '@/lib/cart/actions'
+import { logger } from '@cgk-platform/logging'
 
 const MAX_CHARS = 250
 
@@ -38,7 +39,7 @@ export function GiftMessage() {
         setSaved(true)
         setTimeout(() => setSaved(false), 2000)
       } catch (err) {
-        console.error('[GiftMessage] Failed to save note:', err)
+        logger.error('[GiftMessage] Failed to save note:', err)
       }
     })
   }, [message, isPending])

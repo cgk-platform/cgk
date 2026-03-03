@@ -4,6 +4,7 @@ import { requireAuth } from '@cgk-platform/auth'
 import { getTicketMetrics, getUnacknowledgedAlerts, getAllSLAConfigs } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/support/analytics
@@ -37,7 +38,7 @@ export async function GET(request: Request) {
       slaConfigs,
     })
   } catch (error) {
-    console.error('Error fetching analytics:', error)
+    logger.error('Error fetching analytics:', error)
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },
       { status: 500 }

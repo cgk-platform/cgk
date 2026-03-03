@@ -12,6 +12,7 @@ import { withTenant, sql } from '@cgk-platform/db'
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 // Job Payload Types
 export interface ProcessSurveyResponsePayload {
@@ -290,7 +291,7 @@ export const syncAttributionJob = defineJob<SyncAttributionPayload>({
       } catch {
         // attribution_records table may not exist yet (different phase)
         // Log and continue - not a critical failure
-        console.warn('[survey/sync-attribution] Attribution records table not available')
+        logger.warn('[survey/sync-attribution] Attribution records table not available')
       }
 
       return {

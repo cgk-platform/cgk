@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { Button } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 export default function Error({
   error,
@@ -11,7 +12,7 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Page error:', error)
+    logger.error('Page error:', error)
   }, [error])
 
   return (

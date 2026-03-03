@@ -36,6 +36,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 // Types
 interface TenantCredentialStatus {
@@ -416,7 +417,7 @@ export default function TenantCredentialsPage() {
       const data = await res.json()
       setCredentials(data)
     } catch (err) {
-      console.error('Failed to fetch credentials:', err)
+      logger.error('Failed to fetch credentials:', err)
       setError('Failed to load credentials')
     } finally {
       setLoading(false)

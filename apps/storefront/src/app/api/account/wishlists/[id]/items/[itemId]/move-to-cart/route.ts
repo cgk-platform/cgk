@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { sql, withTenant } from '@cgk-platform/db'
 import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string; itemId: string }>
@@ -93,7 +94,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
       variantId: item.variant_id,
     })
   } catch (error) {
-    console.error('Failed to move item to cart:', error)
+    logger.error('Failed to move item to cart:', error)
     return NextResponse.json({ error: 'Failed to move item' }, { status: 500 })
   }
 }

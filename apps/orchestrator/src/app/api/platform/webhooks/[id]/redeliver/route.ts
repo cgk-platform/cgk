@@ -1,5 +1,6 @@
 import { logAuditAction } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,7 +95,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, message: 'Webhook queued for redelivery' })
   } catch (error) {
-    console.error('Redeliver webhook error:', error)
+    logger.error('Redeliver webhook error:', error)
     return Response.json({ error: 'Failed to redeliver webhook' }, { status: 500 })
   }
 }

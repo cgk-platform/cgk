@@ -9,6 +9,7 @@ import {
   upsertCommissionConfig,
   type CommissionConfig,
 } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   // Require authentication
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
     const config = await getCommissionConfig(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    console.error('Error fetching commission config:', error)
+    logger.error('Error fetching commission config:', error)
     return NextResponse.json(
       { error: 'Failed to fetch commission config' },
       { status: 500 }
@@ -70,7 +71,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true, config })
   } catch (error) {
-    console.error('Error updating commission config:', error)
+    logger.error('Error updating commission config:', error)
     return NextResponse.json(
       { error: 'Failed to update commission config' },
       { status: 500 }

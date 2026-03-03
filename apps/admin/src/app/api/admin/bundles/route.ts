@@ -6,6 +6,7 @@ import { authenticateBundleRequest } from '@/lib/bundles/api-auth'
 import { createBundle, getBundles } from '@/lib/bundles/db'
 import type { CreateBundleInput } from '@/lib/bundles/types'
 import { validateCreateBundle } from '@/lib/bundles/validation'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/bundles
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    console.error('Error fetching bundles:', error)
+    logger.error('Error fetching bundles:', error)
     return NextResponse.json({ error: 'Failed to fetch bundles' }, { status: 500 })
   }
 }
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
     const bundle = await createBundle(auth.tenantSlug, body, auth.userId ?? undefined)
     return NextResponse.json({ bundle }, { status: 201 })
   } catch (error) {
-    console.error('Error creating bundle:', error)
+    logger.error('Error creating bundle:', error)
     return NextResponse.json({ error: 'Failed to create bundle' }, { status: 500 })
   }
 }

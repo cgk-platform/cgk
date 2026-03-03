@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import inquirer from 'inquirer'
 import ora from 'ora'
+import { logger } from '@cgk-platform/logging'
 
 interface OutdatedPackage {
   current: string
@@ -83,47 +84,47 @@ export const updateCommand = new Command('update')
       const otherUpdates = updates.filter((u) => !u.name.startsWith('@cgk-platform/'))
 
       // Display updates
-      console.log(chalk.cyan('\n📦 Packages to update:\n'))
+      logger.info(chalk.cyan('\n📦 Packages to update:\n'))
 
       if (cgkUpdates.length > 0) {
-        console.log(chalk.bold('  CGK Platform Packages:'))
+        logger.info(chalk.bold('  CGK Platform Packages:'))
         for (const pkg of cgkUpdates) {
           const current = chalk.red(pkg.current)
           const target = chalk.green(pkg.latest)
-          console.log(`    ${chalk.cyan(pkg.name)}: ${current} → ${target}`)
+          logger.info(`    ${chalk.cyan(pkg.name)}: ${current} → ${target}`)
         }
-        console.log('')
+        logger.info('')
       }
 
       if (otherUpdates.length > 0 && options.all) {
-        console.log(chalk.bold('  Other Packages:'))
+        logger.info(chalk.bold('  Other Packages:'))
         for (const pkg of otherUpdates.slice(0, 15)) {
           const current = chalk.red(pkg.current)
           const target = chalk.green(pkg.latest)
-          console.log(`    ${chalk.dim(pkg.name)}: ${current} → ${target}`)
+          logger.info(`    ${chalk.dim(pkg.name)}: ${current} → ${target}`)
         }
         if (otherUpdates.length > 15) {
-          console.log(chalk.dim(`    ... and ${otherUpdates.length - 15} more`))
+          logger.info(chalk.dim(`    ... and ${otherUpdates.length - 15} more`))
         }
-        console.log('')
+        logger.info('')
       }
 
       // Dry run mode - just show what would happen
       if (options.dryRun) {
-        console.log(chalk.yellow('  DRY RUN - No changes will be made\n'))
-        console.log(chalk.bold('  Commands that would run:\n'))
+        logger.info(chalk.yellow('  DRY RUN - No changes will be made\n'))
+        logger.info(chalk.bold('  Commands that would run:\n'))
 
         if (cgkUpdates.length > 0) {
           const cgkPkgSpecs = cgkUpdates.map((u) => `${u.name}@${u.latest}`).join(' ')
-          console.log(chalk.dim(`    pnpm update ${cgkPkgSpecs}`))
+          logger.info(chalk.dim(`    pnpm update ${cgkPkgSpecs}`))
         }
 
         if (otherUpdates.length > 0 && options.all) {
           const otherPkgSpecs = otherUpdates.map((u) => `${u.name}@${u.latest}`).join(' ')
-          console.log(chalk.dim(`    pnpm update ${otherPkgSpecs}`))
+          logger.info(chalk.dim(`    pnpm update ${otherPkgSpecs}`))
         }
 
-        console.log('')
+        logger.info('')
         return
       }
 
@@ -139,13 +140,13 @@ export const updateCommand = new Command('update')
         ])
 
         if (!proceed) {
-          console.log(chalk.yellow('\n  Update cancelled.\n'))
+          logger.info(chalk.yellow('\n  Update cancelled.\n'))
           return
         }
       }
 
       // Perform the updates
-      console.log('')
+      logger.info('')
       const updateSpinner = ora('Updating packages...').start()
 
       try {
@@ -161,31 +162,31 @@ export const updateCommand = new Command('update')
         updateSpinner.succeed('Packages updated successfully!')
 
         // Show updated packages
-        console.log(chalk.green('\n✅ Updated packages:\n'))
+        logger.info(chalk.green('\n✅ Updated packages:\n'))
         for (const pkg of packagesToUpdate.slice(0, 20)) {
-          console.log(chalk.green(`    ✓ ${pkg.name}@${pkg.latest}`))
+          logger.info(chalk.green(`    ✓ ${pkg.name}@${pkg.latest}`))
         }
         if (packagesToUpdate.length > 20) {
-          console.log(chalk.dim(`    ... and ${packagesToUpdate.length - 20} more`))
+          logger.info(chalk.dim(`    ... and ${packagesToUpdate.length - 20} more`))
         }
 
         // Remind about lockfile
-        console.log('')
-        console.log(chalk.dim('  Remember to commit the updated pnpm-lock.yaml'))
-        console.log('')
+        logger.info('')
+        logger.info(chalk.dim('  Remember to commit the updated pnpm-lock.yaml'))
+        logger.info('')
       } catch (error) {
         updateSpinner.fail('Failed to update packages')
-        console.error(
+        logger.error(
           chalk.red(
             '\n  Error: ' + (error instanceof Error ? error.message : String(error)) + '\n'
           )
         )
-        console.log(chalk.dim('  Try running `pnpm update` manually to see detailed errors.'))
+        logger.info(chalk.dim('  Try running `pnpm update` manually to see detailed errors.'))
         process.exit(1)
       }
     } catch (error) {
       spinner.fail('Failed to check for updates')
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)))
+      logger.error(chalk.red(error instanceof Error ? error.message : String(error)))
       process.exit(1)
     }
   })

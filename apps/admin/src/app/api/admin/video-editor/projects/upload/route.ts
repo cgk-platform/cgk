@@ -18,6 +18,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 
 import { validateTenantApiKey } from '@/lib/api-key-auth'
 import { createRenderRecord } from '@cgk-platform/video-editor/server'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_TYPES = ['render', 'voiceover', 'music'] as const
 type UploadType = (typeof VALID_TYPES)[number]
@@ -139,7 +140,7 @@ export async function POST(request: Request) {
       projectId,
     })
   } catch (error) {
-    console.error('Video editor upload error:', error)
+    logger.error('Video editor upload error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

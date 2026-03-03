@@ -20,6 +20,7 @@ import {
   type PrivacyRequestStatus,
   type UpdatePrivacyRequestInput,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -57,7 +58,7 @@ export async function GET(
       isOverdue: isRequestOverdue(request),
     })
   } catch (error) {
-    console.error('[privacy/request] GET error:', error)
+    logger.error('[privacy/request] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch request' },
       { status: 500 }
@@ -142,7 +143,7 @@ export async function PATCH(
       isOverdue: isRequestOverdue(request),
     })
   } catch (error) {
-    console.error('[privacy/request] PATCH error:', error)
+    logger.error('[privacy/request] PATCH error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update request' },
       { status: 500 }

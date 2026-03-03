@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import type { SmsNotificationConfig } from '@/lib/integrations/types'
+import { logger } from '@cgk-platform/logging'
 
 const DEFAULT_NOTIFICATIONS: SmsNotificationConfig[] = [
   {
@@ -88,7 +89,7 @@ export default function SmsNotificationsPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch notification config:', error)
+      logger.error('Failed to fetch notification config:', error)
     } finally {
       setLoading(false)
     }
@@ -121,7 +122,7 @@ export default function SmsNotificationsPage() {
         setHasChanges(false)
       }
     } catch (error) {
-      console.error('Failed to save:', error)
+      logger.error('Failed to save:', error)
     } finally {
       setSaving(false)
     }

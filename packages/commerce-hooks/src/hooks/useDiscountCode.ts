@@ -20,6 +20,7 @@ import { useState, useCallback } from 'react'
 
 import { useCart } from './useCart'
 import type { UseDiscountCodeReturn, DiscountActions } from '../context/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Hook for discount code validation
@@ -107,7 +108,7 @@ export function useDiscountCode(actions: DiscountActions): UseDiscountCodeReturn
         setDiscount(result)
         return true
       } catch (err) {
-        console.error('Failed to validate discount code:', err)
+        logger.error('Failed to validate discount code:', err)
         setError(err instanceof Error ? err.message : 'Failed to validate discount code')
         return false
       } finally {

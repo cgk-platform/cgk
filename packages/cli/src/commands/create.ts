@@ -16,12 +16,12 @@ export const createCommand = new Command('create')
   .action(async (name: string, options) => {
     const spinner = ora()
 
-    console.log(chalk.cyan('\n🚀 Creating CGK brand site...\n'))
+    logger.info(chalk.cyan('\n🚀 Creating CGK brand site...\n'))
 
     // Validate name
     const slug = name.toLowerCase().replace(/[^a-z0-9-]/g, '-')
     if (slug !== name) {
-      console.log(chalk.yellow(`Using slug: ${chalk.bold(slug)}`))
+      logger.info(chalk.yellow(`Using slug: ${chalk.bold(slug)}`))
     }
 
     // Determine directory
@@ -39,7 +39,7 @@ export const createCommand = new Command('create')
       ])
 
       if (!overwrite) {
-        console.log(chalk.red('Aborted.'))
+        logger.info(chalk.red('Aborted.'))
         process.exit(1)
       }
 
@@ -49,7 +49,7 @@ export const createCommand = new Command('create')
     // Validate template
     const validTemplates = ['basic', 'full', 'storefront-only']
     if (!validTemplates.includes(options.template)) {
-      console.log(
+      logger.info(
         chalk.red(`Invalid template. Choose from: ${validTemplates.join(', ')}`)
       )
       process.exit(1)
@@ -94,21 +94,21 @@ export const createCommand = new Command('create')
           spinner.succeed('Dependencies installed')
         } catch {
           spinner.warn('Failed to install dependencies')
-          console.log(chalk.yellow('  Run `pnpm install` manually in the project directory'))
+          logger.info(chalk.yellow('  Run `pnpm install` manually in the project directory'))
         }
       }
 
       // Success message
-      console.log(chalk.green('\n✅ Brand site created successfully!\n'))
-      console.log('Next steps:')
-      console.log(chalk.cyan(`  cd ${slug}`))
-      console.log(chalk.cyan('  pnpm dev'))
-      console.log('')
-      console.log('Documentation: https://cgk.dev/docs')
-      console.log('')
+      logger.info(chalk.green('\n✅ Brand site created successfully!\n'))
+      logger.info('Next steps:')
+      logger.info(chalk.cyan(`  cd ${slug}`))
+      logger.info(chalk.cyan('  pnpm dev'))
+      logger.info('')
+      logger.info('Documentation: https://cgk.dev/docs')
+      logger.info('')
     } catch (err) {
       spinner.fail('Failed to create project')
-      console.error(chalk.red(err instanceof Error ? err.message : String(err)))
+      logger.error(chalk.red(err instanceof Error ? err.message : String(err)))
       process.exit(1)
     }
   })
@@ -178,6 +178,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: '${name}',
+import { logger } from '@cgk-platform/logging'
   description: 'Powered by CGK',
 }
 

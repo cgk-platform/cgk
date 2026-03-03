@@ -28,6 +28,7 @@ import {
   notifyDrawRequestApproved,
   notifyDrawRequestRejected,
 } from '@/lib/treasury/slack'
+import { logger } from '@cgk-platform/logging'
 
 interface InboundEmailPayload {
   from: string
@@ -46,7 +47,7 @@ interface InboundEmailPayload {
 function verifyResendSignature(payload: string, signature: string): { valid: boolean; error?: string } {
   const webhookSecret = process.env.RESEND_WEBHOOK_SECRET
   if (!webhookSecret) {
-    console.error('RESEND_WEBHOOK_SECRET not configured - rejecting webhook request')
+    logger.error('RESEND_WEBHOOK_SECRET not configured - rejecting webhook request')
     return { valid: false, error: 'Webhook secret not configured' }
   }
 
@@ -152,7 +153,7 @@ export async function POST(request: Request) {
   // SECURITY: Always verify signature - no exceptions for any environment
   const signatureResult = verifyResendSignature(rawBody, signature)
   if (!signatureResult.valid) {
-    console.error('Webhook signature verification failed:', signatureResult.error)
+    logger.error('Webhook signature verification failed:', signatureResult.error)
     return NextResponse.json({ error: signatureResult.error }, { status: 401 })
   }
 
@@ -175,7 +176,7 @@ export async function POST(request: Request) {
     })
 
     if (isDuplicate) {
-      console.log('[Treasury Webhook] Duplicate email ignored:', messageId)
+      logger.info('[Treasury Webhook] Duplicate email ignored:', messageId)
       return NextResponse.json({ status: 'duplicate_ignored' })
     }
   }
@@ -190,14 +191,14 @@ export async function POST(request: Request) {
 
   // Check for auto-reply/out-of-office
   if (isAutoReply(subject, text, emailHeaders)) {
-    console.log('Ignoring auto-reply from:', from)
+    logger.info('Ignoring auto-reply from:', from)
     return NextResponse.json({ status: 'ignored', reason: 'auto-reply' })
   }
 
   // Find the associated draw request
   const requestInfo = await findRequestFromEmail(to, subject)
   if (!requestInfo) {
-    console.warn('Could not find draw request for email:', { from, to, subject })
+    logger.warn('Could not find draw request for email:', { from, to, subject })
     return NextResponse.json({ status: 'ignored', reason: 'no-matching-request' })
   }
 
@@ -205,7 +206,7 @@ export async function POST(request: Request) {
 
   // Validate sender is the treasurer
   if (!validateSenderEmail(from, treasurerEmail)) {
-    console.warn('Email from unauthorized sender:', from, 'expected:', treasurerEmail)
+    logger.warn('Email from unauthorized sender:', from, 'expected:', treasurerEmail)
     return NextResponse.json({ status: 'ignored', reason: 'unauthorized-sender' })
   }
 

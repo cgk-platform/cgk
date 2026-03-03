@@ -4,6 +4,7 @@ import {
   TenantAccessError,
   verifyJWT,
 } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       )
     }
 
-    console.error('Set default tenant error:', error)
+    logger.error('Set default tenant error:', error)
     return Response.json(
       { error: 'Failed to set default tenant' },
       { status: 500 }

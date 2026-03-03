@@ -17,6 +17,7 @@ import type {
   TreasuryReceipt,
   UpdateTreasuryReceiptInput,
 } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // Attachment Validation
@@ -139,7 +140,7 @@ async function storeAttachment(
       sizeBytes: attachment.sizeBytes,
     }
   } catch (error) {
-    console.error(`Failed to store attachment ${attachment.filename}:`, error)
+    logger.error(`Failed to store attachment ${attachment.filename}`, error instanceof Error ? error : new Error(String(error)))
     return null
   }
 }

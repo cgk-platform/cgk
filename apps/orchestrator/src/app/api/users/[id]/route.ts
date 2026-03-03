@@ -1,6 +1,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { sql } from '@vercel/postgres'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,18 +66,18 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       createdAt: user.created_at,
       isSuperAdmin: user.is_super_admin,
       memberships: membershipsResult.rows.map((m) => ({
-        id: m.id as string,
-        role: m.role as string,
-        createdAt: m.created_at as string,
+        id: m.id as unknown as string,
+        role: m.role as unknown as string,
+        createdAt: m.created_at as unknown as string,
         organization: {
-          id: m.organization_id as string,
-          name: m.organization_name as string,
-          slug: m.organization_slug as string,
+          id: m.organization_id as unknown as string,
+          name: m.organization_name as unknown as string,
+          slug: m.organization_slug as unknown as string,
         },
       })),
     })
   } catch (error) {
-    console.error('Failed to fetch user:', error)
+    logger.error('Failed to fetch user:', error)
     return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 })
   }
 }
@@ -143,7 +144,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       user: result.rows[0],
     })
   } catch (error) {
-    console.error('Failed to update user:', error)
+    logger.error('Failed to update user:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update user' },
       { status: 500 }
@@ -187,7 +188,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       message: 'User deleted successfully',
     })
   } catch (error) {
-    console.error('Failed to delete user:', error)
+    logger.error('Failed to delete user:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to delete user' },
       { status: 500 }

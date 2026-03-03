@@ -6,6 +6,7 @@
 
 import { customerQuery } from './client'
 import type { StoreCreditAccount, StoreCreditTransaction, Money } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 interface StoreCreditResponse {
   customer: {
@@ -85,7 +86,7 @@ export async function getStoreCreditAccounts(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    console.error('Failed to get store credit:', result.errors)
+    logger.error('Failed to get store credit:', result.errors)
     return []
   }
 
@@ -143,7 +144,7 @@ export async function getStoreCreditTransactions(
   )
 
   if (result.errors?.length || !result.data?.customer) {
-    console.error('Failed to get store credit transactions:', result.errors)
+    logger.error('Failed to get store credit transactions:', result.errors)
     return { accounts: [], transactions: [] }
   }
 

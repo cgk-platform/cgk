@@ -12,6 +12,7 @@ import { listBalanceTransactions, type BalanceTransactionType } from '@cgk-platf
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { getBrandFilter } from '@/lib/brand-filter'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -79,7 +80,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching transactions:', error)
+    logger.error('Error fetching transactions:', error)
     return Response.json({ error: 'Failed to fetch transactions' }, { status: 500 })
   }
 }

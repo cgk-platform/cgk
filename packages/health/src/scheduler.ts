@@ -27,6 +27,7 @@ import type {
   ServiceTier,
   TenantHealthReport,
 } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Get all active tenant IDs from the database
@@ -65,7 +66,7 @@ async function storeHealthResult(
       )
     `
   } catch (error) {
-    console.error('Failed to store health result:', error)
+    logger.error('Failed to store health result', error instanceof Error ? error : undefined)
   }
 }
 

@@ -3,6 +3,7 @@ import path from 'path'
 import chalk from 'chalk'
 import { Command } from 'commander'
 import fs from 'fs-extra'
+import { logger } from '@cgk-platform/logging'
 
 export const migrateCreateCommand = new Command('migrate:create')
   .description('Create a new migration file')
@@ -12,9 +13,9 @@ export const migrateCreateCommand = new Command('migrate:create')
   .action(async (name: string, options: { public?: boolean; tenant?: boolean }) => {
     // Validate migration name
     if (!/^[a-z][a-z0-9_]*$/.test(name)) {
-      console.error(chalk.red('\n❌ Invalid migration name'))
-      console.error(chalk.dim('  Must start with a letter and contain only lowercase letters, numbers, and underscores'))
-      console.error(chalk.dim('  Example: add_user_preferences, create_orders_table'))
+      logger.error(chalk.red('\n❌ Invalid migration name'))
+      logger.error(chalk.dim('  Must start with a letter and contain only lowercase letters, numbers, and underscores'))
+      logger.error(chalk.dim('  Example: add_user_preferences, create_orders_table'))
       process.exit(1)
     }
 
@@ -30,9 +31,9 @@ export const migrateCreateCommand = new Command('migrate:create')
     try {
       await fs.ensureDir(migrationsDir)
     } catch (error) {
-      console.error(chalk.red('\n❌ Failed to access migrations directory'))
-      console.error(chalk.dim(`  ${migrationsDir}`))
-      console.error(chalk.dim(error instanceof Error ? error.message : String(error)))
+      logger.error(chalk.red('\n❌ Failed to access migrations directory'))
+      logger.error(chalk.dim(`  ${migrationsDir}`))
+      logger.error(chalk.dim(error instanceof Error ? error.message : String(error)))
       process.exit(1)
     }
 
@@ -46,8 +47,8 @@ export const migrateCreateCommand = new Command('migrate:create')
         .filter((n) => !isNaN(n))
       nextNum = numbers.length > 0 ? Math.max(...numbers) + 1 : 1
     } catch (error) {
-      console.error(chalk.red('\n❌ Failed to read migrations directory'))
-      console.error(chalk.dim(error instanceof Error ? error.message : String(error)))
+      logger.error(chalk.red('\n❌ Failed to read migrations directory'))
+      logger.error(chalk.dim(error instanceof Error ? error.message : String(error)))
       process.exit(1)
     }
 
@@ -57,7 +58,7 @@ export const migrateCreateCommand = new Command('migrate:create')
 
     // Check if file already exists
     if (await fs.pathExists(filepath)) {
-      console.error(chalk.red(`\n❌ Migration file already exists: ${filename}`))
+      logger.error(chalk.red(`\n❌ Migration file already exists: ${filename}`))
       process.exit(1)
     }
 
@@ -66,19 +67,19 @@ export const migrateCreateCommand = new Command('migrate:create')
     try {
       await fs.writeFile(filepath, template)
     } catch (error) {
-      console.error(chalk.red('\n❌ Failed to create migration file'))
-      console.error(chalk.dim(error instanceof Error ? error.message : String(error)))
+      logger.error(chalk.red('\n❌ Failed to create migration file'))
+      logger.error(chalk.dim(error instanceof Error ? error.message : String(error)))
       process.exit(1)
     }
 
-    console.log(chalk.green(`\n✓ Created migration: ${filename}`))
-    console.log(chalk.dim(`  ${filepath}`))
-    console.log('')
-    console.log(chalk.cyan('  Next steps:'))
-    console.log(chalk.dim('    1. Edit the migration file with your SQL'))
-    console.log(chalk.dim('    2. Run: npx @cgk-platform/cli migrate --status'))
-    console.log(chalk.dim('    3. Run: npx @cgk-platform/cli migrate' + (isPublic ? '' : ' --tenant <slug>')))
-    console.log('')
+    logger.info(chalk.green(`\n✓ Created migration: ${filename}`))
+    logger.info(chalk.dim(`  ${filepath}`))
+    logger.info('')
+    logger.info(chalk.cyan('  Next steps:'))
+    logger.info(chalk.dim('    1. Edit the migration file with your SQL'))
+    logger.info(chalk.dim('    2. Run: npx @cgk-platform/cli migrate --status'))
+    logger.info(chalk.dim('    3. Run: npx @cgk-platform/cli migrate' + (isPublic ? '' : ' --tenant <slug>')))
+    logger.info('')
   })
 
 function generateMigrationTemplate(name: string, schemaDir: string): string {

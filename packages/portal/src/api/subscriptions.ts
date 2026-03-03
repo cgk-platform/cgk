@@ -7,6 +7,7 @@
 
 import { customerQuery, customerMutation } from './client'
 import type { CustomerSubscription, PageInfo, UserError } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 interface SubscriptionsResponse {
   customer: {
@@ -255,7 +256,7 @@ export async function getSubscriptions(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    console.error('Failed to get subscriptions:', result.errors)
+    logger.error('Failed to get subscriptions:', result.errors)
     return {
       subscriptions: [],
       pageInfo: {
@@ -292,7 +293,7 @@ export async function getSubscription(
   })
 
   if (result.errors?.length || !result.data?.customer?.subscriptionContract) {
-    console.error('Failed to get subscription:', result.errors)
+    logger.error('Failed to get subscription:', result.errors)
     return null
   }
 

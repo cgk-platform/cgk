@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { getTemplateAnalytics } from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/templates/analytics
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(analytics)
   } catch (error) {
-    console.error('Error fetching template analytics:', error)
+    logger.error('Error fetching template analytics:', error)
     return NextResponse.json(
       { error: 'Failed to fetch template analytics' },
       { status: 500 }

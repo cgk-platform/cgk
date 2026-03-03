@@ -16,6 +16,7 @@ import {
   upsertRfmCustomer,
 } from '@/lib/segments/db'
 import { RFM_SEGMENT_INFO, type RfmSegmentType } from '@/lib/segments/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -111,7 +112,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Failed to fetch RFM data:', error)
+    logger.error('Failed to fetch RFM data:', error)
     return NextResponse.json({ error: 'Failed to fetch RFM data' }, { status: 500 })
   }
 }
@@ -184,7 +185,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Failed to calculate RFM:', error)
+    logger.error('Failed to calculate RFM:', error)
     return NextResponse.json({ error: 'Failed to calculate RFM segments' }, { status: 500 })
   }
 }

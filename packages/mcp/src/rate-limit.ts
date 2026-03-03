@@ -17,6 +17,7 @@
 /**
  * Rate limit configuration for a tenant
  */
+import { logger } from '@cgk-platform/logging'
 export interface RateLimitConfig {
   /** Maximum requests per window (default: 100) */
   maxRequests: number
@@ -640,7 +641,7 @@ export function getRateLimiter(): RateLimiter {
   if (hasRedisConfig) {
     rateLimiterInstance = new RedisRateLimiter()
   } else {
-    console.warn('[mcp/rate-limit] Using in-memory rate limiter. Set Redis env vars for production.')
+    logger.warn('[mcp/rate-limit] Using in-memory rate limiter. Set Redis env vars for production.')
     rateLimiterInstance = new InMemoryRateLimiter()
   }
 

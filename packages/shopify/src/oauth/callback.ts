@@ -9,6 +9,8 @@ import { ShopifyError } from './errors.js'
 import { getOAuthState, deleteOAuthState } from './initiate.js'
 import type { OAuthCallbackParams, OAuthTokenResponse } from './types.js'
 import { verifyOAuthHmac, normalizeShopDomain } from './validation.js'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Get Shopify client ID from environment
@@ -282,15 +284,13 @@ export async function handleOAuthCallback(
           `
         })
       } else if (storefrontResult.data?.storefrontAccessTokenCreate?.userErrors?.length) {
-        console.error(
-          'Storefront token creation errors:',
-          storefrontResult.data.storefrontAccessTokenCreate.userErrors
-        )
+        const errors = storefrontResult.data.storefrontAccessTokenCreate.userErrors
+        logger.error('Storefront token creation errors:', new Error(JSON.stringify(errors)))
       }
     }
   } catch (error) {
     // Don't fail OAuth callback if storefront token creation fails
-    console.error('Failed to create Storefront Access Token:', error)
+    logger.error('Failed to create Storefront Access Token:', error instanceof Error ? error : undefined)
   }
 
   // Trigger initial product sync (don't block OAuth callback)
@@ -307,10 +307,10 @@ export async function handleOAuthCallback(
       tenantId,
     })
 
-    console.log(`Product sync triggered for tenant ${tenantId}`)
+    logger.info(`Product sync triggered for tenant ${tenantId}`)
   } catch (error) {
     // Don't fail OAuth callback if sync trigger fails
-    console.error('Failed to trigger product sync:', error)
+    logger.error('Failed to trigger product sync', error instanceof Error ? error : new Error(String(error)))
   }
 
   // Clean up OAuth state

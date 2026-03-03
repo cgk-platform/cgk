@@ -7,6 +7,7 @@
 
 import type { ABVariant } from '../types.js'
 import { getNormalizedHash } from './hash.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Assign a visitor to a variant based on traffic allocation
@@ -36,7 +37,7 @@ export function assignVariant(
   // Validate allocations sum to ~100%
   const totalAllocation = variants.reduce((sum, v) => sum + v.trafficAllocation, 0)
   if (totalAllocation < 99 || totalAllocation > 101) {
-    console.warn(
+    logger.warn(
       `Traffic allocations sum to ${totalAllocation}%, expected ~100%. ` +
         'Assignment may not match intended distribution.'
     )

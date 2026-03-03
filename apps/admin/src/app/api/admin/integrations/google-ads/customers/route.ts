@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { getGoogleAdsConnection } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
       selectedName: connection.selectedCustomerName,
     })
   } catch (error) {
-    console.error('Failed to get Google Ads customers:', error)
+    logger.error('Failed to get Google Ads customers:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get customers' },
       { status: 500 }

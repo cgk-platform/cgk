@@ -1,4 +1,5 @@
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,7 +161,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Get webhooks error:', error)
+    logger.error('Get webhooks error:', error)
     return Response.json({ error: 'Failed to get webhooks' }, { status: 500 })
   }
 }

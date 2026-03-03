@@ -4,6 +4,7 @@ import { cn, Input, Label } from '@cgk-platform/ui'
 import { useCallback, useState } from 'react'
 
 import type { PaymentData, PaymentMethodType } from '../../../lib/onboarding-wizard/types'
+import { logger } from '@cgk-platform/logging'
 
 interface PaymentStepProps {
   data: PaymentData
@@ -75,7 +76,7 @@ export function PaymentStep({
         window.location.href = url
       }
     } catch (error) {
-      console.error('Failed to initialize Stripe Connect:', error)
+      logger.error('Failed to initialize Stripe Connect:', error)
     } finally {
       setIsConnectingStripe(false)
     }

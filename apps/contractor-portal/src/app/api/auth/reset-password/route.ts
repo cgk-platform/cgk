@@ -6,6 +6,7 @@ import { headers } from 'next/headers'
 import { hashPassword } from '@/lib/auth/password'
 import { markPasswordResetTokenUsed, verifyPasswordResetToken } from '@/lib/auth/password-reset'
 import { revokeAllContractorSessions } from '@/lib/auth/session'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/reset-password
@@ -61,7 +62,7 @@ export async function POST(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Reset password error:', error)
+    logger.error('Reset password error:', error)
     const message = error instanceof Error ? error.message : 'Password reset failed'
     return Response.json({ error: message }, { status: 400 })
   }

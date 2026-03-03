@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { sendReport } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/notifications/slack/reports/[id]/send
@@ -29,7 +30,7 @@ export async function POST(
       error: result.error,
     })
   } catch (error) {
-    console.error('Failed to send Slack report:', error)
+    logger.error('Failed to send Slack report:', error)
     return NextResponse.json(
       { error: 'Failed to send report' },
       { status: 500 },

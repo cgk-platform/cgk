@@ -6,11 +6,12 @@
  */
 import type { ActionFunctionArgs } from '@remix-run/node'
 import { authenticate } from '../shopify.server'
+import { logger } from '@cgk-platform/logging'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { shop, topic } = await authenticate.webhook(request)
 
-  console.log(`[BundleWebhook] Received ${topic} for ${shop}`)
+  logger.info(`[BundleWebhook] Received ${topic} for ${shop}`)
 
   // For now, order updates are logged but not re-synced.
   // Full re-sync would require checking if the bundle order record

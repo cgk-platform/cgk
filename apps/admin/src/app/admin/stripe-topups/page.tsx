@@ -11,6 +11,7 @@ import { Suspense } from 'react'
 import { TopupsClient } from './topups-client'
 
 import type { PendingWithdrawal, StripeBalance, StripeTopup, TopupStats } from '@/lib/admin-utilities/types'
+import { logger } from '@cgk-platform/logging'
 
 export default function StripeTopupsPage() {
   return (
@@ -93,7 +94,7 @@ async function BalanceCardsLoader() {
 
     return <BalanceDisplay balance={balance} />
   } catch (error) {
-    console.error('Failed to fetch Stripe balance:', error)
+    logger.error('Failed to fetch Stripe balance:', error)
     return <BalanceDisplay balance={null} error="Failed to load balance" />
   }
 }

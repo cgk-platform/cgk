@@ -10,6 +10,7 @@ import {
   isShopifyConnected,
   ShopifyError,
 } from '@cgk-platform/shopify'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * DELETE /api/admin/shopify-app/disconnect
@@ -38,7 +39,7 @@ export async function DELETE() {
     try {
       await unregisterWebhooks(tenantId)
     } catch (error) {
-      console.warn('[shopify-disconnect] Failed to unregister webhooks:', error)
+      logger.warn('[shopify-disconnect] Failed to unregister webhooks:', error)
     }
 
     // Disconnect the store
@@ -47,11 +48,11 @@ export async function DELETE() {
     // Clear cached credentials
     await clearCredentialsCache(tenantId)
 
-    console.log(`[shopify-disconnect] Disconnected tenant ${tenantSlug}`)
+    logger.info(`[shopify-disconnect] Disconnected tenant ${tenantSlug}`)
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[shopify-disconnect] Error:', error)
+    logger.error('[shopify-disconnect] Error:', error)
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })

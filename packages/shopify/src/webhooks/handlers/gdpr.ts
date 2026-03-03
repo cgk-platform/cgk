@@ -12,6 +12,8 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 interface CustomerRedactPayload {
   shop_id: number
@@ -84,7 +86,7 @@ export async function handleCustomerRedact(
     `
   })
 
-  console.log(`[GDPR] Customer ${customerId} PII redacted for tenant ${tenantId} (shop: ${data.shop_domain})`)
+  logger.info(`[GDPR] Customer ${customerId} PII redacted for tenant ${tenantId} (shop: ${data.shop_domain})`)
 }
 
 /**
@@ -112,7 +114,7 @@ export async function handleShopRedact(
     WHERE shop = ${data.shop_domain}
   `
 
-  console.log(`[GDPR] Shop ${data.shop_domain} credentials cleared for tenant ${tenantId}`)
+  logger.info(`[GDPR] Shop ${data.shop_domain} credentials cleared for tenant ${tenantId}`)
 }
 
 /**
@@ -156,7 +158,7 @@ export async function handleCustomerDataRequest(
     `
   })
 
-  console.log(`[GDPR] Data request logged for customer ${customerId} at shop ${data.shop_domain}, tenant ${tenantId}`)
+  logger.info(`[GDPR] Data request logged for customer ${customerId} at shop ${data.shop_domain}, tenant ${tenantId}`)
 }
 
 /**
@@ -193,5 +195,5 @@ export async function handleCustomerDelete(
     `
   })
 
-  console.log(`[Webhook] Customer ${customerId} deleted for tenant ${tenantId}`)
+  logger.info(`[Webhook] Customer ${customerId} deleted for tenant ${tenantId}`)
 }

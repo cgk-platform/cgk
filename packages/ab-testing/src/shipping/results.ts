@@ -18,6 +18,7 @@ import type {
 } from './types.js'
 import { calculateRevenueSignificance } from '../statistics/core.js'
 import type { ABTest, ABVariant } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Get test with variants from database
@@ -66,13 +67,13 @@ export async function calculateShippingResults(
   // Find control variant
   const controlVariant = variants.find((v) => v.isControl)
   if (!controlVariant) {
-    console.error(`No control variant found for test ${testId}`)
+    logger.error(`No control variant found for test ${testId}`)
     return null
   }
 
   const controlStats = metrics[controlVariant.id]
   if (!controlStats) {
-    console.error(`No metrics found for control variant ${controlVariant.id}`)
+    logger.error(`No metrics found for control variant ${controlVariant.id}`)
     return null
   }
 

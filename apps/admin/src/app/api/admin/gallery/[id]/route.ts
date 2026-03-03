@@ -14,6 +14,7 @@ import {
   updateUGCSubmissionStatus,
 } from '@/lib/admin-utilities/db'
 import type { UGCModerationAction } from '@/lib/admin-utilities/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -39,7 +40,7 @@ export async function GET(req: Request, context: RouteContext) {
 
     return NextResponse.json({ submission })
   } catch (error) {
-    console.error('Failed to fetch submission:', error)
+    logger.error('Failed to fetch submission:', error)
     return NextResponse.json({ error: 'Failed to fetch submission' }, { status: 500 })
   }
 }
@@ -92,7 +93,7 @@ export async function PATCH(req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true, submission })
   } catch (error) {
-    console.error('Failed to update submission:', error)
+    logger.error('Failed to update submission:', error)
     return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
   }
 }
@@ -133,7 +134,7 @@ export async function DELETE(req: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete submission:', error)
+    logger.error('Failed to delete submission:', error)
     return NextResponse.json({ error: 'Failed to delete submission' }, { status: 500 })
   }
 }

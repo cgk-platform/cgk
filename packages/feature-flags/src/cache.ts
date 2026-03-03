@@ -7,6 +7,7 @@
  */
 
 import type { FeatureFlag, FlagOverride } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Cache configuration
@@ -109,14 +110,14 @@ class RedisCache {
       })
 
       if (!response.ok) {
-        console.error(`Redis command failed: ${response.statusText}`)
+        logger.error(`Redis command failed: ${response.statusText}`)
         return null
       }
 
       const data = (await response.json()) as { result: T }
       return data.result
     } catch (error) {
-      console.error('Redis command error:', error)
+      logger.error('Redis command error', error instanceof Error ? error : new Error(String(error)))
       return null
     }
   }
@@ -398,7 +399,7 @@ export class MultiLayerFlagCache implements FlagCache {
       try {
         callback(flagKey)
       } catch (error) {
-        console.error('Error in invalidation callback:', error)
+        logger.error('Error in invalidation callback', error instanceof Error ? error : new Error(String(error)))
       }
     }
   }

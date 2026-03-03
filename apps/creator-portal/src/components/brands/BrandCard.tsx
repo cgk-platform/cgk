@@ -1,10 +1,12 @@
 'use client'
 
 import { Badge, Card, CardContent, formatCurrency } from '@cgk-platform/ui'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
 
 import type { BrandMembership } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 interface BrandCardProps {
   membership: BrandMembership
@@ -83,7 +85,7 @@ export function BrandCard({ membership }: BrandCardProps): React.JSX.Element {
         setCodeCopied(true)
         setTimeout(() => setCodeCopied(false), 2000)
       } catch (err) {
-        console.error('Failed to copy code:', err)
+        logger.error('Failed to copy code:', err)
       }
     },
     [membership.discountCode]
@@ -107,9 +109,11 @@ export function BrandCard({ membership }: BrandCardProps): React.JSX.Element {
               {/* Brand logo or initials */}
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted ring-1 ring-border">
                 {membership.brandLogo ? (
-                  <img
+                  <Image
                     src={membership.brandLogo}
                     alt={membership.brandName}
+                    width={48}
+                    height={48}
                     className="h-12 w-12 rounded-xl object-cover"
                   />
                 ) : (

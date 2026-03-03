@@ -7,6 +7,7 @@
 import { sql } from '@cgk-platform/db'
 import type { ContentKey, ContentStrings } from '../types'
 import { DEFAULT_CONTENT } from './defaults'
+import { logger } from '@cgk-platform/logging'
 
 interface ContentOverride {
   key: string
@@ -94,7 +95,7 @@ async function getContentOverrides(tenantId: string): Promise<Map<ContentKey, st
     return overrides
   } catch (error) {
     // If table doesn't exist or query fails, return empty overrides
-    console.warn('Failed to load content overrides:', error)
+    logger.warn('Failed to load content overrides:', error)
     return new Map()
   }
 }

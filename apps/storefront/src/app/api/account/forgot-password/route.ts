@@ -5,6 +5,7 @@ import { createHash, randomBytes } from 'crypto'
 import { headers } from 'next/headers'
 
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
@@ -85,8 +86,8 @@ export async function POST(request: Request) {
 
       const resendApiKey = process.env.RESEND_API_KEY
       if (!resendApiKey) {
-        console.log(`[DEV] Password reset for ${normalizedEmail}:`)
-        console.log(`[DEV] ${resetUrl}`)
+        logger.info(`[DEV] Password reset for ${normalizedEmail}:`)
+        logger.info(`[DEV] ${resetUrl}`)
       } else {
         await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
             `.trim(),
           }),
         }).catch((err) => {
-          console.error('Failed to send password reset email:', err)
+          logger.error('Failed to send password reset email:', err)
         })
       }
     }
@@ -116,7 +117,7 @@ export async function POST(request: Request) {
     // Always return success (anti-enumeration)
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Forgot password error:', error)
+    logger.error('Forgot password error:', error)
     return Response.json({ success: true })
   }
 }

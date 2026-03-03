@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { formatDuration } from '@/lib/video/types'
+import { logger } from '@cgk-platform/logging'
 
 interface VideoPlayerProps {
   playbackId: string
@@ -95,7 +96,7 @@ export function VideoPlayer({
           if (autoPlay) {
             video.play().catch((error) => {
               // Autoplay might be blocked by browser policy
-              console.debug('[video-player] Autoplay blocked:', error)
+              logger.debug('[video-player] Autoplay blocked:', error)
               setIsPlaying(false)
             })
           }
@@ -130,7 +131,7 @@ export function VideoPlayer({
           setIsLoading(false)
           if (autoPlay) {
             video.play().catch((error) => {
-              console.debug('[video-player] Play blocked:', error)
+              logger.debug('[video-player] Play blocked:', error)
               setIsPlaying(false)
             })
           }

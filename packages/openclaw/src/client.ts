@@ -18,6 +18,7 @@ import type {
   SessionUsageResponse,
   SkillsStatusResponse,
 } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 type EventHandler = (data: unknown) => void
 
@@ -264,7 +265,7 @@ export class OpenClawGatewayClient {
       this.ws.on('message', (data) => this.handleMessage(data))
       this.ws.on('close', () => this.handleClose())
       this.ws.on('error', (err) => {
-        console.error(`[openclaw:${this.profile}] WS error:`, err.message)
+        logger.error(`[openclaw:${this.profile}] WS error`, err instanceof Error ? err : new Error(String(err)))
       })
     } catch (err) {
       this.setState('disconnected')
@@ -437,7 +438,7 @@ export class OpenClawGatewayClient {
           try {
             handler(eventFrame.data)
           } catch (err) {
-            console.error(`[openclaw:${this.profile}] Event handler error:`, err)
+            logger.error(`[openclaw:${this.profile}] Event handler error`, err instanceof Error ? err : new Error(String(err)))
           }
         }
       }

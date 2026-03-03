@@ -17,6 +17,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,7 +70,7 @@ export async function GET(req: Request) {
       offset,
     })
   } catch (error) {
-    console.error('Error fetching withdrawals:', error)
+    logger.error('Error fetching withdrawals:', error)
     return Response.json(
       { error: 'Failed to fetch withdrawals' },
       { status: 500 }
@@ -141,7 +142,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error creating withdrawal:', error)
+    logger.error('Error creating withdrawal:', error)
     return Response.json(
       { error: 'Failed to create withdrawal' },
       { status: 500 }

@@ -17,6 +17,7 @@ import type {
   ExecutionContext,
   ScheduleFollowupConfig,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // Action Executor
@@ -317,11 +318,11 @@ async function executeSlackNotify(
         ts: response.ts,
       }
     } else {
-      console.log(`[Workflow] Slack not configured for tenant ${context.tenantId}`)
+      logger.info(`[Workflow] Slack not configured for tenant ${context.tenantId}`)
       slackResult = { success: false, error: 'Slack not configured' }
     }
   } catch (error) {
-    console.error('[Workflow] Slack notification error:', error)
+    logger.error('[Workflow] Slack notification error:', error)
     slackResult = {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -356,7 +357,7 @@ async function executeSlackNotify(
     `
   }).catch((dbError) => {
     // Table might not exist yet or other DB error - log but don't fail
-    console.debug('[workflow] Failed to save Slack notification record:', dbError)
+    logger.debug('[workflow] Failed to save Slack notification record:', dbError)
   })
 
   // Return success even if Slack send failed - the notification was logged
@@ -410,7 +411,7 @@ async function executeSuggestAction(
     `
   }).catch((error) => {
     // Table might not exist yet or other DB error - log but don't fail
-    console.debug('[workflow] Failed to save suggestion:', error)
+    logger.debug('[workflow] Failed to save suggestion:', error)
   })
 
   return {
@@ -710,7 +711,7 @@ async function executeGenerateReport(
 
   // TODO: Implement actual report generation
   // For now, just log the intent
-  console.log(
+  logger.info(
     `[Workflow] Generate report: ${config.reportType} to ${config.recipients?.join(', ')}`
   )
 

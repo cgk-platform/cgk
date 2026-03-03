@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getABTest, updateABTest } from '@/lib/ab-tests/db'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteContext {
   params: Promise<{ testId: string }>
@@ -43,7 +44,7 @@ export async function POST(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ test: updatedTest })
   } catch (error) {
-    console.error('Error ending A/B test:', error)
+    logger.error('Error ending A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to end A/B test' },
       { status: 500 }

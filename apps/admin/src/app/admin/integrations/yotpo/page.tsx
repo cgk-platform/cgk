@@ -16,6 +16,7 @@ import {
   TestConnectionResult,
 } from '@/components/integrations'
 import type { YotpoStatus } from '@/lib/integrations/types'
+import { logger } from '@cgk-platform/logging'
 
 export default function YotpoPage() {
   const [status, setStatus] = useState<YotpoStatus | null>(null)
@@ -34,7 +35,7 @@ export default function YotpoPage() {
         setStatus(data)
       }
     } catch (error) {
-      console.error('Failed to fetch Yotpo status:', error)
+      logger.error('Failed to fetch Yotpo status:', error)
     } finally {
       setLoading(false)
     }
@@ -86,7 +87,7 @@ export default function YotpoPage() {
         await fetchStatus()
       }
     } catch (error) {
-      console.error('Failed to connect:', error)
+      logger.error('Failed to connect:', error)
     } finally {
       setSaving(false)
     }
@@ -108,7 +109,7 @@ export default function YotpoPage() {
         })
       }
     } catch (error) {
-      console.error('Failed to disconnect:', error)
+      logger.error('Failed to disconnect:', error)
     }
   }
 

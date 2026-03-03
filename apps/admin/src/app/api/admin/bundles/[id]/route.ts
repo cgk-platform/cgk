@@ -6,6 +6,7 @@ import { authenticateBundleRequest } from '@/lib/bundles/api-auth'
 import { deleteBundle, getBundle, getBundleOrderStats, updateBundle } from '@/lib/bundles/db'
 import type { UpdateBundleInput } from '@/lib/bundles/types'
 import { validateUpdateBundle } from '@/lib/bundles/validation'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/bundles/:id
@@ -32,7 +33,7 @@ export async function GET(
 
     return NextResponse.json({ bundle, stats })
   } catch (error) {
-    console.error('Error fetching bundle:', error)
+    logger.error('Error fetching bundle:', error)
     return NextResponse.json({ error: 'Failed to fetch bundle' }, { status: 500 })
   }
 }
@@ -70,7 +71,7 @@ export async function PATCH(
 
     return NextResponse.json({ bundle })
   } catch (error) {
-    console.error('Error updating bundle:', error)
+    logger.error('Error updating bundle:', error)
     return NextResponse.json({ error: 'Failed to update bundle' }, { status: 500 })
   }
 }
@@ -96,7 +97,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting bundle:', error)
+    logger.error('Error deleting bundle:', error)
     return NextResponse.json({ error: 'Failed to delete bundle' }, { status: 500 })
   }
 }

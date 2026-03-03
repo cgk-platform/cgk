@@ -8,6 +8,7 @@ import {
   saveSlackNotificationConfig,
 } from '@/lib/creators/lifecycle-db'
 import type { CreatorSlackNotificationConfig } from '@/lib/creators/lifecycle-types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/creators/slack-notifications
@@ -25,7 +26,7 @@ export async function GET() {
     const config = await getSlackNotificationConfig(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    console.error('[slack-notifications] GET error:', error)
+    logger.error('[slack-notifications] GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch configuration' }, { status: 500 })
   }
 }
@@ -57,7 +58,7 @@ export async function PATCH(request: Request) {
     await saveSlackNotificationConfig(tenantSlug, body.config)
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[slack-notifications] PATCH error:', error)
+    logger.error('[slack-notifications] PATCH error:', error)
     return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 })
   }
 }

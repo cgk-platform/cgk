@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge, Button, Card, CardContent, CardHeader } from '@cgk-platform/ui'
+import Image from 'next/image'
 
 interface BrandEarningsCardProps {
   brandId: string
@@ -87,9 +88,11 @@ export function BrandEarningsCard({
             {/* Brand logo or initials */}
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-sm font-semibold">
               {brandLogo ? (
-                <img
+                <Image
                   src={brandLogo}
                   alt={brandName}
+                  width={40}
+                  height={40}
                   className="h-10 w-10 rounded-lg object-cover"
                 />
               ) : (

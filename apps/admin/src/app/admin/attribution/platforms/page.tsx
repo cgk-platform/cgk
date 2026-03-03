@@ -27,6 +27,7 @@ import {
 import { useEffect, useState, useCallback } from 'react'
 
 import type { SecondaryPlatformConnection, SecondaryPlatform, SyncFrequency } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const PLATFORM_DESCRIPTIONS: Record<SecondaryPlatform, string> = {
   snapchat: 'Connect Snapchat Ads for attribution data',
@@ -50,7 +51,7 @@ export default function PlatformsPage() {
       setConnections(data.connections)
     } catch (err) {
       setError('Failed to load platform connections')
-      console.error(err)
+      logger.error(err)
     } finally {
       setIsLoading(false)
     }
@@ -76,7 +77,7 @@ export default function PlatformsPage() {
       await fetchConnections()
     } catch (err) {
       setError(`Failed to connect ${platform}`)
-      console.error(err)
+      logger.error(err)
     } finally {
       setConnectingPlatform(null)
     }
@@ -96,7 +97,7 @@ export default function PlatformsPage() {
       await fetchConnections()
     } catch (err) {
       setError(`Failed to disconnect ${platform}`)
-      console.error(err)
+      logger.error(err)
     } finally {
       setConnectingPlatform(null)
     }
@@ -116,7 +117,7 @@ export default function PlatformsPage() {
       await fetchConnections()
     } catch (err) {
       setError(`Failed to sync ${platform}`)
-      console.error(err)
+      logger.error(err)
     } finally {
       setSyncingPlatform(null)
     }
@@ -137,7 +138,7 @@ export default function PlatformsPage() {
       await fetchConnections()
     } catch (err) {
       setError(`Failed to update sync frequency`)
-      console.error(err)
+      logger.error(err)
     }
   }
 

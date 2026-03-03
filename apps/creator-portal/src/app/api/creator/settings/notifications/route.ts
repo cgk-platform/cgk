@@ -9,6 +9,7 @@ import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { NotificationSettings } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,7 +77,7 @@ export async function GET(req: Request): Promise<Response> {
 
     return Response.json({ settings })
   } catch (error) {
-    console.error('Error fetching notification settings:', error)
+    logger.error('Error fetching notification settings:', error)
     return Response.json({ error: 'Failed to fetch settings' }, { status: 500 })
   }
 }
@@ -149,7 +150,7 @@ export async function PATCH(req: Request): Promise<Response> {
       message: 'Notification preferences saved',
     })
   } catch (error) {
-    console.error('Error updating notification settings:', error)
+    logger.error('Error updating notification settings:', error)
     return Response.json({ error: 'Failed to update settings' }, { status: 500 })
   }
 }

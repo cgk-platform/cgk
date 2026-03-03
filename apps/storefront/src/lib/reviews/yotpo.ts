@@ -11,6 +11,7 @@ import type {
   GetReviewsOptions,
   PaginatedReviews,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 const YOTPO_API_BASE = 'https://api.yotpo.com/v1'
 
@@ -94,14 +95,14 @@ export async function getYotpoReviews(
     })
 
     if (!response.ok) {
-      console.error(`Yotpo API error: ${response.status} ${response.statusText}`)
+      logger.error(`Yotpo API error: ${response.status} ${response.statusText}`)
       return { reviews: [], total: 0, hasMore: false }
     }
 
     const data: YotpoReviewResponse = await response.json()
 
     if (data.status.code !== 200) {
-      console.error(`Yotpo API error: ${data.status.message}`)
+      logger.error(`Yotpo API error: ${data.status.message}`)
       return { reviews: [], total: 0, hasMore: false }
     }
 
@@ -118,7 +119,7 @@ export async function getYotpoReviews(
       hasMore: page * limit < data.response.pagination.total,
     }
   } catch (error) {
-    console.error('Failed to fetch Yotpo reviews:', error)
+    logger.error('Failed to fetch Yotpo reviews:', error)
     return { reviews: [], total: 0, hasMore: false }
   }
 }
@@ -143,7 +144,7 @@ export async function getYotpoRating(
     })
 
     if (!response.ok) {
-      console.error(`Yotpo API error: ${response.status} ${response.statusText}`)
+      logger.error(`Yotpo API error: ${response.status} ${response.statusText}`)
       return null
     }
 
@@ -171,7 +172,7 @@ export async function getYotpoRating(
       distribution,
     }
   } catch (error) {
-    console.error('Failed to fetch Yotpo rating:', error)
+    logger.error('Failed to fetch Yotpo rating:', error)
     return null
   }
 }

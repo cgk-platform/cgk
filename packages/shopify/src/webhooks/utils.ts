@@ -44,9 +44,9 @@ export async function getTenantForShop(shop: string): Promise<string | null> {
     LIMIT 1
   `
 
-  if (shopifyResult.rows.length > 0) {
-    const row = shopifyResult.rows[0]
-    return row ? (row.tenant_id as string) : null
+  const shopifyRow = shopifyResult.rows[0]
+  if (shopifyRow) {
+    return shopifyRow.tenant_id as unknown as string
   }
 
   // Fallback: query organizations table (legacy/manual shop setup)
@@ -61,8 +61,12 @@ export async function getTenantForShop(shop: string): Promise<string | null> {
     LIMIT 1
   `
 
-  const row = orgResult.rows[0]
-  return row ? (row.tenant_id as string) : null
+  const orgRow = orgResult.rows[0]
+  if (!orgRow) {
+    return null
+  }
+
+  return orgRow.tenant_id as unknown as string
 }
 
 /**
@@ -83,19 +87,15 @@ export async function getShopifyCredentials(
     LIMIT 1
   `
 
-  if (result.rows.length === 0) {
-    return null
-  }
-
   const row = result.rows[0]
   if (!row) {
     return null
   }
 
   return {
-    shop: row.shop as string,
-    accessToken: row.access_token_encrypted as string,
-    webhookSecret: row.webhook_secret_encrypted as string | null,
+    shop: row.shop as unknown as string,
+    accessToken: row.access_token_encrypted as unknown as string,
+    webhookSecret: (row.webhook_secret_encrypted as unknown as string) || null,
   }
 }
 
@@ -152,7 +152,11 @@ export async function logWebhookEvent(params: {
   `
 
   const row = result.rows[0]
-  return row ? (row.id as string) : ''
+  if (!row) {
+    throw new Error('Failed to log webhook event')
+  }
+
+  return row.id as unknown as string
 }
 
 /**
@@ -217,7 +221,12 @@ export async function getWebhookEvent(eventId: string): Promise<WebhookEvent | n
     return null
   }
 
-  return result.rows[0] as unknown as WebhookEvent
+  const row = result.rows[0]
+  if (!row) {
+    return null
+  }
+
+  return row as unknown as WebhookEvent
 }
 
 /**

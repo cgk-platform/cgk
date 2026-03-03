@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // For MVP, just log the submission
     // In production, this would save to database with tenant context and/or send email
-    console.log('Contact form submission:', {
+    logger.info('Contact form submission:', {
       name: body.name,
       email: body.email,
       subject: body.subject,
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
       message: 'Contact form submitted successfully',
     })
   } catch (error) {
-    console.error('Contact form error:', error)
+    logger.error('Contact form error:', error)
     return NextResponse.json(
       {
         success: false,

@@ -17,6 +17,7 @@ import {
   updateWidgetConfig,
   type UpdateWidgetConfigInput,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
       isOnline,
     })
   } catch (error) {
-    console.error('[chat/config] GET error:', error)
+    logger.error('[chat/config] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch config' },
       { status: 500 }
@@ -113,7 +114,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ config })
   } catch (error) {
-    console.error('[chat/config] PATCH error:', error)
+    logger.error('[chat/config] PATCH error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update config' },
       { status: 500 }

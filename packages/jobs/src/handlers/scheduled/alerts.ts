@@ -17,6 +17,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // ALERT PAYLOAD TYPES
@@ -141,7 +142,7 @@ function checkSmsRateLimit(phone: string): boolean {
   }
 
   if (limit.count >= SMS_RATE_LIMIT.maxPerHour) {
-    console.warn(`[Alert] SMS rate limit exceeded for ${phone}`)
+    logger.warn(`[Alert] SMS rate limit exceeded for ${phone}`)
     return false
   }
 
@@ -219,13 +220,13 @@ export const criticalAlertJob = defineJob<TenantEvent<CriticalAlertPayload>>({
   handler: async (job) => {
     const { tenantId, title, message, source, notifyEmails, notifyPhones, metadata } = job.payload
 
-    console.error(`[CRITICAL ALERT] ${title} - ${message} (tenant: ${tenantId}, source: ${source})`)
+    logger.error(`[CRITICAL ALERT] ${title} - ${message} (tenant: ${tenantId}, source: ${source})`)
 
     const routing = getAlertRouting('critical')
 
     // Send Slack notification immediately
     if (routing.slack) {
-      console.log(`[Alert] Sending Slack notification to ${routing.slackChannel}`)
+      logger.info(`[Alert] Sending Slack notification to ${routing.slackChannel}`)
       // Would trigger slack.notify job with urgent formatting
     }
 
@@ -233,7 +234,7 @@ export const criticalAlertJob = defineJob<TenantEvent<CriticalAlertPayload>>({
     if (routing.sms && notifyPhones?.length) {
       for (const phone of notifyPhones) {
         if (checkSmsRateLimit(phone)) {
-          console.log(`[Alert] Sending SMS to ${phone}`)
+          logger.info(`[Alert] Sending SMS to ${phone}`)
           // Would trigger sms.send job
         }
       }
@@ -241,7 +242,7 @@ export const criticalAlertJob = defineJob<TenantEvent<CriticalAlertPayload>>({
 
     // Send email notification
     if (routing.email && notifyEmails?.length) {
-      console.log(`[Alert] Sending email to ${notifyEmails.length} recipients`)
+      logger.info(`[Alert] Sending email to ${notifyEmails.length} recipients`)
       // Would trigger email.send job
     }
 
@@ -291,14 +292,14 @@ export const systemErrorAlertJob = defineJob<TenantEvent<SystemErrorAlertPayload
       severity = 'critical'
     }
 
-    console.log(
+    logger.info(
       `[Alert] System error (${severity}): ${errorCode} - ${errorMessage} (service: ${service})`
     )
 
     const routing = getAlertRouting(severity)
 
     if (routing.slack) {
-      console.log(`[Alert] Routing to ${routing.slackChannel}`)
+      logger.info(`[Alert] Routing to ${routing.slackChannel}`)
       // Would trigger slack.notify job
     }
 
@@ -329,7 +330,7 @@ export const highValueSubmissionAlertJob = defineJob<TenantEvent<HighValueSubmis
     const { tenantId, projectId, creatorId, creatorName, projectValue, currency, projectType } =
       job.payload
 
-    console.log(
+    logger.info(
       `[Alert] High value submission: $${projectValue} ${currency} from ${creatorName} (${projectType})`
     )
 
@@ -345,7 +346,7 @@ export const highValueSubmissionAlertJob = defineJob<TenantEvent<HighValueSubmis
     else if (projectValue >= 50000) tier = 'gold' // $500+
 
     // Send Slack notification
-    console.log(`[Alert] Notifying team of ${tier} tier submission`)
+    logger.info(`[Alert] Notifying team of ${tier} tier submission`)
     // Would trigger slack.notify with formatted blocks
 
     return {
@@ -378,7 +379,7 @@ export const creatorComplaintAlertJob = defineJob<TenantEvent<CreatorComplaintAl
     const { tenantId, creatorId, creatorName, complaintType, severity, summary, projectId: _projectId } =
       job.payload
 
-    console.log(
+    logger.info(
       `[Alert] Creator complaint (${severity}): ${complaintType} from ${creatorName} - ${summary}`
     )
 
@@ -390,12 +391,12 @@ export const creatorComplaintAlertJob = defineJob<TenantEvent<CreatorComplaintAl
 
     // Slack notification for high+ severity
     if (routing.slack && (severity === 'urgent' || severity === 'high')) {
-      console.log(`[Alert] Escalating complaint to ${routing.slackChannel}`)
+      logger.info(`[Alert] Escalating complaint to ${routing.slackChannel}`)
       // Would trigger slack.notify job
     }
 
     // Create support ticket
-    console.log(`[Alert] Creating support ticket for complaint`)
+    logger.info(`[Alert] Creating support ticket for complaint`)
     // Would trigger ticket creation
 
     return {
@@ -429,7 +430,7 @@ export const securityAlertJob = defineJob<TenantEvent<SecurityAlertPayload>>({
     const { tenantId, alertType, userId, email, ipAddress, userAgent: _userAgent, geoLocation, metadata: _metadata } =
       job.payload
 
-    console.warn(`[SECURITY ALERT] ${alertType} - User: ${email || userId}, IP: ${ipAddress}`)
+    logger.warn(`[SECURITY ALERT] ${alertType} - User: ${email || userId}, IP: ${ipAddress}`)
 
     // All security alerts are at least error level
     let severity: AlertSeverity = 'error'
@@ -443,16 +444,16 @@ export const securityAlertJob = defineJob<TenantEvent<SecurityAlertPayload>>({
     const routing = getAlertRouting(severity)
 
     // Always notify security channel
-    console.log(`[Alert] Notifying security team`)
+    logger.info(`[Alert] Notifying security team`)
     // Would trigger slack.notify to #security-alerts
 
     // Log for audit trail
-    console.log(`[Alert] Logging security event for audit`)
+    logger.info(`[Alert] Logging security event for audit`)
     // Would write to security audit log
 
     // For critical, also send SMS
     if (severity === 'critical' && routing.sms) {
-      console.log(`[Alert] Sending SMS alert to security on-call`)
+      logger.info(`[Alert] Sending SMS alert to security on-call`)
     }
 
     return {
@@ -493,7 +494,7 @@ export const apiFailureAlertJob = defineJob<TenantEvent<ApiFailureAlertPayload>>
       lastSuccessAt,
     } = job.payload
 
-    console.warn(
+    logger.warn(
       `[Alert] API failure: ${service} - ${failureCount} failures in ${timeWindowMinutes}min (${errorCode}: ${errorMessage})`
     )
 
@@ -511,7 +512,7 @@ export const apiFailureAlertJob = defineJob<TenantEvent<ApiFailureAlertPayload>>
     const routing = getAlertRouting(severity)
 
     if (routing.slack) {
-      console.log(`[Alert] Notifying about ${service} API failures`)
+      logger.info(`[Alert] Notifying about ${service} API failures`)
       // Would trigger slack.notify job
     }
 
@@ -546,7 +547,7 @@ export const unusualActivityAlertJob = defineJob<TenantEvent<UnusualActivityAler
     const { tenantId, activityType, metric, currentValue, normalValue, percentageChange, timeWindow } =
       job.payload
 
-    console.log(
+    logger.info(
       `[Alert] Unusual activity: ${activityType} - ${metric}: ${currentValue} (normal: ${normalValue}, change: ${percentageChange}%)`
     )
 
@@ -559,7 +560,7 @@ export const unusualActivityAlertJob = defineJob<TenantEvent<UnusualActivityAler
     const routing = getAlertRouting(severity)
 
     if (routing.slack) {
-      console.log(`[Alert] Notifying about unusual ${activityType}`)
+      logger.info(`[Alert] Notifying about unusual ${activityType}`)
       // Would trigger slack.notify job with trend visualization
     }
 
@@ -594,7 +595,7 @@ export const milestoneAlertJob = defineJob<TenantEvent<MilestoneAlertPayload>>({
   handler: async (job) => {
     const { tenantId, milestoneType, milestone, value, previousMilestone } = job.payload
 
-    console.log(`[Alert] Milestone reached: ${milestoneType} - ${milestone} (value: ${value})`)
+    logger.info(`[Alert] Milestone reached: ${milestoneType} - ${milestone} (value: ${value})`)
 
     // Format milestone for display
     let formattedValue = String(value)
@@ -608,7 +609,7 @@ export const milestoneAlertJob = defineJob<TenantEvent<MilestoneAlertPayload>>({
     }
 
     // Send celebratory Slack message
-    console.log(`[Alert] Sending celebration notification for ${milestone}`)
+    logger.info(`[Alert] Sending celebration notification for ${milestone}`)
     // Would trigger slack.notify with celebration emoji and confetti
 
     return {

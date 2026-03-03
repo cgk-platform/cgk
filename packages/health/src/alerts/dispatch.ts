@@ -8,6 +8,7 @@ import { sql } from '@cgk-platform/db'
 
 import type { Alert, AlertSeverity, CreateAlertPayload } from '../types.js'
 import { getEnabledChannels, type SlackConfig } from './channels.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Create an alert in the database
@@ -143,10 +144,10 @@ async function sendEmailAlert(
   from: string
 ): Promise<void> {
   // In production, integrate with email service
-  console.log(`[EMAIL ALERT] To: ${recipients}, From: ${from}`)
-  console.log(`Subject: [${alert.severity.toUpperCase()}] ${alert.title}`)
-  console.log(`Body: ${alert.message}`)
-  console.log(`Service: ${alert.service}, Tenant: ${alert.tenantSlug || 'Platform'}`)
+  logger.info(`[EMAIL ALERT] To: ${recipients}, From: ${from}`)
+  logger.info(`Subject: [${alert.severity.toUpperCase()}] ${alert.title}`)
+  logger.info(`Body: ${alert.message}`)
+  logger.info(`Service: ${alert.service}, Tenant: ${alert.tenantSlug || 'Platform'}`)
 }
 
 /**
@@ -262,7 +263,9 @@ export async function dispatchAlert(alert: Alert): Promise<void> {
             break
         }
       } catch (error) {
-        console.error(`Failed to send ${channel.type} alert:`, error)
+        logger.error(`Failed to send ${channel.type} alert`, error instanceof Error ? error : undefined, {
+          channel: channel.type,
+        })
         results[channel.type] = 'failed'
       }
     })

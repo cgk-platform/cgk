@@ -15,6 +15,7 @@ import {
   recordPasswordResetAttempt,
   sendPasswordResetEmail,
 } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -96,7 +97,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    console.error('Forgot password error:', error)
+    logger.error('Forgot password error:', error)
 
     // Still return success to prevent enumeration
     return Response.json(

@@ -8,6 +8,7 @@
 /**
  * Cache entry with optional expiration
  */
+import { logger } from '@cgk-platform/logging'
 export interface CacheEntry<T = unknown> {
   value: T
   expiresAt?: number
@@ -277,7 +278,7 @@ export function createTenantCache(tenantSlug: string): TenantCache {
   }
 
   // Fall back to in-memory cache (for development/testing)
-  console.warn(
+  logger.warn(
     `[cache] Using in-memory cache for tenant ${tenantSlug}. Set KV_REST_API_URL for production.`
   )
   return new InMemoryCache(tenantSlug, keyPrefix)

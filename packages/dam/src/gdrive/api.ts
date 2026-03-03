@@ -8,6 +8,7 @@ import { google, type drive_v3 } from 'googleapis'
 import { createOAuth2Client, type OAuthConfig, isTokenExpired, refreshAccessToken } from './oauth.js'
 import { decryptToken, encryptToken } from './tokens.js'
 import type { GDriveConnection } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 export interface DriveFile {
   id: string
@@ -173,7 +174,7 @@ export async function getFile(
       thumbnailLink: f.thumbnailLink || undefined,
     }
   } catch (error) {
-    console.error('Failed to get file:', error)
+    logger.error('Failed to get file:', error)
     return null
   }
 }

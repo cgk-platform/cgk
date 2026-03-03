@@ -4,6 +4,7 @@ import { Button } from '@cgk-platform/ui'
 import { Copy } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 interface DuplicatePageButtonProps {
   pageId: string
@@ -24,7 +25,7 @@ export function DuplicatePageButton({ pageId }: DuplicatePageButtonProps) {
         router.push(`/admin/landing-pages/${page.id}`)
       }
     } catch (err) {
-      console.error('Failed to duplicate page:', err)
+      logger.error('Failed to duplicate page:', err)
     } finally {
       setDuplicating(false)
     }

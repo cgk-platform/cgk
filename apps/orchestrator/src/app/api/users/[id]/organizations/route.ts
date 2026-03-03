@@ -1,6 +1,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { sql } from '@vercel/postgres'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -66,7 +67,7 @@ export async function POST(
       message: `User added to ${orgCheck.rows[0]?.name}`,
     })
   } catch (error) {
-    console.error('Failed to add user to organization:', error)
+    logger.error('Failed to add user to organization:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to add user to organization' },
       { status: 500 }
@@ -116,7 +117,7 @@ export async function DELETE(
       message: 'User removed from organization',
     })
   } catch (error) {
-    console.error('Failed to remove user from organization:', error)
+    logger.error('Failed to remove user from organization:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to remove user from organization' },
       { status: 500 }

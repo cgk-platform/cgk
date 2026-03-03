@@ -10,6 +10,7 @@ import {
   type DateRangeType,
   type ReportMetricConfig,
 } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/notifications/slack/reports/[id]
@@ -36,7 +37,7 @@ export async function GET(
 
     return NextResponse.json({ report })
   } catch (error) {
-    console.error('Failed to get Slack report:', error)
+    logger.error('Failed to get Slack report:', error)
     return NextResponse.json(
       { error: 'Failed to get report' },
       { status: 500 },
@@ -99,7 +100,7 @@ export async function PUT(
 
     return NextResponse.json({ report })
   } catch (error) {
-    console.error('Failed to update Slack report:', error)
+    logger.error('Failed to update Slack report:', error)
     return NextResponse.json(
       { error: 'Failed to update report' },
       { status: 500 },
@@ -132,7 +133,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete Slack report:', error)
+    logger.error('Failed to delete Slack report:', error)
     return NextResponse.json(
       { error: 'Failed to delete report' },
       { status: 500 },

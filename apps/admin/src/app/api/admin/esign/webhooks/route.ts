@@ -9,6 +9,7 @@ import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { listWebhooks, createWebhook } from '@/lib/esign'
 import type { EsignWebhookEvent } from '@/lib/esign/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ webhooks: maskedWebhooks })
   } catch (error) {
-    console.error('Error fetching webhooks:', error)
+    logger.error('Error fetching webhooks:', error)
     return NextResponse.json(
       { error: 'Failed to fetch webhooks' },
       { status: 500 }
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Error creating webhook:', error)
+    logger.error('Error creating webhook:', error)
     return NextResponse.json(
       { error: 'Failed to create webhook' },
       { status: 500 }

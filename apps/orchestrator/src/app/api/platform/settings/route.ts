@@ -5,6 +5,7 @@ import {
   verifyJWT,
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -249,7 +250,7 @@ export async function GET(request: Request) {
       ipAllowlist,
     })
   } catch (error) {
-    console.error('Failed to fetch settings:', error)
+    logger.error('Failed to fetch settings:', error)
     return Response.json(
       { error: 'Failed to fetch settings' },
       { status: 500 }
@@ -294,7 +295,7 @@ export async function PUT(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Failed to save settings:', error)
+    logger.error('Failed to save settings:', error)
     return Response.json(
       { error: 'Failed to save settings' },
       { status: 500 }

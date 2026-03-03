@@ -19,6 +19,7 @@ import { useState, useCallback } from 'react'
 
 import { formatMoney } from '@/lib/cart/types'
 import { useCart } from './CartProvider'
+import { logger } from '@cgk-platform/logging'
 
 interface CartLineItemProps {
   /** Cart line data */
@@ -53,7 +54,7 @@ export function CartLineItem({
     try {
       await removeItem(line.id)
     } catch (error) {
-      console.error('Failed to remove item:', error)
+      logger.error('Failed to remove item:', error)
       setIsRemoving(false)
     }
   }, [line.id, removeItem])

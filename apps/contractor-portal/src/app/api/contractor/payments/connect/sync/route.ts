@@ -10,6 +10,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error syncing Stripe account:', error)
+    logger.error('Error syncing Stripe account:', error)
     return Response.json(
       { error: 'Failed to sync Stripe account' },
       { status: 500 }

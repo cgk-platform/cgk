@@ -6,6 +6,7 @@ import {
   serializeOAuthState,
 } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/platform/slack/connect
@@ -31,7 +32,7 @@ export async function POST(_request: Request) {
       state: serializedState,
     })
   } catch (error) {
-    console.error('Failed to initiate platform Slack OAuth:', error)
+    logger.error('Failed to initiate platform Slack OAuth:', error)
     return NextResponse.json(
       { error: 'Failed to initiate Slack connection' },
       { status: 500 },

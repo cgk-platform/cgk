@@ -6,6 +6,7 @@
  */
 
 import type { EcommerceItem, PurchaseEventData, ViewItemListData } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Debug mode from env
 const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true'
@@ -28,7 +29,7 @@ function isGA4Available(): boolean {
   if (typeof window === 'undefined') return false
   if (!getGA4Id()) {
     if (DEBUG_MODE) {
-      console.log('[GA4] Not configured - no GA4 measurement ID found')
+      logger.info('[GA4] Not configured - no GA4 measurement ID found')
     }
     return false
   }
@@ -40,7 +41,7 @@ function isGA4Available(): boolean {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    console.log(`[GA4] ${message}`, data ?? '')
+    logger.info(`[GA4] ${message}`, data ?? '')
   }
 }
 
@@ -57,7 +58,7 @@ function sendGA4Event(eventName: string, params: Record<string, unknown>): void 
     window.gtag('event', eventName, params)
     debugLog(`Sent ${eventName}`, params)
   } catch (error) {
-    console.error(`[GA4] Error sending ${eventName}:`, error)
+    logger.error(`[GA4] Error sending ${eventName}:`, error)
   }
 }
 

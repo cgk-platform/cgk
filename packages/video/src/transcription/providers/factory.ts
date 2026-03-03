@@ -11,6 +11,7 @@
 
 import type { ITranscriptionProvider, TranscriptionProviderName } from '../types'
 import { AssemblyAIProvider } from './assemblyai'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Get the configured transcription provider
@@ -29,16 +30,16 @@ export function getTranscriptionProvider(): ITranscriptionProvider {
 
     case 'deepgram':
       // Deepgram provider not yet implemented
-      console.warn('Deepgram provider not implemented, falling back to AssemblyAI')
+      logger.warn('Deepgram provider not implemented, falling back to AssemblyAI')
       return new AssemblyAIProvider()
 
     case 'gladia':
       // Gladia provider not yet implemented
-      console.warn('Gladia provider not implemented, falling back to AssemblyAI')
+      logger.warn('Gladia provider not implemented, falling back to AssemblyAI')
       return new AssemblyAIProvider()
 
     default:
-      console.warn(`Unknown transcription provider: ${providerName}, falling back to AssemblyAI`)
+      logger.warn(`Unknown transcription provider: ${providerName}, falling back to AssemblyAI`)
       return new AssemblyAIProvider()
   }
 }
@@ -53,7 +54,7 @@ export function getProvider(name: TranscriptionProviderName): ITranscriptionProv
     case 'deepgram':
     case 'gladia':
       // Fallback until other providers are implemented
-      console.warn(`${name} provider not implemented, using AssemblyAI`)
+      logger.warn(`${name} provider not implemented, using AssemblyAI`)
       return new AssemblyAIProvider()
   }
 }

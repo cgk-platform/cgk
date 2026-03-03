@@ -10,6 +10,7 @@ import { cache } from 'react'
 
 import type { CustomerPortalThemeConfig } from './types'
 import { createPortalTheme } from './defaults'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Database row type for portal theme configuration
@@ -53,7 +54,7 @@ export const loadPortalTheme = cache(
 
       return createPortalTheme(tenantId, savedConfig)
     } catch (error) {
-      console.error('Failed to load portal theme:', error)
+      logger.error('Failed to load portal theme:', error)
       return createPortalTheme(tenantId)
     }
   }
@@ -81,7 +82,7 @@ export async function loadPortalThemeForSSR(
 
     return loadPortalTheme(tenant.id)
   } catch (error) {
-    console.error('Failed to load portal theme for SSR:', error)
+    logger.error('Failed to load portal theme for SSR:', error)
     return createPortalTheme('default')
   }
 }
@@ -109,7 +110,7 @@ export async function savePortalTheme(
 
     return { success: true }
   } catch (error) {
-    console.error('Failed to save portal theme:', error)
+    logger.error('Failed to save portal theme:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'
@@ -133,7 +134,7 @@ export async function resetPortalTheme(
 
     return { success: true }
   } catch (error) {
-    console.error('Failed to reset portal theme:', error)
+    logger.error('Failed to reset portal theme:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error'

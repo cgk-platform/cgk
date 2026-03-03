@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { withTenant } from '@cgk-platform/db'
 
 import { getCategories } from '@/lib/knowledge-base/db'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET() {
   const headerList = await headers()
@@ -19,7 +20,7 @@ export async function GET() {
     const categories = await withTenant(tenantSlug, () => getCategories())
     return NextResponse.json({ categories })
   } catch (err) {
-    console.error('[kb/categories] GET error:', err)
+    logger.error('[kb/categories] GET error:', err)
     return NextResponse.json({ categories: [] })
   }
 }

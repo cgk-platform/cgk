@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 
 import { getPipelineProjects, getPipelineStats } from '@/lib/pipeline/db'
 import type { PipelineFilters, ProjectStatus, RiskLevel } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -75,7 +76,7 @@ export async function GET(request: Request) {
       limit,
     })
   } catch (error) {
-    console.error('Pipeline projects error:', error)
+    logger.error('Pipeline projects error:', error)
     return Response.json(
       { error: 'Failed to fetch pipeline projects' },
       { status: 500 }

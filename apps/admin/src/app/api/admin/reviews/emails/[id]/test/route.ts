@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getEmailTemplate } from '@/lib/reviews/db'
+import { logger } from '@cgk-platform/logging'
 
 interface TestEmailRequest {
   email: string
@@ -58,8 +59,8 @@ export async function POST(
 
   // In production, this would send the email using a service like Resend
   // For now, return the processed template for preview
-  console.log(`Test email would be sent to: ${body.email}`)
-  console.log(`Subject: ${processedSubject}`)
+  logger.info(`Test email would be sent to: ${body.email}`)
+  logger.info(`Subject: ${processedSubject}`)
 
   return NextResponse.json({
     success: true,

@@ -14,6 +14,7 @@ import type {
   CustomerFromToken,
   OAuthStateData,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 const STATE_EXPIRY_MS = 10 * 60 * 1000 // 10 minutes
 
@@ -61,7 +62,7 @@ export async function getCustomerOAuthConfig(
       scopes: row.customer_oauth_scopes || ['openid', 'email', 'customer-account-api:full'],
     }
   } catch (error) {
-    console.error('Failed to get customer OAuth config:', error)
+    logger.error('Failed to get customer OAuth config:', error)
     return null
   }
 }
@@ -76,7 +77,7 @@ export async function initiateShopifyLogin(
 ): Promise<{ authorizationUrl: string; state: string } | null> {
   const config = await getCustomerOAuthConfig(tenantId)
   if (!config) {
-    console.error('No OAuth configuration found for tenant:', tenantId)
+    logger.error('No OAuth configuration found for tenant:', tenantId)
     return null
   }
 
@@ -129,7 +130,7 @@ export async function handleShopifyCallback(
   // Retrieve and validate state
   const stateData = await getOAuthState(state)
   if (!stateData) {
-    console.error('Invalid or expired OAuth state')
+    logger.error('Invalid or expired OAuth state')
     return null
   }
 
@@ -138,13 +139,13 @@ export async function handleShopifyCallback(
 
   // Check state expiry
   if (Date.now() - stateData.createdAt > STATE_EXPIRY_MS) {
-    console.error('OAuth state expired')
+    logger.error('OAuth state expired')
     return null
   }
 
   const config = await getCustomerOAuthConfig(stateData.tenantId)
   if (!config) {
-    console.error('No OAuth config found for tenant:', stateData.tenantId)
+    logger.error('No OAuth config found for tenant:', stateData.tenantId)
     return null
   }
 
@@ -169,7 +170,7 @@ export async function handleShopifyCallback(
 
   if (!tokenResponse.ok) {
     const error = await tokenResponse.text()
-    console.error('Token exchange failed:', error)
+    logger.error('Token exchange failed:', error)
     return null
   }
 
@@ -192,7 +193,7 @@ export async function handleShopifyCallback(
   // Get customer info from Customer Account API
   const customer = await getCustomerFromToken(config.shopId, tokens.accessToken)
   if (!customer) {
-    console.error('Failed to get customer info')
+    logger.error('Failed to get customer info')
     return null
   }
 
@@ -233,7 +234,7 @@ export async function refreshCustomerToken(
   })
 
   if (!response.ok) {
-    console.error('Token refresh failed:', await response.text())
+    logger.error('Token refresh failed:', await response.text())
     return null
   }
 
@@ -286,7 +287,7 @@ async function getCustomerFromToken(
   })
 
   if (!response.ok) {
-    console.error('Customer query failed:', await response.text())
+    logger.error('Customer query failed:', await response.text())
     return null
   }
 
@@ -304,7 +305,7 @@ async function getCustomerFromToken(
   }
 
   if (result.errors?.length) {
-    console.error('Customer query errors:', result.errors)
+    logger.error('Customer query errors:', result.errors)
     return null
   }
 

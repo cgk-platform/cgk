@@ -11,6 +11,7 @@ import {
   type SampleProduct,
   type ShippingAddress,
 } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Error fetching sample requests:', error)
+    logger.error('Error fetching sample requests:', error)
     return NextResponse.json(
       { error: 'Failed to fetch sample requests' },
       { status: 500 }
@@ -96,7 +97,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, request: sampleRequest })
   } catch (error) {
-    console.error('Error creating sample request:', error)
+    logger.error('Error creating sample request:', error)
     return NextResponse.json(
       { error: 'Failed to create sample request' },
       { status: 500 }

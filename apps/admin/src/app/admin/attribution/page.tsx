@@ -14,6 +14,7 @@ import {
   PlatformComparisonSkeleton,
 } from '@/components/attribution'
 import type { AttributionOverview } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 function AttributionDashboardContent() {
   const { model, window, startDate, endDate, isRealtime, setIsRealtime } = useAttribution()
@@ -34,7 +35,7 @@ function AttributionDashboardContent() {
         const data = await response.json()
         setOverview(data.overview)
       } catch (error) {
-        console.error('Failed to fetch attribution overview:', error)
+        logger.error('Failed to fetch attribution overview:', error)
       } finally {
         setIsLoading(false)
       }

@@ -14,6 +14,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 // Job Payload Types
 export interface TreasurySendApprovalEmailPayload {
@@ -92,14 +93,14 @@ export const treasurySendApprovalEmailJob = defineJob<TreasurySendApprovalEmailP
       })
 
       if (!treasurer?.email) {
-        console.log(`[treasury/send-approval-email] No treasurer configured for tenant ${tenantId}`)
+        logger.info(`[treasury/send-approval-email] No treasurer configured for tenant ${tenantId}`)
         return { success: false, error: { message: 'No treasurer configured', retryable: false } }
       }
 
       // Get Resend client
       const resend = await getTenantResendClient(tenantId)
       if (!resend) {
-        console.log(`[treasury/send-approval-email] Resend not configured for tenant ${tenantId}`)
+        logger.info(`[treasury/send-approval-email] Resend not configured for tenant ${tenantId}`)
         return { success: false, error: { message: 'Resend not configured', retryable: false } }
       }
 
@@ -130,7 +131,7 @@ export const treasurySendApprovalEmailJob = defineJob<TreasurySendApprovalEmailP
         `
       })
 
-      console.log(`[treasury/send-approval-email] Sent approval email for request ${requestId} to ${treasurer.email}`)
+      logger.info(`[treasury/send-approval-email] Sent approval email for request ${requestId} to ${treasurer.email}`)
 
       return {
         success: true,
@@ -138,7 +139,7 @@ export const treasurySendApprovalEmailJob = defineJob<TreasurySendApprovalEmailP
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[treasury/send-approval-email] Error for request ${requestId}:`, message)
+      logger.error(`[treasury/send-approval-email] Error for request ${requestId}:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -166,7 +167,7 @@ export const treasuryAutoSendApprovedJob = defineJob<TreasuryAutoSendApprovedPay
       // Get Stripe client
       const stripe = await getTenantStripeClient(tenantId)
       if (!stripe) {
-        console.log(`[treasury/auto-send-approved] Stripe not configured for tenant ${tenantId}`)
+        logger.info(`[treasury/auto-send-approved] Stripe not configured for tenant ${tenantId}`)
         return { success: false, error: { message: 'Stripe not configured', retryable: false } }
       }
 
@@ -237,11 +238,11 @@ export const treasuryAutoSendApprovedJob = defineJob<TreasuryAutoSendApprovedPay
           const errorMessage = reqError instanceof Error ? reqError.message : 'Unknown error'
           await markRequestFailed(tenantId, request.id as string, errorMessage)
           failed++
-          console.error(`[treasury/auto-send-approved] Failed to process request ${request.id}:`, errorMessage)
+          logger.error(`[treasury/auto-send-approved] Failed to process request ${request.id}:`, errorMessage)
         }
       }
 
-      console.log(`[treasury/auto-send-approved] tenantId=${tenantId} processed=${processed} failed=${failed}`)
+      logger.info(`[treasury/auto-send-approved] tenantId=${tenantId} processed=${processed} failed=${failed}`)
 
       return {
         success: true,
@@ -249,7 +250,7 @@ export const treasuryAutoSendApprovedJob = defineJob<TreasuryAutoSendApprovedPay
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[treasury/auto-send-approved] tenantId=${tenantId} error:`, message)
+      logger.error(`[treasury/auto-send-approved] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -287,7 +288,7 @@ export const treasurySyncTopupStatusesJob = defineJob<TreasurySyncTopupStatusesP
       // Get Stripe client
       const stripe = await getTenantStripeClient(tenantId)
       if (!stripe) {
-        console.log(`[treasury/sync-topup-statuses] Stripe not configured for tenant ${tenantId}`)
+        logger.info(`[treasury/sync-topup-statuses] Stripe not configured for tenant ${tenantId}`)
         return { success: true, data: { skipped: 'Stripe not configured' } }
       }
 
@@ -340,14 +341,14 @@ export const treasurySyncTopupStatusesJob = defineJob<TreasurySyncTopupStatusesP
             synced++
           }
         } catch (topupError) {
-          console.error(
+          logger.error(
             `[treasury/sync-topup-statuses] Error syncing topup ${topup.id}:`,
             topupError instanceof Error ? topupError.message : 'Unknown error'
           )
         }
       }
 
-      console.log(`[treasury/sync-topup-statuses] tenantId=${tenantId} checked=${topups.length} synced=${synced}`)
+      logger.info(`[treasury/sync-topup-statuses] tenantId=${tenantId} checked=${topups.length} synced=${synced}`)
 
       return {
         success: true,
@@ -355,7 +356,7 @@ export const treasurySyncTopupStatusesJob = defineJob<TreasurySyncTopupStatusesP
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[treasury/sync-topup-statuses] tenantId=${tenantId} error:`, message)
+      logger.error(`[treasury/sync-topup-statuses] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -383,7 +384,7 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
       // Get Stripe client
       const stripe = await getTenantStripeClient(tenantId)
       if (!stripe) {
-        console.log(`[treasury/low-balance-alert] Stripe not configured for tenant ${tenantId}`)
+        logger.info(`[treasury/low-balance-alert] Stripe not configured for tenant ${tenantId}`)
         return { success: true, data: { skipped: 'Stripe not configured' } }
       }
 
@@ -402,7 +403,7 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
       const alertEmail = config?.alert_email
 
       if (!alertEmail) {
-        console.log(`[treasury/low-balance-alert] No alert email configured for tenant ${tenantId}`)
+        logger.info(`[treasury/low-balance-alert] No alert email configured for tenant ${tenantId}`)
         return { success: true, data: { skipped: 'No alert email configured' } }
       }
 
@@ -411,7 +412,7 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
       const availableBalance = balance.available.reduce((sum, b) => sum + b.amount, 0)
 
       if (availableBalance >= threshold) {
-        console.log(
+        logger.info(
           `[treasury/low-balance-alert] Balance OK for tenant ${tenantId}: $${(availableBalance / 100).toFixed(2)}`
         )
         return { success: true, data: { balanceCents: availableBalance, alertSent: false } }
@@ -444,7 +445,7 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
           `
         })
 
-        console.log(
+        logger.info(
           `[treasury/low-balance-alert] Alert sent for tenant ${tenantId}: $${(availableBalance / 100).toFixed(2)} < $${(threshold / 100).toFixed(2)}`
         )
 
@@ -453,12 +454,12 @@ export const treasuryLowBalanceAlertJob = defineJob<TreasuryLowBalanceAlertPaylo
           data: { balanceCents: availableBalance, alertSent: true, sentTo: alertEmail },
         }
       } else {
-        console.log(`[treasury/low-balance-alert] Resend not configured, skipping email`)
+        logger.info(`[treasury/low-balance-alert] Resend not configured, skipping email`)
         return { success: true, data: { balanceCents: availableBalance, alertSent: false } }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[treasury/low-balance-alert] tenantId=${tenantId} error:`, message)
+      logger.error(`[treasury/low-balance-alert] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },

@@ -1,4 +1,5 @@
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -150,7 +151,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Get failed jobs error:', error)
+    logger.error('Get failed jobs error:', error)
     return Response.json({ error: 'Failed to get failed jobs' }, { status: 500 })
   }
 }

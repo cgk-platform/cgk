@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { rejectCommissions } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   // Require authentication
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, rejected })
   } catch (error) {
-    console.error('Error rejecting commissions:', error)
+    logger.error('Error rejecting commissions:', error)
     return NextResponse.json(
       { error: 'Failed to reject commissions' },
       { status: 500 }

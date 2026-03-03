@@ -14,6 +14,7 @@ import type {
   ListResult,
 } from './interface.js'
 import { generateUniqueFilename } from './interface.js'
+import { logger } from '@cgk-platform/logging'
 
 export interface VercelBlobConfig {
   token?: string
@@ -56,7 +57,7 @@ export class VercelBlobStorage implements IStorageProvider {
       await del(url, { token: this.token })
       return true
     } catch (error) {
-      console.error('Failed to delete blob:', error)
+      logger.error('Failed to delete blob:', error)
       return false
     }
   }

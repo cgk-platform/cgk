@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { Metadata } from 'next'
+import { logger } from '@cgk-platform/logging'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -32,7 +33,7 @@ export default function ContactPage() {
         setSubmitStatus('error')
       }
     } catch (error) {
-      console.error('Form submission error:', error)
+      logger.error('Form submission error:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)

@@ -1,6 +1,7 @@
 import chalk from 'chalk'
 import { Command } from 'commander'
 import ora from 'ora'
+import { logger } from '@cgk-platform/logging'
 
 interface OutdatedPackage {
   current: string
@@ -75,45 +76,45 @@ export const checkUpdatesCommand = new Command('check-updates')
 
       spinner.stop()
 
-      console.log(chalk.cyan('\n📦 Updates available:\n'))
+      logger.info(chalk.cyan('\n📦 Updates available:\n'))
 
       // Group by package type
       const cgkPackages = filteredPackages.filter(([pkg]) => pkg.startsWith('@cgk-platform/'))
       const otherPackages = filteredPackages.filter(([pkg]) => !pkg.startsWith('@cgk-platform/'))
 
       if (cgkPackages.length > 0) {
-        console.log(chalk.bold('  CGK Platform Packages:'))
+        logger.info(chalk.bold('  CGK Platform Packages:'))
         for (const [pkg, info] of cgkPackages) {
           const current = chalk.red(info.current)
           const latest = chalk.green(info.latest)
-          console.log(`    ${chalk.cyan(pkg)}: ${current} → ${latest}`)
+          logger.info(`    ${chalk.cyan(pkg)}: ${current} → ${latest}`)
         }
-        console.log('')
+        logger.info('')
       }
 
       if (otherPackages.length > 0 && options.all) {
-        console.log(chalk.bold('  Other Packages:'))
+        logger.info(chalk.bold('  Other Packages:'))
         for (const [pkg, info] of otherPackages.slice(0, 20)) {
           const current = chalk.red(info.current)
           const latest = chalk.green(info.latest)
-          console.log(`    ${chalk.dim(pkg)}: ${current} → ${latest}`)
+          logger.info(`    ${chalk.dim(pkg)}: ${current} → ${latest}`)
         }
         if (otherPackages.length > 20) {
-          console.log(chalk.dim(`    ... and ${otherPackages.length - 20} more`))
+          logger.info(chalk.dim(`    ... and ${otherPackages.length - 20} more`))
         }
-        console.log('')
+        logger.info('')
       }
 
       // Summary
       const totalUpdates = filteredPackages.length
-      console.log(
+      logger.info(
         chalk.yellow(`  ${totalUpdates} package${totalUpdates === 1 ? '' : 's'} can be updated.`)
       )
-      console.log(chalk.dim('\n  Run `npx @cgk-platform/cli update` to update packages'))
-      console.log(chalk.dim('  Run `npx @cgk-platform/cli update --dry-run` to preview changes\n'))
+      logger.info(chalk.dim('\n  Run `npx @cgk-platform/cli update` to update packages'))
+      logger.info(chalk.dim('  Run `npx @cgk-platform/cli update --dry-run` to preview changes\n'))
     } catch (error) {
       spinner.fail('Failed to check for updates')
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)))
+      logger.error(chalk.red(error instanceof Error ? error.message : String(error)))
       process.exit(1)
     }
   })

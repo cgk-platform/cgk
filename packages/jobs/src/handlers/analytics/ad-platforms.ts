@@ -27,6 +27,7 @@ import type {
 } from './types'
 import { defineJob } from '../../define'
 import type { JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // HELPER FUNCTIONS
@@ -92,7 +93,7 @@ export const sendGA4PurchaseJob = defineJob<SendGA4PurchasePayload>({
       }
     }
 
-    console.log(
+    logger.info(
       `[Analytics] Sending GA4 purchase event for order ${orderId} in tenant ${tenantId}`
     )
 
@@ -111,7 +112,7 @@ export const sendGA4PurchaseJob = defineJob<SendGA4PurchasePayload>({
     const apiSecret = config?.credentials?.api_secret
 
     if (!measurementId || !apiSecret) {
-      console.log(`[Analytics] GA4 not configured for tenant ${tenantId}, skipping`)
+      logger.info(`[Analytics] GA4 not configured for tenant ${tenantId}, skipping`)
       return {
         success: true,
         data: { tenantId, orderId, platform: 'ga4', skipped: true, reason: 'not_configured' },
@@ -160,7 +161,7 @@ export const sendGA4PurchaseJob = defineJob<SendGA4PurchasePayload>({
       }
     }
 
-    console.log(`[Analytics] GA4 purchase event sent for order ${orderId} (status ${response.status})`)
+    logger.info(`[Analytics] GA4 purchase event sent for order ${orderId} (status ${response.status})`)
 
     return {
       success: true,
@@ -213,7 +214,7 @@ export const sendMetaPurchaseJob = defineJob<SendMetaPurchasePayload>({
       }
     }
 
-    console.log(
+    logger.info(
       `[Analytics] Sending Meta CAPI purchase event for order ${orderId} in tenant ${tenantId}`
     )
 
@@ -232,7 +233,7 @@ export const sendMetaPurchaseJob = defineJob<SendMetaPurchasePayload>({
     const accessToken = config?.credentials?.access_token
 
     if (!pixelId || !accessToken) {
-      console.log(`[Analytics] Meta CAPI not configured for tenant ${tenantId}, skipping`)
+      logger.info(`[Analytics] Meta CAPI not configured for tenant ${tenantId}, skipping`)
       return {
         success: true,
         data: { tenantId, orderId, platform: 'meta', skipped: true, reason: 'not_configured' },
@@ -288,7 +289,7 @@ export const sendMetaPurchaseJob = defineJob<SendMetaPurchasePayload>({
 
     if (!response.ok) {
       const body = await response.text().catch(() => '')
-      console.error(`[Analytics] Meta CAPI error for order ${orderId}: ${response.status} ${body}`)
+      logger.error(`[Analytics] Meta CAPI error for order ${orderId}: ${response.status} ${body}`)
       return {
         success: false,
         error: {
@@ -298,7 +299,7 @@ export const sendMetaPurchaseJob = defineJob<SendMetaPurchasePayload>({
       }
     }
 
-    console.log(`[Analytics] Meta CAPI purchase event sent for order ${orderId} (status ${response.status})`)
+    logger.info(`[Analytics] Meta CAPI purchase event sent for order ${orderId} (status ${response.status})`)
 
     return {
       success: true,
@@ -351,7 +352,7 @@ export const sendTikTokEventJob = defineJob<SendTikTokEventPayload>({
       }
     }
 
-    console.log(
+    logger.info(
       `[Analytics] Sending TikTok ${eventType} event for order ${orderId} in tenant ${tenantId}`
     )
 
@@ -412,7 +413,7 @@ export const sendTikTokEventJob = defineJob<SendTikTokEventPayload>({
     //   }
     // )
 
-    console.log(
+    logger.info(
       `[Analytics] TikTok ${eventType} event sent for order ${orderId}: ${JSON.stringify(eventPayload)}`
     )
 
@@ -460,7 +461,7 @@ export const syncGoogleAdsSpendJob = defineJob<SyncGoogleAdsSpendPayload>({
       date ||
       new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-    console.log(
+    logger.info(
       `[Analytics] Syncing Google Ads spend for ${targetDate} in tenant ${tenantId}`
     )
 
@@ -494,7 +495,7 @@ export const syncGoogleAdsSpendJob = defineJob<SyncGoogleAdsSpendPayload>({
     // 3. Convert micros to cents (divide by 10000)
     // 4. Store in google_daily_spend table
 
-    console.log(
+    logger.info(
       `[Analytics] Google Ads GAQL query: ${gaqlQuery}`
     )
 
@@ -535,7 +536,7 @@ export const syncMetaAdsSpendJob = defineJob<SyncMetaAdsSpendPayload>({
       date ||
       new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-    console.log(
+    logger.info(
       `[Analytics] Syncing Meta Ads spend for ${targetDate} in tenant ${tenantId}`
     )
 
@@ -551,7 +552,7 @@ export const syncMetaAdsSpendJob = defineJob<SyncMetaAdsSpendPayload>({
 
     // For date ranges > 7 days, use async reports
     if (useAsyncReport) {
-      console.log(
+      logger.info(
         `[Analytics] Using async report for Meta Ads spend sync`
       )
 

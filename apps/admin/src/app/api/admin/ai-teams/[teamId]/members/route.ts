@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ teamId: string }>
@@ -46,7 +47,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ members })
   } catch (error) {
-    console.error('Error fetching team members:', error)
+    logger.error('Error fetching team members:', error)
     return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 })
   }
 }
@@ -100,7 +101,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ member }, { status: 201 })
   } catch (error) {
-    console.error('Error adding team member:', error)
+    logger.error('Error adding team member:', error)
     const message = error instanceof Error ? error.message : 'Failed to add team member'
     return NextResponse.json({ error: message }, { status: 500 })
   }

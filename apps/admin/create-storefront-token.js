@@ -1,3 +1,4 @@
+import { logger } from '@cgk-platform/logging'
 require('dotenv').config({ path: '.env.local' })
 const { sql } = require('@vercel/postgres')
 const crypto = require('crypto')
@@ -49,7 +50,7 @@ function encrypt(token, keyHex) {
   const adminToken = decrypt(conn.rows[0].access_token_encrypted, encKey)
   const shop = conn.rows[0].shop
 
-  console.log('Creating Storefront Access Token for', shop)
+  logger.info('Creating Storefront Access Token for', shop)
 
   // Create storefront token via Admin API
   const response = await fetch(`https://${shop}/admin/api/2026-01/graphql.json`, {
@@ -82,7 +83,7 @@ function encrypt(token, keyHex) {
 
   if (result.data?.storefrontAccessTokenCreate?.storefrontAccessToken) {
     const storefrontToken = result.data.storefrontAccessTokenCreate.storefrontAccessToken.accessToken
-    console.log('✓ Created Storefront Token')
+    logger.info('✓ Created Storefront Token')
 
     // Encrypt and save to database
     const encrypted = encrypt(storefrontToken, encKey)
@@ -94,10 +95,10 @@ function encrypt(token, keyHex) {
       WHERE shop = ${shop}
     `
 
-    console.log('✓ Saved to database')
-    console.log('✓ Storefront can now fetch products from Shopify!')
+    logger.info('✓ Saved to database')
+    logger.info('✓ Storefront can now fetch products from Shopify!')
   } else {
-    console.error('Error creating token:', JSON.stringify(result, null, 2))
+    logger.error('Error creating token:', JSON.stringify(result, null, 2))
   }
 
   process.exit(0)

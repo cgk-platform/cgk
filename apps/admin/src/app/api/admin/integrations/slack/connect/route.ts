@@ -8,6 +8,7 @@ import {
   buildAuthorizationUrl,
 } from '@cgk-platform/slack'
 import { createTenantCache } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 const OAUTH_STATE_TTL = 600 // 10 minutes
 
@@ -45,7 +46,7 @@ export async function POST(_request: Request) {
       state: serializedState,
     })
   } catch (error) {
-    console.error('Failed to initiate Slack OAuth:', error)
+    logger.error('Failed to initiate Slack OAuth:', error)
     return NextResponse.json(
       { error: 'Failed to initiate Slack connection' },
       { status: 500 },

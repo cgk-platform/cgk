@@ -9,6 +9,7 @@ import {
 } from '@cgk-platform/integrations'
 
 import { updateApplicationStatus, getApplicationById } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(
   request: Request,
@@ -152,11 +153,11 @@ export async function POST(
           notificationSent = true
         } else {
           // Log magic link in dev mode
-          console.log(`[DEV] Creator setup link for ${application.email}: ${setupUrl}`)
+          logger.info(`[DEV] Creator setup link for ${application.email}: ${setupUrl}`)
           notificationSent = true
         }
       } catch (emailError) {
-        console.error('Failed to send approval notification email:', emailError)
+        logger.error('Failed to send approval notification email:', emailError)
       }
     }
 
@@ -166,7 +167,7 @@ export async function POST(
       notificationSent,
     })
   } catch (error) {
-    console.error('Error approving application:', error)
+    logger.error('Error approving application:', error)
     return NextResponse.json(
       { error: 'Failed to approve application' },
       { status: 500 }

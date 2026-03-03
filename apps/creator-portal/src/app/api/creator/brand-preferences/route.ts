@@ -19,6 +19,7 @@ import type {
   RateCardEntry,
   UpdateCreatorBrandPreferencesInput,
 } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -141,7 +142,7 @@ export async function GET(req: Request): Promise<Response> {
       isDefault: false,
     })
   } catch (error) {
-    console.error('Error fetching brand preferences:', error)
+    logger.error('Error fetching brand preferences:', error)
     return Response.json({ error: 'Failed to fetch preferences' }, { status: 500 })
   }
 }
@@ -254,7 +255,7 @@ export async function PUT(req: Request): Promise<Response> {
       profileCompletenessPercent,
     })
   } catch (error) {
-    console.error('Error updating brand preferences:', error)
+    logger.error('Error updating brand preferences:', error)
     return Response.json({ error: 'Failed to update preferences' }, { status: 500 })
   }
 }

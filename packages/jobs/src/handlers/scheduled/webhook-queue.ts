@@ -12,6 +12,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // WEBHOOK QUEUE PAYLOAD TYPES
@@ -107,7 +108,7 @@ export const processWebhookQueueJob = defineJob<TenantEvent<ProcessWebhookQueueP
   handler: async (job) => {
     const { tenantId, limit = 100, webhookTypes } = job.payload
 
-    console.log(`[Webhook] Processing queue for tenant ${tenantId} (limit: ${limit})`)
+    logger.info(`[Webhook] Processing queue for tenant ${tenantId} (limit: ${limit})`)
 
     // Query pending webhooks
     // Would use: SELECT * FROM webhook_queue
@@ -158,7 +159,7 @@ export const processWebhookQueueJob = defineJob<TenantEvent<ProcessWebhookQueueP
 
         if (result.attempt >= (webhook.maxAttempts || MAX_WEBHOOK_ATTEMPTS)) {
           // Mark as permanently failed
-          console.warn(`[Webhook] ${webhook.id} exceeded max attempts, marking as failed`)
+          logger.warn(`[Webhook] ${webhook.id} exceeded max attempts, marking as failed`)
           // Would update: UPDATE webhook_queue
           //               SET status = 'failed', failed_at = NOW()
           //               WHERE id = webhook.id
@@ -166,7 +167,7 @@ export const processWebhookQueueJob = defineJob<TenantEvent<ProcessWebhookQueueP
           // Schedule retry
           const retryDelay = getRetryDelay(result.attempt)
           const nextRetryAt = new Date(Date.now() + retryDelay)
-          console.log(`[Webhook] ${webhook.id} failed, scheduling retry at ${nextRetryAt}`)
+          logger.info(`[Webhook] ${webhook.id} failed, scheduling retry at ${nextRetryAt}`)
           // Would update: UPDATE webhook_queue
           //               SET attempt = attempt + 1, scheduled_at = nextRetryAt
           //               WHERE id = webhook.id
@@ -174,7 +175,7 @@ export const processWebhookQueueJob = defineJob<TenantEvent<ProcessWebhookQueueP
       }
     }
 
-    console.log(
+    logger.info(
       `[Webhook] Queue processing complete: ${succeeded} succeeded, ${failed} failed out of ${webhooksToProcess.length}`
     )
 
@@ -215,11 +216,11 @@ export const processSingleWebhookJob = defineJob<TenantEvent<ProcessSingleWebhoo
 
     // Update webhook status based on result
     if (result.success) {
-      console.log(`[Webhook] ${webhookId} delivered successfully`)
+      logger.info(`[Webhook] ${webhookId} delivered successfully`)
     } else if (result.attempt >= maxAttempts) {
-      console.error(`[Webhook] ${webhookId} permanently failed after ${maxAttempts} attempts`)
+      logger.error(`[Webhook] ${webhookId} permanently failed after ${maxAttempts} attempts`)
     } else {
-      console.warn(`[Webhook] ${webhookId} failed, will retry (attempt ${result.attempt}/${maxAttempts})`)
+      logger.warn(`[Webhook] ${webhookId} failed, will retry (attempt ${result.attempt}/${maxAttempts})`)
     }
 
     return { success: result.success, data: result }
@@ -238,7 +239,7 @@ export const webhookQueueCleanupJob = defineJob<TenantEvent<WebhookQueueCleanupP
   handler: async (job) => {
     const { tenantId, olderThanDays = 30, processedOnly = true } = job.payload
 
-    console.log(
+    logger.info(
       `[Webhook] Cleaning up webhooks older than ${olderThanDays} days (processedOnly: ${processedOnly})`
     )
 
@@ -254,7 +255,7 @@ export const webhookQueueCleanupJob = defineJob<TenantEvent<WebhookQueueCleanupP
 
     const deletedCount = 0 // Would be affected row count
 
-    console.log(`[Webhook] Cleaned up ${deletedCount} old webhooks`)
+    logger.info(`[Webhook] Cleaned up ${deletedCount} old webhooks`)
 
     return {
       success: true,
@@ -283,7 +284,7 @@ export const webhookQueueHealthCheckJob = defineJob<TenantEvent<WebhookQueueHeal
   handler: async (job) => {
     const { tenantId } = job.payload
 
-    console.log(`[Webhook] Running queue health check for tenant ${tenantId}`)
+    logger.info(`[Webhook] Running queue health check for tenant ${tenantId}`)
 
     // Query queue statistics
     // Would use aggregation queries on webhook_queue table
@@ -306,15 +307,15 @@ export const webhookQueueHealthCheckJob = defineJob<TenantEvent<WebhookQueueHeal
 
     // Check for alert conditions
     if (status.pending >= ALERT_THRESHOLDS.pendingCritical) {
-      console.error(`[Webhook] CRITICAL: ${status.pending} pending webhooks`)
+      logger.error(`[Webhook] CRITICAL: ${status.pending} pending webhooks`)
       // Would trigger criticalAlert job
     } else if (status.pending >= ALERT_THRESHOLDS.pendingWarning) {
-      console.warn(`[Webhook] WARNING: ${status.pending} pending webhooks`)
+      logger.warn(`[Webhook] WARNING: ${status.pending} pending webhooks`)
       // Would trigger systemErrorAlert job
     }
 
     if (status.failed >= ALERT_THRESHOLDS.failedCritical) {
-      console.error(`[Webhook] CRITICAL: ${status.failed} failed webhooks`)
+      logger.error(`[Webhook] CRITICAL: ${status.failed} failed webhooks`)
       // Would trigger criticalAlert job
     }
 
@@ -322,7 +323,7 @@ export const webhookQueueHealthCheckJob = defineJob<TenantEvent<WebhookQueueHeal
     if (status.oldestPending) {
       const ageHours = (Date.now() - status.oldestPending.getTime()) / (1000 * 60 * 60)
       if (ageHours > ALERT_THRESHOLDS.oldestPendingHours) {
-        console.warn(`[Webhook] Oldest pending webhook is ${ageHours.toFixed(1)} hours old`)
+        logger.warn(`[Webhook] Oldest pending webhook is ${ageHours.toFixed(1)} hours old`)
         // Would trigger alert
       }
     }
@@ -360,7 +361,7 @@ async function processWebhook(input: WebhookDeliveryInput): Promise<WebhookProce
   const { tenantId: _tenantId, webhookId, webhookType, payload: _payload, targetUrl, attempt, maxAttempts } = input
   const startTime = Date.now()
 
-  console.log(`[Webhook] Delivering ${webhookId} (${webhookType}) to ${targetUrl} (attempt ${attempt})`)
+  logger.info(`[Webhook] Delivering ${webhookId} (${webhookType}) to ${targetUrl} (attempt ${attempt})`)
 
   try {
     // Implementation would:

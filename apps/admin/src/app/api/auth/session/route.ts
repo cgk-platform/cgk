@@ -8,6 +8,7 @@ import {
   validateSessionById,
   verifyJWT,
 } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/auth/session
@@ -44,7 +45,7 @@ export async function GET(request: Request) {
       activeSessions: sessions.length,
     })
   } catch (error) {
-    console.error('Session check error:', error)
+    logger.error('Session check error:', error)
     return Response.json({ error: 'Invalid session' }, { status: 401 })
   }
 }
@@ -66,7 +67,7 @@ export async function DELETE(request: Request) {
     const response = Response.json({ success: true })
     return clearAuthCookie(response)
   } catch (error) {
-    console.error('Session revoke error:', error)
+    logger.error('Session revoke error:', error)
     return Response.json({ error: 'Failed to revoke sessions' }, { status: 500 })
   }
 }

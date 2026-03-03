@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { getSlackNotificationConfigByType } from '@/lib/creators/lifecycle-db'
 import type { CreatorNotificationType } from '@/lib/creators/lifecycle-types'
 import { CREATOR_NOTIFICATION_TYPES } from '@/lib/creators/lifecycle-types'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_TYPES = CREATOR_NOTIFICATION_TYPES.map((t) => t.type)
 
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    console.error('[slack-notifications/test] POST error:', error)
+    logger.error('[slack-notifications/test] POST error:', error)
     return NextResponse.json({ error: 'Failed to send test notification' }, { status: 500 })
   }
 }

@@ -32,6 +32,7 @@ import type {
   ConditionalLogic,
 } from '@/lib/surveys'
 import { QUESTION_TYPE_LABELS } from '@/lib/surveys'
+import { logger } from '@cgk-platform/logging'
 
 const QUESTION_TYPE_ICONS: Record<QuestionType, typeof CircleDot> = {
   single_select: CircleDot,
@@ -69,7 +70,7 @@ export default function QuestionsPage() {
       if (surveyRes.ok) setSurvey(surveyData.survey)
       if (questionsRes.ok) setQuestions(questionsData.questions)
     } catch (error) {
-      console.error('Failed to fetch data:', error)
+      logger.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
@@ -93,7 +94,7 @@ export default function QuestionsPage() {
         setShowNewQuestion(false)
       }
     } catch (error) {
-      console.error('Failed to create question:', error)
+      logger.error('Failed to create question:', error)
     }
   }
 
@@ -111,7 +112,7 @@ export default function QuestionsPage() {
         setEditingId(null)
       }
     } catch (error) {
-      console.error('Failed to update question:', error)
+      logger.error('Failed to update question:', error)
     }
   }
 
@@ -127,7 +128,7 @@ export default function QuestionsPage() {
         setQuestions(questions.filter((q) => q.id !== questionId))
       }
     } catch (error) {
-      console.error('Failed to delete question:', error)
+      logger.error('Failed to delete question:', error)
     }
   }
 
@@ -151,7 +152,7 @@ export default function QuestionsPage() {
         body: JSON.stringify({ orderMap }),
       })
     } catch (error) {
-      console.error('Failed to reorder questions:', error)
+      logger.error('Failed to reorder questions:', error)
     }
   }
 

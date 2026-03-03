@@ -11,6 +11,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk-platform/auth'
 import { getWidgetConfig, isWithinBusinessHours } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -50,7 +51,7 @@ export async function GET(req: NextRequest) {
       isOnline,
     })
   } catch (error) {
-    console.error('[support/chat/widget-config] GET error:', error)
+    logger.error('[support/chat/widget-config] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch config' },
       { status: 500 }

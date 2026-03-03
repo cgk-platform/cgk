@@ -14,6 +14,7 @@
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 // Job Payload Types
 export interface VideoTranscriptionPayload {
@@ -58,7 +59,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       // Check if AssemblyAI is configured for tenant
       const assemblyClient = await getTenantAssemblyAIClient(tenantId)
       if (!assemblyClient) {
-        console.log(`[video/transcription] AssemblyAI not configured for tenant ${tenantId}`)
+        logger.info(`[video/transcription] AssemblyAI not configured for tenant ${tenantId}`)
         return {
           success: false,
           error: { message: 'AssemblyAI not configured for tenant', retryable: false },
@@ -68,7 +69,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       // Check if already transcribing
       const existing = await getVideoTranscription(tenantId, videoId)
       if (existing?.transcriptionStatus === 'processing') {
-        console.log(`[video/transcription] Already processing videoId=${videoId}`)
+        logger.info(`[video/transcription] Already processing videoId=${videoId}`)
         return { success: true, data: { alreadyProcessing: true } }
       }
 
@@ -86,7 +87,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       // Save job ID to database
       await startTranscription(tenantId, videoId, transcriptionJob.id)
 
-      console.log(`[video/transcription] Started transcription for videoId=${videoId} jobId=${transcriptionJob.id}`)
+      logger.info(`[video/transcription] Started transcription for videoId=${videoId} jobId=${transcriptionJob.id}`)
 
       return {
         success: true,
@@ -94,7 +95,7 @@ export const videoTranscriptionJob = defineJob<VideoTranscriptionPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[video/transcription] Error for videoId=${videoId}:`, message)
+      logger.error(`[video/transcription] Error for videoId=${videoId}:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -130,7 +131,7 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
       // Check if Anthropic is configured for tenant
       const anthropic = await getTenantAnthropicClient(tenantId)
       if (!anthropic) {
-        console.log(`[video/ai-content-generation] Anthropic not configured for tenant ${tenantId}`)
+        logger.info(`[video/ai-content-generation] Anthropic not configured for tenant ${tenantId}`)
         return {
           success: false,
           error: { message: 'Anthropic not configured for tenant', retryable: false },
@@ -197,7 +198,7 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
       // Save AI content to database
       await saveAIContent(tenantId, videoId, { title, summary, tasks })
 
-      console.log(
+      logger.info(
         `[video/ai-content-generation] Generated content for videoId=${videoId}: title="${title.substring(0, 30)}..." tasks=${tasks.length}`
       )
 
@@ -207,7 +208,7 @@ export const aiContentGenerationJob = defineJob<AIContentGenerationPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[video/ai-content-generation] Error for videoId=${videoId}:`, message)
+      logger.error(`[video/ai-content-generation] Error for videoId=${videoId}:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -229,7 +230,7 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
     const { tenantId } = job.payload
 
     if (!tenantId) {
-      console.log('[video/transcription-sync] No tenantId provided, skipping')
+      logger.info('[video/transcription-sync] No tenantId provided, skipping')
       return { success: true, data: { message: 'No tenantId provided - needs orchestration' } }
     }
 
@@ -240,7 +241,7 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
       // Check if AssemblyAI is configured for tenant
       const assemblyClient = await getTenantAssemblyAIClient(tenantId)
       if (!assemblyClient) {
-        console.log(`[video/transcription-sync] AssemblyAI not configured for tenant ${tenantId}`)
+        logger.info(`[video/transcription-sync] AssemblyAI not configured for tenant ${tenantId}`)
         return { success: true, data: { skipped: 'AssemblyAI not configured' } }
       }
 
@@ -270,23 +271,23 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
             }))
             await saveTranscriptionResult(tenantId, video.id, result.text, words, [])
             updated++
-            console.log(`[video/transcription-sync] Completed transcription for videoId=${video.id}`)
+            logger.info(`[video/transcription-sync] Completed transcription for videoId=${video.id}`)
           } else if (result.status === 'error') {
             // Mark as failed
             await failTranscription(tenantId, video.id, result.error || 'Unknown transcription error')
             updated++
-            console.log(`[video/transcription-sync] Failed transcription for videoId=${video.id}: ${result.error}`)
+            logger.info(`[video/transcription-sync] Failed transcription for videoId=${video.id}: ${result.error}`)
           }
           // If still processing, leave as-is
         } catch (pollError) {
-          console.error(
+          logger.error(
             `[video/transcription-sync] Error polling job ${video.transcriptionJobId}:`,
             pollError instanceof Error ? pollError.message : 'Unknown error'
           )
         }
       }
 
-      console.log(`[video/transcription-sync] tenantId=${tenantId} checked=${pendingVideos.length} updated=${updated}`)
+      logger.info(`[video/transcription-sync] tenantId=${tenantId} checked=${pendingVideos.length} updated=${updated}`)
 
       return {
         success: true,
@@ -294,7 +295,7 @@ export const transcriptionSyncJob = defineJob<TranscriptionSyncPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[video/transcription-sync] Error for tenantId=${tenantId}:`, message)
+      logger.error(`[video/transcription-sync] Error for tenantId=${tenantId}:`, message)
       return {
         success: false,
         error: { message, retryable: true },

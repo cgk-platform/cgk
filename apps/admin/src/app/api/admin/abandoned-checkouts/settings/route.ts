@@ -15,6 +15,7 @@ import {
   updateRecoverySettings,
 } from '@/lib/abandoned-checkouts/db'
 import type { UpdateRecoverySettingsRequest } from '@/lib/abandoned-checkouts/types'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET() {
   const headerList = await headers()
@@ -38,7 +39,7 @@ export async function GET() {
 
     return NextResponse.json({ settings })
   } catch (error) {
-    console.error('Failed to fetch recovery settings:', error)
+    logger.error('Failed to fetch recovery settings:', error)
     return NextResponse.json(
       { error: 'Failed to fetch recovery settings' },
       { status: 500 },
@@ -112,7 +113,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ settings })
   } catch (error) {
-    console.error('Failed to update recovery settings:', error)
+    logger.error('Failed to update recovery settings:', error)
     return NextResponse.json(
       { error: 'Failed to update recovery settings' },
       { status: 500 },

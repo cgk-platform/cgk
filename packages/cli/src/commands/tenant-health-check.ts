@@ -5,6 +5,7 @@ import {
   type Migration,
 } from '@cgk-platform/db/migrations'
 import chalk from 'chalk'
+import { logger } from '@cgk-platform/logging'
 
 interface HealthCheckResult {
   category: string
@@ -24,7 +25,7 @@ export async function tenantHealthCheck(
   const { verbose = false } = options
   const results: HealthCheckResult[] = []
 
-  console.log(chalk.bold(`\n🏥 Tenant Health Check: ${tenantSlug}\n`))
+  logger.info(chalk.bold(`\n🏥 Tenant Health Check: ${tenantSlug}\n`))
 
   // ==========================================================================
   // 1. Check if organization exists
@@ -322,15 +323,15 @@ export async function tenantHealthCheck(
   // Exit with error if any check failed
   const hasFailures = results.some((r) => r.status === 'fail')
   if (hasFailures) {
-    console.log(chalk.red('\n❌ Health check failed\n'))
+    logger.info(chalk.red('\n❌ Health check failed\n'))
     process.exit(1)
   } else {
-    console.log(chalk.green('\n✅ Health check passed\n'))
+    logger.info(chalk.green('\n✅ Health check passed\n'))
   }
 }
 
 function printResults(results: HealthCheckResult[]): void {
-  console.log('')
+  logger.info('')
 
   for (const result of results) {
     const icon =
@@ -343,10 +344,10 @@ function printResults(results: HealthCheckResult[]): void {
           ? chalk.yellow(result.message)
           : chalk.red(result.message)
 
-    console.log(`${icon} ${chalk.bold(result.category)}: ${message}`)
+    logger.info(`${icon} ${chalk.bold(result.category)}: ${message}`)
 
     if (result.details) {
-      console.log(chalk.gray(`   ${result.details}`))
+      logger.info(chalk.gray(`   ${result.details}`))
     }
   }
 }

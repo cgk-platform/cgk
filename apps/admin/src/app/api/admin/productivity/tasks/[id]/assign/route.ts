@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { assignTask } from '@/lib/productivity'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -47,7 +48,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ task })
   } catch (error) {
-    console.error('Error assigning task:', error)
+    logger.error('Error assigning task:', error)
     return NextResponse.json({ error: 'Failed to assign task' }, { status: 500 })
   }
 }

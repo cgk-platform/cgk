@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 
@@ -51,10 +52,13 @@ function ThreadListItem({ thread, isActive }: { thread: Thread; isActive: boolea
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-medium">
           {thread.creator_avatar_url ? (
-            <img
+            <Image
               src={thread.creator_avatar_url}
               alt={thread.creator_name}
-              className="h-10 w-10 rounded-full object-cover"
+              width={40}
+              height={40}
+              className="rounded-full object-cover"
+              unoptimized
             />
           ) : (
             initials

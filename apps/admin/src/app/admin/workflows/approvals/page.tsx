@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Check, Clock, X } from 'lucide-react'
 
 import { Button } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 interface PendingApproval {
   id: string
@@ -26,7 +27,7 @@ export default function ApprovalsPage() {
       const data = await res.json()
       setApprovals(data.approvals || [])
     } catch (error) {
-      console.error('Failed to fetch approvals:', error)
+      logger.error('Failed to fetch approvals:', error)
     } finally {
       setLoading(false)
     }
@@ -44,7 +45,7 @@ export default function ApprovalsPage() {
       })
       fetchApprovals()
     } catch (error) {
-      console.error('Failed to approve:', error)
+      logger.error('Failed to approve:', error)
     } finally {
       setActioningId(null)
     }
@@ -63,7 +64,7 @@ export default function ApprovalsPage() {
       })
       fetchApprovals()
     } catch (error) {
-      console.error('Failed to reject:', error)
+      logger.error('Failed to reject:', error)
     } finally {
       setActioningId(null)
     }

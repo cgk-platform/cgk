@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 
 import { getPipelineConfig, updatePipelineConfig } from '@/lib/pipeline/db'
 import type { PipelineConfig } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -23,7 +24,7 @@ export async function GET() {
     const config = await getPipelineConfig(tenantSlug)
     return Response.json(config)
   } catch (error) {
-    console.error('Pipeline config error:', error)
+    logger.error('Pipeline config error:', error)
     return Response.json(
       { error: 'Failed to fetch pipeline config' },
       { status: 500 }
@@ -50,7 +51,7 @@ export async function PATCH(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Pipeline config update error:', error)
+    logger.error('Pipeline config update error:', error)
     return Response.json(
       { error: 'Failed to update pipeline config' },
       { status: 500 }

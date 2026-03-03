@@ -1,4 +1,5 @@
 import { logAuditAction, searchUsers } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
         resultCount: users.length,
       },
     }).catch((error) => {
-      console.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error)
     })
 
     return Response.json({
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
       count: users.length,
     })
   } catch (error) {
-    console.error('Search users error:', error)
+    logger.error('Search users error:', error)
     return Response.json({ error: 'Failed to search users' }, { status: 500 })
   }
 }

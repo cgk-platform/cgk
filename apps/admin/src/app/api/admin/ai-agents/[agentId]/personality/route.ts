@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 type RouteParams = { params: Promise<{ agentId: string }> }
 
@@ -47,7 +48,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ personality })
   } catch (error) {
-    console.error('Error fetching personality:', error)
+    logger.error('Error fetching personality:', error)
     return NextResponse.json({ error: 'Failed to fetch personality' }, { status: 500 })
   }
 }
@@ -130,7 +131,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ personality })
   } catch (error) {
-    console.error('Error updating personality:', error)
+    logger.error('Error updating personality:', error)
     return NextResponse.json({ error: 'Failed to update personality' }, { status: 500 })
   }
 }
@@ -184,7 +185,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error generating preview:', error)
+    logger.error('Error generating preview:', error)
     return NextResponse.json({ error: 'Failed to generate preview' }, { status: 500 })
   }
 }

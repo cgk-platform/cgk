@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button, Card, CardContent, Input, Label, cn } from '@cgk-platform/ui'
 import { Palette, Type, CornerUpLeft, Save } from 'lucide-react'
 import { useState, useTransition } from 'react'
@@ -196,14 +197,19 @@ export function BrandingEditor({ branding, onUpdate }: BrandingEditorProps) {
                 />
                 {localBranding.logoUrl && (
                   <div className="mt-2 flex h-16 items-center justify-center rounded-md border bg-muted/50 p-2">
-                    <img
-                      src={localBranding.logoUrl}
-                      alt="Logo preview"
-                      className="h-full max-w-[200px] object-contain"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
+                    <div className="relative h-full max-w-[200px]">
+                      <Image
+                        src={localBranding.logoUrl}
+                        alt="Logo preview"
+                        width={200}
+                        height={64}
+                        className="h-full w-auto object-contain"
+                        unoptimized
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none'
+                        }}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

@@ -6,6 +6,7 @@ import { Plus, Search, User } from 'lucide-react'
 
 import { Button } from '@cgk-platform/ui'
 import { cn } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 interface Contact {
   id: string
@@ -34,7 +35,7 @@ export default function ContactsPage() {
       const data = await res.json()
       setContacts(data.contacts || [])
     } catch (error) {
-      console.error('Failed to fetch contacts:', error)
+      logger.error('Failed to fetch contacts:', error)
     } finally {
       setLoading(false)
     }

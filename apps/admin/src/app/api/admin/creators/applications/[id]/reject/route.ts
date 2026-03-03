@@ -8,6 +8,7 @@ import {
 } from '@cgk-platform/integrations'
 
 import { updateApplicationStatus, getApplicationById } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(
   request: Request,
@@ -76,7 +77,7 @@ export async function POST(
           })
           notificationSent = true
         } catch (emailError) {
-          console.error('Failed to send rejection notification email:', emailError)
+          logger.error('Failed to send rejection notification email:', emailError)
         }
       }
     }
@@ -86,7 +87,7 @@ export async function POST(
       notificationSent,
     })
   } catch (error) {
-    console.error('Error rejecting application:', error)
+    logger.error('Error rejecting application:', error)
     return NextResponse.json(
       { error: 'Failed to reject application' },
       { status: 500 }

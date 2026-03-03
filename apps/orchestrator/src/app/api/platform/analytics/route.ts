@@ -1,6 +1,7 @@
 import { createGlobalCache, sql, withTenant } from '@cgk-platform/db'
 
 import type { PlatformAnalytics, TenantRevenue, TimeSeriesDataPoint } from '../../../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -78,7 +79,7 @@ export async function GET(request: Request): Promise<Response> {
       cached: false,
     })
   } catch (error) {
-    console.error('Failed to fetch platform analytics:', error)
+    logger.error('Failed to fetch platform analytics:', error)
     return Response.json({ error: 'Failed to fetch platform analytics' }, { status: 500 })
   }
 }

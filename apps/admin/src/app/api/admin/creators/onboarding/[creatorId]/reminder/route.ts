@@ -9,6 +9,7 @@ import {
 } from '@cgk-platform/integrations'
 
 import { recordOnboardingReminder, getOnboardingConfig } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(
   request: Request,
@@ -93,7 +94,7 @@ export async function POST(
         `,
       })
     } catch (emailError) {
-      console.error('Failed to send reminder email:', emailError)
+      logger.error('Failed to send reminder email:', emailError)
       return NextResponse.json(
         { error: 'Failed to send reminder email' },
         { status: 500 }
@@ -105,7 +106,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error sending reminder:', error)
+    logger.error('Error sending reminder:', error)
     return NextResponse.json(
       { error: 'Failed to send reminder' },
       { status: 500 }

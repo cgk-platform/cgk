@@ -8,6 +8,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import * as jose from 'jose'
+import { logger } from '@cgk-platform/logging'
 
 const CREATOR_AUTH_COOKIE_NAME = 'creator-auth-token'
 
@@ -60,7 +61,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   // All remaining paths are protected (portal) routes — require auth
   const secret = getCreatorJWTSecret()
   if (!secret) {
-    console.error('[creator-portal] CREATOR_JWT_SECRET is not set — cannot verify sessions')
+    logger.error('[creator-portal] CREATOR_JWT_SECRET is not set — cannot verify sessions')
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('error', 'server_config')
     return NextResponse.redirect(loginUrl)

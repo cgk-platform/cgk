@@ -20,6 +20,7 @@ import {
   sendMessage,
   type SendMessageInput,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -62,7 +63,7 @@ export async function GET(
       messages,
     })
   } catch (error) {
-    console.error('[chat/session] GET error:', error)
+    logger.error('[chat/session] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch session' },
       { status: 500 }
@@ -122,7 +123,7 @@ export async function POST(
 
     return NextResponse.json({ message })
   } catch (error) {
-    console.error('[chat/session] POST error:', error)
+    logger.error('[chat/session] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to send message' },
       { status: 500 }
@@ -166,7 +167,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[chat/session] DELETE error:', error)
+    logger.error('[chat/session] DELETE error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to end session' },
       { status: 500 }

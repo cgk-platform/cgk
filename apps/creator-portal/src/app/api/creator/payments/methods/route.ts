@@ -9,6 +9,7 @@
 import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -112,7 +113,7 @@ export async function GET(req: Request): Promise<Response> {
       defaultMethodId: methods.find((m) => m.isDefault)?.id,
     })
   } catch (error) {
-    console.error('Error fetching payment methods:', error)
+    logger.error('Error fetching payment methods:', error)
     return Response.json({ error: 'Failed to fetch payment methods' }, { status: 500 })
   }
 }
@@ -173,7 +174,7 @@ export async function PATCH(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Error setting default payment method:', error)
+    logger.error('Error setting default payment method:', error)
     return Response.json({ error: 'Failed to update payment method' }, { status: 500 })
   }
 }
@@ -234,7 +235,7 @@ export async function DELETE(req: Request): Promise<Response> {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Error removing payment method:', error)
+    logger.error('Error removing payment method:', error)
     return Response.json({ error: 'Failed to remove payment method' }, { status: 500 })
   }
 }

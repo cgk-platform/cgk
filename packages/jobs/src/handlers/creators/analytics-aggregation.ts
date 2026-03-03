@@ -18,6 +18,7 @@
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
 import type { Job, JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // PAYLOAD TYPES
@@ -151,7 +152,7 @@ export const aggregateCreatorDailyMetricsJob = defineJob<
     // Default to yesterday if no date provided
     const targetDate = date || getYesterdayDate()
 
-    console.log(
+    logger.info(
       `[aggregateCreatorDailyMetrics] Aggregating metrics for ${targetDate} in tenant ${tenantId}`,
       { creatorId: creatorId || 'all' }
     )
@@ -251,7 +252,7 @@ export const generateWeeklyCreatorSummaryJob = defineJob<
     // Default to last week if no date provided
     const { startDate, endDate } = getLastWeekRange(weekStartDate)
 
-    console.log(
+    logger.info(
       `[generateWeeklyCreatorSummary] Generating summary for ${startDate} to ${endDate} in tenant ${tenantId}`
     )
 
@@ -356,7 +357,7 @@ export const generateMonthlyCreatorReportJob = defineJob<
     // Default to previous month if not provided
     const { targetMonth, targetYear } = getPreviousMonth(month, year)
 
-    console.log(
+    logger.info(
       `[generateMonthlyCreatorReport] Generating report for ${targetMonth}/${targetYear} in tenant ${tenantId}`,
       { generatePdf, emailAdmins }
     )

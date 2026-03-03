@@ -2,7 +2,7 @@ import {
   DEFAULT_API_VERSION,
   createAdminClient,
   normalizeStoreDomain
-} from "./chunk-W4RFSGMI.js";
+} from "./chunk-X2N4PNZC.js";
 import {
   getOrganizationIdForShop,
   getOrganizationShops,
@@ -11167,6 +11167,8 @@ async function deleteOAuthState(state) {
 
 // src/oauth/callback.ts
 import { sql as sql3, withTenant } from "@cgk-platform/db";
+import { createLogger as createLogger3 } from "@cgk-platform/logging";
+var logger3 = createLogger3({ meta: { service: "shopify" } });
 function getShopifyClientId2() {
   const clientId = process.env.SHOPIFY_CLIENT_ID;
   if (!clientId) {
@@ -11342,14 +11344,14 @@ async function handleOAuthCallback(params) {
           `;
         });
       } else if (storefrontResult.data?.storefrontAccessTokenCreate?.userErrors?.length) {
-        console.error(
+        logger3.error(
           "Storefront token creation errors:",
           storefrontResult.data.storefrontAccessTokenCreate.userErrors
         );
       }
     }
   } catch (error) {
-    console.error("Failed to create Storefront Access Token:", error);
+    logger3.error("Failed to create Storefront Access Token:", error);
   }
   try {
     const { tasks } = await import("./v3-KVKFRKMI.js");
@@ -11359,9 +11361,9 @@ async function handleOAuthCallback(params) {
     await tasks.trigger("commerce-collection-sync", {
       tenantId
     });
-    console.log(`Product sync triggered for tenant ${tenantId}`);
+    logger3.info(`Product sync triggered for tenant ${tenantId}`);
   } catch (error) {
-    console.error("Failed to trigger product sync:", error);
+    logger3.error("Failed to trigger product sync:", error);
   }
   await deleteOAuthState(state);
   return { tenantId, shop };
@@ -11599,6 +11601,8 @@ async function clearCredentialsCache(tenantId) {
 
 // src/oauth/webhooks.ts
 import { sql as sql5 } from "@cgk-platform/db";
+import { createLogger as createLogger4 } from "@cgk-platform/logging";
+var logger4 = createLogger4({ meta: { service: "shopify" } });
 var WEBHOOK_TOPICS = [
   "orders/create",
   "orders/updated",
@@ -11643,7 +11647,7 @@ async function handleWebhook(request) {
   }
   const tenantId = await getTenantIdForShop(shop);
   if (!tenantId) {
-    console.warn(`[shopify-webhook] Webhook from unknown shop: ${shop}`);
+    logger4.warn(`[shopify-webhook] Webhook from unknown shop: ${shop}`);
     return new Response("Shop not found", { status: 404 });
   }
   const body = await request.text();
@@ -11658,11 +11662,11 @@ async function handleWebhook(request) {
   }
   const secret = credentials.webhookSecret || process.env.SHOPIFY_CLIENT_SECRET;
   if (!secret) {
-    console.error("[shopify-webhook] No webhook secret available");
+    logger4.error("[shopify-webhook] No webhook secret available");
     return new Response("Configuration error", { status: 500 });
   }
   if (!verifyWebhookHmac(body, hmac, secret)) {
-    console.error(`[shopify-webhook] Invalid signature for shop: ${shop}`);
+    logger4.error(`[shopify-webhook] Invalid signature for shop: ${shop}`);
     return new Response("Invalid signature", { status: 401 });
   }
   let payload;
@@ -11673,12 +11677,12 @@ async function handleWebhook(request) {
   }
   await updateLastWebhookAt(tenantId);
   const handlers = webhookHandlers.get(topic) || [];
-  console.log(`[shopify-webhook] Processing ${topic} for tenant ${tenantId} (${webhookId})`);
+  logger4.info(`[shopify-webhook] Processing ${topic} for tenant ${tenantId} (${webhookId})`);
   const handlerPromises = handlers.map(async (handler) => {
     try {
       await handler(tenantId, payload);
     } catch (error) {
-      console.error(
+      logger4.error(
         `[shopify-webhook] Handler error for ${topic}:`,
         error instanceof Error ? error.message : error
       );

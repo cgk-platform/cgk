@@ -8,6 +8,7 @@
 import { sql, withTenant, createTenantCache } from '@cgk-platform/db'
 import type { PortalThemeConfig, PortalThemeConfigRow, SpacingDensity } from './types.js'
 import { mergeWithDefaults } from './defaults.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Cache TTL for theme config (5 minutes)
@@ -108,7 +109,7 @@ export async function loadThemeFromDatabase(tenantSlug: string): Promise<PortalT
     return mergeWithDefaults({ tenantId: tenantSlug })
   } catch (error) {
     // Log error but return defaults to prevent blocking
-    console.error(`Failed to load theme for tenant ${tenantSlug}:`, error)
+    logger.error(`Failed to load theme for tenant ${tenantSlug}:`, error)
     return mergeWithDefaults({ tenantId: tenantSlug })
   }
 }
@@ -173,7 +174,7 @@ export async function loadThemeForSSR(tenantSlug: string): Promise<PortalThemeCo
     await cache.set(cacheKey, defaultConfig, { ttl: THEME_CACHE_TTL })
     return defaultConfig
   } catch (error) {
-    console.error(`Failed to load theme for SSR (tenant: ${tenantSlug}):`, error)
+    logger.error(`Failed to load theme for SSR (tenant: ${tenantSlug}):`, error)
     return mergeWithDefaults({ tenantId: tenantSlug })
   }
 }

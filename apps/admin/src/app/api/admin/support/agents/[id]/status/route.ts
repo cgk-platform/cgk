@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { getAgentByUserId, updateAgentStatus } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -55,7 +56,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     await updateAgentStatus(tenantId, id, input.isOnline)
     return NextResponse.json({ success: true, isOnline: input.isOnline })
   } catch (error) {
-    console.error('Error updating agent status:', error)
+    logger.error('Error updating agent status:', error)
     return NextResponse.json(
       { error: 'Failed to update agent status' },
       { status: 500 }

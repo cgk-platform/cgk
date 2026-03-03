@@ -29,6 +29,7 @@ import type {
 } from './types'
 import { defineJob } from '../../define'
 import type { JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // ATTRIBUTION MODEL CALCULATIONS
@@ -223,7 +224,7 @@ export const processAttributionJob = defineJob<ProcessAttributionPayload>({
       }
     }
 
-    console.log(
+    logger.info(
       `[Analytics] Processing attribution for order ${orderId} in tenant ${tenantId}`
     )
 
@@ -333,10 +334,10 @@ export const processAttributionJob = defineJob<ProcessAttributionPayload>({
     })
 
     if (!skipGA4) {
-      console.log(`[Analytics] Queuing GA4 purchase event for order ${orderId}`)
+      logger.info(`[Analytics] Queuing GA4 purchase event for order ${orderId}`)
     }
     if (!skipMeta) {
-      console.log(`[Analytics] Queuing Meta CAPI event for order ${orderId}`)
+      logger.info(`[Analytics] Queuing Meta CAPI event for order ${orderId}`)
     }
 
     return {
@@ -373,7 +374,7 @@ export const attributionDailyMetricsJob = defineJob<AttributionDailyMetricsPaylo
       date ||
       new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-    console.log(
+    logger.info(
       `[Analytics] Aggregating daily metrics for ${targetDate} in tenant ${tenantId}`
     )
 
@@ -467,7 +468,7 @@ export const attributionExportSchedulerJob = defineJob<AttributionExportSchedule
       }
     }
 
-    console.log(
+    logger.info(
       `[Analytics] Processing export scheduler for tenant ${tenantId}`
     )
 
@@ -509,7 +510,7 @@ export const attributionFairingBridgeJob = defineJob<AttributionFairingBridgePay
 
     const lookbackDays = sinceDays || 1
 
-    console.log(
+    logger.info(
       `[Analytics] Syncing Fairing surveys for tenant ${tenantId} (last ${lookbackDays} days)`
     )
 
@@ -551,7 +552,7 @@ export const attributionOrderReconciliationJob = defineJob<AttributionOrderRecon
 
     const limit = batchSize || 100
 
-    console.log(
+    logger.info(
       `[Analytics] Running order reconciliation for tenant ${tenantId}`
     )
 
@@ -598,7 +599,7 @@ export const attributionOrderReconciliationManualJob = defineJob<AttributionOrde
       }
     }
 
-    console.log(
+    logger.info(
       `[Analytics] Manual reconciliation for order ${orderId} in tenant ${tenantId}`
     )
 
@@ -635,7 +636,7 @@ export const attributionRecalculateRecentJob = defineJob<AttributionRecalculateR
 
     const lookbackDays = days || 3
 
-    console.log(
+    logger.info(
       `[Analytics] Recalculating last ${lookbackDays} days for tenant ${tenantId}`
     )
 
@@ -679,7 +680,7 @@ export const syncTikTokSpendDailyJob = defineJob<SyncTikTokSpendPayload>({
       date ||
       new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-    console.log(
+    logger.info(
       `[Analytics] Syncing TikTok spend for ${targetDate} in tenant ${tenantId}`
     )
 
@@ -721,7 +722,7 @@ export const attributionVTASyncJob = defineJob<AttributionVTASyncPayload>({
 
     const days = lookbackDays || 7
 
-    console.log(
+    logger.info(
       `[Analytics] Syncing VTA data for tenant ${tenantId} (platform: ${platform || 'all'})`
     )
 
@@ -764,7 +765,7 @@ export const attributionProcessUnattributedJob = defineJob<AttributionProcessUna
     const limit = batchSize || 50
     const maxAge = maxAgeHours || 72
 
-    console.log(
+    logger.info(
       `[Analytics] Processing unattributed orders for tenant ${tenantId} (batch: ${limit})`
     )
 
@@ -807,7 +808,7 @@ export const attributionWebhookQueueJob = defineJob<AttributionWebhookQueuePaylo
 
     const limit = batchSize || 100
 
-    console.log(
+    logger.info(
       `[Analytics] Processing webhook queue for tenant ${tenantId} (type: ${queueType || 'all'})`
     )
 

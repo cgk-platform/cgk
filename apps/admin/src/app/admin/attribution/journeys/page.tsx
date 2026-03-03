@@ -13,6 +13,7 @@ import type {
   PathAnalysis,
 } from '@/lib/attribution'
 import { ATTRIBUTION_MODELS, ATTRIBUTION_WINDOWS } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // Journey List Component
@@ -426,7 +427,7 @@ export default function JourneysPage() {
       setJourneys(data.journeys ?? [])
       setTotal(data.total ?? 0)
     } catch (error) {
-      console.error('Failed to fetch journeys:', error)
+      logger.error('Failed to fetch journeys:', error)
     } finally {
       setIsLoading(false)
     }
@@ -439,7 +440,7 @@ export default function JourneysPage() {
       const data = await response.json()
       setPathAnalysis(data.pathAnalysis ?? null)
     } catch (error) {
-      console.error('Failed to fetch path analysis:', error)
+      logger.error('Failed to fetch path analysis:', error)
     } finally {
       setIsPathLoading(false)
     }

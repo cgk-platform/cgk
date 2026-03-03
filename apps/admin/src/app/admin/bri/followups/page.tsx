@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button, Card, CardContent, CardHeader, Input, Switch, Textarea } from '@cgk-platform/ui'
 import { CalendarClock, Save, Bell, AlertTriangle, Clock } from 'lucide-react'
+import { logger } from '@cgk-platform/logging'
 
 interface FollowupSettings {
   enableDeliveryReminders: boolean
@@ -53,7 +54,7 @@ export default function FollowupsPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch:', error)
+      logger.error('Failed to fetch:', error)
     } finally {
       setLoading(false)
     }
@@ -68,7 +69,7 @@ export default function FollowupsPage() {
         body: JSON.stringify(settings),
       })
     } catch (error) {
-      console.error('Failed to save:', error)
+      logger.error('Failed to save:', error)
     } finally {
       setSaving(false)
     }

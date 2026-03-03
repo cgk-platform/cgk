@@ -12,6 +12,7 @@ import {
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   let body: { email?: string; token?: string; name?: string }
@@ -99,7 +100,7 @@ export async function POST(request: Request) {
 
     return response
   } catch (error) {
-    console.error('Error accepting invitation:', error)
+    logger.error('Error accepting invitation:', error)
     const message = error instanceof Error ? error.message : 'Failed to accept invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -138,7 +139,7 @@ async function notifyInviterOfAcceptance(
 
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) {
-    console.log(`[DEV] Notification: ${acceptedName} accepted invitation to ${tenant_name}`)
+    logger.info(`[DEV] Notification: ${acceptedName} accepted invitation to ${tenant_name}`)
     return
   }
 

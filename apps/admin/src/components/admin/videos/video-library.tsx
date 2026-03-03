@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button, cn, Input } from '@cgk-platform/ui'
 import {
   Clock,
@@ -205,10 +206,12 @@ function VideoCard({ video, onClick }: VideoCardProps) {
       {/* Thumbnail */}
       <div className="relative aspect-video bg-muted">
         {thumbnailUrl ? (
-          <img
+          <Image
             src={thumbnailUrl}
             alt={video.title}
-            className="h-full w-full object-cover"
+            fill
+            className="object-cover"
+            unoptimized
           />
         ) : (
           <div className="flex h-full items-center justify-center">
@@ -271,10 +274,13 @@ function VideoRow({ video, onClick }: VideoRowProps) {
       {/* Thumbnail */}
       <div className="relative h-16 w-28 shrink-0 overflow-hidden rounded bg-muted">
         {thumbnailUrl ? (
-          <img
+          <Image
             src={thumbnailUrl}
             alt={video.title}
-            className="h-full w-full object-cover"
+            width={112}
+            height={64}
+            className="object-cover"
+            unoptimized
           />
         ) : (
           <div className="flex h-full items-center justify-center">

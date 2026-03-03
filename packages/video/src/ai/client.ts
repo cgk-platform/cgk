@@ -8,6 +8,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk'
+import { logger } from '@cgk-platform/logging'
 
 let client: Anthropic | null = null
 
@@ -52,7 +53,7 @@ export async function generateCompletion(
     model = 'claude-3-haiku-20240307', // Use Haiku for fast, cheap generations
   } = options || {}
 
-  console.log('[Claude AI] Generating completion...', {
+  logger.info('[Claude AI] Generating completion...', {
     model,
     maxTokens,
     temperature,
@@ -70,7 +71,7 @@ export async function generateCompletion(
   })
 
   const duration = Date.now() - startTime
-  console.log('[Claude AI] Completion received', {
+  logger.info('[Claude AI] Completion received', {
     model,
     duration: `${duration}ms`,
     inputTokens: response.usage?.input_tokens,

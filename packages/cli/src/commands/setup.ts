@@ -2,6 +2,7 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import inquirer from 'inquirer'
 import ora from 'ora'
+import { logger } from '@cgk-platform/logging'
 
 interface SetupStep {
   name: string
@@ -15,8 +16,8 @@ export const setupCommand = new Command('setup')
   .option('--cache', 'Setup cache only')
   .option('--skip-verification', 'Skip verification steps')
   .action(async (options) => {
-    console.log(chalk.cyan('\n🛠️  CGK Platform Setup Wizard\n'))
-    console.log(
+    logger.info(chalk.cyan('\n🛠️  CGK Platform Setup Wizard\n'))
+    logger.info(
       chalk.dim('This wizard will help you configure your CGK platform.\n')
     )
 
@@ -62,24 +63,24 @@ export const setupCommand = new Command('setup')
     // Run steps
     for (let i = 0; i < steps.length; i++) {
       const step = steps[i]!
-      console.log(
+      logger.info(
         chalk.bold(`\nStep ${i + 1}/${steps.length}: ${step.name}`)
       )
-      console.log(chalk.dim(step.description))
+      logger.info(chalk.dim(step.description))
 
       const success = await step.action()
 
       if (!success) {
-        console.log(chalk.red(`\n❌ Setup failed at step: ${step.name}`))
-        console.log(chalk.dim('Please fix the issue and run setup again.'))
+        logger.info(chalk.red(`\n❌ Setup failed at step: ${step.name}`))
+        logger.info(chalk.dim('Please fix the issue and run setup again.'))
         process.exit(1)
       }
     }
 
-    console.log(chalk.green('\n✅ Platform setup complete!\n'))
-    console.log('Next steps:')
-    console.log(chalk.cyan('  pnpm dev'))
-    console.log('')
+    logger.info(chalk.green('\n✅ Platform setup complete!\n'))
+    logger.info('Next steps:')
+    logger.info(chalk.cyan('  pnpm dev'))
+    logger.info('')
   })
 
 /**
@@ -91,36 +92,36 @@ export const setupDatabaseCommand = new Command('setup:database')
   .option('--dry-run', 'Show what would be run without executing')
   .option('--skip-migrations', 'Skip running migrations')
   .action(async (options) => {
-    console.log(chalk.cyan('\n🗄️  Database Setup\n'))
+    logger.info(chalk.cyan('\n🗄️  Database Setup\n'))
 
     const spinner = ora()
 
     // Step 1: Check POSTGRES_URL (Vercel/Neon standard) or DATABASE_URL (fallback)
-    console.log(chalk.bold('Step 1: Checking environment'))
+    logger.info(chalk.bold('Step 1: Checking environment'))
 
     const dbUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
     if (!dbUrl) {
-      console.log(chalk.red('  ✗ POSTGRES_URL not set'))
-      console.log('')
-      console.log(chalk.dim('  To set up your database:'))
-      console.log(chalk.dim('  1. Add Neon integration in Vercel dashboard, OR'))
-      console.log(chalk.dim('  2. Create a database at https://neon.tech'))
-      console.log(chalk.dim('  3. Run: vercel env pull .env.local'))
-      console.log(chalk.dim('  4. Or add to .env.local manually:'))
-      console.log(chalk.cyan('     POSTGRES_URL=postgresql://...'))
-      console.log('')
+      logger.info(chalk.red('  ✗ POSTGRES_URL not set'))
+      logger.info('')
+      logger.info(chalk.dim('  To set up your database:'))
+      logger.info(chalk.dim('  1. Add Neon integration in Vercel dashboard, OR'))
+      logger.info(chalk.dim('  2. Create a database at https://neon.tech'))
+      logger.info(chalk.dim('  3. Run: vercel env pull .env.local'))
+      logger.info(chalk.dim('  4. Or add to .env.local manually:'))
+      logger.info(chalk.cyan('     POSTGRES_URL=postgresql://...'))
+      logger.info('')
       process.exit(1)
     }
 
     const envVarName = process.env.POSTGRES_URL ? 'POSTGRES_URL' : 'DATABASE_URL'
-    console.log(chalk.green(`  ✓ ${envVarName} is set`))
+    logger.info(chalk.green(`  ✓ ${envVarName} is set`))
 
     // Mask the connection string for display
     const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':***@')
-    console.log(chalk.dim(`    ${maskedUrl}`))
+    logger.info(chalk.dim(`    ${maskedUrl}`))
 
     // Step 2: Test connection
-    console.log(chalk.bold('\nStep 2: Testing connection'))
+    logger.info(chalk.bold('\nStep 2: Testing connection'))
     spinner.start('Connecting to database...')
 
     try {
@@ -130,28 +131,28 @@ export const setupDatabaseCommand = new Command('setup:database')
     } catch (error) {
       spinner.fail('Database connection failed')
       if (error instanceof Error) {
-        console.log(chalk.red(`  ${error.message}`))
+        logger.info(chalk.red(`  ${error.message}`))
       }
-      console.log('')
-      console.log(chalk.dim('  Common issues:'))
-      console.log(chalk.dim('  - Check that the connection string is correct'))
-      console.log(chalk.dim('  - Verify the database exists'))
-      console.log(chalk.dim('  - Check firewall/network settings'))
-      console.log('')
+      logger.info('')
+      logger.info(chalk.dim('  Common issues:'))
+      logger.info(chalk.dim('  - Check that the connection string is correct'))
+      logger.info(chalk.dim('  - Verify the database exists'))
+      logger.info(chalk.dim('  - Check firewall/network settings'))
+      logger.info('')
       process.exit(1)
     }
 
     if (options.skipMigrations) {
-      console.log(chalk.yellow('\n⚠ Skipping migrations (--skip-migrations flag)'))
-      console.log(chalk.green('\n✅ Database connection verified!\n'))
+      logger.info(chalk.yellow('\n⚠ Skipping migrations (--skip-migrations flag)'))
+      logger.info(chalk.green('\n✅ Database connection verified!\n'))
       return
     }
 
     // Step 3: Run public migrations
-    console.log(chalk.bold('\nStep 3: Running migrations'))
+    logger.info(chalk.bold('\nStep 3: Running migrations'))
 
     if (options.dryRun) {
-      console.log(chalk.yellow('  DRY RUN - Showing pending migrations\n'))
+      logger.info(chalk.yellow('  DRY RUN - Showing pending migrations\n'))
     }
 
     try {
@@ -170,30 +171,30 @@ export const setupDatabaseCommand = new Command('setup:database')
       })
 
       if (results.length === 0) {
-        console.log(chalk.dim('  No pending migrations'))
+        logger.info(chalk.dim('  No pending migrations'))
       } else {
         const failed = results.filter((r) => !r.success)
         if (failed.length > 0) {
-          console.log(chalk.red(`\n❌ ${failed.length} migration(s) failed`))
+          logger.info(chalk.red(`\n❌ ${failed.length} migration(s) failed`))
           for (const f of failed) {
-            console.log(chalk.red(`  ${f.migration.name}: ${f.error}`))
+            logger.info(chalk.red(`  ${f.migration.name}: ${f.error}`))
           }
           process.exit(1)
         }
 
         const verb = options.dryRun ? 'would apply' : 'applied'
-        console.log(chalk.green(`\n  ${results.length} migration(s) ${verb}`))
+        logger.info(chalk.green(`\n  ${results.length} migration(s) ${verb}`))
       }
     } catch (error) {
       spinner.fail('Migration failed')
       if (error instanceof Error) {
-        console.log(chalk.red(`  ${error.message}`))
+        logger.info(chalk.red(`  ${error.message}`))
       }
       process.exit(1)
     }
 
     // Step 4: Verify
-    console.log(chalk.bold('\nStep 4: Verifying setup'))
+    logger.info(chalk.bold('\nStep 4: Verifying setup'))
     spinner.start('Checking tables...')
 
     try {
@@ -219,18 +220,18 @@ export const setupDatabaseCommand = new Command('setup:database')
       const missing = required.filter((t) => !tables.includes(t))
 
       if (missing.length > 0) {
-        console.log(chalk.yellow(`  ⚠ Missing tables: ${missing.join(', ')}`))
+        logger.info(chalk.yellow(`  ⚠ Missing tables: ${missing.join(', ')}`))
       } else {
-        console.log(chalk.green('  ✓ All required tables present'))
+        logger.info(chalk.green('  ✓ All required tables present'))
       }
     } catch {
       spinner.fail('Verification failed')
     }
 
-    console.log(chalk.green('\n✅ Database setup complete!\n'))
-    console.log('Next steps:')
-    console.log(chalk.cyan('  npx @cgk-platform/cli tenant:create <slug> --name "Brand Name"'))
-    console.log('')
+    logger.info(chalk.green('\n✅ Database setup complete!\n'))
+    logger.info('Next steps:')
+    logger.info(chalk.cyan('  npx @cgk-platform/cli tenant:create <slug> --name "Brand Name"'))
+    logger.info('')
   })
 
 async function setupDatabase(): Promise<boolean> {
@@ -241,10 +242,10 @@ async function setupDatabase(): Promise<boolean> {
   const existingUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
   if (existingUrl) {
     const envVarName = process.env.POSTGRES_URL ? 'POSTGRES_URL' : 'DATABASE_URL'
-    console.log(chalk.green(`  ${envVarName} already set`))
+    logger.info(chalk.green(`  ${envVarName} already set`))
 
     if (!existingUrl.includes('neon') && !existingUrl.includes('postgres')) {
-      console.log(
+      logger.info(
         chalk.yellow('  ⚠ Warning: Expected Neon PostgreSQL URL')
       )
     }
@@ -277,17 +278,17 @@ async function setupDatabase(): Promise<boolean> {
   ])
 
   if (connectionType === 'skip') {
-    console.log(chalk.yellow('  Skipping database setup'))
+    logger.info(chalk.yellow('  Skipping database setup'))
     return true
   }
 
   if (connectionType === 'vercel') {
-    console.log(chalk.cyan('\n  To use Vercel Integration:'))
-    console.log('  1. Go to your Vercel project settings')
-    console.log('  2. Navigate to Storage → Create Database → Neon Postgres')
-    console.log('  3. Connect to your project')
-    console.log('  4. Run: vercel env pull .env.local')
-    console.log('  5. Re-run this setup')
+    logger.info(chalk.cyan('\n  To use Vercel Integration:'))
+    logger.info('  1. Go to your Vercel project settings')
+    logger.info('  2. Navigate to Storage → Create Database → Neon Postgres')
+    logger.info('  3. Connect to your project')
+    logger.info('  4. Run: vercel env pull .env.local')
+    logger.info('  5. Re-run this setup')
     return true
   }
 
@@ -317,7 +318,7 @@ async function setupDatabase(): Promise<boolean> {
   envContent += `\nPOSTGRES_URL=${url}\n`
   await fs.writeFile(envPath, envContent)
 
-  console.log(chalk.green('  POSTGRES_URL saved to .env.local'))
+  logger.info(chalk.green('  POSTGRES_URL saved to .env.local'))
   return true
 }
 
@@ -325,7 +326,7 @@ async function setupCache(): Promise<boolean> {
   // Similar to setupDatabase but for Redis/Upstash
   // Check for Redis - Vercel uses KV_REST_API_*, direct Upstash uses UPSTASH_*
   if (process.env.KV_REST_API_URL || process.env.REDIS_URL || process.env.UPSTASH_REDIS_REST_URL) {
-    console.log(chalk.green('  Redis/Upstash already configured'))
+    logger.info(chalk.green('  Redis/Upstash already configured'))
     return true
   }
 
@@ -339,7 +340,7 @@ async function setupCache(): Promise<boolean> {
   ])
 
   if (skip) {
-    console.log(chalk.yellow('  Skipping cache setup (will use in-memory)'))
+    logger.info(chalk.yellow('  Skipping cache setup (will use in-memory)'))
   }
 
   return true
@@ -369,7 +370,7 @@ async function runMigrations(): Promise<boolean> {
   } catch (error) {
     spinner.fail('Migration failed')
     if (error instanceof Error) {
-      console.log(chalk.red(`  ${error.message}`))
+      logger.info(chalk.red(`  ${error.message}`))
     }
     return false
   }
@@ -386,7 +387,7 @@ async function createAdminUser(): Promise<boolean> {
   ])
 
   if (!createAdmin) {
-    console.log(chalk.yellow('  Skipping admin user creation'))
+    logger.info(chalk.yellow('  Skipping admin user creation'))
     return true
   }
 
@@ -438,7 +439,7 @@ async function createAdminUser(): Promise<boolean> {
   } catch (error) {
     spinner.fail('Failed to create admin user')
     if (error instanceof Error) {
-      console.log(chalk.red(`  ${error.message}`))
+      logger.info(chalk.red(`  ${error.message}`))
     }
     return false
   }
@@ -483,7 +484,7 @@ async function configurePlatform(): Promise<boolean> {
   } catch (error) {
     spinner.fail('Failed to save platform configuration')
     if (error instanceof Error) {
-      console.log(chalk.red(`  ${error.message}`))
+      logger.info(chalk.red(`  ${error.message}`))
     }
     return false
   }

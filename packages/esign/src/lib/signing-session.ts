@@ -22,6 +22,7 @@ import { getDocumentSigners } from './signers.js'
 import { finalizeSignedDocument } from './storage.js'
 import { getTemplate } from './templates.js'
 import { ERROR_MESSAGES } from '../constants.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // SIGNING SESSION
@@ -319,7 +320,7 @@ export async function completeSignerSigning(
         signers: allSigners,
       })
     } catch (finalizationError) {
-      console.error('[esign] PDF finalization failed, using original:', finalizationError)
+      logger.error('[esign] PDF finalization failed, using original', finalizationError instanceof Error ? finalizationError : new Error(String(finalizationError)))
     }
 
     await markDocumentCompleted(tenantSlug, document.id, signedFileUrl)

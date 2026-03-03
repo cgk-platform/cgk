@@ -5,6 +5,7 @@ import { Bell, ChevronUp, Clock } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { AlertPriority, PlatformAlert } from '../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 interface AlertFeedProps {
   /** Initial alerts to display */
@@ -100,7 +101,7 @@ export function AlertFeed({
           })
         }
       } catch (err) {
-        console.error('Failed to parse WebSocket message:', err)
+        logger.error('Failed to parse WebSocket message:', err)
       }
     },
     [maxAlerts, isScrolledDown]
@@ -142,7 +143,7 @@ export function AlertFeed({
 
       wsRef.current = ws
     } catch {
-      console.error('Failed to create WebSocket connection')
+      logger.error('Failed to create WebSocket connection')
     }
   }, [wsUrl, handleMessage])
 

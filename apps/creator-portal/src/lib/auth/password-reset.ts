@@ -10,6 +10,7 @@ import { createHash, randomBytes } from 'crypto'
 import { sql } from '@cgk-platform/db'
 
 import type { PasswordResetToken } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 const TOKEN_LENGTH = 32
 const TOKEN_EXPIRATION_HOURS = 1
@@ -184,9 +185,9 @@ export async function sendPasswordResetEmail(
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) {
     // Development mode: log the link
-    console.log(`[DEV] Password reset link for ${email}:`)
-    console.log(`[DEV] ${resetUrl}`)
-    console.log(`[DEV] Token: ${token}`)
+    logger.info(`[DEV] Password reset link for ${email}:`)
+    logger.info(`[DEV] ${resetUrl}`)
+    logger.info(`[DEV] Token: ${token}`)
     return
   }
 
@@ -207,7 +208,7 @@ export async function sendPasswordResetEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    console.error('Failed to send password reset email:', error)
+    logger.error('Failed to send password reset email:', error)
     throw new Error('Failed to send password reset email')
   }
 }

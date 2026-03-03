@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 
 import { updatePipelineTrigger, deletePipelineTrigger } from '@/lib/pipeline/db'
 import type { PipelineTrigger } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,7 +37,7 @@ export async function PATCH(
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Pipeline trigger update error:', error)
+    logger.error('Pipeline trigger update error:', error)
     return Response.json(
       { error: 'Failed to update pipeline trigger' },
       { status: 500 }
@@ -66,7 +67,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Pipeline trigger delete error:', error)
+    logger.error('Pipeline trigger delete error:', error)
     return Response.json(
       { error: 'Failed to delete pipeline trigger' },
       { status: 500 }

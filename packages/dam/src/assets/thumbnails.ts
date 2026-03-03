@@ -4,6 +4,7 @@
  */
 
 import type { AssetType } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 export interface ThumbnailOptions {
   width?: number
@@ -36,7 +37,7 @@ export async function generateImageThumbnail(
   const sharp = await import('sharp').catch(() => null)
 
   if (!sharp) {
-    console.warn('Sharp not available, skipping thumbnail generation')
+    logger.warn('Sharp not available, skipping thumbnail generation')
     return null
   }
 
@@ -51,8 +52,7 @@ export async function generateImageThumbnail(
       withoutEnlargement: true,
     })
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let output: any
+    let output: ReturnType<typeof resized.webp>
     let contentType: string
 
     switch (opts.format) {
@@ -81,7 +81,7 @@ export async function generateImageThumbnail(
       height: outputMetadata.height || opts.height,
     }
   } catch (error) {
-    console.error('Failed to generate image thumbnail:', error)
+    logger.error('Failed to generate image thumbnail:', error)
     return null
   }
 }
@@ -130,7 +130,7 @@ export async function generateVideoPlaceholder(
       height: opts.height,
     }
   } catch (error) {
-    console.error('Failed to generate video placeholder:', error)
+    logger.error('Failed to generate video placeholder:', error)
     return null
   }
 }
@@ -182,7 +182,7 @@ export async function generateAudioPlaceholder(
       height: opts.height,
     }
   } catch (error) {
-    console.error('Failed to generate audio placeholder:', error)
+    logger.error('Failed to generate audio placeholder:', error)
     return null
   }
 }
@@ -246,7 +246,7 @@ export async function generateDocumentPlaceholder(
       height: opts.height,
     }
   } catch (error) {
-    console.error('Failed to generate document placeholder:', error)
+    logger.error('Failed to generate document placeholder:', error)
     return null
   }
 }

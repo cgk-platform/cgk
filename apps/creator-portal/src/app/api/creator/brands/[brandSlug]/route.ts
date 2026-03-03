@@ -8,6 +8,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { BrandDetail, BrandProject } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -201,7 +202,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
 
     return Response.json({ brand: brandDetail })
   } catch (error) {
-    console.error('Error fetching brand detail:', error)
+    logger.error('Error fetching brand detail:', error)
     return Response.json({ error: 'Failed to fetch brand details' }, { status: 500 })
   }
 }

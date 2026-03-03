@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/shopify-app/sync-products
@@ -48,7 +49,7 @@ export async function POST() {
       message: 'Product sync triggered. This may take a few minutes.',
     })
   } catch (error) {
-    console.error('[shopify-sync] Error:', error)
+    logger.error('[shopify-sync] Error:', error)
 
     return NextResponse.json(
       {

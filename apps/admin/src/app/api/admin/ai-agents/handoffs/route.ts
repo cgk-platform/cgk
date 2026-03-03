@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/ai-agents/handoffs
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ handoffs, stats })
   } catch (error) {
-    console.error('Error fetching handoffs:', error)
+    logger.error('Error fetching handoffs:', error)
     return NextResponse.json({ error: 'Failed to fetch handoffs' }, { status: 500 })
   }
 }

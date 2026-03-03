@@ -11,6 +11,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { Migration, SchemaType } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -49,7 +50,7 @@ async function loadFromDirectory(dir: string): Promise<Migration[]> {
   for (const filename of files) {
     const parsed = parseFilename(filename)
     if (!parsed) {
-      console.warn(`Skipping invalid migration filename: ${filename}`)
+      logger.warn(`Skipping invalid migration filename: ${filename}`)
       continue
     }
 
@@ -80,7 +81,7 @@ async function loadFromDirectory(dir: string): Promise<Migration[]> {
 
   for (const [version, names] of versions) {
     if (names.length > 1) {
-      console.warn(
+      logger.warn(
         `Warning: Duplicate migration version ${String(version).padStart(3, '0')}: ${names.join(', ')}`
       )
     }

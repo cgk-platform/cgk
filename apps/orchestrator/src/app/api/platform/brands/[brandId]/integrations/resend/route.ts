@@ -6,6 +6,7 @@ import {
   verifyTenantResendCredentials,
 } from '@cgk-platform/integrations'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,7 +78,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('Get Resend config error:', error)
+    logger.error('Get Resend config error:', error)
     return NextResponse.json({ error: 'Failed to get Resend configuration' }, { status: 500 })
   }
 }
@@ -141,7 +142,7 @@ export async function POST(
       verification,
     })
   } catch (error) {
-    console.error('Save Resend config error:', error)
+    logger.error('Save Resend config error:', error)
     return NextResponse.json({ error: 'Failed to save Resend configuration' }, { status: 500 })
   }
 }
@@ -176,7 +177,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Delete Resend config error:', error)
+    logger.error('Delete Resend config error:', error)
     return NextResponse.json({ error: 'Failed to delete Resend configuration' }, { status: 500 })
   }
 }

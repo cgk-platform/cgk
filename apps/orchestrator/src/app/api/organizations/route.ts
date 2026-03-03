@@ -1,6 +1,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { sql } from '@vercel/postgres'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,16 +45,17 @@ export async function GET(request: Request) {
       FROM public.organizations
       WHERE status IN ('active', 'onboarding', 'suspended')
     `
-    const total = parseInt(countResult.rows[0]?.count || '0')
+    const countRow = countResult.rows[0]
+    const total = countRow ? parseInt((countRow.count as unknown as string) || '0') : 0
 
     return NextResponse.json({
       organizations: result.rows.map((row) => ({
-        id: row.id as string,
-        name: row.name as string,
-        slug: row.slug as string,
-        status: row.status as string,
-        shopifyStoreDomain: row.shopify_store_domain as string | null,
-        createdAt: row.created_at as string,
+        id: row.id as unknown as string,
+        name: row.name as unknown as string,
+        slug: row.slug as unknown as string,
+        status: row.status as unknown as string,
+        shopifyStoreDomain: (row.shopify_store_domain as unknown as string) || null,
+        createdAt: row.created_at as unknown as string,
       })),
       total,
       page,
@@ -61,7 +63,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    console.error('Failed to fetch organizations:', error)
+    logger.error('Failed to fetch organizations:', error)
     return NextResponse.json({ error: 'Failed to fetch organizations' }, { status: 500 })
   }
 }

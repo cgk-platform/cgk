@@ -56,9 +56,12 @@ describe('/api/sso/verify', () => {
       mockGetUserById.mockResolvedValueOnce({
         id: 'user_123',
         email: 'test@example.com',
+        name: 'Test User',
         role: 'owner',
-        firstName: 'Test',
-        lastName: 'User',
+        status: 'active',
+        emailVerified: true,
+        passwordHash: null,
+        lastLoginAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -226,9 +229,12 @@ describe('/api/sso/verify', () => {
       mockGetUserById.mockResolvedValueOnce({
         id: 'user_123',
         email: 'test@example.com',
+        name: 'Test User',
         role: 'owner',
-        firstName: 'Test',
-        lastName: 'User',
+        status: 'active',
+        emailVerified: true,
+        passwordHash: null,
+        lastLoginAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -278,9 +284,12 @@ describe('/api/sso/verify', () => {
       mockGetUserById.mockResolvedValueOnce({
         id: 'user_123',
         email: 'test@example.com',
+        name: 'Test User',
         role: 'owner',
-        firstName: 'Test',
-        lastName: 'User',
+        status: 'active',
+        emailVerified: true,
+        passwordHash: null,
+        lastLoginAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -329,9 +338,12 @@ describe('/api/sso/verify', () => {
       mockGetUserById.mockResolvedValueOnce({
         id: 'user_super',
         email: 'super@example.com',
+        name: 'Super Admin',
         role: 'super_admin',
-        firstName: 'Super',
-        lastName: 'Admin',
+        status: 'active',
+        emailVerified: true,
+        passwordHash: null,
+        lastLoginAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -393,9 +405,12 @@ describe('/api/sso/verify', () => {
       mockGetUserById.mockResolvedValueOnce({
         id: 'user_123',
         email: 'test@example.com',
+        name: 'Test User',
         role: 'admin',
-        firstName: 'Test',
-        lastName: 'User',
+        status: 'active',
+        emailVerified: true,
+        passwordHash: null,
+        lastLoginAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -472,9 +487,12 @@ describe('/api/sso/verify', () => {
       mockGetUserById.mockResolvedValueOnce({
         id: 'user_123',
         email: 'test@example.com',
+        name: 'Test User',
         role: 'owner',
-        firstName: 'Test',
-        lastName: 'User',
+        status: 'active',
+        emailVerified: true,
+        passwordHash: null,
+        lastLoginAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })
@@ -528,9 +546,12 @@ describe('/api/sso/verify', () => {
       mockGetUserById.mockResolvedValueOnce({
         id: 'user_123',
         email: 'test@example.com',
+        name: 'Test User',
         role: 'owner',
-        firstName: 'Test',
-        lastName: 'User',
+        status: 'active',
+        emailVerified: true,
+        passwordHash: null,
+        lastLoginAt: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       })

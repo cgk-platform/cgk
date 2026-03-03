@@ -23,6 +23,7 @@ import {
   AlertDescription,
 } from '@cgk-platform/ui'
 import { Loader2, Play, Phone, Mic, Volume2, Settings2 } from 'lucide-react'
+import { logger } from '@cgk-platform/logging'
 
 interface VoiceConfig {
   id: string
@@ -135,7 +136,7 @@ export default function VoiceSettingsPage() {
           setVoices(data.voices || [])
         }
       } catch {
-        console.error('Failed to fetch voices')
+        logger.error('Failed to fetch voices')
       }
     }
     if (formData.ttsProvider) {

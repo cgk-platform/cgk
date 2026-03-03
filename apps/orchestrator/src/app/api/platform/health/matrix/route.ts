@@ -1,4 +1,5 @@
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -186,7 +187,7 @@ export async function GET(request: Request) {
       checkedAt: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Get health matrix error:', error)
+    logger.error('Get health matrix error:', error)
     return Response.json({ error: 'Failed to get health matrix' }, { status: 500 })
   }
 }
@@ -246,7 +247,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Update health matrix error:', error)
+    logger.error('Update health matrix error:', error)
     return Response.json({ error: 'Failed to update health' }, { status: 500 })
   }
 }

@@ -40,6 +40,7 @@ import {
   findBundleDiscountFunctionId,
   resolveVariantProducts,
 } from '../lib/bundle-config.server'
+import { logger } from '@cgk-platform/logging'
 
 interface FreeGiftProduct {
   variantId: string
@@ -260,7 +261,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const organizationId = await getOrganizationIdForShop(session.shop)
 
   if (!organizationId) {
-    console.warn(`[BundleSync] Shop ${session.shop} not registered with any tenant — skipping platform sync`)
+    logger.warn(`[BundleSync] Shop ${session.shop} not registered with any tenant — skipping platform sync`)
     return json({ saved: true, bundleTitle: data.title })
   }
 
@@ -272,7 +273,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
   const tenantSlug = orgResult.rows[0]?.slug as string | undefined
 
   if (!tenantSlug) {
-    console.warn(`[BundleSync] Organization ${organizationId} not found — skipping platform sync`)
+    logger.warn(`[BundleSync] Organization ${organizationId} not found — skipping platform sync`)
     return json({ saved: true, bundleTitle: data.title })
   }
 
@@ -324,7 +325,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         }
       }
     } catch (err) {
-      console.error('[BundleSync] Failed to sync to platform:', err)
+      logger.error('[BundleSync] Failed to sync to platform:', err)
     }
   }
 
@@ -419,15 +420,18 @@ export default function BundleEdit() {
       if (!selected || selected.length === 0) return
 
       const newProducts: FreeGiftProduct[] = selected.flatMap(
-        (product: any) => {
-          const variant = product.variants?.[0]
+        (product: unknown) => {
+          const p = product as Record<string, unknown>
+          const variants = p.variants as Array<Record<string, unknown>> | undefined
+          const variant = variants?.[0]
           if (!variant) return []
+          const images = p.images as Array<Record<string, unknown>> | undefined
           return [
             {
-              variantId: variant.id,
-              productTitle: product.title,
-              variantTitle: variant.title ?? 'Default',
-              imageUrl: product.images?.[0]?.originalSrc ?? null,
+              variantId: variant.id as unknown as string,
+              productTitle: p.title as unknown as string,
+              variantTitle: (variant.title as unknown as string) ?? 'Default',
+              imageUrl: (images?.[0]?.originalSrc as unknown as string) ?? null,
             },
           ]
         }

@@ -8,6 +8,7 @@ import {
   getPromoCodeList,
 } from '@/lib/promo-codes/db'
 import type { CreatePromoCodeInput } from '@/lib/promo-codes/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/promo-codes
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    console.error('Error fetching promo codes:', error)
+    logger.error('Error fetching promo codes:', error)
     return NextResponse.json(
       { error: 'Failed to fetch promo codes' },
       { status: 500 },
@@ -77,7 +78,7 @@ export async function POST(request: Request) {
     const promoCode = await createPromoCodeMetadata(tenantSlug, body)
     return NextResponse.json({ promoCode }, { status: 201 })
   } catch (error) {
-    console.error('Error creating promo code:', error)
+    logger.error('Error creating promo code:', error)
     if (error instanceof Error && error.message.includes('unique')) {
       return NextResponse.json(
         { error: 'A promo code with this code already exists' },

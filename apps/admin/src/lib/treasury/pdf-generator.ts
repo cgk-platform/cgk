@@ -5,6 +5,7 @@
  */
 
 import type { DrawRequestWithItems } from './types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * PDF generation options
@@ -155,7 +156,7 @@ export async function generatePdf(
         return { success: true, url: data.url }
       }
     } catch (error) {
-      console.error('PDF API error:', error)
+      logger.error('PDF API error:', error)
     }
   }
 
@@ -527,7 +528,7 @@ export async function uploadPdf(
       })
       return { success: true, url: blob.url }
     } catch (error) {
-      console.error('Blob upload error:', error)
+      logger.error('Blob upload error:', error)
     }
   }
 

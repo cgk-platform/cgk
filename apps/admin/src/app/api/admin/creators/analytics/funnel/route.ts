@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 
 import { getApplicationFunnel } from '@/lib/creators/analytics'
 import type { AnalyticsPeriod } from '@/lib/creators/analytics-types'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_PERIODS = ['7d', '30d', '90d', '12m', 'all'] as const
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     const funnel = await getApplicationFunnel(tenantSlug, period)
     return NextResponse.json(funnel)
   } catch (error) {
-    console.error('Error fetching application funnel:', error)
+    logger.error('Error fetching application funnel:', error)
     return NextResponse.json(
       { error: 'Failed to fetch funnel analytics' },
       { status: 500 }

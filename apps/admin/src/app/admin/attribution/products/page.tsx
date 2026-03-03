@@ -5,6 +5,7 @@ import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 
 import { useAttribution, ModelSelector, TimeRangePicker } from '@/components/attribution'
 import type { ProductAttribution, ProductViewMode } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const platformColors: Record<string, string> = {
   meta: '#3b82f6',
@@ -167,7 +168,7 @@ export default function ProductsPage() {
       const data = await response.json()
       setProducts(data.products || [])
     } catch (error) {
-      console.error('Failed to fetch products:', error)
+      logger.error('Failed to fetch products:', error)
     } finally {
       setIsLoading(false)
     }

@@ -14,6 +14,7 @@ import {
   updateKlaviyoSyncConfig,
 } from '@/lib/segments/db'
 import type { RfmSegmentType } from '@/lib/segments/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -46,7 +47,7 @@ export async function GET() {
 
     return NextResponse.json({ syncConfigs })
   } catch (error) {
-    console.error('Failed to fetch Klaviyo sync configs:', error)
+    logger.error('Failed to fetch Klaviyo sync configs:', error)
     return NextResponse.json({ error: 'Failed to fetch sync configurations' }, { status: 500 })
   }
 }
@@ -174,7 +175,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Failed to sync to Klaviyo:', error)
+    logger.error('Failed to sync to Klaviyo:', error)
     return NextResponse.json({ error: 'Failed to sync to Klaviyo' }, { status: 500 })
   }
 }

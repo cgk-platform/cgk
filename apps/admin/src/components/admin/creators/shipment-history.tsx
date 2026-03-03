@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
 import { ExternalLink, Package, RefreshCw } from 'lucide-react'
 
@@ -166,10 +167,13 @@ export function ShipmentHistory({ creatorId, onSendProduct }: ShipmentHistoryPro
                     <div key={idx} className="flex items-center gap-2 text-sm">
                       <div className="h-6 w-6 shrink-0 overflow-hidden rounded bg-muted">
                         {product.imageUrl ? (
-                          <img
+                          <Image
                             src={product.imageUrl}
                             alt={product.title}
-                            className="h-full w-full object-cover"
+                            width={24}
+                            height={24}
+                            className="object-cover"
+                            unoptimized
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">

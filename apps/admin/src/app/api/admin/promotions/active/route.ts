@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getActivePromotion } from '@/lib/promotions/db'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/promotions/active
@@ -25,7 +26,7 @@ export async function GET() {
       isActive: !!promotion,
     })
   } catch (error) {
-    console.error('Error fetching active promotion:', error)
+    logger.error('Error fetching active promotion:', error)
     return NextResponse.json(
       { error: 'Failed to fetch active promotion' },
       { status: 500 },

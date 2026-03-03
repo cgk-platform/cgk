@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { requireAuth, checkPermissionOrRespond } from '@cgk-platform/auth'
 import { withTenant, sql } from '@cgk-platform/db'
 import { sendJob } from '@cgk-platform/jobs'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_ACTIONS: Record<string, string> = {
   approve: 'approved',
@@ -107,7 +108,7 @@ export async function POST(
       })
     } catch (error) {
       // Log error but don't fail the request
-      console.error('Failed to queue review moderation notification:', error)
+      logger.error('Failed to queue review moderation notification:', error)
     }
   }
 

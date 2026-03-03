@@ -3,6 +3,7 @@
 import { Button, Card, CardContent, CardHeader, cn, StatusDot } from '@cgk-platform/ui'
 import { RefreshCw } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 type HealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown'
 
@@ -49,7 +50,7 @@ export default function HealthPage() {
         setMatrix(data)
       }
     } catch (error) {
-      console.error('Failed to fetch health matrix:', error)
+      logger.error('Failed to fetch health matrix:', error)
     } finally {
       setLoading(false)
     }

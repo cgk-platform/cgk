@@ -17,6 +17,7 @@ import { withTenant, sql } from '@cgk-platform/db'
 import { cookies, headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface PromoCodeMetadata {
   id: string
@@ -205,7 +206,7 @@ async function trackPromoCodeVisit(
     })
   } catch (error) {
     // Don't fail the redirect if tracking fails
-    console.error('Failed to track promo code visit:', error)
+    logger.error('Failed to track promo code visit:', error)
   }
 }
 

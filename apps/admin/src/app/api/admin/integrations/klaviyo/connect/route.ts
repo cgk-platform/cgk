@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { connectKlaviyo } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +30,7 @@ export async function POST(req: Request) {
 
     return Response.json(result)
   } catch (error) {
-    console.error('Failed to connect Klaviyo:', error)
+    logger.error('Failed to connect Klaviyo:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to connect' },
       { status: 500 }

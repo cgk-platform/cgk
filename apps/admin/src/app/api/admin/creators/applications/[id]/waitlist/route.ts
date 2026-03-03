@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { updateApplicationStatus } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(
   request: Request,
@@ -32,7 +33,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error waitlisting application:', error)
+    logger.error('Error waitlisting application:', error)
     return NextResponse.json(
       { error: 'Failed to waitlist application' },
       { status: 500 }

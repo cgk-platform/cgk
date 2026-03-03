@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 
 import { getShipmentById, updateShipmentStatus } from '@/lib/creators/lifecycle-db'
 import type { ShipmentStatus } from '@/lib/creators/lifecycle-types'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_STATUSES: ShipmentStatus[] = ['pending', 'ordered', 'shipped', 'delivered', 'failed']
 const VALID_CARRIERS = ['ups', 'fedex', 'usps', 'dhl']
@@ -34,7 +35,7 @@ export async function GET(
 
     return NextResponse.json({ shipment })
   } catch (error) {
-    console.error('[shipments/[shipmentId]] GET error:', error)
+    logger.error('[shipments/[shipmentId]] GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch shipment' }, { status: 500 })
   }
 }
@@ -97,7 +98,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, shipment })
   } catch (error) {
-    console.error('[shipments/[shipmentId]] PATCH error:', error)
+    logger.error('[shipments/[shipmentId]] PATCH error:', error)
     return NextResponse.json({ error: 'Failed to update shipment' }, { status: 500 })
   }
 }

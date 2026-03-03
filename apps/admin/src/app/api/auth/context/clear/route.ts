@@ -9,6 +9,7 @@ import {
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
 import { logUserActivity } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
       return Response.json({ error: error.message }, { status: 403 })
     }
 
-    console.error('Clear tenant context error:', error)
+    logger.error('Clear tenant context error:', error)
     return Response.json({ error: 'Failed to clear tenant context' }, { status: 500 })
   }
 }

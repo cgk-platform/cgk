@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { withTenant } from '@cgk-platform/db'
 
 import { getArticleById, updateArticle, deleteArticle } from '@/lib/knowledge-base/db'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(
   _request: Request,
@@ -27,7 +28,7 @@ export async function GET(
     }
     return NextResponse.json({ article })
   } catch (err) {
-    console.error('[kb/articles/:id] GET error:', err)
+    logger.error('[kb/articles/:id] GET error:', err)
     return NextResponse.json({ error: 'Failed to load article' }, { status: 500 })
   }
 }
@@ -68,7 +69,7 @@ export async function PATCH(
     }
     return NextResponse.json({ article })
   } catch (err) {
-    console.error('[kb/articles/:id] PATCH error:', err)
+    logger.error('[kb/articles/:id] PATCH error:', err)
     return NextResponse.json({ error: 'Failed to update article' }, { status: 500 })
   }
 }
@@ -90,7 +91,7 @@ export async function DELETE(
     await withTenant(tenantSlug, () => deleteArticle(id))
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error('[kb/articles/:id] DELETE error:', err)
+    logger.error('[kb/articles/:id] DELETE error:', err)
     return NextResponse.json({ error: 'Failed to delete article' }, { status: 500 })
   }
 }

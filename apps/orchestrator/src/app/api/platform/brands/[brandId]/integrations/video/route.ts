@@ -7,6 +7,7 @@ import {
   type TenantApiService,
 } from '@cgk-platform/integrations'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,7 +82,7 @@ export async function GET(
 
     return NextResponse.json({ services })
   } catch (error) {
-    console.error('Get video config error:', error)
+    logger.error('Get video config error:', error)
     return NextResponse.json({ error: 'Failed to get video configuration' }, { status: 500 })
   }
 }
@@ -158,7 +159,7 @@ export async function POST(
       verification,
     })
   } catch (error) {
-    console.error('Save video config error:', error)
+    logger.error('Save video config error:', error)
     return NextResponse.json({ error: 'Failed to save video configuration' }, { status: 500 })
   }
 }
@@ -206,7 +207,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Delete video config error:', error)
+    logger.error('Delete video config error:', error)
     return NextResponse.json({ error: 'Failed to delete video configuration' }, { status: 500 })
   }
 }

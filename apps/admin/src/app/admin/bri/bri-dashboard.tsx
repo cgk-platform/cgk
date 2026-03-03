@@ -28,6 +28,7 @@ import {
 } from 'lucide-react'
 
 import type { BriSettings, BriStats, BriAction, IntegrationStatus } from '@/lib/bri/types'
+import { logger } from '@cgk-platform/logging'
 
 interface BriDashboardProps {
   tenantSlug: string
@@ -95,7 +96,7 @@ export function BriDashboard({
         setSettings(data.settings)
       }
     } catch (error) {
-      console.error('Failed to save settings:', error)
+      logger.error('Failed to save settings:', error)
     } finally {
       setSaving(false)
     }

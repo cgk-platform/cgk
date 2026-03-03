@@ -5,6 +5,8 @@
  */
 
 import { withTenant, sql } from '@cgk-platform/db'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Handle app/uninstalled webhook
@@ -43,5 +45,5 @@ export async function handleAppUninstalled(
 
   // TODO: Trigger dedicated app-disconnect cleanup job once created
 
-  console.log(`[Webhook] App uninstalled for shop ${shopDomain}, tenant ${tenantId}`)
+  logger.info(`[Webhook] App uninstalled for shop ${shopDomain}, tenant ${tenantId}`)
 }

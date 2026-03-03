@@ -13,6 +13,7 @@ import type {
   STTProviderType,
   Transcription,
 } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Create an STT provider instance based on type
@@ -52,7 +53,7 @@ export async function transcribeWithFallback(
     return await primaryProvider.transcribeFile(audioUrl, options)
   } catch (error) {
     if (fallbackProvider) {
-      console.warn(`Primary STT provider ${primaryProvider.name} failed, using fallback:`, error)
+      logger.warn(`Primary STT provider ${primaryProvider.name} failed, using fallback:`, error)
       return await fallbackProvider.transcribeFile(audioUrl, options)
     }
     throw error

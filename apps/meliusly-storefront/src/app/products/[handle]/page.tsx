@@ -14,6 +14,7 @@ import ExtendedReviews from '@/components/pdp/ExtendedReviews'
 import RelatedProducts from '@/components/pdp/RelatedProducts'
 import { TraitsBar } from '@/components/sections/TraitsBar'
 import { ProductSelectorGuide, ProductSelectorTabs } from '@/components/products'
+import { logger } from '@cgk-platform/logging'
 
 interface Product {
   id: string
@@ -98,20 +99,20 @@ async function fetchProduct(handle: string): Promise<Product | null> {
     })
 
     if (!res.ok) {
-      console.error('Failed to fetch product:', await res.text())
+      logger.error('Failed to fetch product:', await res.text())
       return null
     }
 
     const json = (await res.json()) as ProductResponse
 
     if (!json.success || !json.data) {
-      console.error('Invalid product response:', json)
+      logger.error('Invalid product response:', json)
       return null
     }
 
     return json.data
   } catch (error) {
-    console.error('Error fetching product:', error)
+    logger.error('Error fetching product:', error)
     return null
   }
 }
@@ -132,20 +133,20 @@ async function fetchRelatedProducts(): Promise<Product[]> {
     })
 
     if (!res.ok) {
-      console.error('Failed to fetch products:', await res.text())
+      logger.error('Failed to fetch products:', await res.text())
       return []
     }
 
     const json = (await res.json()) as ProductsResponse
 
     if (!json.success || !json.data) {
-      console.error('Invalid products response:', json)
+      logger.error('Invalid products response:', json)
       return []
     }
 
     return json.data
   } catch (error) {
-    console.error('Error fetching products:', error)
+    logger.error('Error fetching products:', error)
     return []
   }
 }

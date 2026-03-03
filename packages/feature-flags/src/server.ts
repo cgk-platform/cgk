@@ -18,6 +18,7 @@ import type {
   EvaluationResult,
   FeatureFlag,
 } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Server-side flag service configuration
@@ -37,7 +38,7 @@ export interface FlagServiceConfig {
 export function initFlagService(_config: FlagServiceConfig = {}): void {
   // Pre-warm the cache
   getAllFlags().catch((err) => {
-    console.warn('[feature-flags] Failed to pre-warm cache:', err)
+    logger.warn('[feature-flags] Failed to pre-warm cache:', err)
   })
 }
 

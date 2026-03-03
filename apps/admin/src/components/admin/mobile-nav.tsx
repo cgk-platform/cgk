@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import { X, ChevronDown, Settings, LogOut } from 'lucide-react'
 import Link from 'next/link'
@@ -64,10 +65,13 @@ export function MobileNav({ open, onClose, tenant, user }: MobileNavProps) {
         <div className="flex items-center justify-between border-b border-border/50 px-5 py-5">
           <div className="flex items-center gap-3">
             {tenant.logo ? (
-              <img
+              <Image
                 src={tenant.logo}
                 alt={tenant.name}
-                className="h-9 w-9 rounded-lg object-cover ring-1 ring-border/50"
+                width={36}
+                height={36}
+                className="rounded-lg object-cover ring-1 ring-border/50"
+                unoptimized
               />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-sm">

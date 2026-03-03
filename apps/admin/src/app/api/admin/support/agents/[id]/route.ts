@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { deleteAgent, getAgent, updateAgent } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -37,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(agent)
   } catch (error) {
-    console.error('Error fetching agent:', error)
+    logger.error('Error fetching agent:', error)
     return NextResponse.json(
       { error: 'Failed to fetch agent' },
       { status: 500 }
@@ -100,7 +101,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(agent)
   } catch (error) {
-    console.error('Error updating agent:', error)
+    logger.error('Error updating agent:', error)
     return NextResponse.json(
       { error: 'Failed to update agent' },
       { status: 500 }
@@ -142,7 +143,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting agent:', error)
+    logger.error('Error deleting agent:', error)
     return NextResponse.json(
       { error: 'Failed to delete agent' },
       { status: 500 }

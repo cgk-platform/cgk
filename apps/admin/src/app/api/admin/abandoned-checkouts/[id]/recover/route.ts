@@ -17,6 +17,7 @@ import {
   scheduleRecoveryEmail,
   incrementRecoveryEmailCount,
 } from '@/lib/abandoned-checkouts/db'
+import { logger } from '@cgk-platform/logging'
 
 interface RecoverRequest {
   sequenceNumber?: number
@@ -118,7 +119,7 @@ export async function POST(
       emailId: result.email.id,
     })
   } catch (error) {
-    console.error('Failed to trigger recovery:', error)
+    logger.error('Failed to trigger recovery:', error)
     return NextResponse.json(
       { error: 'Failed to trigger recovery email' },
       { status: 500 },

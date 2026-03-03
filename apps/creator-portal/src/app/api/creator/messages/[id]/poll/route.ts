@@ -8,6 +8,7 @@
 import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -120,7 +121,7 @@ export async function GET(
       lastCheckedAt: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Error polling messages:', error)
+    logger.error('Error polling messages:', error)
     return Response.json({ error: 'Failed to poll messages' }, { status: 500 })
   }
 }

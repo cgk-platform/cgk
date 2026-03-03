@@ -8,6 +8,7 @@ import {
   upsertReminderConfig,
 } from '@/lib/creators/lifecycle-db'
 import type { CreatorReminderConfig, ReminderStep } from '@/lib/creators/lifecycle-types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/creators/reminder-config
@@ -25,7 +26,7 @@ export async function GET() {
     const config = await getReminderConfigOrDefault(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    console.error('[reminder-config] GET error:', error)
+    logger.error('[reminder-config] GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch configuration' }, { status: 500 })
   }
 }
@@ -126,7 +127,7 @@ export async function PATCH(request: Request) {
     const config = await upsertReminderConfig(tenantSlug, body)
     return NextResponse.json({ success: true, config })
   } catch (error) {
-    console.error('[reminder-config] PATCH error:', error)
+    logger.error('[reminder-config] PATCH error:', error)
     return NextResponse.json({ error: 'Failed to save configuration' }, { status: 500 })
   }
 }

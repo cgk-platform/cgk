@@ -15,6 +15,7 @@
 
 import { NextResponse } from 'next/server'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 // =============================================================================
 // Edge Runtime Configuration
@@ -121,7 +122,7 @@ async function validateClient(
 
     return { valid: true, tenantId: client.tenant_slug }
   } catch (error) {
-    console.error('OAuth client validation error:', error)
+    logger.error('OAuth client validation error:', error)
     return { valid: false, error: 'server_error' }
   }
 }
@@ -168,7 +169,7 @@ async function storeAuthRequest(params: {
     `
     return true
   } catch (error) {
-    console.error('Failed to store auth request:', error)
+    logger.error('Failed to store auth request:', error)
     return false
   }
 }
@@ -534,7 +535,7 @@ export async function POST(request: Request): Promise<Response> {
 
     return NextResponse.json({ redirect_uri: redirectUrl.toString() })
   } catch (error) {
-    console.error('OAuth authorize POST error:', error)
+    logger.error('OAuth authorize POST error:', error)
     return NextResponse.json(
       { error: 'server_error', error_description: 'Internal server error' },
       { status: 500 }

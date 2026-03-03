@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Button, Card, CardContent, CardHeader, Badge, Input } from '@cgk-platform/ui'
 
 import type { AnalyticsReport } from '@/lib/analytics'
+import { logger } from '@cgk-platform/logging'
 
 const PRESET_REPORTS = [
   { id: 'sales_summary', name: 'Sales Summary', description: 'Overview of sales performance' },
@@ -31,7 +32,7 @@ export default function ReportsPage() {
       const json = await res.json()
       setReports(json.reports || [])
     } catch (error) {
-      console.error('Failed to fetch reports:', error)
+      logger.error('Failed to fetch reports:', error)
     } finally {
       setLoading(false)
     }
@@ -50,7 +51,7 @@ export default function ReportsPage() {
       }
       fetchReports()
     } catch (error) {
-      console.error('Failed to run report:', error)
+      logger.error('Failed to run report:', error)
     }
   }
 
@@ -63,7 +64,7 @@ export default function ReportsPage() {
       })
       setReports((prev) => prev.filter((r) => r.id !== id))
     } catch (error) {
-      console.error('Failed to delete report:', error)
+      logger.error('Failed to delete report:', error)
     }
   }
 
@@ -243,7 +244,7 @@ function CreateReportModal({ onClose, onCreated }: CreateReportModalProps) {
       })
       onCreated()
     } catch (error) {
-      console.error('Failed to create report:', error)
+      logger.error('Failed to create report:', error)
     } finally {
       setSaving(false)
     }

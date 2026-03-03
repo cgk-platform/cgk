@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 
 import type { VideoStatus } from '@cgk-platform/video'
 import type { SSEEvent, VideoStatusEventData } from '@cgk-platform/video/creator-tools'
+import { logger } from '@cgk-platform/logging'
 
 interface StatusIndicatorProps {
   videoId: string
@@ -79,7 +80,7 @@ export function StatusIndicator({
               break
           }
         } catch (err) {
-          console.error('Failed to parse SSE event:', err)
+          logger.error('Failed to parse SSE event:', err)
         }
       }
 

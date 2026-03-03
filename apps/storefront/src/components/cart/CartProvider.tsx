@@ -27,6 +27,7 @@ import {
   applyDiscountCode as applyDiscountCodeAction,
   removeDiscountCodes as removeDiscountCodesAction,
 } from '@/lib/cart/actions'
+import { logger } from '@cgk-platform/logging'
 
 const CartContext = createContext<CartContextValue | null>(null)
 
@@ -58,7 +59,7 @@ export function CartProvider({
           setIsLoading(false)
         })
         .catch((err) => {
-          console.error('Failed to fetch cart:', err)
+          logger.error('Failed to fetch cart:', err)
           setIsLoading(false)
         })
     }
@@ -80,7 +81,7 @@ export function CartProvider({
           setIsUpdating(false)
         })
       } catch (err) {
-        console.error('Failed to add to cart:', err)
+        logger.error('Failed to add to cart:', err)
         setError(err instanceof Error ? err.message : 'Failed to add to cart')
         // Rollback optimistic update
         setCart(previousCart)
@@ -115,7 +116,7 @@ export function CartProvider({
           setIsUpdating(false)
         })
       } catch (err) {
-        console.error('Failed to update cart:', err)
+        logger.error('Failed to update cart:', err)
         setError(err instanceof Error ? err.message : 'Failed to update cart')
         setCart(previousCart)
         setIsUpdating(false)
@@ -148,7 +149,7 @@ export function CartProvider({
           setIsUpdating(false)
         })
       } catch (err) {
-        console.error('Failed to remove from cart:', err)
+        logger.error('Failed to remove from cart:', err)
         setError(err instanceof Error ? err.message : 'Failed to remove item')
         setCart(previousCart)
         setIsUpdating(false)
@@ -181,7 +182,7 @@ export function CartProvider({
       const freshCart = await getCurrentCart()
       setCart(freshCart)
     } catch (err) {
-      console.error('Failed to refresh cart:', err)
+      logger.error('Failed to refresh cart:', err)
       setError(err instanceof Error ? err.message : 'Failed to refresh cart')
     } finally {
       setIsLoading(false)
@@ -212,7 +213,7 @@ export function CartProvider({
 
       return true
     } catch (err) {
-      console.error('Failed to apply discount:', err)
+      logger.error('Failed to apply discount:', err)
       setError(err instanceof Error ? err.message : 'Invalid discount code')
       setIsUpdating(false)
       return false
@@ -233,7 +234,7 @@ export function CartProvider({
         setIsUpdating(false)
       })
     } catch (err) {
-      console.error('Failed to remove discounts:', err)
+      logger.error('Failed to remove discounts:', err)
       setError(err instanceof Error ? err.message : 'Failed to remove discount')
       setIsUpdating(false)
     }

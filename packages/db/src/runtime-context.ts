@@ -24,6 +24,7 @@
  */
 
 // Type-only import to avoid bundling issues
+import { logger } from '@cgk-platform/logging'
 type AsyncLocalStorage<T> = {
   run<R>(store: T, callback: () => R): R
   getStore(): T | undefined
@@ -122,7 +123,7 @@ export function createRuntimeContext<T>(): {
       }
     } catch (err) {
       // Fallback to Edge implementation
-      console.warn('[DB] AsyncLocalStorage not available, using Edge-compatible storage:', err)
+      logger.warn('[DB] AsyncLocalStorage not available, using Edge-compatible storage', { error: err })
     }
   }
 

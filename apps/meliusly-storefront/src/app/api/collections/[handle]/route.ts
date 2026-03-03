@@ -152,24 +152,37 @@ export async function GET(request: Request, context: RouteContext) {
     const collection = data.collection
 
     // Transform Shopify products to our format
-    const products = collection.products.edges.map((edge: any) => {
-      const product = edge.node
+    const products = collection.products.edges.map((edge: unknown) => {
+      const e = edge as Record<string, unknown>
+      const product = e.node as Record<string, unknown>
+      const priceRange = product.priceRange as Record<string, unknown>
+      const minVariantPrice = priceRange.minVariantPrice as Record<string, unknown>
+      const compareAtPriceRange = product.compareAtPriceRange as Record<string, unknown> | undefined
+      const compareAtMinVariantPrice = compareAtPriceRange?.minVariantPrice as Record<string, unknown> | undefined
+      const featuredImage = product.featuredImage as Record<string, unknown> | undefined
+      const images = product.images as Record<string, unknown>
+      const imageEdges = images.edges as Array<Record<string, unknown>>
+
       return {
-        id: product.id,
-        title: product.title,
-        handle: product.handle,
-        description: product.description,
-        price: parseFloat(product.priceRange.minVariantPrice.amount),
-        compareAtPrice: product.compareAtPriceRange?.minVariantPrice?.amount
-          ? parseFloat(product.compareAtPriceRange.minVariantPrice.amount)
+        id: product.id as unknown as string,
+        title: product.title as unknown as string,
+        handle: product.handle as unknown as string,
+        description: product.description as unknown as string,
+        price: parseFloat(minVariantPrice.amount as unknown as string),
+        compareAtPrice: compareAtMinVariantPrice?.amount
+          ? parseFloat(compareAtMinVariantPrice.amount as unknown as string)
           : null,
-        image: product.featuredImage?.url || product.images.edges[0]?.node.url || null,
-        images: product.images.edges.map((img: any) => ({
-          url: img.node.url,
-          alt: img.node.altText || product.title
-        })),
-        tags: product.tags,
-        availableForSale: product.availableForSale
+        image: (featuredImage?.url as unknown as string) || ((imageEdges[0] as Record<string, unknown>)?.node as Record<string, unknown>)?.url as unknown as string || null,
+        images: imageEdges.map((img: unknown) => {
+          const i = img as Record<string, unknown>
+          const node = i.node as Record<string, unknown>
+          return {
+            url: node.url as unknown as string,
+            alt: (node.altText as unknown as string) || (product.title as unknown as string)
+          }
+        }),
+        tags: product.tags as unknown as string[],
+        availableForSale: product.availableForSale as unknown as boolean
       }
     })
 

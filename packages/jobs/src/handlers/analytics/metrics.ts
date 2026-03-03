@@ -17,6 +17,7 @@ import type {
 } from './types'
 import { defineJob } from '../../define'
 import type { JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // HELPER TYPES
@@ -92,7 +93,7 @@ export const aggregateDailyMetricsJob = defineJob<AggregateDailyMetricsPayload>(
     const metricsToAggregate = metrics || ['all']
     const includeAll = metricsToAggregate.includes('all')
 
-    console.log(
+    logger.info(
       `[Analytics] Aggregating daily metrics for ${targetDate} in tenant ${tenantId}`
     )
 
@@ -103,7 +104,7 @@ export const aggregateDailyMetricsJob = defineJob<AggregateDailyMetricsPayload>(
 
     // Step 1: Aggregate revenue metrics
     if (includeAll || metricsToAggregate.includes('revenue')) {
-      console.log(`[Analytics] Aggregating revenue metrics for ${targetDate}`)
+      logger.info(`[Analytics] Aggregating revenue metrics for ${targetDate}`)
 
       // Implementation would:
       // await withTenant(tenantId, async () => {
@@ -129,7 +130,7 @@ export const aggregateDailyMetricsJob = defineJob<AggregateDailyMetricsPayload>(
 
     // Step 2: Aggregate attribution metrics
     if (includeAll || metricsToAggregate.includes('attribution')) {
-      console.log(`[Analytics] Aggregating attribution metrics for ${targetDate}`)
+      logger.info(`[Analytics] Aggregating attribution metrics for ${targetDate}`)
 
       // Implementation would:
       // await withTenant(tenantId, async () => {
@@ -158,7 +159,7 @@ export const aggregateDailyMetricsJob = defineJob<AggregateDailyMetricsPayload>(
 
     // Step 3: Aggregate customer metrics
     if (includeAll || metricsToAggregate.includes('customers')) {
-      console.log(`[Analytics] Aggregating customer metrics for ${targetDate}`)
+      logger.info(`[Analytics] Aggregating customer metrics for ${targetDate}`)
 
       // Implementation would:
       // await withTenant(tenantId, async () => {
@@ -226,7 +227,7 @@ export const aggregateDailyMetricsJob = defineJob<AggregateDailyMetricsPayload>(
     //   `
     // })
 
-    console.log(
+    logger.info(
       `[Analytics] Stored daily snapshot for ${targetDate} in tenant ${tenantId}`
     )
 
@@ -274,7 +275,7 @@ export const hourlyMetricsRollupJob = defineJob<HourlyMetricsRollupPayload>({
     // Note: hourEnd is used in commented implementation
     void new Date(targetHour.getTime() + 60 * 60 * 1000).toISOString()
 
-    console.log(
+    logger.info(
       `[Analytics] Rolling up hourly metrics for ${hourStart} in tenant ${tenantId}`
     )
 
@@ -352,7 +353,7 @@ export const weeklyMetricsSummaryJob = defineJob<WeeklyMetricsSummaryPayload>({
       .toISOString()
       .split('T')[0]!
 
-    console.log(
+    logger.info(
       `[Analytics] Generating weekly summary for ${targetWeekStart} to ${targetWeekEnd} in tenant ${tenantId}`
     )
 
@@ -399,7 +400,7 @@ export const weeklyMetricsSummaryJob = defineJob<WeeklyMetricsSummaryPayload>({
     } | null = null
 
     if (includeTrends) {
-      console.log(`[Analytics] Including WoW trend analysis`)
+      logger.info(`[Analytics] Including WoW trend analysis`)
       trends = {
         revenueChange: 0,
         ordersChange: 0,

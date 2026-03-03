@@ -14,6 +14,7 @@ import type {
   BrandSampleAddress,
   UpdateBrandPreferencesInput,
 } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -144,7 +145,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       isDefault: false,
     })
   } catch (error) {
-    console.error('Error fetching brand preferences:', error)
+    logger.error('Error fetching brand preferences:', error)
     return Response.json({ error: 'Failed to fetch preferences' }, { status: 500 })
   }
 }
@@ -275,7 +276,7 @@ export async function PATCH(req: Request, { params }: RouteParams): Promise<Resp
       message: 'Preferences updated successfully',
     })
   } catch (error) {
-    console.error('Error updating brand preferences:', error)
+    logger.error('Error updating brand preferences:', error)
     return Response.json({ error: 'Failed to update preferences' }, { status: 500 })
   }
 }

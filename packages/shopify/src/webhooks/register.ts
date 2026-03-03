@@ -8,6 +8,8 @@ import { withTenant, sql } from '@cgk-platform/db'
 
 import { createAdminClient } from '../admin'
 import type { WebhookTopic, WebhookSyncResult, ShopifyCredentials } from './types'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Required webhook topics that are auto-registered on app installation
@@ -147,7 +149,7 @@ export async function registerWebhooks(
       if (userErrors && userErrors.length > 0) {
         const firstError = userErrors[0]
         const error = firstError ? firstError.message : 'Unknown error'
-        console.error(`[Webhook] Failed to register ${topic} for ${shop}: ${error}`)
+        logger.error(`[Webhook] Failed to register ${topic} for ${shop}: ${error}`)
         errors.push({ topic, error })
         continue
       }
@@ -167,17 +169,17 @@ export async function registerWebhooks(
           `
         })
 
-        console.log(`[Webhook] Registered ${topic} for ${shop}`)
+        logger.info(`[Webhook] Registered ${topic} for ${shop}`)
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[Webhook] Failed to register ${topic} for ${shop}:`, error)
+      logger.error(`[Webhook] Failed to register ${topic} for ${shop}:`, error instanceof Error ? error : undefined)
       errors.push({ topic, error: message })
     }
   }
 
   if (errors.length > 0) {
-    console.error(`[Webhook] ${errors.length} webhooks failed to register for ${shop}`)
+    logger.error(`[Webhook] ${errors.length} webhooks failed to register for ${shop}`)
   }
 }
 
@@ -340,7 +342,7 @@ export async function syncWebhookRegistrations(
 
     return result
   } catch (error) {
-    console.error(`[Webhook] Sync failed for ${shop}:`, error)
+    logger.error(`[Webhook] Sync failed for ${shop}:`, error instanceof Error ? error : undefined)
     throw error
   }
 }
@@ -365,7 +367,7 @@ export async function unregisterWebhook(
   })
 
   if (!registration?.shopify_webhook_id) {
-    console.log(`[Webhook] No registration found for ${topic} on ${shop}`)
+    logger.info(`[Webhook] No registration found for ${topic} on ${shop}`)
     return
   }
 
@@ -388,9 +390,9 @@ export async function unregisterWebhook(
       `
     })
 
-    console.log(`[Webhook] Unregistered ${topic} for ${shop}`)
+    logger.info(`[Webhook] Unregistered ${topic} for ${shop}`)
   } catch (error) {
-    console.error(`[Webhook] Failed to unregister ${topic} for ${shop}:`, error)
+    logger.error(`[Webhook] Failed to unregister ${topic} for ${shop}:`, error instanceof Error ? error : undefined)
     throw error
   }
 }

@@ -10,6 +10,7 @@ import { NextResponse } from 'next/server'
 import { getTenantStripeConfig } from '@cgk-platform/integrations'
 
 import { getTenantSlug } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -36,7 +37,7 @@ export async function GET() {
       publishableKey: stripeConfig.publishableKey,
     })
   } catch (error) {
-    console.error('[stripe-config] Error:', error)
+    logger.error('[stripe-config] Error:', error)
     return NextResponse.json(
       { error: 'Failed to get Stripe configuration' },
       { status: 500 }

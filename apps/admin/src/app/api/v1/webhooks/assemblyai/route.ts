@@ -24,6 +24,7 @@ import {
   saveTranscriptionResult,
   failTranscription,
 } from '@cgk-platform/video/server'
+import { logger } from '@cgk-platform/logging'
 
 interface AssemblyAIWebhookBody {
   transcript_id: string
@@ -45,19 +46,19 @@ export async function POST(request: Request) {
   // Verify webhook signature - MANDATORY
   const secret = process.env.ASSEMBLYAI_WEBHOOK_SECRET
   if (!secret) {
-    console.error('[assemblyai-webhook] ASSEMBLYAI_WEBHOOK_SECRET not configured')
+    logger.error('[assemblyai-webhook] ASSEMBLYAI_WEBHOOK_SECRET not configured')
     return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 })
   }
 
   const signature = request.headers.get('x-assemblyai-signature')
   if (!signature) {
-    console.warn('[assemblyai-webhook] Missing signature header')
+    logger.warn('[assemblyai-webhook] Missing signature header')
     return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
   }
 
   const isValid = await verifyAssemblyAIWebhookSignature(rawBody, signature, secret)
   if (!isValid) {
-    console.warn('[assemblyai-webhook] Invalid signature')
+    logger.warn('[assemblyai-webhook] Invalid signature')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  console.log('[assemblyai-webhook] Received', { jobId, status })
+  logger.info('[assemblyai-webhook] Received', { jobId, status })
 
   // Find video by transcription job ID (query public schema to find tenant)
   // Note: In production, you might want to encode tenantId in webhook URL or metadata
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
     WHERE v.id IS NOT NULL
     LIMIT 1
   `.catch((error) => {
-    console.warn('[assemblyai-webhook] Failed to search for video:', error)
+    logger.warn('[assemblyai-webhook] Failed to search for video:', error)
     return { rows: [] }
   })
 
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
   if (!video) {
     // Try simpler approach - search known tenant schemas
     // In a real implementation, you'd want to pass tenantId in webhook URL
-    console.warn('[assemblyai-webhook] Could not find video for job', { jobId })
+    logger.warn('[assemblyai-webhook] Could not find video for job', { jobId })
 
     // Return success to prevent retries - we'll rely on sync job
     return NextResponse.json({
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
         result.chapters
       )
 
-      console.log('[assemblyai-webhook] Transcription saved', {
+      logger.info('[assemblyai-webhook] Transcription saved', {
         tenantId,
         videoId,
         wordCount: result.words.length,
@@ -138,7 +139,7 @@ export async function POST(request: Request) {
         videoId,
       })
     } catch (err) {
-      console.error('[assemblyai-webhook] Failed to process completion', {
+      logger.error('[assemblyai-webhook] Failed to process completion', {
         tenantId,
         videoId,
         error: err instanceof Error ? err.message : 'Unknown error',
@@ -151,7 +152,7 @@ export async function POST(request: Request) {
       )
     }
   } else if (status === 'error') {
-    console.error('[assemblyai-webhook] Transcription failed', {
+    logger.error('[assemblyai-webhook] Transcription failed', {
       tenantId,
       videoId,
       error,

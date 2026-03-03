@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/ai-agents/actions
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ actions })
   } catch (error) {
-    console.error('Error fetching actions:', error)
+    logger.error('Error fetching actions:', error)
     return NextResponse.json({ error: 'Failed to fetch actions' }, { status: 500 })
   }
 }

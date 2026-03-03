@@ -12,6 +12,7 @@ import {
   createBulkSend,
 } from '@/lib/esign'
 import type { CreateBulkSendInput, EsignBulkSendStatus } from '@/lib/esign/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    console.error('Error fetching bulk sends:', error)
+    logger.error('Error fetching bulk sends:', error)
     return NextResponse.json(
       { error: 'Failed to fetch bulk sends' },
       { status: 500 }
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
       bulkSend,
     })
   } catch (error) {
-    console.error('Error creating bulk send:', error)
+    logger.error('Error creating bulk send:', error)
     return NextResponse.json(
       { error: 'Failed to create bulk send' },
       { status: 500 }

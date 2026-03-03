@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 type RouteParams = { params: Promise<{ callId: string }> }
 
@@ -64,7 +65,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error fetching voice call:', error)
+    logger.error('Error fetching voice call:', error)
     return NextResponse.json({ error: 'Failed to fetch voice call' }, { status: 500 })
   }
 }

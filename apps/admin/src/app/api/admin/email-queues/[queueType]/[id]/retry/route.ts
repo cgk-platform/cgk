@@ -19,6 +19,7 @@ import {
   scheduleRetry,
   type QueueType,
 } from '@cgk-platform/communications'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -124,7 +125,7 @@ export async function POST(
       entry: updatedEntry,
     })
   } catch (error) {
-    console.error('[email-queues] retry error:', error)
+    logger.error('[email-queues] retry error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to retry entry' },
       { status: 500 }

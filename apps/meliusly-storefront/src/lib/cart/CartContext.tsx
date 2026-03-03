@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { Cart, CartItem, CartContextValue } from './types'
+import { logger } from '@cgk-platform/logging'
 
 const CART_STORAGE_KEY = 'meliusly_cart'
 const CART_SYNC_INTERVAL = 30000 // Sync every 30 seconds
@@ -62,7 +63,7 @@ export function CartProvider({ children }: CartProviderProps) {
           })
         }
       } catch (err) {
-        console.error('Failed to load cart from storage:', err)
+        logger.error('Failed to load cart from storage:', err)
         setCart({
           items: [],
           subtotal: { amount: '0.00', currencyCode: 'USD' },
@@ -82,7 +83,7 @@ export function CartProvider({ children }: CartProviderProps) {
       try {
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart))
       } catch (err) {
-        console.error('Failed to save cart to storage:', err)
+        logger.error('Failed to save cart to storage:', err)
       }
     }
   }, [cart, isLoading])
@@ -99,7 +100,7 @@ export function CartProvider({ children }: CartProviderProps) {
           body: JSON.stringify({ cart }),
         })
       } catch (err) {
-        console.error('Failed to sync cart to database:', err)
+        logger.error('Failed to sync cart to database:', err)
       }
     }
 
@@ -257,7 +258,7 @@ export function CartProvider({ children }: CartProviderProps) {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to refresh cart')
-      console.error('Failed to refresh cart:', err)
+      logger.error('Failed to refresh cart:', err)
     } finally {
       setIsLoading(false)
     }

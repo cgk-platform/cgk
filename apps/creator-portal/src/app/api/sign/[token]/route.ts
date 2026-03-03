@@ -7,6 +7,7 @@
  */
 
 import { getSigningSessionByToken, signDocument, declineDocument, type SignDocumentInput } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -109,7 +110,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       hasExistingSignature: !!session.existingSignature,
     })
   } catch (error) {
-    console.error('Error fetching signing session:', error)
+    logger.error('Error fetching signing session:', error)
     return Response.json({ error: 'Failed to load document' }, { status: 500 })
   }
 }
@@ -158,7 +159,7 @@ export async function POST(req: Request, { params }: RouteParams): Promise<Respo
       document: result.document,
     })
   } catch (error) {
-    console.error('Error signing document:', error)
+    logger.error('Error signing document:', error)
     const message = error instanceof Error ? error.message : 'Failed to sign document'
     return Response.json({ error: message }, { status: 500 })
   }
@@ -199,7 +200,7 @@ export async function DELETE(req: Request, { params }: RouteParams): Promise<Res
       message: 'Document declined',
     })
   } catch (error) {
-    console.error('Error declining document:', error)
+    logger.error('Error declining document:', error)
     const message = error instanceof Error ? error.message : 'Failed to decline document'
     return Response.json({ error: message }, { status: 500 })
   }

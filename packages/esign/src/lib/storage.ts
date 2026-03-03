@@ -13,6 +13,7 @@ import { put, del } from '@vercel/blob'
 import { embedFieldsInPDF, forceFlattenPdf, verifyPdfFlattened } from './pdf.js'
 import { STORAGE_PATHS } from '../constants.js'
 import type { EsignField, EsignSigner } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // TYPES
@@ -130,7 +131,7 @@ export async function finalizeSignedDocument(options: FinalizeDocumentOptions): 
   // Step 3: Verify flattening
   const verification = await verifyPdfFlattened(pdfBytes)
   if (!verification.isFlat) {
-    console.warn('PDF flattening verification issues:', verification.issues)
+    logger.warn('PDF flattening verification issues', { issues: verification.issues })
     // Continue anyway - issues are logged but shouldn't block signing
     // In production, you may want stricter handling
   }
@@ -238,7 +239,7 @@ export async function deleteSignatureImage(url: string): Promise<void> {
   try {
     await del(url)
   } catch (error) {
-    console.warn('Failed to delete signature image:', error)
+    logger.warn('Failed to delete signature image', { error: error instanceof Error ? error.message : String(error) })
   }
 }
 
@@ -356,7 +357,7 @@ export async function cleanupPreviews(
   if (previewUrls.length === 0) return
 
   const deletePromises = previewUrls.map((url) =>
-    del(url).catch((error) => console.warn('Failed to delete preview:', error))
+    del(url).catch((error) => logger.warn('Failed to delete preview:', error))
   )
 
   await Promise.allSettled(deletePromises)

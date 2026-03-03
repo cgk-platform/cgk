@@ -9,6 +9,7 @@ import {
   updateSellingPlan,
 } from '@/lib/selling-plans/db'
 import type { UpdateSellingPlanInput } from '@/lib/selling-plans/types'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -36,7 +37,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ sellingPlan })
   } catch (error) {
-    console.error('Error fetching selling plan:', error)
+    logger.error('Error fetching selling plan:', error)
     return NextResponse.json(
       { error: 'Failed to fetch selling plan' },
       { status: 500 },
@@ -73,7 +74,7 @@ export async function PUT(request: Request, context: RouteContext) {
 
     return NextResponse.json({ sellingPlan })
   } catch (error) {
-    console.error('Error updating selling plan:', error)
+    logger.error('Error updating selling plan:', error)
     if (error instanceof Error && error.message.includes('unique')) {
       return NextResponse.json(
         { error: 'A selling plan with this name already exists' },
@@ -109,7 +110,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting selling plan:', error)
+    logger.error('Error deleting selling plan:', error)
     return NextResponse.json(
       { error: 'Failed to delete selling plan' },
       { status: 500 },

@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { getMetaConnection, selectMetaAdAccount } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, accountId, accountName: account.name })
   } catch (error) {
-    console.error('Failed to select Meta ad account:', error)
+    logger.error('Failed to select Meta ad account:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to select account' },
       { status: 500 }

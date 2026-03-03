@@ -15,6 +15,7 @@ import {
   archiveTemplate,
   activateTemplate,
 } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -42,7 +43,7 @@ export async function GET(
       stats,
     })
   } catch (error) {
-    console.error('Error fetching template:', error)
+    logger.error('Error fetching template:', error)
     return NextResponse.json(
       { error: 'Failed to fetch template' },
       { status: 500 }
@@ -93,7 +94,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
   } catch (error) {
-    console.error('Error with template action:', error)
+    logger.error('Error with template action:', error)
     return NextResponse.json(
       { error: 'Failed to perform action' },
       { status: 500 }
@@ -120,7 +121,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error archiving template:', error)
+    logger.error('Error archiving template:', error)
     return NextResponse.json(
       { error: 'Failed to archive template' },
       { status: 500 }

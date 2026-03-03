@@ -20,6 +20,7 @@ import type {
   InboundEmail,
   ThreadMessage,
 } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // Creator-Specific Thread Matching
@@ -136,7 +137,7 @@ async function updateCreatorLastActivity(creatorId: string): Promise<void> {
     `
   } catch (error) {
     // Log but don't fail - creator table might not have last_activity_at column
-    console.warn(`Failed to update creator last activity: ${error}`)
+    logger.warn(`Failed to update creator last activity: ${error}`)
   }
 }
 

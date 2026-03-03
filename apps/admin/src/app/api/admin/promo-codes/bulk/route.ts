@@ -6,6 +6,7 @@ import crypto from 'crypto'
 
 import { bulkCreatePromoCodeMetadata } from '@/lib/promo-codes/db'
 import type { BulkGenerateInput, CreatePromoCodeInput } from '@/lib/promo-codes/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Generate a random alphanumeric code
@@ -110,7 +111,7 @@ export async function POST(request: Request) {
       csv,
     })
   } catch (error) {
-    console.error('Error bulk creating promo codes:', error)
+    logger.error('Error bulk creating promo codes:', error)
     return NextResponse.json(
       { error: 'Failed to bulk create promo codes' },
       { status: 500 },

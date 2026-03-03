@@ -4,6 +4,7 @@
  */
 
 import { google, type Auth } from 'googleapis'
+import { logger } from '@cgk-platform/logging'
 
 export interface OAuthConfig {
   clientId: string
@@ -117,7 +118,7 @@ export async function revokeTokens(
   try {
     await oauth2Client.revokeToken(accessToken)
   } catch (error) {
-    console.error('Failed to revoke token:', error)
+    logger.error('Failed to revoke token:', error)
     // Token may already be revoked, continue anyway
   }
 }

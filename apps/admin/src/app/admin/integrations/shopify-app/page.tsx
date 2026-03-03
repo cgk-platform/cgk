@@ -19,6 +19,7 @@ import {
   OAuthConnectButton,
   TestConnectionResult,
 } from '@/components/integrations'
+import { logger } from '@cgk-platform/logging'
 
 interface ShopifyStatus {
   connected: boolean
@@ -72,7 +73,7 @@ export default function ShopifyAppPage() {
         setStatus(data)
       }
     } catch (error) {
-      console.error('Failed to fetch Shopify status:', error)
+      logger.error('Failed to fetch Shopify status:', error)
     } finally {
       setLoading(false)
     }
@@ -127,7 +128,7 @@ export default function ShopifyAppPage() {
         })
       }
     } catch (error) {
-      console.error('Failed to disconnect:', error)
+      logger.error('Failed to disconnect:', error)
     }
   }
 

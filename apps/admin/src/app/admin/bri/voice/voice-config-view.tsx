@@ -5,6 +5,7 @@ import { Button, Card, CardContent, CardHeader, Input, Badge } from '@cgk-platfo
 import { Mic, Volume2, AudioLines, Save, Play, Plus, X } from 'lucide-react'
 
 import type { VoiceConfig } from '@/lib/bri/types'
+import { logger } from '@cgk-platform/logging'
 
 interface VoiceConfigViewProps {
   tenantSlug: string
@@ -59,7 +60,7 @@ export function VoiceConfigView({ initialConfig }: VoiceConfigViewProps) {
         body: JSON.stringify(config),
       })
     } catch (error) {
-      console.error('Failed to save voice config:', error)
+      logger.error('Failed to save voice config:', error)
     } finally {
       setSaving(false)
     }

@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { sql, withTenant } from '@cgk-platform/db'
 import { headers, cookies } from 'next/headers'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/signout
@@ -23,7 +24,7 @@ export async function POST() {
         `
       })
     } catch (error) {
-      console.error('Failed to revoke session:', error)
+      logger.error('Failed to revoke session:', error)
     }
   }
 

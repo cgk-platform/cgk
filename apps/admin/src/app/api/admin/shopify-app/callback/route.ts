@@ -7,6 +7,7 @@ import {
   registerWebhooks,
   ShopifyError,
 } from '@cgk-platform/shopify'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/shopify-app/callback
@@ -32,7 +33,7 @@ export async function GET(request: Request) {
 
   // Validate required parameters
   if (!code || !state || !shop || !hmac || !timestamp) {
-    console.error('[shopify-oauth] Missing callback parameters')
+    logger.error('[shopify-oauth] Missing callback parameters')
     return NextResponse.redirect(
       new URL('/admin/integrations/shopify-app?error=missing_params', appUrl)
     )
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
       host: host || undefined,
     })
 
-    console.log(`[shopify-oauth] Successfully connected shop ${connectedShop} for tenant ${tenantId}`)
+    logger.info(`[shopify-oauth] Successfully connected shop ${connectedShop} for tenant ${tenantId}`)
 
     // Register webhooks for the connected shop
     const webhookBaseUrl = process.env.SHOPIFY_WEBHOOK_BASE_URL || appUrl
@@ -61,13 +62,13 @@ export async function GET(request: Request) {
         webhookBaseUrl
       )
 
-      console.log(`[shopify-oauth] Registered ${registered.length} webhooks`)
+      logger.info(`[shopify-oauth] Registered ${registered.length} webhooks`)
       if (errors.length > 0) {
-        console.warn('[shopify-oauth] Webhook registration errors:', errors)
+        logger.warn('[shopify-oauth] Webhook registration errors:', errors)
       }
     } catch (webhookError) {
       // Log but don't fail the OAuth flow
-      console.error('[shopify-oauth] Webhook registration failed:', webhookError)
+      logger.error('[shopify-oauth] Webhook registration failed:', webhookError)
     }
 
     // Redirect to success page
@@ -75,7 +76,7 @@ export async function GET(request: Request) {
       new URL('/admin/integrations/shopify-app?success=connected', appUrl)
     )
   } catch (error) {
-    console.error('[shopify-oauth] Callback error:', error)
+    logger.error('[shopify-oauth] Callback error:', error)
 
     if (error instanceof ShopifyError) {
       return NextResponse.redirect(

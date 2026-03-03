@@ -15,6 +15,7 @@ import {
   getRecoveryStats,
 } from '@/lib/abandoned-checkouts/db'
 import type { AbandonedCheckoutFilters } from '@/lib/abandoned-checkouts/types'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -65,7 +66,7 @@ export async function GET(request: Request) {
       stats: result.stats,
     })
   } catch (error) {
-    console.error('Failed to fetch abandoned checkouts:', error)
+    logger.error('Failed to fetch abandoned checkouts:', error)
     return NextResponse.json(
       { error: 'Failed to fetch abandoned checkouts' },
       { status: 500 },

@@ -9,6 +9,7 @@ import { sql } from '@cgk-platform/db'
 
 import { hashPassword, requireCreatorAuth, verifyPassword, type CreatorAuthContext } from '@/lib/auth'
 import { validatePassword } from '@/lib/auth/password'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -115,7 +116,7 @@ export async function POST(req: Request): Promise<Response> {
       message: 'Password changed successfully',
     })
   } catch (error) {
-    console.error('Error changing password:', error)
+    logger.error('Error changing password:', error)
     return Response.json({ error: 'Failed to change password' }, { status: 500 })
   }
 }

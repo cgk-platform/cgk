@@ -8,6 +8,7 @@
 import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -103,7 +104,7 @@ export async function GET(
       messages,
     })
   } catch (error) {
-    console.error('Error fetching messages:', error)
+    logger.error('Error fetching messages:', error)
     return Response.json({ error: 'Failed to fetch messages' }, { status: 500 })
   }
 }
@@ -188,7 +189,7 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.error('Error sending message:', error)
+    logger.error('Error sending message:', error)
     return Response.json({ error: 'Failed to send message' }, { status: 500 })
   }
 }

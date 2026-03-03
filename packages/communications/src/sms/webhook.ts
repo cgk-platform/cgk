@@ -22,6 +22,7 @@ import {
   parseTwilioStatusWebhook,
 } from './provider.js'
 import { getSmsQueueEntryByMessageSid, markSmsDelivered, markSmsFailed } from './queue.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // Webhook Handler Types
@@ -205,17 +206,17 @@ export function verifyTwilioSignature(
   params: Record<string, string>
 ): boolean {
   if (!authToken) {
-    console.error('[Twilio Webhook] Auth token not provided')
+    logger.error('[Twilio Webhook] Auth token not provided')
     return false
   }
 
   if (!signature) {
-    console.error('[Twilio Webhook] Signature header missing')
+    logger.error('[Twilio Webhook] Signature header missing')
     return false
   }
 
   if (!url) {
-    console.error('[Twilio Webhook] URL not provided')
+    logger.error('[Twilio Webhook] URL not provided')
     return false
   }
 
@@ -225,7 +226,7 @@ export function verifyTwilioSignature(
     // using the auth token and the request parameters
     return twilio.validateRequest(authToken, signature, url, params)
   } catch (error) {
-    console.error('[Twilio Webhook] Signature verification error:', error)
+    logger.error('[Twilio Webhook] Signature verification error', error instanceof Error ? error : new Error(String(error)))
     return false
   }
 }

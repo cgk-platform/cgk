@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button, Card, CardContent, CardHeader, Input, Badge, Alert, AlertDescription } from '@cgk-platform/ui'
 import { Search, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { logger } from '@cgk-platform/logging'
 
 interface TeamMember {
   id: string
@@ -48,7 +49,7 @@ export default function SlackUsersPage() {
         setSlackConnected(data.slackConnected ?? false)
       }
     } catch (error) {
-      console.error('Failed to fetch data:', error)
+      logger.error('Failed to fetch data:', error)
     } finally {
       setLoading(false)
     }
@@ -64,7 +65,7 @@ export default function SlackUsersPage() {
         setSearchResults(data.users ?? [])
       }
     } catch (error) {
-      console.error('Failed to search:', error)
+      logger.error('Failed to search:', error)
     } finally {
       setSearching(false)
     }
@@ -84,7 +85,7 @@ export default function SlackUsersPage() {
         ])
       }
     } catch (error) {
-      console.error('Failed to link user:', error)
+      logger.error('Failed to link user:', error)
     }
   }
 
@@ -97,7 +98,7 @@ export default function SlackUsersPage() {
         setSlackLinks(slackLinks.filter((l) => l.userId !== userId))
       }
     } catch (error) {
-      console.error('Failed to unlink user:', error)
+      logger.error('Failed to unlink user:', error)
     }
   }
 

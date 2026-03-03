@@ -10,6 +10,7 @@ import {
   updateLastSyncAt,
   ShopifyError,
 } from '@cgk-platform/shopify'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/shopify-app/refresh
@@ -65,7 +66,7 @@ export async function POST() {
       },
     })
   } catch (error) {
-    console.error('[shopify-refresh] Error:', error)
+    logger.error('[shopify-refresh] Error:', error)
 
     if (error instanceof ShopifyError) {
       return NextResponse.json(

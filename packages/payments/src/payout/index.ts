@@ -14,6 +14,7 @@ import type {
 } from './types'
 import { isWiseSupportedCountry } from './types'
 import { createWiseBusinessProvider } from './wise-business'
+import { logger } from '@cgk-platform/logging'
 
 // Re-export types
 export type {
@@ -220,7 +221,7 @@ export function getPayoutOrchestrator(): PayoutOrchestrator {
   }
 
   if (!wiseApiToken || !wiseProfileId) {
-    console.warn('Wise credentials not configured. International payouts will fall back to Stripe.')
+    logger.warn('Wise credentials not configured. International payouts will fall back to Stripe.')
   }
 
   defaultOrchestrator = createPayoutOrchestrator({

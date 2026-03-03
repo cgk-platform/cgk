@@ -5,6 +5,7 @@ import {
   testPlatformConnection,
 } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/platform/slack/test
@@ -40,7 +41,7 @@ export async function POST(request: Request) {
       error: result.error,
     })
   } catch (error) {
-    console.error('Failed to test platform Slack connection:', error)
+    logger.error('Failed to test platform Slack connection:', error)
     return NextResponse.json(
       {
         success: false,

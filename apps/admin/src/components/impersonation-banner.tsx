@@ -3,6 +3,7 @@
 import { AlertTriangle, Clock, LogOut, Loader2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { logger } from '@cgk-platform/logging'
 
 interface ImpersonationInfo {
   impersonatorEmail: string
@@ -75,11 +76,11 @@ export function ImpersonationBanner({
         // Redirect to login page (or wherever specified)
         router.push(data.redirectTo || '/login')
       } else {
-        console.error('Failed to end impersonation session')
+        logger.error('Failed to end impersonation session')
         setIsEnding(false)
       }
     } catch (error) {
-      console.error('Error ending impersonation:', error)
+      logger.error('Error ending impersonation:', error)
       setIsEnding(false)
     }
   }, [isEnding, router])

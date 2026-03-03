@@ -5,6 +5,7 @@ import * as React from 'react'
 import { TenantLogo, RoleBadge } from './tenant-switcher'
 import { useTenant, type TenantInfo } from '../context/tenant-context'
 import { cn } from '../utils/cn'
+import { logger } from '@cgk-platform/logging'
 
 export interface MultiTenantWelcomeModalProps {
   /** User's display name */
@@ -87,7 +88,7 @@ export function MultiTenantWelcomeModal({
       // Reload to apply new context
       window.location.reload()
     } catch (error) {
-      console.error('Failed to switch tenant:', error)
+      logger.error('Failed to switch tenant', error instanceof Error ? error : new Error(String(error)))
     } finally {
       setIsSubmitting(false)
     }

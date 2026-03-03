@@ -11,6 +11,7 @@
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { getBrandFilter, getAccessibleBrandSlugs } from '@/lib/brand-filter'
 import { getProjects, getProjectStats, type ProjectListOptions, type ProjectStatus } from '@/lib/projects'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -185,7 +186,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching projects:', error)
+    logger.error('Error fetching projects:', error)
     return Response.json({ error: 'Failed to fetch projects' }, { status: 500 })
   }
 }

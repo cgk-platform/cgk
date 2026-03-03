@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react'
 
 import { ConnectionStatusBadge, OAuthConnectButton } from '@/components/integrations'
 import type { MetaAdsStatus } from '@/lib/integrations/types'
+import { logger } from '@cgk-platform/logging'
 
 export default function MetaAdsPage() {
   const [status, setStatus] = useState<MetaAdsStatus | null>(null)
@@ -37,7 +38,7 @@ export default function MetaAdsPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch Meta Ads status:', error)
+      logger.error('Failed to fetch Meta Ads status:', error)
     } finally {
       setLoading(false)
     }
@@ -69,7 +70,7 @@ export default function MetaAdsPage() {
         })
       }
     } catch (error) {
-      console.error('Failed to disconnect:', error)
+      logger.error('Failed to disconnect:', error)
     }
   }
 
@@ -83,7 +84,7 @@ export default function MetaAdsPage() {
         await fetchStatus()
       }
     } catch (error) {
-      console.error('Failed to sync:', error)
+      logger.error('Failed to sync:', error)
     } finally {
       setSyncing(false)
     }
@@ -104,7 +105,7 @@ export default function MetaAdsPage() {
         await fetchStatus()
       }
     } catch (error) {
-      console.error('Failed to save config:', error)
+      logger.error('Failed to save config:', error)
     } finally {
       setSaving(false)
     }

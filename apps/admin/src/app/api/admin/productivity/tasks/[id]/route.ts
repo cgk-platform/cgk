@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getTask, updateTask, deleteTask, type UpdateTaskInput } from '@/lib/productivity'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -39,7 +40,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ task })
   } catch (error) {
-    console.error('Error fetching task:', error)
+    logger.error('Error fetching task:', error)
     return NextResponse.json({ error: 'Failed to fetch task' }, { status: 500 })
   }
 }
@@ -81,7 +82,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ task })
   } catch (error) {
-    console.error('Error updating task:', error)
+    logger.error('Error updating task:', error)
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
   }
 }
@@ -116,7 +117,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting task:', error)
+    logger.error('Error deleting task:', error)
     return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 })
   }
 }

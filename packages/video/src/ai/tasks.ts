@@ -8,6 +8,7 @@
 
 import { generateCompletion } from './client'
 import type { AITask } from '../transcription/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Extract action items/tasks from the transcript
@@ -54,7 +55,7 @@ Return only valid JSON array:`
       }))
       .filter((t) => t.text.length > 0)
   } catch {
-    console.error('[AI Tasks] Failed to parse tasks response:', response)
+    logger.error('[AI Tasks] Failed to parse tasks response:', response)
     return []
   }
 }
@@ -111,7 +112,7 @@ Return only valid JSON array:`
       }))
       .filter((t) => t.text.length > 0)
   } catch {
-    console.error('[AI Tasks] Failed to parse tasks response:', response)
+    logger.error('[AI Tasks] Failed to parse tasks response:', response)
     return []
   }
 }

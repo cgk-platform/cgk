@@ -14,6 +14,7 @@
 import { NextResponse } from 'next/server'
 import { sql } from '@cgk-platform/db'
 import * as jose from 'jose'
+import { logger } from '@cgk-platform/logging'
 
 // =============================================================================
 // Edge Runtime Configuration
@@ -154,7 +155,7 @@ async function validateClientCredentials(
 
     return { valid: true, organizationId: client.organization_id }
   } catch (error) {
-    console.error('Client validation error:', error)
+    logger.error('Client validation error:', error)
     return { valid: false, error: 'server_error' }
   }
 }
@@ -607,7 +608,7 @@ export async function POST(request: Request): Promise<Response> {
         return createErrorResponse('unsupported_grant_type', `Unknown grant type: ${params.grant_type}`)
     }
   } catch (error) {
-    console.error('OAuth token error:', error)
+    logger.error('OAuth token error:', error)
     return createErrorResponse('server_error', 'Internal server error', 500)
   }
 }

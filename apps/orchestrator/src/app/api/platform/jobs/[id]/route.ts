@@ -1,4 +1,5 @@
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,7 +78,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return Response.json({ job })
   } catch (error) {
-    console.error('Get job detail error:', error)
+    logger.error('Get job detail error:', error)
     return Response.json({ error: 'Failed to get job details' }, { status: 500 })
   }
 }
@@ -155,7 +156,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Update job error:', error)
+    logger.error('Update job error:', error)
     return Response.json({ error: 'Failed to update job' }, { status: 500 })
   }
 }

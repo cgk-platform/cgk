@@ -9,6 +9,7 @@ import {
   decryptToken,
   revokeToken,
 } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * DELETE /api/admin/integrations/slack/disconnect
@@ -62,7 +63,7 @@ export async function DELETE() {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to disconnect Slack:', error)
+    logger.error('Failed to disconnect Slack:', error)
     return NextResponse.json(
       { error: 'Failed to disconnect Slack' },
       { status: 500 },

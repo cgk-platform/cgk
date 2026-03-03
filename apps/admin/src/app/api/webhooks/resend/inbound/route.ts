@@ -24,6 +24,7 @@ import {
   routeEmail,
   getEmailTypeFromPurpose,
 } from '@cgk-platform/communications'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Get webhook secret from environment
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
   const isValidLegacy = verifyResendSignature(rawBody, resendSignature, secret)
 
   if (!isValidSvix && !isValidLegacy) {
-    console.error('Invalid webhook signature')
+    logger.error('Invalid webhook signature')
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 401 }
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
   try {
     payload = JSON.parse(rawBody)
   } catch {
-    console.error('Invalid JSON payload')
+    logger.error('Invalid JSON payload')
     return NextResponse.json(
       { error: 'Invalid JSON' },
       { status: 400 }
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
     })
 
     if (isDuplicate) {
-      console.log('[Resend Webhook] Duplicate event ignored:', eventId)
+      logger.info('[Resend Webhook] Duplicate event ignored:', eventId)
       return NextResponse.json({
         received: true,
         processed: false,

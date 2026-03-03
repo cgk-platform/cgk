@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { testKlaviyoConnection } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
     const isValid = await testKlaviyoConnection(tenantId)
     return Response.json({ connected: isValid })
   } catch (error) {
-    console.error('Failed to test Klaviyo connection:', error)
+    logger.error('Failed to test Klaviyo connection:', error)
     return Response.json({ connected: false })
   }
 }

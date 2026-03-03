@@ -11,6 +11,7 @@ import {
   Users,
   MessageSquare,
 } from 'lucide-react'
+import { logger } from '@cgk-platform/logging'
 
 async function getMetrics(tenantId: string): Promise<TicketMetrics | null> {
   try {
@@ -31,7 +32,7 @@ export default async function SupportDashboardPage() {
   const [metrics, alerts] = await Promise.all([
     getMetrics(tenantId),
     getUnacknowledgedAlerts(tenantId).catch((error) => {
-      console.error('[support] Failed to load alerts:', error)
+      logger.error('[support] Failed to load alerts:', error)
       return []
     }),
   ])

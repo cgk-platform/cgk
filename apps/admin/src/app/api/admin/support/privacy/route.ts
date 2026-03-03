@@ -20,6 +20,7 @@ import {
   type PrivacyRequestStatus,
   type PrivacyRequestType,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -97,7 +98,7 @@ export async function GET(req: NextRequest) {
       stats,
     })
   } catch (error) {
-    console.error('[privacy] GET error:', error)
+    logger.error('[privacy] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch privacy requests' },
       { status: 500 }
@@ -145,7 +146,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ request }, { status: 201 })
   } catch (error) {
-    console.error('[privacy] POST error:', error)
+    logger.error('[privacy] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create privacy request' },
       { status: 500 }

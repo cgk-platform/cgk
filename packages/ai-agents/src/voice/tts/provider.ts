@@ -6,6 +6,7 @@
  */
 
 import type { TTSOptions, TTSProvider, TTSProviderType, TTSResult, Voice } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Create a TTS provider instance based on type
@@ -45,7 +46,7 @@ export async function generateSpeechWithFallback(
     return await primaryProvider.generateSpeech(text, options)
   } catch (error) {
     if (fallbackProvider) {
-      console.warn(`Primary TTS provider ${primaryProvider.name} failed, using fallback:`, error)
+      logger.warn(`Primary TTS provider ${primaryProvider.name} failed, using fallback:`, error)
       return await fallbackProvider.generateSpeech(text, options)
     }
     throw error

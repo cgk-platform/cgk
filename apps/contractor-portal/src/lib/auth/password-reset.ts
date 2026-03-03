@@ -5,6 +5,7 @@
 import { createHash, randomBytes } from 'crypto'
 
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 const RESET_TOKEN_LENGTH = 48
 const RESET_TOKEN_EXPIRATION_HOURS = 1 // 1 hour expiry for security
@@ -164,9 +165,9 @@ export async function sendPasswordResetEmail(
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) {
     // Development mode: log the reset link
-    console.log(`[DEV] Contractor password reset for ${email}:`)
-    console.log(`[DEV] ${resetUrl}`)
-    console.log(`[DEV] Token: ${token}`)
+    logger.info(`[DEV] Contractor password reset for ${email}:`)
+    logger.info(`[DEV] ${resetUrl}`)
+    logger.info(`[DEV] Token: ${token}`)
     return
   }
 
@@ -187,7 +188,7 @@ export async function sendPasswordResetEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    console.error('Failed to send contractor password reset email:', error)
+    logger.error('Failed to send contractor password reset email:', error)
     throw new Error('Failed to send password reset email')
   }
 }

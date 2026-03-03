@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getStuckCreators } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ creators, minDays })
   } catch (error) {
-    console.error('Error fetching stuck creators:', error)
+    logger.error('Error fetching stuck creators:', error)
     return NextResponse.json(
       { error: 'Failed to fetch stuck creators' },
       { status: 500 }

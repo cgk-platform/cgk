@@ -7,6 +7,7 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getDocumentWithSigners, getDocumentAuditLog } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,7 @@ export async function GET(
       auditLog,
     })
   } catch (error) {
-    console.error('Error fetching document:', error)
+    logger.error('Error fetching document:', error)
     return NextResponse.json(
       { error: 'Failed to fetch document' },
       { status: 500 }

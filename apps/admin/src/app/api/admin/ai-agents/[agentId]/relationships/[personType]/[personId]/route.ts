@@ -5,6 +5,7 @@ import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { PersonType } from '@cgk-platform/ai-agents'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ agentId: string; personType: string; personId: string }>
@@ -64,7 +65,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ relationship, preferences, context })
   } catch (error) {
-    console.error('Error fetching relationship:', error)
+    logger.error('Error fetching relationship:', error)
     return NextResponse.json({ error: 'Failed to fetch relationship' }, { status: 500 })
   }
 }
@@ -123,7 +124,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ relationship })
   } catch (error) {
-    console.error('Error updating relationship:', error)
+    logger.error('Error updating relationship:', error)
     return NextResponse.json({ error: 'Failed to update relationship' }, { status: 500 })
   }
 }

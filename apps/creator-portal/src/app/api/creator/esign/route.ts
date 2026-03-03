@@ -6,6 +6,7 @@
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { getPendingSigningRequests, getSignedDocuments } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,7 +60,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching signing requests:', error)
+    logger.error('Error fetching signing requests:', error)
     return Response.json({ error: 'Failed to fetch signing requests' }, { status: 500 })
   }
 }

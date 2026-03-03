@@ -26,6 +26,7 @@ import type {
   TenantEvent,
 } from '../../events'
 import type { JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // Note: ABMetricsAggregatePayload, ABOptimizePayload, ABOrderReconcilePayload
 // are defined in events.ts but we use custom payloads with more fields here.
@@ -158,7 +159,7 @@ export const abHourlyMetricsAggregationJob = defineJob<TenantEvent<ABHourlyMetri
     // const hourStart = new Date(targetHour).toISOString()
     // const hourEnd = new Date(new Date(targetHour).getTime() + 3600000).toISOString()
 
-    console.log(`[ab.hourlyMetricsAggregation] Aggregating metrics`, {
+    logger.info(`[ab.hourlyMetricsAggregation] Aggregating metrics`, {
       tenantId,
       testId: testId || 'all',
       targetHour,
@@ -195,7 +196,7 @@ export const abHourlyMetricsAggregationJob = defineJob<TenantEvent<ABHourlyMetri
       const testIds = [...new Set(filtered.map(r => r.test_id))]
       const variantsAggregated = new Set(filtered.map(r => `${r.test_id}:${r.variant_id}`)).size
 
-      console.log(`[ab.hourlyMetricsAggregation] Aggregated ${filtered.length} event buckets across ${testIds.length} tests`)
+      logger.info(`[ab.hourlyMetricsAggregation] Aggregated ${filtered.length} event buckets across ${testIds.length} tests`)
 
       return { testsProcessed: testIds.length, variantsAggregated }
     })
@@ -244,7 +245,7 @@ export const abNightlyReconciliationJob = defineJob<TenantEvent<ABNightlyReconci
 
     const targetDate = reconciliationDate || new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
-    console.log(`[ab.nightlyReconciliation] Running nightly reconciliation`, {
+    logger.info(`[ab.nightlyReconciliation] Running nightly reconciliation`, {
       tenantId,
       targetDate,
       fullReconciliation,
@@ -314,7 +315,7 @@ export const abAggregateTestMetricsJob = defineJob<TenantEvent<ABAggregateTestMe
       }
     }
 
-    console.log(`[ab.aggregateTestMetrics] Manual aggregation`, {
+    logger.info(`[ab.aggregateTestMetrics] Manual aggregation`, {
       tenantId,
       testId,
       period,
@@ -375,7 +376,7 @@ export const abSyncRedisToPostgresJob = defineJob<TenantEvent<ABSyncRedisToPostg
       }
     }
 
-    console.log(`[ab.syncRedisToPostgres] Syncing Redis to Postgres`, {
+    logger.info(`[ab.syncRedisToPostgres] Syncing Redis to Postgres`, {
       tenantId,
       testIds: testIds || 'all',
       forceSync,
@@ -434,7 +435,7 @@ export const abDailyMetricsSummaryJob = defineJob<TenantEvent<ABDailyMetricsSumm
       }
     }
 
-    console.log(`[ab.dailyMetricsSummary] Generating daily summary`, {
+    logger.info(`[ab.dailyMetricsSummary] Generating daily summary`, {
       tenantId,
       sendToSlack,
       recipientEmail,
@@ -499,7 +500,7 @@ export const abOptimizationJob = defineJob<TenantEvent<ABOptimizationPayload>>({
       }
     }
 
-    console.log(`[ab.optimization] Running optimization`, {
+    logger.info(`[ab.optimization] Running optimization`, {
       tenantId,
       testId: testId || 'all',
       algorithm,
@@ -638,7 +639,7 @@ export const abOptimizeTestJob = defineJob<TenantEvent<ABOptimizeTestPayload>>({
       }
     }
 
-    console.log(`[ab.optimizeTest] Optimizing test`, {
+    logger.info(`[ab.optimizeTest] Optimizing test`, {
       tenantId,
       testId,
       algorithm,
@@ -697,7 +698,7 @@ export const abOptimizationSummaryJob = defineJob<TenantEvent<ABOptimizationSumm
       }
     }
 
-    console.log(`[ab.optimizationSummary] Generating optimization summary`, {
+    logger.info(`[ab.optimizationSummary] Generating optimization summary`, {
       tenantId,
       includeRecommendations,
       jobId: job.id,
@@ -764,7 +765,7 @@ export const abOrderReconciliationJob = defineJob<TenantEvent<ABOrderReconciliat
     const defaultStartTime = new Date(Date.now() - 2 * 3600000).toISOString() // 2 hours ago
     const defaultEndTime = new Date().toISOString()
 
-    console.log(`[ab.orderReconciliation] Reconciling orders`, {
+    logger.info(`[ab.orderReconciliation] Reconciling orders`, {
       tenantId,
       startTime: startTime || defaultStartTime,
       endTime: endTime || defaultEndTime,
@@ -831,7 +832,7 @@ export const abOrderReconciliationManualJob = defineJob<TenantEvent<ABOrderRecon
       }
     }
 
-    console.log(`[ab.orderReconciliationManual] Manual order reconciliation`, {
+    logger.info(`[ab.orderReconciliationManual] Manual order reconciliation`, {
       tenantId,
       orderId,
       testId,
@@ -891,7 +892,7 @@ export const abTestSchedulerJob = defineJob<TenantEvent<ABTestSchedulerPayload>>
       }
     }
 
-    console.log(`[ab.testScheduler] Running test scheduler`, {
+    logger.info(`[ab.testScheduler] Running test scheduler`, {
       tenantId,
       jobId: job.id,
     })
@@ -972,9 +973,9 @@ export const abTestSchedulerJob = defineJob<TenantEvent<ABTestSchedulerPayload>>
         }
       }
 
-      if (testsStarted > 0) console.log(`[ab.testScheduler] Started ${testsStarted} tests`)
-      if (testsEnded > 0) console.log(`[ab.testScheduler] Completed ${testsEnded} tests`)
-      if (winnersDetected > 0) console.log(`[ab.testScheduler] Detected ${winnersDetected} winners`)
+      if (testsStarted > 0) logger.info(`[ab.testScheduler] Started ${testsStarted} tests`)
+      if (testsEnded > 0) logger.info(`[ab.testScheduler] Completed ${testsEnded} tests`)
+      if (winnersDetected > 0) logger.info(`[ab.testScheduler] Detected ${winnersDetected} winners`)
 
       return { testsStarted, testsEnded }
     })
@@ -1014,7 +1015,7 @@ export const handleABTestCreatedJob = defineJob<TenantEvent<ABTestCreatedPayload
       }
     }
 
-    console.log(`[ab.handleTestCreated] New test created`, {
+    logger.info(`[ab.handleTestCreated] New test created`, {
       tenantId,
       testId,
       name,
@@ -1060,7 +1061,7 @@ export const handleABTestStartedJob = defineJob<TenantEvent<ABTestStartedPayload
       }
     }
 
-    console.log(`[ab.handleTestStarted] Test started`, {
+    logger.info(`[ab.handleTestStarted] Test started`, {
       tenantId,
       testId,
       jobId: job.id,
@@ -1104,7 +1105,7 @@ export const handleABTestEndedJob = defineJob<TenantEvent<ABTestEndedPayload>>({
       }
     }
 
-    console.log(`[ab.handleTestEnded] Test ended`, {
+    logger.info(`[ab.handleTestEnded] Test ended`, {
       tenantId,
       testId,
       winningVariant,

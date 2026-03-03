@@ -18,6 +18,7 @@ import type {
   ResourceContents,
   TextContent,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * MCP server configuration
@@ -187,11 +188,11 @@ export function createMCPServer(config: MCPServerConfig): MCPServer {
     },
 
     async start() {
-      console.log(`MCP Server ${config.name} v${config.version} starting...`)
+      logger.info(`MCP Server ${config.name} v${config.version} starting...`)
     },
 
     async stop() {
-      console.log(`MCP Server ${config.name} stopping...`)
+      logger.info(`MCP Server ${config.name} stopping...`)
     },
   }
 }

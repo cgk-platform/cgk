@@ -12,6 +12,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 import type { CustomerReview } from '../route'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -304,7 +305,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       status: existingReview.rows[0] ? 200 : 201,
     })
   } catch (error) {
-    console.error('Failed to save review:', error)
+    logger.error('Failed to save review:', error)
     return NextResponse.json({ error: 'Failed to save review' }, { status: 500 })
   }
 }

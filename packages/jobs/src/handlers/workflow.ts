@@ -13,6 +13,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 
 import { defineJob } from '../define'
 import type { Job } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 async function getWorkflowEngine(tenantId: string) {
   const { WorkflowEngine } = await import('@cgk-platform/admin-core/workflow')
@@ -49,7 +50,7 @@ export const processScheduledActionsJob = defineJob<ProcessScheduledActionsPaylo
       await engine.loadRules()
       await engine.processScheduledActions()
 
-      console.log(`[workflow/process-scheduled-actions] tenantId=${tenantId} completed`)
+      logger.info(`[workflow/process-scheduled-actions] tenantId=${tenantId} completed`)
 
       return {
         success: true,
@@ -57,7 +58,7 @@ export const processScheduledActionsJob = defineJob<ProcessScheduledActionsPaylo
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[workflow/process-scheduled-actions] tenantId=${tenantId} error:`, message)
+      logger.error(`[workflow/process-scheduled-actions] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -100,13 +101,13 @@ export const checkTimeElapsedTriggersJob = defineJob<CheckTimeElapsedTriggersPay
       const entities = await getEntitiesForTimeElapsedCheck(tenantId, entityType)
 
       if (entities.length === 0) {
-        console.log(`[workflow/check-time-elapsed-triggers] tenantId=${tenantId} no entities to check`)
+        logger.info(`[workflow/check-time-elapsed-triggers] tenantId=${tenantId} no entities to check`)
         return { success: true, data: { checked: 0, triggered: 0 } }
       }
 
       const executions = await engine.checkTimeElapsedTriggers(entities)
 
-      console.log(
+      logger.info(
         `[workflow/check-time-elapsed-triggers] tenantId=${tenantId} checked=${entities.length} triggered=${executions.length}`
       )
 
@@ -116,7 +117,7 @@ export const checkTimeElapsedTriggersJob = defineJob<CheckTimeElapsedTriggersPay
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[workflow/check-time-elapsed-triggers] tenantId=${tenantId} error:`, message)
+      logger.error(`[workflow/check-time-elapsed-triggers] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -268,7 +269,7 @@ export const cleanupExecutionLogsJob = defineJob<CleanupExecutionLogsPayload>({
         }
       })
 
-      console.log(
+      logger.info(
         `[workflow/cleanup-execution-logs] tenantId=${tenantId} deleted: executions=${deleted.executions} actions=${deleted.actions} states=${deleted.states}`
       )
 
@@ -278,7 +279,7 @@ export const cleanupExecutionLogsJob = defineJob<CleanupExecutionLogsPayload>({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[workflow/cleanup-execution-logs] tenantId=${tenantId} error:`, message)
+      logger.error(`[workflow/cleanup-execution-logs] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -314,7 +315,7 @@ export const processSnoozedThreadsJob = defineJob<ProcessSnoozedThreadsPayload>(
       // Unsnooze threads that are past their snooze date
       const unsnoozedCount = await unsnoozeThreads(tenantId)
 
-      console.log(`[workflow/process-snoozed-threads] tenantId=${tenantId} unsnoozed=${unsnoozedCount}`)
+      logger.info(`[workflow/process-snoozed-threads] tenantId=${tenantId} unsnoozed=${unsnoozedCount}`)
 
       return {
         success: true,
@@ -322,7 +323,7 @@ export const processSnoozedThreadsJob = defineJob<ProcessSnoozedThreadsPayload>(
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[workflow/process-snoozed-threads] tenantId=${tenantId} error:`, message)
+      logger.error(`[workflow/process-snoozed-threads] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },

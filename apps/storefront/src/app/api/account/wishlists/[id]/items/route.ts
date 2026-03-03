@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { WishlistItem } from '@/lib/account/types'
+import { logger } from '@cgk-platform/logging'
 
 interface AddItemRequest {
   productId: string
@@ -86,7 +87,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         })
       }
     } catch (error) {
-      console.error('Failed to get/create default wishlist:', error)
+      logger.error('Failed to get/create default wishlist:', error)
       return NextResponse.json({ error: 'Failed to process wishlist' }, { status: 500 })
     }
   }
@@ -252,7 +253,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(item)
   } catch (error) {
-    console.error('Failed to add item to wishlist:', error)
+    logger.error('Failed to add item to wishlist:', error)
     return NextResponse.json({ error: 'Failed to add item' }, { status: 500 })
   }
 }

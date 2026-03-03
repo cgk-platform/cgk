@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 
 import { getSavedFilters, createSavedFilter, getCreatorsForFilter } from '@/lib/pipeline/db'
 import type { PipelineFilters } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -28,7 +29,7 @@ export async function GET() {
 
     return Response.json({ filters, creators })
   } catch (error) {
-    console.error('Saved filters error:', error)
+    logger.error('Saved filters error:', error)
     return Response.json(
       { error: 'Failed to fetch saved filters' },
       { status: 500 }
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true, filter })
   } catch (error) {
-    console.error('Saved filter create error:', error)
+    logger.error('Saved filter create error:', error)
     return Response.json(
       { error: 'Failed to create saved filter' },
       { status: 500 }

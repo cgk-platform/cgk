@@ -12,6 +12,7 @@ import { getTenantStripeClient } from '@cgk-platform/integrations'
 import { withTenant, sql } from '@cgk-platform/db'
 
 import { getTenantSlug } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -195,7 +196,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       redirectUrl: `/order-confirmation/${orderId}`,
     })
   } catch (error) {
-    console.error('[confirm-order] Error:', error)
+    logger.error('[confirm-order] Error:', error)
     return NextResponse.json(
       { error: 'Failed to create order' },
       { status: 500 }

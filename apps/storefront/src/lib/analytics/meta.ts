@@ -6,6 +6,7 @@
  */
 
 import type { EcommerceItem, PurchaseEventData, ViewItemListData } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Debug mode from env
 const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true'
@@ -30,7 +31,7 @@ function isMetaPixelAvailable(): boolean {
   if (typeof window === 'undefined') return false
   if (!getMetaPixelId()) {
     if (DEBUG_MODE) {
-      console.log('[Meta Pixel] Not configured - no Meta pixel ID found')
+      logger.info('[Meta Pixel] Not configured - no Meta pixel ID found')
     }
     return false
   }
@@ -42,7 +43,7 @@ function isMetaPixelAvailable(): boolean {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    console.log(`[Meta Pixel] ${message}`, data ?? '')
+    logger.info(`[Meta Pixel] ${message}`, data ?? '')
   }
 }
 
@@ -68,7 +69,7 @@ function sendMetaEvent(
     }
     debugLog(`Sent ${eventName}`, params)
   } catch (error) {
-    console.error(`[Meta Pixel] Error sending ${eventName}:`, error)
+    logger.error(`[Meta Pixel] Error sending ${eventName}:`, error)
   }
 }
 

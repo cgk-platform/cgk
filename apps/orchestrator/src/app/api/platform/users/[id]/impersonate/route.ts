@@ -6,6 +6,7 @@ import {
   ImpersonationError,
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ async function sendImpersonationNotice(params: ImpersonationNoticeParams): Promi
   const resendApiKey = process.env.RESEND_API_KEY
   const emailFrom = process.env.EMAIL_FROM || process.env.ALERT_EMAIL_FROM
   if (!resendApiKey || !emailFrom) {
-    console.warn('[Impersonation] Email not configured (RESEND_API_KEY or EMAIL_FROM missing)')
+    logger.warn('[Impersonation] Email not configured (RESEND_API_KEY or EMAIL_FROM missing)')
     return
   }
 
@@ -72,7 +73,7 @@ async function sendImpersonationNotice(params: ImpersonationNoticeParams): Promi
     throw new Error(`Resend API error ${res.status}: ${await res.text()}`)
   }
 
-  console.log(`[Impersonation] Security notice sent to ${targetEmail} (session ${sessionId})`)
+  logger.info(`[Impersonation] Security notice sent to ${targetEmail} (session ${sessionId})`)
 }
 
 interface RouteParams {
@@ -157,7 +158,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       reason,
       startedAt: new Date(),
       sessionId: result.session.id,
-    }).catch((err) => console.error('[Impersonation] Security notice failed:', err))
+    }).catch((err) => logger.error('[Impersonation] Security notice failed:', err))
 
     // Get tenant info for response
     const tenantResult = await sql`
@@ -192,7 +193,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    console.error('Start impersonation error:', error)
+    logger.error('Start impersonation error:', error)
     return Response.json(
       { error: 'Failed to start impersonation' },
       { status: 500 }
@@ -236,7 +237,7 @@ export async function GET(request: Request, _params: RouteParams) {
 
     return Response.json({ sessions: enrichedSessions })
   } catch (error) {
-    console.error('Get impersonation sessions error:', error)
+    logger.error('Get impersonation sessions error:', error)
     return Response.json(
       { error: 'Failed to get impersonation sessions' },
       { status: 500 }
@@ -272,7 +273,7 @@ export async function DELETE(request: Request, _params: RouteParams) {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('End impersonation error:', error)
+    logger.error('End impersonation error:', error)
     return Response.json(
       { error: 'Failed to end impersonation' },
       { status: 500 }

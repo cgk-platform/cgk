@@ -20,6 +20,7 @@ import type {
   InboundProcessingStatus,
   LogInboundEmailInput,
 } from './types.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // Webhook Signature Verification
@@ -373,7 +374,7 @@ export async function logUnknownInbound(email: InboundEmail): Promise<void> {
       )
     `
   } catch (error) {
-    console.error('Failed to log unknown inbound email:', error)
+    logger.error('Failed to log unknown inbound email', error instanceof Error ? error : new Error(String(error)))
   }
 }
 

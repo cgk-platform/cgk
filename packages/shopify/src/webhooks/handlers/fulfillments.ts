@@ -8,6 +8,8 @@ import { withTenant, sql } from '@cgk-platform/db'
 import { tasks } from '@trigger.dev/sdk/v3'
 
 import type { ShopifyFulfillmentPayload } from '../types'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Handle fulfillments/create webhook
@@ -82,7 +84,7 @@ export async function handleFulfillmentCreate(
     }),
   ])
 
-  console.log(
+  logger.info(
     `[Webhook] Fulfillment ${shopifyFulfillmentId} created for order ${orderId}, tenant ${tenantId}`
   )
 }
@@ -160,7 +162,7 @@ export async function handleFulfillmentUpdate(
     })
   }
 
-  console.log(
+  logger.info(
     `[Webhook] Fulfillment ${shopifyFulfillmentId} updated for order ${orderId}, tenant ${tenantId}`
   )
 }

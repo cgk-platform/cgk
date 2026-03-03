@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 interface TemplateRecord {
   id: string
@@ -49,7 +50,7 @@ export async function GET() {
 
     return NextResponse.json({ templates: result.rows })
   } catch (error) {
-    console.error('Failed to get Slack templates:', error)
+    logger.error('Failed to get Slack templates:', error)
     return NextResponse.json(
       { error: 'Failed to get templates' },
       { status: 500 },

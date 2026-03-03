@@ -14,6 +14,7 @@ import { defineJob } from '@cgk-platform/jobs'
 import { refreshGoogleAdsToken } from '../google-ads/refresh.js'
 import { refreshMetaToken } from '../meta/refresh.js'
 import { refreshTikTokToken } from '../tiktok/refresh.js'
+import { logger } from '@cgk-platform/logging'
 
 /** Provider types for token refresh */
 type RefreshableProvider = 'meta' | 'google_ads' | 'tiktok'
@@ -111,7 +112,7 @@ async function notifyTokenRefreshFailed(
   const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
   // Always log the failure
-  console.error(
+  logger.error(
     `[token-refresh] Failed to refresh ${provider} token for tenant ${tenantId}:`,
     errorMessage
   )
@@ -124,7 +125,7 @@ async function notifyTokenRefreshFailed(
 
     const resend = await getTenantResendClient(tenantId)
     if (!resend) {
-      console.warn(`[token-refresh] Cannot send notification - Resend not configured for ${tenantId}`)
+      logger.warn(`[token-refresh] Cannot send notification - Resend not configured for ${tenantId}`)
       return
     }
 
@@ -134,7 +135,7 @@ async function notifyTokenRefreshFailed(
     // Get admin emails
     const adminEmails = await getTenantAdminEmails(tenantId)
     if (adminEmails.length === 0) {
-      console.warn(`[token-refresh] No admin emails found for tenant ${tenantId}`)
+      logger.warn(`[token-refresh] No admin emails found for tenant ${tenantId}`)
       return
     }
 
@@ -172,10 +173,10 @@ async function notifyTokenRefreshFailed(
       `,
     })
 
-    console.log(`[token-refresh] Sent failure notification to ${adminEmails.join(', ')} for ${tenantId}`)
+    logger.info(`[token-refresh] Sent failure notification to ${adminEmails.join(', ')} for ${tenantId}`)
   } catch (emailError) {
     // Don't let email failures break the job
-    console.error(
+    logger.error(
       `[token-refresh] Failed to send notification email for ${tenantId}:`,
       emailError instanceof Error ? emailError.message : emailError
     )
@@ -196,7 +197,7 @@ export const refreshExpiringTokensJob = defineJob({
   handler: async () => {
     const expiringConnections = await getExpiringConnections()
 
-    console.log(
+    logger.info(
       `[token-refresh] Found ${expiringConnections.length} tokens to refresh`
     )
 
@@ -225,7 +226,7 @@ export const refreshExpiringTokensJob = defineJob({
 
         if (refreshResult.success) {
           results.success++
-          console.log(
+          logger.info(
             `[token-refresh] Refreshed ${connection.provider} token for tenant ${connection.tenantId}`
           )
         } else {
@@ -251,7 +252,7 @@ export const refreshExpiringTokensJob = defineJob({
           error: errorMessage,
         })
 
-        console.error(
+        logger.error(
           `[token-refresh] Failed to refresh ${connection.provider} token for tenant ${connection.tenantId}:`,
           error
         )
@@ -264,7 +265,7 @@ export const refreshExpiringTokensJob = defineJob({
       }
     }
 
-    console.log(
+    logger.info(
       `[token-refresh] Completed: ${results.success} success, ${results.failed} failed`
     )
 

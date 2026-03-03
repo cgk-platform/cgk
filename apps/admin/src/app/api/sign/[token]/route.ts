@@ -24,6 +24,7 @@ import {
   logDocumentDeclined,
   type EsignField,
 } from '@cgk-platform/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -188,7 +189,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       })),
     })
   } catch (error) {
-    console.error('Error loading signing session:', error)
+    logger.error('Error loading signing session', { error })
     return NextResponse.json(
       { error: 'Failed to load signing session' },
       { status: 500 }
@@ -297,7 +298,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       allComplete: allSigned,
     })
   } catch (error) {
-    console.error('Error processing signature:', error)
+    logger.error('Error processing signature', { error })
     return NextResponse.json(
       { error: 'Failed to process signature' },
       { status: 500 }

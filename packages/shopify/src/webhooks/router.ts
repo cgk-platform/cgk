@@ -17,6 +17,8 @@ import { handleOrderCreate, handleOrderUpdate, handleOrderPaid, handleOrderCance
 import { handleProductCreate, handleProductUpdate, handleProductDelete } from './handlers/products'
 import { handleRefundCreate } from './handlers/refunds'
 import type { WebhookHandler, WebhookTopic } from './types'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Registry of webhook handlers by topic
@@ -70,7 +72,7 @@ export async function routeToHandler(
   const handler = HANDLERS[topic as WebhookTopic]
 
   if (!handler) {
-    console.log(`[Webhook] No handler registered for topic: ${topic}`)
+    logger.info(`[Webhook] No handler registered for topic: ${topic}`)
     return
   }
 

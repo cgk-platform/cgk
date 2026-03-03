@@ -8,6 +8,7 @@
 import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -173,7 +174,7 @@ export async function POST(req: Request): Promise<Response> {
 
     return Response.json(summary)
   } catch (error) {
-    console.error('Error generating annual summary:', error)
+    logger.error('Error generating annual summary:', error)
     return Response.json({ error: 'Failed to generate annual summary' }, { status: 500 })
   }
 }

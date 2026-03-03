@@ -9,6 +9,7 @@ import {
 } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 const MAX_INVITATIONS_PER_DAY = 50
 
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Error fetching team members:', error)
+    logger.error('Error fetching team members:', error)
     return NextResponse.json(
       { error: 'Failed to fetch team members' },
       { status: 500 }

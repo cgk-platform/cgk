@@ -19,6 +19,7 @@ import type { Order } from '@cgk-platform/commerce'
 import { useState, useCallback, useEffect, useRef } from 'react'
 
 import type { UseOrdersOptions, UseOrdersReturn, OrderActions } from '../context/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Hook for fetching customer orders
@@ -97,7 +98,7 @@ export function useOrders(
         }
       } catch (err) {
         if (!cancelled) {
-          console.error('Failed to fetch orders:', err)
+          logger.error('Failed to fetch orders:', err)
           setError(err instanceof Error ? err.message : 'Failed to fetch orders')
         }
       } finally {
@@ -131,7 +132,7 @@ export function useOrders(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      console.error('Failed to load more orders:', err)
+      logger.error('Failed to load more orders:', err)
       setError(err instanceof Error ? err.message : 'Failed to load more orders')
     } finally {
       setIsLoading(false)
@@ -149,7 +150,7 @@ export function useOrders(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      console.error('Failed to refetch orders:', err)
+      logger.error('Failed to refetch orders:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch orders')
     } finally {
       setIsLoading(false)
@@ -221,7 +222,7 @@ export function useOrder(actions: OrderActions, orderId: string) {
         }
       } catch (err) {
         if (!cancelled) {
-          console.error('Failed to fetch order:', err)
+          logger.error('Failed to fetch order:', err)
           setError(err instanceof Error ? err.message : 'Failed to fetch order')
         }
       } finally {
@@ -248,7 +249,7 @@ export function useOrder(actions: OrderActions, orderId: string) {
       const result = await actions.getOrder(orderIdRef.current)
       setOrder(result)
     } catch (err) {
-      console.error('Failed to refetch order:', err)
+      logger.error('Failed to refetch order:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch order')
     } finally {
       setIsLoading(false)

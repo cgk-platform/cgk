@@ -7,6 +7,7 @@
 
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -134,7 +135,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[bundle-config] Upsert failed:', error)
+    logger.error('[bundle-config] Upsert failed:', error)
     return NextResponse.json(
       { error: 'Failed to save bundle config' },
       { status: 500 }

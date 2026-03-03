@@ -5,6 +5,7 @@ import { Command } from 'commander'
 import fs from 'fs-extra'
 import inquirer from 'inquirer'
 import ora from 'ora'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Validate tenant slug format
@@ -72,15 +73,15 @@ export const tenantImportCommand = new Command('tenant:import')
     const filePath = path.isAbsolute(file) ? file : path.join(process.cwd(), file)
 
     if (!(await fs.pathExists(filePath))) {
-      console.log(chalk.red('\n[ERROR] File not found'))
-      console.log(chalk.dim(`   Path: ${filePath}`))
+      logger.info(chalk.red('\n[ERROR] File not found'))
+      logger.info(chalk.dim(`   Path: ${filePath}`))
       process.exit(1)
     }
 
     // Require target slug
     if (!options.target) {
-      console.log(chalk.red('\n[ERROR] Target tenant slug is required'))
-      console.log(chalk.dim('   Use --target <slug> to specify the target tenant'))
+      logger.info(chalk.red('\n[ERROR] Target tenant slug is required'))
+      logger.info(chalk.dim('   Use --target <slug> to specify the target tenant'))
       process.exit(1)
     }
 
@@ -88,8 +89,8 @@ export const tenantImportCommand = new Command('tenant:import')
 
     // Validate target slug format
     if (!isValidSlug(targetSlug)) {
-      console.log(chalk.red('\n[ERROR] Invalid target tenant slug'))
-      console.log(
+      logger.info(chalk.red('\n[ERROR] Invalid target tenant slug'))
+      logger.info(
         chalk.dim(
           '   Slug must be lowercase alphanumeric with underscores only (e.g., my_brand)'
         )
@@ -99,15 +100,15 @@ export const tenantImportCommand = new Command('tenant:import')
 
     const targetSchema = `tenant_${targetSlug}`
 
-    console.log(chalk.cyan('\n[IMPORT] Tenant Import\n'))
-    console.log(`  File: ${chalk.bold(filePath)}`)
-    console.log(`  Target: ${chalk.bold(targetSlug)}`)
-    console.log(`  Schema: ${chalk.bold(targetSchema)}`)
+    logger.info(chalk.cyan('\n[IMPORT] Tenant Import\n'))
+    logger.info(`  File: ${chalk.bold(filePath)}`)
+    logger.info(`  Target: ${chalk.bold(targetSlug)}`)
+    logger.info(`  Schema: ${chalk.bold(targetSchema)}`)
 
     // Check POSTGRES_URL (Vercel/Neon) or DATABASE_URL
     if (!process.env.POSTGRES_URL && !process.env.DATABASE_URL) {
-      console.log(chalk.red('\n[ERROR] POSTGRES_URL not set'))
-      console.log(chalk.dim('   Run: npx @cgk-platform/cli setup:database'))
+      logger.info(chalk.red('\n[ERROR] POSTGRES_URL not set'))
+      logger.info(chalk.dim('   Run: npx @cgk-platform/cli setup:database'))
       process.exit(1)
     }
 
@@ -119,28 +120,28 @@ export const tenantImportCommand = new Command('tenant:import')
 
       // Show export metadata
       if (exportData.sourceSlug || exportData.exportDate) {
-        console.log('')
-        console.log(chalk.bold('  Export metadata:'))
+        logger.info('')
+        logger.info(chalk.bold('  Export metadata:'))
         if (exportData.sourceSlug) {
-          console.log(chalk.dim(`    Source tenant: ${exportData.sourceSlug}`))
+          logger.info(chalk.dim(`    Source tenant: ${exportData.sourceSlug}`))
         }
         if (exportData.sourceSchema) {
-          console.log(chalk.dim(`    Source schema: ${exportData.sourceSchema}`))
+          logger.info(chalk.dim(`    Source schema: ${exportData.sourceSchema}`))
         }
         if (exportData.exportDate) {
-          console.log(chalk.dim(`    Export date: ${new Date(exportData.exportDate).toLocaleString()}`))
+          logger.info(chalk.dim(`    Export date: ${new Date(exportData.exportDate).toLocaleString()}`))
         }
         if (exportData.tables && exportData.tables.length > 0) {
-          console.log(chalk.dim(`    Tables: ${exportData.tables.length}`))
+          logger.info(chalk.dim(`    Tables: ${exportData.tables.length}`))
           for (const table of exportData.tables.slice(0, 10)) {
-            console.log(chalk.dim(`      - ${table}`))
+            logger.info(chalk.dim(`      - ${table}`))
           }
           if (exportData.tables.length > 10) {
-            console.log(chalk.dim(`      ... and ${exportData.tables.length - 10} more`))
+            logger.info(chalk.dim(`      ... and ${exportData.tables.length - 10} more`))
           }
         }
       }
-      console.log('')
+      logger.info('')
 
       // Check if target tenant exists
       spinner.start('Checking target tenant...')
@@ -158,7 +159,7 @@ export const tenantImportCommand = new Command('tenant:import')
           if (failed.length > 0) {
             spinner.fail('Failed to create target tenant')
             for (const f of failed) {
-              console.log(chalk.red(`  [ERROR] ${f.migration.name}: ${f.error}`))
+              logger.info(chalk.red(`  [ERROR] ${f.migration.name}: ${f.error}`))
             }
             process.exit(1)
           }
@@ -174,9 +175,9 @@ export const tenantImportCommand = new Command('tenant:import')
             ON CONFLICT (slug) DO NOTHING
           `
         } else {
-          console.log('')
-          console.log(chalk.yellow('  Use --create-tenant to create the target tenant'))
-          console.log(chalk.dim('  Or create it manually with: npx @cgk-platform/cli tenant:create ' + targetSlug))
+          logger.info('')
+          logger.info(chalk.yellow('  Use --create-tenant to create the target tenant'))
+          logger.info(chalk.dim('  Or create it manually with: npx @cgk-platform/cli tenant:create ' + targetSlug))
           process.exit(1)
         }
       } else {
@@ -185,10 +186,10 @@ export const tenantImportCommand = new Command('tenant:import')
 
       // Warn about data overwrite
       if (!options.dryRun && !options.yes) {
-        console.log('')
-        console.log(chalk.yellow('  [WARNING] This will import data into the target tenant.'))
-        console.log(chalk.yellow('  Existing data may be affected if there are conflicts.'))
-        console.log('')
+        logger.info('')
+        logger.info(chalk.yellow('  [WARNING] This will import data into the target tenant.'))
+        logger.info(chalk.yellow('  Existing data may be affected if there are conflicts.'))
+        logger.info('')
 
         const { proceed } = await inquirer.prompt([
           {
@@ -200,7 +201,7 @@ export const tenantImportCommand = new Command('tenant:import')
         ])
 
         if (!proceed) {
-          console.log(chalk.dim('\n  Import cancelled.\n'))
+          logger.info(chalk.dim('\n  Import cancelled.\n'))
           return
         }
       }
@@ -216,22 +217,22 @@ export const tenantImportCommand = new Command('tenant:import')
       }
 
       if (options.dryRun) {
-        console.log(chalk.yellow('\n  DRY RUN - No changes will be made\n'))
-        console.log(chalk.dim('  Would execute SQL import with:'))
-        console.log(chalk.dim(`    Target schema: ${targetSchema}`))
-        console.log(chalk.dim(`    SQL content: ${sqlContent.length} characters`))
+        logger.info(chalk.yellow('\n  DRY RUN - No changes will be made\n'))
+        logger.info(chalk.dim('  Would execute SQL import with:'))
+        logger.info(chalk.dim(`    Target schema: ${targetSchema}`))
+        logger.info(chalk.dim(`    SQL content: ${sqlContent.length} characters`))
 
         // Show first few lines
         const previewLines = sqlContent.split('\n').slice(0, 20)
-        console.log('')
-        console.log(chalk.dim('  Preview:'))
+        logger.info('')
+        logger.info(chalk.dim('  Preview:'))
         for (const line of previewLines) {
-          console.log(chalk.dim(`    ${line}`))
+          logger.info(chalk.dim(`    ${line}`))
         }
         if (sqlContent.split('\n').length > 20) {
-          console.log(chalk.dim('    ... (truncated)'))
+          logger.info(chalk.dim('    ... (truncated)'))
         }
-        console.log('')
+        logger.info('')
         return
       }
 
@@ -276,26 +277,26 @@ export const tenantImportCommand = new Command('tenant:import')
         spinner.warn(`Import completed with errors: ${successCount} succeeded, ${errorCount} failed`)
 
         if (errors.length > 0) {
-          console.log('')
-          console.log(chalk.yellow('  Some statements failed:'))
+          logger.info('')
+          logger.info(chalk.yellow('  Some statements failed:'))
           for (const error of errors.slice(0, 5)) {
-            console.log(chalk.dim(`    - ${error.slice(0, 150)}`))
+            logger.info(chalk.dim(`    - ${error.slice(0, 150)}`))
           }
           if (errors.length > 5) {
-            console.log(chalk.dim(`    ... and ${errors.length - 5} more errors`))
+            logger.info(chalk.dim(`    ... and ${errors.length - 5} more errors`))
           }
         }
       }
 
-      console.log('')
-      console.log(chalk.green('[SUCCESS] Import completed!\n'))
-      console.log('Verify the import:')
-      console.log(chalk.cyan(`  npx @cgk-platform/cli tenant:list --status active`))
-      console.log('')
+      logger.info('')
+      logger.info(chalk.green('[SUCCESS] Import completed!\n'))
+      logger.info('Verify the import:')
+      logger.info(chalk.cyan(`  npx @cgk-platform/cli tenant:list --status active`))
+      logger.info('')
     } catch (error) {
       spinner.fail('Import failed')
       if (error instanceof Error) {
-        console.log(chalk.red(`  ${error.message}`))
+        logger.info(chalk.red(`  ${error.message}`))
       }
       process.exit(1)
     }

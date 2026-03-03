@@ -6,6 +6,7 @@
  */
 
 import * as crypto from 'node:crypto'
+import { logger } from '@cgk-platform/logging'
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 16
@@ -108,7 +109,7 @@ export function safeDecrypt(encryptedBase64: string | null | undefined): string 
   try {
     return decrypt(encryptedBase64)
   } catch (error) {
-    console.error('[encryption] Failed to decrypt value:', error)
+    logger.error('[encryption] Failed to decrypt value:', error)
     return null
   }
 }

@@ -7,6 +7,7 @@
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { getProject, updateProject, canEditProject, type UpdateProjectInput } from '@/lib/projects'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +54,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
       canEdit: canEditProject(project),
     })
   } catch (error) {
-    console.error('Error fetching project:', error)
+    logger.error('Error fetching project:', error)
     return Response.json({ error: 'Failed to fetch project' }, { status: 500 })
   }
 }
@@ -105,7 +106,7 @@ export async function PATCH(req: Request, { params }: RouteParams): Promise<Resp
 
     return Response.json({ project })
   } catch (error) {
-    console.error('Error updating project:', error)
+    logger.error('Error updating project:', error)
     const message = error instanceof Error ? error.message : 'Failed to update project'
     return Response.json({ error: message }, { status: 400 })
   }

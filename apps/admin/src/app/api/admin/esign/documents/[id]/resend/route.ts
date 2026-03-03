@@ -7,6 +7,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { resendDocument, addAuditLogEntry } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,7 +42,7 @@ export async function POST(
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error resending document:', error)
+    logger.error('Error resending document:', error)
     return NextResponse.json(
       { error: 'Failed to resend document' },
       { status: 500 }

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -97,10 +98,13 @@ export function ProjectCard({ project, isDragging, onClick }: ProjectCardProps) 
       <div className="mb-2 flex items-center gap-2">
         <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[10px] font-medium text-slate-300">
           {project.creatorAvatar ? (
-            <img
+            <Image
               src={project.creatorAvatar}
               alt={project.creatorName}
-              className="h-5 w-5 rounded-full object-cover"
+              width={20}
+              height={20}
+              className="rounded-full object-cover"
+              unoptimized
             />
           ) : (
             initials

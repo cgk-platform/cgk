@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { generateAuthorizationUrl, getOAuthConfigFromEnv, type OAuthState } from '@cgk-platform/dam'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   const headerList = await headers()
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ authUrl })
   } catch (error) {
-    console.error('Failed to generate auth URL:', error)
+    logger.error('Failed to generate auth URL:', error)
     return NextResponse.json(
       { error: 'Google Drive integration not configured' },
       { status: 500 }

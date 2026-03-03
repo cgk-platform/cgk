@@ -8,6 +8,7 @@ import { getSetCookieHeader } from '@/lib/auth/cookies'
 import { signContractorJWT } from '@/lib/auth/jwt'
 import { verifyContractorMagicLink } from '@/lib/auth/magic-link'
 import { createContractorSession } from '@/lib/auth/session'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/verify
@@ -96,7 +97,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    console.error('Verify error:', error)
+    logger.error('Verify error:', error)
     const message = error instanceof Error ? error.message : 'Verification failed'
     return Response.json({ error: message }, { status: 401 })
   }

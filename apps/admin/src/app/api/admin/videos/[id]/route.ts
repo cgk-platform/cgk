@@ -18,6 +18,7 @@ import {
 import type { UpdateVideoInput } from '@cgk-platform/video'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -123,7 +124,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     try {
       await deleteAsset(existingVideo.muxAssetId)
     } catch (error) {
-      console.error('Failed to delete Mux asset:', error)
+      logger.error('Failed to delete Mux asset:', error)
       // Continue with soft delete even if Mux deletion fails
     }
   }

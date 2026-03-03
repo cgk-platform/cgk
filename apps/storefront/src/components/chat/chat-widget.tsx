@@ -11,6 +11,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================
 // TYPES
@@ -139,7 +140,7 @@ export function ChatWidget({
         setIsOnline(data.isOnline)
         setError(null)
       } catch (err) {
-        console.error('[ChatWidget] Failed to load config:', err)
+        logger.error('[ChatWidget] Failed to load config:', err)
         setError('Unable to load chat. Please try again later.')
       } finally {
         setIsLoading(false)
@@ -197,7 +198,7 @@ export function ChatWidget({
           }
         }
       } catch (err) {
-        console.error('[ChatWidget] Failed to fetch messages:', err)
+        logger.error('[ChatWidget] Failed to fetch messages:', err)
       }
     }
 
@@ -265,7 +266,7 @@ export function ChatWidget({
         ])
       }
     } catch (err) {
-      console.error('[ChatWidget] Failed to start session:', err)
+      logger.error('[ChatWidget] Failed to start session:', err)
       setError(err instanceof Error ? err.message : 'Failed to start chat')
     } finally {
       setIsLoading(false)
@@ -318,7 +319,7 @@ export function ChatWidget({
         prev.map((msg) => (msg.id === optimisticMessage.id ? data.message : msg))
       )
     } catch (err) {
-      console.error('[ChatWidget] Failed to send message:', err)
+      logger.error('[ChatWidget] Failed to send message:', err)
       // Remove optimistic message on error
       setMessages((prev) => prev.filter((msg) => msg.id !== optimisticMessage.id))
       setError('Failed to send message. Please try again.')
@@ -345,7 +346,7 @@ export function ChatWidget({
       setMessages([])
       setShowPreChat(true)
     } catch (err) {
-      console.error('[ChatWidget] Failed to end session:', err)
+      logger.error('[ChatWidget] Failed to end session:', err)
     }
   }, [session, tenantId, baseUrl, onSessionEnd])
 

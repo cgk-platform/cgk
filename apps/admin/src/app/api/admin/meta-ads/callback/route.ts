@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { withTenant, sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/meta-ads/callback
@@ -146,7 +147,7 @@ export async function GET(request: Request) {
       new URL('/admin/integrations/meta-ads?success=connected', appUrl)
     )
   } catch (error) {
-    console.error('Meta OAuth error:', error)
+    logger.error('Meta OAuth error:', error)
     return NextResponse.redirect(
       new URL('/admin/integrations/meta-ads?error=oauth_failed', appUrl)
     )

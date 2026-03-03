@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { Wishlist, WishlistItem } from '@/lib/account/types'
+import { logger } from '@cgk-platform/logging'
 
 interface WishlistRow {
   id: string
@@ -139,7 +140,7 @@ export async function GET() {
 
     return NextResponse.json(wishlist)
   } catch (error) {
-    console.error('Failed to get default wishlist:', error)
+    logger.error('Failed to get default wishlist:', error)
     // Return empty wishlist if tables don't exist
     return NextResponse.json({
       id: 'default',

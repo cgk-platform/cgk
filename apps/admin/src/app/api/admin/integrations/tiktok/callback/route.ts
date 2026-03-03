@@ -1,5 +1,6 @@
 import { completeTikTokOAuth } from '@cgk-platform/integrations'
 import { redirect } from 'next/navigation'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,7 @@ export async function GET(req: Request) {
 
     redirect(result.returnUrl || '/admin/settings/integrations?success=tiktok')
   } catch (err) {
-    console.error('TikTok OAuth callback failed:', err)
+    logger.error('TikTok OAuth callback failed:', err)
     const message = err instanceof Error ? err.message : 'OAuth failed'
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(message)}`)
   }

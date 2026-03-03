@@ -13,6 +13,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // MEDIA PROCESSING PAYLOAD TYPES
@@ -127,7 +128,7 @@ export const creatorFileProcessingJob = defineJob<TenantEvent<CreatorFileProcess
     const { tenantId, fileId, creatorId: _creatorId, projectId, fileType, fileUrl, fileName, fileSize, mimeType } =
       job.payload
 
-    console.log(`[Media] Processing ${fileType} file ${fileId} for project ${projectId}`)
+    logger.info(`[Media] Processing ${fileType} file ${fileId} for project ${projectId}`)
 
     switch (fileType) {
       case 'video':
@@ -161,7 +162,7 @@ export const creatorFileProcessingJob = defineJob<TenantEvent<CreatorFileProcess
         })
 
       default:
-        console.warn(`[Media] Unknown file type: ${fileType}`)
+        logger.warn(`[Media] Unknown file type: ${fileType}`)
         return {
           success: false,
           error: { message: `Unknown file type: ${fileType}`, retryable: false },
@@ -186,7 +187,7 @@ export const creatorFileBatchProcessingJob = defineJob<
   handler: async (job) => {
     const { tenantId: _tenantId, files, batchId } = job.payload
 
-    console.log(`[Media] Processing batch ${batchId} with ${files.length} files`)
+    logger.info(`[Media] Processing batch ${batchId} with ${files.length} files`)
 
     if (files.length > 50) {
       return {
@@ -202,7 +203,7 @@ export const creatorFileBatchProcessingJob = defineJob<
     for (const file of files) {
       try {
         // Process based on file type
-        console.log(`[Media] Batch processing file ${file.fileId} (${file.fileType})`)
+        logger.info(`[Media] Batch processing file ${file.fileId} (${file.fileType})`)
 
         // Would trigger individual processing based on type
         results.push({ fileId: file.fileId, success: true })
@@ -217,7 +218,7 @@ export const creatorFileBatchProcessingJob = defineJob<
       }
     }
 
-    console.log(`[Media] Batch ${batchId} complete: ${processed} processed, ${failed} failed`)
+    logger.info(`[Media] Batch ${batchId} complete: ${processed} processed, ${failed} failed`)
 
     return {
       success: failed === 0,
@@ -248,7 +249,7 @@ export const damIngestProjectJob = defineJob<TenantEvent<DamIngestProjectPayload
   handler: async (job) => {
     const { tenantId, projectId, assetTypes, storagePath } = job.payload
 
-    console.log(`[Media] Ingesting project ${projectId} to DAM`)
+    logger.info(`[Media] Ingesting project ${projectId} to DAM`)
 
     // Implementation would:
     // 1. Get all assets from the project
@@ -273,7 +274,7 @@ export const damIngestProjectJob = defineJob<TenantEvent<DamIngestProjectPayload
     for (const asset of assets) {
       if (!types.includes(asset.type)) continue
 
-      console.log(`[Media] Ingesting ${asset.type} asset ${asset.assetId}`)
+      logger.info(`[Media] Ingesting ${asset.type} asset ${asset.assetId}`)
       // Would copy to DAM storage and create record
       ingested++
     }
@@ -302,7 +303,7 @@ export const damBulkIngestJob = defineJob<TenantEvent<DamBulkIngestPayload>>({
   handler: async (job) => {
     const { tenantId, projectIds, limit = 100, startDate: _startDate } = job.payload
 
-    console.log(`[Media] Starting bulk DAM ingestion for tenant ${tenantId}`)
+    logger.info(`[Media] Starting bulk DAM ingestion for tenant ${tenantId}`)
 
     // Query projects to ingest
     let projects: string[] = []
@@ -314,7 +315,7 @@ export const damBulkIngestJob = defineJob<TenantEvent<DamBulkIngestPayload>>({
       //              WHERE dam_ingested = false
       //              AND created_at >= startDate
       //              LIMIT limit
-      console.log(`[Media] Querying projects for bulk ingest (limit: ${limit})`)
+      logger.info(`[Media] Querying projects for bulk ingest (limit: ${limit})`)
     }
 
     let ingested = 0
@@ -323,7 +324,7 @@ export const damBulkIngestJob = defineJob<TenantEvent<DamBulkIngestPayload>>({
     for (const projectId of projects) {
       try {
         // Queue individual project ingestion
-        console.log(`[Media] Queueing DAM ingestion for project ${projectId}`)
+        logger.info(`[Media] Queueing DAM ingestion for project ${projectId}`)
         // Would trigger dam.ingestProject job
         ingested++
       } catch {
@@ -360,7 +361,7 @@ export const detectAssetFacesJob = defineJob<TenantEvent<DetectAssetFacesPayload
   handler: async (job) => {
     const { tenantId: _tenantId, assetId, assetUrl: _assetUrl, assetType } = job.payload
 
-    console.log(`[Media] Running face detection on ${assetType} asset ${assetId}`)
+    logger.info(`[Media] Running face detection on ${assetType} asset ${assetId}`)
 
     // Implementation would:
     // 1. For images: directly run face detection
@@ -376,7 +377,7 @@ export const detectAssetFacesJob = defineJob<TenantEvent<DetectAssetFacesPayload
     }
 
     // Would call face detection API
-    console.log(`[Media] Detected ${result.facesDetected} faces in asset ${assetId}`)
+    logger.info(`[Media] Detected ${result.facesDetected} faces in asset ${assetId}`)
 
     // Store results
     // Would update asset record with face data
@@ -400,7 +401,7 @@ export const batchDetectFacesJob = defineJob<TenantEvent<BatchDetectFacesPayload
   handler: async (job) => {
     const { tenantId: _tenantId, assetIds, batchId } = job.payload
 
-    console.log(`[Media] Running batch face detection (batch: ${batchId}, assets: ${assetIds.length})`)
+    logger.info(`[Media] Running batch face detection (batch: ${batchId}, assets: ${assetIds.length})`)
 
     let processed = 0
     let failed = 0
@@ -408,7 +409,7 @@ export const batchDetectFacesJob = defineJob<TenantEvent<BatchDetectFacesPayload
     for (const assetId of assetIds) {
       try {
         // Queue individual face detection
-        console.log(`[Media] Queueing face detection for asset ${assetId}`)
+        logger.info(`[Media] Queueing face detection for asset ${assetId}`)
         // Would trigger media/detect-asset-faces job
         processed++
       } catch {
@@ -440,7 +441,7 @@ export const scanAllForFacesJob = defineJob<TenantEvent<ScanAllForFacesPayload>>
   handler: async (job) => {
     const { tenantId, unprocessedOnly: _unprocessedOnly = true, limit = 1000 } = job.payload
 
-    console.log(`[Media] Scanning for assets needing face detection (limit: ${limit})`)
+    logger.info(`[Media] Scanning for assets needing face detection (limit: ${limit})`)
 
     // Query assets needing face detection
     // Would use: SELECT id FROM dam_assets
@@ -460,7 +461,7 @@ export const scanAllForFacesJob = defineJob<TenantEvent<ScanAllForFacesPayload>>
     // Queue each batch
     for (let i = 0; i < batches.length; i++) {
       const batchId = `faces-${tenantId}-${Date.now()}-${i}`
-      console.log(`[Media] Queueing face detection batch ${batchId}`)
+      logger.info(`[Media] Queueing face detection batch ${batchId}`)
       // Would trigger media/batch-detect-faces job
     }
 
@@ -496,7 +497,7 @@ interface FileProcessingInput {
 async function processVideoFile(input: FileProcessingInput) {
   const { tenantId: _tenantId, fileId, fileUrl: _fileUrl, fileName: _fileName, fileSize: _fileSize, mimeType: _mimeType } = input
 
-  console.log(`[Media] Creating Mux asset for video ${fileId}`)
+  logger.info(`[Media] Creating Mux asset for video ${fileId}`)
 
   // Implementation would:
   // 1. Create Mux input URL
@@ -513,7 +514,7 @@ async function processVideoFile(input: FileProcessingInput) {
     maxResolution: undefined,
   }
 
-  console.log(`[Media] Mux asset created: ${muxResult.muxAssetId}`)
+  logger.info(`[Media] Mux asset created: ${muxResult.muxAssetId}`)
 
   return {
     success: true,
@@ -532,7 +533,7 @@ async function processVideoFile(input: FileProcessingInput) {
 async function processImageFile(input: FileProcessingInput) {
   const { tenantId: _tenantId, fileId, fileUrl, fileName: _fileName, fileSize: _fileSize, mimeType: _mimeType } = input
 
-  console.log(`[Media] Processing image ${fileId}`)
+  logger.info(`[Media] Processing image ${fileId}`)
 
   // Implementation would:
   // 1. Generate thumbnails (small, medium, large)
@@ -561,7 +562,7 @@ async function processImageFile(input: FileProcessingInput) {
 async function processDocumentFile(input: FileProcessingInput) {
   const { tenantId: _tenantId, fileId, fileUrl, fileName: _fileName, fileSize: _fileSize, mimeType: _mimeType } = input
 
-  console.log(`[Media] Processing document ${fileId}`)
+  logger.info(`[Media] Processing document ${fileId}`)
 
   // Implementation would:
   // 1. Extract text content (for PDFs)

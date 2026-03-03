@@ -20,6 +20,7 @@ import type {
   CreatorSetupCompletePayload,
 } from '../../events'
 import type { Job, JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // Note: CreatorEmailQueuedPayload and CreatorReminderPayload are available
 // from events.ts but we use custom payloads with more specific fields
@@ -185,7 +186,7 @@ export const processCreatorEmailQueueJob = defineJob<
       }
     }
 
-    console.log(`[processCreatorEmailQueue] Processing up to ${limit} emails for tenant ${tenantId}`, {
+    logger.info(`[processCreatorEmailQueue] Processing up to ${limit} emails for tenant ${tenantId}`, {
       priority,
     })
 
@@ -244,7 +245,7 @@ export const scheduleCreatorWelcomeSequenceJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[scheduleCreatorWelcomeSequence] Scheduling welcome sequence for ${creatorName} (${email}) in tenant ${tenantId}`
     )
 
@@ -268,7 +269,7 @@ export const scheduleCreatorWelcomeSequenceJob = defineJob<
     // 3. If welcomeCallScheduled, skip email 1 (they're already engaged)
     // 4. Store sequence metadata for cancellation
 
-    console.log(
+    logger.info(
       `[scheduleCreatorWelcomeSequence] Scheduled ${emailSchedule.length} emails for sequence ${sequenceId}`
     )
 
@@ -314,7 +315,7 @@ export const cancelCreatorPendingEmailsJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[cancelCreatorPendingEmails] Cancelling emails for creator ${creatorId} in tenant ${tenantId}`,
       { reason, emailTypes }
     )
@@ -368,7 +369,7 @@ export const retryFailedCreatorEmailsJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[retryFailedCreatorEmails] Retrying failed emails for tenant ${tenantId}`,
       { limit, maxRetries, minAgeMinutes }
     )
@@ -425,7 +426,7 @@ export const queueCreatorEmailJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[queueCreatorEmail] Queuing ${templateId} for creator ${creatorId} in tenant ${tenantId}`,
       { priority, scheduledFor, idempotencyKey }
     )
@@ -478,7 +479,7 @@ export const queueProjectEmailJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[queueProjectEmail] Queuing ${templateId} for creator ${creatorId}, project ${projectId} in tenant ${tenantId}`
     )
 
@@ -527,7 +528,7 @@ export const queuePaymentEmailJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[queuePaymentEmail] Queuing ${templateId} for creator ${creatorId} in tenant ${tenantId}`,
       { payoutId, amount, currency }
     )
@@ -576,7 +577,7 @@ export const onCreatorSetupCompleteJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onCreatorSetupComplete] Creator ${creatorId} completed setup in tenant ${tenantId}`
     )
 
@@ -623,7 +624,7 @@ export const creatorProductDeliveryRemindersJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[creatorProductDeliveryReminders] Checking ${daysAfterDelivery}-day delivery reminders for tenant ${tenantId}`
     )
 
@@ -671,7 +672,7 @@ export const creatorDeadlineRemindersJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[creatorDeadlineReminders] Checking deadline reminders for tenant ${tenantId}`,
       { daysBeforeDeadline }
     )
@@ -721,7 +722,7 @@ export const creatorNoResponseRemindersJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[creatorNoResponseReminders] Checking ${daysWithoutResponse}-day no-response for tenant ${tenantId}`
     )
 
@@ -772,7 +773,7 @@ export const creatorAbandonedApplicationRemindersJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[creatorAbandonedApplicationReminders] Processing ${checkType} reminders for tenant ${tenantId}`
     )
 
@@ -832,7 +833,7 @@ export const sendCreatorReminderJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[sendCreatorReminder] Sending ${reminderType} reminder to creator ${creatorId} in tenant ${tenantId}`,
       { projectId, message }
     )
@@ -882,7 +883,7 @@ export const checkApprovalRemindersJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[checkApprovalReminders] Checking approval reminders for tenant ${tenantId}`
     )
 

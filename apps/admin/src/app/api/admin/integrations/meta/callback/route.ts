@@ -1,5 +1,6 @@
 import { completeMetaOAuth } from '@cgk-platform/integrations'
 import { redirect } from 'next/navigation'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,7 @@ export async function GET(req: Request) {
 
   // Handle OAuth errors
   if (error) {
-    console.error('Meta OAuth error:', error, errorDescription)
+    logger.error('Meta OAuth error:', error, errorDescription)
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(errorDescription || error)}`)
   }
 
@@ -34,7 +35,7 @@ export async function GET(req: Request) {
 
     redirect(result.returnUrl || '/admin/settings/integrations?success=meta')
   } catch (err) {
-    console.error('Meta OAuth callback failed:', err)
+    logger.error('Meta OAuth callback failed:', err)
     const message = err instanceof Error ? err.message : 'OAuth failed'
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(message)}`)
   }

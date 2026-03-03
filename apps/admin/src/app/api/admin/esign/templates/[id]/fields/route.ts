@@ -8,6 +8,7 @@
 import { getTenantContext, requireAuth } from '@cgk-platform/auth'
 import { getTemplateFields, replaceTemplateFields, getTemplate, type FieldType } from '@cgk-platform/esign'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ fields })
   } catch (error) {
-    console.error('Error fetching template fields:', error)
+    logger.error('Error fetching template fields:', error)
     return NextResponse.json(
       { error: 'Failed to fetch template fields' },
       { status: 500 }
@@ -105,7 +106,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ fields: savedFields })
   } catch (error) {
-    console.error('Error saving template fields:', error)
+    logger.error('Error saving template fields:', error)
     return NextResponse.json(
       { error: 'Failed to save template fields' },
       { status: 500 }

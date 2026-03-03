@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 interface GoogleShoppingProduct {
   id: string
@@ -65,7 +66,7 @@ export default function GoogleFeedPreviewPage() {
           }
         }
       } catch (error) {
-        console.error('Failed to load preview:', error)
+        logger.error('Failed to load preview:', error)
       } finally {
         setLoading(false)
       }

@@ -8,6 +8,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -122,7 +123,7 @@ export async function GET(request: Request): Promise<NextResponse<ExtensionSurve
     // Return default config if no tenant or survey not found
     return NextResponse.json(DEFAULT_SURVEY_CONFIG, { headers })
   } catch (error) {
-    console.error('[Survey API] Error:', error)
+    logger.error('[Survey API] Error:', error)
     return NextResponse.json(DEFAULT_SURVEY_CONFIG, { headers })
   }
 }

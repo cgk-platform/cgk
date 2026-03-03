@@ -9,6 +9,7 @@ import { sql } from '@cgk-platform/db'
 import { encryptToken, decryptToken } from '@cgk-platform/shopify'
 import type { CustomerSessionData, CustomerTokens, CustomerFromToken } from './types'
 import { refreshCustomerToken } from './oauth'
+import { logger } from '@cgk-platform/logging'
 
 const SESSION_COOKIE_NAME = 'cgk_customer_session'
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60 // 30 days in seconds
@@ -219,7 +220,7 @@ async function refreshSession(
       },
     }
   } catch (error) {
-    console.error('Failed to refresh session:', error)
+    logger.error('Failed to refresh session:', error)
     return null
   }
 }

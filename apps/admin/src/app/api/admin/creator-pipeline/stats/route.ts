@@ -6,6 +6,7 @@
 import { headers } from 'next/headers'
 
 import { getPipelineStats } from '@/lib/pipeline/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -22,7 +23,7 @@ export async function GET() {
     const stats = await getPipelineStats(tenantSlug)
     return Response.json(stats)
   } catch (error) {
-    console.error('Pipeline stats error:', error)
+    logger.error('Pipeline stats error:', error)
     return Response.json(
       { error: 'Failed to fetch pipeline stats' },
       { status: 500 }

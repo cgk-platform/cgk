@@ -12,6 +12,7 @@ import type {
   LandingPageStatus,
   BlockType,
 } from '@/lib/theme/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Database row type for landing pages — matches migration 071 flat columns
@@ -103,7 +104,7 @@ export const getLandingPage = cache(
 
       return transformLandingPage(row)
     } catch (error) {
-      console.error('Failed to fetch landing page:', error)
+      logger.error('Failed to fetch landing page:', error)
       return null
     }
   }
@@ -139,7 +140,7 @@ export const getLandingPageById = cache(
 
       return transformLandingPage(row)
     } catch (error) {
-      console.error('Failed to fetch landing page by ID:', error)
+      logger.error('Failed to fetch landing page by ID:', error)
       return null
     }
   }
@@ -168,7 +169,7 @@ export const getPublishedLandingPages = cache(
 
       return result.rows.map(transformLandingPage)
     } catch (error) {
-      console.error('Failed to fetch published landing pages:', error)
+      logger.error('Failed to fetch published landing pages:', error)
       return []
     }
   }

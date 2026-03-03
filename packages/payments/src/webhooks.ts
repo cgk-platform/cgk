@@ -8,6 +8,7 @@
  */
 
 import Stripe from 'stripe'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Verify a Stripe webhook signature
@@ -85,7 +86,7 @@ export async function verifyWiseWebhook(
     return isValid
   } catch (error) {
     // Log error but don't expose details (could be attack attempt)
-    console.error('[Wise Webhook] Signature verification failed:', error)
+    logger.error('[Wise Webhook] Signature verification failed:', error)
     return false
   }
 }
@@ -109,7 +110,7 @@ export function verifyWiseWebhookSync(
 
     return verifier.verify(publicKey, signature, 'base64')
   } catch (error) {
-    console.error('[Wise Webhook] Sync verification failed:', error)
+    logger.error('[Wise Webhook] Sync verification failed:', error)
     return false
   }
 }

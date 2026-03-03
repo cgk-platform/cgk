@@ -6,6 +6,7 @@
 
 import { sql } from '@cgk-platform/db'
 import type { PortalFeatureFlags } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Default feature flag values
@@ -87,7 +88,7 @@ export async function getPortalFeatures(tenantId: string): Promise<PortalFeature
 
     return features
   } catch (error) {
-    console.warn('Failed to load feature flags:', error)
+    logger.warn('Failed to load feature flags:', error)
     return DEFAULT_FEATURES
   }
 }

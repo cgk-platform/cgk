@@ -15,6 +15,7 @@ import {
   updateShipmentWithOrder,
 } from '@/lib/creators/lifecycle-db'
 import type { CreateShipmentParams } from '@/lib/creators/lifecycle-types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/creators/[id]/shipments
@@ -33,7 +34,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     const shipments = await getCreatorShipments(tenantSlug, creatorId)
     return NextResponse.json({ shipments })
   } catch (error) {
-    console.error('[shipments] GET error:', error)
+    logger.error('[shipments] GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch shipments' }, { status: 500 })
   }
 }
@@ -274,7 +275,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       shopifyOrderNumber: orderNumber,
     })
   } catch (error) {
-    console.error('[shipments] POST error:', error)
+    logger.error('[shipments] POST error:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
     // Handle Shopify-specific errors

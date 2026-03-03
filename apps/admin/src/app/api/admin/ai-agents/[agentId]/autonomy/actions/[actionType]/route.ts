@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 type RouteParams = { params: Promise<{ agentId: string; actionType: string }> }
 
@@ -47,7 +48,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ actionAutonomy })
   } catch (error) {
-    console.error('Error fetching action autonomy:', error)
+    logger.error('Error fetching action autonomy:', error)
     return NextResponse.json({ error: 'Failed to fetch action autonomy' }, { status: 500 })
   }
 }
@@ -104,7 +105,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ actionAutonomy })
   } catch (error) {
-    console.error('Error updating action autonomy:', error)
+    logger.error('Error updating action autonomy:', error)
     return NextResponse.json({ error: 'Failed to update action autonomy' }, { status: 500 })
   }
 }

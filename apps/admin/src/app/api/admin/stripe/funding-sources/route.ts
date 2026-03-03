@@ -14,6 +14,7 @@ import {
   upsertStripeTopupSettings,
 } from '@/lib/admin-utilities/db'
 import type { StripeFundingSource } from '@/lib/admin-utilities/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -65,7 +66,7 @@ export async function GET(req: Request) {
     } catch (error) {
       // Payment methods API may require customer context
       // Log and continue with empty sources
-      console.warn('Failed to list payment methods:', error)
+      logger.warn('Failed to list payment methods:', error)
     }
 
     const settings = await getStripeTopupSettings(tenantId)
@@ -76,7 +77,7 @@ export async function GET(req: Request) {
       configuredInDashboard: sources.length > 0,
     })
   } catch (error) {
-    console.error('Failed to fetch funding sources:', error)
+    logger.error('Failed to fetch funding sources:', error)
     return NextResponse.json({ error: 'Failed to fetch funding sources' }, { status: 500 })
   }
 }
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, settings })
   } catch (error) {
-    console.error('Failed to update funding source settings:', error)
+    logger.error('Failed to update funding source settings:', error)
     return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 })
   }
 }

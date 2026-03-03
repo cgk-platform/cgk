@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import { Clock, MessageSquare, Reply, Trash2 } from 'lucide-react'
 import { useState } from 'react'
@@ -151,10 +152,13 @@ function CommentItem({
         {/* Avatar */}
         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
           {comment.userAvatarUrl ? (
-            <img
+            <Image
               src={comment.userAvatarUrl}
               alt={comment.userName}
-              className="h-8 w-8 rounded-full object-cover"
+              width={32}
+              height={32}
+              className="rounded-full object-cover"
+              unoptimized
             />
           ) : (
             initials

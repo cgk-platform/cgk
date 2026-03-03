@@ -7,6 +7,7 @@ import {
   getShopifyConnection,
   isShopifyConnected,
 } from '@cgk-platform/shopify'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/shopify-app/status
@@ -63,7 +64,7 @@ export async function GET() {
       installedAt: connection.installedAt.toISOString(),
     })
   } catch (error) {
-    console.error('[shopify-status] Error fetching status:', error)
+    logger.error('[shopify-status] Error fetching status:', error)
     return NextResponse.json(
       { error: 'Failed to fetch status' },
       { status: 500 }

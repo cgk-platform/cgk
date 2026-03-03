@@ -3,6 +3,7 @@
  */
 
 import type { EventParams, UserProperties } from './types'
+import { logger } from '@cgk-platform/logging'
 
 export interface GA4Config {
   measurementId: string
@@ -20,7 +21,7 @@ export function initGA4(ga4Config: GA4Config): void {
   config = ga4Config
 
   if (typeof window === 'undefined') {
-    console.warn('GA4 can only be initialized in browser environment')
+    logger.warn('GA4 can only be initialized in browser environment')
     return
   }
 
@@ -50,7 +51,7 @@ export function initGA4(ga4Config: GA4Config): void {
 export function trackEvent(eventName: string, params?: EventParams): void {
   if (typeof window === 'undefined' || !window.gtag) {
     if (config?.debug) {
-      console.log('GA4 trackEvent:', eventName, params)
+      logger.info('GA4 trackEvent', { eventName, params })
     }
     return
   }
@@ -64,7 +65,7 @@ export function trackEvent(eventName: string, params?: EventParams): void {
 export function trackPageView(path?: string, title?: string): void {
   if (typeof window === 'undefined' || !window.gtag) {
     if (config?.debug) {
-      console.log('GA4 trackPageView:', path, title)
+      logger.info('GA4 trackPageView', { path, title })
     }
     return
   }

@@ -24,6 +24,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,7 +70,7 @@ export async function GET(req: Request) {
       w9Status,
     })
   } catch (error) {
-    console.error('Error fetching payout methods:', error)
+    logger.error('Error fetching payout methods:', error)
     return Response.json(
       { error: 'Failed to fetch payout methods' },
       { status: 500 }
@@ -142,7 +143,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error adding payout method:', error)
+    logger.error('Error adding payout method:', error)
     return Response.json(
       { error: 'Failed to add payout method' },
       { status: 500 }
@@ -212,7 +213,7 @@ export async function PATCH(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error updating payout method:', error)
+    logger.error('Error updating payout method:', error)
     return Response.json(
       { error: 'Failed to update payout method' },
       { status: 500 }
@@ -245,7 +246,7 @@ export async function DELETE(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error removing payout method:', error)
+    logger.error('Error removing payout method:', error)
     return Response.json(
       { error: 'Failed to remove payout method' },
       { status: 500 }

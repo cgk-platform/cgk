@@ -11,6 +11,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk-platform/auth'
 import { getChatQueueStats, getQueuedSessions } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -36,7 +37,7 @@ export async function GET(req: NextRequest) {
       stats,
     })
   } catch (error) {
-    console.error('[chat/queue] GET error:', error)
+    logger.error('[chat/queue] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch queue' },
       { status: 500 }

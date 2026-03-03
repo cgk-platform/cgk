@@ -6,6 +6,7 @@ import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 import { useAttribution, TimeRangePicker } from '@/components/attribution'
 import type { AttributionModel, RoasIndexData, AIConfidence } from '@/lib/attribution'
 import { ATTRIBUTION_MODELS } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const confidenceColors: Record<AIConfidence, string> = {
   high: 'bg-green-100 text-green-800 border-green-200',
@@ -208,7 +209,7 @@ export default function RoasIndexPage() {
       const result = await response.json()
       setData(result.roasIndex || [])
     } catch (error) {
-      console.error('Failed to fetch ROAS index:', error)
+      logger.error('Failed to fetch ROAS index:', error)
     } finally {
       setIsLoading(false)
     }

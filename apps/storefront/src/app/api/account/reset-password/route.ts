@@ -5,6 +5,7 @@ import { createHash } from 'crypto'
 import { headers } from 'next/headers'
 
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Reset password error:', error)
+    logger.error('Reset password error:', error)
     return Response.json(
       { error: 'Password reset failed. Please try again.' },
       { status: 500 }

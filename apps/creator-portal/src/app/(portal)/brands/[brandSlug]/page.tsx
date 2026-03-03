@@ -15,6 +15,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@cgk-platform/ui'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -185,9 +186,11 @@ export default function BrandDetailPage(): React.JSX.Element {
           {/* Brand logo */}
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-muted ring-2 ring-border">
             {brand.brandLogo ? (
-              <img
+              <Image
                 src={brand.brandLogo}
                 alt={brand.brandName}
+                width={64}
+                height={64}
                 className="h-16 w-16 rounded-xl object-cover"
               />
             ) : (

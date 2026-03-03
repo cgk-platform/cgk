@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 
 import { getPipelineTriggers, createPipelineTrigger } from '@/lib/pipeline/db'
 import type { PipelineTrigger } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -23,7 +24,7 @@ export async function GET() {
     const triggers = await getPipelineTriggers(tenantSlug)
     return Response.json({ triggers })
   } catch (error) {
-    console.error('Pipeline triggers error:', error)
+    logger.error('Pipeline triggers error:', error)
     return Response.json(
       { error: 'Failed to fetch pipeline triggers' },
       { status: 500 }
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true, trigger })
   } catch (error) {
-    console.error('Pipeline trigger create error:', error)
+    logger.error('Pipeline trigger create error:', error)
     return Response.json(
       { error: 'Failed to create pipeline trigger' },
       { status: 500 }

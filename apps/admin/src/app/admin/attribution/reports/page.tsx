@@ -42,6 +42,7 @@ import {
   type AttributionModel,
   type AttributionWindow,
 } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const TIMEZONE_OPTIONS = [
   'America/New_York',
@@ -110,7 +111,7 @@ export default function ReportsPage() {
       setReports(data.reports)
     } catch (err) {
       setError('Failed to load reports')
-      console.error(err)
+      logger.error(err)
     } finally {
       setIsLoading(false)
     }

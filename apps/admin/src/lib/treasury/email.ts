@@ -5,6 +5,7 @@
  */
 
 import type { DrawRequestWithItems } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Email templates
 const APPROVAL_REQUEST_SUBJECT = (requestNumber: string) =>
@@ -329,7 +330,7 @@ export async function sendEmail(
   const resendApiKey = process.env.RESEND_API_KEY
 
   if (!resendApiKey) {
-    console.warn('RESEND_API_KEY not set, skipping email send')
+    logger.warn('RESEND_API_KEY not set, skipping email send')
     return { success: false, error: 'Email not configured' }
   }
 

@@ -41,6 +41,7 @@ import type {
   ExportFormat,
   ExportableTable,
 } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const DESTINATION_OPTIONS: { value: ExportDestinationType; label: string; icon: React.ReactNode }[] = [
   { value: 's3', label: 'Amazon S3', icon: <Cloud className="h-4 w-4" /> },
@@ -91,7 +92,7 @@ export default function ExportsPage() {
       setExports(data.exports)
     } catch (err) {
       setError('Failed to load exports')
-      console.error(err)
+      logger.error(err)
     } finally {
       setIsLoading(false)
     }

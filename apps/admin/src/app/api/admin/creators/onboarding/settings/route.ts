@@ -8,6 +8,7 @@ import {
   upsertOnboardingConfig,
   type OnboardingConfig,
 } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET() {
   const headerList = await headers()
@@ -21,7 +22,7 @@ export async function GET() {
     const config = await getOnboardingConfig(tenantSlug)
     return NextResponse.json({ config })
   } catch (error) {
-    console.error('Error fetching onboarding config:', error)
+    logger.error('Error fetching onboarding config:', error)
     return NextResponse.json(
       { error: 'Failed to fetch onboarding config' },
       { status: 500 }
@@ -43,7 +44,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true, config })
   } catch (error) {
-    console.error('Error updating onboarding config:', error)
+    logger.error('Error updating onboarding config:', error)
     return NextResponse.json(
       { error: 'Failed to update onboarding config' },
       { status: 500 }

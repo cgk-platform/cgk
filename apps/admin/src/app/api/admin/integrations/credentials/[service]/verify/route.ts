@@ -8,6 +8,7 @@ import {
   type TenantApiService,
 } from '@cgk-platform/integrations'
 import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -121,7 +122,7 @@ export async function POST(
       }
     }
   } catch (error) {
-    console.error(`Failed to verify ${service} credentials:`, error)
+    logger.error(`Failed to verify ${service} credentials:`, error)
     return Response.json(
       {
         valid: false,

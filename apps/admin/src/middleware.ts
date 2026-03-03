@@ -10,6 +10,7 @@ import {
 import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 const PUBLIC_PATHS = [
   '/login',
@@ -145,7 +146,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     if (tenantId) {
       updateMembershipActivity(payload.sub, tenantId).catch((error) => {
         // Non-critical: log but don't block request
-        console.warn('[middleware] Failed to update membership activity:', error)
+        logger.warn('[middleware] Failed to update membership activity:', error)
       })
     }
 

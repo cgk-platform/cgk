@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { sql, withTenant } from '@cgk-platform/db'
 import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/account/profile/password-reset
@@ -62,7 +63,7 @@ export async function POST() {
       message: 'Password reset email sent. Please check your inbox.',
     })
   } catch (error) {
-    console.error('Failed to initiate password reset:', error)
+    logger.error('Failed to initiate password reset:', error)
 
     // Even if the table doesn't exist, return success for security
     // (don't reveal whether the operation actually happened)

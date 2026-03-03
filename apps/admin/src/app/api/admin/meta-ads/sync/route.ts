@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { withTenant, sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/meta-ads/sync
@@ -97,7 +98,7 @@ export async function POST() {
         WHERE integration_type = 'meta-ads'
       `
     } catch (error) {
-      console.error('Meta Ads sync error:', error)
+      logger.error('Meta Ads sync error:', error)
       await sql`
         UPDATE integration_credentials
         SET

@@ -15,6 +15,7 @@ import {
   cancelPendingEmails,
 } from '@/lib/abandoned-checkouts/db'
 import type { CreateDraftOrderRequest } from '@/lib/abandoned-checkouts/types'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   const headerList = await headers()
@@ -120,7 +121,7 @@ export async function POST(request: Request) {
       draftOrder: result.draftOrder,
     })
   } catch (error) {
-    console.error('Failed to create draft order:', error)
+    logger.error('Failed to create draft order:', error)
     return NextResponse.json(
       { error: 'Failed to create draft order' },
       { status: 500 },

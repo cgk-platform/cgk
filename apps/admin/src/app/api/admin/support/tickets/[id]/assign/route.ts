@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { assignTicket, autoAssignTicket, unassignTicket } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -63,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     await assignTicket(tenantId, ticketId, input.agentId, auth.userId, auth.email)
     return NextResponse.json({ success: true, agentId: input.agentId })
   } catch (error) {
-    console.error('Error assigning ticket:', error)
+    logger.error('Error assigning ticket:', error)
     return NextResponse.json(
       { error: 'Failed to assign ticket' },
       { status: 500 }
@@ -95,7 +96,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     await unassignTicket(tenantId, ticketId, auth.userId, auth.email)
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error unassigning ticket:', error)
+    logger.error('Error unassigning ticket:', error)
     return NextResponse.json(
       { error: 'Failed to unassign ticket' },
       { status: 500 }

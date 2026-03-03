@@ -8,6 +8,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getBulkSendWithRecipients, cancelBulkSend } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,7 +31,7 @@ export async function GET(
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error fetching bulk send:', error)
+    logger.error('Error fetching bulk send:', error)
     return NextResponse.json(
       { error: 'Failed to fetch bulk send' },
       { status: 500 }
@@ -67,7 +68,7 @@ export async function POST(
 
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
   } catch (error) {
-    console.error('Error with bulk send action:', error)
+    logger.error('Error with bulk send action:', error)
     return NextResponse.json(
       { error: 'Failed to perform action' },
       { status: 500 }

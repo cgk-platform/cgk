@@ -12,6 +12,7 @@ import {
   getTenantResendClient,
   getTenantResendSenderConfig,
 } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 */
 
 // import type { SampleStatus } from './types'
@@ -248,7 +249,7 @@ export const sendOnboardingRemindersJob = defineJob({
               })
             } catch {
               // Log error but continue processing other reminders
-              console.error(
+              logger.error(
                 `Failed to send reminder email to ${row.email as string}`
               )
             }
@@ -411,7 +412,7 @@ async function checkTrackingStatus(
       trackingUrl: result.trackingUrl,
     }
   } catch (error) {
-    console.error(
+    logger.error(
       '[checkTrackingStatus] Error:',
       error instanceof Error ? error.message : error
     )

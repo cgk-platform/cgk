@@ -8,6 +8,8 @@
 
 import { withTenant, sql } from '@cgk-platform/db'
 import { tasks } from '@trigger.dev/sdk/v3'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 interface ShopifyProductPayload {
   id: number
@@ -39,7 +41,7 @@ export async function handleProductCreate(
     action: 'create',
   })
 
-  console.log(`[Webhook] Product ${shopifyProductId} created for tenant ${tenantId}`)
+  logger.info(`[Webhook] Product ${shopifyProductId} created for tenant ${tenantId}`)
 }
 
 /**
@@ -61,7 +63,7 @@ export async function handleProductUpdate(
     action: 'update',
   })
 
-  console.log(`[Webhook] Product ${shopifyProductId} updated for tenant ${tenantId}`)
+  logger.info(`[Webhook] Product ${shopifyProductId} updated for tenant ${tenantId}`)
 }
 
 /**
@@ -87,5 +89,5 @@ export async function handleProductDelete(
     `
   })
 
-  console.log(`[Webhook] Product ${shopifyProductId} deleted/archived for tenant ${tenantId}`)
+  logger.info(`[Webhook] Product ${shopifyProductId} deleted/archived for tenant ${tenantId}`)
 }

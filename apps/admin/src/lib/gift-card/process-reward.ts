@@ -18,6 +18,7 @@ import {
 import { getGiftCardSettings } from './settings'
 import { buildGiftCardVariantIdSet, isGiftCardLineItem, extractNumericId } from './shopify-products'
 import { createGiftCardEmail } from './db/emails'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Order line item data from Shopify webhook
@@ -226,7 +227,7 @@ export async function issueStoreCredit(
 
   // If no tenant ID provided, we can't connect to Shopify
   if (!tenantId) {
-    console.log(`issueStoreCredit: No tenantId provided, using placeholder for transaction ${transaction.id}`)
+    logger.info(`issueStoreCredit: No tenantId provided, using placeholder for transaction ${transaction.id}`)
     const mockTransactionId = `sc_${Date.now()}_${transaction.id.slice(0, 8)}`
     return { success: true, transactionId: mockTransactionId }
   }
@@ -320,7 +321,7 @@ export async function issueStoreCredit(
       throw apiError
     }
   } catch (error) {
-    console.error('issueStoreCredit error:', error)
+    logger.error('issueStoreCredit error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to issue store credit',

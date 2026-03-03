@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 import type { BrandSummary } from '../../../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Brand detail page
@@ -46,7 +47,7 @@ export default function BrandDetailPage() {
         setError('Failed to fetch brand')
       }
     } catch (err) {
-      console.error('Failed to fetch brand:', err)
+      logger.error('Failed to fetch brand:', err)
       setError('Failed to fetch brand')
     } finally {
       setIsLoading(false)
@@ -81,7 +82,7 @@ export default function BrandDetailPage() {
           : process.env.NEXT_PUBLIC_STOREFRONT_URL
 
       if (!baseUrl) {
-        console.error(`${targetApp.toUpperCase()}_URL not configured`)
+        logger.error(`${targetApp.toUpperCase()}_URL not configured`)
         return
       }
 
@@ -90,7 +91,7 @@ export default function BrandDetailPage() {
       // Open in new tab
       window.open(ssoUrl, '_blank')
     } catch (err) {
-      console.error('Failed to generate SSO token:', err)
+      logger.error('Failed to generate SSO token:', err)
       alert('Failed to open app. Please try again.')
     } finally {
       setIsGeneratingToken(false)

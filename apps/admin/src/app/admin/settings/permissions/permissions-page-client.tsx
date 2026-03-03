@@ -5,6 +5,7 @@ import * as React from 'react'
 
 import { PermissionMatrix } from '@/components/roles'
 import type { PermissionsByCategory, Role } from '@/components/roles/types'
+import { logger } from '@cgk-platform/logging'
 
 interface PermissionsPageClientProps {
   roles: Role[]
@@ -57,7 +58,7 @@ export function PermissionsPageClient({
           )
         )
         const data = await response.json()
-        console.error('Failed to update permission:', data.error)
+        logger.error('Failed to update permission:', data.error)
       } else {
         // Refresh data from server
         router.refresh()
@@ -69,7 +70,7 @@ export function PermissionsPageClient({
           r.id === roleId ? { ...r, permissions: role.permissions } : r
         )
       )
-      console.error('Failed to update permission:', error)
+      logger.error('Failed to update permission:', error)
     } finally {
       setIsUpdating(false)
     }

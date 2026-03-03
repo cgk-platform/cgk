@@ -3,6 +3,7 @@ import path from 'path'
 import chalk from 'chalk'
 import { Command } from 'commander'
 import fs from 'fs-extra'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Parse a CHANGELOG.md file and extract version sections
@@ -144,15 +145,15 @@ export const changelogCommand = new Command('changelog')
     }
 
     if (!changelogPath) {
-      console.log(chalk.yellow('\n[INFO] No changelog found\n'))
-      console.log('  Looked for:')
+      logger.info(chalk.yellow('\n[INFO] No changelog found\n'))
+      logger.info('  Looked for:')
       for (const p of possiblePaths) {
-        console.log(chalk.dim(`    - ${p}`))
+        logger.info(chalk.dim(`    - ${p}`))
       }
-      console.log('')
-      console.log('  Create a CHANGELOG.md file in your project root.')
-      console.log('  See https://keepachangelog.com for format guidelines.')
-      console.log('')
+      logger.info('')
+      logger.info('  Create a CHANGELOG.md file in your project root.')
+      logger.info('  See https://keepachangelog.com for format guidelines.')
+      logger.info('')
 
       // If in CGK monorepo, show platform version info
       const packageJsonPath = path.join(process.cwd(), 'package.json')
@@ -160,13 +161,13 @@ export const changelogCommand = new Command('changelog')
         try {
           const packageJson = await fs.readJson(packageJsonPath)
           if (packageJson.version) {
-            console.log(chalk.dim(`  Current project version: ${packageJson.version}`))
+            logger.info(chalk.dim(`  Current project version: ${packageJson.version}`))
           }
         } catch {
           // Ignore package.json read errors
         }
       }
-      console.log('')
+      logger.info('')
       return
     }
 
@@ -175,12 +176,12 @@ export const changelogCommand = new Command('changelog')
     const entries = parseChangelog(content)
 
     if (entries.length === 0) {
-      console.log(chalk.yellow('\n[INFO] Changelog is empty or has no version entries\n'))
-      console.log('  Expected format:')
-      console.log(chalk.dim('    ## [1.0.0] - 2025-02-10'))
-      console.log(chalk.dim('    ### Added'))
-      console.log(chalk.dim('    - New feature description'))
-      console.log('')
+      logger.info(chalk.yellow('\n[INFO] Changelog is empty or has no version entries\n'))
+      logger.info('  Expected format:')
+      logger.info(chalk.dim('    ## [1.0.0] - 2025-02-10'))
+      logger.info(chalk.dim('    ### Added'))
+      logger.info(chalk.dim('    - New feature description'))
+      logger.info('')
       return
     }
 
@@ -189,21 +190,21 @@ export const changelogCommand = new Command('changelog')
       if (version) {
         const entry = entries.find((e) => e.version === version)
         if (!entry) {
-          console.log(JSON.stringify({ error: `Version ${version} not found` }))
+          logger.info(JSON.stringify({ error: `Version ${version} not found` }))
           process.exit(1)
         }
-        console.log(JSON.stringify(entry, null, 2))
+        logger.info(JSON.stringify(entry, null, 2))
       } else if (options.all) {
-        console.log(JSON.stringify(entries, null, 2))
+        logger.info(JSON.stringify(entries, null, 2))
       } else {
         const count = parseInt(options.count, 10) || 5
-        console.log(JSON.stringify(entries.slice(0, count), null, 2))
+        logger.info(JSON.stringify(entries.slice(0, count), null, 2))
       }
       return
     }
 
     // Console output
-    console.log(chalk.cyan('\n[CHANGELOG] CGK Platform\n'))
+    logger.info(chalk.cyan('\n[CHANGELOG] CGK Platform\n'))
 
     let entriesToShow: VersionEntry[]
 
@@ -211,15 +212,15 @@ export const changelogCommand = new Command('changelog')
       // Find specific version
       const entry = entries.find((e) => e.version === version)
       if (!entry) {
-        console.log(chalk.red(`  Version ${version} not found\n`))
-        console.log('  Available versions:')
+        logger.info(chalk.red(`  Version ${version} not found\n`))
+        logger.info('  Available versions:')
         for (const e of entries.slice(0, 10)) {
-          console.log(chalk.dim(`    - ${e.version}${e.date ? ` (${e.date})` : ''}`))
+          logger.info(chalk.dim(`    - ${e.version}${e.date ? ` (${e.date})` : ''}`))
         }
         if (entries.length > 10) {
-          console.log(chalk.dim(`    ... and ${entries.length - 10} more`))
+          logger.info(chalk.dim(`    ... and ${entries.length - 10} more`))
         }
-        console.log('')
+        logger.info('')
         process.exit(1)
       }
       entriesToShow = [entry]
@@ -232,41 +233,41 @@ export const changelogCommand = new Command('changelog')
 
     // Display entries
     for (const entry of entriesToShow) {
-      console.log(chalk.bold(`  v${entry.version}`) + (entry.date ? chalk.dim(` - ${entry.date}`) : ''))
+      logger.info(chalk.bold(`  v${entry.version}`) + (entry.date ? chalk.dim(` - ${entry.date}`) : ''))
 
       if (entry.sections.length > 0) {
         for (const section of entry.sections) {
           const { icon, color } = getSectionStyle(section.type)
-          console.log('')
-          console.log(color(`    ${icon} ${section.type}`))
+          logger.info('')
+          logger.info(color(`    ${icon} ${section.type}`))
 
           for (const item of section.items.slice(0, 10)) {
-            console.log(chalk.dim(`      - ${item}`))
+            logger.info(chalk.dim(`      - ${item}`))
           }
           if (section.items.length > 10) {
-            console.log(chalk.dim(`      ... and ${section.items.length - 10} more`))
+            logger.info(chalk.dim(`      ... and ${section.items.length - 10} more`))
           }
         }
       } else if (entry.content) {
         // Show raw content if no structured sections
         const contentLines = entry.content.split('\n').filter((l) => l.trim())
         for (const line of contentLines.slice(0, 10)) {
-          console.log(chalk.dim(`    ${line.trim()}`))
+          logger.info(chalk.dim(`    ${line.trim()}`))
         }
         if (contentLines.length > 10) {
-          console.log(chalk.dim(`    ... (${contentLines.length - 10} more lines)`))
+          logger.info(chalk.dim(`    ... (${contentLines.length - 10} more lines)`))
         }
       }
 
-      console.log('')
-      console.log(chalk.dim('    ' + '-'.repeat(50)))
-      console.log('')
+      logger.info('')
+      logger.info(chalk.dim('    ' + '-'.repeat(50)))
+      logger.info('')
     }
 
     // Show navigation help
     if (!version && entries.length > entriesToShow.length) {
-      console.log(chalk.dim(`  Showing ${entriesToShow.length} of ${entries.length} versions.`))
-      console.log(chalk.dim('  Use --all to show all versions, or specify a version number.'))
-      console.log('')
+      logger.info(chalk.dim(`  Showing ${entriesToShow.length} of ${entries.length} versions.`))
+      logger.info(chalk.dim('  Use --all to show all versions, or specify a version number.'))
+      logger.info('')
     }
   })

@@ -8,6 +8,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getReportData, exportReportCsv } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(report)
   } catch (error) {
-    console.error('Error fetching report:', error)
+    logger.error('Error fetching report:', error)
     return NextResponse.json(
       { error: 'Failed to fetch report' },
       { status: 500 }

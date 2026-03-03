@@ -10,6 +10,7 @@ import { syncWebhookRegistrations } from '@cgk-platform/shopify/webhooks'
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Health check job result
@@ -83,7 +84,7 @@ export const webhookHealthCheckJob = defineJob<{ tenantIds?: string[] }>({
   handler: async (job): Promise<JobResult<HealthCheckResult>> => {
     const { tenantIds } = job.payload
 
-    console.log(`[webhooks/health-check] Starting health check`, {
+    logger.info(`[webhooks/health-check] Starting health check`, {
       tenantIds: tenantIds?.join(',') || 'all',
       jobId: job.id,
     })
@@ -116,7 +117,7 @@ export const webhookHealthCheckJob = defineJob<{ tenantIds?: string[] }>({
       }
     }
 
-    console.log(`[webhooks/health-check] Checking ${tenants.length} tenants`)
+    logger.info(`[webhooks/health-check] Checking ${tenants.length} tenants`)
 
     // Check each tenant
     for (const tenant of tenants) {
@@ -130,7 +131,7 @@ export const webhookHealthCheckJob = defineJob<{ tenantIds?: string[] }>({
         )
 
         if (syncResult.added.length > 0) {
-          console.log(`[webhooks/health-check] Re-registered ${syncResult.added.length} webhooks for ${tenant.shop}:`, syncResult.added)
+          logger.info(`[webhooks/health-check] Re-registered ${syncResult.added.length} webhooks for ${tenant.shop}:`, syncResult.added)
           webhooksReRegistered += syncResult.added.length
         }
 
@@ -140,10 +141,10 @@ export const webhookHealthCheckJob = defineJob<{ tenantIds?: string[] }>({
           }
         }
 
-        console.log(`[webhooks/health-check] ${tenant.shop}: +${syncResult.added.length} added, ${syncResult.unchanged.length} ok, ${syncResult.errors.length} errors`)
+        logger.info(`[webhooks/health-check] ${tenant.shop}: +${syncResult.added.length} added, ${syncResult.unchanged.length} ok, ${syncResult.errors.length} errors`)
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err)
-        console.error(`[webhooks/health-check] Error checking ${tenant.shop}:`, err)
+        logger.error(`[webhooks/health-check] Error checking ${tenant.shop}:`, err)
         errors.push({ tenantId: tenant.tenantId, shop: tenant.shop, error: message })
       }
     }
@@ -175,7 +176,7 @@ export const cleanupOldWebhookEventsJob = defineJob<{
   handler: async (job): Promise<JobResult<{ deleted: number }>> => {
     const { tenantIds, retentionDays = 30 } = job.payload
 
-    console.log(`[webhooks/cleanup-old-events] Cleaning events older than ${retentionDays} days`, {
+    logger.info(`[webhooks/cleanup-old-events] Cleaning events older than ${retentionDays} days`, {
       tenantIds: tenantIds?.join(',') || 'all',
     })
 
@@ -199,11 +200,11 @@ export const cleanupOldWebhookEventsJob = defineJob<{
         })
         totalDeleted += result
       } catch (err) {
-        console.error(`[webhooks/cleanup-old-events] Error cleaning ${tenant.tenantId}:`, err)
+        logger.error(`[webhooks/cleanup-old-events] Error cleaning ${tenant.tenantId}:`, err)
       }
     }
 
-    console.log(`[webhooks/cleanup-old-events] Deleted ${totalDeleted} old webhook events`)
+    logger.info(`[webhooks/cleanup-old-events] Deleted ${totalDeleted} old webhook events`)
 
     return {
       success: true,

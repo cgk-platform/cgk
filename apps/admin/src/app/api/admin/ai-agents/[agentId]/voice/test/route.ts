@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 type RouteParams = { params: Promise<{ agentId: string }> }
 
@@ -77,7 +78,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('Error testing voice config:', error)
+    logger.error('Error testing voice config:', error)
     return NextResponse.json({ error: 'Failed to test voice configuration' }, { status: 500 })
   }
 }

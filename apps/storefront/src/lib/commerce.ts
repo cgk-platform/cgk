@@ -12,6 +12,7 @@ import { cache } from 'react'
 
 import { getProductByHandleFromLocalDB, getProductsFromLocalDB, searchProductsInLocalDB } from './products-db'
 import { getCommerceProviderType, getTenantConfig } from './tenant'
+import { logger } from '@cgk-platform/logging'
 
 
 /**
@@ -39,7 +40,7 @@ export const getCommerceProvider = cache(async (): Promise<StorefrontCommercePro
   // For Shopify provider, we need Shopify config
   if (providerType === 'shopify') {
     if (!config.shopify) {
-      console.error('Shopify provider requested but no Shopify config found')
+      logger.error('Shopify provider requested but no Shopify config found')
       return null
     }
 
@@ -101,10 +102,10 @@ function createLocalDBProductOperations(
         }
 
         // Fallback to Shopify if local DB is empty
-        console.warn('Local DB empty, falling back to Shopify API')
+        logger.warn('Local DB empty, falling back to Shopify API')
         return fallbackProvider.products.list(params)
       } catch (error) {
-        console.error('Error fetching products from local DB:', error)
+        logger.error('Error fetching products from local DB:', error)
         return fallbackProvider.products.list(params)
       }
     },
@@ -130,7 +131,7 @@ function createLocalDBProductOperations(
 
         // Fallback to Shopify API if not in local DB
         // This handles race conditions where product was just added
-        console.warn(`Product ${handle} not in local DB, falling back to Shopify API`)
+        logger.warn(`Product ${handle} not in local DB, falling back to Shopify API`)
         const shopifyProduct = await fallbackProvider.products.getByHandle(handle)
 
         if (shopifyProduct) {
@@ -140,7 +141,7 @@ function createLocalDBProductOperations(
 
         return shopifyProduct
       } catch (error) {
-        console.error(`Error fetching product ${handle} from local DB:`, error)
+        logger.error(`Error fetching product ${handle} from local DB:`, error)
         return fallbackProvider.products.getByHandle(handle)
       }
     },
@@ -162,7 +163,7 @@ function createLocalDBProductOperations(
         // Fallback to Shopify search if no local results
         return fallbackProvider.products.search(query, params)
       } catch (error) {
-        console.error('Error searching products in local DB:', error)
+        logger.error('Error searching products in local DB:', error)
         return fallbackProvider.products.search(query, params)
       }
     },

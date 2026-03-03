@@ -26,6 +26,7 @@ import type {
   SMSPhoneNumber,
 } from '../types.js'
 import { decrypt as _decrypt, safeDecrypt, encrypt } from '../utils/encryption.js'
+import { logger } from '@cgk-platform/logging'
 
 const TWILIO_API_BASE = 'https://api.twilio.com/2010-04-01'
 
@@ -154,7 +155,7 @@ export class SMSIntegration {
 
       return { success: true, messageSid: result.sid, status: result.status }
     } catch (error) {
-      console.error('[sms] Failed to send SMS:', error)
+      logger.error('[sms] Failed to send SMS:', error)
 
       await logAction({
         agentId: params.agentId,
@@ -191,7 +192,7 @@ export class SMSIntegration {
     )
     const agentId = phoneConfig?.agentId || config.defaultAgentId
     if (!agentId) {
-      console.log('[sms] No agent configured for phone number:', webhook.To)
+      logger.info('[sms] No agent configured for phone number:', webhook.To)
       return { processed: false }
     }
 

@@ -10,6 +10,7 @@ import { prepareAndSendDocument } from '@cgk-platform/esign'
 import { NextResponse } from 'next/server'
 import { getDocuments } from '@/lib/esign'
 import type { EsignDocumentFilters } from '@/lib/esign/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -72,7 +73,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    console.error('Error fetching documents:', error)
+    logger.error('Error fetching documents:', error)
     return NextResponse.json(
       { error: 'Failed to fetch documents' },
       { status: 500 }
@@ -141,7 +142,7 @@ export async function POST(request: Request) {
       signersToNotify: result.signers_to_notify.map((s: { email: string }) => s.email),
     }, { status: 201 })
   } catch (error) {
-    console.error('Error creating document:', error)
+    logger.error('Error creating document:', error)
     const message = error instanceof Error ? error.message : 'Failed to create document'
     return NextResponse.json({ error: message }, { status: 500 })
   }

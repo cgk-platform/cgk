@@ -23,6 +23,7 @@ import {
 
 import { toPdfCoordinates, fromPdfCoordinates, type PdfCoordinates } from './coordinates.js'
 import type { EsignField, EsignSigner, FieldType } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // TYPES
@@ -111,7 +112,7 @@ export async function embedFieldsInPDF(options: EmbedOptions): Promise<Uint8Arra
     // pdf-lib uses 0-indexed pages
     const pageIndex = pageNum - 1
     if (pageIndex < 0 || pageIndex >= pages.length) {
-      console.warn(`Page ${pageNum} does not exist in PDF (total pages: ${pages.length})`)
+      logger.warn(`Page ${pageNum} does not exist in PDF (total pages: ${pages.length})`)
       continue
     }
 
@@ -263,7 +264,7 @@ async function embedField(
     default: {
       // Handle any unknown field type as text
       const _exhaustiveCheck: never = fieldType
-      console.warn(`Unknown field type: ${_exhaustiveCheck}`)
+      logger.warn(`Unknown field type: ${_exhaustiveCheck}`)
       embedText(page, value, coords, ctx, false)
     }
   }
@@ -330,13 +331,13 @@ async function embedSignatureImage(
       if (imageUrl.startsWith('data:image/')) {
         const extracted = extractBase64FromDataUrl(imageUrl)
         if (!extracted) {
-          console.warn('Invalid signature data URL format')
+          logger.warn('Invalid signature data URL format')
           return
         }
 
         // Handle SVG by skipping (SVG needs rasterization first)
         if (extracted.format === 'svg+xml') {
-          console.warn('SVG signatures must be rasterized before embedding')
+          logger.warn('SVG signatures must be rasterized before embedding')
           return
         }
 
@@ -351,7 +352,7 @@ async function embedSignatureImage(
         // Fetch from URL
         const response = await fetch(imageUrl)
         if (!response.ok) {
-          console.warn(`Failed to fetch signature image: ${response.statusText}`)
+          logger.warn(`Failed to fetch signature image: ${response.statusText}`)
           return
         }
         imageBytes = await response.arrayBuffer()
@@ -367,7 +368,7 @@ async function embedSignatureImage(
         try {
           signatureImage = await ctx.pdfDoc.embedPng(imageBytes)
         } catch {
-          console.warn('Unable to embed signature image - unsupported format')
+          logger.warn('Unable to embed signature image - unsupported format')
           return
         }
       }
@@ -396,7 +397,7 @@ async function embedSignatureImage(
       height: scaledHeight,
     })
   } catch (error) {
-    console.error('Error embedding signature:', error)
+    logger.error('Error embedding signature', error instanceof Error ? error : new Error(String(error)))
   }
 }
 
@@ -592,7 +593,7 @@ export async function forceFlattenPdf(pdfBytes: Uint8Array): Promise<Uint8Array>
       catalog.delete(PDFName.of('AcroForm'))
     }
   } catch (error) {
-    console.warn('Could not remove AcroForm:', error)
+    logger.warn('Could not remove AcroForm', { error: error instanceof Error ? error.message : String(error) })
   }
 
   // Remove annotations from each page
@@ -604,7 +605,7 @@ export async function forceFlattenPdf(pdfBytes: Uint8Array): Promise<Uint8Array>
         page.node.delete(PDFName.of('Annots'))
       }
     } catch (error) {
-      console.warn('Could not remove annotations from page:', error)
+      logger.warn('Could not remove annotations from page', { error: error instanceof Error ? error.message : String(error) })
     }
   }
 
@@ -937,7 +938,7 @@ export async function createSignaturePreview(
   for (const sig of signatures) {
     const pageIndex = sig.position.page - 1
     if (pageIndex < 0 || pageIndex >= pages.length) {
-      console.warn(`Page ${sig.position.page} does not exist in PDF`)
+      logger.warn(`Page ${sig.position.page} does not exist in PDF`)
       continue
     }
 
@@ -982,12 +983,12 @@ export async function createSignaturePreview(
           // Handle data URL
           const matches = sig.imageUrl.match(/^data:image\/(png|jpeg|jpg|webp|svg\+xml);base64,(.+)$/)
           if (!matches || !matches[2]) {
-            console.warn('Invalid signature data URL format')
+            logger.warn('Invalid signature data URL format')
             continue
           }
 
           if (matches[1] === 'svg+xml') {
-            console.warn('SVG signatures need rasterization')
+            logger.warn('SVG signatures need rasterization')
             continue
           }
 
@@ -1001,7 +1002,7 @@ export async function createSignaturePreview(
           // Fetch from URL
           const response = await fetch(sig.imageUrl)
           if (!response.ok) {
-            console.warn(`Failed to fetch signature: ${response.statusText}`)
+            logger.warn(`Failed to fetch signature: ${response.statusText}`)
             continue
           }
           imageBytes = await response.arrayBuffer()
@@ -1016,7 +1017,7 @@ export async function createSignaturePreview(
           try {
             signatureImage = await pdfDoc.embedPng(imageBytes)
           } catch {
-            console.warn('Unable to embed signature - unsupported format')
+            logger.warn('Unable to embed signature - unsupported format')
             continue
           }
         }
@@ -1044,7 +1045,7 @@ export async function createSignaturePreview(
         height: scaledHeight,
       })
     } catch (error) {
-      console.error('Error embedding signature in preview:', error)
+      logger.error('Error embedding signature in preview', error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -1338,7 +1339,7 @@ export async function detectSignatureFields(
       })
     }
   } catch (error) {
-    console.warn('Error detecting signature fields:', error)
+    logger.warn('Error detecting signature fields', { error: error instanceof Error ? error.message : String(error) })
   }
 
   return fields

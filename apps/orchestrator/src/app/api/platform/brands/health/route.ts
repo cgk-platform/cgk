@@ -1,4 +1,5 @@
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -278,7 +279,7 @@ export async function GET(request: Request) {
       checkedAt: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('Get brand health error:', error)
+    logger.error('Get brand health error:', error)
     return Response.json({ error: 'Failed to get brand health data' }, { status: 500 })
   }
 }

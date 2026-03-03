@@ -12,6 +12,7 @@ import {
   getClientIP,
   recordPasswordResetAttempt,
 } from '@/lib/auth/rate-limit'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/forgot-password
@@ -67,7 +68,7 @@ export async function POST(req: Request): Promise<Response> {
     // Always return success for anti-enumeration
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Forgot password error:', error)
+    logger.error('Forgot password error:', error)
     // Still return success for anti-enumeration
     return Response.json({ success: true })
   }

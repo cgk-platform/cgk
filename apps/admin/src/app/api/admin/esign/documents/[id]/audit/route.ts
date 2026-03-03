@@ -8,6 +8,7 @@ import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getDocumentAuditLog, getDocumentWithSigners } from '@/lib/esign'
 import type { EsignAuditAction } from '@/lib/esign/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -99,7 +100,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       summary,
     })
   } catch (error) {
-    console.error('Error fetching document audit:', error)
+    logger.error('Error fetching document audit:', error)
     return NextResponse.json(
       { error: 'Failed to fetch audit trail' },
       { status: 500 }

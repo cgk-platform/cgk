@@ -19,6 +19,7 @@ import {
   type QueueStatus,
   type QueueType,
 } from '@cgk-platform/communications'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -132,7 +133,7 @@ export async function GET(
       stats,
     })
   } catch (error) {
-    console.error('[email-queues] GET error:', error)
+    logger.error('[email-queues] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch queue entries' },
       { status: 500 }

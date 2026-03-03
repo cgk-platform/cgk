@@ -15,6 +15,7 @@ import { cn } from '@cgk-platform/ui'
 import { useState, useCallback, useEffect } from 'react'
 
 import { useCart } from './CartProvider'
+import { logger } from '@cgk-platform/logging'
 
 type ButtonState = 'idle' | 'loading' | 'success' | 'error'
 
@@ -67,7 +68,7 @@ export function AddToCartButton({
       setButtonState('success')
       onSuccess?.()
     } catch (error) {
-      console.error('Add to cart failed:', error)
+      logger.error('Add to cart failed:', error)
       setButtonState('error')
     }
   }, [addItem, variantId, quantity, available, buttonState, onSuccess])

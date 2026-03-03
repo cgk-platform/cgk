@@ -16,6 +16,7 @@ import type {
   AgentHandoffWithAgents,
   InitiateHandoffInput,
 } from '../types/teams.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Initiate a handoff from one agent to another
@@ -100,7 +101,7 @@ export async function initiateAndNotifyHandoff(
       notificationSent: true,
     }
   } catch (error) {
-    console.error('Failed to send handoff notification:', error)
+    logger.error('Failed to send handoff notification:', error)
     return {
       handoff,
       notificationSent: false,

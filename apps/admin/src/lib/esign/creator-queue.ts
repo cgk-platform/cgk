@@ -7,6 +7,7 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 import type { EsignDocument, EsignSigner } from './types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * E-sign email types for creator queue
@@ -91,7 +92,7 @@ export async function logToCreatorQueue(
     })
   } catch (error) {
     // Don't throw - this is supplementary logging
-    console.error('Failed to log to creator queue:', error)
+    logger.error('Failed to log to creator queue:', error)
   }
 }
 

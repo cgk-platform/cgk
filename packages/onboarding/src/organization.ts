@@ -126,7 +126,10 @@ export async function createOrganization(data: BasicInfoData): Promise<{
     RETURNING id, slug
   `
 
-  const org = result.rows[0] as { id: string; slug: string }
+  const org = result.rows[0]
+  if (!org) {
+    throw new Error('Failed to create organization')
+  }
 
   // Create tenant schema with all migrations
   logger.info('Creating tenant schema', { slug: data.slug })
@@ -242,7 +245,12 @@ export async function getOrganizationBySlug(slug: string): Promise<OrganizationS
     return null
   }
 
-  return getOrganization((result.rows[0] as { id: string }).id)
+  const row = result.rows[0]
+  if (!row) {
+    return null
+  }
+
+  return getOrganization(row.id as unknown as string)
 }
 
 /**

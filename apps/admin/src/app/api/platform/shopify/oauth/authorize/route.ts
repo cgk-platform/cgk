@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { initiateOAuth, normalizeShopDomain, ShopifyError } from '@cgk-platform/shopify'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/platform/shopify/oauth/authorize?shop=example.myshopify.com
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
 
     return NextResponse.redirect(authUrl)
   } catch (error) {
-    console.error('[shopify-oauth] Platform OAuth error:', error)
+    logger.error('[shopify-oauth] Platform OAuth error:', error)
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ authUrl })
   } catch (error) {
-    console.error('[shopify-oauth] Platform OAuth error:', error)
+    logger.error('[shopify-oauth] Platform OAuth error:', error)
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })

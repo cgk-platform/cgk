@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { ShareWishlistResponse } from '@/lib/account/types'
+import { logger } from '@cgk-platform/logging'
 
 interface ShareRequest {
   expiresInDays?: number
@@ -96,7 +97,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Failed to share wishlist:', error)
+    logger.error('Failed to share wishlist:', error)
     return NextResponse.json({ error: 'Failed to share wishlist' }, { status: 500 })
   }
 }

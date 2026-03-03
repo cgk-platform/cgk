@@ -4,6 +4,7 @@ import { createCommerceProvider, type Product } from '@cgk-platform/commerce'
 import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Shopify product variant type for the SendProductModal
@@ -131,7 +132,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ products })
   } catch (error) {
-    console.error('[products/available] GET error:', error)
+    logger.error('[products/available] GET error:', error)
     return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 })
   }
 }

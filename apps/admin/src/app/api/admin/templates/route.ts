@@ -10,6 +10,7 @@ import {
 } from '@cgk-platform/communications'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/templates
@@ -81,7 +82,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(library)
   } catch (error) {
-    console.error('Error fetching template library:', error)
+    logger.error('Error fetching template library:', error)
     return NextResponse.json(
       { error: 'Failed to fetch template library' },
       { status: 500 }

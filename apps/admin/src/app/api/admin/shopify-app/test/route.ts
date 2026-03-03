@@ -8,6 +8,7 @@ import {
   getShopifyCredentialsBySlug,
   ShopifyError,
 } from '@cgk-platform/shopify'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/shopify-app/test
@@ -73,7 +74,7 @@ export async function POST() {
       lastSyncAt: health.lastSyncAt?.toISOString(),
     })
   } catch (error) {
-    console.error('[shopify-test] Error:', error)
+    logger.error('[shopify-test] Error:', error)
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({

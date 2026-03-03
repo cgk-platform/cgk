@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { getSetupStatus } from '@/lib/setup-detection'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,7 +16,7 @@ export async function GET() {
     const status = await getSetupStatus()
     return NextResponse.json(status)
   } catch (error) {
-    console.error('Failed to get setup status:', error)
+    logger.error('Failed to get setup status:', error)
     return NextResponse.json(
       {
         isConfigured: false,

@@ -9,6 +9,7 @@ import {
   getDomainById,
   getResendConfig,
 } from '@cgk-platform/communications'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -63,7 +64,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
       const result = await deleteDomainFromResend(domain.resendDomainId, resendConfig)
       if (!result.success) {
         // Log but don't block deletion
-        console.warn(`Failed to delete domain from Resend: ${result.error}`)
+        logger.warn(`Failed to delete domain from Resend: ${result.error}`)
       }
     }
   }

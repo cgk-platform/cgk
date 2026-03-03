@@ -10,6 +10,7 @@ import {
 import { sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Super Admin Middleware for Orchestrator
@@ -224,7 +225,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         isSensitive: isSensitiveRoute,
       },
     }).catch((error) => {
-      console.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error)
     })
 
     // Clone the request and add auth headers
@@ -249,7 +250,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (err: unknown) {
-    console.error('Middleware error:', err)
+    logger.error('Middleware error:', err)
     // Invalid token, redirect to login
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)

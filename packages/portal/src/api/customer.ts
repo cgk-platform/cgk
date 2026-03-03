@@ -6,6 +6,7 @@
 
 import { customerQuery, customerMutation } from './client'
 import type { CustomerInfo, UserError } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 interface CustomerResponse {
   customer: {
@@ -72,7 +73,7 @@ export async function getCustomer(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    console.error('Failed to get customer:', result.errors)
+    logger.error('Failed to get customer:', result.errors)
     return null
   }
 
@@ -123,7 +124,7 @@ export async function updateCustomer(
   })
 
   if (result.errors?.length) {
-    console.error('Failed to update customer:', result.errors)
+    logger.error('Failed to update customer:', result.errors)
     return {
       customer: null,
       errors: result.errors.map((e) => ({ field: null, message: e.message })),

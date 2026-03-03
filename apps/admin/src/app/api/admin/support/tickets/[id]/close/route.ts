@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { updateTicket } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -63,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     }
 
-    console.error('Error closing ticket:', error)
+    logger.error('Error closing ticket:', error)
     return NextResponse.json(
       { error: 'Failed to close ticket' },
       { status: 500 }

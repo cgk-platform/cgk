@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getABTest, getVariants, updateABTest, deleteABTest } from '@/lib/ab-tests/db'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteContext {
   params: Promise<{ testId: string }>
@@ -57,7 +58,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    console.error('Error updating A/B test:', error)
+    logger.error('Error updating A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to update A/B test' },
       { status: 500 }
@@ -88,7 +89,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting A/B test:', error)
+    logger.error('Error deleting A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to delete A/B test' },
       { status: 500 }

@@ -11,6 +11,7 @@
  */
 
 import { validateRequiredEnv, validateEnv, isEnvSet } from '@cgk-platform/core'
+import { logger } from '@cgk-platform/logging'
 
 // Vercel/Neon sets POSTGRES_URL; map it to DATABASE_URL if needed
 if (!process.env.DATABASE_URL && process.env.POSTGRES_URL) {
@@ -30,7 +31,7 @@ validateRequiredEnv([...REQUIRED_ENV_VARS])
 // Check for JWT secret availability
 const hasJwtSecret = isEnvSet('JWT_SECRET') || isEnvSet('CONTRACTOR_JWT_SECRET')
 if (!hasJwtSecret) {
-  console.warn(
+  logger.warn(
     '[CONTRACTOR-PORTAL] Warning: Neither JWT_SECRET nor CONTRACTOR_JWT_SECRET is set. ' +
       'Authentication features may not work correctly.'
   )
@@ -40,7 +41,7 @@ if (!hasJwtSecret) {
 if (process.env.NODE_ENV === 'development') {
   const result = validateEnv([], [...OPTIONAL_ENV_VARS])
   if (result.warnings.length > 0) {
-    console.warn(`[CONTRACTOR-PORTAL] Missing optional env vars: ${result.warnings.join(', ')}`)
+    logger.warn(`[CONTRACTOR-PORTAL] Missing optional env vars: ${result.warnings.join(', ')}`)
   }
 }
 

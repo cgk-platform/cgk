@@ -9,6 +9,7 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { withTenant, sql } from '@cgk-platform/db'
 import { getWebhookHealth, getWebhookEventsByTopic } from '@cgk-platform/shopify/webhooks'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,7 +51,7 @@ export async function GET(req: Request): Promise<Response> {
       eventsByTopic,
     })
   } catch (error) {
-    console.error('[API] Failed to get webhook health:', error)
+    logger.error('[API] Failed to get webhook health:', error)
     return Response.json(
       { error: 'Failed to get webhook health' },
       { status: 500 }

@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import { Command } from 'commander'
+import { logger } from '@cgk-platform/logging'
 
 interface CheckResult {
   name: string
@@ -11,7 +12,7 @@ interface CheckResult {
 export const doctorCommand = new Command('doctor')
   .description('Check system requirements and configuration')
   .action(async () => {
-    console.log(chalk.cyan('\n🔍 CGK Doctor - Checking system...\n'))
+    logger.info(chalk.cyan('\n🔍 CGK Doctor - Checking system...\n'))
 
     const results: CheckResult[] = []
 
@@ -76,7 +77,7 @@ export const doctorCommand = new Command('doctor')
     })
 
     // Display results
-    console.log(chalk.bold('System Check Results:\n'))
+    logger.info(chalk.bold('System Check Results:\n'))
 
     for (const result of results) {
       const icon =
@@ -86,9 +87,9 @@ export const doctorCommand = new Command('doctor')
             ? chalk.yellow('⚠')
             : chalk.red('✗')
 
-      console.log(`  ${icon} ${chalk.bold(result.name)}: ${result.message}`)
+      logger.info(`  ${icon} ${chalk.bold(result.name)}: ${result.message}`)
       if (result.details) {
-        console.log(`     ${chalk.dim(result.details)}`)
+        logger.info(`     ${chalk.dim(result.details)}`)
       }
     }
 
@@ -97,15 +98,15 @@ export const doctorCommand = new Command('doctor')
     const failed = results.filter((r) => r.status === 'fail').length
     const warned = results.filter((r) => r.status === 'warn').length
 
-    console.log('')
+    logger.info('')
     if (failed === 0) {
-      console.log(chalk.green(`✅ All checks passed! (${passed} passed, ${warned} warnings)`))
+      logger.info(chalk.green(`✅ All checks passed! (${passed} passed, ${warned} warnings)`))
     } else {
-      console.log(chalk.red(`❌ ${failed} checks failed (${passed} passed, ${warned} warnings)`))
-      console.log(chalk.dim('Fix the issues above before continuing.'))
+      logger.info(chalk.red(`❌ ${failed} checks failed (${passed} passed, ${warned} warnings)`))
+      logger.info(chalk.dim('Fix the issues above before continuing.'))
       process.exit(1)
     }
-    console.log('')
+    logger.info('')
   })
 
 async function checkCommand(

@@ -10,6 +10,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +55,7 @@ export async function GET(req: Request) {
       offset,
     })
   } catch (error) {
-    console.error('Error fetching tax forms:', error)
+    logger.error('Error fetching tax forms:', error)
     return Response.json(
       { error: 'Failed to fetch tax forms' },
       { status: 500 }

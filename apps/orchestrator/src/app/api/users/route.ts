@@ -2,6 +2,7 @@ import { requireAuth } from '@cgk-platform/auth'
 // import { sendEmail } from '@cgk-platform/communications' // TODO: Implement email sending via queue
 import { sql } from '@vercel/postgres'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -102,7 +103,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    console.error('Failed to fetch users:', error)
+    logger.error('Failed to fetch users:', error)
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 })
   }
 }
@@ -183,9 +184,9 @@ export async function POST(request: Request) {
         //     <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/auth/signup?email=${encodeURIComponent(email)}">Accept Invitation</a></p>
         //   `,
         // })
-        console.log(`TODO: Send invitation email to ${email} for ${orgName}`)
+        logger.info(`TODO: Send invitation email to ${email} for ${orgName}`)
       } catch (emailError) {
-        console.error('Failed to send invitation email:', emailError)
+        logger.error('Failed to send invitation email:', emailError)
         // Don't fail the whole operation if email fails
       }
     }
@@ -196,7 +197,7 @@ export async function POST(request: Request) {
       message: sendInvite ? 'User created and invitation sent' : 'User created successfully',
     })
   } catch (error) {
-    console.error('Failed to create user:', error)
+    logger.error('Failed to create user:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create user' },
       { status: 500 }

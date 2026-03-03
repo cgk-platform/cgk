@@ -15,6 +15,7 @@ import { validateTenantApiKey } from '@/lib/api-key-auth'
 import { syncProject } from '@cgk-platform/video-editor/server'
 
 import type { SyncProjectInput, SyncSceneInput, SyncCaptionInput } from '@cgk-platform/video-editor'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   const auth = await validateTenantApiKey(request)
@@ -143,7 +144,7 @@ export async function POST(request: Request) {
       { status: 200 }
     )
   } catch (error) {
-    console.error('Video editor sync error:', error)
+    logger.error('Video editor sync error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Sync failed' },
       { status: 500 }

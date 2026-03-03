@@ -9,6 +9,8 @@ import { tasks } from '@trigger.dev/sdk/v3'
 
 import type { ShopifyOrderPayload } from '../types'
 import { parseCents, mapFinancialStatus, mapFulfillmentStatus } from '../utils'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Handle orders/create webhook
@@ -122,7 +124,7 @@ export async function handleOrderCreate(
     }),
   ])
 
-  console.log(`[Webhook] Order ${orderName} created for tenant ${tenantId}`)
+  logger.info(`[Webhook] Order ${orderName} created for tenant ${tenantId}`)
 }
 
 /**
@@ -162,7 +164,7 @@ export async function handleOrderPaid(
     }),
   ])
 
-  console.log(`[Webhook] Order ${order.name} paid for tenant ${tenantId}`)
+  logger.info(`[Webhook] Order ${order.name} paid for tenant ${tenantId}`)
 }
 
 /**
@@ -190,7 +192,7 @@ export async function handleOrderUpdate(
     `
   })
 
-  console.log(`[Webhook] Order ${order.name} updated for tenant ${tenantId}`)
+  logger.info(`[Webhook] Order ${order.name} updated for tenant ${tenantId}`)
 }
 
 /**
@@ -232,7 +234,7 @@ export async function handleOrderCancelled(
     }),
   ])
 
-  console.log(`[Webhook] Order ${order.name} cancelled for tenant ${tenantId}`)
+  logger.info(`[Webhook] Order ${order.name} cancelled for tenant ${tenantId}`)
 }
 
 /**

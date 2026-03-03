@@ -4,6 +4,7 @@ import { withTenant, sql } from '@cgk-platform/db'
 import { NextResponse } from 'next/server'
 
 import { authenticateBundleRequest } from '@/lib/bundles/api-auth'
+import { logger } from '@cgk-platform/logging'
 
 interface CreateBundleOrderInput {
   order_id: string
@@ -82,7 +83,7 @@ export async function POST(
     const row = result.rows[0] as Record<string, unknown> | undefined
     return NextResponse.json({ success: true, id: row?.id ?? null }, { status: 201 })
   } catch (error) {
-    console.error('Error recording bundle order:', error)
+    logger.error('Error recording bundle order:', error)
     return NextResponse.json({ error: 'Failed to record bundle order' }, { status: 500 })
   }
 }
@@ -121,7 +122,7 @@ export async function GET(
     const totalCount = (countResult.rows[0] as Record<string, unknown> | undefined)?.total ?? 0
     return NextResponse.json({ orders: result.rows, totalCount, limit, offset })
   } catch (error) {
-    console.error('Error fetching bundle orders:', error)
+    logger.error('Error fetching bundle orders:', error)
     return NextResponse.json({ error: 'Failed to fetch bundle orders' }, { status: 500 })
   }
 }

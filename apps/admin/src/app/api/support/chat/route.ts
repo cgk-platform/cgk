@@ -17,6 +17,7 @@ import {
   isWithinBusinessHours,
   type CreateChatSessionInput,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
       isOnline,
     })
   } catch (error) {
-    console.error('[support/chat] GET error:', error)
+    logger.error('[support/chat] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch config' },
       { status: 500 }
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
       offlineMessage: !isOnline ? config.offlineMessage : null,
     }, { status: 201 })
   } catch (error) {
-    console.error('[support/chat] POST error:', error)
+    logger.error('[support/chat] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to start chat' },
       { status: 500 }

@@ -2,6 +2,7 @@
  * Bundle PDP — Full product page with gallery, variant picker, tabs,
  * and bundle builder. Uses BundleCore for shared pricing/cart logic.
  */
+import { logger } from '@cgk-platform/logging'
 (function () {
   'use strict';
 
@@ -909,7 +910,7 @@
     updateShippingBar(subtotalCents) {
       if (!this.freeShippingThreshold || this.freeShippingThreshold <= 0) return;
       var thresholdCents = this.freeShippingThreshold * 100;
-      console.log('[ShippingBar]', {
+      logger.info('[ShippingBar]', {
         bundleTotal: subtotalCents,
         existingCart: this.existingCartTotal,
         combined: subtotalCents + (this.existingCartTotal || 0),
@@ -1769,7 +1770,7 @@
           self.recalculate();
         }, 2000);
       } catch (err) {
-        console.error('[BundlePDP] Cart error:', err);
+        logger.error('[BundlePDP] Cart error:', err);
         allCtas.forEach(function (b) {
           b.textContent = 'Error \u2014 Try Again';
           b.classList.remove('bb-pdp__cta--loading');

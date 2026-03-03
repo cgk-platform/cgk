@@ -5,6 +5,7 @@ import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 
 import { useAttribution, ModelSelector, TimeRangePicker } from '@/components/attribution'
 import type { CreativePerformance, CreativePlatform, CreativeSavedView } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const platformColors: Record<CreativePlatform, string> = {
   meta: '#3b82f6',
@@ -266,7 +267,7 @@ export default function CreativesPage() {
       const data = await response.json()
       setCreatives(data.creatives || [])
     } catch (error) {
-      console.error('Failed to fetch creatives:', error)
+      logger.error('Failed to fetch creatives:', error)
     } finally {
       setIsLoading(false)
     }
@@ -278,7 +279,7 @@ export default function CreativesPage() {
       const data = await response.json()
       setSavedViews(data.savedViews || [])
     } catch (error) {
-      console.error('Failed to fetch saved views:', error)
+      logger.error('Failed to fetch saved views:', error)
     }
   }, [])
 
@@ -318,7 +319,7 @@ export default function CreativesPage() {
       setShowSaveDialog(false)
       fetchSavedViews()
     } catch (error) {
-      console.error('Failed to save view:', error)
+      logger.error('Failed to save view:', error)
     }
   }
 

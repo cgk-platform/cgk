@@ -8,6 +8,7 @@ import {
   getApplicationStatusCounts,
   parseApplicationFilters,
 } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Error fetching applications:', error)
+    logger.error('Error fetching applications:', error)
     return NextResponse.json(
       { error: 'Failed to fetch applications' },
       { status: 500 }

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import type { CommissionConfig, TierRate } from '@/lib/creators-admin-ops/types'
 import { DEFAULT_TIER_RATES } from '@/lib/creators-admin-ops/types'
 import { formatMoney } from '@/lib/format'
+import { logger } from '@cgk-platform/logging'
 
 export default function CommissionSettingsPage() {
   const [, setConfig] = useState<CommissionConfig | null>(null)
@@ -37,7 +38,7 @@ export default function CommissionSettingsPage() {
         setLoading(false)
       })
       .catch((error) => {
-        console.error('[commissions-settings] Failed to load config:', error)
+        logger.error('[commissions-settings] Failed to load config:', error)
         setLoading(false)
       })
   }, [])

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 
 import type { BriAction, ActionCategory } from '@/lib/bri/types'
+import { logger } from '@cgk-platform/logging'
 
 interface ActionLogViewProps {
   tenantSlug: string
@@ -59,7 +60,7 @@ export function ActionLogView({ initialActions, stats }: ActionLogViewProps) {
         }
       }
     } catch (error) {
-      console.error('Failed to approve action:', error)
+      logger.error('Failed to approve action:', error)
     } finally {
       setProcessing(null)
     }
@@ -84,7 +85,7 @@ export function ActionLogView({ initialActions, stats }: ActionLogViewProps) {
         }
       }
     } catch (error) {
-      console.error('Failed to reject action:', error)
+      logger.error('Failed to reject action:', error)
     } finally {
       setProcessing(null)
     }

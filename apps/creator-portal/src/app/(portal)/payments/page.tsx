@@ -12,6 +12,7 @@ import Link from 'next/link'
 import WithdrawalModal from '@/components/payments/WithdrawalModal'
 import WithdrawalTimeline from '@/components/payments/WithdrawalTimeline'
 import TransactionList from '@/components/payments/TransactionList'
+import { logger } from '@cgk-platform/logging'
 
 interface BalanceData {
   balance: {
@@ -103,7 +104,7 @@ export default function PaymentsPage(): React.JSX.Element {
       setWithdrawalData(withdraw)
       setPaymentMethods(methods.methods)
     } catch (err) {
-      console.error('Error loading data:', err)
+      logger.error('Error loading data:', err)
       setError(err instanceof Error ? err.message : 'Failed to load data')
     } finally {
       setLoading(false)

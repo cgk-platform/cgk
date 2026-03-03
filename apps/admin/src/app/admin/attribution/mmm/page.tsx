@@ -10,6 +10,7 @@ import type {
   MMMResults,
   SaturationCurve,
 } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // MMM Configuration Component
@@ -367,7 +368,7 @@ function BudgetOptimizer({ results }: BudgetOptimizerProps) {
       const data = await response.json()
       setOptimization(data.optimization ?? null)
     } catch (error) {
-      console.error('Optimization failed:', error)
+      logger.error('Optimization failed:', error)
     } finally {
       setIsOptimizing(false)
     }
@@ -512,7 +513,7 @@ export default function MMMPage() {
         setIsRunning(false)
       }
     } catch (error) {
-      console.error('Failed to fetch MMM data:', error)
+      logger.error('Failed to fetch MMM data:', error)
     }
   }, [])
 
@@ -532,7 +533,7 @@ export default function MMMPage() {
       setModel(data.model ?? null)
       setTimeout(fetchMMMData, 2000)
     } catch (error) {
-      console.error('Failed to run MMM model:', error)
+      logger.error('Failed to run MMM model:', error)
       setIsRunning(false)
     }
   }

@@ -22,6 +22,7 @@ import {
 } from '@/lib/account/api'
 import { getContent } from '@/lib/account/content'
 import type { PortalContentStrings } from '@/lib/account/types'
+import { logger } from '@cgk-platform/logging'
 
 interface AddressesClientProps {
   addresses: CustomerAddress[]
@@ -44,7 +45,7 @@ export function AddressesClient({ addresses, content }: AddressesClientProps) {
       setDeletingAddress(null)
       router.refresh()
     } catch (error) {
-      console.error('Failed to delete address:', error)
+      logger.error('Failed to delete address:', error)
     } finally {
       setIsDeleting(false)
     }
@@ -56,7 +57,7 @@ export function AddressesClient({ addresses, content }: AddressesClientProps) {
       await setDefaultAddress(addressId)
       router.refresh()
     } catch (error) {
-      console.error('Failed to set default address:', error)
+      logger.error('Failed to set default address:', error)
     } finally {
       setSettingDefault(null)
     }

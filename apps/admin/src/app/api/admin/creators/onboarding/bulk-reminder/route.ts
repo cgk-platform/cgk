@@ -9,6 +9,7 @@ import {
 } from '@cgk-platform/integrations'
 
 import { recordOnboardingReminder, getOnboardingConfig } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   const headerList = await headers()
@@ -118,7 +119,7 @@ export async function POST(request: Request) {
       errors: errors.length > 0 ? errors : undefined,
     })
   } catch (error) {
-    console.error('Error sending bulk reminders:', error)
+    logger.error('Error sending bulk reminders:', error)
     return NextResponse.json(
       { error: 'Failed to send reminders' },
       { status: 500 }

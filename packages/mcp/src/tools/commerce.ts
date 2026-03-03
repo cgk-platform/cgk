@@ -10,6 +10,7 @@ import { withTenant, sql } from '@cgk-platform/db'
 import { defineTool, jsonResult, errorResult } from '../tools'
 import type { ToolDefinition } from '../tools'
 import type { ToolResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 // =============================================================================
 // Types
@@ -1611,7 +1612,7 @@ export const syncProductTool = defineTool({
       }
 
       // Fallback: TRIGGER_SECRET_KEY not configured — log and return success
-      console.warn('[syncProductTool] TRIGGER_SECRET_KEY not set — sync skipped')
+      logger.warn('[syncProductTool] TRIGGER_SECRET_KEY not set — sync skipped')
       return jsonResult({
         success: true,
         message: `Sync queued for product "${product.title}" (job runner not configured)`,

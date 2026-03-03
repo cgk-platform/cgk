@@ -11,6 +11,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk-platform/auth'
 import { getAgentCSATScores } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ scores })
   } catch (error) {
-    console.error('[csat/agents] GET error:', error)
+    logger.error('[csat/agents] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch agent scores' },
       { status: 500 }

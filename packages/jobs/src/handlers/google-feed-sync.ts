@@ -7,6 +7,7 @@
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 // ---------------------------------------------------------------------------
 // Job Payloads
@@ -60,7 +61,7 @@ export const googleFeedSyncJob = defineJob<GoogleFeedSyncPayload>({
 
     // The actual implementation will be in the admin app
     // This job definition establishes the contract
-    console.log(`[google-feed-sync] Starting sync for tenant: ${tenantId}`, {
+    logger.info(`[google-feed-sync] Starting sync for tenant: ${tenantId}`, {
       fullSync,
       triggeredBy,
       jobId: job.id,
@@ -126,7 +127,7 @@ export const googleFeedProductUpdateJob = defineJob<GoogleFeedProductUpdatePaylo
       }
     }
 
-    console.log(`[google-feed-product-update] ${action} product: ${productId}`, {
+    logger.info(`[google-feed-product-update] ${action} product: ${productId}`, {
       tenantId,
       variantId,
       jobId: job.id,
@@ -188,7 +189,7 @@ export const googleFeedImageOptimizeJob = defineJob<GoogleFeedImageOptimizePaylo
       }
     }
 
-    console.log(`[google-feed-image-optimize] Optimizing image for product: ${productId}`, {
+    logger.info(`[google-feed-image-optimize] Optimizing image for product: ${productId}`, {
       tenantId,
       imageUrl,
       options,
@@ -241,7 +242,7 @@ export const googleFeedScheduledSyncJob = defineJob<{ tenantId: string }>({
       }
     }
 
-    console.log(`[google-feed-scheduled-sync] Running scheduled sync for tenant: ${tenantId}`, {
+    logger.info(`[google-feed-scheduled-sync] Running scheduled sync for tenant: ${tenantId}`, {
       jobId: job.id,
     })
 

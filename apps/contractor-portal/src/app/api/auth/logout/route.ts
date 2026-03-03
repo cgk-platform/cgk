@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { getAuthCookie, getClearCookieHeader } from '@/lib/auth/cookies'
 import { verifyContractorJWT } from '@/lib/auth/jwt'
 import { revokeContractorSession } from '@/lib/auth/session'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/logout
@@ -29,7 +30,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    console.error('Logout error:', error)
+    logger.error('Logout error:', error)
     return Response.json(
       { success: true },
       {

@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { getTikTokConnection, selectTikTokAdvertiser } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,7 @@ export async function POST(req: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, advertiserId, advertiserName })
   } catch (error) {
-    console.error('Failed to select TikTok advertiser:', error)
+    logger.error('Failed to select TikTok advertiser:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to select advertiser' },
       { status: 500 }

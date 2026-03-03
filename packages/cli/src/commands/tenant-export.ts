@@ -6,6 +6,7 @@ import chalk from 'chalk'
 import { Command } from 'commander'
 import fs from 'fs-extra'
 import ora from 'ora'
+import { logger } from '@cgk-platform/logging'
 
 
 const execAsync = promisify(exec)
@@ -54,8 +55,8 @@ export const tenantExportCommand = new Command('tenant:export')
 
     // Validate slug format
     if (!isValidSlug(slug)) {
-      console.log(chalk.red('\n[ERROR] Invalid tenant slug'))
-      console.log(
+      logger.info(chalk.red('\n[ERROR] Invalid tenant slug'))
+      logger.info(
         chalk.dim(
           '   Slug must be lowercase alphanumeric with underscores only (e.g., my_brand)'
         )
@@ -68,21 +69,21 @@ export const tenantExportCommand = new Command('tenant:export')
     const defaultFilename = `${slug}-export-${timestamp}.sql`
     const output = options.output || defaultFilename
 
-    console.log(chalk.cyan('\n[EXPORT] Tenant Export\n'))
-    console.log(`  Tenant: ${chalk.bold(slug)}`)
-    console.log(`  Schema: ${chalk.bold(schemaName)}`)
-    console.log(`  Output: ${chalk.bold(output)}`)
+    logger.info(chalk.cyan('\n[EXPORT] Tenant Export\n'))
+    logger.info(`  Tenant: ${chalk.bold(slug)}`)
+    logger.info(`  Schema: ${chalk.bold(schemaName)}`)
+    logger.info(`  Output: ${chalk.bold(output)}`)
 
     if (options.dataOnly && options.schemaOnly) {
-      console.log(chalk.red('\n[ERROR] Cannot use both --data-only and --schema-only'))
+      logger.info(chalk.red('\n[ERROR] Cannot use both --data-only and --schema-only'))
       process.exit(1)
     }
 
     // Check POSTGRES_URL (Vercel/Neon) or DATABASE_URL
     const databaseUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
     if (!databaseUrl) {
-      console.log(chalk.red('\n[ERROR] POSTGRES_URL not set'))
-      console.log(chalk.dim('   Run: npx @cgk-platform/cli setup:database'))
+      logger.info(chalk.red('\n[ERROR] POSTGRES_URL not set'))
+      logger.info(chalk.dim('   Run: npx @cgk-platform/cli setup:database'))
       process.exit(1)
     }
 
@@ -103,24 +104,24 @@ export const tenantExportCommand = new Command('tenant:export')
       const tables = await getTenantTables(slug)
       spinner.succeed(`Found ${tables.length} tables`)
 
-      console.log('')
-      console.log(chalk.bold('  Tables to export:'))
+      logger.info('')
+      logger.info(chalk.bold('  Tables to export:'))
       for (const table of tables) {
-        console.log(chalk.dim(`    - ${table}`))
+        logger.info(chalk.dim(`    - ${table}`))
       }
-      console.log('')
+      logger.info('')
 
       if (options.dryRun) {
-        console.log(chalk.yellow('  DRY RUN - No file will be created\n'))
-        console.log(chalk.dim('  Would execute pg_dump with options:'))
-        console.log(chalk.dim(`    --schema=${schemaName}`))
+        logger.info(chalk.yellow('  DRY RUN - No file will be created\n'))
+        logger.info(chalk.dim('  Would execute pg_dump with options:'))
+        logger.info(chalk.dim(`    --schema=${schemaName}`))
         if (options.dataOnly) {
-          console.log(chalk.dim('    --data-only'))
+          logger.info(chalk.dim('    --data-only'))
         }
         if (options.schemaOnly) {
-          console.log(chalk.dim('    --schema-only'))
+          logger.info(chalk.dim('    --schema-only'))
         }
-        console.log('')
+        logger.info('')
         return
       }
 
@@ -163,7 +164,7 @@ export const tenantExportCommand = new Command('tenant:export')
 
         if (stderr && !stderr.includes('warning')) {
           spinner.warn('pg_dump completed with warnings')
-          console.log(chalk.yellow(`  ${stderr}`))
+          logger.info(chalk.yellow(`  ${stderr}`))
         }
 
         // Write output to file
@@ -175,14 +176,14 @@ export const tenantExportCommand = new Command('tenant:export')
         const sizeKB = Math.round(stats.size / 1024)
 
         spinner.succeed(`Export completed: ${outputPath}`)
-        console.log('')
-        console.log(`  File size: ${chalk.bold(`${sizeKB} KB`)}`)
-        console.log(`  Tables: ${chalk.bold(tables.length)}`)
-        console.log('')
-        console.log(chalk.green('[SUCCESS] Tenant exported successfully!\n'))
-        console.log('To import this export to another tenant:')
-        console.log(chalk.cyan(`  npx @cgk-platform/cli tenant:import ${output} --target <new_slug>`))
-        console.log('')
+        logger.info('')
+        logger.info(`  File size: ${chalk.bold(`${sizeKB} KB`)}`)
+        logger.info(`  Tables: ${chalk.bold(tables.length)}`)
+        logger.info('')
+        logger.info(chalk.green('[SUCCESS] Tenant exported successfully!\n'))
+        logger.info('To import this export to another tenant:')
+        logger.info(chalk.cyan(`  npx @cgk-platform/cli tenant:import ${output} --target <new_slug>`))
+        logger.info('')
       } catch {
         // pg_dump might not be available, fall back to SQL export
         spinner.warn('pg_dump not available, falling back to SQL query export')
@@ -209,14 +210,14 @@ export const tenantExportCommand = new Command('tenant:export')
         await fs.writeFile(outputPath, sqlContent, 'utf-8')
 
         spinner.succeed(`Partial export completed: ${outputPath}`)
-        console.log('')
-        console.log(chalk.yellow('  Note: pg_dump not found. Install PostgreSQL client tools for full export.'))
-        console.log('')
+        logger.info('')
+        logger.info(chalk.yellow('  Note: pg_dump not found. Install PostgreSQL client tools for full export.'))
+        logger.info('')
       }
     } catch (error) {
       spinner.fail('Export failed')
       if (error instanceof Error) {
-        console.log(chalk.red(`  ${error.message}`))
+        logger.info(chalk.red(`  ${error.message}`))
       }
       process.exit(1)
     }

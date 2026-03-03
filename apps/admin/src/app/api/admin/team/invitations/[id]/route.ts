@@ -9,6 +9,7 @@ import {
 } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(
   request: Request,
@@ -51,7 +52,7 @@ export async function GET(
 
     return NextResponse.json({ invitation })
   } catch (error) {
-    console.error('Error fetching invitation:', error)
+    logger.error('Error fetching invitation:', error)
     return NextResponse.json(
       { error: 'Failed to fetch invitation' },
       { status: 500 }
@@ -100,7 +101,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error revoking invitation:', error)
+    logger.error('Error revoking invitation:', error)
     const message = error instanceof Error ? error.message : 'Failed to revoke invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }

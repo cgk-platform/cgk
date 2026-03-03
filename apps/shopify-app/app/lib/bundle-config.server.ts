@@ -324,16 +324,28 @@ export async function resolveVariantProducts(
   const nodes = data.data?.nodes ?? []
 
   return nodes
-    .filter((node: any) => node?.id)
-    .map((node: any) => ({
-      variantId: node.id,
-      productTitle: node.product?.title ?? 'Unknown Product',
-      variantTitle: node.title ?? 'Default',
-      imageUrl:
-        node.media?.nodes?.[0]?.image?.url ??
-        node.product?.featuredMedia?.preview?.image?.url ??
-        null,
-    }))
+    .filter((node: unknown) => {
+      const n = node as Record<string, unknown>
+      return n?.id
+    })
+    .map((node: unknown) => {
+      const n = node as Record<string, unknown>
+      const product = n.product as Record<string, unknown> | undefined
+      const media = n.media as Record<string, unknown> | undefined
+      const mediaNodes = media?.nodes as Array<Record<string, unknown>> | undefined
+      const firstMedia = mediaNodes?.[0] as Record<string, unknown> | undefined
+      const image = firstMedia?.image as Record<string, unknown> | undefined
+      const featuredMedia = product?.featuredMedia as Record<string, unknown> | undefined
+      const preview = featuredMedia?.preview as Record<string, unknown> | undefined
+      const previewImage = preview?.image as Record<string, unknown> | undefined
+
+      return {
+        variantId: n.id as unknown as string,
+        productTitle: (product?.title as unknown as string) ?? 'Unknown Product',
+        variantTitle: (n.title as unknown as string) ?? 'Default',
+        imageUrl: (image?.url as unknown as string) ?? (previewImage?.url as unknown as string) ?? null,
+      }
+    })
 }
 
 /**

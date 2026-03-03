@@ -7,6 +7,7 @@
 import { sql, withTenant } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -225,7 +226,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching trends data:', error)
+    logger.error('Error fetching trends data:', error)
     return Response.json({ error: 'Failed to fetch trends data' }, { status: 500 })
   }
 }

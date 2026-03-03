@@ -3,6 +3,8 @@
  */
 
 import { type AdminConfig, DEFAULT_API_VERSION, normalizeStoreDomain } from './config'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 export interface AdminClient {
   readonly storeDomain: string
@@ -46,7 +48,7 @@ export function createAdminClient(config: AdminConfig): AdminClient {
       if (response.status === 429 && attempt < MAX_RETRIES) {
         const retryAfter = response.headers.get('Retry-After')
         const waitMs = retryAfter ? parseFloat(retryAfter) * 1000 : 2000
-        console.warn(`[Shopify Admin] Rate limited (429), retrying in ${waitMs}ms (attempt ${attempt + 1}/${MAX_RETRIES})`)
+        logger.warn(`[Shopify Admin] Rate limited (429), retrying in ${waitMs}ms (attempt ${attempt + 1}/${MAX_RETRIES})`)
         await sleep(waitMs)
         continue
       }
@@ -65,7 +67,7 @@ export function createAdminClient(config: AdminConfig): AdminClient {
       if (json.errors && json.errors.length > 0) {
         const isThrottled = json.errors.some(e => e.message.includes('Throttled'))
         if (isThrottled && attempt < MAX_RETRIES) {
-          console.warn(`[Shopify Admin] GraphQL throttled, retrying in 1s (attempt ${attempt + 1}/${MAX_RETRIES})`)
+          logger.warn(`[Shopify Admin] GraphQL throttled, retrying in 1s (attempt ${attempt + 1}/${MAX_RETRIES})`)
           await sleep(1000)
           continue
         }

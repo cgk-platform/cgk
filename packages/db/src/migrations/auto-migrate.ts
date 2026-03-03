@@ -9,13 +9,20 @@
 import { sql } from '../client.js'
 import { getMigrationStatus, runTenantMigrations } from './runner.js'
 
-// Simple logger for CLI output (no dependency on @cgk-platform/logging to avoid circular deps)
+// Simple logger for CLI output
 const logger = {
-  debug: (msg: string, ctx?: object) => console.log(`[DEBUG] ${msg}`, ctx || ''),
-  info: (msg: string, ctx?: object) => console.log(`[INFO] ${msg}`, ctx || ''),
-  warn: (msg: string, ctx?: object) => console.warn(`[WARN] ${msg}`, ctx || ''),
-  error: (msg: string, err?: Error, ctx?: object) =>
-    console.error(`[ERROR] ${msg}`, err, ctx || ''),
+  debug: (msg: string, ctx?: object): void => {
+    console.log(`[DEBUG] ${msg}`, ctx || {})
+  },
+  info: (msg: string, ctx?: object): void => {
+    console.log(`[INFO] ${msg}`, ctx || {})
+  },
+  warn: (msg: string, ctx?: object): void => {
+    console.warn(`[WARN] ${msg}`, ctx || {})
+  },
+  error: (msg: string, err?: Error, ctx?: object): void => {
+    console.error(`[ERROR] ${msg}`, err || '', ctx || {})
+  },
 }
 
 /**

@@ -1,6 +1,7 @@
 import { sql } from '@cgk-platform/db'
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -50,7 +51,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ tenants })
   } catch (error) {
-    console.error('Failed to fetch tenants:', error)
+    logger.error('Failed to fetch tenants:', error)
 
     if ((error as Error).name === 'AuthenticationError') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

@@ -3,6 +3,7 @@
 import * as React from 'react'
 
 import { cn } from '../utils/cn'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Tenant info for super admin selection
@@ -64,7 +65,7 @@ export function SuperAdminTenantSelector({
         setTenants(data.tenants || [])
         setError(null)
       } catch (err) {
-        console.error('Failed to fetch tenants:', err)
+        logger.error('Failed to fetch tenants:', err instanceof Error ? err : new Error(String(err)))
         setError('Failed to load tenants')
       } finally {
         setIsLoading(false)
@@ -150,7 +151,7 @@ export function SuperAdminTenantSelector({
       // Success - reload to apply new JWT
       window.location.reload()
     } catch (err) {
-      console.error('Failed to switch tenant:', err)
+      logger.error('Failed to switch tenant:', err instanceof Error ? err : new Error(String(err)))
       alert(err instanceof Error ? err.message : 'Failed to switch tenant')
       setIsSwitching(false)
     }
@@ -176,7 +177,7 @@ export function SuperAdminTenantSelector({
       // Success - reload to apply changes
       window.location.reload()
     } catch (err) {
-      console.error('Failed to clear context:', err)
+      logger.error('Failed to clear context:', err instanceof Error ? err : new Error(String(err)))
       alert('Failed to clear tenant context')
       setIsSwitching(false)
     }

@@ -7,6 +7,7 @@ import { getSetCookieHeader } from '@/lib/auth/cookies'
 import { signContractorJWT } from '@/lib/auth/jwt'
 import { hashPassword } from '@/lib/auth/password'
 import { createContractorSession } from '@/lib/auth/session'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/auth/invite?token=xxx&tenant=slug
@@ -105,7 +106,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Invitation redemption error:', error)
+    logger.error('Invitation redemption error:', error)
     return Response.json({ error: 'Failed to redeem invitation' }, { status: 500 })
   }
 }
@@ -224,7 +225,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    console.error('Invitation completion error:', error)
+    logger.error('Invitation completion error:', error)
     return Response.json({ error: 'Failed to complete invitation' }, { status: 500 })
   }
 }

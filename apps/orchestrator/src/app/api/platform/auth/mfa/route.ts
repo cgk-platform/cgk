@@ -10,6 +10,7 @@ import {
   verifyJWT,
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -319,7 +320,7 @@ export async function POST(request: Request) {
       redirectTo: '/',
     })
   } catch (error) {
-    console.error('MFA verification error:', error)
+    logger.error('MFA verification error:', error)
     return Response.json(
       { error: 'MFA verification failed' },
       { status: 500 }
@@ -391,7 +392,7 @@ async function handleMfaSetup(userId: string, request: Request): Promise<Respons
       message: 'Scan the QR code with your authenticator app, then verify with a code',
     })
   } catch (error) {
-    console.error('MFA setup error:', error)
+    logger.error('MFA setup error:', error)
     return Response.json(
       { error: 'MFA setup failed' },
       { status: 500 }
@@ -451,7 +452,7 @@ export async function GET(request: Request) {
       mfaChallengeExpiresAt: session.mfaChallengeExpiresAt,
     })
   } catch (error) {
-    console.error('MFA status error:', error)
+    logger.error('MFA status error:', error)
     return Response.json(
       { error: 'Failed to get MFA status' },
       { status: 500 }

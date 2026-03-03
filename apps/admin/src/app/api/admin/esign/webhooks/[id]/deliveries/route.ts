@@ -7,6 +7,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getWebhookDeliveries } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export async function GET(
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    console.error('Error fetching webhook deliveries:', error)
+    logger.error('Error fetching webhook deliveries:', error)
     return NextResponse.json(
       { error: 'Failed to fetch deliveries' },
       { status: 500 }

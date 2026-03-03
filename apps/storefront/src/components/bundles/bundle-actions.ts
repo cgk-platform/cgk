@@ -13,6 +13,7 @@ import type { CartAttribute } from '@cgk-platform/commerce'
 import { addToCart } from '@/lib/cart/actions'
 
 import type { BundleCartItem } from './types'
+import { logger } from '@cgk-platform/logging'
 
 export async function addBundleToCart(
   items: BundleCartItem[]
@@ -32,7 +33,7 @@ export async function addBundleToCart(
 
     return { success: true }
   } catch (err) {
-    console.error('[BundleBuilder] Failed to add bundle to cart:', err)
+    logger.error('[BundleBuilder] Failed to add bundle to cart:', err)
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Failed to add bundle to cart',

@@ -14,6 +14,7 @@ import type {
   SlackView,
   TenantSlackConfig,
 } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 export interface InteractionContext {
   tenantId: string
@@ -118,7 +119,7 @@ async function handleSingleAction(
       return null
 
     default:
-      console.log(`[slack] Unknown action: ${actionId}`)
+      logger.info(`[slack] Unknown action: ${actionId}`)
       return null
   }
 }
@@ -134,7 +135,7 @@ async function handleApprovalAction(
 ): Promise<SlackInteractionResponse | null> {
   const request = await getRequest(requestId)
   if (!request) {
-    console.error(`[slack] Approval request not found: ${requestId}`)
+    logger.error(`[slack] Approval request not found: ${requestId}`)
     return null
   }
 
@@ -198,7 +199,7 @@ async function recordFeedback(
     visibleInDashboard: true,
   })
 
-  console.log(`[slack] Feedback recorded: ${feedback} for message ${messageId}`)
+  logger.info(`[slack] Feedback recorded: ${feedback} for message ${messageId}`)
 }
 
 /**
@@ -221,7 +222,7 @@ async function handleViewSubmission(
       return handleFeedbackSubmission(ctx, view, payload)
 
     default:
-      console.log(`[slack] Unknown view callback: ${callbackId}`)
+      logger.info(`[slack] Unknown view callback: ${callbackId}`)
       return { ok: true }
   }
 }
@@ -296,7 +297,7 @@ async function handleShortcut(
   payload: SlackInteractionPayload
 ): Promise<SlackInteractionResponse> {
   // Handle any global shortcuts here
-  console.log(`[slack] Shortcut triggered: ${payload.type}`)
+  logger.info(`[slack] Shortcut triggered: ${payload.type}`)
   return { ok: true }
 }
 
@@ -308,7 +309,7 @@ async function handleMessageAction(
   _payload: SlackInteractionPayload
 ): Promise<SlackInteractionResponse> {
   // Handle message-level shortcuts here
-  console.log(`[slack] Message action triggered`)
+  logger.info(`[slack] Message action triggered`)
   return { ok: true }
 }
 

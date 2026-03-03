@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { ProductCard } from '@/components/sections/ProductCard'
 import type { Product } from '@/components/sections/ProductGrid'
+import { logger } from '@cgk-platform/logging'
 
 interface ProductsResponse {
   success: boolean
@@ -23,7 +24,7 @@ async function fetchCollectionProducts(handle: string): Promise<{
     })
 
     if (!res.ok) {
-      console.error('Failed to fetch collection:', await res.text())
+      logger.error('Failed to fetch collection:', await res.text())
       return {
         products: [],
         collection: { title: formatCollectionTitle(handle), description: '' },
@@ -33,7 +34,7 @@ async function fetchCollectionProducts(handle: string): Promise<{
     const json = (await res.json()) as ProductsResponse
 
     if (!json.success || !json.data) {
-      console.error('Invalid collection response:', json)
+      logger.error('Invalid collection response:', json)
       return {
         products: [],
         collection: { title: formatCollectionTitle(handle), description: '' },
@@ -48,7 +49,7 @@ async function fetchCollectionProducts(handle: string): Promise<{
       },
     }
   } catch (error) {
-    console.error('Error fetching collection:', error)
+    logger.error('Error fetching collection:', error)
     return {
       products: [],
       collection: { title: formatCollectionTitle(handle), description: '' },

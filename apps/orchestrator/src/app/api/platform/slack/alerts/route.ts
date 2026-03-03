@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { getAlertHistory, type AlertSeverity } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/platform/slack/alerts
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ alerts })
   } catch (error) {
-    console.error('Failed to get platform alerts:', error)
+    logger.error('Failed to get platform alerts:', error)
     return NextResponse.json(
       { error: 'Failed to get alerts' },
       { status: 500 },

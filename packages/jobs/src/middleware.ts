@@ -9,6 +9,7 @@
 
 import type { TenantEvent } from './events'
 import type { JobContext, JobHandler } from './provider'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Error classification for retry decisions
@@ -95,7 +96,7 @@ export function withTenantContext<T extends TenantEvent<unknown>, R = void>(
     } catch {
       // If @cgk-platform/db is not available, proceed without tenant context
       // This allows the jobs package to be used standalone for testing
-      console.warn(
+      logger.warn(
         `[Job:${ctx.name}] @cgk-platform/db not available, proceeding without tenant context`
       )
       return handler(ctx)
@@ -112,7 +113,7 @@ export function withLogging<T, R = void>(): Middleware<T, R> {
     const start = Date.now()
     const tenantId = (ctx.payload as TenantEvent<unknown>).tenantId ?? 'unknown'
 
-    console.log(
+    logger.info(
       `[Job:${ctx.name}] Starting`,
       JSON.stringify({
         id: ctx.id,
@@ -126,7 +127,7 @@ export function withLogging<T, R = void>(): Middleware<T, R> {
       const result = await next()
       const duration = Date.now() - start
 
-      console.log(
+      logger.info(
         `[Job:${ctx.name}] Completed`,
         JSON.stringify({
           id: ctx.id,
@@ -141,7 +142,7 @@ export function withLogging<T, R = void>(): Middleware<T, R> {
       const errorMessage =
         error instanceof Error ? error.message : String(error)
 
-      console.error(
+      logger.error(
         `[Job:${ctx.name}] Failed`,
         JSON.stringify({
           id: ctx.id,
@@ -301,7 +302,7 @@ export function withIdempotency<T, R = void>(
 
     const alreadyProcessed = await storage.has(key)
     if (alreadyProcessed) {
-      console.log(`[Job:${ctx.name}] Skipping duplicate: ${key}`)
+      logger.info(`[Job:${ctx.name}] Skipping duplicate: ${key}`)
       return undefined as unknown as R
     }
 

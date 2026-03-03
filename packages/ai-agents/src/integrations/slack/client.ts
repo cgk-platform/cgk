@@ -11,6 +11,7 @@ import type {
   AgentSlackApp,
 } from '../types.js'
 import { safeDecrypt } from '../utils/encryption.js'
+import { logger } from '@cgk-platform/logging'
 
 const SLACK_API_BASE = 'https://slack.com/api'
 
@@ -72,7 +73,7 @@ export class SlackClient {
     body: string
   ): boolean {
     if (!this.signingSecret) {
-      console.warn('[slack] No signing secret configured, skipping verification')
+      logger.warn('[slack] No signing secret configured, skipping verification')
       return true
     }
 

@@ -7,6 +7,7 @@
 
 import { getTenantApiKey, getTenantApiKeyAndSecret, getTenantApiCredential } from '../storage.js'
 import type { TenantApiService } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 // Credential cache
 const credentialCache = new Map<string, { credentials: { apiKey: string; apiSecret: string | null }; timestamp: number }>()
@@ -488,7 +489,7 @@ export async function checkEasyPostTrackingStatus(
       trackingUrl: tracker.public_url || undefined,
     }
   } catch (error) {
-    console.error('[easypost] Tracking error:', error instanceof Error ? error.message : error)
+    logger.error('[easypost] Tracking error:', error instanceof Error ? error.message : error)
     return {
       delivered: false,
       inTransit: false,
@@ -521,7 +522,7 @@ export async function verifyTenantServiceCredentials(
         // A 401 would throw before this completes. The 404 error is expected and ignored.
         await client.video.assets.retrieve('nonexistent').catch((error) => {
           // Expected: 404 for valid creds, will throw auth error if creds invalid
-          console.debug('[mux-verify] Expected 404:', error)
+          logger.debug('[mux-verify] Expected 404:', error)
         })
         return { valid: true }
       }

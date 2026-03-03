@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 type RouteParams = { params: Promise<{ agentId: string }> }
 
@@ -62,7 +63,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ calls })
   } catch (error) {
-    console.error('Error fetching voice calls:', error)
+    logger.error('Error fetching voice calls:', error)
     return NextResponse.json({ error: 'Failed to fetch voice calls' }, { status: 500 })
   }
 }
@@ -143,7 +144,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ call })
   } catch (error) {
-    console.error('Error initiating voice call:', error)
+    logger.error('Error initiating voice call:', error)
     const errorMessage = error instanceof Error ? error.message : 'Failed to initiate voice call'
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }

@@ -19,6 +19,7 @@ import type {
   TenantEvent,
 } from '../events'
 import type { Job, JobResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // APPROVAL REMINDERS (Daily 9 AM UTC)
@@ -59,7 +60,7 @@ export const checkApprovalRemindersJob = defineJob<
       }
     }
 
-    console.log(`[checkApprovalReminders] Processing approval reminders for tenant ${tenantId}`)
+    logger.info(`[checkApprovalReminders] Processing approval reminders for tenant ${tenantId}`)
 
     const result = await withTenant(tenantId, async () => {
       // 1. Get reminder config
@@ -199,7 +200,7 @@ export const checkWelcomeCallRemindersJob = defineJob<
       }
     }
 
-    console.log(`[checkWelcomeCallReminders] Processing welcome call reminders for tenant ${tenantId}`)
+    logger.info(`[checkWelcomeCallReminders] Processing welcome call reminders for tenant ${tenantId}`)
 
     const result = await withTenant(tenantId, async () => {
       // 1. Get welcome call reminder config
@@ -318,7 +319,7 @@ export const sendCreatorSlackNotificationJob = defineJob<
   ): Promise<JobResult<SendSlackNotificationResult>> => {
     const { tenantId, notificationType, creatorName, creatorEmail, metadata } = job.payload
 
-    console.log(
+    logger.info(
       `[sendCreatorSlackNotification] Sending ${notificationType} for ${creatorName} (${creatorEmail}) in tenant ${tenantId}`,
       metadata
     )
@@ -373,7 +374,7 @@ export const syncCreatorShipmentsJob = defineJob<
   ): Promise<JobResult<SyncShipmentsResult>> => {
     const { tenantId, shipmentId, fullSync } = job.payload
 
-    console.log(
+    logger.info(
       `[syncCreatorShipments] Syncing shipments for tenant ${tenantId}`,
       { shipmentId, fullSync }
     )

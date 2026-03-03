@@ -25,6 +25,7 @@ import {
   type WizardStepId,
 } from '../../lib/onboarding-wizard/types'
 import { validateStep } from '../../lib/onboarding-wizard/validation'
+import { logger } from '@cgk-platform/logging'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -63,7 +64,7 @@ export function OnboardingWizard(): React.JSX.Element {
           setWizardData(getInitialWizardData('creator_temp', 'tenant_temp'))
         }
       } catch (error) {
-        console.error('Failed to load onboarding progress:', error)
+        logger.error('Failed to load onboarding progress:', error)
         setWizardData(getInitialWizardData('creator_temp', 'tenant_temp'))
       } finally {
         setIsLoading(false)
@@ -94,7 +95,7 @@ export function OnboardingWizard(): React.JSX.Element {
           setSaveStatus('error')
         }
       } catch (error) {
-        console.error('Failed to save progress:', error)
+        logger.error('Failed to save progress:', error)
         setSaveStatus('error')
       }
     }, 1500)
@@ -217,7 +218,7 @@ export function OnboardingWizard(): React.JSX.Element {
         router.push('/dashboard?onboarding=complete')
       }
     } catch (error) {
-      console.error('Failed to complete onboarding:', error)
+      logger.error('Failed to complete onboarding:', error)
       setErrors({ submit: 'Failed to complete onboarding. Please try again.' })
     }
   }, [wizardData, updateData, router])

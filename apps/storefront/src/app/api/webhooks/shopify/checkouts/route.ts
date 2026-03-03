@@ -13,6 +13,7 @@ import { NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { withTenant, sql } from '@cgk-platform/db'
 import { sendJob } from '@cgk-platform/jobs'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -133,7 +134,7 @@ export async function POST(request: Request) {
   // Get tenant from shop domain
   const tenant = await getTenantFromShopDomain(shopDomain)
   if (!tenant) {
-    console.warn(`[Webhook] Unknown shop domain: ${shopDomain}`)
+    logger.warn(`[Webhook] Unknown shop domain: ${shopDomain}`)
     return NextResponse.json(
       { error: 'Unknown shop' },
       { status: 404 },
@@ -151,7 +152,7 @@ export async function POST(request: Request) {
 
   // Verify HMAC signature - MANDATORY
   if (!webhookSecret) {
-    console.error(`[Webhook] Shopify webhook secret not configured for tenant ${tenant.slug}`)
+    logger.error(`[Webhook] Shopify webhook secret not configured for tenant ${tenant.slug}`)
     return NextResponse.json(
       { error: 'Webhook not configured' },
       { status: 503 },
@@ -160,7 +161,7 @@ export async function POST(request: Request) {
 
   const isValid = verifyWebhookSignature(rawBody, hmacHeader, webhookSecret)
   if (!isValid) {
-    console.warn(`[Webhook] Invalid HMAC signature for ${shopDomain}`)
+    logger.warn(`[Webhook] Invalid HMAC signature for ${shopDomain}`)
     return NextResponse.json(
       { error: 'Invalid signature' },
       { status: 401 },
@@ -178,7 +179,7 @@ export async function POST(request: Request) {
     )
   }
 
-  console.log(`[Webhook] Received ${webhookTopic} for shop ${shopDomain}`)
+  logger.info(`[Webhook] Received ${webhookTopic} for shop ${shopDomain}`)
 
   try {
     switch (webhookTopic) {
@@ -191,12 +192,12 @@ export async function POST(request: Request) {
         break
 
       default:
-        console.warn(`[Webhook] Unhandled checkout topic: ${webhookTopic}`)
+        logger.warn(`[Webhook] Unhandled checkout topic: ${webhookTopic}`)
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error(`[Webhook] Error processing ${webhookTopic}:`, error)
+    logger.error(`[Webhook] Error processing ${webhookTopic}:`, error)
     return NextResponse.json(
       { error: 'Processing failed' },
       { status: 500 },

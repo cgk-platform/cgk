@@ -24,6 +24,7 @@ import type {
   CommissionMaturedPayload,
 } from '../../events'
 import type { Job, JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // Note: PayoutRequestedPayload is available from events.ts but we use
 // InternationalPayoutPayload and DomesticPayoutPayload with more specific fields
@@ -166,7 +167,7 @@ export const onPaymentAvailableJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onPaymentAvailable] Creator ${creatorId} has ${currency} ${amount / 100} available in tenant ${tenantId}`
     )
 
@@ -216,7 +217,7 @@ export const onPayoutInitiatedJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onPayoutInitiated] Payout ${payoutId} initiated for creator ${creatorId} via ${provider} in tenant ${tenantId}`
     )
 
@@ -270,7 +271,7 @@ export const onPayoutCompleteJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onPayoutComplete] Payout ${payoutId} completed at ${completedAt} in tenant ${tenantId}`,
       { transactionId }
     )
@@ -327,7 +328,7 @@ export const onPayoutFailedJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onPayoutFailed] Payout ${payoutId} failed: ${reason} (retryable: ${retryable}) in tenant ${tenantId}`
     )
 
@@ -382,7 +383,7 @@ export const monthlyPaymentSummaryJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[monthlyPaymentSummary] Generating ${month}/${year} summary for tenant ${tenantId}`,
       { creatorId: creatorId || 'all' }
     )
@@ -438,7 +439,7 @@ export const checkPaymentsBecomeAvailableJob = defineJob<
       }
     }
 
-    console.log(`[checkPaymentsBecomeAvailable] Checking matured payments for tenant ${tenantId}`)
+    logger.info(`[checkPaymentsBecomeAvailable] Checking matured payments for tenant ${tenantId}`)
 
     // Implementation would:
     // 1. Query commissions WHERE hold_until <= NOW() AND status = 'pending'
@@ -578,7 +579,7 @@ export const processInternationalPayoutJob = defineJob<
     // CRITICAL: Check if this payout was already processed
     const existingResult = checkIdempotency(idempotencyKey)
     if (existingResult) {
-      console.log(
+      logger.info(
         `[processInternationalPayout] IDEMPOTENT: Payout ${payoutId} already processed with key ${idempotencyKey}`,
         { existingResult }
       )
@@ -588,7 +589,7 @@ export const processInternationalPayoutJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[processInternationalPayout] Processing payout ${payoutId} for creator ${creatorId} in tenant ${tenantId}`,
       { amount, currency, wiseRecipientId, idempotencyKey }
     )
@@ -629,7 +630,7 @@ export const processInternationalPayoutJob = defineJob<
       // Record failure for idempotency
       recordIdempotency(idempotencyKey, payoutId, 'failed')
 
-      console.error(`[processInternationalPayout] Failed for payout ${payoutId}:`, error)
+      logger.error(`[processInternationalPayout] Failed for payout ${payoutId}:`, error)
 
       return {
         success: false,
@@ -673,7 +674,7 @@ export const checkPendingInternationalPayoutsJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[checkPendingInternationalPayouts] Checking pending Wise payouts for tenant ${tenantId}`,
       { limit }
     )
@@ -752,7 +753,7 @@ export const processDomesticPayoutJob = defineJob<
     // CRITICAL: Check if this payout was already processed
     const existingResult = checkIdempotency(idempotencyKey)
     if (existingResult) {
-      console.log(
+      logger.info(
         `[processDomesticPayout] IDEMPOTENT: Payout ${payoutId} already processed with key ${idempotencyKey}`,
         { existingResult }
       )
@@ -762,7 +763,7 @@ export const processDomesticPayoutJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[processDomesticPayout] Processing payout ${payoutId} for creator ${creatorId} in tenant ${tenantId}`,
       { amount, currency, stripeConnectAccountId, idempotencyKey }
     )
@@ -810,7 +811,7 @@ export const processDomesticPayoutJob = defineJob<
       // Record failure for idempotency
       recordIdempotency(idempotencyKey, payoutId, 'failed')
 
-      console.error(`[processDomesticPayout] Failed for payout ${payoutId}:`, error)
+      logger.error(`[processDomesticPayout] Failed for payout ${payoutId}:`, error)
 
       return {
         success: false,
@@ -852,7 +853,7 @@ export const checkPendingDomesticPayoutsJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[checkPendingDomesticPayouts] Checking pending Stripe payouts for tenant ${tenantId}`,
       { limit }
     )
@@ -904,7 +905,7 @@ export const onTopupSucceededJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onTopupSucceeded] Topup ${topupId} succeeded: ${currency} ${amount / 100} in tenant ${tenantId}`,
       { stripeTopupId }
     )
@@ -954,7 +955,7 @@ export const dailyExpenseSyncJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[dailyExpenseSync] Syncing expenses for tenant ${tenantId}`,
       { payoutId, startDate, endDate }
     )
@@ -1007,7 +1008,7 @@ export const monthlyPLSnapshotJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[monthlyPLSnapshot] Generating P&L snapshot for ${month}/${year} in tenant ${tenantId}`
     )
 
@@ -1061,7 +1062,7 @@ export const onCommissionMaturedJob = defineJob<
       }
     }
 
-    console.log(
+    logger.info(
       `[onCommissionMatured] Commission ${commissionId} matured for creator ${creatorId} in tenant ${tenantId}`,
       { orderId, amount }
     )

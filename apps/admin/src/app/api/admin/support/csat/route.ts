@@ -15,6 +15,7 @@ import {
   getCSATMetrics,
   type CSATMetricsOptions,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -61,7 +62,7 @@ export async function GET(req: NextRequest) {
       config,
     })
   } catch (error) {
-    console.error('[csat] GET error:', error)
+    logger.error('[csat] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch CSAT metrics' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ config })
   } catch (error) {
-    console.error('[csat] PATCH error:', error)
+    logger.error('[csat] PATCH error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update CSAT config' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/ai-teams
@@ -41,7 +42,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ teams })
   } catch (error) {
-    console.error('Error fetching AI teams:', error)
+    logger.error('Error fetching AI teams:', error)
     return NextResponse.json({ error: 'Failed to fetch AI teams' }, { status: 500 })
   }
 }
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ team }, { status: 201 })
   } catch (error) {
-    console.error('Error creating AI team:', error)
+    logger.error('Error creating AI team:', error)
     const message = error instanceof Error ? error.message : 'Failed to create AI team'
     return NextResponse.json({ error: message }, { status: 500 })
   }

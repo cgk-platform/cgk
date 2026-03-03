@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { CustomerAddress, CreateAddressRequest } from '@/lib/account/api'
+import { logger } from '@cgk-platform/logging'
 
 interface AddressRow {
   id: string
@@ -241,7 +242,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(mapRowToAddress(address))
   } catch (error) {
-    console.error('Failed to create address:', error)
+    logger.error('Failed to create address:', error)
     return NextResponse.json({ error: 'Failed to create address' }, { status: 500 })
   }
 }

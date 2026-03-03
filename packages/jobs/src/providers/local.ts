@@ -20,6 +20,7 @@ import type {
   WaitResult,
 } from '../provider'
 import { createJobId } from '../utils'
+import { logger } from '@cgk-platform/logging'
 
 interface LocalProviderConfig {
   /** Maximum queue size */
@@ -112,7 +113,7 @@ export function createLocalProvider(config: LocalProviderConfig = {}): JobProvid
     const handler = handlers.get(job.event)
 
     if (!handler) {
-      console.warn(`[LocalProvider] No handler for event: ${job.event}`)
+      logger.warn(`[LocalProvider] No handler for event: ${job.event}`)
       job.status = 'failed'
       job.error = `No handler registered for event: ${job.event}`
       job.completedAt = new Date()
@@ -155,7 +156,7 @@ export function createLocalProvider(config: LocalProviderConfig = {}): JobProvid
         // Retry
         job.status = 'pending'
         job.error = errorMessage
-        console.log(
+        logger.info(
           `[LocalProvider] Job ${job.id} failed (attempt ${job.attempts}/${job.maxAttempts}): ${errorMessage}`
         )
       } else {

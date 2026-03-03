@@ -7,6 +7,7 @@
  * will be wired when tenant Klaviyo credentials are configured.
  */
 
+import { logger } from '@cgk-platform/logging'
 export async function subscribeToNewsletter(formData: FormData): Promise<{ success: boolean; message: string }> {
   const email = formData.get('email')
 
@@ -23,7 +24,7 @@ export async function subscribeToNewsletter(formData: FormData): Promise<{ succe
   try {
     // TODO: Wire to tenant's Klaviyo/email provider when credentials are configured
     // For now, log the subscription attempt
-    console.log(`[Newsletter] Subscription: ${email}`)
+    logger.info(`[Newsletter] Subscription: ${email}`)
 
     return { success: true, message: 'Thanks for subscribing! Check your inbox for 10% off.' }
   } catch {

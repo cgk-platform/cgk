@@ -10,6 +10,7 @@ import type {
   ConditionField,
   VisitorContext,
 } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Get field value from visitor context
@@ -108,7 +109,7 @@ function matchOperator(
         const regex = new RegExp(pattern, 'i')
         return regex.test(actualValue)
       } catch {
-        console.warn(`Invalid regex pattern: ${expectedValue}`)
+        logger.warn(`Invalid regex pattern: ${expectedValue}`)
         return false
       }
     }
@@ -140,7 +141,7 @@ function matchOperator(
     }
 
     default:
-      console.warn(`Unknown operator: ${operator}`)
+      logger.warn(`Unknown operator: ${operator}`)
       return false
   }
 }

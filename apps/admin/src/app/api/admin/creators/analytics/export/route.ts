@@ -14,6 +14,7 @@ import type {
   ExportFormat,
   ExportReportType,
 } from '@/lib/creators/analytics-types'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_PERIODS = ['7d', '30d', '90d', '12m', 'all'] as const
 const VALID_TYPES = ['funnel', 'performance', 'earnings', 'health', 'all'] as const
@@ -172,7 +173,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Error exporting analytics:', error)
+    logger.error('Error exporting analytics:', error)
     return NextResponse.json(
       { error: 'Failed to export analytics' },
       { status: 500 }

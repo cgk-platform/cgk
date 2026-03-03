@@ -1,4 +1,5 @@
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -210,7 +211,7 @@ export async function GET(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Get platform errors error:', error)
+    logger.error('Get platform errors error:', error)
     return Response.json({ error: 'Failed to get errors' }, { status: 500 })
   }
 }
@@ -275,7 +276,7 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true, errorId })
   } catch (error) {
-    console.error('Create platform error error:', error)
+    logger.error('Create platform error error:', error)
     return Response.json({ error: 'Failed to create error' }, { status: 500 })
   }
 }

@@ -12,6 +12,7 @@ import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { getBrandFilter } from '@/lib/brand-filter'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -226,7 +227,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching earnings data:', error)
+    logger.error('Error fetching earnings data:', error)
     return Response.json({ error: 'Failed to fetch earnings data' }, { status: 500 })
   }
 }

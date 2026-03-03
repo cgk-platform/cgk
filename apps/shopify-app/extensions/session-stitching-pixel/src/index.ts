@@ -7,6 +7,7 @@
  */
 
 import { register } from '@shopify/web-pixels-extension'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Extension settings interface
@@ -95,7 +96,7 @@ register((api) => {
    */
   function debugLog(message: string, data?: unknown): void {
     if (DEBUG_MODE) {
-      console.log(`[CGK Pixel] ${message}`, data ?? '')
+      logger.info(`[CGK Pixel] ${message}`, data ?? '')
     }
   }
 
@@ -175,7 +176,7 @@ register((api) => {
       )
       debugLog(`GA4 event sent: ${eventName}`)
     } catch (error) {
-      console.error('[CGK Pixel] GA4 error:', error)
+      logger.error('[CGK Pixel] GA4 error:', error)
     }
   }
 
@@ -240,7 +241,7 @@ register((api) => {
       })
       debugLog(`Meta event sent: ${eventName}`)
     } catch (error) {
-      console.error('[CGK Pixel] Meta error:', error)
+      logger.error('[CGK Pixel] Meta error:', error)
     }
   }
 
@@ -285,7 +286,7 @@ register((api) => {
         keepalive: true,
       })
     } catch (error) {
-      console.error('[CGK Pixel] Platform API error:', error)
+      logger.error('[CGK Pixel] Platform API error:', error)
     }
   }
 

@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 
 import type { AttributionOption, AttributionCategory, CreateAttributionOptionInput } from '@/lib/surveys'
 import { ATTRIBUTION_CATEGORY_LABELS } from '@/lib/surveys'
+import { logger } from '@cgk-platform/logging'
 
 export default function AttributionOptionsPage() {
   const [options, setOptions] = useState<AttributionOption[]>([])
@@ -25,7 +26,7 @@ export default function AttributionOptionsPage() {
         setOptions(data.options)
       }
     } catch (error) {
-      console.error('Failed to fetch options:', error)
+      logger.error('Failed to fetch options:', error)
     } finally {
       setLoading(false)
     }
@@ -49,7 +50,7 @@ export default function AttributionOptionsPage() {
         setShowNew(false)
       }
     } catch (error) {
-      console.error('Failed to create option:', error)
+      logger.error('Failed to create option:', error)
     }
   }
 
@@ -70,7 +71,7 @@ export default function AttributionOptionsPage() {
         setEditingId(null)
       }
     } catch (error) {
-      console.error('Failed to update option:', error)
+      logger.error('Failed to update option:', error)
     }
   }
 
@@ -86,7 +87,7 @@ export default function AttributionOptionsPage() {
         setOptions(options.filter((o) => o.id !== optionId))
       }
     } catch (error) {
-      console.error('Failed to delete option:', error)
+      logger.error('Failed to delete option:', error)
     }
   }
 

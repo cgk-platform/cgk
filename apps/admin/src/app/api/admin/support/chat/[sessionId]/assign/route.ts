@@ -15,6 +15,7 @@ import {
   getChatSession,
   transferChatSession,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -74,7 +75,7 @@ export async function POST(
 
     return NextResponse.json({ session: updatedSession })
   } catch (error) {
-    console.error('[chat/assign] POST error:', error)
+    logger.error('[chat/assign] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to assign agent' },
       { status: 500 }

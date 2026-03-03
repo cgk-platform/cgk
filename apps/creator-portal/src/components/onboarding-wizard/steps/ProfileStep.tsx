@@ -1,6 +1,7 @@
 'use client'
 
 import { cn, Input, Label } from '@cgk-platform/ui'
+import Image from 'next/image'
 import { useCallback, useRef, useState } from 'react'
 
 import type { ProfileData } from '../../../lib/onboarding-wizard/types'
@@ -98,9 +99,11 @@ export function ProfileStep({
               )}
             >
               {previewUrl ? (
-                <img
+                <Image
                   src={previewUrl}
                   alt="Profile preview"
+                  width={96}
+                  height={96}
                   className="h-full w-full object-cover"
                 />
               ) : (

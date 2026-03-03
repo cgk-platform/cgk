@@ -10,6 +10,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,7 +38,7 @@ export async function POST(req: Request) {
       url: oauthUrl,
     })
   } catch (error) {
-    console.error('Error generating OAuth URL:', error)
+    logger.error('Error generating OAuth URL:', error)
     return Response.json(
       { error: 'Failed to generate OAuth URL' },
       { status: 500 }

@@ -13,6 +13,7 @@ import {
   updateWebhookStatus,
   routeToHandler,
 } from '@cgk-platform/shopify/webhooks'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,7 +87,7 @@ export async function POST(
       })
     }
   } catch (error) {
-    console.error('[API] Failed to retry webhook:', error)
+    logger.error('[API] Failed to retry webhook:', error)
     return Response.json(
       { error: 'Failed to retry webhook' },
       { status: 500 }

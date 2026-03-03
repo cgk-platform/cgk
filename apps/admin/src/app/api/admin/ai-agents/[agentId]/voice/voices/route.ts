@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 type RouteParams = { params: Promise<{ agentId: string }> }
 
@@ -42,7 +43,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ voices, provider })
   } catch (error) {
-    console.error('Error fetching voices:', error)
+    logger.error('Error fetching voices:', error)
     const errorMessage = error instanceof Error ? error.message : 'Failed to fetch voices'
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }

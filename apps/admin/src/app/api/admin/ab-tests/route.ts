@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 
 import { getABTests, getQuickStats, createABTest, createVariant } from '@/lib/ab-tests/db'
 import type { ABTestFilters, WizardData } from '@/lib/ab-tests/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/ab-tests
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    console.error('Error creating A/B test:', error)
+    logger.error('Error creating A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to create A/B test' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { createTenantCache } from '@cgk-platform/db'
 import { getTenantWorkspace, SlackClient } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 const CHANNEL_CACHE_TTL = 300 // 5 minutes
 
@@ -39,7 +40,7 @@ export async function POST() {
 
     return NextResponse.json({ channels })
   } catch (error) {
-    console.error('Failed to refresh Slack channels:', error)
+    logger.error('Failed to refresh Slack channels:', error)
     return NextResponse.json(
       { error: 'Failed to refresh channels' },
       { status: 500 },

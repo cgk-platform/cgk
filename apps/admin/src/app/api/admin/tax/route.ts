@@ -8,6 +8,7 @@ import { generate1099NECPacketPdf } from '@cgk-platform/tax'
 
 import { parseTaxFilters } from '@/lib/search-params'
 import { getCreatorTaxInfo, getTaxYearSummary, updateW9Status, generate1099, mark1099Sent } from '@/lib/tax/db'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
           pdfUrl = blob.url
         }
       } catch (pdfErr) {
-        console.error('[tax] PDF generation failed:', pdfErr)
+        logger.error('[tax] PDF generation failed:', pdfErr)
         // Continue to mark as generated even if PDF fails
       }
 

@@ -11,6 +11,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // HEALTH CHECK PAYLOAD TYPES
@@ -428,7 +429,7 @@ export const opsHealthCheckCriticalJob = defineJob<TenantEvent<HealthCheckCritic
     const { tenantId } = job.payload
     const start = Date.now()
 
-    console.log(`[Health Check] Running critical health check for ${tenantId}`)
+    logger.info(`[Health Check] Running critical health check for ${tenantId}`)
 
     // Run critical checks in parallel
     const results = await Promise.all([checkDatabase(), checkRedis(), checkShopify()])
@@ -446,15 +447,15 @@ export const opsHealthCheckCriticalJob = defineJob<TenantEvent<HealthCheckCritic
 
     // Log result
     if (!result.healthy) {
-      console.error(`[Health Check] CRITICAL: Services unhealthy: ${failedServices.join(', ')}`)
+      logger.error(`[Health Check] CRITICAL: Services unhealthy: ${failedServices.join(', ')}`)
       // Would trigger criticalAlert job here
     } else {
-      console.log(`[Health Check] All critical services healthy (${durationMs}ms)`)
+      logger.info(`[Health Check] All critical services healthy (${durationMs}ms)`)
     }
 
     // Enforce 30 second constraint
     if (durationMs > 30000) {
-      console.warn(`[Health Check] Critical check exceeded 30s timeout: ${durationMs}ms`)
+      logger.warn(`[Health Check] Critical check exceeded 30s timeout: ${durationMs}ms`)
     }
 
     return { success: result.healthy, data: result }
@@ -479,7 +480,7 @@ export const opsHealthCheckFullJob = defineJob<TenantEvent<HealthCheckFullPayloa
     const { tenantId } = job.payload
     const start = Date.now()
 
-    console.log(`[Health Check] Running full health check for ${tenantId}`)
+    logger.info(`[Health Check] Running full health check for ${tenantId}`)
 
     // Run all checks in parallel for speed
     const results = await Promise.all([
@@ -523,19 +524,19 @@ export const opsHealthCheckFullJob = defineJob<TenantEvent<HealthCheckFullPayloa
       const hasCriticalFailure = failedServices.some((s) => criticalServices.includes(s))
 
       if (hasCriticalFailure) {
-        console.error(`[Health Check] CRITICAL: ${failedServices.join(', ')}`)
+        logger.error(`[Health Check] CRITICAL: ${failedServices.join(', ')}`)
         // Would trigger criticalAlert job
       } else {
-        console.warn(`[Health Check] WARNING: ${failedServices.join(', ')}`)
+        logger.warn(`[Health Check] WARNING: ${failedServices.join(', ')}`)
         // Would trigger systemErrorAlert job
       }
     } else {
-      console.log(`[Health Check] All ${results.length} services healthy (${durationMs}ms)`)
+      logger.info(`[Health Check] All ${results.length} services healthy (${durationMs}ms)`)
     }
 
     // Enforce 30 second constraint
     if (durationMs > 30000) {
-      console.warn(`[Health Check] Full check exceeded 30s timeout: ${durationMs}ms`)
+      logger.warn(`[Health Check] Full check exceeded 30s timeout: ${durationMs}ms`)
     }
 
     return { success: result.healthy, data: result }

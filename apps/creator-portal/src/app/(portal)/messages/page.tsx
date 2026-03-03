@@ -8,6 +8,7 @@ import { MessageBubble } from '@/components/messages/MessageBubble'
 import { MessageComposer } from '@/components/messages/MessageComposer'
 import { TypingIndicator } from '@/components/messages/TypingIndicator'
 import { useBrand } from '@/lib/brand-context'
+import { logger } from '@cgk-platform/logging'
 
 interface Conversation {
   id: string
@@ -101,7 +102,7 @@ export default function MessagesPage(): React.JSX.Element {
       setCoordinatorName(data.conversation.coordinatorName)
       lastCheckedRef.current = new Date().toISOString()
     } catch (err) {
-      console.error('Error fetching messages:', err)
+      logger.error('Error fetching messages:', err)
     } finally {
       setIsLoadingMessages(false)
     }
@@ -198,7 +199,7 @@ export default function MessagesPage(): React.JSX.Element {
         )
       )
     } catch (err) {
-      console.error('Error sending message:', err)
+      logger.error('Error sending message:', err)
       throw err
     }
   }

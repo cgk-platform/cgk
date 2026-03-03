@@ -6,6 +6,7 @@
  */
 import type { ActionFunctionArgs } from '@remix-run/node'
 import { authenticate } from '../shopify.server'
+import { logger } from '@cgk-platform/logging'
 
 interface OrderLineItem {
   id: number
@@ -89,7 +90,7 @@ function extractBundleGroups(lineItems: OrderLineItem[]): BundleLineGroup[] {
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { shop, topic, payload } = await authenticate.webhook(request)
 
-  console.log(`[BundleWebhook] Received ${topic} for ${shop}`)
+  logger.info(`[BundleWebhook] Received ${topic} for ${shop}`)
 
   const order = payload as unknown as OrderWebhookPayload
 
@@ -103,7 +104,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return new Response()
   }
 
-  console.log(
+  logger.info(
     `[BundleWebhook] Order #${order.order_number}: found ${bundleGroups.length} bundle(s)`
   )
 
@@ -114,7 +115,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const organizationId = await getOrganizationIdForShop(shop)
 
   if (!organizationId) {
-    console.warn(`[BundleWebhook] Shop ${shop} not registered with any tenant — skipping`)
+    logger.warn(`[BundleWebhook] Shop ${shop} not registered with any tenant — skipping`)
     return new Response()
   }
 
@@ -126,7 +127,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const tenantSlug = orgResult.rows[0]?.slug as string | undefined
 
   if (!tenantSlug) {
-    console.warn(`[BundleWebhook] Organization ${organizationId} not found — skipping`)
+    logger.warn(`[BundleWebhook] Organization ${organizationId} not found — skipping`)
     return new Response()
   }
 
@@ -135,7 +136,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const platformApiKey = process.env.CGK_PLATFORM_API_KEY
 
   if (!platformApiUrl || !platformApiKey) {
-    console.warn(
+    logger.warn(
       '[BundleWebhook] Missing CGK_PLATFORM_API_URL or CGK_PLATFORM_API_KEY — skipping platform sync'
     )
     return new Response()
@@ -164,12 +165,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       })
 
       if (!resp.ok) {
-        console.error(
+        logger.error(
           `[BundleWebhook] Failed to sync bundle order for ${group.bundleId}: ${resp.status} ${resp.statusText}`
         )
       }
     } catch (err) {
-      console.error(`[BundleWebhook] Error syncing bundle order for ${group.bundleId}:`, err)
+      logger.error(`[BundleWebhook] Error syncing bundle order for ${group.bundleId}:`, err)
     }
   }
 

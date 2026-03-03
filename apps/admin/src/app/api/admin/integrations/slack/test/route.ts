@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { getTenantWorkspace, SlackClient } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/integrations/slack/test
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
       canListChannels: testResult.canListChannels,
     })
   } catch (error) {
-    console.error('Failed to test Slack connection:', error)
+    logger.error('Failed to test Slack connection:', error)
     return NextResponse.json(
       {
         success: false,

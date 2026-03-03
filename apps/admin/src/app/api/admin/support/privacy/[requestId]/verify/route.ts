@@ -15,6 +15,7 @@ import {
   verifyRequest,
   type VerificationMethod,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -66,7 +67,7 @@ export async function POST(
 
     return NextResponse.json({ request })
   } catch (error) {
-    console.error('[privacy/verify] POST error:', error)
+    logger.error('[privacy/verify] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to verify request' },
       { status: 500 }

@@ -15,6 +15,7 @@ import {
   getPrivacyRequest,
   isRequestOverdue,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -58,7 +59,7 @@ export async function GET(
       resultUrl: request.status === 'completed' ? request.resultUrl : null,
     })
   } catch (error) {
-    console.error('[support/privacy/request] GET error:', error)
+    logger.error('[support/privacy/request] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch request' },
       { status: 500 }

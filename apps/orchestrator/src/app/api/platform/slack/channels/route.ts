@@ -5,6 +5,7 @@ import {
   updatePlatformChannels,
 } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/platform/slack/channels
@@ -28,7 +29,7 @@ export async function GET() {
       mentionErrors: workspace.mentionErrors,
     })
   } catch (error) {
-    console.error('Failed to get platform Slack channels:', error)
+    logger.error('Failed to get platform Slack channels:', error)
     return NextResponse.json(
       { error: 'Failed to get channels' },
       { status: 500 },
@@ -74,7 +75,7 @@ export async function PUT(request: Request) {
       mentionErrors: workspace.mentionErrors,
     })
   } catch (error) {
-    console.error('Failed to update platform Slack channels:', error)
+    logger.error('Failed to update platform Slack channels:', error)
     return NextResponse.json(
       { error: 'Failed to update channels' },
       { status: 500 },

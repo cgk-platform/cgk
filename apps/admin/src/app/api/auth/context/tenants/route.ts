@@ -5,6 +5,7 @@ import {
   verifyJWT,
   type TenantContext,
 } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -58,7 +59,7 @@ export async function GET(request: Request) {
       current,
     })
   } catch (error) {
-    console.error('Tenants fetch error:', error)
+    logger.error('Tenants fetch error:', error)
     return Response.json(
       { error: 'Failed to fetch tenants' },
       { status: 500 }

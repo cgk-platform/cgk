@@ -8,6 +8,7 @@
 
 import * as React from 'react'
 import { Building2, Check, ChevronDown, Layers } from 'lucide-react'
+import Image from 'next/image'
 
 import { cn, formatCurrency } from '@cgk-platform/ui'
 
@@ -55,9 +56,11 @@ function BrandLogo({
 
   if (brand.logoUrl) {
     return (
-      <img
+      <Image
         src={brand.logoUrl}
         alt={brand.name}
+        width={size === 'sm' ? 24 : 32}
+        height={size === 'sm' ? 24 : 32}
         className={cn('rounded-md object-cover', sizeClasses[size], className)}
       />
     )

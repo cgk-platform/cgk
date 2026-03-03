@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { AlertCircle, Minus, Package, Plus, RefreshCw, Search, Trash2, X } from 'lucide-react'
 
@@ -250,10 +251,13 @@ export function SendProductModal({
                     <div className="flex items-start gap-3">
                       <div className="h-12 w-12 shrink-0 overflow-hidden rounded bg-muted">
                         {product.images[0] ? (
-                          <img
+                          <Image
                             src={product.images[0].url}
                             alt={product.title}
-                            className="h-full w-full object-cover"
+                            width={48}
+                            height={48}
+                            className="object-cover"
+                            unoptimized
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
@@ -314,10 +318,13 @@ export function SendProductModal({
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 shrink-0 overflow-hidden rounded bg-muted">
                         {product.imageUrl ? (
-                          <img
+                          <Image
                             src={product.imageUrl}
                             alt={product.title}
-                            className="h-full w-full object-cover"
+                            width={32}
+                            height={32}
+                            className="object-cover"
+                            unoptimized
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">

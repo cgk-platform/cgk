@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ teamId: string; agentId: string }>
@@ -55,7 +56,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ member })
   } catch (error) {
-    console.error('Error updating team member:', error)
+    logger.error('Error updating team member:', error)
     const message = error instanceof Error ? error.message : 'Failed to update team member'
     return NextResponse.json({ error: message }, { status: 500 })
   }
@@ -102,7 +103,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error removing team member:', error)
+    logger.error('Error removing team member:', error)
     const message = error instanceof Error ? error.message : 'Failed to remove team member'
     return NextResponse.json({ error: message }, { status: 500 })
   }

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import { createTicket } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/support/tickets
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('Error creating ticket from form:', error)
+    logger.error('Error creating ticket from form:', error)
     return NextResponse.json(
       { error: 'Failed to submit support request. Please try again.' },
       { status: 500 }

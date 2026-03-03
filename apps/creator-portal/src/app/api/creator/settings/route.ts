@@ -9,6 +9,7 @@ import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { UpdateProfileInput } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,7 +69,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching creator settings:', error)
+    logger.error('Error fetching creator settings:', error)
     return Response.json({ error: 'Failed to fetch settings' }, { status: 500 })
   }
 }
@@ -182,7 +183,7 @@ export async function PATCH(req: Request): Promise<Response> {
       message: 'Profile updated successfully',
     })
   } catch (error) {
-    console.error('Error updating creator settings:', error)
+    logger.error('Error updating creator settings:', error)
     return Response.json({ error: 'Failed to update settings' }, { status: 500 })
   }
 }

@@ -5,6 +5,7 @@
  */
 import type { CreateGiftCardProductInput, GiftCardProduct } from './types'
 import { upsertGiftCardProduct } from './db/products'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Extract numeric ID from Shopify GID
@@ -138,7 +139,7 @@ export async function fetchGiftCardProductsFromShopify(
   // 4. Return array of ShopifyProductData
 
   // For now, return empty array - integration with @cgk-platform/shopify would be done in Phase 3B
-  console.log('fetchGiftCardProductsFromShopify: Shopify integration pending')
+  logger.info('fetchGiftCardProductsFromShopify: Shopify integration pending')
   return []
 }
 

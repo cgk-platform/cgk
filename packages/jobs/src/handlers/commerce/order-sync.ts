@@ -32,6 +32,7 @@ import type {
   TenantEvent,
 } from '../../events'
 import type { JobResult } from '../../types'
+import { logger } from '@cgk-platform/logging'
 
 // ---------------------------------------------------------------------------
 // Job Payloads
@@ -145,7 +146,7 @@ export const syncOrderJob = defineJob<TenantEvent<SyncOrderPayload>>({
       }
     }
 
-    console.log(`[commerce.syncOrder] Syncing order`, {
+    logger.info(`[commerce.syncOrder] Syncing order`, {
       tenantId,
       orderId,
       shopifyOrderId,
@@ -209,7 +210,7 @@ export const syncOrderBatchJob = defineJob<TenantEvent<SyncOrderBatchPayload>>({
       }
     }
 
-    console.log(`[commerce.syncOrderBatch] Starting batch sync`, {
+    logger.info(`[commerce.syncOrderBatch] Starting batch sync`, {
       tenantId,
       orderCount: orderIds?.length || shopifyOrderIds?.length || 'all',
       startDate,
@@ -270,7 +271,7 @@ export const orderReconciliationJob = defineJob<TenantEvent<OrderReconciliationP
       }
     }
 
-    console.log(`[commerce.orderReconciliation] Running reconciliation`, {
+    logger.info(`[commerce.orderReconciliation] Running reconciliation`, {
       tenantId,
       lookbackHours,
       maxOrders,
@@ -336,7 +337,7 @@ export const orderAttributionJob = defineJob<TenantEvent<OrderAttributionPayload
       }
     }
 
-    console.log(`[commerce.orderAttribution] Processing attribution`, {
+    logger.info(`[commerce.orderAttribution] Processing attribution`, {
       tenantId,
       orderId,
       customerId,
@@ -402,7 +403,7 @@ export const orderCommissionJob = defineJob<TenantEvent<OrderCommissionPayload>>
       }
     }
 
-    console.log(`[commerce.orderCommission] Processing commission`, {
+    logger.info(`[commerce.orderCommission] Processing commission`, {
       tenantId,
       orderId,
       discountCode,
@@ -469,7 +470,7 @@ export const orderReviewEmailJob = defineJob<TenantEvent<OrderReviewEmailPayload
       }
     }
 
-    console.log(`[commerce.orderReviewEmail] Scheduling review email`, {
+    logger.info(`[commerce.orderReviewEmail] Scheduling review email`, {
       tenantId,
       orderId,
       customerId,
@@ -526,7 +527,7 @@ export const handleOrderCreatedJob = defineJob<TenantEvent<OrderCreatedPayload>>
       }
     }
 
-    console.log(`[commerce.handleOrderCreated] Processing new order`, {
+    logger.info(`[commerce.handleOrderCreated] Processing new order`, {
       tenantId,
       orderId,
       shopifyOrderId,
@@ -582,7 +583,7 @@ export const handleOrderFulfilledJob = defineJob<TenantEvent<OrderFulfilledPaylo
       }
     }
 
-    console.log(`[commerce.handleOrderFulfilled] Processing fulfillment`, {
+    logger.info(`[commerce.handleOrderFulfilled] Processing fulfillment`, {
       tenantId,
       orderId,
       fulfillmentId,

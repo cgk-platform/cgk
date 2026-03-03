@@ -12,6 +12,7 @@ import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { getBrandFilter } from '@/lib/brand-filter'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -104,7 +105,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching conversations:', error)
+    logger.error('Error fetching conversations:', error)
     return Response.json({ error: 'Failed to fetch messages' }, { status: 500 })
   }
 }

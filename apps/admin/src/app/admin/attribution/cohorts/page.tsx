@@ -5,6 +5,7 @@ import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 
 import { useAttribution, TimeRangePicker } from '@/components/attribution'
 import type { CohortData, CohortGrouping, CohortLTV } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 const healthColors: Record<CohortData['health'], string> = {
   healthy: 'bg-green-100 text-green-800',
@@ -196,7 +197,7 @@ export default function CohortsPage() {
       const data = await response.json()
       setCohorts(data.cohorts || [])
     } catch (error) {
-      console.error('Failed to fetch cohorts:', error)
+      logger.error('Failed to fetch cohorts:', error)
     } finally {
       setIsLoading(false)
     }

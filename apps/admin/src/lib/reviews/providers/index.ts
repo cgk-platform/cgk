@@ -13,6 +13,7 @@ import type {
   ReviewProviderInterface,
 } from '../types'
 import * as db from '../db'
+import { logger } from '@cgk-platform/logging'
 
 // =============================================================================
 // INTERNAL PROVIDER
@@ -116,13 +117,13 @@ export class YotpoReviewProvider implements ReviewProviderInterface {
   async syncFromProvider(): Promise<{ imported: number; updated: number; errors: number }> {
     // Would fetch all reviews from Yotpo and sync to local database
     // Implementation would use Yotpo's Reviews API
-    console.log('Syncing from Yotpo...', this.credentials.app_key)
+    logger.info('Syncing from Yotpo...', this.credentials.app_key)
     return { imported: 0, updated: 0, errors: 0 }
   }
 
   async pushToProvider(review: Review): Promise<void> {
     // Would push a review to Yotpo
-    console.log('Pushing review to Yotpo...', review.id)
+    logger.info('Pushing review to Yotpo...', review.id)
   }
 }
 

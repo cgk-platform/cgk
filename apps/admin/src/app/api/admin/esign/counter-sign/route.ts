@@ -12,6 +12,7 @@ import {
   markSignerSigned,
   addAuditLogEntry,
 } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ documents })
   } catch (error) {
-    console.error('Error fetching counter-sign queue:', error)
+    logger.error('Error fetching counter-sign queue:', error)
     return NextResponse.json(
       { error: 'Failed to fetch counter-sign queue' },
       { status: 500 }
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error counter-signing:', error)
+    logger.error('Error counter-signing:', error)
     return NextResponse.json(
       { error: 'Failed to counter-sign document' },
       { status: 500 }

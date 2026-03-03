@@ -17,6 +17,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,7 +62,7 @@ export async function GET(req: Request) {
       stripeRequirementsErrors: stripeMethod?.stripeRequirementsErrors || [],
     })
   } catch (error) {
-    console.error('Error fetching onboarding progress:', error)
+    logger.error('Error fetching onboarding progress:', error)
     return Response.json(
       { error: 'Failed to fetch onboarding progress' },
       { status: 500 }
@@ -123,7 +124,7 @@ export async function POST(req: Request) {
         { status: 400 }
       )
     }
-    console.error('Error creating Stripe account:', error)
+    logger.error('Error creating Stripe account:', error)
     return Response.json(
       { error: 'Failed to create Stripe account' },
       { status: 500 }

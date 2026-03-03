@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Card, CardContent, Input, Label, Textarea } from '@cgk-platform/ui'
 
 import type { LandingPage } from '@/lib/landing-pages/types'
@@ -114,11 +115,15 @@ export function SEOEditor({ page, onUpdate }: SEOEditorProps) {
           </p>
           <div className="overflow-hidden rounded-md border">
             {page.og_image_url ? (
-              <img
-                src={page.og_image_url}
-                alt="OG Preview"
-                className="aspect-[1200/630] w-full bg-muted object-cover"
-              />
+              <div className="relative aspect-[1200/630] w-full bg-muted">
+                <Image
+                  src={page.og_image_url}
+                  alt="OG Preview"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
             ) : (
               <div className="flex aspect-[1200/630] items-center justify-center bg-muted text-sm text-muted-foreground">
                 No image set

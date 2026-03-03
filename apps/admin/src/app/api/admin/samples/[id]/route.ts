@@ -7,6 +7,7 @@ import {
   updateSampleRequest,
   deleteSampleRequest,
 } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function PATCH(
   request: Request,
@@ -58,7 +59,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, request: sampleRequest })
   } catch (error) {
-    console.error('Error updating sample request:', error)
+    logger.error('Error updating sample request:', error)
     return NextResponse.json(
       { error: 'Failed to update sample request' },
       { status: 500 }
@@ -90,7 +91,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting sample request:', error)
+    logger.error('Error deleting sample request:', error)
     return NextResponse.json(
       { error: 'Failed to delete sample request' },
       { status: 500 }

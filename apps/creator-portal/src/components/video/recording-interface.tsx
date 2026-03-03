@@ -15,6 +15,7 @@ import {
   Video,
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 type RecordingMode = 'camera' | 'screen' | 'screen_camera'
 type RecordingState = 'idle' | 'previewing' | 'recording' | 'paused' | 'stopped'
@@ -128,7 +129,7 @@ export function RecordingInterface({
 
       setState('previewing')
     } catch (err) {
-      console.error('Failed to start preview:', err)
+      logger.error('Failed to start preview:', err)
       setError(err instanceof Error ? err.message : 'Failed to access camera/screen')
     }
   }

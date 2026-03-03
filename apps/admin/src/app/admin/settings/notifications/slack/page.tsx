@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, Button, Badge, Switch, RadixSelect as Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@cgk-platform/ui'
 import { NOTIFICATION_TYPES } from '@cgk-platform/slack/types'
+import { logger } from '@cgk-platform/logging'
 
 interface SlackChannel {
   id: string
@@ -69,7 +70,7 @@ export default function SlackNotificationSettingsPage() {
         setMappings(mappingsMap)
       }
     } catch (error) {
-      console.error('Failed to fetch data:', error)
+      logger.error('Failed to fetch data:', error)
       setConnected(false)
     } finally {
       setLoading(false)
@@ -126,7 +127,7 @@ export default function SlackNotificationSettingsPage() {
         setPendingChanges(new Map())
       }
     } catch (error) {
-      console.error('Failed to save mappings:', error)
+      logger.error('Failed to save mappings:', error)
     } finally {
       setSaving(false)
     }
@@ -140,7 +141,7 @@ export default function SlackNotificationSettingsPage() {
         body: JSON.stringify({ notificationType, useSampleData: true }),
       })
     } catch (error) {
-      console.error('Failed to send test:', error)
+      logger.error('Failed to send test:', error)
     }
   }
 
@@ -154,7 +155,7 @@ export default function SlackNotificationSettingsPage() {
         setChannels(data.channels || [])
       }
     } catch (error) {
-      console.error('Failed to refresh channels:', error)
+      logger.error('Failed to refresh channels:', error)
     }
   }
 

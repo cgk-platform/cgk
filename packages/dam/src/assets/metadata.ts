@@ -4,6 +4,7 @@
  */
 
 import type { AssetType } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 export interface ExtractedMetadata {
   width?: number
@@ -57,7 +58,7 @@ export async function extractImageMetadata(
 
     return result
   } catch (error) {
-    console.error('Failed to extract image metadata:', error)
+    logger.error('Failed to extract image metadata:', error)
     return {}
   }
 }

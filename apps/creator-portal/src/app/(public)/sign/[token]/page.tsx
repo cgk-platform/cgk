@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useParams, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -359,9 +360,11 @@ export default function SigningPage(): React.JSX.Element {
                 {/* Signature preview */}
                 <div className="mb-4 rounded-lg border bg-white p-4">
                   {signature.signatureType === 'drawn' ? (
-                    <img
+                    <Image
                       src={signature.signatureData}
                       alt="Your signature"
+                      width={200}
+                      height={80}
                       className="h-20 w-auto"
                     />
                   ) : (

@@ -12,6 +12,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 
 import { defineJob } from '../define.js'
 import type { JobResult } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Generate AI summaries for completed calls
@@ -35,7 +36,7 @@ export const generateCallSummariesJob = defineJob({
       // Check if Anthropic is configured
       const anthropic = await getTenantAnthropicClient(tenantId)
       if (!anthropic) {
-        console.log(`[ai-agents/generate-call-summaries] Anthropic not configured for tenant ${tenantId}`)
+        logger.info(`[ai-agents/generate-call-summaries] Anthropic not configured for tenant ${tenantId}`)
         return { success: true, data: { skipped: 'Anthropic not configured' } }
       }
 
@@ -81,14 +82,14 @@ export const generateCallSummariesJob = defineJob({
             summarized++
           }
         } catch (callError) {
-          console.error(
+          logger.error(
             `[ai-agents/generate-call-summaries] Error summarizing call ${call.id}:`,
             callError instanceof Error ? callError.message : 'Unknown error'
           )
         }
       }
 
-      console.log(`[ai-agents/generate-call-summaries] tenantId=${tenantId} summarized=${summarized}`)
+      logger.info(`[ai-agents/generate-call-summaries] tenantId=${tenantId} summarized=${summarized}`)
 
       return {
         success: true,
@@ -96,7 +97,7 @@ export const generateCallSummariesJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[ai-agents/generate-call-summaries] tenantId=${tenantId} error:`, message)
+      logger.error(`[ai-agents/generate-call-summaries] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -169,7 +170,7 @@ export const cleanupOldRecordingsJob = defineJob({
         }
       })
 
-      console.log(
+      logger.info(
         `[ai-agents/cleanup-old-recordings] tenantId=${tenantId} deleted: calls=${deleted.calls} transcripts=${deleted.transcripts} responses=${deleted.responses}`
       )
 
@@ -179,7 +180,7 @@ export const cleanupOldRecordingsJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[ai-agents/cleanup-old-recordings] tenantId=${tenantId} error:`, message)
+      logger.error(`[ai-agents/cleanup-old-recordings] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -210,7 +211,7 @@ export const syncRetellAgentsJob = defineJob({
       const credentials = await getVoiceCredentials(tenantId)
 
       if (!credentials?.retellApiKeyEncrypted) {
-        console.log(`[ai-agents/sync-retell-agents] Retell not configured for tenant ${tenantId}`)
+        logger.info(`[ai-agents/sync-retell-agents] Retell not configured for tenant ${tenantId}`)
         return { success: true, data: { skipped: 'Retell not configured' } }
       }
 
@@ -234,17 +235,17 @@ export const syncRetellAgentsJob = defineJob({
         try {
           // If agent has retell_agent_id, verify it still exists
           // For now, just log the sync - actual Retell API calls would go here
-          console.log(`[ai-agents/sync-retell-agents] Would sync agent ${agent.id} (${agent.name})`)
+          logger.info(`[ai-agents/sync-retell-agents] Would sync agent ${agent.id} (${agent.name})`)
           synced++
         } catch (agentError) {
-          console.error(
+          logger.error(
             `[ai-agents/sync-retell-agents] Error syncing agent ${agent.id}:`,
             agentError instanceof Error ? agentError.message : 'Unknown error'
           )
         }
       }
 
-      console.log(`[ai-agents/sync-retell-agents] tenantId=${tenantId} synced=${synced}`)
+      logger.info(`[ai-agents/sync-retell-agents] tenantId=${tenantId} synced=${synced}`)
 
       return {
         success: true,
@@ -252,7 +253,7 @@ export const syncRetellAgentsJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[ai-agents/sync-retell-agents] tenantId=${tenantId} error:`, message)
+      logger.error(`[ai-agents/sync-retell-agents] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },
@@ -351,7 +352,7 @@ export const processVoiceUsageJob = defineJob({
         }
       })
 
-      console.log(
+      logger.info(
         `[ai-agents/process-voice-usage] tenantId=${tenantId} period=${periodStart} to ${periodEnd}: calls=${usage.callCount} minutes=${usage.totalMinutes} cost=$${(usage.totalCostCents / 100).toFixed(2)}`
       )
 
@@ -361,7 +362,7 @@ export const processVoiceUsageJob = defineJob({
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
-      console.error(`[ai-agents/process-voice-usage] tenantId=${tenantId} error:`, message)
+      logger.error(`[ai-agents/process-voice-usage] tenantId=${tenantId} error:`, message)
       return {
         success: false,
         error: { message, retryable: true },

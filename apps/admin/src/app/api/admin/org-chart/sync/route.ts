@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/org-chart/sync
@@ -50,7 +51,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ result })
   } catch (error) {
-    console.error('Error syncing org chart:', error)
+    logger.error('Error syncing org chart:', error)
     return NextResponse.json({ error: 'Failed to sync org chart' }, { status: 500 })
   }
 }

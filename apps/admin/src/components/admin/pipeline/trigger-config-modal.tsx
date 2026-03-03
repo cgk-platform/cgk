@@ -11,6 +11,7 @@ import type {
   ProjectStatus,
 } from '@/lib/pipeline/types'
 import { PIPELINE_STAGES } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 interface TriggerConfigModalProps {
   trigger?: PipelineTrigger
@@ -104,7 +105,7 @@ export function TriggerConfigModal({
       })
       onClose()
     } catch (error) {
-      console.error('Failed to save trigger:', error)
+      logger.error('Failed to save trigger:', error)
     } finally {
       setIsSaving(false)
     }

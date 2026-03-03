@@ -3,6 +3,7 @@
  * cart API integration, and free gift management.
  * Used by both bundle-builder.js and bundle-pdp.js.
  */
+import { logger } from '@cgk-platform/logging'
 (function () {
   'use strict';
 
@@ -270,7 +271,7 @@
           // Decorate gift items after drawer renders
           setTimeout(function () { BundleCore.decorateCartGifts(); }, 200);
         })
-        .catch(function (err) { console.error('[BundleCore] openCartDrawer error:', err); });
+        .catch(function (err) { logger.error('[BundleCore] openCartDrawer error:', err); });
     }, 300);
   };
 

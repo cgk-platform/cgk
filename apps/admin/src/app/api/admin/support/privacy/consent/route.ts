@@ -17,6 +17,7 @@ import {
   type ConsentFilters,
   type ConsentType,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -92,7 +93,7 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[privacy/consent] GET error:', error)
+    logger.error('[privacy/consent] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch consent records' },
       { status: 500 }

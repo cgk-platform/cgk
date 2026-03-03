@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 
 
 import { SessionCard } from '@/components/settings/SessionCard'
+import { logger } from '@cgk-platform/logging'
 
 interface Session {
   id: string
@@ -45,7 +46,7 @@ export default function SecuritySettingsPage(): React.JSX.Element {
         const data = await response.json()
         setSessions(data.sessions)
       } catch (err) {
-        console.error('Error fetching sessions:', err)
+        logger.error('Error fetching sessions:', err)
       } finally {
         setIsLoadingSessions(false)
       }
@@ -110,7 +111,7 @@ export default function SecuritySettingsPage(): React.JSX.Element {
 
       setSessions((prev) => prev.filter((s) => s.id !== sessionId))
     } catch (err) {
-      console.error('Error revoking session:', err)
+      logger.error('Error revoking session:', err)
     }
   }
 
@@ -127,7 +128,7 @@ export default function SecuritySettingsPage(): React.JSX.Element {
       // Keep only current session
       setSessions((prev) => prev.filter((s) => s.isCurrent))
     } catch (err) {
-      console.error('Error revoking sessions:', err)
+      logger.error('Error revoking sessions:', err)
     } finally {
       setIsRevokingAll(false)
     }

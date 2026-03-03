@@ -7,6 +7,7 @@ import { getTenantContext } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 
 import { createUGCSubmission, logChange } from '@/lib/admin-utilities/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
       submissionId: submission.id,
     })
   } catch (error) {
-    console.error('Failed to create submission:', error)
+    logger.error('Failed to create submission:', error)
     return NextResponse.json({ error: 'Failed to submit' }, { status: 500 })
   }
 }

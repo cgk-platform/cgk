@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getTemplateABTests, createTemplateABTest } from '@/lib/ab-tests/db'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/templates/ab-tests
@@ -21,7 +22,7 @@ export async function GET() {
     const tests = await getTemplateABTests(tenantSlug)
     return NextResponse.json({ tests })
   } catch (error) {
-    console.error('Error fetching template A/B tests:', error)
+    logger.error('Error fetching template A/B tests:', error)
     return NextResponse.json(
       { error: 'Failed to fetch template A/B tests' },
       { status: 500 }
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    console.error('Error creating template A/B test:', error)
+    logger.error('Error creating template A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to create template A/B test' },
       { status: 500 }

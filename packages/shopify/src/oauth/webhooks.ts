@@ -7,6 +7,8 @@ import { sql } from '@cgk-platform/db'
 import { getShopifyCredentials, updateLastWebhookAt } from './credentials.js'
 import { ShopifyError } from './errors.js'
 import { verifyWebhookHmac } from './validation.js'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Webhook topics to register
@@ -99,7 +101,7 @@ export async function handleWebhook(request: Request): Promise<Response> {
   const tenantId = await getTenantIdForShop(shop)
 
   if (!tenantId) {
-    console.warn(`[shopify-webhook] Webhook from unknown shop: ${shop}`)
+    logger.warn(`[shopify-webhook] Webhook from unknown shop: ${shop}`)
     return new Response('Shop not found', { status: 404 })
   }
 
@@ -122,13 +124,13 @@ export async function handleWebhook(request: Request): Promise<Response> {
     credentials.webhookSecret || process.env.SHOPIFY_CLIENT_SECRET
 
   if (!secret) {
-    console.error('[shopify-webhook] No webhook secret available')
+    logger.error('[shopify-webhook] No webhook secret available')
     return new Response('Configuration error', { status: 500 })
   }
 
   // Verify HMAC signature
   if (!verifyWebhookHmac(body, hmac, secret)) {
-    console.error(`[shopify-webhook] Invalid signature for shop: ${shop}`)
+    logger.error(`[shopify-webhook] Invalid signature for shop: ${shop}`)
     return new Response('Invalid signature', { status: 401 })
   }
 
@@ -146,16 +148,16 @@ export async function handleWebhook(request: Request): Promise<Response> {
   // Route to handlers
   const handlers = webhookHandlers.get(topic) || []
 
-  console.log(`[shopify-webhook] Processing ${topic} for tenant ${tenantId} (${webhookId})`)
+  logger.info(`[shopify-webhook] Processing ${topic} for tenant ${tenantId} (${webhookId})`)
 
   // Execute handlers
   const handlerPromises = handlers.map(async (handler) => {
     try {
       await handler(tenantId, payload)
     } catch (error) {
-      console.error(
-        `[shopify-webhook] Handler error for ${topic}:`,
-        error instanceof Error ? error.message : error
+      logger.error(
+        `[shopify-webhook] Handler error for ${topic}`,
+        error instanceof Error ? error : new Error(String(error))
       )
     }
   })

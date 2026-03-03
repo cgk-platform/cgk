@@ -11,6 +11,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk-platform/auth'
 import { getSurvey } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -42,7 +43,7 @@ export async function GET(
 
     return NextResponse.json({ survey })
   } catch (error) {
-    console.error('[csat/survey] GET error:', error)
+    logger.error('[csat/survey] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch survey' },
       { status: 500 }

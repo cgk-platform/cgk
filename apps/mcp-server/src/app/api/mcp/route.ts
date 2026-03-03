@@ -48,6 +48,7 @@ import {
   popSessionMessages,
   isSSEBridgeAvailable,
 } from '@/lib/sse-bridge'
+import { logger } from '@cgk-platform/logging'
 
 // =============================================================================
 // Edge Runtime Configuration
@@ -219,7 +220,7 @@ export async function POST(request: Request): Promise<Response> {
     if (error instanceof MCPProtocolError) {
       return createErrorResponse(null, error.code, error.message, corsHeaders)
     }
-    console.error('MCP request error:', error)
+    logger.error('MCP request error:', error)
     return createErrorResponse(
       null,
       JSONRPCErrorCodes.INTERNAL_ERROR,
@@ -311,7 +312,7 @@ export async function GET(request: Request): Promise<Response> {
             } catch (error) {
               // If the stream was closed by the client, exit gracefully
               if (closed) return
-              console.error('SSE poll error:', error)
+              logger.error('SSE poll error:', error)
               // Brief pause before retry
               await new Promise((resolve) => setTimeout(resolve, 1000))
             }

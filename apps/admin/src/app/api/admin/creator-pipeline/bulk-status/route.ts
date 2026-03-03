@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 
 import { bulkUpdateStatus } from '@/lib/pipeline/db'
 import { VALID_TRANSITIONS, type ProjectStatus } from '@/lib/pipeline/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
       errors: result.errors.length > 0 ? result.errors : undefined,
     })
   } catch (error) {
-    console.error('Bulk status update error:', error)
+    logger.error('Bulk status update error:', error)
     return Response.json(
       { error: 'Failed to update project statuses' },
       { status: 500 }

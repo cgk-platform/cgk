@@ -21,6 +21,7 @@ import type {
   RecoveryExpireOldPayload,
   TenantEvent,
 } from '../events'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Process a scheduled recovery email
@@ -38,7 +39,7 @@ export const processRecoveryEmailJob = defineJob({
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    console.log(`[Recovery] Processing email ${emailId} for checkout ${checkoutId} (sequence ${sequenceNumber})`)
+    logger.info(`[Recovery] Processing email ${emailId} for checkout ${checkoutId} (sequence ${sequenceNumber})`)
 
     const result = await withTenant(tenantId, async () => {
       // 1. Lock and fetch the recovery email record
@@ -136,7 +137,7 @@ export const processRecoveryEmailJob = defineJob({
       `
 
       // 6. Log the send (actual email delivery via Resend handled by communications package)
-      console.log(`[Recovery] Sending sequence ${record.sequence_number} email to ${record.customer_email}`, {
+      logger.info(`[Recovery] Sending sequence ${record.sequence_number} email to ${record.customer_email}`, {
         checkoutId: record.abandoned_checkout_id,
         cartTotal: record.cart_total_cents,
         incentiveCode: record.incentive_code,
@@ -189,7 +190,7 @@ export const checkAbandonedCheckoutsJob = defineJob({
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    console.log(`[Recovery] Checking for abandoned checkouts in tenant ${tenantId}`)
+    logger.info(`[Recovery] Checking for abandoned checkouts in tenant ${tenantId}`)
 
     const processed = await withTenant(tenantId, async () => {
       // Get recovery settings
@@ -278,7 +279,7 @@ export const processRecoveryQueueJob = defineJob({
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    console.log(`[Recovery] Processing recovery queue for tenant ${tenantId}`)
+    logger.info(`[Recovery] Processing recovery queue for tenant ${tenantId}`)
 
     const processed = await withTenant(tenantId, async () => {
       // Get settings for sequence delays
@@ -340,7 +341,7 @@ export const processRecoveryQueueJob = defineJob({
           WHERE id = ${email.id}
         `
 
-        console.log(`[Recovery] Sending sequence ${email.sequence_number} to ${email.customer_email} (checkout: ${email.abandoned_checkout_id})`)
+        logger.info(`[Recovery] Sending sequence ${email.sequence_number} to ${email.customer_email} (checkout: ${email.abandoned_checkout_id})`)
 
         // Mark sent
         await sql`
@@ -404,7 +405,7 @@ export const expireOldCheckoutsJob = defineJob({
       return { success: false, error: { message: 'tenantId required', retryable: false } }
     }
 
-    console.log(`[Recovery] Expiring checkouts older than ${daysOld} days for tenant ${tenantId}`)
+    logger.info(`[Recovery] Expiring checkouts older than ${daysOld} days for tenant ${tenantId}`)
 
     const expired = await withTenant(tenantId, async () => {
       // Find stale checkouts to expire

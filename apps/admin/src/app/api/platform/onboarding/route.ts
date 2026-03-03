@@ -9,6 +9,7 @@ import {
   getSessionWithProgress,
   updateSession,
 } from '@cgk-platform/onboarding'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/platform/onboarding
@@ -35,7 +36,7 @@ export async function GET() {
 
     return NextResponse.json({ session: sessionWithProgress })
   } catch (error) {
-    console.error('Error fetching onboarding session:', error)
+    logger.error('Error fetching onboarding session:', error)
     return NextResponse.json(
       { error: 'Failed to fetch onboarding session' },
       { status: 500 }
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('Error creating onboarding session:', error)
+    logger.error('Error creating onboarding session:', error)
     return NextResponse.json(
       { error: 'Failed to create onboarding session' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { createAgent, getAgents, type AgentFilters } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/support/agents
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
     const result = await getAgents(tenantId, filters)
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error fetching agents:', error)
+    logger.error('Error fetching agents:', error)
     return NextResponse.json(
       { error: 'Failed to fetch agents' },
       { status: 500 }
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(agent, { status: 201 })
   } catch (error) {
-    console.error('Error creating agent:', error)
+    logger.error('Error creating agent:', error)
     return NextResponse.json(
       { error: 'Failed to create agent' },
       { status: 500 }

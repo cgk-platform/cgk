@@ -8,6 +8,7 @@ import { withTenant, sql } from '@cgk-platform/db'
 
 import { defineJob } from '../define'
 import type { JobResult } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Configuration for retry job
@@ -36,7 +37,7 @@ export const retryFailedWebhooksJob = defineJob<{ tenantId: string; config?: Par
     const { tenantId, config = {} } = job.payload
     const { maxRetries, hoursAgo, batchSize } = { ...DEFAULT_CONFIG, ...config }
 
-    console.log(`[webhooks/retry-failed] tenantId=${tenantId} maxRetries=${maxRetries} hoursAgo=${hoursAgo} batchSize=${batchSize}`)
+    logger.info(`[webhooks/retry-failed] tenantId=${tenantId} maxRetries=${maxRetries} hoursAgo=${hoursAgo} batchSize=${batchSize}`)
 
     const result = await withTenant(tenantId, async () => {
       // Query failed webhook events eligible for retry
@@ -65,7 +66,7 @@ export const retryFailedWebhooksJob = defineJob<{ tenantId: string; config?: Par
           successCount++
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Unknown error'
-          console.error(`[webhooks/retry-failed] Failed to reset event ${row.id}: ${msg}`)
+          logger.error(`[webhooks/retry-failed] Failed to reset event ${row.id}: ${msg}`)
           failCount++
         }
       }
@@ -77,7 +78,7 @@ export const retryFailedWebhooksJob = defineJob<{ tenantId: string; config?: Par
       }
     })
 
-    console.log(`[webhooks/retry-failed] Processed: ${result.total} events, reset: ${result.reset}, failed: ${result.failed}`)
+    logger.info(`[webhooks/retry-failed] Processed: ${result.total} events, reset: ${result.reset}, failed: ${result.failed}`)
 
     return {
       success: true,

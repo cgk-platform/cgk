@@ -5,6 +5,7 @@ import { cn } from '@cgk-platform/ui'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 interface EmailTemplate {
   id: string
@@ -86,7 +87,7 @@ export default function TemplateEditorPage() {
         setVariables(data.variables || [])
       }
     } catch (err) {
-      console.error('Failed to fetch variables:', err)
+      logger.error('Failed to fetch variables:', err)
     }
   }
 
@@ -99,7 +100,7 @@ export default function TemplateEditorPage() {
         setVersions(data.versions || [])
       }
     } catch (err) {
-      console.error('Failed to fetch versions:', err)
+      logger.error('Failed to fetch versions:', err)
     }
   }
 
@@ -116,7 +117,7 @@ export default function TemplateEditorPage() {
         setPreview(data.preview)
       }
     } catch (err) {
-      console.error('Failed to fetch preview:', err)
+      logger.error('Failed to fetch preview:', err)
     }
   }
 

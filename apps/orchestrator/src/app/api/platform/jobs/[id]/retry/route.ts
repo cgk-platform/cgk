@@ -1,5 +1,6 @@
 import { logAuditAction } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -102,7 +103,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return Response.json({ success: true, message: 'Job queued for retry' })
   } catch (error) {
-    console.error('Retry job error:', error)
+    logger.error('Retry job error:', error)
     return Response.json({ error: 'Failed to retry job' }, { status: 500 })
   }
 }

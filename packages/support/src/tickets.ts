@@ -29,6 +29,7 @@ import type {
   TicketStatus,
   UpdateTicketInput,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Status workflow validation
 const VALID_STATUS_TRANSITIONS: Record<TicketStatus, TicketStatus[]> = {
@@ -125,7 +126,7 @@ export async function createTicket(
     // Run sentiment analysis on description (async, don't wait)
     if (runSentimentAnalysis) {
       processSentiment(tenantId, ticket.id, input.description, priority, true).catch((err) =>
-        console.error('Sentiment analysis failed:', err)
+        logger.error('Sentiment analysis failed:', err)
       )
     }
 

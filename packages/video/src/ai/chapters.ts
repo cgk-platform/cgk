@@ -8,6 +8,7 @@
 
 import { generateCompletion } from './client'
 import type { TranscriptionChapter } from '../transcription/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Enhance existing chapters with better titles and summaries
@@ -66,7 +67,7 @@ JSON array only:`
       summary: enhanced[index]?.summary || original.summary,
     }))
   } catch {
-    console.error('[AI Chapters] Failed to parse enhanced chapters:', response)
+    logger.error('[AI Chapters] Failed to parse enhanced chapters:', response)
     return chapters
   }
 }
@@ -122,7 +123,7 @@ JSON array only:`
       }))
       .filter((c) => c.headline.length > 0)
   } catch {
-    console.error('[AI Chapters] Failed to parse generated chapters:', response)
+    logger.error('[AI Chapters] Failed to parse generated chapters:', response)
     return []
   }
 }

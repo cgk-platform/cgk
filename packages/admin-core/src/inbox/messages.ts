@@ -12,6 +12,7 @@ import type {
   SendMessageInput,
   SenderType,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // Message Operations
@@ -351,7 +352,7 @@ export async function generateDraft(
       }
     } catch (aiError) {
       // AI generation failed - fall back to template
-      console.error('[inbox] AI draft generation failed:', aiError)
+      logger.error('[inbox] AI draft generation failed:', aiError)
       draftBody = generateSimpleDraft(context)
     }
 

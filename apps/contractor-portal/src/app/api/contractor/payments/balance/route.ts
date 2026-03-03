@@ -10,6 +10,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +34,7 @@ export async function GET(req: Request) {
       },
     })
   } catch (error) {
-    console.error('Error fetching balance:', error)
+    logger.error('Error fetching balance:', error)
     return Response.json(
       { error: 'Failed to fetch balance' },
       { status: 500 }

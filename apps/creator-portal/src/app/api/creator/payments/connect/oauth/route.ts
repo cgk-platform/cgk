@@ -8,6 +8,7 @@ import { sql } from '@cgk-platform/db'
 import { requiresStripeStandardAccount } from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -109,7 +110,7 @@ export async function GET(req: Request): Promise<Response> {
       methodId,
     })
   } catch (error) {
-    console.error('Error generating OAuth URL:', error)
+    logger.error('Error generating OAuth URL:', error)
     return Response.json({ error: 'Failed to generate OAuth URL' }, { status: 500 })
   }
 }

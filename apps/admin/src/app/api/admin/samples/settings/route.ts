@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server'
 
 import { getSamplesConfig, updateSamplesConfig } from '@/lib/samples/db'
 import type { UpdateSamplesConfigInput } from '@/lib/samples/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -49,7 +50,7 @@ export async function GET() {
       updatedAt: config.updated_at,
     })
   } catch (error) {
-    console.error('Failed to fetch samples config:', error)
+    logger.error('Failed to fetch samples config:', error)
     return NextResponse.json({ error: 'Failed to fetch samples config' }, { status: 500 })
   }
 }
@@ -116,7 +117,7 @@ export async function PATCH(req: Request) {
       updatedAt: config.updated_at,
     })
   } catch (error) {
-    console.error('Failed to update samples config:', error)
+    logger.error('Failed to update samples config:', error)
     return NextResponse.json({ error: 'Failed to update samples config' }, { status: 500 })
   }
 }

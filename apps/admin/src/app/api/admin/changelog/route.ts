@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 
 import { getChangelog, getChangelogStats } from '@/lib/admin-utilities/db'
 import type { ChangeSource } from '@/lib/admin-utilities/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Failed to fetch changelog:', error)
+    logger.error('Failed to fetch changelog:', error)
     return NextResponse.json({ error: 'Failed to fetch changelog' }, { status: 500 })
   }
 }

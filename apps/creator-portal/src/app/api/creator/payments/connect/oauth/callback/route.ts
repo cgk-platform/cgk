@@ -11,6 +11,7 @@ import {
   validateStripeOAuthState,
 } from '@cgk-platform/payments'
 import { redirect } from 'next/navigation'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export async function GET(req: Request): Promise<Response> {
 
   // Handle OAuth errors
   if (error) {
-    console.error('Stripe OAuth error:', error, errorDescription)
+    logger.error('Stripe OAuth error:', error, errorDescription)
     return redirect('/creator/settings/payout-methods?error=oauth_failed')
   }
 
@@ -88,7 +89,7 @@ export async function GET(req: Request): Promise<Response> {
     // Redirect to success page
     return redirect('/creator/settings/payout-methods?setup=complete')
   } catch (err) {
-    console.error('Error handling OAuth callback:', err)
+    logger.error('Error handling OAuth callback:', err)
     return redirect('/creator/settings/payout-methods?error=oauth_failed')
   }
 }

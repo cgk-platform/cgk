@@ -7,6 +7,7 @@
  */
 
 import { validateRequiredEnv, validateEnv } from '@cgk-platform/core'
+import { logger } from '@cgk-platform/logging'
 
 // Required environment variables - app will not start without these
 const REQUIRED_ENV_VARS = ['DATABASE_URL', 'JWT_SECRET'] as const
@@ -21,7 +22,7 @@ validateRequiredEnv([...REQUIRED_ENV_VARS])
 if (process.env.NODE_ENV === 'development') {
   const result = validateEnv([], [...OPTIONAL_ENV_VARS])
   if (result.warnings.length > 0) {
-    console.warn(`[ADMIN] Missing optional env vars: ${result.warnings.join(', ')}`)
+    logger.warn(`[ADMIN] Missing optional env vars: ${result.warnings.join(', ')}`)
   }
 }
 

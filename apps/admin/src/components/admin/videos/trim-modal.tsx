@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button, cn, Input, Label } from '@cgk-platform/ui'
 import { Loader2, Scissors, X } from 'lucide-react'
 import { useCallback, useRef, useState } from 'react'
@@ -158,12 +159,15 @@ export function TrimModal({
           <div className="relative overflow-hidden rounded-lg bg-zinc-800">
             <div className="flex h-20">
               {Array.from({ length: 10 }).map((_, i) => (
-                <img
-                  key={i}
-                  src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=${Math.floor((i / 10) * videoDuration)}`}
-                  alt=""
-                  className="h-full w-[10%] object-cover"
-                />
+                <div key={i} className="relative h-full w-[10%]">
+                  <Image
+                    src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=${Math.floor((i / 10) * videoDuration)}`}
+                    alt=""
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
               ))}
             </div>
 

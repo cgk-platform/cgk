@@ -13,6 +13,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ tenantSlug: row.slug })
   } catch (error) {
-    console.error('[domain-lookup] Error looking up domain:', error)
+    logger.error('[domain-lookup] Error looking up domain:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

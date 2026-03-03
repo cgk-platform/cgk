@@ -8,6 +8,7 @@ import {
   updateTemplateABTest,
   deleteTemplateABTest,
 } from '@/lib/ab-tests/db'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -36,7 +37,7 @@ export async function GET(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    console.error('Error fetching template A/B test:', error)
+    logger.error('Error fetching template A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to fetch template A/B test' },
       { status: 500 }
@@ -69,7 +70,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return NextResponse.json({ test })
   } catch (error) {
-    console.error('Error updating template A/B test:', error)
+    logger.error('Error updating template A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to update template A/B test' },
       { status: 500 }
@@ -100,7 +101,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting template A/B test:', error)
+    logger.error('Error deleting template A/B test:', error)
     return NextResponse.json(
       { error: 'Failed to delete template A/B test' },
       { status: 500 }

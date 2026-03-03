@@ -15,6 +15,7 @@ import { useEffect, useState } from 'react'
 
 import { ConnectionStatusBadge, OAuthConnectButton } from '@/components/integrations'
 import type { SlackNotificationCategory } from '@/lib/integrations/types'
+import { logger } from '@cgk-platform/logging'
 
 interface SlackStatus {
   connected: boolean
@@ -115,7 +116,7 @@ export default function SlackPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch Slack status:', error)
+      logger.error('Failed to fetch Slack status:', error)
     } finally {
       setLoading(false)
     }
@@ -142,7 +143,7 @@ export default function SlackPage() {
         setStatus({ connected: false, channels: [] })
       }
     } catch (error) {
-      console.error('Failed to disconnect:', error)
+      logger.error('Failed to disconnect:', error)
     }
   }
 
@@ -175,7 +176,7 @@ export default function SlackPage() {
         body: JSON.stringify({ notificationConfig }),
       })
     } catch (error) {
-      console.error('Failed to save config:', error)
+      logger.error('Failed to save config:', error)
     } finally {
       setSaving(false)
     }

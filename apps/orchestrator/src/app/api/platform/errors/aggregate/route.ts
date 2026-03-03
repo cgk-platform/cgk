@@ -1,4 +1,5 @@
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -175,7 +176,7 @@ export async function GET(request: Request) {
       since,
     })
   } catch (error) {
-    console.error('Get error aggregates error:', error)
+    logger.error('Get error aggregates error:', error)
     return Response.json({ error: 'Failed to get error aggregates' }, { status: 500 })
   }
 }

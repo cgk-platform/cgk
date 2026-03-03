@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sql } from '@vercel/postgres'
 import { withTenant } from '@cgk-platform/db'
 import { getTenantSlug } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, message: 'Successfully subscribed to newsletter' })
   } catch (error) {
-    console.error('Newsletter subscription error:', error)
+    logger.error('Newsletter subscription error:', error)
     return NextResponse.json(
       { error: 'Failed to subscribe. Please try again later.' },
       { status: 500 }

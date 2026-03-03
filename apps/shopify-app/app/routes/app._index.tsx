@@ -27,6 +27,7 @@ import {
   deleteBundleDiscount,
   parseBundleConfig,
 } from '../lib/bundle-config.server'
+import { logger } from '@cgk-platform/logging'
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const { admin } = await authenticate.admin(request)
@@ -34,13 +35,15 @@ export async function loader({ request }: LoaderFunctionArgs) {
   try {
     const nodes = await listBundleDiscounts(admin)
 
-    const discounts = nodes.map((node: any) => {
-      const discount = node.automaticDiscount
-      const config = parseBundleConfig(node.metafield?.value)
+    const discounts = nodes.map((node: unknown) => {
+      const n = node as Record<string, unknown>
+      const discount = n.automaticDiscount as Record<string, unknown> | undefined
+      const metafield = n.metafield as Record<string, unknown> | undefined
+      const config = parseBundleConfig(metafield?.value as unknown as string)
       return {
-        id: node.id,
-        title: discount?.title ?? 'Untitled',
-        status: discount?.status ?? 'UNKNOWN',
+        id: n.id as unknown as string,
+        title: (discount?.title as unknown as string) ?? 'Untitled',
+        status: (discount?.status as unknown as string) ?? 'UNKNOWN',
         bundleCount: config.bundles.length,
         config,
       }
@@ -48,7 +51,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
     return json({ discounts, error: null })
   } catch (err) {
-    console.error('[BundleBuilder] Failed to load discounts:', err)
+    logger.error('[BundleBuilder] Failed to load discounts:', err)
     return json({
       discounts: [],
       error: 'Failed to load bundle discounts. Please try refreshing the page.',

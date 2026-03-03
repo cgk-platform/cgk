@@ -17,6 +17,7 @@ import {
   type AssetFilters,
   type CreateAssetInput,
 } from '@cgk-platform/dam'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
   const headerList = await headers()
@@ -145,7 +146,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ asset }, { status: 201 })
   } catch (error) {
-    console.error('Upload error:', error)
+    logger.error('Upload error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getApplicationById } from '@/lib/creators-admin-ops'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET(
   _request: Request,
@@ -29,7 +30,7 @@ export async function GET(
 
     return NextResponse.json({ application })
   } catch (error) {
-    console.error('Error fetching application:', error)
+    logger.error('Error fetching application:', error)
     return NextResponse.json(
       { error: 'Failed to fetch application' },
       { status: 500 }

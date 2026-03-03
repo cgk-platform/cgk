@@ -17,6 +17,7 @@ import {
   type ChatSessionFilters,
   type ChatSessionStatus,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -107,7 +108,7 @@ export async function GET(req: NextRequest) {
       stats,
     })
   } catch (error) {
-    console.error('[chat] GET error:', error)
+    logger.error('[chat] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch chat sessions' },
       { status: 500 }

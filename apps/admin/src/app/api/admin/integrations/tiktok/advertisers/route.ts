@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { getTikTokConnection } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
       selectedName: connection.selectedAdvertiserName,
     })
   } catch (error) {
-    console.error('Failed to get TikTok advertisers:', error)
+    logger.error('Failed to get TikTok advertisers:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get advertisers' },
       { status: 500 }

@@ -9,6 +9,7 @@ import { WebClient, type ChatPostMessageResponse, type ConversationsListResponse
 
 import { decryptToken } from './encryption'
 import type { SlackBlock, SlackChannel } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Helper to cast our SlackBlock type to Slack API's expected type
 function toApiBlocks(blocks: SlackBlock[]): KnownBlock[] {
@@ -286,7 +287,7 @@ export class SlackClient {
 
       return channels
     } catch (error) {
-      console.error('Failed to list channels:', error)
+      logger.error('Failed to list channels', error instanceof Error ? error : new Error(String(error)))
       return []
     }
   }
@@ -379,7 +380,7 @@ export class SlackClient {
 
       return users
     } catch (error) {
-      console.error('Failed to list users:', error)
+      logger.error('Failed to list users', error instanceof Error ? error : new Error(String(error)))
       return []
     }
   }

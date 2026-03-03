@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getPublicArticle, getRelatedArticles, incrementViewCount } from '@/lib/knowledge-base/db'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ slug: string }>
@@ -40,7 +41,7 @@ export async function GET(request: Request, { params }: RouteParams) {
   if (trackView) {
     withTenant(tenantSlug, () => incrementViewCount(article.id)).catch((error) => {
       // Non-critical: view count is for analytics only
-      console.debug('[kb] Failed to increment view count:', error)
+      logger.debug('[kb] Failed to increment view count:', error)
     })
   }
 

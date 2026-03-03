@@ -16,6 +16,7 @@ import {
   clearTenantServiceCache,
   type TenantApiService,
 } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -98,7 +99,7 @@ export async function POST(
       }
     }
   } catch (error) {
-    console.error(`Failed to save ${service} credentials:`, error)
+    logger.error(`Failed to save ${service} credentials:`, error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to save credentials' },
       { status: 500 }
@@ -146,7 +147,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error(`Failed to delete ${service} credentials:`, error)
+    logger.error(`Failed to delete ${service} credentials:`, error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to delete credentials' },
       { status: 500 }

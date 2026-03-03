@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { getAllSLAConfigs, updateSLAConfig } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/support/sla
@@ -27,7 +28,7 @@ export async function GET(request: Request) {
     const configs = await getAllSLAConfigs(tenantId)
     return NextResponse.json(configs)
   } catch (error) {
-    console.error('Error fetching SLA configs:', error)
+    logger.error('Error fetching SLA configs:', error)
     return NextResponse.json(
       { error: 'Failed to fetch SLA configurations' },
       { status: 500 }
@@ -115,7 +116,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json(config)
   } catch (error) {
-    console.error('Error updating SLA config:', error)
+    logger.error('Error updating SLA config:', error)
     return NextResponse.json(
       { error: 'Failed to update SLA configuration' },
       { status: 500 }

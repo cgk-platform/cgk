@@ -27,6 +27,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 interface ProductSyncStatus {
   totalProducts: number
@@ -119,7 +120,7 @@ function Step7Content() {
         })
       }
     } catch (err) {
-      console.error('Failed to fetch sync status:', err)
+      logger.error('Failed to fetch sync status:', err)
       setError('Failed to load product sync status')
     } finally {
       setIsLoading(false)
@@ -177,7 +178,7 @@ function Step7Content() {
         }
       }, 500)
     } catch (err) {
-      console.error('Sync error:', err)
+      logger.error('Sync error:', err)
       setSyncStatus((prev) => ({
         ...prev,
         status: 'error',
@@ -209,7 +210,7 @@ function Step7Content() {
         }),
       })
     } catch (err) {
-      console.error('Failed to save step:', err)
+      logger.error('Failed to save step:', err)
     }
 
     router.push(`/brands/new/wizard/step-6?sessionId=${sessionId}`)
@@ -236,7 +237,7 @@ function Step7Content() {
         }),
       })
     } catch (err) {
-      console.error('Failed to save step:', err)
+      logger.error('Failed to save step:', err)
     }
 
     router.push(`/brands/new/wizard/step-8?sessionId=${sessionId}`)
@@ -259,7 +260,7 @@ function Step7Content() {
         }),
       })
     } catch (err) {
-      console.error('Failed to skip step:', err)
+      logger.error('Failed to skip step:', err)
     }
 
     router.push(`/brands/new/wizard/step-8?sessionId=${sessionId}`)

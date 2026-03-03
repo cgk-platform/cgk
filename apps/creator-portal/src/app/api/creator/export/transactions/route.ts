@@ -7,6 +7,7 @@
 import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -133,7 +134,7 @@ export async function POST(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error generating transaction CSV:', error)
+    logger.error('Error generating transaction CSV:', error)
     return Response.json({ error: 'Failed to generate CSV export' }, { status: 500 })
   }
 }

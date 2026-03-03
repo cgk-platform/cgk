@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { getTicket, updateTicket, type UpdateTicketInput } from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -37,7 +38,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(ticket)
   } catch (error) {
-    console.error('Error fetching ticket:', error)
+    logger.error('Error fetching ticket:', error)
     return NextResponse.json(
       { error: 'Failed to fetch ticket' },
       { status: 500 }
@@ -90,7 +91,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       return NextResponse.json({ error: message }, { status: 400 })
     }
 
-    console.error('Error updating ticket:', error)
+    logger.error('Error updating ticket:', error)
     return NextResponse.json(
       { error: 'Failed to update ticket' },
       { status: 500 }

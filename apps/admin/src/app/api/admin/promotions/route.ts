@@ -10,6 +10,7 @@ import {
   getPromotionsForCalendar,
 } from '@/lib/promotions/db'
 import type { CreatePromotionInput } from '@/lib/promotions/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/promotions
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    console.error('Error fetching promotions:', error)
+    logger.error('Error fetching promotions:', error)
     return NextResponse.json(
       { error: 'Failed to fetch promotions' },
       { status: 500 },
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
       { status: 201 },
     )
   } catch (error) {
-    console.error('Error creating promotion:', error)
+    logger.error('Error creating promotion:', error)
     return NextResponse.json(
       { error: 'Failed to create promotion' },
       { status: 500 },

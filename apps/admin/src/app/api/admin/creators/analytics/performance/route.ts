@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 
 import { getPerformanceLeaderboard } from '@/lib/creators/analytics'
 import type { AnalyticsPeriod, LeaderboardMetric } from '@/lib/creators/analytics-types'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_PERIODS = ['7d', '30d', '90d', '12m', 'all'] as const
 const VALID_METRICS = ['earnings', 'projects', 'response_time', 'delivery_speed', 'quality'] as const
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
     const leaderboard = await getPerformanceLeaderboard(tenantSlug, metric, period, limit)
     return NextResponse.json(leaderboard)
   } catch (error) {
-    console.error('Error fetching performance leaderboard:', error)
+    logger.error('Error fetching performance leaderboard:', error)
     return NextResponse.json(
       { error: 'Failed to fetch performance data' },
       { status: 500 }

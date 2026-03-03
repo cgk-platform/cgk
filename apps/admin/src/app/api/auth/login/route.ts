@@ -10,6 +10,7 @@ import {
 } from '@cgk-platform/auth'
 import type { UserRole } from '@cgk-platform/auth'
 import { verifyPassword } from '@cgk-platform/auth/node'
+import { logger } from '@cgk-platform/logging'
 
 // IP-based rate limiting
 const IP_RATE_LIMIT_MAX = 5
@@ -153,7 +154,7 @@ export async function POST(request: Request) {
 
     return setAuthCookie(response, jwt)
   } catch (error) {
-    console.error('Login error:', error)
+    logger.error('Login error:', error)
     return Response.json({ error: 'Login failed. Please try again.' }, { status: 500 })
   }
 }

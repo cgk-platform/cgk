@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { AlertCircle, Check, ExternalLink, RefreshCw, X } from 'lucide-react'
 
 import { Alert, AlertDescription, Badge, Button, Card, CardContent, Input, Label, Spinner } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 interface IntegrationStatus {
   provider: 'meta' | 'google_ads' | 'tiktok' | 'klaviyo'
@@ -293,7 +294,7 @@ export default function IntegrationsSettingsPage() {
         setStatuses(data.integrations)
       }
     } catch (err) {
-      console.error('Failed to fetch integrations:', err)
+      logger.error('Failed to fetch integrations:', err)
       setError('Failed to load integration statuses')
     } finally {
       setLoading(false)

@@ -5,6 +5,7 @@
  * duplicated across every route that pushes edits back to the agent.
  */
 
+import { logger } from '@cgk-platform/logging'
 export interface GatewayConfig {
   url: string
   token: string
@@ -22,7 +23,7 @@ export function getGatewayConfig(profile: string): GatewayConfig | null {
 
   const token = process.env.OPENCLAW_GATEWAY_TOKEN
   if (!token) {
-    console.error('[openclaw-gateway] OPENCLAW_GATEWAY_TOKEN is not set')
+    logger.error('[openclaw-gateway] OPENCLAW_GATEWAY_TOKEN is not set')
     return null
   }
 
@@ -52,12 +53,12 @@ export async function pushToGateway(
       body: JSON.stringify({ agentId, message }),
     })
     if (!res.ok) {
-      console.error(
+      logger.error(
         `[openclaw-gateway] Push to ${profile} failed: ${res.status} ${await res.text()}`
       )
     }
   } catch (err) {
-    console.error(
+    logger.error(
       `[openclaw-gateway] Push to ${profile} error:`,
       err instanceof Error ? err.message : err
     )

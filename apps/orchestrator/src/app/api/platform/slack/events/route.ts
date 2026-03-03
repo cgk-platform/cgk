@@ -8,6 +8,7 @@
  * Responds 200 immediately; LLM processing runs fire-and-forget.
  */
 
+import { logger } from '@cgk-platform/logging'
 export const dynamic = 'force-dynamic'
 
 // Maximum allowed age of a Slack request (5 minutes)
@@ -64,7 +65,7 @@ async function postSlackMessage(
 ): Promise<void> {
   const botToken = process.env.SLACK_BOT_TOKEN
   if (!botToken) {
-    console.error('[Slack Events] SLACK_BOT_TOKEN not configured')
+    logger.error('[Slack Events] SLACK_BOT_TOKEN not configured')
     return
   }
 
@@ -81,7 +82,7 @@ async function postSlackMessage(
   })
 
   if (!res.ok) {
-    console.error('[Slack Events] Failed to post message:', res.status, await res.text())
+    logger.error('[Slack Events] Failed to post message:', res.status, await res.text())
   }
 }
 
@@ -118,7 +119,7 @@ async function callPlatformLLM(userText: string): Promise<string> {
   })
 
   if (!res.ok) {
-    console.error('[Slack Events] LLM call failed:', res.status, await res.text())
+    logger.error('[Slack Events] LLM call failed:', res.status, await res.text())
     return 'Sorry, I encountered an error processing your request.'
   }
 
@@ -147,7 +148,7 @@ async function processMessageEvent(event: Record<string, unknown>): Promise<void
     const reply = await callPlatformLLM(text)
     await postSlackMessage(channel, reply, threadTs)
   } catch (err) {
-    console.error('[Slack Events] Error processing message event:', err)
+    logger.error('[Slack Events] Error processing message event:', err)
   }
 }
 
@@ -157,7 +158,7 @@ async function processMessageEvent(event: Record<string, unknown>): Promise<void
 export async function POST(request: Request): Promise<Response> {
   const signingSecret = process.env.SLACK_SIGNING_SECRET
   if (!signingSecret) {
-    console.error('[Slack Events] SLACK_SIGNING_SECRET not configured')
+    logger.error('[Slack Events] SLACK_SIGNING_SECRET not configured')
     return Response.json({ error: 'Webhook not configured' }, { status: 500 })
   }
 
@@ -196,7 +197,7 @@ export async function POST(request: Request): Promise<Response> {
       if (!event.bot_id) {
         // Fire-and-forget — do not await, respond to Slack first
         processMessageEvent(event).catch((err) =>
-          console.error('[Slack Events] Async processing error:', err),
+          logger.error('[Slack Events] Async processing error:', err),
         )
       }
     }

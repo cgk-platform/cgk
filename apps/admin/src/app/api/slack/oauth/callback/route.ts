@@ -8,6 +8,7 @@ import {
   exchangeCodeForTokens,
   processOAuthResponse,
 } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/slack/oauth/callback
@@ -123,7 +124,7 @@ export async function GET(request: Request) {
     redirectUrl.searchParams.set('slack_connected', 'true')
     return NextResponse.redirect(redirectUrl)
   } catch (error) {
-    console.error('Slack OAuth callback error:', error)
+    logger.error('Slack OAuth callback error:', error)
     const redirectUrl = new URL('/admin/settings/integrations', url.origin)
     redirectUrl.searchParams.set('slack_error', 'connection_failed')
     return NextResponse.redirect(redirectUrl)

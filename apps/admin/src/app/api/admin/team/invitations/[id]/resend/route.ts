@@ -9,6 +9,7 @@ import {
 } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(
   request: Request,
@@ -54,7 +55,7 @@ export async function POST(
       message: `Invitation resent to ${invitation.email}`,
     })
   } catch (error) {
-    console.error('Error resending invitation:', error)
+    logger.error('Error resending invitation:', error)
     const message = error instanceof Error ? error.message : 'Failed to resend invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -73,9 +74,9 @@ async function sendResendInvitationEmail(
 
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) {
-    console.log(`[DEV] Resent team invitation for ${email}:`)
-    console.log(`[DEV] ${inviteUrl}`)
-    console.log(`[DEV] Token: ${token}`)
+    logger.info(`[DEV] Resent team invitation for ${email}:`)
+    logger.info(`[DEV] ${inviteUrl}`)
+    logger.info(`[DEV] Token: ${token}`)
     return
   }
 
@@ -114,7 +115,7 @@ async function sendResendInvitationEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    console.error('Failed to send invitation email:', error)
+    logger.error('Failed to send invitation email:', error)
     throw new Error('Failed to send invitation email')
   }
 }

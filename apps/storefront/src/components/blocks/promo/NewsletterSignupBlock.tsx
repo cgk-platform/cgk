@@ -12,6 +12,7 @@ import { useState, useCallback } from 'react'
 import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import type { BlockProps, ImageConfig } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Newsletter Signup block configuration
@@ -120,7 +121,7 @@ export function NewsletterSignupBlock({ block, className }: BlockProps<Newslette
           await new Promise((resolve) => setTimeout(resolve, 1500))
 
           // In production, this would call your email service API
-          console.log('Newsletter signup:', { email, name, phone, formId })
+          logger.info('Newsletter signup:', { email, name, phone, formId })
         }
 
         setFormState('success')

@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Tenant context for React components
@@ -102,7 +103,7 @@ export function TenantProvider({
         setError('Failed to fetch tenants')
       }
     } catch (err) {
-      console.error('Failed to fetch tenants:', err)
+      logger.error('Failed to fetch tenants:', err instanceof Error ? err : new Error(String(err)))
       setError('Failed to fetch tenants')
     } finally {
       setIsLoading(false)
@@ -139,14 +140,14 @@ export function TenantProvider({
           }
         } else {
           const data = await response.json().catch((parseError) => {
-            console.warn('[tenant-context] Failed to parse switch response:', parseError)
+            logger.warn('[tenant-context] Failed to parse switch response:', parseError)
             return {}
           })
           setError(data.error || 'Failed to switch tenant')
           throw new Error(data.error || 'Failed to switch tenant')
         }
       } catch (err) {
-        console.error('Failed to switch tenant:', err)
+        logger.error('Failed to switch tenant:', err instanceof Error ? err : new Error(String(err)))
         if (err instanceof Error && !error) {
           setError(err.message)
         }
@@ -181,14 +182,14 @@ export function TenantProvider({
           }
         } else {
           const data = await response.json().catch((parseError) => {
-            console.warn('[tenant-context] Failed to parse default response:', parseError)
+            logger.warn('[tenant-context] Failed to parse default response:', parseError)
             return {}
           })
           setError(data.error || 'Failed to set default tenant')
           throw new Error(data.error || 'Failed to set default tenant')
         }
       } catch (err) {
-        console.error('Failed to set default tenant:', err)
+        logger.error('Failed to set default tenant:', err instanceof Error ? err : new Error(String(err)))
         throw err
       }
     },

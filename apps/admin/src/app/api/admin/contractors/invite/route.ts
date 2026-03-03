@@ -8,6 +8,7 @@ import {
 
 import { createContractorInvitation, createProject } from '@/lib/contractors/db'
 import type { ContractorInvitation } from '@/lib/contractors/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -108,11 +109,11 @@ export async function POST(req: NextRequest) {
       emailSent = true
     } else {
       // Dev mode: log the invite link
-      console.log(`[DEV] Contractor invite for ${body.email}: ${inviteUrl}`)
+      logger.info(`[DEV] Contractor invite for ${body.email}: ${inviteUrl}`)
       emailSent = true
     }
   } catch (emailError) {
-    console.error('Failed to send contractor invitation email:', emailError)
+    logger.error('Failed to send contractor invitation email:', emailError)
   }
 
   return NextResponse.json(

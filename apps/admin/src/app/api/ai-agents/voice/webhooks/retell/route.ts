@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/ai-agents/voice/webhooks/retell
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
     // Verify webhook signature
     const { verifyRetellSignature } = await import('@cgk-platform/ai-agents')
     if (!verifyRetellSignature(bodyText, signature)) {
-      console.error('Invalid Retell webhook signature')
+      logger.error('Invalid Retell webhook signature')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
     }
 
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     const tenantId = metadata.tenant_id
 
     if (!tenantId) {
-      console.error('No tenant_id in webhook metadata')
+      logger.error('No tenant_id in webhook metadata')
       // Still acknowledge the webhook to prevent retries
       return NextResponse.json({ received: true, warning: 'No tenant context' })
     }
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
       // Get tenant's Retell credentials
       const credentials = await getVoiceCredentials(tenantId)
       if (!credentials?.retellApiKeyEncrypted) {
-        console.error('Retell credentials not found for tenant:', tenantId)
+        logger.error('Retell credentials not found for tenant:', tenantId)
         return
       }
 
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Error processing Retell webhook:', error)
+    logger.error('Error processing Retell webhook:', error)
     // Return 200 to prevent Retell from retrying
     // Log the error for investigation
     return NextResponse.json({ received: true, error: 'Processing failed' })

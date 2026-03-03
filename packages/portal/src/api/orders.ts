@@ -6,6 +6,7 @@
 
 import { customerQuery } from './client'
 import type { CustomerOrder, PageInfo } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 interface OrdersResponse {
   customer: {
@@ -171,7 +172,7 @@ export async function getOrders(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    console.error('Failed to get orders:', result.errors)
+    logger.error('Failed to get orders:', result.errors)
     return {
       orders: [],
       pageInfo: {
@@ -249,7 +250,7 @@ export async function getOrder(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    console.error('Failed to get order:', result.errors)
+    logger.error('Failed to get order:', result.errors)
     return null
   }
 

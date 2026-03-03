@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react'
 import { IntegrationCard } from '@/components/integrations'
 import type { IntegrationCard as IntegrationCardType, IntegrationStatus } from '@/lib/integrations/types'
 import { INTEGRATION_CATEGORIES, INTEGRATION_DEFINITIONS } from '@/lib/integrations/types'
+import { logger } from '@cgk-platform/logging'
 
 const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   commerce: ShoppingCart,
@@ -55,7 +56,7 @@ export default function IntegrationsHubPage() {
         setStatuses(data.statuses || {})
       }
     } catch (error) {
-      console.error('Failed to fetch integration statuses:', error)
+      logger.error('Failed to fetch integration statuses:', error)
     } finally {
       setLoading(false)
       setRefreshing(false)

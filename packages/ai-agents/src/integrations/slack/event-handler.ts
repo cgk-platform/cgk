@@ -21,6 +21,7 @@ import type {
   SlackUserAssociation,
   TenantSlackConfig,
 } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 export interface SlackEventContext {
   tenantId: string
@@ -72,14 +73,14 @@ export async function handleSlackEvent(
   // Get tenant's Slack config
   const config = await getSlackConfig()
   if (!config?.enabled) {
-    console.log('[slack] Integration disabled or not configured')
+    logger.info('[slack] Integration disabled or not configured')
     return
   }
 
   // Create client
   const client = SlackClient.fromTenantConfig(config)
   if (!client) {
-    console.error('[slack] Failed to create Slack client - missing bot token')
+    logger.error('[slack] Failed to create Slack client - missing bot token')
     return
   }
 
@@ -134,14 +135,14 @@ async function handleMessage(
   // Determine which agent should respond
   const agentId = await determineAgent(ctx, event.channel, event.user)
   if (!agentId) {
-    console.log('[slack] No agent configured for this channel')
+    logger.info('[slack] No agent configured for this channel')
     return
   }
 
   // Check rate limits
   const rateLimit = await checkAndIncrementRateLimit(agentId, 'slack')
   if (!rateLimit.allowed) {
-    console.log(`[slack] Rate limited for agent ${agentId} (${rateLimit.limitType})`)
+    logger.info(`[slack] Rate limited for agent ${agentId} (${rateLimit.limitType})`)
     await ctx.client.addReaction(event.channel, event.ts, 'hourglass_flowing_sand')
     return
   }
@@ -160,7 +161,7 @@ async function handleMessage(
 
   // Add thinking reaction (non-critical, best effort)
   await ctx.client.addReaction(event.channel, event.ts, 'thinking_face').catch((error) => {
-    console.debug('[slack] Failed to add thinking reaction:', error)
+    logger.debug('[slack] Failed to add thinking reaction:', error)
   })
 
   try {
@@ -206,9 +207,9 @@ async function handleMessage(
       conversationId: conversation.id,
     })
   } catch (error) {
-    console.error('[slack] Error processing message:', error)
+    logger.error('[slack] Error processing message:', error)
     await ctx.client.addReaction(event.channel, event.ts, 'x').catch((reactionError) => {
-      console.debug('[slack] Failed to add error reaction:', reactionError)
+      logger.debug('[slack] Failed to add error reaction:', reactionError)
     })
     throw error
   }
@@ -224,14 +225,14 @@ async function handleMention(
   // Determine which agent was mentioned
   const agentId = await determineAgent(ctx, event.channel, event.user)
   if (!agentId) {
-    console.log('[slack] No agent configured for mention handling')
+    logger.info('[slack] No agent configured for mention handling')
     return
   }
 
   // Check rate limits
   const rateLimit = await checkAndIncrementRateLimit(agentId, 'slack')
   if (!rateLimit.allowed) {
-    console.log(`[slack] Rate limited for agent ${agentId}`)
+    logger.info(`[slack] Rate limited for agent ${agentId}`)
     return
   }
 
@@ -301,7 +302,7 @@ async function handleMention(
       conversationId: conversation.id,
     })
   } catch (error) {
-    console.error('[slack] Error handling mention:', error)
+    logger.error('[slack] Error handling mention:', error)
     throw error
   }
 }
@@ -418,7 +419,7 @@ async function resolveSlackUser(
           association?.associationMethod || (userInfo.profile.email ? 'auto' : undefined),
       })
     } catch (error) {
-      console.warn('[slack] Failed to fetch user info:', error)
+      logger.warn('[slack] Failed to fetch user info:', error)
     }
   }
 
@@ -453,7 +454,7 @@ export async function buildConversationContext(
       }
     }
   } catch (error) {
-    console.warn('[slack] Failed to build conversation context:', error)
+    logger.warn('[slack] Failed to build conversation context:', error)
   }
 
   return messages

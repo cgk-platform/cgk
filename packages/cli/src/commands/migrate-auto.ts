@@ -8,6 +8,7 @@ import { Command } from 'commander'
 import ora from 'ora'
 import chalk from 'chalk'
 import { autoMigrateAllTenants, autoMigrateTenant } from '@cgk-platform/db/migrations'
+import { logger } from '@cgk-platform/logging'
 
 export const migrateAutoCommand = new Command('migrate:auto')
   .description('Automatically run missing migrations on existing tenants')
@@ -27,16 +28,16 @@ export const migrateAutoCommand = new Command('migrate:auto')
 
         spinner.succeed()
 
-        console.log()
-        console.log(chalk.bold('Migration Results:'))
-        console.log(chalk.green(`  Applied: ${result.applied}`))
+        logger.info()
+        logger.info(chalk.bold('Migration Results:'))
+        logger.info(chalk.green(`  Applied: ${result.applied}`))
         if (result.errors > 0) {
-          console.log(chalk.red(`  Errors: ${result.errors}`))
+          logger.info(chalk.red(`  Errors: ${result.errors}`))
         }
 
         if (options.dryRun) {
-          console.log()
-          console.log(chalk.yellow('  (Dry run - no changes made)'))
+          logger.info()
+          logger.info(chalk.yellow('  (Dry run - no changes made)'))
         }
       } else {
         // Migrate all tenants
@@ -48,36 +49,36 @@ export const migrateAutoCommand = new Command('migrate:auto')
 
         spinner.succeed()
 
-        console.log()
-        console.log(chalk.bold('Migration Summary:'))
-        console.log(`  Total tenants: ${result.total}`)
-        console.log(chalk.green(`  Succeeded: ${result.succeeded}`))
+        logger.info()
+        logger.info(chalk.bold('Migration Summary:'))
+        logger.info(`  Total tenants: ${result.total}`)
+        logger.info(chalk.green(`  Succeeded: ${result.succeeded}`))
         if (result.failed > 0) {
-          console.log(chalk.red(`  Failed: ${result.failed}`))
+          logger.info(chalk.red(`  Failed: ${result.failed}`))
         }
 
         if (options.dryRun) {
-          console.log()
-          console.log(chalk.yellow('  (Dry run - no changes made)'))
+          logger.info()
+          logger.info(chalk.yellow('  (Dry run - no changes made)'))
         }
 
-        console.log()
-        console.log(chalk.bold('Details:'))
+        logger.info()
+        logger.info(chalk.bold('Details:'))
         result.details.forEach((detail) => {
           if (detail.applied > 0 || detail.errors > 0) {
             const status =
               detail.errors > 0
                 ? chalk.red(`✗ ${detail.errors} errors`)
                 : chalk.green(`✓ ${detail.applied} applied`)
-            console.log(`  ${detail.slug}: ${status}`)
+            logger.info(`  ${detail.slug}: ${status}`)
           }
         })
       }
     } catch (error) {
       spinner.fail()
-      console.error()
-      console.error(chalk.red('Auto-migration failed:'))
-      console.error(chalk.red(error instanceof Error ? error.message : String(error)))
+      logger.error()
+      logger.error(chalk.red('Auto-migration failed:'))
+      logger.error(chalk.red(error instanceof Error ? error.message : String(error)))
       process.exit(1)
     }
   })

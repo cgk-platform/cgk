@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql, createTenantCache } from '@cgk-platform/db'
 import type { NotificationType } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 interface MappingRecord {
   id: string
@@ -47,7 +48,7 @@ export async function GET() {
 
     return NextResponse.json({ mappings: result.rows })
   } catch (error) {
-    console.error('Failed to get Slack mappings:', error)
+    logger.error('Failed to get Slack mappings:', error)
     return NextResponse.json(
       { error: 'Failed to get mappings' },
       { status: 500 },
@@ -120,7 +121,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to update Slack mappings:', error)
+    logger.error('Failed to update Slack mappings:', error)
     return NextResponse.json(
       { error: 'Failed to update mappings' },
       { status: 500 },

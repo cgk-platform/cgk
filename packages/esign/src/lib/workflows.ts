@@ -17,6 +17,7 @@ import type {
 } from '../types.js'
 import { createDocument } from './documents.js'
 import { getTemplate } from './templates.js'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================================
 // WORKFLOW CRUD OPERATIONS
@@ -486,7 +487,7 @@ export async function advanceToNextStep(
         })
       }
     } catch (docError) {
-      console.error('[esign-workflow] Failed to create document for step:', nextStepOrder, docError)
+      logger.error('[esign-workflow] Failed to create document for step', docError instanceof Error ? docError : new Error(String(docError)), { stepOrder: nextStepOrder })
       // Don't fail the step advance — document creation failure is non-blocking
     }
   }

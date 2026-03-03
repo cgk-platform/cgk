@@ -25,6 +25,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // BRI (Business Resource Integration) TASKS
@@ -62,7 +63,7 @@ export const briGmailSyncJob = defineJob<TenantEvent<BriGmailSyncPayload>>({
   name: 'bri/gmail-sync',
   handler: async (job) => {
     const { tenantId, userId: _userId, fullSync: _fullSync } = job.payload
-    console.log(`[BRI] Syncing Gmail for tenant ${tenantId}`)
+    logger.info(`[BRI] Syncing Gmail for tenant ${tenantId}`)
 
     // Implementation would:
     // 1. Connect to Gmail API
@@ -82,7 +83,7 @@ export const briSlackSyncJob = defineJob<TenantEvent<BriSlackSyncPayload>>({
   name: 'bri/slack-sync',
   handler: async (job) => {
     const { tenantId, workspaceId: _workspaceId, channelIds: _channelIds } = job.payload
-    console.log(`[BRI] Syncing Slack for tenant ${tenantId}`)
+    logger.info(`[BRI] Syncing Slack for tenant ${tenantId}`)
 
     return { success: true, data: { tenantId, synced: 0 } }
   },
@@ -96,7 +97,7 @@ export const briMeetingSyncJob = defineJob<TenantEvent<BriMeetingSyncPayload>>({
   name: 'bri/meeting-sync',
   handler: async (job) => {
     const { tenantId, calendarIds: _calendarIds, startDate: _startDate, endDate: _endDate } = job.payload
-    console.log(`[BRI] Syncing meetings for tenant ${tenantId}`)
+    logger.info(`[BRI] Syncing meetings for tenant ${tenantId}`)
 
     return { success: true, data: { tenantId, synced: 0 } }
   },
@@ -110,7 +111,7 @@ export const briDataProcessJob = defineJob<TenantEvent<BriDataProcessPayload>>({
   name: 'bri/data-process',
   handler: async (job) => {
     const { tenantId, dataType, sourceId: _sourceId } = job.payload
-    console.log(`[BRI] Processing ${dataType} data for tenant ${tenantId}`)
+    logger.info(`[BRI] Processing ${dataType} data for tenant ${tenantId}`)
 
     // Implementation would:
     // 1. Load raw data from source
@@ -151,7 +152,7 @@ export const damRightsExpiryCheckJob = defineJob<TenantEvent<DamRightsExpiryChec
   name: 'dam/rights-expiry-check',
   handler: async (job) => {
     const { tenantId, daysAhead = 30 } = job.payload
-    console.log(`[DAM] Checking rights expiring within ${daysAhead} days`)
+    logger.info(`[DAM] Checking rights expiring within ${daysAhead} days`)
 
     // Query assets with rights expiring soon
     // Would send notifications to asset owners
@@ -168,7 +169,7 @@ export const damMuxBackfillJob = defineJob<TenantEvent<DamMuxBackfillPayload>>({
   name: 'dam/mux-backfill',
   handler: async (job) => {
     const { tenantId, limit = 50 } = job.payload
-    console.log(`[DAM] Backfilling Mux assets (limit: ${limit})`)
+    logger.info(`[DAM] Backfilling Mux assets (limit: ${limit})`)
 
     // Query videos without Mux assets
     // Create Mux assets for each
@@ -203,7 +204,7 @@ export const esignReminderJob = defineJob<TenantEvent<EsignReminderPayload>>({
   handler: async (job) => {
     const { tenantId, documentId: _documentId, minHoursSinceReminder = 24 } = job.payload
     void minHoursSinceReminder // Will be used in implementation
-    console.log(`[E-Sign] Sending reminders for tenant ${tenantId}`)
+    logger.info(`[E-Sign] Sending reminders for tenant ${tenantId}`)
 
     // Query pending documents needing reminders
     // Send reminder emails
@@ -220,7 +221,7 @@ export const esignExpiryCheckJob = defineJob<TenantEvent<EsignExpiryCheckPayload
   name: 'esign/expiry-check',
   handler: async (job) => {
     const { tenantId, daysBeforeExpiry = 7 } = job.payload
-    console.log(`[E-Sign] Checking documents expiring in ${daysBeforeExpiry} days`)
+    logger.info(`[E-Sign] Checking documents expiring in ${daysBeforeExpiry} days`)
 
     return { success: true, data: { tenantId, expiring: 0 } }
   },
@@ -248,7 +249,7 @@ export const escalationCheckJob = defineJob<TenantEvent<EscalationCheckPayload>>
   name: 'escalation/check',
   handler: async (job) => {
     const { tenantId, escalationType } = job.payload
-    console.log(`[Escalation] Checking ${escalationType || 'all'} escalations`)
+    logger.info(`[Escalation] Checking ${escalationType || 'all'} escalations`)
 
     // Check for:
     // - Projects past SLA
@@ -282,7 +283,7 @@ export const giftCardEmailJob = defineJob<TenantEvent<GiftCardEmailPayload>>({
   name: 'giftcard/send-email',
   handler: async (job) => {
     const { tenantId, giftCardId, recipientEmail } = job.payload
-    console.log(`[GiftCard] Sending gift card ${giftCardId} to ${recipientEmail}`)
+    logger.info(`[GiftCard] Sending gift card ${giftCardId} to ${recipientEmail}`)
 
     // Generate gift card email with code/link
     // Send via email provider
@@ -299,7 +300,7 @@ export const giftCardExpiryNotifyJob = defineJob<TenantEvent<GiftCardExpiryNotif
   name: 'giftcard/expiry-notify',
   handler: async (job) => {
     const { tenantId, daysBeforeExpiry = 30 } = job.payload
-    console.log(`[GiftCard] Notifying about cards expiring in ${daysBeforeExpiry} days`)
+    logger.info(`[GiftCard] Notifying about cards expiring in ${daysBeforeExpiry} days`)
 
     return { success: true, data: { tenantId, notified: 0 } }
   },
@@ -328,7 +329,7 @@ export const commissionMaturationCheckJob = defineJob<
   name: 'commission/maturation-check',
   handler: async (job) => {
     const { tenantId } = job.payload
-    console.log(`[Commission] Checking matured commissions for tenant ${tenantId}`)
+    logger.info(`[Commission] Checking matured commissions for tenant ${tenantId}`)
 
     // Query commissions where:
     // - Status is 'pending'
@@ -362,7 +363,7 @@ export const onboardingCheckJob = defineJob<TenantEvent<OnboardingCheckPayload>>
   name: 'onboarding/check-progress',
   handler: async (job) => {
     const { tenantId, stage } = job.payload
-    console.log(`[Onboarding] Checking progress for stage: ${stage || 'all'}`)
+    logger.info(`[Onboarding] Checking progress for stage: ${stage || 'all'}`)
 
     // Check creators at each onboarding stage
     // Send nudges for stuck creators
@@ -392,7 +393,7 @@ export const projectAutomationJob = defineJob<TenantEvent<ProjectAutomationPaylo
   name: 'project/automation',
   handler: async (job) => {
     const { tenantId, automationType } = job.payload
-    console.log(`[Project] Running automation: ${automationType}`)
+    logger.info(`[Project] Running automation: ${automationType}`)
 
     switch (automationType) {
       case 'deadline_reminder':
@@ -434,7 +435,7 @@ export const scheduledReportJob = defineJob<TenantEvent<ScheduledReportPayload>>
   handler: async (job) => {
     const { tenantId, reportType, reportId: _reportId, recipients: _recipients, format = 'email' } = job.payload
     void format // Will be used in implementation
-    console.log(`[Report] Generating ${reportType} report`)
+    logger.info(`[Report] Generating ${reportType} report`)
 
     // Generate report based on type
     // Send to recipients
@@ -470,7 +471,7 @@ export const stripeTokenRefreshJob = defineJob<TenantEvent<StripeTokenRefreshPay
   name: 'stripe/token-refresh',
   handler: async (job) => {
     const { tenantId } = job.payload
-    console.log(`[Stripe] Refreshing tokens for tenant ${tenantId}`)
+    logger.info(`[Stripe] Refreshing tokens for tenant ${tenantId}`)
 
     // Refresh OAuth tokens for Stripe Connect accounts
 
@@ -486,7 +487,7 @@ export const klaviyoSyncJob = defineJob<TenantEvent<KlaviyoSyncPayload>>({
   name: 'klaviyo/sync',
   handler: async (job) => {
     const { tenantId, syncType = 'all' } = job.payload
-    console.log(`[Klaviyo] Syncing ${syncType} for tenant ${tenantId}`)
+    logger.info(`[Klaviyo] Syncing ${syncType} for tenant ${tenantId}`)
 
     // Sync profiles, events, or list memberships
 
@@ -502,7 +503,7 @@ export const googleDriveSyncJob = defineJob<TenantEvent<GoogleDriveSyncPayload>>
   name: 'gdrive/sync',
   handler: async (job) => {
     const { tenantId, folderId: _folderId, fullSync: _fullSync } = job.payload
-    console.log(`[GDrive] Syncing for tenant ${tenantId}`)
+    logger.info(`[GDrive] Syncing for tenant ${tenantId}`)
 
     // Sync files from Google Drive to DAM
 
@@ -531,7 +532,7 @@ export const w9ReminderJob = defineJob<TenantEvent<W9ReminderPayload>>({
   name: 'compliance/w9-reminder',
   handler: async (job) => {
     const { tenantId } = job.payload
-    console.log(`[Compliance] Sending W9 reminders for tenant ${tenantId}`)
+    logger.info(`[Compliance] Sending W9 reminders for tenant ${tenantId}`)
 
     // Find creators missing W9
     // Send reminder emails
@@ -565,7 +566,7 @@ export const agentMemoryDecayJob = defineJob<TenantEvent<AgentMemoryDecayPayload
   name: 'agent/memory-decay',
   handler: async (job) => {
     const { tenantId, decayThresholdDays = 30 } = job.payload
-    console.log(`[Agent] Decaying memories older than ${decayThresholdDays} days`)
+    logger.info(`[Agent] Decaying memories older than ${decayThresholdDays} days`)
 
     // Implementation would:
     // 1. Query memories older than threshold
@@ -585,7 +586,7 @@ export const agentContextPruneJob = defineJob<TenantEvent<AgentContextPrunePaylo
   name: 'agent/context-prune',
   handler: async (job) => {
     const { tenantId, maxContextSize = 100000 } = job.payload
-    console.log(`[Agent] Pruning context to max ${maxContextSize} tokens`)
+    logger.info(`[Agent] Pruning context to max ${maxContextSize} tokens`)
 
     return { success: true, data: { tenantId, pruned: 0 } }
   },
@@ -624,7 +625,7 @@ export const brandContextRefreshJob = defineJob<TenantEvent<BrandContextRefreshP
   name: 'brand/refresh-embeddings',
   handler: async (job) => {
     const { tenantId, documentId: _documentId, chunkLimit = 50 } = job.payload
-    console.log(`[Brand] Refreshing embeddings (limit: ${chunkLimit})`)
+    logger.info(`[Brand] Refreshing embeddings (limit: ${chunkLimit})`)
 
     return { success: true, data: { tenantId, refreshed: 0 } }
   },
@@ -638,7 +639,7 @@ export const brandContextCleanupJob = defineJob<TenantEvent<BrandContextCleanupP
   name: 'brand/cleanup-cache',
   handler: async (job) => {
     const { tenantId, maxAgeHours = 24 } = job.payload
-    console.log(`[Brand] Cleaning up cache older than ${maxAgeHours}h`)
+    logger.info(`[Brand] Cleaning up cache older than ${maxAgeHours}h`)
 
     return { success: true, data: { tenantId, cleaned: 0 } }
   },
@@ -652,7 +653,7 @@ export const brandStalenessCheckJob = defineJob<TenantEvent<BrandStalenessCheckP
   name: 'brand/staleness-check',
   handler: async (job) => {
     const { tenantId, stalenessThresholdDays = 90 } = job.payload
-    console.log(`[Brand] Checking for content stale after ${stalenessThresholdDays} days`)
+    logger.info(`[Brand] Checking for content stale after ${stalenessThresholdDays} days`)
 
     return { success: true, data: { tenantId, staleCount: 0 } }
   },
@@ -666,7 +667,7 @@ export const brandUrlSyncJob = defineJob<TenantEvent<BrandUrlSyncPayload>>({
   name: 'brand/url-sync',
   handler: async (job) => {
     const { tenantId, urlId: _urlId } = job.payload
-    console.log(`[Brand] Syncing URL content for tenant ${tenantId}`)
+    logger.info(`[Brand] Syncing URL content for tenant ${tenantId}`)
 
     return { success: true, data: { tenantId, synced: 0 } }
   },

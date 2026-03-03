@@ -58,7 +58,10 @@ export async function switchTenantContext(
     throw new TenantAccessError('User not found')
   }
 
-  const user = userResult.rows[0] as { email: string; role: UserRole }
+  const user = userResult.rows[0]
+  if (!user) {
+    throw new TenantAccessError('User not found')
+  }
   const userEmail = user.email
 
   // Validate user has access to target tenant
@@ -98,7 +101,10 @@ export async function switchTenantContext(
     throw new TenantAccessError('User does not have access to this tenant')
   }
 
-  const row = membershipResult.rows[0] as Record<string, unknown>
+  const row = membershipResult.rows[0]
+  if (!row) {
+    throw new TenantAccessError('Membership not found')
+  }
 
   // Check tenant is active
   if (row.status !== 'active') {
@@ -127,16 +133,16 @@ export async function switchTenantContext(
   }
 
   const orgs: OrgContext[] = orgsResult.rows.map((r) => ({
-    id: (r as Record<string, unknown>).id as string,
-    slug: (r as Record<string, unknown>).slug as string,
+    id: r.id as unknown as string,
+    slug: r.slug as unknown as string,
     role:
-      user.role === 'super_admin'
+      (user.role as unknown as UserRole) === 'super_admin'
         ? 'super_admin'
-        : ((r as Record<string, unknown>).role as UserRole),
+        : (r.role as unknown as UserRole),
   }))
 
-  const tenantId = row.id as string
-  const tenantRole = user.role === 'super_admin' ? 'super_admin' : (row.role as UserRole)
+  const tenantId = row.id as unknown as string
+  const tenantRole = (user.role as unknown as UserRole) === 'super_admin' ? 'super_admin' : (row.role as unknown as UserRole)
 
   // Update session organization
   await updateSessionOrganization(sessionId, tenantId)
@@ -180,11 +186,11 @@ export async function switchTenantContext(
 
   const tenant: TenantContext = {
     id: tenantId,
-    slug: row.slug as string,
-    name: row.name as string,
-    logoUrl: (row.logo_url as string) || null,
+    slug: row.slug as unknown as string,
+    name: row.name as unknown as string,
+    logoUrl: (row.logo_url as unknown as string) || null,
     role: tenantRole,
-    isDefault: user.role === 'super_admin' ? false : Boolean(row.is_default),
+    isDefault: (user.role as unknown as UserRole) === 'super_admin' ? false : Boolean(row.is_default),
     lastActiveAt: null,
   }
 
@@ -203,14 +209,13 @@ export async function getUserTenants(userId: string): Promise<TenantContext[]> {
     SELECT role FROM public.users WHERE id = ${userId}
   `
 
-  if (userResult.rows.length === 0) {
+  const user = userResult.rows[0]
+  if (!user) {
     return []
   }
 
-  const user = userResult.rows[0] as { role: UserRole }
-
   // Super admins get ALL organizations
-  if (user.role === 'super_admin') {
+  if ((user.role as unknown as UserRole) === 'super_admin') {
     const orgsResult = await sql`
       SELECT
         o.id,
@@ -223,12 +228,11 @@ export async function getUserTenants(userId: string): Promise<TenantContext[]> {
     `
 
     return orgsResult.rows.map((row) => {
-      const r = row as Record<string, unknown>
       return {
-        id: r.id as string,
-        slug: r.slug as string,
-        name: r.name as string,
-        logoUrl: (r.logo_url as string) || null,
+        id: row.id as unknown as string,
+        slug: row.slug as unknown as string,
+        name: row.name as unknown as string,
+        logoUrl: (row.logo_url as unknown as string) || null,
         role: 'super_admin' as UserRole,
         isDefault: false,
         lastActiveAt: null,
@@ -257,15 +261,14 @@ export async function getUserTenants(userId: string): Promise<TenantContext[]> {
   `
 
   return result.rows.map((row) => {
-    const r = row as Record<string, unknown>
     return {
-      id: r.id as string,
-      slug: r.slug as string,
-      name: r.name as string,
-      logoUrl: (r.logo_url as string) || null,
-      role: r.role as UserRole,
-      isDefault: Boolean(r.is_default),
-      lastActiveAt: r.last_active_at ? new Date(r.last_active_at as string) : null,
+      id: row.id as unknown as string,
+      slug: row.slug as unknown as string,
+      name: row.name as unknown as string,
+      logoUrl: (row.logo_url as unknown as string) || null,
+      role: row.role as unknown as UserRole,
+      isDefault: Boolean(row.is_default),
+      lastActiveAt: row.last_active_at ? new Date(row.last_active_at as unknown as string) : null,
     }
   })
 }
@@ -326,19 +329,19 @@ export async function getDefaultTenant(userId: string): Promise<TenantContext | 
     LIMIT 1
   `
 
-  if (result.rows.length === 0) {
+  const row = result.rows[0]
+  if (!row) {
     return null
   }
 
-  const r = result.rows[0] as Record<string, unknown>
   return {
-    id: r.id as string,
-    slug: r.slug as string,
-    name: r.name as string,
-    logoUrl: (r.logo_url as string) || null,
-    role: r.role as UserRole,
+    id: row.id as unknown as string,
+    slug: row.slug as unknown as string,
+    name: row.name as unknown as string,
+    logoUrl: (row.logo_url as unknown as string) || null,
+    role: row.role as unknown as UserRole,
     isDefault: true,
-    lastActiveAt: r.last_active_at ? new Date(r.last_active_at as string) : null,
+    lastActiveAt: row.last_active_at ? new Date(row.last_active_at as unknown as string) : null,
   }
 }
 
@@ -374,7 +377,11 @@ export async function shouldShowWelcomeModal(userId: string): Promise<boolean> {
       AND o.status = 'active'
   `
 
-  const row = result.rows[0] as Record<string, unknown>
+  const row = result.rows[0]
+  if (!row) {
+    return false
+  }
+
   const tenantCount = Number(row.tenant_count || 0)
   const defaultCount = Number(row.default_count || 0)
 
@@ -397,12 +404,12 @@ export async function getLastTenantForSuperAdmin(sessionId: string): Promise<str
     LIMIT 1
   `
 
-  if (result.rows.length === 0) {
+  const row = result.rows[0]
+  if (!row) {
     return null
   }
 
-  const row = result.rows[0] as { last_tenant_slug: string | null }
-  return row.last_tenant_slug
+  return row.last_tenant_slug as unknown as string
 }
 
 /**

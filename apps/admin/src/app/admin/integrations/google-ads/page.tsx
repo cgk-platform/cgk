@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from 'react'
 
 import { ConnectionStatusBadge, OAuthConnectButton, TestConnectionResult } from '@/components/integrations'
+import { logger } from '@cgk-platform/logging'
 
 interface GoogleAdsStatus {
   connected: boolean
@@ -97,7 +98,7 @@ export default function GoogleAdsPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch Google Ads status:', error)
+      logger.error('Failed to fetch Google Ads status:', error)
     } finally {
       setLoading(false)
     }
@@ -124,7 +125,7 @@ export default function GoogleAdsPage() {
         setStatus({ connected: false, mode: 'none' })
       }
     } catch (error) {
-      console.error('Failed to disconnect:', error)
+      logger.error('Failed to disconnect:', error)
     }
   }
 
@@ -141,7 +142,7 @@ export default function GoogleAdsPage() {
         await fetchStatus()
       }
     } catch (error) {
-      console.error('Failed to save config:', error)
+      logger.error('Failed to save config:', error)
     } finally {
       setSaving(false)
     }

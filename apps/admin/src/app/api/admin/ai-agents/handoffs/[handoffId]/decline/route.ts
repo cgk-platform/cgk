@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ handoffId: string }>
@@ -63,7 +64,7 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ handoff })
   } catch (error) {
-    console.error('Error declining handoff:', error)
+    logger.error('Error declining handoff:', error)
     const message = error instanceof Error ? error.message : 'Failed to decline handoff'
     return NextResponse.json({ error: message }, { status: 500 })
   }

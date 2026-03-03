@@ -11,6 +11,7 @@ import {
 } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_ROLES: UserRole[] = ['owner', 'admin', 'member']
 
@@ -50,7 +51,7 @@ export async function GET(
 
     return NextResponse.json({ member })
   } catch (error) {
-    console.error('Error fetching team member:', error)
+    logger.error('Error fetching team member:', error)
     return NextResponse.json(
       { error: 'Failed to fetch team member' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function PATCH(
 
     return NextResponse.json({ success: true, role: body.role })
   } catch (error) {
-    console.error('Error updating member role:', error)
+    logger.error('Error updating member role:', error)
     const message = error instanceof Error ? error.message : 'Failed to update role'
     return NextResponse.json({ error: message }, { status: 500 })
   }
@@ -170,7 +171,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error removing team member:', error)
+    logger.error('Error removing team member:', error)
     const message = error instanceof Error ? error.message : 'Failed to remove member'
     return NextResponse.json({ error: message }, { status: 500 })
   }

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Creator Program',
@@ -21,7 +22,7 @@ export default function PublicLayout({
       {/* Minimal header */}
       <header className="border-b bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto flex h-14 items-center px-4">
-          <a href="/" className="flex items-center gap-2 font-semibold">
+          <Link href="/" className="flex items-center gap-2 font-semibold">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +40,7 @@ export default function PublicLayout({
               </svg>
             </div>
             <span>Creator Program</span>
-          </a>
+          </Link>
         </div>
       </header>
 

@@ -29,6 +29,7 @@ import type {
   VoiceCall,
   VoiceCallProvider,
 } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 const RETELL_API_BASE = 'https://api.retellai.com'
 
@@ -410,7 +411,7 @@ export function verifyRetellSignature(body: string, signature: string | null): b
   const webhookSecret = process.env.RETELL_WEBHOOK_SECRET
 
   if (!webhookSecret) {
-    console.error('RETELL_WEBHOOK_SECRET not configured - rejecting webhook')
+    logger.error('RETELL_WEBHOOK_SECRET not configured - rejecting webhook')
     return false // Reject if secret not configured
   }
 

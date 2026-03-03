@@ -7,6 +7,7 @@
 import { sql } from '@cgk-platform/db'
 
 import { loadBrandMemberships, requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -171,7 +172,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('Error fetching tax summary:', error)
+    logger.error('Error fetching tax summary:', error)
     return Response.json({ error: 'Failed to fetch tax summary' }, { status: 500 })
   }
 }

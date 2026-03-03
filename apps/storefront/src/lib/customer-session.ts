@@ -8,6 +8,7 @@
 import { cookies } from 'next/headers'
 import { sql, withTenant } from '@cgk-platform/db'
 import { getTenantConfig } from './tenant'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Cookie name for customer session
@@ -96,7 +97,7 @@ export async function getCustomerSession(): Promise<CustomerSession | null> {
     }
   } catch (error) {
     // Table might not exist yet, return null gracefully
-    console.error('Failed to get customer session:', error)
+    logger.error('Failed to get customer session:', error)
     return null
   }
 }

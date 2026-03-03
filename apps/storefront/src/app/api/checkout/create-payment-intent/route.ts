@@ -13,6 +13,7 @@ import { getTenantStripeClient, getTenantStripeConfig } from '@cgk-platform/inte
 import { withTenant, sql } from '@cgk-platform/db'
 
 import { getTenantSlug, getTenantConfig } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -198,7 +199,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       currency: cartData.currency,
     })
   } catch (error) {
-    console.error('[create-payment-intent] Error:', error)
+    logger.error('[create-payment-intent] Error:', error)
 
     // Handle Stripe-specific errors
     if (error && typeof error === 'object' && 'type' in error) {

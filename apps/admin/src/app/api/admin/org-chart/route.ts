@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/org-chart
@@ -43,7 +44,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ chart, stats })
   } catch (error) {
-    console.error('Error fetching org chart:', error)
+    logger.error('Error fetching org chart:', error)
     return NextResponse.json({ error: 'Failed to fetch org chart' }, { status: 500 })
   }
 }

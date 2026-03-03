@@ -8,6 +8,7 @@ import { sql } from '@cgk-platform/db'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import type { BrandMembership } from '@/lib/types'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -100,7 +101,7 @@ export async function GET(req: Request): Promise<Response> {
       stats,
     })
   } catch (error) {
-    console.error('Error fetching creator brands:', error)
+    logger.error('Error fetching creator brands:', error)
     return Response.json({ error: 'Failed to fetch brands' }, { status: 500 })
   }
 }

@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { CustomerAddress, UpdateAddressRequest } from '@/lib/account/api'
+import { logger } from '@cgk-platform/logging'
 
 interface AddressRow {
   id: string
@@ -130,7 +131,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(mapRowToAddress(address))
   } catch (error) {
-    console.error('Failed to update address:', error)
+    logger.error('Failed to update address:', error)
     return NextResponse.json({ error: 'Failed to update address' }, { status: 500 })
   }
 }
@@ -198,7 +199,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error('Failed to delete address:', error)
+    logger.error('Failed to delete address:', error)
     return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 })
   }
 }

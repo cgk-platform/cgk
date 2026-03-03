@@ -6,6 +6,7 @@ import {
   validateSessionById,
   verifyJWT,
 } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
       )
     }
 
-    console.error('Switch tenant error:', error)
+    logger.error('Switch tenant error:', error)
     return Response.json(
       { error: 'Failed to switch tenant' },
       { status: 500 }

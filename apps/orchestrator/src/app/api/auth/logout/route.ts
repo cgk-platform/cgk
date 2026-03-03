@@ -4,6 +4,7 @@ import {
   revokeSession,
   verifyJWT,
 } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
 
     return clearAuthCookie(response)
   } catch (error) {
-    console.error('Logout error:', error)
+    logger.error('Logout error:', error)
 
     // Still clear the cookie even if there's an error
     const response = Response.json({

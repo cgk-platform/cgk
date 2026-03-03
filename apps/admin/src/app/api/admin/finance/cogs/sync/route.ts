@@ -9,6 +9,7 @@ import {
   updateCOGSLastSync,
   logPLConfigChange,
 } from '@/lib/finance'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/finance/cogs/sync
@@ -84,7 +85,7 @@ export async function POST() {
       lastSyncAt: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('[finance/cogs/sync] Error triggering sync:', error)
+    logger.error('[finance/cogs/sync] Error triggering sync:', error)
 
     // Still update timestamp and log even if job trigger fails
     // This handles cases where Trigger.dev is not configured

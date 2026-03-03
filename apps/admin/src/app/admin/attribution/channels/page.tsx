@@ -5,6 +5,7 @@ import { Button, Card, CardContent, cn } from '@cgk-platform/ui'
 
 import { useAttribution, ModelSelector, TimeRangePicker } from '@/components/attribution'
 import type { ChannelHierarchy, ChannelTrendPoint, CustomerType, QuickFilter } from '@/lib/attribution'
+import { logger } from '@cgk-platform/logging'
 
 interface ChannelRowProps {
   channel: ChannelHierarchy
@@ -221,7 +222,7 @@ export default function ChannelsPage() {
         setTrends(data.trends)
       }
     } catch (error) {
-      console.error('Failed to fetch channels:', error)
+      logger.error('Failed to fetch channels:', error)
     } finally {
       setIsLoading(false)
     }

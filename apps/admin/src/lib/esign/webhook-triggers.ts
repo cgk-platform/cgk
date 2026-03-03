@@ -16,6 +16,7 @@ import type {
   EsignWebhookPayload,
   EsignDocumentWithSigners,
 } from './types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Build webhook payload from document data
@@ -77,7 +78,7 @@ async function sendSingleWebhook(
 
     const durationMs = Date.now() - startTime
     const responseBody = await response.text().catch((parseError) => {
-      console.debug('[esign-webhook] Failed to parse response body:', parseError)
+      logger.debug('[esign-webhook] Failed to parse response body:', parseError)
       return ''
     })
 
@@ -136,7 +137,7 @@ export async function triggerWebhooks(
   // Get document data for payload
   const document = await getDocumentWithSigners(tenantSlug, documentId)
   if (!document) {
-    console.error(`Document ${documentId} not found for webhook trigger`)
+    logger.error(`Document ${documentId} not found for webhook trigger`)
     return { triggered: 0, successful: 0, failed: 0 }
   }
 

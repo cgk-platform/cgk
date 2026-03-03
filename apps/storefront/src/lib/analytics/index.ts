@@ -44,6 +44,7 @@ import * as ga4 from './ga4'
 import * as meta from './meta'
 import * as tiktok from './tiktok'
 import type { EcommerceItem, PurchaseEventData, ViewItemListData } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Re-export types
 export type { EcommerceItem, PurchaseEventData, ViewItemListData, AnalyticsProvider } from './types'
@@ -63,7 +64,7 @@ function generateEventId(): string {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    console.log(`[Analytics] ${message}`, data ?? '')
+    logger.info(`[Analytics] ${message}`, data ?? '')
   }
 }
 

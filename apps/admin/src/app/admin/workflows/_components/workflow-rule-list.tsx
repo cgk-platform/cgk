@@ -14,6 +14,7 @@ import {
 
 import { Button } from '@cgk-platform/ui'
 import { cn } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 interface WorkflowRule {
   id: string
@@ -58,7 +59,7 @@ export function WorkflowRuleList() {
       const data = await res.json()
       setRules(data.rules || [])
     } catch (error) {
-      console.error('Failed to fetch rules:', error)
+      logger.error('Failed to fetch rules:', error)
     } finally {
       setLoading(false)
     }
@@ -77,7 +78,7 @@ export function WorkflowRuleList() {
       })
       fetchRules()
     } catch (error) {
-      console.error('Failed to toggle rule:', error)
+      logger.error('Failed to toggle rule:', error)
     }
   }
 

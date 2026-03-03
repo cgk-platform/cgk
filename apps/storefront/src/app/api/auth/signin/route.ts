@@ -6,6 +6,7 @@ import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 
 import { updateCartBuyerIdentity } from '@/lib/cart/actions'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/signin
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
     // can pre-fill checkout and apply customer-specific pricing.
     // This is fire-and-forget: a failure here must not break login.
     updateCartBuyerIdentity(customer.email as string).catch((err) => {
-      console.warn('signin: updateCartBuyerIdentity failed', err)
+      logger.warn('signin: updateCartBuyerIdentity failed', err)
     })
 
     return Response.json(
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
       }
     )
   } catch (error) {
-    console.error('Signin error:', error)
+    logger.error('Signin error:', error)
     return Response.json({ error: 'Sign in failed' }, { status: 500 })
   }
 }

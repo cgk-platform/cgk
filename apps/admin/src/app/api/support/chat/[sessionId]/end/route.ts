@@ -11,6 +11,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { getTenantContext } from '@cgk-platform/auth'
 import { endChatSession, getChatSession } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -66,7 +67,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[support/chat/end] POST error:', error)
+    logger.error('[support/chat/end] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to end session' },
       { status: 500 }

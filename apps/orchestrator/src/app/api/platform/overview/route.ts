@@ -1,6 +1,7 @@
 import { createGlobalCache, sql, withTenant } from '@cgk-platform/db'
 
 import type { PlatformKPIs } from '../../../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -52,7 +53,7 @@ export async function GET(request: Request): Promise<Response> {
       cached: false,
     })
   } catch (error) {
-    console.error('Failed to fetch platform KPIs:', error)
+    logger.error('Failed to fetch platform KPIs:', error)
     return Response.json({ error: 'Failed to fetch platform KPIs' }, { status: 500 })
   }
 }

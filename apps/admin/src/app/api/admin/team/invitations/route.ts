@@ -12,6 +12,7 @@ import {
 import { sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 const MAX_INVITATIONS_PER_DAY = 50
 const VALID_ROLES: UserRole[] = ['owner', 'admin', 'member']
@@ -64,7 +65,7 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    console.error('Error fetching invitations:', error)
+    logger.error('Error fetching invitations:', error)
     return NextResponse.json(
       { error: 'Failed to fetch invitations' },
       { status: 500 }
@@ -160,7 +161,7 @@ export async function POST(request: Request) {
       message: `Invitation sent to ${body.email}`,
     })
   } catch (error) {
-    console.error('Error creating invitation:', error)
+    logger.error('Error creating invitation:', error)
     const message = error instanceof Error ? error.message : 'Failed to create invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -180,9 +181,9 @@ async function sendTeamInvitationEmail(
 
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) {
-    console.log(`[DEV] Team invitation for ${email}:`)
-    console.log(`[DEV] ${inviteUrl}`)
-    console.log(`[DEV] Token: ${token}`)
+    logger.info(`[DEV] Team invitation for ${email}:`)
+    logger.info(`[DEV] ${inviteUrl}`)
+    logger.info(`[DEV] Token: ${token}`)
     return
   }
 
@@ -226,7 +227,7 @@ async function sendTeamInvitationEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    console.error('Failed to send invitation email:', error)
+    logger.error('Failed to send invitation email:', error)
     throw new Error('Failed to send invitation email')
   }
 }

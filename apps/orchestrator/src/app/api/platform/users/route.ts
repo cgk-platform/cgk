@@ -1,5 +1,6 @@
 import { getAllUsers, logAuditAction } from '@cgk-platform/auth'
 import type { UserQueryOptions, PlatformUserStatus } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -92,12 +93,12 @@ export async function GET(request: Request) {
         resultCount: result.total,
       },
     }).catch((error) => {
-      console.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error)
     })
 
     return Response.json(result)
   } catch (error) {
-    console.error('List users error:', error)
+    logger.error('List users error:', error)
     return Response.json({ error: 'Failed to list users' }, { status: 500 })
   }
 }

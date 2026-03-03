@@ -16,6 +16,7 @@ import {
   processDataExport,
   updateRequestStatus,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -124,7 +125,7 @@ export async function POST(
       resultUrl,
     })
   } catch (error) {
-    console.error('[privacy/process] POST error:', error)
+    logger.error('[privacy/process] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to process request' },
       { status: 500 }

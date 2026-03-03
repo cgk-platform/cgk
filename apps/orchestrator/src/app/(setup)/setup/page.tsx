@@ -12,6 +12,7 @@ import { DatabaseStep } from './components/database-step'
 import { MigrationsStep } from './components/migrations-step'
 import { StepIndicator } from './components/step-indicator'
 import { StorageStep } from './components/storage-step'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Step definitions for the setup wizard
@@ -60,7 +61,7 @@ export default function SetupPage() {
         setCurrentStep(firstIncomplete)
       }
     } catch (error) {
-      console.error('Failed to check setup status:', error)
+      logger.error('Failed to check setup status:', error)
       // Continue with setup from beginning
     } finally {
       setLoading(false)

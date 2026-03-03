@@ -16,6 +16,7 @@ import type {
   RAGContextOptions,
   RAGContextResult,
 } from '../memory/types.js'
+import { logger } from '@cgk-platform/logging'
 
 // Helper to convert snake_case DB rows to camelCase
 function toCamelCase<T extends Record<string, unknown>>(row: T): Record<string, unknown> {
@@ -205,7 +206,7 @@ export async function buildMemoryContext(options: RAGContextOptions): Promise<RA
   // Record memory access for all used memories (async, don't wait)
   recordMemoryAccessBatch(memoriesUsed).catch((error) => {
     // Non-critical: memory access tracking is for analytics only
-    console.debug('[rag] Failed to record memory access:', error)
+    logger.debug('[rag] Failed to record memory access:', error)
   })
 
   // Combine sections

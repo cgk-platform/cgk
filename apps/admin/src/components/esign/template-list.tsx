@@ -7,6 +7,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import {
   Badge,
@@ -179,10 +180,12 @@ export function TemplateList({
                   {/* Thumbnail */}
                   <div className="relative aspect-[4/3] bg-slate-100 dark:bg-slate-800">
                     {template.thumbnailUrl ? (
-                      <img
+                      <Image
                         src={template.thumbnailUrl}
                         alt={template.name}
-                        className="h-full w-full object-cover"
+                        fill
+                        className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center">

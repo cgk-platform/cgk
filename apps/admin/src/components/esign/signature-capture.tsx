@@ -8,6 +8,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { Button, Card, CardContent, cn, Input, Tabs, TabsContent, TabsList, TabsTrigger } from '@cgk-platform/ui'
 import { Check, Eraser, Pencil, Type, Upload, X, RotateCcw } from 'lucide-react'
 
@@ -358,11 +359,16 @@ export function SignatureCapture({
                       'bg-[#fefcf3] border border-slate-200'
                     )}
                   >
-                    <img
-                      src={uploadedImage}
-                      alt="Uploaded signature"
-                      className="max-h-32 object-contain"
-                    />
+                    <div className="relative w-full max-h-32">
+                      <Image
+                        src={uploadedImage}
+                        alt="Uploaded signature"
+                        width={400}
+                        height={128}
+                        className="max-h-32 w-auto mx-auto object-contain"
+                        unoptimized
+                      />
+                    </div>
                   </div>
                   <Button
                     type="button"

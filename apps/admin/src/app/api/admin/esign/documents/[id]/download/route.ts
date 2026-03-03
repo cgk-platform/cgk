@@ -7,6 +7,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getDocumentWithSigners, addAuditLogEntry } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,7 +70,7 @@ export async function GET(request: Request, { params }: RouteParams) {
       documentStatus: document.status,
     })
   } catch (error) {
-    console.error('Error getting download URL:', error)
+    logger.error('Error getting download URL:', error)
     return NextResponse.json(
       { error: 'Failed to get download URL' },
       { status: 500 }

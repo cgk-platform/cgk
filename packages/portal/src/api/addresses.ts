@@ -6,6 +6,7 @@
 
 import { customerQuery, customerMutation } from './client'
 import type { CustomerAddress, AddressInput, UserError } from '../types'
+import { logger } from '@cgk-platform/logging'
 
 interface AddressesResponse {
   customer: {
@@ -132,7 +133,7 @@ export async function getAddresses(
   })
 
   if (result.errors?.length || !result.data?.customer) {
-    console.error('Failed to get addresses:', result.errors)
+    logger.error('Failed to get addresses:', result.errors)
     return []
   }
 

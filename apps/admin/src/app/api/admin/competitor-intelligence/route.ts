@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { withTenant, sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/competitor-intelligence/ingest
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[ci-ingest] Error:', error)
+    logger.error('[ci-ingest] Error:', error)
     return NextResponse.json({ error: 'Ingest failed' }, { status: 500 })
   }
 }
@@ -218,7 +219,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 })
   } catch (error) {
-    console.error(`[ci-${action}] Error:`, error)
+    logger.error(`[ci-${action}] Error:`, error)
     return NextResponse.json({ error: `Failed to process ${action}` }, { status: 500 })
   }
 }

@@ -8,6 +8,7 @@
  */
 
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -94,12 +95,12 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     // Log error but return success to not break checkout
     const errorData = await platformResponse.text()
-    console.error('[Survey Submit] Platform API error:', errorData)
+    logger.error('[Survey Submit] Platform API error:', errorData)
 
     // Still return success to not disrupt checkout experience
     return NextResponse.json({ success: true, warning: 'Response may not have been saved' }, { headers })
   } catch (error) {
-    console.error('[Survey Submit] Error:', error)
+    logger.error('[Survey Submit] Error:', error)
 
     // Return success anyway to not break checkout
     return NextResponse.json(

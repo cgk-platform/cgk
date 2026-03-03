@@ -7,6 +7,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { voidDocument } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,7 +39,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error voiding document:', error)
+    logger.error('Error voiding document:', error)
     return NextResponse.json(
       { error: 'Failed to void document' },
       { status: 500 }

@@ -11,6 +11,7 @@ import { cn } from '@cgk-platform/ui'
 import { ActionList } from './action-list'
 import { ConditionBuilder } from './condition-builder'
 import { TriggerConfigForm } from './trigger-config-form'
+import { logger } from '@cgk-platform/logging'
 
 type TriggerType = 'status_change' | 'time_elapsed' | 'scheduled' | 'event' | 'manual'
 
@@ -111,7 +112,7 @@ export function WorkflowRuleEditor({ initialRule, isNew = false }: WorkflowRuleE
       const data = await res.json()
       router.push(`/admin/workflows/${data.rule.id}`)
     } catch (error) {
-      console.error('Failed to save:', error)
+      logger.error('Failed to save:', error)
       alert('Failed to save rule')
     } finally {
       setSaving(false)

@@ -14,6 +14,7 @@ import {
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
 import { NextResponse, type NextRequest } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -108,7 +109,7 @@ export async function GET(request: NextRequest) {
 
     return response
   } catch (error) {
-    console.error('SSO verification failed:', error)
+    logger.error('SSO verification failed:', error)
 
     // Redirect to login with error
     const loginUrl = new URL('/login', request.url)

@@ -10,6 +10,7 @@ import {
   verifyMagicLink,
 } from '@cgk-platform/auth'
 import type { UserRole } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/verify
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
 
     return setAuthCookie(response, jwt)
   } catch (error) {
-    console.error('Verify error:', error)
+    logger.error('Verify error:', error)
     const message = error instanceof Error ? error.message : 'Verification failed'
     return Response.json({ error: message }, { status: 401 })
   }

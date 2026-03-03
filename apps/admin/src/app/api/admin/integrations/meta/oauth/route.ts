@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { startMetaOAuth } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
 
     return Response.json({ authUrl, state })
   } catch (error) {
-    console.error('Failed to start Meta OAuth:', error)
+    logger.error('Failed to start Meta OAuth:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'OAuth initiation failed' },
       { status: 500 }

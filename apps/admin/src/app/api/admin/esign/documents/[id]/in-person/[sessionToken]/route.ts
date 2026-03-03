@@ -14,6 +14,7 @@ import {
   markSignerSigned,
   addAuditLogEntry,
 } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,7 +76,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error('Error fetching in-person session:', error)
+    logger.error('Error fetching in-person session:', error)
     return NextResponse.json(
       { error: 'Failed to fetch session' },
       { status: 500 }
@@ -127,7 +128,7 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error completing in-person signing:', error)
+    logger.error('Error completing in-person signing:', error)
     return NextResponse.json(
       { error: 'Failed to complete signing' },
       { status: 500 }

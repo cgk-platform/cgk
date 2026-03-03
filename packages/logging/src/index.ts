@@ -8,6 +8,13 @@
 // Logger factory
 export { createLogger, type Logger, type LoggerConfig } from './logger.js'
 
+// Default logger instance for convenience
+import { createLogger } from './logger.js'
+export const logger = createLogger({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  meta: { service: 'cgk-platform' },
+})
+
 // Log levels
 export { LogLevel, type LogLevelName } from './levels.js'
 

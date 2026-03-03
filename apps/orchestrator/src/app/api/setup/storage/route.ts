@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,7 +65,7 @@ export async function POST() {
       { status: 400 }
     )
   } catch (error) {
-    console.error('Storage connection test failed:', error)
+    logger.error('Storage connection test failed:', error)
     return NextResponse.json(
       {
         success: false,

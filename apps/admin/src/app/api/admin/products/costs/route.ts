@@ -5,6 +5,7 @@ import { requireAuth, type AuthContext } from '@cgk-platform/auth'
 import { withTenant, sql } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/products/costs
@@ -46,7 +47,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ products })
   } catch (error) {
-    console.error('Error fetching product costs:', error)
+    logger.error('Error fetching product costs:', error)
     return NextResponse.json({ error: 'Failed to fetch product costs' }, { status: 500 })
   }
 }
@@ -97,7 +98,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error updating product cost:', error)
+    logger.error('Error updating product cost:', error)
     return NextResponse.json({ error: 'Failed to update product cost' }, { status: 500 })
   }
 }

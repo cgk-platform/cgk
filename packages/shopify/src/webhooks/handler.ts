@@ -19,6 +19,8 @@ import {
   generateIdempotencyKey,
   headersToObject,
 } from './utils'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Handle an incoming Shopify webhook request
@@ -48,14 +50,14 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
 
   // Validate required headers
   if (!shop || !topic || !hmac) {
-    console.warn('[Webhook] Missing required headers', { shop, topic, hasHmac: !!hmac })
+    logger.warn('[Webhook] Missing required headers', { shop, topic, hasHmac: !!hmac })
     return new Response('Missing required headers', { status: 400 })
   }
 
   // Get tenant for this shop
   const tenantId = await getTenantForShop(shop)
   if (!tenantId) {
-    console.warn(`[Webhook] Unknown shop: ${shop}, topic: ${topic}`)
+    logger.warn(`[Webhook] Unknown shop: ${shop}, topic: ${topic}`)
     // Return 200 to prevent Shopify from retrying for unknown shops
     return new Response('Shop not registered', { status: 200 })
   }
@@ -69,7 +71,7 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
   })
 
   if (!credentials || !credentials.webhookSecret) {
-    console.error(`[Webhook] No webhook secret for shop ${shop}, tenant ${tenantId}`)
+    logger.error(`[Webhook] No webhook secret for shop ${shop}, tenant ${tenantId}`)
     // Return 500 for configuration errors
     return new Response('Configuration error', { status: 500 })
   }
@@ -77,7 +79,7 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
   // Verify HMAC signature
   const isValid = verifyShopifyWebhook(body, hmac, credentials.webhookSecret)
   if (!isValid) {
-    console.error(`[Webhook] Invalid HMAC signature for ${shop}, topic: ${topic}`)
+    logger.error(`[Webhook] Invalid HMAC signature for ${shop}, topic: ${topic}`)
     // Return 401 - Shopify will retry with valid signature
     return new Response('Invalid signature', { status: 401 })
   }
@@ -87,7 +89,7 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
   try {
     payload = JSON.parse(body)
   } catch {
-    console.error(`[Webhook] Invalid JSON for ${shop}, topic: ${topic}`)
+    logger.error(`[Webhook] Invalid JSON for ${shop}, topic: ${topic}`)
     return new Response('Invalid JSON', { status: 400 })
   }
 
@@ -101,7 +103,7 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
   })
 
   if (isDuplicate) {
-    console.log(`[Webhook] Duplicate ignored: ${idempotencyKey} for ${shop}`)
+    logger.info(`[Webhook] Duplicate ignored: ${idempotencyKey} for ${shop}`)
     return new Response('Already processed', { status: 200 })
   }
 
@@ -130,7 +132,7 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
     })
 
     const duration = Date.now() - startTime
-    console.log(`[Webhook] ${topic} processed in ${duration}ms for ${shop}`)
+    logger.info(`[Webhook] ${topic} processed in ${duration}ms for ${shop}`)
 
     return new Response('OK', { status: 200 })
   } catch (error) {
@@ -141,8 +143,8 @@ export async function handleShopifyWebhook(request: Request): Promise<Response> 
       await updateWebhookStatus(eventId, 'failed', errorMessage)
     })
 
-    console.error(`[Webhook] ${topic} failed for ${shop}:`, error)
-    console.log(`[Webhook] Event ${eventId} marked as failed — scheduled retry job will pick it up`)
+    logger.error(`[Webhook] ${topic} failed for ${shop}:`, error instanceof Error ? error : undefined)
+    logger.info(`[Webhook] Event ${eventId} marked as failed — scheduled retry job will pick it up`)
 
     // Return 200 anyway to prevent infinite retries from Shopify
     // The webhooks/retry-failed scheduled job picks up failed events and resets them for reprocessing

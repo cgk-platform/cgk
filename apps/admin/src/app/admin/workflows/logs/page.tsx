@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { AlertCircle, Check, Clock, Filter, X } from 'lucide-react'
 
 import { cn } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 interface WorkflowExecution {
   id: string
@@ -41,7 +42,7 @@ export default function ExecutionLogsPage() {
       setExecutions(data.executions || [])
       setTotal(data.total || 0)
     } catch (error) {
-      console.error('Failed to fetch executions:', error)
+      logger.error('Failed to fetch executions:', error)
     } finally {
       setLoading(false)
     }

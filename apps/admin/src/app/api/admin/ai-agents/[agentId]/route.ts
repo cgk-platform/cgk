@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 type RouteParams = { params: Promise<{ agentId: string }> }
 
@@ -57,7 +58,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error fetching AI agent:', error)
+    logger.error('Error fetching AI agent:', error)
     return NextResponse.json({ error: 'Failed to fetch AI agent' }, { status: 500 })
   }
 }
@@ -122,7 +123,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ agent })
   } catch (error) {
-    console.error('Error updating AI agent:', error)
+    logger.error('Error updating AI agent:', error)
     return NextResponse.json({ error: 'Failed to update AI agent' }, { status: 500 })
   }
 }
@@ -167,7 +168,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error retiring AI agent:', error)
+    logger.error('Error retiring AI agent:', error)
     return NextResponse.json({ error: 'Failed to retire AI agent' }, { status: 500 })
   }
 }

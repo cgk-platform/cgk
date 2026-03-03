@@ -6,6 +6,7 @@
 import { headers } from 'next/headers'
 
 import { deleteSavedFilter } from '@/lib/pipeline/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export async function DELETE(
 
     return Response.json({ success: true })
   } catch (error) {
-    console.error('Saved filter delete error:', error)
+    logger.error('Saved filter delete error:', error)
     return Response.json(
       { error: 'Failed to delete saved filter' },
       { status: 500 }

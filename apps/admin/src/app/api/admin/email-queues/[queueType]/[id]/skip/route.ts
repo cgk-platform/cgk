@@ -16,6 +16,7 @@ import {
   markAsSkipped,
   type QueueType,
 } from '@cgk-platform/communications'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -92,7 +93,7 @@ export async function POST(
       entry: updatedEntry,
     })
   } catch (error) {
-    console.error('[email-queues] skip error:', error)
+    logger.error('[email-queues] skip error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to skip entry' },
       { status: 500 }

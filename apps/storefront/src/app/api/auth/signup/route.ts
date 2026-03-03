@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto'
 
 import { sql, withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/signup
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
       }
     )
   } catch (error) {
-    console.error('Signup error:', error)
+    logger.error('Signup error:', error)
     return Response.json({ error: 'Registration failed' }, { status: 500 })
   }
 }

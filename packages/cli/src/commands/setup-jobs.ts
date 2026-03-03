@@ -45,16 +45,16 @@ export const setupJobsCommand = new Command('setup:jobs')
   .option('--skip-env', 'Skip environment variable setup')
   .option('--verify-only', 'Only verify existing configuration')
   .action(async (options) => {
-    console.log(chalk.cyan('\n🔄 Background Jobs Setup\n'))
+    logger.info(chalk.cyan('\n🔄 Background Jobs Setup\n'))
 
     const spinner = ora()
 
     // Step 1: Check for existing configuration
-    console.log(chalk.bold('Step 1: Checking existing configuration'))
+    logger.info(chalk.bold('Step 1: Checking existing configuration'))
 
     const existingProvider = detectExistingProvider()
     if (existingProvider) {
-      console.log(chalk.green(`  ✓ Found existing ${existingProvider} configuration`))
+      logger.info(chalk.green(`  ✓ Found existing ${existingProvider} configuration`))
 
       if (options.verifyOnly) {
         await verifyProvider(existingProvider, spinner)
@@ -75,17 +75,17 @@ export const setupJobsCommand = new Command('setup:jobs')
         return
       }
     } else {
-      console.log(chalk.yellow('  No existing job provider detected'))
+      logger.info(chalk.yellow('  No existing job provider detected'))
     }
 
     // Step 2: Select provider
-    console.log(chalk.bold('\nStep 2: Select a provider'))
+    logger.info(chalk.bold('\nStep 2: Select a provider'))
 
     let provider: 'trigger.dev' | 'inngest' | 'local'
 
     if (options.provider) {
       provider = options.provider as typeof provider
-      console.log(chalk.dim(`  Using specified provider: ${provider}`))
+      logger.info(chalk.dim(`  Using specified provider: ${provider}`))
     } else {
       const { selectedProvider } = await inquirer.prompt([
         {
@@ -103,7 +103,7 @@ export const setupJobsCommand = new Command('setup:jobs')
     }
 
     // Step 3: Configure provider
-    console.log(chalk.bold(`\nStep 3: Configure ${provider}`))
+    logger.info(chalk.bold(`\nStep 3: Configure ${provider}`))
 
     switch (provider) {
       case 'trigger.dev':
@@ -118,21 +118,21 @@ export const setupJobsCommand = new Command('setup:jobs')
     }
 
     // Step 4: Verify
-    console.log(chalk.bold('\nStep 4: Verifying setup'))
+    logger.info(chalk.bold('\nStep 4: Verifying setup'))
     await verifyProvider(provider, spinner)
 
-    console.log(chalk.green('\n✅ Background jobs setup complete!\n'))
-    console.log('Next steps:')
-    console.log(chalk.cyan('  1. Start development: pnpm dev'))
+    logger.info(chalk.green('\n✅ Background jobs setup complete!\n'))
+    logger.info('Next steps:')
+    logger.info(chalk.cyan('  1. Start development: pnpm dev'))
 
     if (provider === 'trigger.dev') {
-      console.log(chalk.cyan('  2. Run Trigger.dev dev server: npx trigger dev'))
+      logger.info(chalk.cyan('  2. Run Trigger.dev dev server: npx trigger dev'))
     } else if (provider === 'inngest') {
-      console.log(chalk.cyan('  2. Run Inngest dev server: npx inngest-cli dev'))
+      logger.info(chalk.cyan('  2. Run Inngest dev server: npx inngest-cli dev'))
     }
 
-    console.log(chalk.cyan('  3. Send a test job to verify everything works'))
-    console.log('')
+    logger.info(chalk.cyan('  3. Send a test job to verify everything works'))
+    logger.info('')
   })
 
 /**
@@ -155,29 +155,29 @@ async function configureTriggerDev(
   spinner: ReturnType<typeof ora>,
   skipEnv?: boolean
 ): Promise<void> {
-  console.log('')
-  console.log(chalk.dim('  Trigger.dev is the recommended provider based on'))
-  console.log(chalk.dim('  institutional knowledge from RAWDOG (199+ tasks).'))
-  console.log('')
+  logger.info('')
+  logger.info(chalk.dim('  Trigger.dev is the recommended provider based on'))
+  logger.info(chalk.dim('  institutional knowledge from RAWDOG (199+ tasks).'))
+  logger.info('')
 
   // Check for existing API key
   const existingKey =
     process.env.TRIGGER_SECRET_KEY || process.env.TRIGGER_DEV_SECRET_KEY
 
   if (existingKey && !skipEnv) {
-    console.log(chalk.green('  ✓ TRIGGER_SECRET_KEY is already set'))
+    logger.info(chalk.green('  ✓ TRIGGER_SECRET_KEY is already set'))
     return
   }
 
-  console.log(chalk.cyan('  To set up Trigger.dev:\n'))
-  console.log('  1. Go to https://trigger.dev and create an account')
-  console.log('  2. Create a new project (or use existing)')
-  console.log('  3. Go to Project Settings → API Keys')
-  console.log('  4. Copy your secret key (starts with "tr_")')
-  console.log('')
+  logger.info(chalk.cyan('  To set up Trigger.dev:\n'))
+  logger.info('  1. Go to https://trigger.dev and create an account')
+  logger.info('  2. Create a new project (or use existing)')
+  logger.info('  3. Go to Project Settings → API Keys')
+  logger.info('  4. Copy your secret key (starts with "tr_")')
+  logger.info('')
 
   if (skipEnv) {
-    console.log(chalk.yellow('  Skipping environment setup (--skip-env flag)'))
+    logger.info(chalk.yellow('  Skipping environment setup (--skip-env flag)'))
     return
   }
 
@@ -191,10 +191,10 @@ async function configureTriggerDev(
   ])
 
   if (!hasKey) {
-    console.log(
+    logger.info(
       chalk.yellow('\n  ⚠ Please get your API key and run setup:jobs again')
     )
-    console.log(
+    logger.info(
       chalk.dim('    Or manually add TRIGGER_SECRET_KEY to your .env.local')
     )
     return
@@ -245,28 +245,28 @@ async function configureInngest(
   spinner: ReturnType<typeof ora>,
   skipEnv?: boolean
 ): Promise<void> {
-  console.log('')
-  console.log(chalk.dim('  Inngest is an event-driven alternative with'))
-  console.log(chalk.dim('  step functions for complex workflows.'))
-  console.log('')
+  logger.info('')
+  logger.info(chalk.dim('  Inngest is an event-driven alternative with'))
+  logger.info(chalk.dim('  step functions for complex workflows.'))
+  logger.info('')
 
   // Check for existing keys
   const existingKey = process.env.INNGEST_EVENT_KEY
 
   if (existingKey && !skipEnv) {
-    console.log(chalk.green('  ✓ INNGEST_EVENT_KEY is already set'))
+    logger.info(chalk.green('  ✓ INNGEST_EVENT_KEY is already set'))
     return
   }
 
-  console.log(chalk.cyan('  To set up Inngest:\n'))
-  console.log('  1. Go to https://www.inngest.com and create an account')
-  console.log('  2. Create a new app (or use existing)')
-  console.log('  3. Go to Settings → Keys')
-  console.log('  4. Copy your Event Key and Signing Key')
-  console.log('')
+  logger.info(chalk.cyan('  To set up Inngest:\n'))
+  logger.info('  1. Go to https://www.inngest.com and create an account')
+  logger.info('  2. Create a new app (or use existing)')
+  logger.info('  3. Go to Settings → Keys')
+  logger.info('  4. Copy your Event Key and Signing Key')
+  logger.info('')
 
   if (skipEnv) {
-    console.log(chalk.yellow('  Skipping environment setup (--skip-env flag)'))
+    logger.info(chalk.yellow('  Skipping environment setup (--skip-env flag)'))
     return
   }
 
@@ -280,8 +280,8 @@ async function configureInngest(
   ])
 
   if (!hasKeys) {
-    console.log(chalk.yellow('\n  ⚠ Please get your keys and run setup:jobs again'))
-    console.log(
+    logger.info(chalk.yellow('\n  ⚠ Please get your keys and run setup:jobs again'))
+    logger.info(
       chalk.dim('    Or manually add INNGEST_EVENT_KEY to your .env.local')
     )
     return
@@ -323,10 +323,10 @@ async function configureInngest(
  * Configure local provider
  */
 async function configureLocal(spinner: ReturnType<typeof ora>): Promise<void> {
-  console.log('')
-  console.log(chalk.yellow('  ⚠ Local provider is for development only!'))
-  console.log(chalk.dim('    Jobs run in-memory and are lost on restart.'))
-  console.log('')
+  logger.info('')
+  logger.info(chalk.yellow('  ⚠ Local provider is for development only!'))
+  logger.info(chalk.dim('    Jobs run in-memory and are lost on restart.'))
+  logger.info('')
 
   spinner.start('Setting up local provider...')
 
@@ -336,8 +336,8 @@ async function configureLocal(spinner: ReturnType<typeof ora>): Promise<void> {
 
   spinner.succeed('Local provider configured')
 
-  console.log('')
-  console.log(
+  logger.info('')
+  logger.info(
     chalk.yellow('  Remember to switch to Trigger.dev or Inngest for production!')
   )
 }
@@ -372,7 +372,7 @@ async function verifyProvider(
       spinner.warn(
         `Could not verify ${provider}: ${error instanceof Error ? error.message : 'Unknown error'}`
       )
-      console.log(chalk.dim('    This may be expected if the provider API is not reachable'))
+      logger.info(chalk.dim('    This may be expected if the provider API is not reachable'))
     }
   }
 }
@@ -411,7 +411,7 @@ async function createTriggerConfig(): Promise<void> {
   const configPath = path.join(process.cwd(), 'trigger.config.ts')
 
   if (await fs.pathExists(configPath)) {
-    console.log(chalk.dim('  trigger.config.ts already exists'))
+    logger.info(chalk.dim('  trigger.config.ts already exists'))
     return
   }
 
@@ -422,6 +422,7 @@ async function createTriggerConfig(): Promise<void> {
  */
 
 import { defineConfig } from '@trigger.dev/sdk/v3'
+import { logger } from '@cgk-platform/logging'
 
 export default defineConfig({
   project: process.env.TRIGGER_PROJECT_REF || 'cgk-platform',
@@ -441,5 +442,5 @@ export default defineConfig({
 `
 
   await fs.writeFile(configPath, configContent)
-  console.log(chalk.green('  ✓ Created trigger.config.ts'))
+  logger.info(chalk.green('  ✓ Created trigger.config.ts'))
 }

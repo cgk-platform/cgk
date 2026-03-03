@@ -24,6 +24,7 @@ import type {
   UseProductByHandleReturn,
   ProductActions,
 } from '../context/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Hook for fetching a list of products
@@ -95,7 +96,7 @@ export function useProducts(
         }
       } catch (err) {
         if (!cancelled) {
-          console.error('Failed to fetch products:', err)
+          logger.error('Failed to fetch products:', err)
           setError(err instanceof Error ? err.message : 'Failed to fetch products')
         }
       } finally {
@@ -129,7 +130,7 @@ export function useProducts(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      console.error('Failed to load more products:', err)
+      logger.error('Failed to load more products:', err)
       setError(err instanceof Error ? err.message : 'Failed to load more products')
     } finally {
       setIsLoading(false)
@@ -147,7 +148,7 @@ export function useProducts(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      console.error('Failed to refetch products:', err)
+      logger.error('Failed to refetch products:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch products')
     } finally {
       setIsLoading(false)
@@ -210,7 +211,7 @@ export function useProductByHandle(
         }
       } catch (err) {
         if (!cancelled) {
-          console.error('Failed to fetch product:', err)
+          logger.error('Failed to fetch product:', err)
           setError(err instanceof Error ? err.message : 'Failed to fetch product')
         }
       } finally {
@@ -235,7 +236,7 @@ export function useProductByHandle(
       const result = await actions.getProductByHandle(handleRef.current)
       setProduct(result)
     } catch (err) {
-      console.error('Failed to refetch product:', err)
+      logger.error('Failed to refetch product:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch product')
     } finally {
       setIsLoading(false)
@@ -311,7 +312,7 @@ export function useProductSearch(
         }
       } catch (err) {
         if (!cancelled) {
-          console.error('Failed to search products:', err)
+          logger.error('Failed to search products:', err)
           setError(err instanceof Error ? err.message : 'Failed to search products')
         }
       } finally {
@@ -344,7 +345,7 @@ export function useProductSearch(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      console.error('Failed to load more search results:', err)
+      logger.error('Failed to load more search results:', err)
       setError(err instanceof Error ? err.message : 'Failed to load more results')
     } finally {
       setIsLoading(false)
@@ -363,7 +364,7 @@ export function useProductSearch(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      console.error('Failed to refetch search results:', err)
+      logger.error('Failed to refetch search results:', err)
       setError(err instanceof Error ? err.message : 'Failed to search products')
     } finally {
       setIsLoading(false)

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getCreatorHealth } from '@/lib/creators/analytics'
+import { logger } from '@cgk-platform/logging'
 
 export async function GET() {
   const headerList = await headers()
@@ -17,7 +18,7 @@ export async function GET() {
     const health = await getCreatorHealth(tenantSlug)
     return NextResponse.json(health)
   } catch (error) {
-    console.error('Error fetching creator health:', error)
+    logger.error('Error fetching creator health:', error)
     return NextResponse.json(
       { error: 'Failed to fetch health data' },
       { status: 500 }

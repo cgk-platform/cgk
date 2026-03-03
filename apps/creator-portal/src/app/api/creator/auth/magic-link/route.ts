@@ -15,6 +15,7 @@ import {
   recordRateLimitAttempt,
   sendCreatorMagicLinkEmail,
 } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,7 +89,7 @@ export async function POST(req: Request): Promise<Response> {
       }
     )
   } catch (error) {
-    console.error('Magic link error:', error)
+    logger.error('Magic link error:', error)
 
     // Still return success to prevent enumeration
     return Response.json(

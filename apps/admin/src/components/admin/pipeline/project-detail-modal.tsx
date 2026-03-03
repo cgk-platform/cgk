@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import {
   AlertCircle,
@@ -93,10 +94,13 @@ export function ProjectDetailModal({
               <div className="flex items-center gap-2">
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-700 text-[10px] font-medium text-slate-300">
                   {project.creatorAvatar ? (
-                    <img
+                    <Image
                       src={project.creatorAvatar}
                       alt={project.creatorName}
-                      className="h-6 w-6 rounded-full object-cover"
+                      width={24}
+                      height={24}
+                      className="rounded-full object-cover"
+                      unoptimized
                     />
                   ) : (
                     initials

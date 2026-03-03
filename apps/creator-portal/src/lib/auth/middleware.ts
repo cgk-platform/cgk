@@ -8,6 +8,7 @@ import type { CreatorJWTPayload, MembershipStatus } from '../types'
 import { getTokenFromRequest } from './cookies'
 import { verifyCreatorJWT } from './jwt'
 import { validateCreatorSessionById } from './session'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Creator authentication context
@@ -174,7 +175,7 @@ export async function withCreatorAuth<T>(
     if (error instanceof CreatorAuthError) {
       return authErrorResponse(error)
     }
-    console.error('API error:', error)
+    logger.error('API error:', error)
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }

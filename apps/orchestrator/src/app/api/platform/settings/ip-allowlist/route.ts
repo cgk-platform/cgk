@@ -5,6 +5,7 @@ import {
   verifyJWT,
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -225,7 +226,7 @@ export async function POST(request: Request) {
       },
     })
   } catch (error) {
-    console.error('Failed to add IP to allowlist:', error)
+    logger.error('Failed to add IP to allowlist:', error)
     return Response.json(
       { error: 'Failed to add IP to allowlist' },
       { status: 500 }

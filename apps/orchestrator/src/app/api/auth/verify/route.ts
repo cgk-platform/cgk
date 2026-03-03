@@ -9,6 +9,7 @@ import {
   updateUserLastLogin,
   verifyMagicLink,
 } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -129,7 +130,7 @@ export async function POST(request: Request) {
 
     return setAuthCookie(response, jwt)
   } catch (error) {
-    console.error('Verify error:', error)
+    logger.error('Verify error:', error)
 
     if (error instanceof Error && error.message === 'Invalid or expired magic link') {
       return Response.json({ error: 'Invalid or expired magic link' }, { status: 400 })

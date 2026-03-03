@@ -9,6 +9,7 @@ import OpenAI from 'openai'
 import { sql } from '@cgk-platform/db'
 
 import type { KBArticleRow, KBArticleWithCategory, SearchOptions } from './types'
+import { logger } from '@cgk-platform/logging'
 
 // Lazy singleton
 let openaiClient: OpenAI | null = null
@@ -65,7 +66,7 @@ export async function generateAndStoreArticleEmbedding(
     `
   } catch (err) {
     // Log but don't throw — embedding generation is non-critical
-    console.error(`[kb-embeddings] Failed to generate embedding for article ${articleId}:`, err)
+    logger.error(`[kb-embeddings] Failed to generate embedding for article ${articleId}:`, err)
   }
 }
 

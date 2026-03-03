@@ -7,6 +7,7 @@
 import { createHash, randomBytes } from 'crypto'
 
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 const MAGIC_LINK_TOKEN_LENGTH = 48
 const MAGIC_LINK_EXPIRATION_HOURS = 24
@@ -128,9 +129,9 @@ export async function sendCreatorMagicLinkEmail(
   const resendApiKey = process.env.RESEND_API_KEY
   if (!resendApiKey) {
     // Development mode: log the magic link
-    console.log(`[DEV] Creator magic link for ${email}:`)
-    console.log(`[DEV] ${magicLinkUrl}`)
-    console.log(`[DEV] Token: ${token}`)
+    logger.info(`[DEV] Creator magic link for ${email}:`)
+    logger.info(`[DEV] ${magicLinkUrl}`)
+    logger.info(`[DEV] Token: ${token}`)
     return
   }
 
@@ -151,7 +152,7 @@ export async function sendCreatorMagicLinkEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    console.error('Failed to send creator magic link email:', error)
+    logger.error('Failed to send creator magic link email:', error)
     throw new Error('Failed to send magic link email')
   }
 }

@@ -12,6 +12,7 @@
 
 import { defineJob } from '../../define'
 import type { TenantEvent } from '../../events'
+import { logger } from '@cgk-platform/logging'
 
 // ============================================================
 // SMS QUEUE PAYLOAD TYPES
@@ -113,7 +114,7 @@ async function checkSmsConsent(
   // 3. Check consent type matches message type
   // 4. Return consent status
 
-  console.log(`[SMS] Checking consent for ${phone} in tenant ${tenantId}`)
+  logger.info(`[SMS] Checking consent for ${phone} in tenant ${tenantId}`)
 
   // Stub implementation - would query database
   return {
@@ -181,7 +182,7 @@ export const sendSmsJob = defineJob<TenantEvent<SendSmsPayload>>({
     // Normalize and validate phone number
     const normalizedPhone = normalizePhoneNumber(to)
     if (!validatePhoneNumber(normalizedPhone)) {
-      console.warn(`[SMS] Invalid phone number: ${to}`)
+      logger.warn(`[SMS] Invalid phone number: ${to}`)
       return {
         success: false,
         data: {
@@ -196,7 +197,7 @@ export const sendSmsJob = defineJob<TenantEvent<SendSmsPayload>>({
     if (!skipConsentCheck) {
       const consent = await checkSmsConsent(tenantId, normalizedPhone)
       if (!consent.hasConsent) {
-        console.log(`[SMS] No consent for ${normalizedPhone}, skipping`)
+        logger.info(`[SMS] No consent for ${normalizedPhone}, skipping`)
         return {
           success: false,
           data: {
@@ -212,11 +213,11 @@ export const sendSmsJob = defineJob<TenantEvent<SendSmsPayload>>({
     let messageContent = message
     if (templateId) {
       // Would load template and interpolate variables
-      console.log(`[SMS] Loading template ${templateId}`)
+      logger.info(`[SMS] Loading template ${templateId}`)
       messageContent = message || 'Template message' // Stub
     }
 
-    console.log(`[SMS] Sending to ${normalizedPhone}: ${messageContent?.substring(0, 50)}...`)
+    logger.info(`[SMS] Sending to ${normalizedPhone}: ${messageContent?.substring(0, 50)}...`)
 
     // Implementation would:
     // 1. Call Twilio/SMS provider API
@@ -232,7 +233,7 @@ export const sendSmsJob = defineJob<TenantEvent<SendSmsPayload>>({
       segments: Math.ceil((messageContent?.length || 0) / 160),
     }
 
-    console.log(`[SMS] Message sent: ${result.messageId}`)
+    logger.info(`[SMS] Message sent: ${result.messageId}`)
 
     return { success: true, data: result }
   },
@@ -250,7 +251,7 @@ export const sendBulkSmsJob = defineJob<TenantEvent<SendBulkSmsPayload>>({
   handler: async (job) => {
     const { tenantId, recipients, message, templateId: _templateId, batchId, rateLimit = 10 } = job.payload
 
-    console.log(`[SMS] Processing bulk send (batch: ${batchId}, recipients: ${recipients.length})`)
+    logger.info(`[SMS] Processing bulk send (batch: ${batchId}, recipients: ${recipients.length})`)
 
     const results: SmsSendResult[] = []
     let sent = 0
@@ -325,7 +326,7 @@ export const sendBulkSmsJob = defineJob<TenantEvent<SendBulkSmsPayload>>({
       results,
     }
 
-    console.log(
+    logger.info(
       `[SMS] Bulk send complete: ${sent} sent, ${failed} failed, ${noConsent} no consent`
     )
 
@@ -345,7 +346,7 @@ export const retryDeadLetterSmsJob = defineJob<TenantEvent<RetryDeadLetterSmsPay
   handler: async (job) => {
     const { tenantId, minAgeHours = 1, limit = 100 } = job.payload
 
-    console.log(
+    logger.info(
       `[SMS] Retrying dead letter messages (min age: ${minAgeHours}h, limit: ${limit})`
     )
 
@@ -375,19 +376,19 @@ export const retryDeadLetterSmsJob = defineJob<TenantEvent<RetryDeadLetterSmsPay
     for (const letter of deadLetters) {
       if (letter.retryCount >= letter.maxRetries) {
         // Mark as permanently failed
-        console.log(`[SMS] Message ${letter.id} exceeded max retries, marking permanently failed`)
+        logger.info(`[SMS] Message ${letter.id} exceeded max retries, marking permanently failed`)
         permanentlyFailed++
         // Would update: UPDATE sms_queue SET status = 'permanently_failed' WHERE id = letter.id
         continue
       }
 
       // Re-queue for sending
-      console.log(`[SMS] Requeueing message ${letter.id} (retry ${letter.retryCount + 1})`)
+      logger.info(`[SMS] Requeueing message ${letter.id} (retry ${letter.retryCount + 1})`)
       // Would trigger sms/send job
       retried++
     }
 
-    console.log(
+    logger.info(
       `[SMS] Dead letter processing complete: ${retried} requeued, ${permanentlyFailed} permanently failed`
     )
 

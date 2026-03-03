@@ -4,6 +4,7 @@ import { requireAuth, type AuthContext, checkPermissionOrRespond } from '@cgk-pl
 import { withTenant } from '@cgk-platform/db'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteParams {
   params: Promise<{ agentId: string }>
@@ -50,7 +51,7 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ relationships, stats, insights })
   } catch (error) {
-    console.error('Error fetching agent relationships:', error)
+    logger.error('Error fetching agent relationships:', error)
     return NextResponse.json({ error: 'Failed to fetch relationships' }, { status: 500 })
   }
 }

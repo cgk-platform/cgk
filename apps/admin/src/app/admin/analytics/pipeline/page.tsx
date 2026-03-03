@@ -7,6 +7,7 @@ import type { DateRange, PipelineData } from '@/lib/analytics'
 import { formatNumber, formatPercent } from '@/lib/format'
 
 import { DateRangePicker } from '../components/date-range-picker'
+import { logger } from '@cgk-platform/logging'
 
 export default function PipelinePage() {
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -30,7 +31,7 @@ export default function PipelinePage() {
         const json = await res.json()
         setData(json.data)
       } catch (error) {
-        console.error('Failed to fetch pipeline data:', error)
+        logger.error('Failed to fetch pipeline data:', error)
       } finally {
         setLoading(false)
       }

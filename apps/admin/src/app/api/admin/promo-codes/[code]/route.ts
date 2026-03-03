@@ -11,6 +11,7 @@ import {
   updatePromoCodeMetadata,
 } from '@/lib/promo-codes/db'
 import type { UpdatePromoCodeInput } from '@/lib/promo-codes/types'
+import { logger } from '@cgk-platform/logging'
 
 interface RouteContext {
   params: Promise<{ code: string }>
@@ -52,7 +53,7 @@ export async function GET(request: Request, context: RouteContext) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Error fetching promo code:', error)
+    logger.error('Error fetching promo code:', error)
     return NextResponse.json(
       { error: 'Failed to fetch promo code' },
       { status: 500 },
@@ -89,7 +90,7 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     return NextResponse.json({ promoCode })
   } catch (error) {
-    console.error('Error updating promo code:', error)
+    logger.error('Error updating promo code:', error)
     return NextResponse.json(
       { error: 'Failed to update promo code' },
       { status: 500 },
@@ -119,7 +120,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting promo code:', error)
+    logger.error('Error deleting promo code:', error)
     return NextResponse.json(
       { error: 'Failed to delete promo code' },
       { status: 500 },

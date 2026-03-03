@@ -7,6 +7,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { testWebhook } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,7 +26,7 @@ export async function POST(
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Error testing webhook:', error)
+    logger.error('Error testing webhook:', error)
     return NextResponse.json(
       { error: 'Failed to test webhook' },
       { status: 500 }

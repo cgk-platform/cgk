@@ -24,6 +24,7 @@ import type {
   WaitResult,
 } from '../provider'
 import { createJobId } from '../utils'
+import { logger } from '@cgk-platform/logging'
 
 interface TriggerDevConfig {
   /** API URL (defaults to cloud) */
@@ -144,11 +145,11 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
     ): Promise<SendResult> {
       // For development without Trigger.dev configured
       if (!isConfigured()) {
-        console.warn(
+        logger.warn(
           `[TriggerDevProvider] Not configured - job ${event as string} will be logged only`
         )
         const id = options?.idempotencyKey ?? createJobId()
-        console.log(`[TriggerDevProvider] Would send:`, {
+        logger.info(`[TriggerDevProvider] Would send:`, {
           event,
           payload,
           options,
@@ -160,7 +161,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
         const result = await triggerTask(event as string, payload, options)
         return { id: result.id, accepted: true }
       } catch (error) {
-        console.error(
+        logger.error(
           `[TriggerDevProvider] Failed to send ${event as string}:`,
           error
         )
@@ -213,7 +214,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
       timeout?: number
     ): Promise<WaitResult<R>> {
       if (!isConfigured()) {
-        console.warn(
+        logger.warn(
           `[TriggerDevProvider] Not configured - triggerAndWait for ${event as string} will fail`
         )
         return {
@@ -260,7 +261,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
 
     async cancel(runId: string): Promise<boolean> {
       if (!isConfigured()) {
-        console.warn('[TriggerDevProvider] Not configured - cannot cancel')
+        logger.warn('[TriggerDevProvider] Not configured - cannot cancel')
         return false
       }
 

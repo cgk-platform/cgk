@@ -15,6 +15,7 @@ import type {
   ShippingVariantMetrics,
 } from './types.js'
 import type { ABTest, ABVariant, TrackEventInput } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Get test and variant data from database
@@ -140,21 +141,21 @@ export async function attributeShippingOrder(
   // Get test and variants from database
   const testData = await getTestWithVariants(tenantId, abData.testId)
   if (!testData) {
-    console.error(`Shipping test not found: ${abData.testId}`)
+    logger.error(`Shipping test not found: ${abData.testId}`)
     return null
   }
 
   // Find assigned variant
   const assignedVariant = findVariantBySuffix(testData.variants, abData.suffix)
   if (!assignedVariant) {
-    console.error(`Unknown variant suffix: ${abData.suffix} for test ${abData.testId}`)
+    logger.error(`Unknown variant suffix: ${abData.suffix} for test ${abData.testId}`)
     return null
   }
 
   // Get actual shipping from order
   const actualShipping = order.shippingLines[0]
   if (!actualShipping) {
-    console.error(`No shipping line found for order ${order.id}`)
+    logger.error(`No shipping line found for order ${order.id}`)
     return null
   }
 

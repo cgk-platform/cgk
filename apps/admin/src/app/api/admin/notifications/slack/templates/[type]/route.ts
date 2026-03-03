@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
 import type { SlackBlock } from '@cgk-platform/slack'
+import { logger } from '@cgk-platform/logging'
 
 interface TemplateRecord {
   id: string
@@ -59,7 +60,7 @@ export async function GET(
 
     return NextResponse.json({ template: result.rows[0] })
   } catch (error) {
-    console.error('Failed to get Slack template:', error)
+    logger.error('Failed to get Slack template:', error)
     return NextResponse.json(
       { error: 'Failed to get template' },
       { status: 500 },
@@ -140,7 +141,7 @@ export async function PUT(
 
     return NextResponse.json({ template: result.rows[0] })
   } catch (error) {
-    console.error('Failed to update Slack template:', error)
+    logger.error('Failed to update Slack template:', error)
     return NextResponse.json(
       { error: 'Failed to update template' },
       { status: 500 },

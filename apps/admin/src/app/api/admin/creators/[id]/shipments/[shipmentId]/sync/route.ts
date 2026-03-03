@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { getShipmentById } from '../../../../../../../../lib/creators/lifecycle-db'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/creators/[id]/shipments/[shipmentId]/sync
@@ -58,7 +59,7 @@ export async function POST(
       message: 'Sync complete (simulated)',
     })
   } catch (error) {
-    console.error('[shipments/[shipmentId]/sync] POST error:', error)
+    logger.error('[shipments/[shipmentId]/sync] POST error:', error)
     return NextResponse.json({ error: 'Failed to sync shipment' }, { status: 500 })
   }
 }

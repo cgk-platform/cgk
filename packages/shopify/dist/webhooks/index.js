@@ -1,6 +1,6 @@
 import {
   createAdminClient
-} from "../chunk-W4RFSGMI.js";
+} from "../chunk-X2N4PNZC.js";
 import {
   tasks
 } from "../chunk-ULCOC4PL.js";
@@ -12,6 +12,8 @@ import { withTenant as withTenant8 } from "@cgk-platform/db";
 
 // src/webhooks/handlers/app.ts
 import { withTenant, sql } from "@cgk-platform/db";
+import { createLogger } from "@cgk-platform/logging";
+var logger = createLogger({ meta: { service: "shopify" } });
 async function handleAppUninstalled(tenantId, payload, _eventId) {
   const shop = payload;
   const shopDomain = shop.myshopify_domain || shop.domain || "";
@@ -32,11 +34,13 @@ async function handleAppUninstalled(tenantId, payload, _eventId) {
       WHERE shop = ${shopDomain}
     `;
   });
-  console.log(`[Webhook] App uninstalled for shop ${shopDomain}, tenant ${tenantId}`);
+  logger.info(`[Webhook] App uninstalled for shop ${shopDomain}, tenant ${tenantId}`);
 }
 
 // src/webhooks/handlers/customers.ts
 import { withTenant as withTenant2, sql as sql2 } from "@cgk-platform/db";
+import { createLogger as createLogger2 } from "@cgk-platform/logging";
+var logger2 = createLogger2({ meta: { service: "shopify" } });
 async function handleCustomerCreate(tenantId, payload, _eventId) {
   const customer = payload;
   const shopifyCustomerId = customer.id.toString();
@@ -52,7 +56,7 @@ async function handleCustomerCreate(tenantId, payload, _eventId) {
     shopifyCustomerId,
     fullSync: false
   });
-  console.log(`[Webhook] Customer ${shopifyCustomerId} created for tenant ${tenantId}`);
+  logger2.info(`[Webhook] Customer ${shopifyCustomerId} created for tenant ${tenantId}`);
 }
 async function handleCustomerUpdate(tenantId, payload, _eventId) {
   const customer = payload;
@@ -69,7 +73,7 @@ async function handleCustomerUpdate(tenantId, payload, _eventId) {
     shopifyCustomerId,
     fullSync: false
   });
-  console.log(`[Webhook] Customer ${shopifyCustomerId} updated for tenant ${tenantId}`);
+  logger2.info(`[Webhook] Customer ${shopifyCustomerId} updated for tenant ${tenantId}`);
 }
 async function upsertCustomer(customer) {
   const shopifyCustomerId = customer.id.toString();
@@ -168,6 +172,8 @@ async function syncCustomerAddresses(customerId, addresses) {
 
 // src/webhooks/handlers/fulfillments.ts
 import { withTenant as withTenant3, sql as sql3 } from "@cgk-platform/db";
+import { createLogger as createLogger3 } from "@cgk-platform/logging";
+var logger3 = createLogger3({ meta: { service: "shopify" } });
 async function handleFulfillmentCreate(tenantId, payload, _eventId) {
   const fulfillment = payload;
   const shopifyFulfillmentId = fulfillment.id.toString();
@@ -224,7 +230,7 @@ async function handleFulfillmentCreate(tenantId, payload, _eventId) {
       carrier: fulfillment.tracking_company || null
     })
   ]);
-  console.log(
+  logger3.info(
     `[Webhook] Fulfillment ${shopifyFulfillmentId} created for order ${orderId}, tenant ${tenantId}`
   );
 }
@@ -281,13 +287,15 @@ async function handleFulfillmentUpdate(tenantId, payload, _eventId) {
       carrier: fulfillment.tracking_company || null
     });
   }
-  console.log(
+  logger3.info(
     `[Webhook] Fulfillment ${shopifyFulfillmentId} updated for order ${orderId}, tenant ${tenantId}`
   );
 }
 
 // src/webhooks/handlers/gdpr.ts
 import { withTenant as withTenant4, sql as sql4 } from "@cgk-platform/db";
+import { createLogger as createLogger4 } from "@cgk-platform/logging";
+var logger4 = createLogger4({ meta: { service: "shopify" } });
 async function handleCustomerRedact(tenantId, payload, _eventId) {
   const data = payload;
   const customerId = String(data.customer.id);
@@ -323,7 +331,7 @@ async function handleCustomerRedact(tenantId, payload, _eventId) {
       WHERE customer_shopify_id = ${customerId}
     `;
   });
-  console.log(`[GDPR] Customer ${customerId} PII redacted for tenant ${tenantId} (shop: ${data.shop_domain})`);
+  logger4.info(`[GDPR] Customer ${customerId} PII redacted for tenant ${tenantId} (shop: ${data.shop_domain})`);
 }
 async function handleShopRedact(tenantId, payload, _eventId) {
   const data = payload;
@@ -337,7 +345,7 @@ async function handleShopRedact(tenantId, payload, _eventId) {
       updated_at = NOW()
     WHERE shop = ${data.shop_domain}
   `;
-  console.log(`[GDPR] Shop ${data.shop_domain} credentials cleared for tenant ${tenantId}`);
+  logger4.info(`[GDPR] Shop ${data.shop_domain} credentials cleared for tenant ${tenantId}`);
 }
 async function handleCustomerDataRequest(tenantId, payload, _eventId) {
   const data = payload;
@@ -366,7 +374,7 @@ async function handleCustomerDataRequest(tenantId, payload, _eventId) {
       ON CONFLICT (idempotency_key) DO NOTHING
     `;
   });
-  console.log(`[GDPR] Data request logged for customer ${customerId} at shop ${data.shop_domain}, tenant ${tenantId}`);
+  logger4.info(`[GDPR] Data request logged for customer ${customerId} at shop ${data.shop_domain}, tenant ${tenantId}`);
 }
 async function handleCustomerDelete(tenantId, payload, _eventId) {
   const customer = payload;
@@ -387,7 +395,7 @@ async function handleCustomerDelete(tenantId, payload, _eventId) {
       WHERE customer_shopify_id = ${customerId}
     `;
   });
-  console.log(`[Webhook] Customer ${customerId} deleted for tenant ${tenantId}`);
+  logger4.info(`[Webhook] Customer ${customerId} deleted for tenant ${tenantId}`);
 }
 
 // src/webhooks/handlers/orders.ts
@@ -412,19 +420,25 @@ async function getTenantForShop(shop) {
     AND status = 'active'
     LIMIT 1
   `;
-  if (shopifyResult.rows.length > 0) {
-    const row2 = shopifyResult.rows[0];
-    return row2 ? row2.tenant_id : null;
+  const shopifyRow = shopifyResult.rows[0];
+  if (shopifyRow) {
+    return shopifyRow.tenant_id;
   }
   const orgResult = await sql5`
     SELECT id as tenant_id
     FROM public.organizations
-    WHERE shopify_store_domain = ${shop}
+    WHERE (
+      shopify_store_domain = ${shop}
+      OR shopify_config->>'checkoutDomain' = ${shop}
+    )
     AND status = 'active'
     LIMIT 1
   `;
-  const row = orgResult.rows[0];
-  return row ? row.tenant_id : null;
+  const orgRow = orgResult.rows[0];
+  if (!orgRow) {
+    return null;
+  }
+  return orgRow.tenant_id;
 }
 async function getShopifyCredentials(_tenantId, shop) {
   const result = await sql5`
@@ -436,9 +450,6 @@ async function getShopifyCredentials(_tenantId, shop) {
     WHERE shop = ${shop}
     LIMIT 1
   `;
-  if (result.rows.length === 0) {
-    return null;
-  }
   const row = result.rows[0];
   if (!row) {
     return null;
@@ -446,7 +457,7 @@ async function getShopifyCredentials(_tenantId, shop) {
   return {
     shop: row.shop,
     accessToken: row.access_token_encrypted,
-    webhookSecret: row.webhook_secret_encrypted
+    webhookSecret: row.webhook_secret_encrypted || null
   };
 }
 async function checkDuplicateWebhook(idempotencyKey) {
@@ -485,7 +496,10 @@ async function logWebhookEvent(params) {
     RETURNING id
   `;
   const row = result.rows[0];
-  return row ? row.id : "";
+  if (!row) {
+    throw new Error("Failed to log webhook event");
+  }
+  return row.id;
 }
 async function updateWebhookStatus(eventId, status, errorMessage) {
   if (status === "completed") {
@@ -536,7 +550,11 @@ async function getWebhookEvent(eventId) {
   if (result.rows.length === 0) {
     return null;
   }
-  return result.rows[0];
+  const row = result.rows[0];
+  if (!row) {
+    return null;
+  }
+  return row;
 }
 function parseCents(priceString) {
   if (priceString === void 0 || priceString === null) {
@@ -594,6 +612,8 @@ function headersToObject(headers) {
 }
 
 // src/webhooks/handlers/orders.ts
+import { createLogger as createLogger5 } from "@cgk-platform/logging";
+var logger5 = createLogger5({ meta: { service: "shopify" } });
 async function handleOrderCreate(tenantId, payload, _eventId) {
   const order = payload;
   const shopifyId = order.id.toString();
@@ -680,7 +700,7 @@ async function handleOrderCreate(tenantId, payload, _eventId) {
       currency: order.currency || "USD"
     })
   ]);
-  console.log(`[Webhook] Order ${orderName} created for tenant ${tenantId}`);
+  logger5.info(`[Webhook] Order ${orderName} created for tenant ${tenantId}`);
 }
 async function handleOrderPaid(tenantId, payload, eventId) {
   const order = payload;
@@ -704,7 +724,7 @@ async function handleOrderPaid(tenantId, payload, eventId) {
       // Session ID should be extracted from note attributes if available
     })
   ]);
-  console.log(`[Webhook] Order ${order.name} paid for tenant ${tenantId}`);
+  logger5.info(`[Webhook] Order ${order.name} paid for tenant ${tenantId}`);
 }
 async function handleOrderUpdate(tenantId, payload, _eventId) {
   const order = payload;
@@ -720,7 +740,7 @@ async function handleOrderUpdate(tenantId, payload, _eventId) {
       WHERE shopify_id = ${shopifyId}
     `;
   });
-  console.log(`[Webhook] Order ${order.name} updated for tenant ${tenantId}`);
+  logger5.info(`[Webhook] Order ${order.name} updated for tenant ${tenantId}`);
 }
 async function handleOrderCancelled(tenantId, payload, eventId) {
   const order = payload;
@@ -746,7 +766,7 @@ async function handleOrderCancelled(tenantId, payload, eventId) {
       currency: order.currency || "USD"
     })
   ]);
-  console.log(`[Webhook] Order ${order.name} cancelled for tenant ${tenantId}`);
+  logger5.info(`[Webhook] Order ${order.name} cancelled for tenant ${tenantId}`);
 }
 async function syncOrderLineItems(orderId, lineItems) {
   await sql6`DELETE FROM order_line_items WHERE order_shopify_id = ${orderId}`;
@@ -779,6 +799,8 @@ async function syncOrderLineItems(orderId, lineItems) {
 
 // src/webhooks/handlers/products.ts
 import { withTenant as withTenant6, sql as sql7 } from "@cgk-platform/db";
+import { createLogger as createLogger6 } from "@cgk-platform/logging";
+var logger6 = createLogger6({ meta: { service: "shopify" } });
 async function handleProductCreate(tenantId, payload, _eventId) {
   const product = payload;
   const shopifyProductId = product.id.toString();
@@ -787,7 +809,7 @@ async function handleProductCreate(tenantId, payload, _eventId) {
     shopifyProductId,
     action: "create"
   });
-  console.log(`[Webhook] Product ${shopifyProductId} created for tenant ${tenantId}`);
+  logger6.info(`[Webhook] Product ${shopifyProductId} created for tenant ${tenantId}`);
 }
 async function handleProductUpdate(tenantId, payload, _eventId) {
   const product = payload;
@@ -797,7 +819,7 @@ async function handleProductUpdate(tenantId, payload, _eventId) {
     shopifyProductId,
     action: "update"
   });
-  console.log(`[Webhook] Product ${shopifyProductId} updated for tenant ${tenantId}`);
+  logger6.info(`[Webhook] Product ${shopifyProductId} updated for tenant ${tenantId}`);
 }
 async function handleProductDelete(tenantId, payload, _eventId) {
   const product = payload;
@@ -811,11 +833,13 @@ async function handleProductDelete(tenantId, payload, _eventId) {
       WHERE shopify_product_id = ${shopifyProductId}
     `;
   });
-  console.log(`[Webhook] Product ${shopifyProductId} deleted/archived for tenant ${tenantId}`);
+  logger6.info(`[Webhook] Product ${shopifyProductId} deleted/archived for tenant ${tenantId}`);
 }
 
 // src/webhooks/handlers/refunds.ts
 import { withTenant as withTenant7, sql as sql8 } from "@cgk-platform/db";
+import { createLogger as createLogger7 } from "@cgk-platform/logging";
+var logger7 = createLogger7({ meta: { service: "shopify" } });
 async function handleRefundCreate(tenantId, payload, _eventId) {
   const refund = payload;
   const shopifyRefundId = refund.id.toString();
@@ -905,12 +929,14 @@ async function handleRefundCreate(tenantId, payload, _eventId) {
       sessionId: null
     })
   ]);
-  console.log(
+  logger7.info(
     `[Webhook] Refund ${shopifyRefundId} created for order ${orderId}, amount: ${totalRefundCents} cents, tenant ${tenantId}`
   );
 }
 
 // src/webhooks/router.ts
+import { createLogger as createLogger8 } from "@cgk-platform/logging";
+var logger8 = createLogger8({ meta: { service: "shopify" } });
 var HANDLERS = {
   // Orders
   "orders/create": handleOrderCreate,
@@ -943,7 +969,7 @@ var HANDLERS = {
 async function routeToHandler(tenantId, topic, payload, eventId) {
   const handler = HANDLERS[topic];
   if (!handler) {
-    console.log(`[Webhook] No handler registered for topic: ${topic}`);
+    logger8.info(`[Webhook] No handler registered for topic: ${topic}`);
     return;
   }
   await handler(tenantId, payload, eventId);
@@ -959,6 +985,8 @@ function registerHandler(topic, handler) {
 }
 
 // src/webhooks/handler.ts
+import { createLogger as createLogger9 } from "@cgk-platform/logging";
+var logger9 = createLogger9({ meta: { service: "shopify" } });
 async function handleShopifyWebhook(request) {
   const startTime = Date.now();
   const shop = request.headers.get("x-shopify-shop-domain");
@@ -966,12 +994,12 @@ async function handleShopifyWebhook(request) {
   const hmac = request.headers.get("x-shopify-hmac-sha256");
   const webhookId = request.headers.get("x-shopify-webhook-id");
   if (!shop || !topic || !hmac) {
-    console.warn("[Webhook] Missing required headers", { shop, topic, hasHmac: !!hmac });
+    logger9.warn("[Webhook] Missing required headers", { shop, topic, hasHmac: !!hmac });
     return new Response("Missing required headers", { status: 400 });
   }
   const tenantId = await getTenantForShop(shop);
   if (!tenantId) {
-    console.warn(`[Webhook] Unknown shop: ${shop}, topic: ${topic}`);
+    logger9.warn(`[Webhook] Unknown shop: ${shop}, topic: ${topic}`);
     return new Response("Shop not registered", { status: 200 });
   }
   const body = await request.text();
@@ -979,19 +1007,19 @@ async function handleShopifyWebhook(request) {
     return getShopifyCredentials(tenantId, shop);
   });
   if (!credentials || !credentials.webhookSecret) {
-    console.error(`[Webhook] No webhook secret for shop ${shop}, tenant ${tenantId}`);
+    logger9.error(`[Webhook] No webhook secret for shop ${shop}, tenant ${tenantId}`);
     return new Response("Configuration error", { status: 500 });
   }
   const isValid = verifyShopifyWebhook(body, hmac, credentials.webhookSecret);
   if (!isValid) {
-    console.error(`[Webhook] Invalid HMAC signature for ${shop}, topic: ${topic}`);
+    logger9.error(`[Webhook] Invalid HMAC signature for ${shop}, topic: ${topic}`);
     return new Response("Invalid signature", { status: 401 });
   }
   let payload;
   try {
     payload = JSON.parse(body);
   } catch {
-    console.error(`[Webhook] Invalid JSON for ${shop}, topic: ${topic}`);
+    logger9.error(`[Webhook] Invalid JSON for ${shop}, topic: ${topic}`);
     return new Response("Invalid JSON", { status: 400 });
   }
   const resourceId = extractResourceId(payload);
@@ -1000,7 +1028,7 @@ async function handleShopifyWebhook(request) {
     return checkDuplicateWebhook(idempotencyKey);
   });
   if (isDuplicate) {
-    console.log(`[Webhook] Duplicate ignored: ${idempotencyKey} for ${shop}`);
+    logger9.info(`[Webhook] Duplicate ignored: ${idempotencyKey} for ${shop}`);
     return new Response("Already processed", { status: 200 });
   }
   const eventId = await withTenant8(tenantId, async () => {
@@ -1022,15 +1050,15 @@ async function handleShopifyWebhook(request) {
       await updateWebhookStatus(eventId, "completed");
     });
     const duration = Date.now() - startTime;
-    console.log(`[Webhook] ${topic} processed in ${duration}ms for ${shop}`);
+    logger9.info(`[Webhook] ${topic} processed in ${duration}ms for ${shop}`);
     return new Response("OK", { status: 200 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     await withTenant8(tenantId, async () => {
       await updateWebhookStatus(eventId, "failed", errorMessage);
     });
-    console.error(`[Webhook] ${topic} failed for ${shop}:`, error);
-    console.log(`[Webhook] Event ${eventId} marked as failed \u2014 scheduled retry job will pick it up`);
+    logger9.error(`[Webhook] ${topic} failed for ${shop}:`, error instanceof Error ? error : void 0);
+    logger9.info(`[Webhook] Event ${eventId} marked as failed \u2014 scheduled retry job will pick it up`);
     return new Response("Processing error", { status: 200 });
   }
 }
@@ -1042,6 +1070,8 @@ function createWebhookRoute() {
 
 // src/webhooks/register.ts
 import { withTenant as withTenant9, sql as sql9 } from "@cgk-platform/db";
+import { createLogger as createLogger10 } from "@cgk-platform/logging";
+var logger10 = createLogger10({ meta: { service: "shopify" } });
 var REQUIRED_TOPICS = [
   "orders/create",
   "orders/updated",
@@ -1133,7 +1163,7 @@ async function registerWebhooks(tenantId, shop, accessToken, webhookUrl) {
       if (userErrors && userErrors.length > 0) {
         const firstError = userErrors[0];
         const error = firstError ? firstError.message : "Unknown error";
-        console.error(`[Webhook] Failed to register ${topic} for ${shop}: ${error}`);
+        logger10.error(`[Webhook] Failed to register ${topic} for ${shop}: ${error}`);
         errors.push({ topic, error });
         continue;
       }
@@ -1150,16 +1180,16 @@ async function registerWebhooks(tenantId, shop, accessToken, webhookUrl) {
               updated_at = NOW()
           `;
         });
-        console.log(`[Webhook] Registered ${topic} for ${shop}`);
+        logger10.info(`[Webhook] Registered ${topic} for ${shop}`);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      console.error(`[Webhook] Failed to register ${topic} for ${shop}:`, error);
+      logger10.error(`[Webhook] Failed to register ${topic} for ${shop}:`, error instanceof Error ? error : void 0);
       errors.push({ topic, error: message });
     }
   }
   if (errors.length > 0) {
-    console.error(`[Webhook] ${errors.length} webhooks failed to register for ${shop}`);
+    logger10.error(`[Webhook] ${errors.length} webhooks failed to register for ${shop}`);
   }
 }
 async function registerSingleWebhook(tenantId, shop, accessToken, topic, webhookUrl) {
@@ -1264,7 +1294,7 @@ async function syncWebhookRegistrations(tenantId, shop, credentials, webhookUrl)
     }
     return result;
   } catch (error) {
-    console.error(`[Webhook] Sync failed for ${shop}:`, error);
+    logger10.error(`[Webhook] Sync failed for ${shop}:`, error instanceof Error ? error : void 0);
     throw error;
   }
 }
@@ -1278,7 +1308,7 @@ async function unregisterWebhook(tenantId, shop, accessToken, topic) {
     return res.rows[0];
   });
   if (!registration?.shopify_webhook_id) {
-    console.log(`[Webhook] No registration found for ${topic} on ${shop}`);
+    logger10.info(`[Webhook] No registration found for ${topic} on ${shop}`);
     return;
   }
   const client = createAdminClient({
@@ -1296,9 +1326,9 @@ async function unregisterWebhook(tenantId, shop, accessToken, topic) {
         WHERE shop = ${shop} AND topic = ${topic}
       `;
     });
-    console.log(`[Webhook] Unregistered ${topic} for ${shop}`);
+    logger10.info(`[Webhook] Unregistered ${topic} for ${shop}`);
   } catch (error) {
-    console.error(`[Webhook] Failed to unregister ${topic} for ${shop}:`, error);
+    logger10.error(`[Webhook] Failed to unregister ${topic} for ${shop}:`, error instanceof Error ? error : void 0);
     throw error;
   }
 }

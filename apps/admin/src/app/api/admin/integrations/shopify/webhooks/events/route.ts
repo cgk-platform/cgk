@@ -10,6 +10,7 @@ import { getTenantContext } from '@cgk-platform/auth'
 import { withTenant, sql } from '@cgk-platform/db'
 import { getRecentWebhookEvents } from '@cgk-platform/shopify/webhooks'
 import type { WebhookEventStatus } from '@cgk-platform/shopify/webhooks'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,7 +66,7 @@ export async function GET(req: Request): Promise<Response> {
       },
     })
   } catch (error) {
-    console.error('[API] Failed to get webhook events:', error)
+    logger.error('[API] Failed to get webhook events:', error)
     return Response.json(
       { error: 'Failed to get webhook events' },
       { status: 500 }

@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Extension status from the API
@@ -110,7 +111,7 @@ export default function ShopifyExtensionsPage() {
         setData(result)
       }
     } catch (error) {
-      console.error('Failed to fetch extensions:', error)
+      logger.error('Failed to fetch extensions:', error)
     } finally {
       setLoading(false)
       setRefreshing(false)

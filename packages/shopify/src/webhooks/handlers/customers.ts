@@ -8,6 +8,8 @@ import { withTenant, sql } from '@cgk-platform/db'
 import { tasks } from '@trigger.dev/sdk/v3'
 
 import type { ShopifyCustomerPayload } from '../types'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Handle customers/create webhook
@@ -39,7 +41,7 @@ export async function handleCustomerCreate(
     fullSync: false,
   })
 
-  console.log(`[Webhook] Customer ${shopifyCustomerId} created for tenant ${tenantId}`)
+  logger.info(`[Webhook] Customer ${shopifyCustomerId} created for tenant ${tenantId}`)
 }
 
 /**
@@ -72,7 +74,7 @@ export async function handleCustomerUpdate(
     fullSync: false,
   })
 
-  console.log(`[Webhook] Customer ${shopifyCustomerId} updated for tenant ${tenantId}`)
+  logger.info(`[Webhook] Customer ${shopifyCustomerId} updated for tenant ${tenantId}`)
 }
 
 /**

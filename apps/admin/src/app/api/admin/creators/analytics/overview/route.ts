@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 
 import { getCreatorOverviewKPIs } from '@/lib/creators/analytics'
 import type { AnalyticsPeriod } from '@/lib/creators/analytics-types'
+import { logger } from '@cgk-platform/logging'
 
 const VALID_PERIODS = ['7d', '30d', '90d', '12m', 'all'] as const
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
     const kpis = await getCreatorOverviewKPIs(tenantSlug, period)
     return NextResponse.json({ kpis, period })
   } catch (error) {
-    console.error('Error fetching creator overview KPIs:', error)
+    logger.error('Error fetching creator overview KPIs:', error)
     return NextResponse.json(
       { error: 'Failed to fetch analytics' },
       { status: 500 }

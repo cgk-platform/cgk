@@ -3,6 +3,7 @@
  * Handles product selection, tier-based pricing, quantity controls, and Shopify Cart API integration.
  * Uses BundleCore for shared pricing, tier, cart, and free gift logic.
  */
+import { logger } from '@cgk-platform/logging'
 (function () {
   'use strict';
 
@@ -597,7 +598,7 @@
           self.recalculate();
         }, 2000);
       } catch (err) {
-        console.error('[BundleBuilder] Cart error:', err);
+        logger.error('[BundleBuilder] Cart error:', err);
         if (this.els.cta) {
           this.els.cta.textContent = 'Error \u2014 Try Again';
           this.els.cta.classList.remove('bb-cta--loading');

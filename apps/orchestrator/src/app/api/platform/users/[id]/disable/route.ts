@@ -1,4 +1,5 @@
 import { disableUser, getSuperAdminUser, logAuditAction } from '@cgk-platform/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -106,7 +107,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       message: 'User has been disabled and all sessions have been revoked',
     })
   } catch (error) {
-    console.error('Disable user error:', error)
+    logger.error('Disable user error:', error)
 
     if (error instanceof Error) {
       if (error.message.includes('last super admin')) {

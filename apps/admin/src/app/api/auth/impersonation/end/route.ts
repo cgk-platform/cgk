@@ -1,6 +1,7 @@
 import { endImpersonation, AUTH_COOKIE_NAME } from '@cgk-platform/auth'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,7 +49,7 @@ export async function POST() {
 
     return response
   } catch (error) {
-    console.error('End impersonation error:', error)
+    logger.error('End impersonation error:', error)
     return NextResponse.json(
       { error: 'Failed to end impersonation session' },
       { status: 500 }

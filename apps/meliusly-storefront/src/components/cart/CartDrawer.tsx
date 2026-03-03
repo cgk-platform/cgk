@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/lib/cart'
 import { useEffect, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 interface CartDrawerProps {
   isOpen: boolean
@@ -76,7 +77,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         setCheckoutError(data.error || 'Failed to create checkout')
       }
     } catch (error) {
-      console.error('Checkout error:', error)
+      logger.error('Checkout error:', error)
       setCheckoutError('Failed to create checkout. Please try again.')
     } finally {
       setIsCheckingOut(false)

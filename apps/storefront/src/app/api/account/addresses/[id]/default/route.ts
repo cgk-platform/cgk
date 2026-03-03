@@ -7,6 +7,7 @@ import { getCustomerSession } from '@/lib/customer-session'
 import { getTenantSlug } from '@/lib/tenant'
 
 import type { CustomerAddress } from '@/lib/account/api'
+import { logger } from '@cgk-platform/logging'
 
 interface AddressRow {
   id: string
@@ -123,7 +124,7 @@ export async function POST(_request: Request, { params }: RouteParams) {
 
     return NextResponse.json(mapRowToAddress(address))
   } catch (error) {
-    console.error('Failed to set default address:', error)
+    logger.error('Failed to set default address:', error)
     return NextResponse.json({ error: 'Failed to set default address' }, { status: 500 })
   }
 }

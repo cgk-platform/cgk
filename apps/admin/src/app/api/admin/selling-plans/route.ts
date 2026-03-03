@@ -9,6 +9,7 @@ import {
   getSellingPlanList,
 } from '@/lib/selling-plans/db'
 import type { CreateSellingPlanInput } from '@/lib/selling-plans/types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/admin/selling-plans
@@ -54,7 +55,7 @@ export async function GET(request: Request) {
       offset,
     })
   } catch (error) {
-    console.error('Error fetching selling plans:', error)
+    logger.error('Error fetching selling plans:', error)
     return NextResponse.json(
       { error: 'Failed to fetch selling plans' },
       { status: 500 },
@@ -115,7 +116,7 @@ export async function POST(request: Request) {
     const sellingPlan = await createSellingPlan(tenantSlug, body)
     return NextResponse.json({ sellingPlan }, { status: 201 })
   } catch (error) {
-    console.error('Error creating selling plan:', error)
+    logger.error('Error creating selling plan:', error)
     if (error instanceof Error && error.message.includes('unique')) {
       return NextResponse.json(
         { error: 'A selling plan with this name already exists' },

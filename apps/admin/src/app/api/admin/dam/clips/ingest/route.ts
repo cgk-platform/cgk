@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 import { ingestClip, findDuplicateClip, type ClipIngestInput } from '@cgk-platform/dam'
 
 import { validateTenantApiKey } from '@/lib/api-key-auth'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   const auth = await validateTenantApiKey(request)
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('Clip ingest error:', error)
+    logger.error('Clip ingest error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Ingest failed' },
       { status: 500 }

@@ -8,6 +8,7 @@ import { withTenant } from '@cgk-platform/db'
 import { archiveOldHandoffs, getHandoffStats } from '../db/handoffs-queries.js'
 import { syncOrgChart, validateOrgChart } from '../org-chart/sync.js'
 import { applyFamiliarityDecay } from '../relationships/familiarity.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Job: Sync org chart with team changes
@@ -36,7 +37,7 @@ export async function syncOrgChartJob(tenantId: string): Promise<{
 
     return { success: true, result }
   } catch (error) {
-    console.error('Org chart sync job failed:', error)
+    logger.error('Org chart sync job failed:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -63,7 +64,7 @@ export async function decayFamiliarityJob(tenantId: string): Promise<{
 
     return { success: true, decayedCount }
   } catch (error) {
-    console.error('Familiarity decay job failed:', error)
+    logger.error('Familiarity decay job failed:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -103,7 +104,7 @@ export async function cleanupHandoffsJob(
 
     return { success: true, ...result }
   } catch (error) {
-    console.error('Handoff cleanup job failed:', error)
+    logger.error('Handoff cleanup job failed:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

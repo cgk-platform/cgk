@@ -29,6 +29,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Log entry structure
@@ -134,7 +135,7 @@ export default function LogsPage() {
         setStats(data.stats)
       }
     } catch (error) {
-      console.error('Failed to fetch logs:', error)
+      logger.error('Failed to fetch logs:', error)
     } finally {
       setLoading(false)
     }
@@ -151,7 +152,7 @@ export default function LogsPage() {
         setErrorPatterns(data.patterns)
       }
     } catch (error) {
-      console.error('Failed to fetch error patterns:', error)
+      logger.error('Failed to fetch error patterns:', error)
     }
   }, [])
 
@@ -172,7 +173,7 @@ export default function LogsPage() {
         )
       }
     } catch (error) {
-      console.error('Failed to fetch tenants:', error)
+      logger.error('Failed to fetch tenants:', error)
     }
   }, [])
 
@@ -207,7 +208,7 @@ export default function LogsPage() {
     })
 
     eventSource.addEventListener('error', () => {
-      console.error('SSE connection error')
+      logger.error('SSE connection error')
       setIsStreaming(false)
     })
   }, [levelFilter, tenantFilter])

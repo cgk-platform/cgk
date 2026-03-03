@@ -5,6 +5,7 @@
 import { upsertSlackConfig, getSlackConfig } from '../db/queries.js'
 import type { TenantSlackConfig } from '../types.js'
 import { encrypt } from '../utils/encryption.js'
+import { logger } from '@cgk-platform/logging'
 
 const SLACK_OAUTH_URL = 'https://slack.com/api/oauth.v2.access'
 const SLACK_AUTH_URL = 'https://slack.com/oauth/v2/authorize'
@@ -167,7 +168,7 @@ export async function revokeSlackTokens(botToken: string): Promise<boolean> {
     const result = await response.json() as { ok: boolean }
     return result.ok
   } catch (error) {
-    console.error('[slack] Failed to revoke tokens:', error)
+    logger.error('[slack] Failed to revoke tokens:', error)
     return false
   }
 }

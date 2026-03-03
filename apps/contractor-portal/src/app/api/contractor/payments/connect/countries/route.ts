@@ -10,6 +10,7 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +29,7 @@ export async function GET(req: Request) {
       countries,
     })
   } catch (error) {
-    console.error('Error fetching countries:', error)
+    logger.error('Error fetching countries:', error)
     return Response.json(
       { error: 'Failed to fetch countries' },
       { status: 500 }

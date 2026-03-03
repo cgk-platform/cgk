@@ -14,6 +14,7 @@ import {
 
 import { Button } from '@cgk-platform/ui'
 import { cn } from '@cgk-platform/ui'
+import { logger } from '@cgk-platform/logging'
 
 interface Message {
   id: string
@@ -69,7 +70,7 @@ export function ThreadDetail({ threadId }: ThreadDetailProps) {
       setThread(threadData.thread)
       setMessages(messagesData.messages || [])
     } catch (error) {
-      console.error('Failed to fetch thread:', error)
+      logger.error('Failed to fetch thread:', error)
     } finally {
       setLoading(false)
     }
@@ -95,7 +96,7 @@ export function ThreadDetail({ threadId }: ThreadDetailProps) {
       setNewMessage('')
       fetchThread()
     } catch (error) {
-      console.error('Failed to send:', error)
+      logger.error('Failed to send:', error)
     } finally {
       setSending(false)
     }
@@ -136,7 +137,7 @@ export function ThreadDetail({ threadId }: ThreadDetailProps) {
         setNewMessage(data.draft.body)
       }
     } catch (error) {
-      console.error('Failed to generate draft:', error)
+      logger.error('Failed to generate draft:', error)
     }
   }
 

@@ -8,6 +8,7 @@ import { put, del, head } from '@vercel/blob'
 import { nanoid } from 'nanoid'
 
 import { addProjectFile, deleteProjectFile } from '../projects'
+import { logger } from '@cgk-platform/logging'
 
 export interface UploadResult {
   id: string
@@ -209,7 +210,7 @@ export async function removeProjectFile(
     await del(fileUrl)
   } catch (error) {
     // Log but don't fail if blob deletion fails
-    console.error('Failed to delete blob:', error)
+    logger.error('Failed to delete blob:', error)
   }
 }
 

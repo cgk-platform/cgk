@@ -20,6 +20,7 @@ import type {
   InboundEmail,
   EmailSendResult,
 } from '../types.js'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Resend email client interface
@@ -137,7 +138,7 @@ export async function sendAgentEmail(
 
     return { success: true, messageId: result.id }
   } catch (error) {
-    console.error('[email] Failed to send email:', error)
+    logger.error('[email] Failed to send email:', error)
 
     await logAction({
       agentId: params.agentId,
@@ -176,7 +177,7 @@ export async function handleAgentInboundEmail(
   }
 
   if (!agentId) {
-    console.log('[email] No agent found for email:', email.to)
+    logger.info('[email] No agent found for email:', email.to)
     return { processed: false, error: 'No agent configured for this email address' }
   }
 

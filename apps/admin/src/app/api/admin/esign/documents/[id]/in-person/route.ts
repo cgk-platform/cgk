@@ -11,6 +11,7 @@ import {
   getActiveInPersonSession,
   addAuditLogEntry,
 } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +64,7 @@ export async function POST(
       expiresAt: session.expiresAt,
     })
   } catch (error) {
-    console.error('Error starting in-person session:', error)
+    logger.error('Error starting in-person session:', error)
     return NextResponse.json(
       { error: 'Failed to start in-person signing session' },
       { status: 500 }

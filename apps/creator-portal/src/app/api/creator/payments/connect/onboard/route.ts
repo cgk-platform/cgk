@@ -13,6 +13,7 @@ import {
 } from '@cgk-platform/payments'
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -107,7 +108,7 @@ export async function GET(req: Request): Promise<Response> {
       pendingRequirements: accountStatus.pendingRequirements,
     })
   } catch (error) {
-    console.error('Error fetching Stripe account status:', error)
+    logger.error('Error fetching Stripe account status:', error)
     return Response.json({ error: 'Failed to fetch account status' }, { status: 500 })
   }
 }
@@ -249,7 +250,7 @@ export async function POST(req: Request): Promise<Response> {
       methodId,
     })
   } catch (error) {
-    console.error('Error starting Stripe onboarding:', error)
+    logger.error('Error starting Stripe onboarding:', error)
     return Response.json({ error: 'Failed to start onboarding' }, { status: 500 })
   }
 }

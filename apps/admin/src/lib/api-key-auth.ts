@@ -4,6 +4,7 @@
  */
 
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export interface TenantApiKeyResult {
   tenantId: string
@@ -34,7 +35,7 @@ export async function validateTenantApiKey(request: Request): Promise<TenantApiK
   sql`
     UPDATE public.tenant_api_keys SET last_used_at = NOW()
     WHERE api_key = ${apiKey}
-  `.catch((err) => console.error('Failed to update API key last_used_at:', err))
+  `.catch((err) => logger.error('Failed to update API key last_used_at:', err))
 
   return {
     tenantId: record.slug,

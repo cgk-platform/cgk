@@ -20,6 +20,7 @@ import {
   type QueueType,
 } from '@cgk-platform/communications'
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -69,7 +70,7 @@ export async function GET(
 
     return NextResponse.json({ entry })
   } catch (error) {
-    console.error('[email-queues] GET error:', error)
+    logger.error('[email-queues] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch entry' },
       { status: 500 }
@@ -139,7 +140,7 @@ export async function PATCH(
 
     return NextResponse.json({ entry: updatedEntry })
   } catch (error) {
-    console.error('[email-queues] PATCH error:', error)
+    logger.error('[email-queues] PATCH error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update entry' },
       { status: 500 }

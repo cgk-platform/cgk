@@ -1,6 +1,7 @@
 import { createGlobalCache, sql, withTenant } from '@cgk-platform/db'
 
 import type { BrandSummary, PaginatedBrands } from '../../../../../types/platform'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -171,7 +172,7 @@ export async function GET(request: Request): Promise<Response> {
 
     return Response.json(response)
   } catch (error) {
-    console.error('Failed to fetch brands:', error)
+    logger.error('Failed to fetch brands:', error)
     return Response.json({ error: 'Failed to fetch brands' }, { status: 500 })
   }
 }

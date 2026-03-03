@@ -9,6 +9,8 @@ import { tasks } from '@trigger.dev/sdk/v3'
 
 import type { ShopifyRefundPayload } from '../types'
 import { parseCents } from '../utils'
+import { createLogger } from "@cgk-platform/logging"
+const logger = createLogger({ meta: { service: "shopify" } })
 
 /**
  * Handle refunds/create webhook
@@ -122,7 +124,7 @@ export async function handleRefundCreate(
     }),
   ])
 
-  console.log(
+  logger.info(
     `[Webhook] Refund ${shopifyRefundId} created for order ${orderId}, amount: ${totalRefundCents} cents, tenant ${tenantId}`
   )
 }

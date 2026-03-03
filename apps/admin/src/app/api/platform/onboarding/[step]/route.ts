@@ -11,6 +11,7 @@ import {
   updateSession,
   type StepNumber,
 } from '@cgk-platform/onboarding'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * PATCH /api/platform/onboarding/[step]
@@ -117,7 +118,7 @@ export async function PATCH(
       step: stepProgress,
     })
   } catch (error) {
-    console.error('Error updating onboarding step:', error)
+    logger.error('Error updating onboarding step:', error)
     return NextResponse.json(
       { error: 'Failed to update onboarding step' },
       { status: 500 }

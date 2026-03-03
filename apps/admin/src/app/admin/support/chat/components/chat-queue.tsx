@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 
 import type { ChatSession } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 interface ChatQueueProps {
   tenantId: string
@@ -33,7 +34,7 @@ export function ChatQueue({ tenantId: _tenantId }: ChatQueueProps) {
         setLastUpdated(new Date())
       }
     } catch (error) {
-      console.error('Failed to fetch queue:', error)
+      logger.error('Failed to fetch queue:', error)
     } finally {
       setLoading(false)
     }
@@ -62,7 +63,7 @@ export function ChatQueue({ tenantId: _tenantId }: ChatQueueProps) {
         fetchQueue()
       }
     } catch (error) {
-      console.error('Failed to claim session:', error)
+      logger.error('Failed to claim session:', error)
     } finally {
       setClaiming(null)
     }

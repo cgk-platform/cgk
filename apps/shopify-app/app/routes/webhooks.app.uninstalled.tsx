@@ -1,11 +1,12 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
+import { logger } from '@cgk-platform/logging'
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { shop, session, topic } = await authenticate.webhook(request);
 
-  console.log(`Received ${topic} webhook for ${shop}`);
+  logger.info(`Received ${topic} webhook for ${shop}`);
 
   // Record app uninstallation in public schema (multi-tenant tracking)
   const { recordShopUninstallation } = await import('@cgk-platform/shopify')

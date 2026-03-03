@@ -9,6 +9,7 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { withTenant, sql } from '@cgk-platform/db'
 import { syncWebhookRegistrations } from '@cgk-platform/shopify/webhooks'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,7 +69,7 @@ export async function POST(req: Request): Promise<Response> {
         : 'All webhooks are in sync',
     })
   } catch (error) {
-    console.error('[API] Failed to sync webhooks:', error)
+    logger.error('[API] Failed to sync webhooks:', error)
     return Response.json(
       { error: 'Failed to sync webhooks' },
       { status: 500 }

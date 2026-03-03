@@ -9,6 +9,7 @@ import {
   revokeCreatorSession,
   type CreatorAuthContext,
 } from '@/lib/auth'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,7 +53,7 @@ export async function DELETE(
       message: 'Session revoked successfully',
     })
   } catch (error) {
-    console.error('Error revoking session:', error)
+    logger.error('Error revoking session:', error)
     return Response.json({ error: 'Failed to revoke session' }, { status: 500 })
   }
 }

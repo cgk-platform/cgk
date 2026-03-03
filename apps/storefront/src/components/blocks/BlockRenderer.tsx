@@ -84,6 +84,7 @@ import { TestimonialCarouselBlock } from './conversion/TestimonialCarouselBlock'
 import { GuaranteeBlock } from './conversion/GuaranteeBlock'
 import { UrgencyBannerBlock } from './conversion/UrgencyBannerBlock'
 import { ExitIntentBlock } from './conversion/ExitIntentBlock'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * Block component type - generic to handle various config types
@@ -249,7 +250,7 @@ export function BlockRenderer({ block, className }: BlockRendererProps) {
   // Validate block type
   if (!isValidBlockType(block.type)) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(
+      logger.warn(
         `[BlockRenderer] Unknown block type "${block.type}" - skipping block with id "${block.id}"`
       )
     }
@@ -262,7 +263,7 @@ export function BlockRenderer({ block, className }: BlockRendererProps) {
   // If no component is registered, show placeholder in dev
   if (!Component) {
     if (process.env.NODE_ENV === 'development') {
-      console.info(
+      logger.info(
         `[BlockRenderer] Block type "${block.type}" is registered but not implemented - showing placeholder`
       )
     }

@@ -6,6 +6,7 @@
 
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { submitProject, type SubmitProjectInput } from '@/lib/projects'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,7 +54,7 @@ export async function POST(req: Request, { params }: RouteParams): Promise<Respo
       message: 'Project submitted successfully',
     })
   } catch (error) {
-    console.error('Error submitting project:', error)
+    logger.error('Error submitting project:', error)
     const message = error instanceof Error ? error.message : 'Failed to submit project'
     return Response.json({ error: message }, { status: 400 })
   }

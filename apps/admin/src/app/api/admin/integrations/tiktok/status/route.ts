@@ -1,5 +1,6 @@
 import { getTenantContext } from '@cgk-platform/auth'
 import { getIntegrationStatus } from '@cgk-platform/integrations'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
     const status = await getIntegrationStatus(tenantId, 'tiktok')
     return Response.json(status)
   } catch (error) {
-    console.error('Failed to get TikTok status:', error)
+    logger.error('Failed to get TikTok status:', error)
     return Response.json(
       { error: error instanceof Error ? error.message : 'Failed to get status' },
       { status: 500 }

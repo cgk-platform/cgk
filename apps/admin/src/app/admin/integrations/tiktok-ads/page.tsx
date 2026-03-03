@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 
 import { ConnectionStatusBadge, OAuthConnectButton, SecureApiKeyInput } from '@/components/integrations'
 import type { TikTokAdsStatus } from '@/lib/integrations/types'
+import { logger } from '@cgk-platform/logging'
 
 export default function TikTokAdsPage() {
   const [status, setStatus] = useState<TikTokAdsStatus | null>(null)
@@ -28,7 +29,7 @@ export default function TikTokAdsPage() {
         if (data.pixelId) setPixelId(data.pixelId)
       }
     } catch (error) {
-      console.error('Failed to fetch TikTok Ads status:', error)
+      logger.error('Failed to fetch TikTok Ads status:', error)
     } finally {
       setLoading(false)
     }
@@ -58,7 +59,7 @@ export default function TikTokAdsPage() {
         })
       }
     } catch (error) {
-      console.error('Failed to disconnect:', error)
+      logger.error('Failed to disconnect:', error)
     }
   }
 
@@ -74,7 +75,7 @@ export default function TikTokAdsPage() {
         await fetchStatus()
       }
     } catch (error) {
-      console.error('Failed to save pixel config:', error)
+      logger.error('Failed to save pixel config:', error)
     } finally {
       setSaving(false)
     }

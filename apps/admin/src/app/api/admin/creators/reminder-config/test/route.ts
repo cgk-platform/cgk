@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { getCreator } from '@/lib/creators/db'
 import { getReminderConfigOrDefault, getApplicableReminderStep } from '@/lib/creators/lifecycle-db'
 import type { ReminderChainType } from '@/lib/creators/lifecycle-types'
+import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/admin/creators/reminder-config/test
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
       })
     }
   } catch (error) {
-    console.error('[reminder-config/test] POST error:', error)
+    logger.error('[reminder-config/test] POST error:', error)
     return NextResponse.json({ error: 'Failed to test reminder' }, { status: 500 })
   }
 }

@@ -1,5 +1,6 @@
 import { sql } from '@cgk-platform/db'
 import { NextResponse, type NextRequest } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   } catch (error) {
-    console.error('Migration failed:', error)
+    logger.error('Migration failed:', error)
     return NextResponse.json(
       {
         success: false,

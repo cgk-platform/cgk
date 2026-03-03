@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Button, Card, CardContent, CardHeader, Input, Label, Textarea } from '@cgk-platform/ui'
 import { Save } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -207,11 +208,15 @@ export function GlobalSEOSettings({ settings: initialSettings }: GlobalSEOSettin
               </p>
               <div className="overflow-hidden rounded-lg border">
                 {settings.og_default_image ? (
-                  <img
-                    src={settings.og_default_image}
-                    alt="OG Preview"
-                    className="aspect-[1200/630] w-full bg-muted object-cover"
-                  />
+                  <div className="relative aspect-[1200/630] w-full bg-muted">
+                    <Image
+                      src={settings.og_default_image}
+                      alt="OG Preview"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
                 ) : (
                   <div className="flex aspect-[1200/630] items-center justify-center bg-muted text-sm text-muted-foreground">
                     No default image set

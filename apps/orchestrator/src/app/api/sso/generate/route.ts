@@ -6,6 +6,7 @@
 
 import { generateSSOToken, requireAuth, type TargetApp } from '@cgk-platform/auth'
 import { NextResponse, type NextRequest } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       expiresIn: 300, // 5 minutes in seconds
     })
   } catch (error) {
-    console.error('Failed to generate SSO token:', error)
+    logger.error('Failed to generate SSO token:', error)
     return NextResponse.json(
       { error: 'Failed to generate SSO token' },
       { status: 500 }

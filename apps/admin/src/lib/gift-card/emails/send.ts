@@ -7,6 +7,7 @@ import type { GiftCardEmail, GiftCardSettings, GiftCardTransaction } from '../ty
 import { markEmailSent, markEmailFailed, getPendingEmailsToSend } from '../db/emails'
 import { getGiftCardTransactionById } from '../db/transactions'
 import { getGiftCardSettings } from '../settings'
+import { logger } from '@cgk-platform/logging'
 /**
  * Format cents to currency string
  */
@@ -158,7 +159,7 @@ export async function sendEmail(
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   // If no tenant ID, fall back to placeholder behavior
   if (!tenantId) {
-    console.log(`sendEmail: No tenantId provided, using placeholder for ${rendered.to}`)
+    logger.info(`sendEmail: No tenantId provided, using placeholder for ${rendered.to}`)
     const mockMessageId = `msg_${Date.now()}`
     return { success: true, messageId: mockMessageId }
   }
@@ -172,7 +173,7 @@ export async function sendEmail(
     // Get tenant's Resend client
     const resend = await getTenantResendClient(tenantId)
     if (!resend) {
-      console.warn(`sendEmail: Resend not configured for tenant ${tenantId}`)
+      logger.warn(`sendEmail: Resend not configured for tenant ${tenantId}`)
       // Return success with placeholder to not block the flow
       const mockMessageId = `msg_placeholder_${Date.now()}`
       return {
@@ -196,7 +197,7 @@ export async function sendEmail(
     })
 
     if (result.error) {
-      console.error('Resend API error:', result.error)
+      logger.error('Resend API error:', result.error)
       return {
         success: false,
         error: result.error.message || 'Failed to send email',
@@ -207,14 +208,14 @@ export async function sendEmail(
       return { success: false, error: 'No message ID returned from Resend' }
     }
 
-    console.log(`sendEmail: Successfully sent to ${rendered.to}, messageId: ${result.data.id}`)
+    logger.info(`sendEmail: Successfully sent to ${rendered.to}, messageId: ${result.data.id}`)
 
     return {
       success: true,
       messageId: result.data.id,
     }
   } catch (error) {
-    console.error('sendEmail error:', error)
+    logger.error('sendEmail error:', error)
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send email',

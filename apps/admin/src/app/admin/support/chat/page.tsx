@@ -8,6 +8,7 @@ import { Badge, Button, Card, CardContent, CardHeader, CardTitle } from '@cgk-pl
 import { ChatQueue } from './components/chat-queue'
 
 import type { ChatSession } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 interface ActiveSession extends ChatSession {
   unreadCount?: number
@@ -26,7 +27,7 @@ export default function ChatManagementPage() {
           setActiveSessions(data.sessions)
         }
       } catch (error) {
-        console.error('Failed to fetch active sessions:', error)
+        logger.error('Failed to fetch active sessions:', error)
       } finally {
         setLoading(false)
       }

@@ -7,6 +7,7 @@
 import { requireAuth } from '@cgk-platform/auth'
 import { NextResponse } from 'next/server'
 import { getPendingDocuments } from '@/lib/esign'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(pending)
   } catch (error) {
-    console.error('Error fetching pending documents:', error)
+    logger.error('Error fetching pending documents:', error)
     return NextResponse.json(
       { error: 'Failed to fetch pending documents' },
       { status: 500 }

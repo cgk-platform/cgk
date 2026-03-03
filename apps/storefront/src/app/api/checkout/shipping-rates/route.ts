@@ -12,6 +12,7 @@ import type { NextRequest } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
 
 import { getTenantSlug, getTenantConfig } from '@/lib/tenant'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -152,7 +153,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       subtotalCents = cartResult.rows[0]?.subtotal_cents ?? 0
     } catch {
       // Cart table may not exist, continue with default rates
-      console.warn('[shipping-rates] Could not fetch cart data')
+      logger.warn('[shipping-rates] Could not fetch cart data')
     }
 
     // Try to get tenant-configured shipping rates
@@ -191,7 +192,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     } catch {
       // Shipping rates table doesn't exist, use defaults
-      console.debug('[shipping-rates] Using default rates (table not found)')
+      logger.debug('[shipping-rates] Using default rates (table not found)')
     }
 
     // Fall back to default rates if none configured
@@ -228,7 +229,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       cartSubtotal: subtotalCents / 100,
     })
   } catch (error) {
-    console.error('[shipping-rates] Error:', error)
+    logger.error('[shipping-rates] Error:', error)
 
     // Return fallback rates on error
     return NextResponse.json({

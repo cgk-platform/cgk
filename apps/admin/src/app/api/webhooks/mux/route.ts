@@ -21,6 +21,7 @@ import {
 } from '@cgk-platform/video/server'
 import { getThumbnailUrl } from '@cgk-platform/video'
 import { NextResponse } from 'next/server'
+import { logger } from '@cgk-platform/logging'
 
 export async function POST(request: Request) {
   // Get raw body for signature verification
@@ -28,14 +29,14 @@ export async function POST(request: Request) {
   const signature = request.headers.get('mux-signature')
 
   if (!signature) {
-    console.error('[Mux Webhook] Missing signature')
+    logger.error('[Mux Webhook] Missing signature')
     return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
   }
 
   // Verify webhook signature
   const { valid, error: verifyError } = verifyWebhookSignature(body, signature)
   if (!valid) {
-    console.error('[Mux Webhook] Invalid signature:', verifyError)
+    logger.error('[Mux Webhook] Invalid signature:', verifyError)
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
@@ -44,11 +45,11 @@ export async function POST(request: Request) {
   try {
     payload = parseWebhookPayload(body)
   } catch (error) {
-    console.error('[Mux Webhook] Failed to parse payload:', error)
+    logger.error('[Mux Webhook] Failed to parse payload:', error)
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
-  console.log('[Mux Webhook] Received event:', payload.type, payload.data.id)
+  logger.info('[Mux Webhook] Received event:', payload.type, payload.data.id)
 
   // Check idempotency - prevent duplicate processing
   // Mux webhooks are identified by type + data.id combination
@@ -59,14 +60,14 @@ export async function POST(request: Request) {
   })
 
   if (isDuplicate) {
-    console.log('[Mux Webhook] Duplicate event ignored:', eventId)
+    logger.info('[Mux Webhook] Duplicate event ignored:', eventId)
     return NextResponse.json({ received: true, duplicate: true })
   }
 
   // Process the webhook event
   await processWebhookEvent(payload, {
     onUploadAssetCreated: async (uploadId: string, assetId: string) => {
-      console.log('[Mux Webhook] Upload asset created:', uploadId, assetId)
+      logger.info('[Mux Webhook] Upload asset created:', uploadId, assetId)
 
       // Find video by upload ID across all tenants
       // This requires checking the passthrough data or querying all tenants
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
       `
 
       if (result.rows.length === 0) {
-        console.error('[Mux Webhook] No video found for upload:', uploadId)
+        logger.error('[Mux Webhook] No video found for upload:', uploadId)
         return
       }
 
@@ -100,7 +101,7 @@ export async function POST(request: Request) {
         `
       })
 
-      console.log('[Mux Webhook] Updated video with asset ID:', videoId, assetId)
+      logger.info('[Mux Webhook] Updated video with asset ID:', videoId, assetId)
     },
 
     onAssetReady: async (
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
       playbackId: string | null,
       duration: number | null,
     ) => {
-      console.log('[Mux Webhook] Asset ready:', assetId, playbackId, duration)
+      logger.info('[Mux Webhook] Asset ready:', assetId, playbackId, duration)
 
       // Find video by asset ID
       const result = await sql`
@@ -119,7 +120,7 @@ export async function POST(request: Request) {
       `
 
       if (result.rows.length === 0) {
-        console.error('[Mux Webhook] No video found for asset:', assetId)
+        logger.error('[Mux Webhook] No video found for asset:', assetId)
         return
       }
 
@@ -147,11 +148,11 @@ export async function POST(request: Request) {
         `
       })
 
-      console.log('[Mux Webhook] Video ready:', videoId)
+      logger.info('[Mux Webhook] Video ready:', videoId)
     },
 
     onAssetErrored: async (assetId: string, error: string) => {
-      console.error('[Mux Webhook] Asset errored:', assetId, error)
+      logger.error('[Mux Webhook] Asset errored:', assetId, error)
 
       // Find video by asset ID
       const result = await sql`
@@ -162,7 +163,7 @@ export async function POST(request: Request) {
       `
 
       if (result.rows.length === 0) {
-        console.error('[Mux Webhook] No video found for asset:', assetId)
+        logger.error('[Mux Webhook] No video found for asset:', assetId)
         return
       }
 
@@ -176,22 +177,22 @@ export async function POST(request: Request) {
         await updateVideoStatus(tenantId, videoId, 'error', error)
       })
 
-      console.log('[Mux Webhook] Video marked as error:', videoId)
+      logger.info('[Mux Webhook] Video marked as error:', videoId)
     },
 
     onStaticRenditionsReady: async (assetId: string) => {
-      console.log('[Mux Webhook] Static renditions ready:', assetId)
+      logger.info('[Mux Webhook] Static renditions ready:', assetId)
       // This event can be used to trigger transcription
       // The transcription job would be triggered here
     },
 
     onUploadCancelled: async (uploadId: string) => {
-      console.log('[Mux Webhook] Upload cancelled:', uploadId)
+      logger.info('[Mux Webhook] Upload cancelled:', uploadId)
       // Optionally mark video as cancelled
     },
 
     onUploadErrored: async (uploadId: string, error: string) => {
-      console.error('[Mux Webhook] Upload errored:', uploadId, error)
+      logger.error('[Mux Webhook] Upload errored:', uploadId, error)
 
       // Find video by upload ID
       const result = await sql`
@@ -202,7 +203,7 @@ export async function POST(request: Request) {
       `
 
       if (result.rows.length === 0) {
-        console.error('[Mux Webhook] No video found for upload:', uploadId)
+        logger.error('[Mux Webhook] No video found for upload:', uploadId)
         return
       }
 
@@ -218,7 +219,7 @@ export async function POST(request: Request) {
     },
 
     onAssetDeleted: async (assetId: string) => {
-      console.log('[Mux Webhook] Asset deleted:', assetId)
+      logger.info('[Mux Webhook] Asset deleted:', assetId)
       // Clean up mapping if needed
     },
   })

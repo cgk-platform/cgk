@@ -16,6 +16,7 @@ import {
   submitSurveyResponse,
   type CSATRating,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -76,7 +77,7 @@ export async function GET(req: NextRequest) {
       expiresAt: survey.expiresAt,
     })
   } catch (error) {
-    console.error('[support/csat] GET error:', error)
+    logger.error('[support/csat] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch survey' },
       { status: 500 }
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
       message: 'Thank you for your feedback!',
     })
   } catch (error) {
-    console.error('[support/csat] POST error:', error)
+    logger.error('[support/csat] POST error:', error)
 
     const errorMessage = error instanceof Error ? error.message : 'Failed to submit response'
 

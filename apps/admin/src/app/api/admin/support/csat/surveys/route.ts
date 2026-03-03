@@ -19,6 +19,7 @@ import {
   type CSATRating,
   type CSATSurveyFilters,
 } from '@cgk-platform/support'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -103,7 +104,7 @@ export async function GET(req: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('[csat/surveys] GET error:', error)
+    logger.error('[csat/surveys] GET error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch surveys' },
       { status: 500 }
@@ -151,7 +152,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ survey }, { status: 201 })
   } catch (error) {
-    console.error('[csat/surveys] POST error:', error)
+    logger.error('[csat/surveys] POST error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create survey' },
       { status: 500 }

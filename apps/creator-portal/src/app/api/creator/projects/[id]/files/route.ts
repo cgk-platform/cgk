@@ -8,6 +8,7 @@
 import { requireCreatorAuth, type CreatorAuthContext } from '@/lib/auth'
 import { getProjectFiles } from '@/lib/projects'
 import { uploadProjectFileFromBuffer, removeProjectFile, MAX_FILE_SIZE, ALL_ALLOWED_TYPES } from '@/lib/files/upload'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -43,7 +44,7 @@ export async function GET(req: Request, { params }: RouteParams): Promise<Respon
 
     return Response.json({ files })
   } catch (error) {
-    console.error('Error fetching project files:', error)
+    logger.error('Error fetching project files:', error)
     const message = error instanceof Error ? error.message : 'Failed to fetch files'
     return Response.json({ error: message }, { status: 400 })
   }
@@ -120,7 +121,7 @@ export async function POST(req: Request, { params }: RouteParams): Promise<Respo
       message: 'File uploaded successfully',
     })
   } catch (error) {
-    console.error('Error uploading file:', error)
+    logger.error('Error uploading file:', error)
     const message = error instanceof Error ? error.message : 'Failed to upload file'
     return Response.json({ error: message }, { status: 400 })
   }
@@ -164,7 +165,7 @@ export async function DELETE(req: Request, { params }: RouteParams): Promise<Res
 
     return Response.json({ message: 'File deleted successfully' })
   } catch (error) {
-    console.error('Error deleting file:', error)
+    logger.error('Error deleting file:', error)
     const message = error instanceof Error ? error.message : 'Failed to delete file'
     return Response.json({ error: message }, { status: 400 })
   }

@@ -8,6 +8,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 import { deleteStaleSegments, getCachedSegments, upsertCachedSegment } from '@/lib/segments/db'
+import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -53,7 +54,7 @@ export async function GET(req: Request) {
       totalPages: Math.ceil(result.totalCount / limit),
     })
   } catch (error) {
-    console.error('Failed to fetch Shopify segments:', error)
+    logger.error('Failed to fetch Shopify segments:', error)
     return NextResponse.json({ error: 'Failed to fetch segments' }, { status: 500 })
   }
 }
@@ -119,7 +120,7 @@ export async function POST(req: Request) {
       note: 'In production, this triggers a background job to fetch segments from Shopify Admin API.',
     })
   } catch (error) {
-    console.error('Failed to sync Shopify segments:', error)
+    logger.error('Failed to sync Shopify segments:', error)
     return NextResponse.json({ error: 'Failed to sync segments' }, { status: 500 })
   }
 }
