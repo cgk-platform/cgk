@@ -1,5 +1,6 @@
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import nextPlugin from "@next/eslint-plugin-next";
 
 import baseConfig from "./index.js";
 
@@ -7,10 +8,11 @@ import baseConfig from "./index.js";
 export default [
   ...baseConfig,
   {
-    files: ["**/*.tsx", "**/*.jsx"],
+    files: ["**/*.tsx", "**/*.jsx", "**/*.ts", "**/*.js"],
     plugins: {
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
+      "@next/next": nextPlugin,
     },
     settings: {
       react: {
@@ -20,6 +22,8 @@ export default [
     rules: {
       ...reactPlugin.configs.recommended.rules,
       ...reactHooksPlugin.configs.recommended.rules,
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs["core-web-vitals"].rules,
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
       "react/no-unescaped-entities": "off",
