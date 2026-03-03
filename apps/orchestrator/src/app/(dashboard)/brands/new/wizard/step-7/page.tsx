@@ -23,6 +23,7 @@ import {
   ShoppingBag,
   SkipForward,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useCallback, useEffect, useState } from 'react'
@@ -298,8 +299,8 @@ function Step7Content() {
         </div>
         <h1 className="text-2xl font-bold tracking-tight">Import Products</h1>
         <p className="text-muted-foreground">
-          Sync your products from Shopify to enable local features like reviews,
-          attribution, and analytics.
+          Sync your products from Shopify to enable local features like reviews, attribution, and
+          analytics.
         </p>
       </div>
 
@@ -368,9 +369,7 @@ function Step7Content() {
                     </p>
                   </div>
                 </div>
-                {syncStatus.status === 'completed' && (
-                  <Badge variant="success">Synced</Badge>
-                )}
+                {syncStatus.status === 'completed' && <Badge variant="success">Synced</Badge>}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -458,23 +457,22 @@ function Step7Content() {
               <CardContent>
                 <div className="grid gap-3">
                   {products.slice(0, 5).map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex items-center gap-3 rounded-lg border p-3"
-                    >
+                    <div key={product.id} className="flex items-center gap-3 rounded-lg border p-3">
                       <div className="flex h-12 w-12 items-center justify-center rounded bg-muted">
                         {product.images[0] ? (
-                          <img
+                          <Image
                             src={product.images[0].url}
                             alt={product.title}
+                            width={48}
+                            height={48}
                             className="h-12 w-12 rounded object-cover"
                           />
                         ) : (
                           <Package className="h-6 w-6 text-muted-foreground" />
                         )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{product.title}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{product.title}</p>
                         <p className="text-xs text-muted-foreground">
                           {product.productType || 'Uncategorized'} &bull; {product.vendor}
                         </p>

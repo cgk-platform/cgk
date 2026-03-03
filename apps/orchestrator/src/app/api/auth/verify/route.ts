@@ -28,10 +28,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as VerifyRequestBody
 
     if (!body.email || !body.token) {
-      return Response.json(
-        { error: 'Email and token are required' },
-        { status: 400 }
-      )
+      return Response.json({ error: 'Email and token are required' }, { status: 400 })
     }
 
     const email = body.email.toLowerCase().trim()
@@ -53,11 +50,7 @@ export async function POST(request: Request) {
 
     // Handle invite - add user to organization
     if (verification.purpose === 'invite' && verification.orgId) {
-      await addUserToOrganization(
-        userId,
-        verification.orgId,
-        verification.inviteRole || 'member'
-      )
+      await addUserToOrganization(userId, verification.orgId, verification.inviteRole || 'member')
     }
 
     // Update last login
@@ -78,7 +71,7 @@ export async function POST(request: Request) {
         WHERE status IN ('active', 'onboarding', 'suspended')
         ORDER BY name ASC
       `
-      orgs = orgsResult.rows.map((row: any) => ({
+      orgs = orgsResult.rows.map((row) => ({
         id: row.id as string,
         slug: row.slug as string,
         role: 'super_admin' as const,
@@ -131,9 +124,7 @@ export async function POST(request: Request) {
         name: user.name,
         role: currentRole,
       },
-      organization: currentOrgId
-        ? { id: currentOrgId, slug: currentOrgSlug }
-        : null,
+      organization: currentOrgId ? { id: currentOrgId, slug: currentOrgSlug } : null,
     })
 
     return setAuthCookie(response, jwt)
@@ -141,15 +132,9 @@ export async function POST(request: Request) {
     console.error('Verify error:', error)
 
     if (error instanceof Error && error.message === 'Invalid or expired magic link') {
-      return Response.json(
-        { error: 'Invalid or expired magic link' },
-        { status: 400 }
-      )
+      return Response.json({ error: 'Invalid or expired magic link' }, { status: 400 })
     }
 
-    return Response.json(
-      { error: 'Verification failed' },
-      { status: 500 }
-    )
+    return Response.json({ error: 'Verification failed' }, { status: 500 })
   }
 }

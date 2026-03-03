@@ -1,6 +1,7 @@
 'use client'
 
 import { cn } from '@cgk-platform/ui'
+import Image from 'next/image'
 
 interface UserAvatarProps {
   name: string | null
@@ -14,6 +15,13 @@ const sizeClasses = {
   md: 'h-10 w-10 text-sm',
   lg: 'h-12 w-12 text-base',
   xl: 'h-16 w-16 text-lg',
+}
+
+const sizePixels = {
+  sm: 32,
+  md: 40,
+  lg: 48,
+  xl: 64,
 }
 
 /**
@@ -36,13 +44,13 @@ function getInitials(name: string | null): string {
 function stringToColor(str: string): string {
   // Theme-compatible color palette using HSL values that work with the design system
   const colors = [
-    'bg-primary',           // Deep Navy
-    'bg-primary/80',        // Lighter Navy
-    'bg-gold',              // Gold accent
-    'bg-gold/80',           // Lighter Gold
-    'bg-info',              // Info blue
-    'bg-success',           // Success green
-    'bg-warning',           // Warning amber
+    'bg-primary', // Deep Navy
+    'bg-primary/80', // Lighter Navy
+    'bg-gold', // Gold accent
+    'bg-gold/80', // Lighter Gold
+    'bg-info', // Info blue
+    'bg-success', // Success green
+    'bg-warning', // Warning amber
     'bg-[hsl(280,60%,50%)]', // Purple (theme-compatible)
     'bg-[hsl(340,60%,50%)]', // Pink (theme-compatible)
     'bg-[hsl(180,60%,40%)]', // Teal (theme-compatible)
@@ -62,17 +70,16 @@ function stringToColor(str: string): string {
 export function UserAvatar({ name, avatarUrl, size = 'md', className }: UserAvatarProps) {
   const initials = getInitials(name)
   const colorClass = stringToColor(name || 'unknown')
+  const pixelSize = sizePixels[size]
 
   if (avatarUrl) {
     return (
-      <img
+      <Image
         src={avatarUrl}
         alt={name || 'User avatar'}
-        className={cn(
-          'rounded-full object-cover',
-          sizeClasses[size],
-          className
-        )}
+        width={pixelSize}
+        height={pixelSize}
+        className={cn('rounded-full object-cover', sizeClasses[size], className)}
       />
     )
   }

@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const offset = (page - 1) * limit
 
-    // Get organizations
+    // Get organizations from public.organizations table
     const result = await sql`
       SELECT
         id,
@@ -44,13 +44,13 @@ export async function GET(request: Request) {
     const total = parseInt(countResult.rows[0]?.count || '0')
 
     return NextResponse.json({
-      organizations: result.rows.map((row: any) => ({
-        id: row.id,
-        name: row.name,
-        slug: row.slug,
-        status: row.status,
-        shopifyStoreDomain: row.shopify_store_domain,
-        createdAt: row.created_at,
+      organizations: result.rows.map((row) => ({
+        id: row.id as string,
+        name: row.name as string,
+        slug: row.slug as string,
+        status: row.status as string,
+        shopifyStoreDomain: row.shopify_store_domain as string | null,
+        createdAt: row.created_at as string,
       })),
       total,
       page,

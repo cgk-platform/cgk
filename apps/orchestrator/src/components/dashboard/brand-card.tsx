@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge, Card, cn, StatusDot } from '@cgk-platform/ui'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import type { BrandSummary } from '../../types/platform'
@@ -64,9 +65,11 @@ export function BrandCard({ brand, className }: BrandCardProps) {
           {/* Logo / Initials */}
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold">
             {brand.logoUrl ? (
-              <img
+              <Image
                 src={brand.logoUrl}
                 alt={`${brand.name} logo`}
+                width={40}
+                height={40}
                 className="h-10 w-10 rounded-lg object-cover"
               />
             ) : (
@@ -77,9 +80,7 @@ export function BrandCard({ brand, className }: BrandCardProps) {
           {/* Name & Slug */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="truncate font-semibold group-hover:text-primary">
-                {brand.name}
-              </h3>
+              <h3 className="truncate font-semibold group-hover:text-primary">{brand.name}</h3>
               <StatusDot
                 status={
                   brand.health === 'healthy'
@@ -91,9 +92,7 @@ export function BrandCard({ brand, className }: BrandCardProps) {
                 size="sm"
               />
             </div>
-            <p className="truncate text-sm text-muted-foreground">
-              {brand.slug}
-            </p>
+            <p className="truncate text-sm text-muted-foreground">{brand.slug}</p>
           </div>
 
           {/* Status Badge */}
@@ -140,14 +139,8 @@ export function BrandCard({ brand, className }: BrandCardProps) {
 
         {/* Integration Badges */}
         <div className="mt-3 flex items-center gap-2">
-          <IntegrationBadge
-            name="Shopify"
-            connected={brand.shopifyConnected}
-          />
-          <IntegrationBadge
-            name="Stripe"
-            connected={brand.stripeConnected}
-          />
+          <IntegrationBadge name="Shopify" connected={brand.shopifyConnected} />
+          <IntegrationBadge name="Stripe" connected={brand.stripeConnected} />
         </div>
       </Card>
     </Link>
@@ -167,9 +160,7 @@ function IntegrationBadge({ name, connected }: IntegrationBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-medium',
-        connected
-          ? 'bg-green-500/10 text-green-500'
-          : 'bg-muted text-muted-foreground/50'
+        connected ? 'bg-green-500/10 text-green-500' : 'bg-muted text-muted-foreground/50'
       )}
     >
       <span

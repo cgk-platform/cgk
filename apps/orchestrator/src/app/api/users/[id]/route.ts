@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     const { id } = await params
 
-    // Get user with memberships
+    // Get user from public.users table
     const userResult = await sql`
       SELECT
         u.id,
@@ -39,7 +39,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Get memberships
+    // Get memberships from public.team_memberships JOIN public.organizations
     const membershipsResult = await sql`
       SELECT
         tm.id,
@@ -64,14 +64,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       lastLoginAt: user.last_login_at,
       createdAt: user.created_at,
       isSuperAdmin: user.is_super_admin,
-      memberships: membershipsResult.rows.map((m: any) => ({
-        id: m.id,
-        role: m.role,
-        createdAt: m.created_at,
+      memberships: membershipsResult.rows.map((m) => ({
+        id: m.id as string,
+        role: m.role as string,
+        createdAt: m.created_at as string,
         organization: {
-          id: m.organization_id,
-          name: m.organization_name,
-          slug: m.organization_slug,
+          id: m.organization_id as string,
+          name: m.organization_name as string,
+          slug: m.organization_slug as string,
         },
       })),
     })
@@ -97,7 +97,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const { name, status, isSuperAdmin } = body
 
     const updates: string[] = []
-    const values: any[] = []
+    const values: (string | boolean)[] = []
     let paramIndex = 1
 
     if (name !== undefined) {

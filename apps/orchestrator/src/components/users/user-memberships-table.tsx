@@ -1,6 +1,7 @@
 'use client'
 
 import { Badge, cn } from '@cgk-platform/ui'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface UserMembership {
@@ -81,9 +82,11 @@ export function UserMembershipsTable({ memberships, className }: UserMemberships
               <td className="px-4 py-3">
                 <div className="flex items-center gap-3">
                   {membership.tenantLogoUrl ? (
-                    <img
+                    <Image
                       src={membership.tenantLogoUrl}
                       alt={membership.tenantName}
+                      width={32}
+                      height={32}
                       className="h-8 w-8 rounded object-cover"
                     />
                   ) : (
@@ -98,9 +101,7 @@ export function UserMembershipsTable({ memberships, className }: UserMemberships
                     >
                       {membership.tenantName}
                     </Link>
-                    <div className="text-sm text-muted-foreground">
-                      {membership.tenantSlug}
-                    </div>
+                    <div className="text-sm text-muted-foreground">{membership.tenantSlug}</div>
                   </div>
                 </div>
               </td>

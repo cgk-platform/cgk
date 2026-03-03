@@ -1,14 +1,8 @@
 'use client'
 
 import { Badge, Button, Card, CardContent, CardHeader, cn, StatusDot } from '@cgk-platform/ui'
-import {
-  ArrowLeft,
-  ExternalLink,
-  RefreshCw,
-  Settings,
-  ShoppingBag,
-  CreditCard,
-} from 'lucide-react'
+import { ArrowLeft, ExternalLink, RefreshCw, Settings, ShoppingBag, CreditCard } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -42,9 +36,7 @@ export default function BrandDetailPage() {
       const response = await fetch('/api/platform/overview/brands?pageSize=50')
       if (response.ok) {
         const result = await response.json()
-        const foundBrand = result.brands.find(
-          (b: BrandSummary) => b.id === brandId
-        )
+        const foundBrand = result.brands.find((b: BrandSummary) => b.id === brandId)
         if (foundBrand) {
           setBrand(foundBrand)
         } else {
@@ -66,10 +58,7 @@ export default function BrandDetailPage() {
   }, [fetchBrand])
 
   // Generate SSO token and open app
-  const openAppWithSSO = async (
-    targetApp: 'admin' | 'storefront',
-    tenantSlug: string
-  ) => {
+  const openAppWithSSO = async (targetApp: 'admin' | 'storefront', tenantSlug: string) => {
     setIsGeneratingToken(true)
     try {
       // Generate SSO token
@@ -115,9 +104,7 @@ export default function BrandDetailPage() {
   if (error || !brand) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-lg font-medium text-muted-foreground">
-          {error || 'Brand not found'}
-        </p>
+        <p className="text-lg font-medium text-muted-foreground">{error || 'Brand not found'}</p>
         <Link href="/brands">
           <Button variant="outline" className="mt-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -142,9 +129,11 @@ export default function BrandDetailPage() {
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-lg font-bold">
               {brand.logoUrl ? (
-                <img
+                <Image
                   src={brand.logoUrl}
                   alt={brand.name}
+                  width={48}
+                  height={48}
                   className="h-12 w-12 rounded-lg object-cover"
                 />
               ) : (
@@ -221,19 +210,13 @@ export default function BrandDetailPage() {
             <IntegrationCard
               name="Shopify"
               connected={brand.shopifyConnected}
-              description={
-                brand.shopifyConnected
-                  ? 'Connected and syncing'
-                  : 'Not connected'
-              }
+              description={brand.shopifyConnected ? 'Connected and syncing' : 'Not connected'}
             />
             <IntegrationCard
               name="Stripe"
               connected={brand.stripeConnected}
               description={
-                brand.stripeConnected
-                  ? 'Connected and processing payments'
-                  : 'Not connected'
+                brand.stripeConnected ? 'Connected and processing payments' : 'Not connected'
               }
             />
           </div>

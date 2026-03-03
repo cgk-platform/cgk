@@ -83,16 +83,16 @@ export async function GET(request: Request) {
     const usersResult = await sql.query(usersQuery, params)
 
     return NextResponse.json({
-      users: usersResult.rows.map((row: any) => ({
-        id: row.id,
-        email: row.email,
-        name: row.name,
-        avatarUrl: row.avatar_url,
-        status: row.status,
-        role: row.is_super_admin ? 'Super Admin' : 'User',
-        emailVerified: row.email_verified,
-        lastLoginAt: row.last_login_at,
-        createdAt: row.created_at,
+      users: usersResult.rows.map((row) => ({
+        id: row.id as string,
+        email: row.email as string,
+        name: row.name as string | null,
+        avatarUrl: row.avatar_url as string | null,
+        status: row.status as string,
+        role: (row.is_super_admin as boolean) ? 'Super Admin' : 'User',
+        emailVerified: row.email_verified as boolean,
+        lastLoginAt: row.last_login_at as string | null,
+        createdAt: row.created_at as string,
         tenantCount: parseInt(row.tenant_count),
         isSuperAdmin: row.is_super_admin,
       })),
@@ -122,10 +122,7 @@ export async function POST(request: Request) {
     const { email, name, organizationId, role = 'admin', sendInvite = true } = body
 
     if (!email || !organizationId) {
-      return NextResponse.json(
-        { error: 'Email and organization ID are required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email and organization ID are required' }, { status: 400 })
     }
 
     // Check if user already exists
@@ -171,7 +168,8 @@ export async function POST(request: Request) {
     // Send invitation email if requested
     if (sendInvite) {
       try {
-        const org = await sql`SELECT name, slug FROM public.organizations WHERE id = ${organizationId}`
+        const org =
+          await sql`SELECT name, slug FROM public.organizations WHERE id = ${organizationId}`
         const orgName = org.rows[0]?.name || 'CGK Platform'
 
         // TODO: Implement email sending via queue system
