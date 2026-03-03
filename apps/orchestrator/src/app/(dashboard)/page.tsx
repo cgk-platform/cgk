@@ -1,7 +1,7 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useCallback, useEffect, useState } from 'react'
 
 import { AlertFeed } from '../../components/dashboard/alert-feed'
 import { BrandsGrid } from '../../components/dashboard/brands-grid'
