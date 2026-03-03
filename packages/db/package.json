@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/logging": "workspace:*",
     "@neondatabase/serverless": "^1.0.2",
     "@vercel/postgres": "^0.10.0"
   },
