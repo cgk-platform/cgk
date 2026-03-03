@@ -20,8 +20,9 @@ import {
 export async function DELETE() {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
+  const tenantId = headerList.get('x-tenant-id')
 
-  if (!tenantSlug) {
+  if (!tenantSlug || !tenantId) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 400 })
   }
 
@@ -35,7 +36,7 @@ export async function DELETE() {
 
     // Try to unregister webhooks first (may fail if token already invalid)
     try {
-      await unregisterWebhooks(tenantSlug)
+      await unregisterWebhooks(tenantId)
     } catch (error) {
       console.warn('[shopify-disconnect] Failed to unregister webhooks:', error)
     }
@@ -44,7 +45,7 @@ export async function DELETE() {
     await disconnectStore(tenantSlug)
 
     // Clear cached credentials
-    await clearCredentialsCache(tenantSlug)
+    await clearCredentialsCache(tenantId)
 
     console.log(`[shopify-disconnect] Disconnected tenant ${tenantSlug}`)
 
@@ -53,15 +54,9 @@ export async function DELETE() {
     console.error('[shopify-disconnect] Error:', error)
 
     if (error instanceof ShopifyError) {
-      return NextResponse.json(
-        { error: error.message, code: error.code },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })
     }
 
-    return NextResponse.json(
-      { error: 'Failed to disconnect' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to disconnect' }, { status: 500 })
   }
 }
