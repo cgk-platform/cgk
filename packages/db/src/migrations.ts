@@ -24,11 +24,7 @@ export type {
 } from './migrations/types.js'
 
 // Loader (Node.js only - uses fs/path)
-export {
-  loadMigrations,
-  loadPublicMigrations,
-  loadTenantMigrations,
-} from './migrations/loader.js'
+export { loadMigrations, loadPublicMigrations, loadTenantMigrations } from './migrations/loader.js'
 
 // Runner (Node.js only - depends on loader)
 export {
@@ -38,3 +34,11 @@ export {
   runTenantMigrations,
   tenantSchemaExists,
 } from './migrations/runner.js'
+
+// Auto-migration (Node.js only)
+export {
+  autoMigrateAllTenants,
+  autoMigrateTenant,
+  checkAndMigrate,
+  hasPendingMigrations,
+} from './migrations/auto-migrate.js'

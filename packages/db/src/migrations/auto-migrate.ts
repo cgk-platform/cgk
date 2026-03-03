@@ -35,10 +35,9 @@ export async function autoMigrateTenant(
   tenantSlug: string,
   options: {
     dryRun?: boolean
-    maxMigrations?: number
   } = {}
 ): Promise<{ applied: number; errors: number }> {
-  const { dryRun = false, maxMigrations = 100 } = options
+  const { dryRun = false } = options
 
   try {
     const schemaName = `tenant_${tenantSlug}`
@@ -54,9 +53,6 @@ export async function autoMigrateTenant(
       pending: status.pending.length,
       dryRun,
     })
-
-    // Limit number of migrations to prevent blocking for too long
-    const limitedPending = status.pending.slice(0, maxMigrations)
 
     const results = await runTenantMigrations(tenantSlug, {
       dryRun,
@@ -81,9 +77,8 @@ export async function autoMigrateTenant(
 
     return { applied, errors }
   } catch (error) {
-    logger.error('Auto-migration failed', {
+    logger.error('Auto-migration failed', error instanceof Error ? error : undefined, {
       tenant: tenantSlug,
-      error: error instanceof Error ? error.message : String(error),
     })
     return { applied: 0, errors: 1 }
   }
@@ -95,16 +90,17 @@ export async function autoMigrateTenant(
  * Runs pending migrations on all active tenants.
  * Call this on platform startup or via a cron job.
  */
-export async function autoMigrateAllTenants(options: {
-  dryRun?: boolean
-  maxMigrations?: number
-} = {}): Promise<{
+export async function autoMigrateAllTenants(
+  options: {
+    dryRun?: boolean
+  } = {}
+): Promise<{
   total: number
   succeeded: number
   failed: number
   details: Array<{ slug: string; applied: number; errors: number }>
 }> {
-  const { dryRun = false, maxMigrations = 100 } = options
+  const { dryRun = false } = options
 
   logger.info('Starting auto-migration for all tenants', { dryRun })
 
@@ -126,7 +122,7 @@ export async function autoMigrateAllTenants(options: {
 
   // Process each tenant
   for (const tenant of tenants) {
-    const result = await autoMigrateTenant(tenant.slug, { dryRun, maxMigrations })
+    const result = await autoMigrateTenant(tenant.slug, { dryRun })
     details.push({ slug: tenant.slug, ...result })
 
     if (result.errors > 0) {
@@ -165,12 +161,7 @@ export async function autoMigrateAllTenants(options: {
  * }
  * ```
  */
-export async function checkAndMigrate(
-  tenantSlug: string,
-  options: {
-    maxMigrations?: number
-  } = {}
-): Promise<void> {
+export async function checkAndMigrate(tenantSlug: string): Promise<void> {
   // Check if migrations are needed (quick check)
   const hasPending = await hasPendingMigrations(tenantSlug)
 
@@ -178,10 +169,9 @@ export async function checkAndMigrate(
     logger.warn('Tenant has pending migrations, auto-migrating', { tenant: tenantSlug })
 
     // Run migrations in background (don't block request)
-    autoMigrateTenant(tenantSlug, options).catch((error) => {
-      logger.error('Background auto-migration failed', {
+    autoMigrateTenant(tenantSlug).catch((error) => {
+      logger.error('Background auto-migration failed', error instanceof Error ? error : undefined, {
         tenant: tenantSlug,
-        error: error instanceof Error ? error.message : String(error),
       })
     })
   }

@@ -13,20 +13,16 @@ export const migrateAutoCommand = new Command('migrate:auto')
   .description('Automatically run missing migrations on existing tenants')
   .option('--tenant <slug>', 'Migrate specific tenant only')
   .option('--dry-run', 'Show what would be migrated without applying')
-  .option('--max <n>', 'Maximum migrations to apply per tenant', '100')
   .action(async (options) => {
     const spinner = ora('Checking for pending migrations...').start()
 
     try {
-      const maxMigrations = parseInt(options.max)
-
       if (options.tenant) {
         // Migrate single tenant
         spinner.text = `Migrating tenant: ${options.tenant}...`
 
         const result = await autoMigrateTenant(options.tenant, {
           dryRun: options.dryRun,
-          maxMigrations,
         })
 
         spinner.succeed()
@@ -48,7 +44,6 @@ export const migrateAutoCommand = new Command('migrate:auto')
 
         const result = await autoMigrateAllTenants({
           dryRun: options.dryRun,
-          maxMigrations,
         })
 
         spinner.succeed()
