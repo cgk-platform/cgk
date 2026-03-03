@@ -277,16 +277,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS dam_assets_updated_at ON dam_assets;
 CREATE TRIGGER dam_assets_updated_at
   BEFORE UPDATE ON dam_assets
   FOR EACH ROW
   EXECUTE FUNCTION dam_update_updated_at();
 
+DROP TRIGGER IF EXISTS dam_collections_updated_at ON dam_collections;
 CREATE TRIGGER dam_collections_updated_at
   BEFORE UPDATE ON dam_collections
   FOR EACH ROW
   EXECUTE FUNCTION dam_update_updated_at();
 
+DROP TRIGGER IF EXISTS dam_gdrive_connections_updated_at ON dam_gdrive_connections;
 CREATE TRIGGER dam_gdrive_connections_updated_at
   BEFORE UPDATE ON dam_gdrive_connections
   FOR EACH ROW

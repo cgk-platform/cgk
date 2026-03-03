@@ -1,0 +1,45 @@
+{
+  "name": "@cgk-platform/video-editor",
+  "version": "0.1.0",
+  "description": "Video editor project management for CGK Creative Studio",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js"
+    }
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/dam": "workspace:*",
+    "@cgk-platform/db": "workspace:*"
+  },
+  "devDependencies": {
+    "@cgk-platform/eslint-config": "workspace:*",
+    "@cgk-platform/typescript-config": "workspace:*",
+    "eslint": "^9.18.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.0.0"
+  }
+}

@@ -117,12 +117,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger for shopify_connections
+DROP TRIGGER IF EXISTS trigger_shopify_connections_updated_at ON shopify_connections;
 CREATE TRIGGER trigger_shopify_connections_updated_at
   BEFORE UPDATE ON shopify_connections
   FOR EACH ROW
   EXECUTE FUNCTION update_shopify_connection_updated_at();
 
 -- Trigger for rate limits
+DROP TRIGGER IF EXISTS trigger_rate_limits_updated_at ON shopify_rate_limits;
 CREATE TRIGGER trigger_rate_limits_updated_at
   BEFORE UPDATE ON shopify_rate_limits
   FOR EACH ROW

@@ -12,7 +12,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'products' AND column_name = 'description_html'
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'description_html'
   ) THEN
     ALTER TABLE products ADD COLUMN description_html TEXT;
   END IF;
@@ -23,7 +23,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'products' AND column_name = 'shopify_gid'
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'shopify_gid'
   ) THEN
     ALTER TABLE products ADD COLUMN shopify_gid TEXT;
     CREATE INDEX IF NOT EXISTS idx_products_shopify_gid ON products(shopify_gid);
@@ -35,7 +35,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'products' AND column_name = 'synced_at'
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'synced_at'
   ) THEN
     ALTER TABLE products ADD COLUMN synced_at TIMESTAMPTZ DEFAULT NOW();
     CREATE INDEX IF NOT EXISTS idx_products_synced_at ON products(synced_at);
@@ -47,13 +47,36 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'products' AND column_name = 'platform_data'
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'platform_data'
   ) THEN
     ALTER TABLE products ADD COLUMN platform_data JSONB DEFAULT '{}';
   END IF;
 END $$;
 
-COMMENT ON COLUMN products.description_html IS 'HTML-formatted product description from Shopify';
-COMMENT ON COLUMN products.shopify_gid IS 'Shopify GraphQL Global ID (gid://shopify/Product/123)';
-COMMENT ON COLUMN products.synced_at IS 'Last time product was synced from Shopify';
-COMMENT ON COLUMN products.platform_data IS 'Platform-specific data: {avgRating, reviewCount, badges, etc}';
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'description_html'
+  ) THEN
+    COMMENT ON COLUMN products.description_html IS 'HTML-formatted product description from Shopify';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'shopify_gid'
+  ) THEN
+    COMMENT ON COLUMN products.shopify_gid IS 'Shopify GraphQL Global ID (gid://shopify/Product/123)';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'synced_at'
+  ) THEN
+    COMMENT ON COLUMN products.synced_at IS 'Last time product was synced from Shopify';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = current_schema() AND table_name = 'products' AND column_name = 'platform_data'
+  ) THEN
+    COMMENT ON COLUMN products.platform_data IS 'Platform-specific data: {avgRating, reviewCount, badges, etc}';
+  END IF;
+END $$;

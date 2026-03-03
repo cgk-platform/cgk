@@ -98,12 +98,14 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Trigger for webhook_registrations
+DROP TRIGGER IF EXISTS trigger_webhook_registrations_updated_at ON webhook_registrations;
 CREATE TRIGGER trigger_webhook_registrations_updated_at
   BEFORE UPDATE ON webhook_registrations
   FOR EACH ROW
   EXECUTE FUNCTION update_webhook_registration_updated_at();
 
 -- Trigger for shopify_connections
+DROP TRIGGER IF EXISTS trigger_shopify_connections_updated_at ON shopify_connections;
 CREATE TRIGGER trigger_shopify_connections_updated_at
   BEFORE UPDATE ON shopify_connections
   FOR EACH ROW

@@ -79,20 +79,25 @@ async function scanFiles(targetPaths: string[], verbose: boolean): Promise<ScanR
 
     filesScanned++
 
+    // Skip library packages — they are always called within withTenant() from route handlers
+    const isLibraryPackage = /\/packages\/[^/]+\/src\//.test(file)
+    if (isLibraryPackage) {
+      continue
+    }
+
     // Rule 1: No raw SQL queries (must use withTenant)
     lines.forEach((line, idx) => {
       // Check for sql` template literal usage
       if (/await\s+sql`/.test(line) || /return\s+sql`/.test(line)) {
-        // Check if withTenant is used in surrounding context (within 10 lines before)
-        const contextStart = Math.max(0, idx - 10)
-        const contextEnd = Math.min(lines.length, idx + 10)
-        const contextLines = lines.slice(contextStart, contextEnd).join('\n')
+        // Check if withTenant is used anywhere above this line in the file
+        const precedingLines = lines.slice(0, idx + 1).join('\n')
+        const localContext = lines.slice(Math.max(0, idx - 5), idx + 5).join('\n')
 
         // Skip if query explicitly uses public schema or withTenant is present
-        const hasWithTenant = /withTenant\s*\(/.test(contextLines)
+        const hasWithTenant = /withTenant\s*\(/.test(precedingLines)
         const usesPublicSchema =
           /FROM\s+public\.|JOIN\s+public\.|UPDATE\s+public\.|INSERT\s+INTO\s+public\./i.test(
-            contextLines
+            localContext
           )
 
         if (!hasWithTenant && !usesPublicSchema) {

@@ -181,18 +181,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_tenant_sms_settings_updated_at ON tenant_sms_settings;
 CREATE TRIGGER trigger_tenant_sms_settings_updated_at
   BEFORE UPDATE ON tenant_sms_settings
   FOR EACH ROW EXECUTE FUNCTION update_sms_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_sms_templates_updated_at ON sms_templates;
 CREATE TRIGGER trigger_sms_templates_updated_at
   BEFORE UPDATE ON sms_templates
   FOR EACH ROW EXECUTE FUNCTION update_sms_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_sms_queue_updated_at ON sms_queue;
 CREATE TRIGGER trigger_sms_queue_updated_at
   BEFORE UPDATE ON sms_queue
   FOR EACH ROW EXECUTE FUNCTION update_sms_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_notification_channel_settings_updated_at ON notification_channel_settings;
 CREATE TRIGGER trigger_notification_channel_settings_updated_at
   BEFORE UPDATE ON notification_channel_settings
   FOR EACH ROW EXECUTE FUNCTION update_sms_updated_at();

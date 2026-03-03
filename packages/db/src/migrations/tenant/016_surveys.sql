@@ -254,11 +254,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS surveys_updated_at ON surveys;
 CREATE TRIGGER surveys_updated_at
   BEFORE UPDATE ON surveys
   FOR EACH ROW
   EXECUTE FUNCTION update_survey_updated_at();
 
+DROP TRIGGER IF EXISTS survey_slack_config_updated_at ON survey_slack_config;
 CREATE TRIGGER survey_slack_config_updated_at
   BEFORE UPDATE ON survey_slack_config
   FOR EACH ROW

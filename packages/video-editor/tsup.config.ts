@@ -1,0 +1,12 @@
+import { defineConfig } from 'tsup'
+
+export default defineConfig({
+  entry: ['src/index.ts', 'src/server.ts'],
+  format: ['esm'],
+  dts: true,
+  clean: true,
+  sourcemap: true,
+  splitting: false,
+  treeshake: true,
+  external: ['@cgk-platform/core', '@cgk-platform/db', '@cgk-platform/dam'],
+})

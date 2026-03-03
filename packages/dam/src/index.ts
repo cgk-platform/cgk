@@ -249,6 +249,15 @@ export {
   type TagSuggestion,
 } from './search/tags.js'
 
+// Clip Ingest
+export {
+  ingestClip,
+  findDuplicateClip,
+  type ClipIngestInput,
+  type ClipSegmentInput,
+  type IngestResult,
+} from './clips/ingest.js'
+
 // Audit Logging
 export {
   createAuditLog,

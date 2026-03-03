@@ -78,6 +78,7 @@ CREATE INDEX IF NOT EXISTS idx_shopify_app_installations_org_status
 -- ============================================================================
 
 -- Auto-update updated_at timestamp
+DROP TRIGGER IF EXISTS shopify_app_installations_updated_at ON public.shopify_app_installations;
 CREATE TRIGGER shopify_app_installations_updated_at
   BEFORE UPDATE ON public.shopify_app_installations
   FOR EACH ROW

@@ -28,6 +28,7 @@ import {
   FolderKanban,
   ImageIcon,
   Rss,
+  Clapperboard,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -151,6 +152,15 @@ export const navigation: NavSection[] = [
     ],
   },
   {
+    label: 'Creative Studio',
+    icon: Clapperboard,
+    href: '/admin/creative-studio',
+    children: [
+      { label: 'Projects', href: '/admin/creative-studio' },
+      { label: 'Clip Library', href: '/admin/creative-studio/clips' },
+    ],
+  },
+  {
     label: 'Samples',
     icon: Image,
     href: '/admin/samples',
@@ -216,9 +226,7 @@ export const navigation: NavSection[] = [
     label: 'Segments',
     icon: FolderKanban,
     href: '/admin/segments',
-    children: [
-      { label: 'All Segments', href: '/admin/segments' },
-    ],
+    children: [{ label: 'All Segments', href: '/admin/segments' }],
   },
   {
     label: 'Creators',
