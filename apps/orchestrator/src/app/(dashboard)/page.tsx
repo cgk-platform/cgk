@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import Link from 'next/link'
 
 import { AlertFeed } from '../../components/dashboard/alert-feed'
 import { BrandsGrid } from '../../components/dashboard/brands-grid'
@@ -111,10 +112,7 @@ export default function OverviewPage() {
         {kpis ? (
           <PlatformKPIsGrid data={kpis} isLoading={kpisLoading} />
         ) : (
-          <PlatformKPIsGrid
-            data={getDefaultKPIs()}
-            isLoading={true}
-          />
+          <PlatformKPIsGrid data={getDefaultKPIs()} isLoading={true} />
         )}
       </section>
 
@@ -136,12 +134,9 @@ export default function OverviewPage() {
             <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
               Brands
             </h2>
-            <a
-              href="/brands"
-              className="text-sm text-primary hover:underline"
-            >
+            <Link href="/brands" className="text-sm text-primary hover:underline">
               View all
-            </a>
+            </Link>
           </div>
           {brands ? (
             <BrandsGrid
@@ -151,12 +146,7 @@ export default function OverviewPage() {
               isLoading={brandsLoading}
             />
           ) : (
-            <BrandsGrid
-              data={getEmptyBrands()}
-              page={1}
-              onPageChange={() => {}}
-              isLoading={true}
-            />
+            <BrandsGrid data={getEmptyBrands()} page={1} onPageChange={() => {}} isLoading={true} />
           )}
         </section>
 
@@ -165,11 +155,7 @@ export default function OverviewPage() {
           <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
             Recent Alerts
           </h2>
-          <AlertFeed
-            initialAlerts={alerts}
-            maxAlerts={50}
-            className="h-[600px]"
-          />
+          <AlertFeed initialAlerts={alerts} maxAlerts={50} className="h-[600px]" />
         </section>
       </div>
 
@@ -178,11 +164,7 @@ export default function OverviewPage() {
         <h2 className="mb-4 text-sm font-medium uppercase tracking-wider text-muted-foreground">
           Recent Alerts
         </h2>
-        <AlertFeed
-          initialAlerts={alerts}
-          maxAlerts={20}
-          className="h-[400px]"
-        />
+        <AlertFeed initialAlerts={alerts} maxAlerts={20} className="h-[400px]" />
       </section>
     </div>
   )
