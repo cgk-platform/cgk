@@ -84,7 +84,31 @@ export async function GET(request: Request, context: RouteContext) {
     }
 
     // Fetch collection from Shopify
-    const response = await shopify.query(COLLECTION_PRODUCTS_QUERY, { handle })
+    const response = (await shopify.query(COLLECTION_PRODUCTS_QUERY, { handle })) as {
+      data?: {
+        collection?: {
+          id: string
+          title: string
+          description: string
+          products: {
+            edges: Array<{
+              node: {
+                id: string
+                title: string
+                handle: string
+                description: string
+                priceRange: { minVariantPrice: { amount: string; currencyCode: string } }
+                compareAtPriceRange?: { minVariantPrice: { amount: string; currencyCode: string } }
+                featuredImage?: { url: string; altText: string }
+                images: { edges: Array<{ node: { url: string; altText: string } }> }
+                tags: string[]
+                availableForSale: boolean
+              }
+            }>
+          }
+        }
+      }
+    }
 
     if (!response.data?.collection) {
       console.warn(`[collections] Collection "${handle}" not found in Shopify`)
