@@ -159,11 +159,12 @@ async function checkShopifyHealth(tenantSlug: string): Promise<Omit<ServiceCheck
   try {
     // Get tenant's Shopify configuration
     const configResult = await sql`
-      SELECT shopify_store_domain, shopify_access_token
+      SELECT
+        shopify_store_domain,
+        shopify_access_token,
+        shopify_config
       FROM public.organizations
       WHERE slug = ${tenantSlug}
-        AND shopify_store_domain IS NOT NULL
-        AND shopify_access_token IS NOT NULL
       LIMIT 1
     `
 
@@ -171,14 +172,26 @@ async function checkShopifyHealth(tenantSlug: string): Promise<Omit<ServiceCheck
       return {
         status: 'unknown',
         responseTimeMs: Date.now() - start,
-        lastError: 'Shopify not configured for tenant',
+        lastError: 'Tenant not found',
         metadata: { configured: false },
       }
     }
 
     const row = configResult.rows[0] as Record<string, unknown>
-    const domain = row.shopify_store_domain as string
-    const token = row.shopify_access_token as string
+    const shopifyConfig = row.shopify_config as { checkoutDomain?: string; storefrontAccessToken?: string } | null
+
+    // Prefer shopify_config, fallback to legacy columns
+    const domain = shopifyConfig?.checkoutDomain || (row.shopify_store_domain as string | null)
+    const token = shopifyConfig?.storefrontAccessToken || (row.shopify_access_token as string | null)
+
+    if (!domain || !token) {
+      return {
+        status: 'unknown',
+        responseTimeMs: Date.now() - start,
+        lastError: 'Shopify not configured for tenant',
+        metadata: { configured: false },
+      }
+    }
 
     // Make a simple shop info request
     const response = await fetch(`https://${domain}/admin/api/2024-01/shop.json`, {

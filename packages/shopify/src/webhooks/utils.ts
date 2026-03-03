@@ -53,7 +53,10 @@ export async function getTenantForShop(shop: string): Promise<string | null> {
   const orgResult = await sql`
     SELECT id as tenant_id
     FROM public.organizations
-    WHERE shopify_store_domain = ${shop}
+    WHERE (
+      shopify_store_domain = ${shop}
+      OR shopify_config->>'checkoutDomain' = ${shop}
+    )
     AND status = 'active'
     LIMIT 1
   `

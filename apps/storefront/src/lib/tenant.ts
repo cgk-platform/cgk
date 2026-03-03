@@ -122,7 +122,7 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
 
         if (storefrontToken) {
           config.shopify = {
-            storeDomain: org.shopify_store_domain,
+            storeDomain: org.shopify_config?.checkoutDomain || org.shopify_store_domain,
             storefrontAccessToken: storefrontToken,
             checkoutDomain: org.shopify_config?.checkoutDomain,
           }

@@ -27,7 +27,10 @@ export async function GET(request: Request) {
         name,
         slug,
         status,
-        shopify_store_domain,
+        COALESCE(
+          shopify_config->>'checkoutDomain',
+          shopify_store_domain
+        ) as shopify_store_domain,
         created_at
       FROM public.organizations
       WHERE status IN ('active', 'onboarding', 'suspended')

@@ -174,6 +174,15 @@ export async function updateOrganization(
       enabled_features = COALESCE(${updates.enabledFeatures ? JSON.stringify(updates.enabledFeatures) : null}::jsonb, enabled_features),
       shopify_store_domain = COALESCE(${updates.shopifyStoreDomain || null}, shopify_store_domain),
       shopify_access_token_encrypted = COALESCE(${updates.shopifyAccessTokenEncrypted || null}, shopify_access_token_encrypted),
+      shopify_config = CASE
+        WHEN ${updates.shopifyStoreDomain || null} IS NOT NULL
+             OR ${updates.shopifyAccessTokenEncrypted || null} IS NOT NULL
+        THEN jsonb_build_object(
+          'storefrontAccessToken', COALESCE(${updates.shopifyAccessTokenEncrypted || null}, shopify_access_token_encrypted),
+          'checkoutDomain', COALESCE(${updates.shopifyStoreDomain || null}, shopify_store_domain)
+        )
+        ELSE shopify_config
+      END,
       stripe_account_id = COALESCE(${updates.stripeAccountId || null}, stripe_account_id),
       status = COALESCE(${updates.status || null}::organization_status, status),
       onboarding_status = COALESCE(${updates.onboardingStatus || null}, onboarding_status),

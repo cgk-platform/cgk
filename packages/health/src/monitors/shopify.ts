@@ -24,23 +24,33 @@ async function getShopifyCredentials(tenantId: string): Promise<ShopifyCredentia
     const result = await sql<{
       shopify_store_domain: string | null
       shopify_access_token_encrypted: string | null
+      shopify_config: { checkoutDomain?: string; storefrontAccessToken?: string } | null
     }>`
-      SELECT shopify_store_domain, shopify_access_token_encrypted
+      SELECT
+        shopify_store_domain,
+        shopify_access_token_encrypted,
+        shopify_config
       FROM public.organizations
       WHERE id = ${tenantId} OR slug = ${tenantId}
       LIMIT 1
     `
 
     const org = result.rows[0]
-    if (!org?.shopify_store_domain || !org?.shopify_access_token_encrypted) {
+    if (!org) return null
+
+    // Prefer shopify_config, fallback to legacy columns
+    const storeDomain = org.shopify_config?.checkoutDomain || org.shopify_store_domain
+    const accessToken = org.shopify_config?.storefrontAccessToken || org.shopify_access_token_encrypted
+
+    if (!storeDomain || !accessToken) {
       return null
     }
 
     // In production, decrypt the access token
     // For now, treat it as plain text (should be encrypted in real implementation)
     return {
-      storeDomain: org.shopify_store_domain,
-      accessToken: org.shopify_access_token_encrypted,
+      storeDomain,
+      accessToken,
     }
   } catch {
     return null

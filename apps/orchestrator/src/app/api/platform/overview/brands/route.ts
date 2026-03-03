@@ -69,7 +69,10 @@ export async function GET(request: Request): Promise<Response> {
           id, name, slug,
           settings->>'logoUrl' as logo_url,
           status,
-          shopify_store_domain,
+          COALESCE(
+            shopify_config->>'checkoutDomain',
+            shopify_store_domain
+          ) as shopify_store_domain,
           stripe_account_id,
           created_at
         FROM public.organizations
@@ -92,7 +95,10 @@ export async function GET(request: Request): Promise<Response> {
           id, name, slug,
           settings->>'logoUrl' as logo_url,
           status,
-          shopify_store_domain,
+          COALESCE(
+            shopify_config->>'checkoutDomain',
+            shopify_store_domain
+          ) as shopify_store_domain,
           stripe_account_id,
           created_at
         FROM public.organizations
@@ -114,7 +120,10 @@ export async function GET(request: Request): Promise<Response> {
           id, name, slug,
           settings->>'logoUrl' as logo_url,
           status,
-          shopify_store_domain,
+          COALESCE(
+            shopify_config->>'checkoutDomain',
+            shopify_store_domain
+          ) as shopify_store_domain,
           stripe_account_id,
           created_at
         FROM public.organizations
@@ -134,7 +143,10 @@ export async function GET(request: Request): Promise<Response> {
           id, name, slug,
           settings->>'logoUrl' as logo_url,
           status,
-          shopify_store_domain,
+          COALESCE(
+            shopify_config->>'checkoutDomain',
+            shopify_store_domain
+          ) as shopify_store_domain,
           stripe_account_id,
           created_at
         FROM public.organizations
