@@ -96,7 +96,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ han
       </div>
 
       {/* Products Grid */}
-      <div className="px-6 py-16 lg:px-12">
+      <div className="px-4 py-16 md:px-[50px]">
         <div className="mx-auto max-w-[1440px]">
           <div className="mb-8 flex items-center justify-between">
             <p className="text-lg text-[#777777]">
@@ -118,7 +118,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ han
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:gap-5">
               {products.map((product, index) => (
                 <ProductCard key={product.id} product={product} index={index} />
               ))}
