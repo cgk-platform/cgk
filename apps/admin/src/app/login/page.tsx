@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Card, CardContent, Button, Input, Label } from '@cgk-platform/ui'
-import { Mail, Loader2, CheckCircle, Lock } from 'lucide-react'
+import { Loader2, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
 
 type AuthMode = 'magic-link' | 'password'
