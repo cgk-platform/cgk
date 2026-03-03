@@ -174,7 +174,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@2.6.1)
+        version: 9.39.2(jiti@1.21.7)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
@@ -238,7 +238,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@1.21.7)
+        version: 9.39.2(jiti@2.6.1)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
@@ -652,6 +652,12 @@ importers:
 
   apps/shopify-app:
     dependencies:
+      '@cgk-platform/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@cgk-platform/shopify':
+        specifier: workspace:*
+        version: link:../../packages/shopify
       '@prisma/client':
         specifier: ^6.2.1
         version: 6.19.2(prisma@6.19.2(magicast@0.3.5)(typescript@5.9.3))(typescript@5.9.3)
