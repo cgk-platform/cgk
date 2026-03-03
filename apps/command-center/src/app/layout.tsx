@@ -39,24 +39,20 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0c1320',
+  themeColor: '#f9f7f4',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}): React.JSX.Element {
+export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <html
       lang="en"
-      className={`dark ${instrumentSerif.variable} ${geistSans.variable} ${geistMono.variable}`}
+      className={`${instrumentSerif.variable} ${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background font-sans antialiased">
         <TooltipProvider delayDuration={200}>
           {children}
-          <Toaster position="bottom-right" richColors closeButton theme="dark" />
+          <Toaster position="bottom-right" richColors closeButton />
         </TooltipProvider>
       </body>
     </html>

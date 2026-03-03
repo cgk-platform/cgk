@@ -17,11 +17,11 @@ import {
   Menu,
   MessageSquare,
   Puzzle,
-  Radio,
   Settings,
   Terminal,
   X,
 } from 'lucide-react'
+import NextImage from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -177,7 +177,14 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
         {/* Header */}
         <div className="flex h-14 items-center justify-between border-b px-4">
           <Link href="/" className="flex items-center gap-2">
-            <Radio className="h-5 w-5 text-gold" />
+            <NextImage
+              src="/cgk-platform-logo.png"
+              alt="CGK Platform"
+              width={54}
+              height={36}
+              className="h-9 w-auto"
+              priority
+            />
             <span className="font-bold">Command Center</span>
           </Link>
           <div className="flex items-center gap-1">
@@ -248,9 +255,10 @@ export function Sidebar({ userName, userEmail }: SidebarProps) {
                       {PROFILE_TABS.map((tab) => {
                         const TabIcon = ICONS[tab.icon]
                         const tabHref = `${profile.href}${tab.href}`
-                        const tabActive = tab.href === ''
-                          ? pathname === profile.href
-                          : pathname === tabHref || pathname.startsWith(tabHref + '/')
+                        const tabActive =
+                          tab.href === ''
+                            ? pathname === profile.href
+                            : pathname === tabHref || pathname.startsWith(tabHref + '/')
                         return (
                           <li key={tabHref}>
                             <Link
