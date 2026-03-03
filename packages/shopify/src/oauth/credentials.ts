@@ -194,11 +194,11 @@ export async function getShopifyConnection(tenantSlug: string): Promise<ShopifyC
  *
  * Verifies the connection is active and token is valid.
  *
- * @param tenantId - Tenant ID
+ * @param tenantSlug - Tenant slug
  * @returns Connection health check result
  */
-export async function checkConnectionHealth(tenantId: string): Promise<ConnectionHealthCheck> {
-  const connection = await getShopifyConnection(tenantId)
+export async function checkConnectionHealth(tenantSlug: string): Promise<ConnectionHealthCheck> {
+  const connection = await getShopifyConnection(tenantSlug)
 
   if (!connection) {
     return {
@@ -216,6 +216,17 @@ export async function checkConnectionHealth(tenantId: string): Promise<Connectio
   // Check if token is valid by making a simple API call
   let tokenValid = false
   try {
+    // Convert slug to UUID for getShopifyCredentials (it expects tenantId, not slug)
+    const tenantResult = await sql`
+      SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
+    `
+
+    if (tenantResult.rows.length === 0) {
+      throw new ShopifyError('NOT_CONNECTED', `Tenant ${tenantSlug} not found`)
+    }
+
+    const tenantId = (tenantResult.rows[0] as { id: string }).id
+
     const credentials = await getShopifyCredentials(tenantId)
 
     // Make a simple shop query to verify token
