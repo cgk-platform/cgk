@@ -65,6 +65,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Enhanced focus indicators for accessibility */
+  [data-radix-navigation-menu-content] {
+    @apply focus:outline-none;
+  }
+
+  /* Smooth focus ring for interactive elements */
+  :focus-visible {
+    @apply outline-none ring-2 ring-meliusly-primary ring-offset-2 ring-offset-white transition-shadow duration-200;
+  }
 }
 
 /* ==========================================================================

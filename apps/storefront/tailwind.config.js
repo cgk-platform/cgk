@@ -50,6 +50,12 @@ module.exports = {
         ...baseConfig.theme?.extend?.borderRadius,
         btn: '6px',
       },
+      zIndex: {
+        ...baseConfig.theme?.extend?.zIndex,
+        header: '50',
+        dropdown: '60',
+        modal: '100',
+      },
       keyframes: {
         ...baseConfig.theme?.extend?.keyframes,
         marquee: {

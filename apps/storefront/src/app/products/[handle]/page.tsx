@@ -25,12 +25,16 @@ import {
   CompactStarRating,
   RelatedProductsSkeleton,
   CollapsibleTabs,
+  ProductSelectorTabs,
+  ProductSelectorGuide,
   SocialShare,
   SleepSaverGallery,
   TrustBadges,
   ShopPayInstallment,
   DeliveryEstimate,
+  ProductComparisonTable,
 } from '@/components/products'
+import type { ComparisonFeature } from '@/components/products'
 import { Check } from 'lucide-react'
 import { MarqueeLogos } from '@/components/sections'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/seo/JsonLd'
@@ -38,6 +42,7 @@ import { getCommerceProvider } from '@/lib/commerce'
 import { getMetafields, parseBadges, parseVideoUrl } from '@/lib/metafields'
 import { getProductRating } from '@/lib/reviews'
 import { getTenantConfig } from '@/lib/tenant'
+import type { Product } from '@cgk-platform/commerce'
 
 const PRESS_LOGOS: { src: string; alt: string; width?: number }[] = [
   {
@@ -234,6 +239,9 @@ async function ProductContent({ handle }: ProductContentProps) {
         }
       />
       <BreadcrumbJsonLd items={breadcrumbItems} />
+
+      {/* Product Selector Guide (SleepSaver only) */}
+      {isSleepSaver && <ProductSelectorGuide />}
 
       {/* Breadcrumb */}
       <nav className="mb-6" aria-label="Breadcrumb">
@@ -522,43 +530,197 @@ async function ProductContent({ handle }: ProductContentProps) {
             </>
           )}
 
-          {/* Collapsible Tabs */}
-          <CollapsibleTabs
-            tabs={[
-              ...(product.descriptionHtml
-                ? [{ title: 'Description', content: product.descriptionHtml }]
-                : product.description
-                  ? [{ title: 'Description', content: `<p>${product.description}</p>` }]
-                  : []),
-              {
-                title: 'Size Guide',
-                content: `
-                  <table class="w-full text-sm">
-                    <thead><tr class="border-b"><th class="py-2 text-left">Size</th><th class="py-2 text-left">Flat Sheet</th><th class="py-2 text-left">Fitted Sheet</th><th class="py-2 text-left">Pillowcases</th></tr></thead>
-                    <tbody>
-                      <tr class="border-b"><td class="py-2">Twin</td><td>66" x 96"</td><td>39" x 75" x 21"</td><td>1 Standard</td></tr>
-                      <tr class="border-b"><td class="py-2">Twin XL</td><td>66" x 102"</td><td>39" x 80" x 21"</td><td>1 Standard</td></tr>
-                      <tr class="border-b"><td class="py-2">Full</td><td>81" x 96"</td><td>54" x 75" x 21"</td><td>2 Standard</td></tr>
-                      <tr class="border-b"><td class="py-2">Queen</td><td>90" x 102"</td><td>60" x 80" x 21"</td><td>2 Standard</td></tr>
-                      <tr class="border-b"><td class="py-2">King</td><td>108" x 102"</td><td>78" x 80" x 21"</td><td>2 King</td></tr>
-                      <tr class="border-b"><td class="py-2">Cal King</td><td>108" x 102"</td><td>72" x 84" x 21"</td><td>2 King</td></tr>
-                      <tr><td class="py-2">Split King</td><td>108" x 102"</td><td>2x 39" x 80" x 21"</td><td>2 King</td></tr>
-                    </tbody>
-                  </table>
-                `,
-              },
-              {
-                title: 'Shipping & Returns',
-                content:
-                  "<p>Free standard shipping on orders over $50. Express 2-3 day shipping available. 30-day hassle-free returns — if you're not satisfied, we'll make it right.</p>",
-              },
-              {
-                title: 'Care Instructions',
-                content:
-                  '<p>Machine wash cold on a gentle cycle. Tumble dry low. Remove promptly to minimize wrinkles. Do not bleach. Iron on low if needed.</p>',
-              },
-            ]}
-          />
+          {/* Product Information Tabs */}
+          {isSleepSaver ? (
+            <ProductSelectorTabs
+              tabs={[
+                {
+                  title: 'Features',
+                  content: `
+                    <div class="space-y-3">
+                      <h3 class="font-semibold text-meliusly-dark mb-2">SleeperSaver Features</h3>
+                      <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start gap-2">
+                          <svg class="h-5 w-5 text-meliusly-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          <span>Full coverage support across the entire sleeping surface</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                          <svg class="h-5 w-5 text-meliusly-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          <span>Permanently installed solution that folds with your sofa bed</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                          <svg class="h-5 w-5 text-meliusly-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          <span>Provides firm, even support without sagging or pressure points</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                          <svg class="h-5 w-5 text-meliusly-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          <span>Compatible with most sleeper sofa brands and mattress pad sizes</span>
+                        </li>
+                      </ul>
+                    </div>
+                  `,
+                },
+                {
+                  title: 'Installation',
+                  content: `
+                    <div class="space-y-3">
+                      <h3 class="font-semibold text-meliusly-dark mb-2">Easy Installation</h3>
+                      <ol class="space-y-2 text-gray-600 list-decimal list-inside">
+                        <li>Open your sleeper sofa mattress pad and locate the metal bars</li>
+                        <li>Position the SleeperSaver board under the mattress pad</li>
+                        <li>Use the included hook and loop fasteners to secure in place</li>
+                        <li>Fold the sofa bed closed to test - the board folds with the frame</li>
+                      </ol>
+                      <p class="text-sm text-gray-500 mt-4">No drilling or hardware required. Installation takes less than 5 minutes.</p>
+                    </div>
+                  `,
+                },
+                {
+                  title: 'Sizing & Fit',
+                  content: `
+                    <div class="space-y-3">
+                      <h3 class="font-semibold text-meliusly-dark mb-2">Size Guide</h3>
+                      <table class="w-full text-sm border-collapse">
+                        <thead>
+                          <tr class="border-b border-gray-200">
+                            <th class="py-2 px-3 text-left font-semibold">Size</th>
+                            <th class="py-2 px-3 text-left font-semibold">Board Dimensions</th>
+                            <th class="py-2 px-3 text-left font-semibold">Fits Mattress</th>
+                          </tr>
+                        </thead>
+                        <tbody class="text-gray-600">
+                          <tr class="border-b border-gray-100">
+                            <td class="py-2 px-3">Twin</td>
+                            <td class="py-2 px-3">36" x 72"</td>
+                            <td class="py-2 px-3">Twin sleeper sofas</td>
+                          </tr>
+                          <tr class="border-b border-gray-100">
+                            <td class="py-2 px-3">Full</td>
+                            <td class="py-2 px-3">52" x 72"</td>
+                            <td class="py-2 px-3">Full sleeper sofas</td>
+                          </tr>
+                          <tr class="border-b border-gray-100">
+                            <td class="py-2 px-3">Queen</td>
+                            <td class="py-2 px-3">58" x 72"</td>
+                            <td class="py-2 px-3">Queen sleeper sofas</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  `,
+                },
+                {
+                  title: 'Care',
+                  content: `
+                    <div class="space-y-3">
+                      <h3 class="font-semibold text-meliusly-dark mb-2">Care Instructions</h3>
+                      <ul class="space-y-2 text-gray-600">
+                        <li>Wipe clean with a damp cloth as needed</li>
+                        <li>Do not machine wash or submerge in water</li>
+                        <li>Allow to air dry completely if it gets wet</li>
+                        <li>Store flat when not in use (though it stays permanently installed)</li>
+                      </ul>
+                    </div>
+                  `,
+                },
+                {
+                  title: "What's Included",
+                  content: `
+                    <div class="space-y-3">
+                      <h3 class="font-semibold text-meliusly-dark mb-2">Package Contents</h3>
+                      <ul class="space-y-2 text-gray-600">
+                        <li class="flex items-start gap-2">
+                          <svg class="h-5 w-5 text-meliusly-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          <span>1x SleeperSaver Support Board (size selected)</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                          <svg class="h-5 w-5 text-meliusly-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          <span>Hook and loop fastener strips for secure attachment</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                          <svg class="h-5 w-5 text-meliusly-primary mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                          </svg>
+                          <span>Installation guide with step-by-step instructions</span>
+                        </li>
+                      </ul>
+                    </div>
+                  `,
+                },
+                {
+                  title: 'Help',
+                  content: `
+                    <div class="space-y-3">
+                      <h3 class="font-semibold text-meliusly-dark mb-2">Frequently Asked Questions</h3>
+                      <div class="space-y-4">
+                        <div>
+                          <h4 class="font-medium text-meliusly-dark mb-1">Will this work with my sofa bed?</h4>
+                          <p class="text-sm text-gray-600">The SleeperSaver works with most sleeper sofas. Measure your mattress pad to ensure proper fit.</p>
+                        </div>
+                        <div>
+                          <h4 class="font-medium text-meliusly-dark mb-1">Can I remove it easily?</h4>
+                          <p class="text-sm text-gray-600">Yes! The hook and loop fasteners allow for easy removal if needed.</p>
+                        </div>
+                        <div>
+                          <h4 class="font-medium text-meliusly-dark mb-1">What if I need help?</h4>
+                          <p class="text-sm text-gray-600">Contact our support team at support@meliusly.com for assistance.</p>
+                        </div>
+                      </div>
+                    </div>
+                  `,
+                },
+              ]}
+            />
+          ) : (
+            <CollapsibleTabs
+              tabs={[
+                ...(product.descriptionHtml
+                  ? [{ title: 'Description', content: product.descriptionHtml }]
+                  : product.description
+                    ? [{ title: 'Description', content: `<p>${product.description}</p>` }]
+                    : []),
+                {
+                  title: 'Size Guide',
+                  content: `
+                    <table class="w-full text-sm">
+                      <thead><tr class="border-b"><th class="py-2 text-left">Size</th><th class="py-2 text-left">Flat Sheet</th><th class="py-2 text-left">Fitted Sheet</th><th class="py-2 text-left">Pillowcases</th></tr></thead>
+                      <tbody>
+                        <tr class="border-b"><td class="py-2">Twin</td><td>66" x 96"</td><td>39" x 75" x 21"</td><td>1 Standard</td></tr>
+                        <tr class="border-b"><td class="py-2">Twin XL</td><td>66" x 102"</td><td>39" x 80" x 21"</td><td>1 Standard</td></tr>
+                        <tr class="border-b"><td class="py-2">Full</td><td>81" x 96"</td><td>54" x 75" x 21"</td><td>2 Standard</td></tr>
+                        <tr class="border-b"><td class="py-2">Queen</td><td>90" x 102"</td><td>60" x 80" x 21"</td><td>2 Standard</td></tr>
+                        <tr class="border-b"><td class="py-2">King</td><td>108" x 102"</td><td>78" x 80" x 21"</td><td>2 King</td></tr>
+                        <tr class="border-b"><td class="py-2">Cal King</td><td>108" x 102"</td><td>72" x 84" x 21"</td><td>2 King</td></tr>
+                        <tr><td class="py-2">Split King</td><td>108" x 102"</td><td>2x 39" x 80" x 21"</td><td>2 King</td></tr>
+                      </tbody>
+                    </table>
+                  `,
+                },
+                {
+                  title: 'Shipping & Returns',
+                  content:
+                    "<p>Free standard shipping on orders over $50. Express 2-3 day shipping available. 30-day hassle-free returns — if you're not satisfied, we'll make it right.</p>",
+                },
+                {
+                  title: 'Care Instructions',
+                  content:
+                    '<p>Machine wash cold on a gentle cycle. Tumble dry low. Remove promptly to minimize wrinkles. Do not bleach. Iron on low if needed.</p>',
+                },
+              ]}
+            />
+          )}
 
           {/* Social Share */}
           <SocialShare url={productUrl} title={product.title} image={product.images[0]?.url} />
@@ -589,6 +751,22 @@ async function ProductContent({ handle }: ProductContentProps) {
           title: product.title,
         }}
       />
+
+      {/* Product Comparison Section (SleepSaver only) */}
+      {isSleepSaver && (
+        <section className="mt-20 md:mt-24">
+          <Suspense
+            fallback={
+              <div className="animate-pulse space-y-4">
+                <div className="mx-auto h-8 w-64 rounded bg-muted" />
+                <div className="h-96 w-full rounded bg-muted" />
+              </div>
+            }
+          >
+            <ProductComparisonSection currentProduct={product} productType={product.productType} />
+          </Suspense>
+        </section>
+      )}
 
       {/* Reviews Section */}
       <section className="mt-16 border-t pt-8">
@@ -645,5 +823,89 @@ async function ProductRatingSummary({ productId }: { productId: string }) {
     <a href="#reviews-heading" className="inline-flex items-center gap-2 text-sm hover:underline">
       <CompactStarRating rating={rating.averageRating} reviewCount={rating.totalReviews} />
     </a>
+  )
+}
+
+/**
+ * Product Comparison Section
+ *
+ * Shows current product compared to alternatives in the same category.
+ * Fetches related products and displays them in a comparison table.
+ */
+async function ProductComparisonSection({
+  currentProduct,
+  productType,
+}: {
+  currentProduct: Product
+  productType?: string
+}) {
+  const commerce = await getCommerceProvider()
+
+  if (!commerce || !productType) {
+    return null
+  }
+
+  // Fetch related products (same product type)
+  const relatedProductsResult = await commerce.products.search(`product_type:${productType}`, {
+    first: 6,
+  })
+
+  // Filter out current product and limit to 3 total products
+  const alternativeProducts = relatedProductsResult.items
+    .filter((p) => p.id !== currentProduct.id)
+    .slice(0, 2)
+
+  // If we don't have enough alternatives, don't show comparison
+  if (alternativeProducts.length === 0) {
+    return null
+  }
+
+  // Build products array: current product + alternatives
+  const comparisonProducts = [currentProduct, ...alternativeProducts]
+
+  // Define comparison features based on product type
+  // For SleepSaver sofa bed support boards
+  const features: ComparisonFeature[] = [
+    {
+      label: 'Installation Type',
+      values: ['Permanently installed', 'Removable insert', 'Top layer pad'],
+    },
+    {
+      label: 'Stays in Place',
+      values: [true, false, false],
+    },
+    {
+      label: 'Blocks Metal Bars',
+      values: [true, true, false],
+    },
+    {
+      label: 'Folds with Sofa Bed',
+      values: [true, false, false],
+    },
+    {
+      label: 'Supports Full Weight',
+      values: [true, true, false],
+    },
+    {
+      label: 'Installation Time',
+      values: ['5 minutes', '10-15 minutes', '2 minutes'],
+    },
+    {
+      label: 'Hardware Required',
+      values: [false, true, false],
+    },
+    {
+      label: 'Warranty',
+      values: ['Lifetime', '1 year', '90 days'],
+    },
+  ]
+
+  return (
+    <ProductComparisonTable
+      products={comparisonProducts}
+      features={features}
+      sectionTitle="Compare Our Sofa Bed Support Boards"
+      currentProductId={currentProduct.id}
+    />
   )
 }
