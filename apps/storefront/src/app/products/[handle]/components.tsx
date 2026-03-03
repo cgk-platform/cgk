@@ -10,16 +10,21 @@ import type { Product } from '@cgk-platform/commerce'
 import { cn } from '@cgk-platform/ui'
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 
-import { VariantSelector, PriceDisplay } from '@/components/products'
+import {
+  VariantSelector,
+  PriceDisplay,
+  SizeSelector,
+  DeliveryEstimate,
+} from '@/components/products'
 import { AddToCartButton } from '@/components/cart'
 import { CartProvider } from '@/components/cart/CartProvider'
-
 
 interface ProductInfoProps {
   product: Product
   options: Array<{ name: string; values: string[] }>
   hasMultipleVariants: boolean
   tenantSlug: string
+  isSleepSaver?: boolean
 }
 
 export function ProductInfo({
@@ -27,6 +32,7 @@ export function ProductInfo({
   options,
   hasMultipleVariants,
   tenantSlug,
+  isSleepSaver = false,
 }: ProductInfoProps) {
   return (
     <CartProvider tenantSlug={tenantSlug}>
@@ -34,6 +40,7 @@ export function ProductInfo({
         product={product}
         options={options}
         hasMultipleVariants={hasMultipleVariants}
+        isSleepSaver={isSleepSaver}
       />
     </CartProvider>
   )
@@ -43,12 +50,14 @@ interface ProductInfoInnerProps {
   product: Product
   options: Array<{ name: string; values: string[] }>
   hasMultipleVariants: boolean
+  isSleepSaver: boolean
 }
 
 function ProductInfoInner({
   product,
   options,
   hasMultipleVariants,
+  isSleepSaver,
 }: ProductInfoInnerProps) {
   const [quantity, setQuantity] = useState(1)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
@@ -63,24 +72,35 @@ function ProductInfoInner({
     return initial
   })
 
-  // Find the selected variant based on current options
+  // For SleepSaver, track selected variant by ID
+  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(
+    isSleepSaver && hasMultipleVariants ? undefined : product.variants[0]?.id
+  )
+
+  // Find the selected variant based on current options or ID
   const selectedVariant = useMemo(() => {
     if (!hasMultipleVariants) {
       return product.variants[0]
     }
 
+    if (isSleepSaver && selectedVariantId) {
+      return product.variants.find((v) => v.id === selectedVariantId)
+    }
+
     return product.variants.find((variant) =>
-      variant.selectedOptions.every(
-        (opt) => selectedOptions[opt.name.toLowerCase()] === opt.value
-      )
+      variant.selectedOptions.every((opt) => selectedOptions[opt.name.toLowerCase()] === opt.value)
     )
-  }, [product.variants, selectedOptions, hasMultipleVariants])
+  }, [product.variants, selectedOptions, hasMultipleVariants, isSleepSaver, selectedVariantId])
 
   const handleOptionChange = useCallback((name: string, value: string) => {
     setSelectedOptions((prev) => ({
       ...prev,
       [name.toLowerCase()]: value,
     }))
+  }, [])
+
+  const handleSizeSelect = useCallback((variantId: string) => {
+    setSelectedVariantId(variantId)
   }, [])
 
   const handleQuantityChange = useCallback((delta: number) => {
@@ -109,32 +129,70 @@ function ProductInfoInner({
     return () => observer.disconnect()
   }, [])
 
+  // Prepare SizeSelector variants if SleepSaver
+  const sizeVariants = useMemo(() => {
+    if (!isSleepSaver || !hasMultipleVariants) return []
+
+    return product.variants.map((variant) => {
+      // Extract dimensions from variant title or metafields
+      // Expected format: "Twin Size - 35\" x 64\""
+      const titleParts = variant.title.split(' - ')
+      const sizeName = titleParts[0] || variant.title
+      const dimensions = titleParts[1] || ''
+
+      return {
+        id: variant.id,
+        title: sizeName,
+        dimensions,
+        price: variant.price,
+        compareAtPrice: variant.compareAtPrice,
+      }
+    })
+  }, [isSleepSaver, hasMultipleVariants, product.variants])
+
   return (
     <div className="space-y-6">
-      {/* Variant Selector */}
-      {hasMultipleVariants && options.length > 0 && (
-        <VariantSelector
-          options={options}
-          variants={product.variants}
-          selectedOptions={selectedOptions}
-          onOptionChange={handleOptionChange}
-        />
-      )}
-
-      {/* Selected Variant Price (if different from default) */}
-      {selectedVariant && hasMultipleVariants && (
-        <div className="rounded-lg bg-muted/50 p-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">
-              {selectedVariant.title}
-            </span>
-            <PriceDisplay
-              price={selectedVariant.price}
-              compareAtPrice={selectedVariant.compareAtPrice}
-              size="lg"
+      {/* Variant Selector - Conditional */}
+      {isSleepSaver ? (
+        <>
+          {/* SizeSelector for SleepSaver */}
+          {hasMultipleVariants && sizeVariants.length > 0 && (
+            <SizeSelector
+              variants={sizeVariants}
+              selectedVariantId={selectedVariantId}
+              onSelectVariant={handleSizeSelect}
             />
-          </div>
-        </div>
+          )}
+
+          {/* Delivery Estimate for SleepSaver */}
+          <DeliveryEstimate zipCode="90210" />
+        </>
+      ) : (
+        <>
+          {/* Standard VariantSelector for non-SleepSaver */}
+          {hasMultipleVariants && options.length > 0 && (
+            <VariantSelector
+              options={options}
+              variants={product.variants}
+              selectedOptions={selectedOptions}
+              onOptionChange={handleOptionChange}
+            />
+          )}
+
+          {/* Selected Variant Price (if different from default) */}
+          {selectedVariant && hasMultipleVariants && (
+            <div className="rounded-lg bg-muted/50 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{selectedVariant.title}</span>
+                <PriceDisplay
+                  price={selectedVariant.price}
+                  compareAtPrice={selectedVariant.compareAtPrice}
+                  size="lg"
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Quantity Selector */}
@@ -190,7 +248,7 @@ function ProductInfoInner({
               'cursor-not-allowed bg-muted text-muted-foreground'
             )}
           >
-            Select Options
+            {isSleepSaver ? 'Select A Size' : 'Select Options'}
           </button>
         )}
 
@@ -200,12 +258,7 @@ function ProductInfoInner({
           className="flex items-center justify-center gap-2 rounded-xl border px-6 py-4 font-medium transition-colors hover:bg-muted"
           aria-label="Add to wishlist"
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -235,12 +288,7 @@ function ProductInfoInner({
       {/* Trust Signals */}
       <div className="grid grid-cols-3 gap-4 border-t pt-6 text-center text-xs text-muted-foreground">
         <div className="flex flex-col items-center gap-1">
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -251,12 +299,7 @@ function ProductInfoInner({
           <span>Free Returns</span>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -267,12 +310,7 @@ function ProductInfoInner({
           <span>Secure Payment</span>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

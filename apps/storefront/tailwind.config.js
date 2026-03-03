@@ -28,11 +28,20 @@ module.exports = {
           charcoal: '#242833',
           'near-white': '#FBF9F8',
         },
+        // Meliusly brand colors
+        meliusly: {
+          primary: '#0268A0',
+          'light-blue': '#F3FAFE',
+          'light-gray': '#F6F6F6',
+          'dark-gray': '#777777',
+          dark: '#161F2B',
+        },
       },
       fontFamily: {
         ...baseConfig.theme?.extend?.fontFamily,
         assistant: ['var(--font-assistant)', 'system-ui', 'sans-serif'],
         raleway: ['var(--font-raleway)', 'system-ui', 'sans-serif'],
+        manrope: ['var(--font-manrope)', 'system-ui', 'sans-serif'],
       },
       maxWidth: {
         store: '1400px',

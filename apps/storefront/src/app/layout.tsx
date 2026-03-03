@@ -9,7 +9,7 @@
 import '@/lib/env-validation'
 
 import type { Metadata } from 'next'
-import { Assistant, Raleway } from 'next/font/google'
+import { Assistant, Raleway, Manrope } from 'next/font/google'
 
 import { getTenantConfig, getTenantSlug } from '@/lib/tenant'
 import {
@@ -41,6 +41,13 @@ const raleway = Raleway({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-raleway',
+  display: 'swap',
+})
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-manrope',
   display: 'swap',
 })
 
@@ -90,7 +97,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${assistant.variable} ${raleway.variable}`}
+      className={`${assistant.variable} ${raleway.variable} ${manrope.variable}`}
       suppressHydrationWarning
     >
       <head>
