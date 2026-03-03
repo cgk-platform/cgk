@@ -293,6 +293,26 @@ export async function handleOAuthCallback(
     console.error('Failed to create Storefront Access Token:', error)
   }
 
+  // Trigger initial product sync (don't block OAuth callback)
+  try {
+    const { sendJob } = await import('@cgk-platform/jobs')
+
+    // Sync all products from Shopify to local database
+    await sendJob('commerce/product-batch-sync', {
+      tenantId,
+    })
+
+    // Sync collections
+    await sendJob('commerce/collection-sync', {
+      tenantId,
+    })
+
+    console.log(`Product sync triggered for tenant ${tenantId}`)
+  } catch (error) {
+    // Don't fail OAuth callback if sync trigger fails
+    console.error('Failed to trigger product sync:', error)
+  }
+
   // Clean up OAuth state
   await deleteOAuthState(state)
 
