@@ -128,8 +128,8 @@ export async function updateDocument(input: UpdateDocumentInput, userId?: string
   // If content changed, save the old version to history
   if (input.content && input.content !== current.content) {
     await sql`
-      INSERT INTO brand_context_versions (document_id, version, content, created_by)
-      VALUES (${input.id}, ${current.version}, ${current.content}, ${userId || null})
+      INSERT INTO brand_context_versions (document_id, version, content)
+      VALUES (${input.id}, ${current.version}, ${current.content})
     `
   }
 
@@ -157,10 +157,10 @@ export async function deleteDocument(id: string): Promise<boolean> {
 
 export async function getDocumentVersions(documentId: string): Promise<DocumentVersion[]> {
   const result = await sql<DocumentVersion>`
-    SELECT v.id, v.document_id, v.version, v.content, v.created_at, v.created_by,
-           u.name as created_by_name
+    SELECT v.id, v.document_id, v.version, v.content, v.created_at,
+           NULL::text as created_by,
+           NULL::text as created_by_name
     FROM brand_context_versions v
-    LEFT JOIN public.users u ON v.created_by = u.id
     WHERE v.document_id = ${documentId}
     ORDER BY v.version DESC
   `
