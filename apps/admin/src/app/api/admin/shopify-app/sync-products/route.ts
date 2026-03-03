@@ -18,8 +18,8 @@ export async function POST() {
   }
 
   try {
-    // Import the job sender
-    const { sendJob } = await import('@cgk-platform/jobs')
+    // Import Trigger.dev task API
+    const { tasks } = await import('@trigger.dev/sdk/v3')
 
     // Get tenant ID
     const { sql } = await import('@cgk-platform/db')
@@ -34,13 +34,12 @@ export async function POST() {
     const tenantId = (tenantResult.rows[0] as { id: string }).id
 
     // Trigger batch product sync (syncs ALL products from Shopify)
-    await sendJob('commerce/product-batch-sync', {
+    await tasks.trigger('commerce-product-batch-sync', {
       tenantId,
-      // No productIds means sync ALL products
     })
 
     // Also sync collections
-    await sendJob('commerce/collection-sync', {
+    await tasks.trigger('commerce-collection-sync', {
       tenantId,
     })
 
