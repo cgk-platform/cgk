@@ -57,11 +57,9 @@ const nextConfig = {
   experimental: {
     // Reduces webpack memory usage by ~30%
     webpackMemoryOptimizations: true,
+    // Optimize package imports for better performance
+    optimizePackageImports: ['date-fns'],
   },
-
-  // lucide-react is pre-optimized by default in Next.js 13.5+
-  // Add other heavy packages if needed
-  optimizePackageImports: ['date-fns'],
 
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
