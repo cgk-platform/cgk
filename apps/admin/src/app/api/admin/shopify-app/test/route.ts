@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 
 import {
   checkConnectionHealth,
-  getShopifyCredentials,
+  getShopifyCredentialsBySlug,
   ShopifyError,
 } from '@cgk-platform/shopify'
 
@@ -41,7 +41,7 @@ export async function POST() {
     }
 
     // Get credentials to fetch shop name
-    const credentials = await getShopifyCredentials(tenantSlug)
+    const credentials = await getShopifyCredentialsBySlug(tenantSlug)
 
     // Make a shop query to get the shop name
     const response = await fetch(
@@ -60,7 +60,7 @@ export async function POST() {
       })
     }
 
-    const data = await response.json() as { shop?: { name: string } }
+    const data = (await response.json()) as { shop?: { name: string } }
 
     return NextResponse.json({
       success: true,

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic'
 import { withTenant } from '@cgk-platform/db'
 import {
   createAdminClient,
-  getShopifyCredentials,
+  getShopifyCredentialsBySlug,
   isShopifyConnected,
 } from '@cgk-platform/shopify'
 import { headers } from 'next/headers'
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     }
 
     // Get Shopify credentials
-    const credentials = await getShopifyCredentials(tenantSlug)
+    const credentials = await getShopifyCredentialsBySlug(tenantSlug)
 
     // Create Admin API client
     const admin = createAdminClient({

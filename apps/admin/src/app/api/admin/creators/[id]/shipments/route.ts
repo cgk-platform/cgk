@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server'
 
 import {
   createAdminClient,
-  getShopifyCredentials,
+  getShopifyCredentialsBySlug,
   isShopifyConnected,
 } from '@cgk-platform/shopify'
 
@@ -20,10 +20,7 @@ import type { CreateShipmentParams } from '@/lib/creators/lifecycle-types'
  * GET /api/admin/creators/[id]/shipments
  * Returns all shipments for a creator
  */
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: creatorId } = await params
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
@@ -52,7 +49,7 @@ async function createShopifyDraftOrder(
   notes?: string
 ): Promise<{ draftOrderId: string; orderId: string; orderNumber: string }> {
   // Get Shopify credentials
-  const credentials = await getShopifyCredentials(tenantSlug)
+  const credentials = await getShopifyCredentialsBySlug(tenantSlug)
 
   // Create Admin client
   const admin = createAdminClient({
@@ -113,7 +110,9 @@ async function createShopifyDraftOrder(
   }>(mutation, { input })
 
   if (result.draftOrderCreate.userErrors.length > 0) {
-    throw new Error(result.draftOrderCreate.userErrors[0]?.message || 'Failed to create draft order')
+    throw new Error(
+      result.draftOrderCreate.userErrors[0]?.message || 'Failed to create draft order'
+    )
   }
 
   if (!result.draftOrderCreate.draftOrder) {
@@ -176,10 +175,7 @@ async function createShopifyDraftOrder(
  * POST /api/admin/creators/[id]/shipments
  * Creates a new shipment (Shopify draft order)
  */
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: creatorId } = await params
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')

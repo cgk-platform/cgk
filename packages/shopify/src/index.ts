@@ -148,6 +148,7 @@ export {
   disconnectStore,
   // Credentials
   getShopifyCredentials,
+  getShopifyCredentialsBySlug,
   isShopifyConnected,
   getShopifyConnection,
   checkConnectionHealth,

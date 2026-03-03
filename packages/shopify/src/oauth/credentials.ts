@@ -15,6 +15,38 @@ import type { ShopifyCredentials, ShopifyConnection, ConnectionHealthCheck } fro
 const CREDENTIAL_CACHE_TTL = 60
 
 /**
+ * Get Shopify credentials by tenant slug
+ *
+ * Convenience wrapper that converts tenant slug to UUID before fetching credentials.
+ *
+ * @param tenantSlug - Tenant slug
+ * @returns Decrypted Shopify credentials
+ * @throws ShopifyError if tenant not found or not connected
+ *
+ * @example
+ * ```ts
+ * const credentials = await getShopifyCredentialsBySlug('meliusly')
+ * const client = createAdminClient({
+ *   storeDomain: credentials.shop,
+ *   adminAccessToken: credentials.accessToken,
+ * })
+ * ```
+ */
+export async function getShopifyCredentialsBySlug(tenantSlug: string): Promise<ShopifyCredentials> {
+  // Convert slug to UUID
+  const tenantResult = await sql`
+    SELECT id FROM public.organizations WHERE slug = ${tenantSlug}
+  `
+
+  if (tenantResult.rows.length === 0) {
+    throw new ShopifyError('NOT_CONNECTED', `Tenant ${tenantSlug} not found`)
+  }
+
+  const tenantId = (tenantResult.rows[0] as { id: string }).id
+  return getShopifyCredentials(tenantId)
+}
+
+/**
  * Get Shopify credentials for a tenant
  *
  * Retrieves and decrypts Shopify credentials, with caching

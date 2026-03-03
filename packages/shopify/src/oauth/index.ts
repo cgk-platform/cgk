@@ -9,19 +9,10 @@
 export { ShopifyError, type ShopifyErrorCode } from './errors.js'
 
 // Encryption
-export {
-  encryptToken,
-  decryptToken,
-  generateSecureToken,
-} from './encryption.js'
+export { encryptToken, decryptToken, generateSecureToken } from './encryption.js'
 
 // Scopes
-export {
-  PLATFORM_SCOPES,
-  getScopesString,
-  validateScopes,
-  type PlatformScope,
-} from './scopes.js'
+export { PLATFORM_SCOPES, getScopesString, validateScopes, type PlatformScope } from './scopes.js'
 
 // Types
 export type {
@@ -47,20 +38,14 @@ export {
 } from './validation.js'
 
 // OAuth flow
-export {
-  initiateOAuth,
-  getOAuthState,
-  deleteOAuthState,
-} from './initiate.js'
+export { initiateOAuth, getOAuthState, deleteOAuthState } from './initiate.js'
 
-export {
-  handleOAuthCallback,
-  disconnectStore,
-} from './callback.js'
+export { handleOAuthCallback, disconnectStore } from './callback.js'
 
 // Credentials
 export {
   getShopifyCredentials,
+  getShopifyCredentialsBySlug,
   isShopifyConnected,
   getShopifyConnection,
   checkConnectionHealth,
