@@ -1270,9 +1270,6 @@ importers:
       '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
-      '@cgk-platform/logging':
-        specifier: workspace:*
-        version: link:../logging
       '@neondatabase/serverless':
         specifier: ^1.0.2
         version: 1.0.2

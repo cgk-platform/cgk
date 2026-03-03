@@ -6,14 +6,17 @@
  * existing tenants get updated automatically.
  */
 
-import { createLogger } from '@cgk-platform/logging'
-
 import { sql } from '../client.js'
 import { getMigrationStatus, runTenantMigrations } from './runner.js'
 
-const logger = createLogger({
-  meta: { service: 'db', component: 'auto-migrate' },
-})
+// Simple logger for CLI output (no dependency on @cgk-platform/logging to avoid circular deps)
+const logger = {
+  debug: (msg: string, ctx?: object) => console.log(`[DEBUG] ${msg}`, ctx || ''),
+  info: (msg: string, ctx?: object) => console.log(`[INFO] ${msg}`, ctx || ''),
+  warn: (msg: string, ctx?: object) => console.warn(`[WARN] ${msg}`, ctx || ''),
+  error: (msg: string, err?: Error, ctx?: object) =>
+    console.error(`[ERROR] ${msg}`, err, ctx || ''),
+}
 
 /**
  * Check if a tenant has pending migrations
