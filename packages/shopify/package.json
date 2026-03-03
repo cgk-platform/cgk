@@ -32,6 +32,8 @@
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
     "@cgk-platform/jobs": "workspace:*",
+    "@cgk-platform/logging": "^1.1.0",
+    "@shopify/hydrogen-react": "^2025.10.0",
     "@shopify/shopify-api": "^12.3.0"
   },
   "devDependencies": {

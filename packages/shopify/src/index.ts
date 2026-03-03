@@ -5,7 +5,15 @@
  * @ai-note Provides typed clients for Shopify APIs
  */
 
-// Client factories
+// Hydrogen React (NEW PRIMARY - with dual token source)
+export { createHydrogenClient } from './hydrogen-adapter'
+export type { HydrogenClientConfig } from './hydrogen-adapter'
+
+// Re-export Hydrogen React types
+export type { StorefrontClientProps as HydrogenStorefrontClientProps } from '@shopify/hydrogen-react'
+
+// Legacy client factories (DEPRECATED - prefer createHydrogenClient)
+/** @deprecated Use createHydrogenClient instead */
 export { createStorefrontClient, type StorefrontClient } from './storefront'
 export { createAdminClient, type AdminClient } from './admin'
 

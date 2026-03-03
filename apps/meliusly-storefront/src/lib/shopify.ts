@@ -7,12 +7,7 @@
  * Use getShopifyClientForTenant() with a tenant ID to get a configured client.
  */
 
-export {
-  getShopifyClientForTenant,
-  getShopifyInstallation,
-  isShopifyConnected,
-  getShopDomain,
-} from './shopify-from-database'
+export { getShopifyClientForTenant } from './shopify-from-database'
 
 export { resolveTenantFromDomain, getTenantIdFromDomain } from './tenant-resolution'
 

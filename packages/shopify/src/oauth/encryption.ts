@@ -8,6 +8,11 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 
 import { ShopifyError } from './errors.js'
+import { createLogger } from '@cgk-platform/logging'
+
+const logger = createLogger({
+  meta: { service: 'shopify', component: 'encryption' }
+})
 
 const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12
@@ -75,14 +80,40 @@ export function encryptToken(token: string): string {
  * @returns Decrypted plaintext token
  */
 export function decryptToken(encrypted: string): string {
+  // Log decryption attempt
+  logger.debug('[Shopify] Decrypting token', {
+    encryptedLength: encrypted.length,
+    encryptedPreview: encrypted.substring(0, 30) + '...',
+    encryptionKeySet: !!process.env.SHOPIFY_TOKEN_ENCRYPTION_KEY,
+    encryptionKeyLength: process.env.SHOPIFY_TOKEN_ENCRYPTION_KEY?.length || 0
+  })
+
   try {
     const key = getEncryptionKey()
     const parts = encrypted.split(':')
 
+    // Log token parts analysis
+    logger.debug('[Shopify] Token parts analysis', {
+      partCount: parts.length,
+      partLengths: parts.map((p, i) => ({ part: i + 1, length: p.length })),
+      expectedPartCount: 3
+    })
+
     if (parts.length !== 3) {
+      logger.error(
+        '[Shopify] ❌ Invalid token format',
+        undefined,
+        {
+          expected: 3,
+          actual: parts.length,
+          encrypted: encrypted.substring(0, 100),
+          fullLength: encrypted.length
+        }
+      )
+
       throw new ShopifyError(
         'DECRYPTION_FAILED',
-        'Invalid encrypted token format'
+        `Invalid encrypted token format: expected 3 parts (iv:authTag:cipherText), got ${parts.length} parts`
       )
     }
 
@@ -90,6 +121,37 @@ export function decryptToken(encrypted: string): string {
 
     const iv = Buffer.from(ivHex!, 'hex')
     const authTag = Buffer.from(authTagHex!, 'hex')
+
+    // Validate part lengths
+    const validationErrors: string[] = []
+
+    if (ivHex!.length !== 24) {
+      validationErrors.push(`IV length ${ivHex!.length} (expected 24)`)
+    }
+    if (authTagHex!.length !== 32) {
+      validationErrors.push(`AuthTag length ${authTagHex!.length} (expected 32)`)
+    }
+    if (cipherText!.length < 1) {
+      validationErrors.push('CipherText is empty')
+    }
+
+    if (validationErrors.length > 0) {
+      logger.error(
+        '[Shopify] ❌ Token part validation failed',
+        undefined,
+        {
+          errors: validationErrors,
+          ivLength: ivHex!.length,
+          authTagLength: authTagHex!.length,
+          cipherTextLength: cipherText!.length
+        }
+      )
+
+      throw new ShopifyError(
+        'DECRYPTION_FAILED',
+        `Invalid token part lengths: ${validationErrors.join(', ')}`
+      )
+    }
 
     if (iv.length !== IV_LENGTH) {
       throw new ShopifyError(
@@ -111,14 +173,27 @@ export function decryptToken(encrypted: string): string {
     let decrypted = decipher.update(cipherText!, 'hex', 'utf8')
     decrypted += decipher.final('utf8')
 
+    logger.info('[Shopify] ✅ Token decrypted successfully', {
+      decryptedLength: decrypted.length
+    })
+
     return decrypted
   } catch (error) {
     if (error instanceof ShopifyError) {
       throw error
     }
+
+    logger.error(
+      '[Shopify] ❌ Decryption failed',
+      error instanceof Error ? error : undefined,
+      {
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      }
+    )
+
     throw new ShopifyError(
       'DECRYPTION_FAILED',
-      'Failed to decrypt token',
+      `Decryption error: ${error instanceof Error ? error.message : 'Unknown'}`,
       { error: error instanceof Error ? error.message : String(error) }
     )
   }

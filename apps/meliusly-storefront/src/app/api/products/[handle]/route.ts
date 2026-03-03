@@ -1,13 +1,19 @@
 /**
  * Product Detail API Route
  *
- * Fetches a single product by handle from Shopify using database-driven credentials.
+ * Fetches a single product by handle from Shopify using Hydrogen React.
+ * CRITICAL: Powers all 14 PDP components - preserves data structure and mock fallback.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { resolveTenantFromDomain } from '@/lib/tenant-resolution'
 import { getShopifyClientForTenant } from '@/lib/shopify-from-database'
 import { getMockProductByHandle } from '@/lib/mock-products'
+import { createLogger } from '@cgk-platform/logging'
+
+const logger = createLogger({
+  meta: { service: 'meliusly-storefront', component: 'product-detail-api' }
+})
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -18,6 +24,55 @@ interface RouteParams {
   }>
 }
 
+interface ProductDetailResponse {
+  product: {
+    id: string
+    title: string
+    handle: string
+    description: string
+    descriptionHtml: string
+    priceRange: {
+      minVariantPrice: { amount: string; currencyCode: string }
+    }
+    compareAtPriceRange?: {
+      minVariantPrice: { amount: string; currencyCode: string }
+    }
+    featuredImage?: {
+      url: string
+      altText: string
+      width: number
+      height: number
+    }
+    images: {
+      edges: Array<{
+        node: {
+          url: string
+          altText: string
+          width: number
+          height: number
+        }
+      }>
+    }
+    variants: {
+      edges: Array<{
+        node: {
+          id: string
+          title: string
+          availableForSale: boolean
+          price: { amount: string; currencyCode: string }
+          compareAtPrice?: { amount: string; currencyCode: string }
+          selectedOptions: Array<{ name: string; value: string }>
+        }
+      }>
+    }
+    options: Array<{
+      id: string
+      name: string
+      values: string[]
+    }>
+  }
+}
+
 /**
  * GET /api/products/:handle
  */
@@ -26,15 +81,21 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const { handle } = await params
 
     // Resolve tenant from domain
-    const host = request.headers.get('host')
+    const host = request.headers.get('host') || 'localhost:3300'
     const tenant = await resolveTenantFromDomain(host)
 
+    logger.info('[Product API] Fetching single product', {
+      tenantId: tenant.id,
+      handle,
+      host
+    })
+
     try {
-      // Get Shopify client with database credentials
+      // Get Shopify client (Hydrogen React with dual token source)
       const shopify = await getShopifyClientForTenant(tenant.id)
 
-      // Fetch product from Shopify
-      const result = (await shopify.query(
+      // Fetch product using Hydrogen React query method
+      const { data, errors } = await shopify.query<ProductDetailResponse>(
         `
         query getProduct($handle: String!) {
           product(handle: $handle) {
@@ -101,64 +162,85 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         }
       `,
         { handle }
-      )) as { product: unknown }
+      )
 
-      if (!result.product) {
+      if (errors) {
+        throw new Error(`GraphQL errors: ${JSON.stringify(errors)}`)
+      }
+
+      if (!data.product) {
+        // Try mock data fallback
+        const mockProduct = getMockProductByHandle(handle)
+        if (mockProduct) {
+          logger.warn('[Product API] Product not in Shopify, using mock', { handle })
+          return NextResponse.json({
+            success: true,
+            data: mockProduct,
+            tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
+            mock: true,
+            message: 'Using mock product data'
+          })
+        }
+
         return NextResponse.json(
           {
             success: false,
-            error: 'Product not found',
+            error: 'Product not found'
           },
           { status: 404 }
         )
       }
 
+      logger.info('[Product API] Product fetched from Shopify', {
+        handle,
+        productId: data.product.id,
+        tokenSource: shopify._metadata.tokenSource
+      })
+
       return NextResponse.json({
         success: true,
-        data: result.product,
-        tenant: {
-          id: tenant.id,
-          slug: tenant.slug,
-          name: tenant.name,
-        },
+        data: data.product,
+        tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
+        tokenSource: shopify._metadata.tokenSource
       })
     } catch (shopifyError) {
-      // If Shopify connection fails, try mock data
-      console.warn('⚠️  Shopify connection not available, trying mock data:', shopifyError)
+      // Shopify connection failed - use mock data
+      logger.warn('[Product API] Shopify connection failed, using mock data', {
+        error: shopifyError instanceof Error ? shopifyError.message : 'Unknown'
+      })
 
       const mockProduct = getMockProductByHandle(handle)
-
-      if (!mockProduct) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Product not found',
-          },
-          { status: 404 }
-        )
+      if (mockProduct) {
+        return NextResponse.json({
+          success: true,
+          data: mockProduct,
+          tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
+          mock: true,
+          message: 'Shopify unavailable, using mock data'
+        })
       }
 
-      console.log(`🎨 Demo Mode: Displaying mock product "${mockProduct.title}"`)
-
-      return NextResponse.json({
-        success: true,
-        data: mockProduct,
-        tenant: {
-          id: tenant.id,
-          slug: tenant.slug,
-          name: tenant.name,
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Product not found and no mock data available'
         },
-        mock: true,
-        message: 'Demo mode - using mock product data',
-      })
+        { status: 404 }
+      )
     }
   } catch (error) {
-    console.error('Failed to fetch product:', error)
+    logger.error(
+      '[Product API] Failed',
+      error instanceof Error ? error : undefined,
+      {
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      }
+    )
 
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to fetch product',
+        error: error instanceof Error ? error.message : 'Failed to fetch product'
       },
       { status: 500 }
     )

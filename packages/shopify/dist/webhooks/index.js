@@ -6,7 +6,7 @@ import {
   __commonJS,
   __export,
   __toESM
-} from "../chunk-U67V476Y.js";
+} from "../chunk-4VNS5WPM.js";
 
 // ../../node_modules/.pnpm/@jsonhero+path@1.0.21/node_modules/@jsonhero/path/lib/path/query-result.js
 var require_query_result = __commonJS({
@@ -6301,7 +6301,7 @@ var JWT_ALGORITHM = "HS256";
 var JWT_ISSUER = "https://id.trigger.dev";
 var JWT_AUDIENCE = "https://api.trigger.dev";
 async function generateJWT(options) {
-  const { SignJWT } = await import("../esm-TN6ZUNU6.js");
+  const { SignJWT } = await import("../esm-D6BMRDT5.js");
   const secret = new TextEncoder().encode(options.secretKey);
   return new SignJWT(options.payload).setIssuer(JWT_ISSUER).setAudience(JWT_AUDIENCE).setProtectedHeader({ alg: JWT_ALGORITHM }).setIssuedAt().setExpirationTime(options.expirationTime ?? "15m").sign(secret);
 }
@@ -11542,11 +11542,11 @@ function splitLines(chunk) {
 
 // ../../node_modules/.pnpm/@trigger.dev+core@4.3.3_bufferutil@4.1.0_supports-color@10.2.2_typescript@5.9.3/node_modules/@trigger.dev/core/dist/esm/v3/utils/crypto.js
 async function randomUUID() {
-  const { randomUUID: randomUUID2 } = await import("../crypto.node-LTI2JSW6.js");
+  const { randomUUID: randomUUID2 } = await import("../crypto.node-NQYPF3CW.js");
   return randomUUID2();
 }
 async function digestSHA256(data) {
-  const { subtle: subtle2 } = await import("../crypto.node-LTI2JSW6.js");
+  const { subtle: subtle2 } = await import("../crypto.node-NQYPF3CW.js");
   const hash = await subtle2.digest("SHA-256", new TextEncoder().encode(data));
   return Array.from(new Uint8Array(hash)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }

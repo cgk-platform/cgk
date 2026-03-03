@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { headers } from 'next/headers'
-import { createStorefrontClient } from '@cgk-platform/shopify'
+import { resolveTenantFromDomain } from '@/lib/tenant-resolution'
+import { getShopifyClientForTenant } from '@/lib/shopify-from-database'
+import { createLogger } from '@cgk-platform/logging'
+
+const logger = createLogger({
+  meta: { service: 'meliusly-storefront', component: 'checkout-api' }
+})
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -12,6 +17,31 @@ interface CartItem {
 
 interface CheckoutRequest {
   items: CartItem[]
+}
+
+interface CartCreateResponse {
+  cartCreate: {
+    cart: {
+      id: string
+      checkoutUrl: string
+      lines: {
+        edges: Array<{
+          node: {
+            id: string
+            quantity: number
+            merchandise: {
+              id: string
+              title: string
+            }
+          }
+        }>
+      }
+    }
+    userErrors: Array<{
+      field: string[]
+      message: string
+    }>
+  }
 }
 
 /**
@@ -26,24 +56,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Cart is empty' }, { status: 400 })
     }
 
-    // Get tenant/shop domain from headers or environment
-    // For now, use the environment variable for the shop domain
-    const shopDomain = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || 'meliusly.myshopify.com'
-    const storefrontToken = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN
+    // Resolve tenant from domain (CONSISTENT WITH REST OF APP)
+    const host = request.headers.get('host') || 'localhost:3300'
+    const tenant = await resolveTenantFromDomain(host)
 
-    if (!storefrontToken) {
-      console.error('Missing Shopify Storefront Access Token')
-      return NextResponse.json(
-        { success: false, error: 'Checkout configuration error' },
-        { status: 500 }
-      )
-    }
-
-    // Create Shopify Storefront API client
-    const storefront = createStorefrontClient({
-      storeDomain: shopDomain,
-      storefrontAccessToken: storefrontToken,
+    logger.info('[Checkout API] Creating cart', {
+      tenantId: tenant.id,
+      itemCount: body.items.length,
+      host
     })
+
+    // Get Shopify client (Hydrogen React with dual token source)
+    // NOW USES DATABASE TOKEN - consistent with products/collections APIs
+    const shopify = await getShopifyClientForTenant(tenant.id)
 
     // Build cart lines for Shopify
     const lines = body.items.map((item) => ({
@@ -87,67 +112,69 @@ export async function POST(request: NextRequest) {
       },
     }
 
-    // Execute mutation
-    interface CartCreateResponse {
-      cartCreate: {
-        cart: {
-          id: string
-          checkoutUrl: string
-          lines: {
-            edges: Array<{
-              node: {
-                id: string
-                quantity: number
-                merchandise: {
-                  id: string
-                  title: string
-                }
-              }
-            }>
-          }
-        }
-        userErrors: Array<{
-          field: string[]
-          message: string
-        }>
-      }
-    }
+    // Execute mutation using Hydrogen React query method
+    const { data, errors: graphqlErrors } = await shopify.query<CartCreateResponse>(
+      mutation,
+      variables
+    )
 
-    const response = await storefront.query<CartCreateResponse>(mutation, variables)
-
-    if (response.cartCreate.userErrors.length > 0) {
-      const errors = response.cartCreate.userErrors
-      console.error('Shopify cart creation errors:', errors)
+    if (graphqlErrors) {
+      logger.error('[Checkout API] GraphQL errors', undefined, { errors: graphqlErrors })
       return NextResponse.json(
         {
           success: false,
-          error: errors[0].message || 'Failed to create checkout',
+          error: 'GraphQL query failed',
+          details: graphqlErrors
+        },
+        { status: 500 }
+      )
+    }
+
+    if (data.cartCreate.userErrors.length > 0) {
+      const errors = data.cartCreate.userErrors
+      logger.error('[Checkout API] Cart creation errors', undefined, { errors })
+      return NextResponse.json(
+        {
+          success: false,
+          error: errors[0].message || 'Failed to create checkout'
         },
         { status: 400 }
       )
     }
 
-    const cart = response.cartCreate.cart
+    const cart = data.cartCreate.cart
 
     if (!cart || !cart.checkoutUrl) {
-      console.error('No checkout URL returned from Shopify')
+      logger.error('[Checkout API] No checkout URL returned', undefined)
       return NextResponse.json(
         { success: false, error: 'Failed to create checkout' },
         { status: 500 }
       )
     }
 
+    logger.info('[Checkout API] Cart created successfully', {
+      cartId: cart.id,
+      tokenSource: shopify._metadata.tokenSource
+    })
+
     return NextResponse.json({
       success: true,
       checkoutUrl: cart.checkoutUrl,
       cartId: cart.id,
+      tokenSource: shopify._metadata.tokenSource
     })
   } catch (error) {
-    console.error('Checkout API error:', error)
+    logger.error(
+      '[Checkout API] Failed',
+      error instanceof Error ? error : undefined,
+      {
+        errorType: error instanceof Error ? error.constructor.name : typeof error
+      }
+    )
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create checkout',
+        error: error instanceof Error ? error.message : 'Failed to create checkout'
       },
       { status: 500 }
     )
