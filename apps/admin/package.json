@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 3200",
-    "build": "next build --turbopack",
+    "dev": "next dev --port 3200",
+    "build": "next build",
     "start": "next start --port 3200",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
