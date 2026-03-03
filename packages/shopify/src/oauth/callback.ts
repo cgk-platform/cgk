@@ -295,15 +295,15 @@ export async function handleOAuthCallback(
 
   // Trigger initial product sync (don't block OAuth callback)
   try {
-    const { sendJob } = await import('@cgk-platform/jobs')
+    const { tasks } = await import('@trigger.dev/sdk/v3')
 
     // Sync all products from Shopify to local database
-    await sendJob('commerce/product-batch-sync', {
+    await tasks.trigger('commerce-product-batch-sync', {
       tenantId,
     })
 
     // Sync collections
-    await sendJob('commerce/collection-sync', {
+    await tasks.trigger('commerce-collection-sync', {
       tenantId,
     })
 
