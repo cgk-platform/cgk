@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { Suspense } from 'react'
 
 import { LoginForm, LoginFormSkeleton } from './login-form'
@@ -11,11 +12,21 @@ import { LoginForm, LoginFormSkeleton } from './login-form'
  */
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 space-y-6 bg-card rounded-lg border shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="w-full max-w-md space-y-6 rounded-lg border bg-card p-8 shadow-lg">
         <div className="text-center">
+          <div className="mb-4 flex justify-center">
+            <Image
+              src="/cgk-platform-logo.png"
+              alt="CGK Platform"
+              width={96}
+              height={64}
+              className="h-16 w-auto"
+              priority
+            />
+          </div>
           <h1 className="text-2xl font-bold">Orchestrator</h1>
-          <p className="text-muted-foreground mt-2">Super Admin Login</p>
+          <p className="mt-2 text-muted-foreground">Super Admin Login</p>
         </div>
 
         <Suspense fallback={<LoginFormSkeleton />}>

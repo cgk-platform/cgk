@@ -1,24 +1,29 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 export const metadata: Metadata = {
   title: 'Creator Portal - Sign In',
   description: 'Sign in to manage your creator account',
 }
 
-export default function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode
-}): React.JSX.Element {
+export default function AuthLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <Image
+              src="/cgk-platform-logo.png"
+              alt="CGK Platform"
+              width={96}
+              height={64}
+              className="h-16 w-auto"
+              priority
+            />
+          </div>
           <h1 className="text-2xl font-bold">Creator Portal</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your earnings across brands
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Manage your earnings across brands</p>
         </div>
 
         {/* Auth card */}

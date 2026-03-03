@@ -2,6 +2,7 @@
 
 import { cn } from '@cgk-platform/ui'
 import { Briefcase, Menu, X } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useCallback, useEffect } from 'react'
@@ -38,7 +39,14 @@ export function MobileNav(): React.JSX.Element {
       {/* Mobile header */}
       <div className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden">
         <div className="flex h-14 items-center justify-between px-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/cgk-platform-logo.png"
+              alt="CGK Platform"
+              width={42}
+              height={28}
+              className="h-7 w-auto"
+            />
             <Link href="/" className="font-bold tracking-tight">
               Contractor Portal
             </Link>
@@ -73,17 +81,15 @@ export function MobileNav(): React.JSX.Element {
         <div className="flex h-full flex-col">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border/50 p-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2.5"
-              onClick={closeMobileMenu}
-            >
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                <Briefcase className="h-4.5 w-4.5" />
-              </div>
-              <span className="text-lg font-bold tracking-tight">
-                Contractor Portal
-              </span>
+            <Link href="/" className="flex items-center gap-2.5" onClick={closeMobileMenu}>
+              <Image
+                src="/cgk-platform-logo.png"
+                alt="CGK Platform"
+                width={48}
+                height={32}
+                className="h-8 w-auto"
+              />
+              <span className="text-lg font-bold tracking-tight">Contractor Portal</span>
             </Link>
             <button
               onClick={closeMobileMenu}

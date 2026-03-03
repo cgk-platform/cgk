@@ -16,6 +16,7 @@ import {
   Users,
   X,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
@@ -144,8 +145,8 @@ export function Sidebar({ mfaVerified = false, userName, userEmail }: SidebarPro
   }, [router])
 
   // Auto-expand active parent items
-  const activeParent = NAV_ITEMS.find(
-    (item) => item.children?.some((child) => isActive(child.href))
+  const activeParent = NAV_ITEMS.find((item) =>
+    item.children?.some((child) => isActive(child.href))
   )
   if (activeParent && !expandedItems.has(activeParent.href)) {
     setExpandedItems((prev) => new Set([...prev, activeParent.href]))
@@ -180,7 +181,14 @@ export function Sidebar({ mfaVerified = false, userName, userEmail }: SidebarPro
         {/* Header */}
         <div className="flex h-14 items-center justify-between border-b px-4">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" />
+            <Image
+              src="/cgk-platform-logo.png"
+              alt="CGK Platform"
+              width={54}
+              height={36}
+              className="h-9 w-auto"
+              priority
+            />
             <span className="font-bold">Orchestrator</span>
           </div>
           <button
@@ -221,9 +229,7 @@ export function Sidebar({ mfaVerified = false, userName, userEmail }: SidebarPro
         <div className="border-t p-3">
           <div className="mb-2 px-2">
             <p className="truncate text-sm font-medium">{userName || 'Super Admin'}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {userEmail || 'No email'}
-            </p>
+            <p className="truncate text-xs text-muted-foreground">{userEmail || 'No email'}</p>
           </div>
           <Button
             variant="ghost"

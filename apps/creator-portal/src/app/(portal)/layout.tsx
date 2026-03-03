@@ -17,6 +17,7 @@ import {
   Building,
   Receipt,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, useCallback, useEffect } from 'react'
@@ -76,9 +77,14 @@ export default function PortalLayout({
             {/* Logo */}
             <div className="border-b border-border/50 p-4">
               <Link href="/dashboard" className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                  <User className="h-4.5 w-4.5" />
-                </div>
+                <Image
+                  src="/cgk-platform-logo.png"
+                  alt="CGK Platform"
+                  width={54}
+                  height={36}
+                  className="h-9 w-auto"
+                  priority
+                />
                 <span className="text-lg font-bold tracking-tight">Creator Portal</span>
               </Link>
             </div>
@@ -115,7 +121,14 @@ export default function PortalLayout({
         {/* Mobile header */}
         <div className="fixed inset-x-0 top-0 z-50 border-b border-border/50 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 lg:hidden">
           <div className="flex h-14 items-center justify-between px-4">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Image
+                src="/cgk-platform-logo.png"
+                alt="CGK Platform"
+                width={42}
+                height={28}
+                className="h-7 w-auto"
+              />
               <Link href="/dashboard" className="font-bold tracking-tight">
                 Creator Portal
               </Link>
@@ -151,10 +164,18 @@ export default function PortalLayout({
           <div className="flex h-full flex-col">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-border/50 p-4">
-              <Link href="/dashboard" className="flex items-center gap-2.5" onClick={closeMobileMenu}>
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-                  <User className="h-4.5 w-4.5" />
-                </div>
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-2.5"
+                onClick={closeMobileMenu}
+              >
+                <Image
+                  src="/cgk-platform-logo.png"
+                  alt="CGK Platform"
+                  width={48}
+                  height={32}
+                  className="h-8 w-auto"
+                />
                 <span className="text-lg font-bold tracking-tight">Creator Portal</span>
               </Link>
               <button
@@ -174,7 +195,12 @@ export default function PortalLayout({
             {/* Navigation */}
             <nav className="flex-1 space-y-1 p-4">
               {navItems.map((item) => (
-                <NavLink key={item.href} href={item.href} pathname={pathname} onClick={closeMobileMenu}>
+                <NavLink
+                  key={item.href}
+                  href={item.href}
+                  pathname={pathname}
+                  onClick={closeMobileMenu}
+                >
                   <item.icon className="h-4 w-4" />
                   {item.label}
                 </NavLink>
@@ -185,7 +211,12 @@ export default function PortalLayout({
             <div className="border-t border-border/50 p-4">
               <nav className="space-y-1">
                 {bottomNavItems.map((item) => (
-                  <NavLink key={item.href} href={item.href} pathname={pathname} onClick={closeMobileMenu}>
+                  <NavLink
+                    key={item.href}
+                    href={item.href}
+                    pathname={pathname}
+                    onClick={closeMobileMenu}
+                  >
                     <item.icon className="h-4 w-4" />
                     {item.label}
                   </NavLink>
@@ -197,7 +228,7 @@ export default function PortalLayout({
 
         {/* Main content */}
         <main className="flex-1 pt-14 lg:pt-0">
-          <div className="mx-auto max-w-6xl p-6 lg:p-8 animate-fade-up">{children}</div>
+          <div className="mx-auto max-w-6xl animate-fade-up p-6 lg:p-8">{children}</div>
         </main>
       </div>
     </BrandProvider>

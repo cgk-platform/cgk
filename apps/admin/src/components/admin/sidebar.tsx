@@ -2,6 +2,7 @@
 
 import { cn } from '@cgk-platform/ui'
 import { ChevronDown, LogOut, Settings } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -24,6 +25,19 @@ export function Sidebar({ tenant, user }: SidebarProps) {
 
   return (
     <aside className="flex h-full w-64 flex-col border-r border-border/50 bg-card">
+      {/* Platform branding */}
+      <div className="flex items-center gap-2.5 border-b border-border/50 px-5 py-4">
+        <Image
+          src="/cgk-platform-logo.png"
+          alt="CGK Platform"
+          width={54}
+          height={36}
+          className="h-9 w-auto"
+          priority
+        />
+        <span className="text-lg font-bold tracking-tight">Admin Portal</span>
+      </div>
+
       {/* Tenant branding */}
       <div className="flex items-center gap-3 border-b border-border/50 px-5 py-5">
         {tenant.logo ? (
@@ -38,9 +52,7 @@ export function Sidebar({ tenant, user }: SidebarProps) {
           </div>
         )}
         <div className="flex-1 overflow-hidden">
-          <span className="block truncate text-sm font-semibold tracking-tight">
-            {tenant.name}
-          </span>
+          <span className="block truncate text-sm font-semibold tracking-tight">{tenant.name}</span>
           <span className="text-xs text-muted-foreground">Admin Portal</span>
         </div>
       </div>
@@ -119,13 +131,13 @@ function NavItem({ section, pathname }: { section: NavSection; pathname: string 
           <Icon
             className={cn(
               'h-4 w-4 transition-colors',
-              isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
+              isActive
+                ? 'text-primary-foreground'
+                : 'text-muted-foreground group-hover:text-foreground'
             )}
           />
           {section.label}
-          {isActive && (
-            <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold" />
-          )}
+          {isActive && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-gold" />}
         </Link>
       </li>
     )

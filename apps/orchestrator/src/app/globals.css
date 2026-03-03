@@ -5,46 +5,46 @@
 @layer base {
   :root {
     /* ========================================================================
-       CGK Design System - Orchestrator (Dark Mode Only)
-       Super Admin Dashboard - Navy + Gold
+       CGK Design System - Orchestrator
+       Super Admin Dashboard - Navy + Gold (Light Theme)
        ======================================================================== */
 
-    /* Background & Foreground (Dark theme base) */
-    --background: 222 47% 6%;
-    --foreground: 40 15% 95%;
+    /* Background & Foreground */
+    --background: 40 20% 98%;
+    --foreground: 40 10% 10%;
 
     /* Card */
-    --card: 222 47% 8%;
-    --card-foreground: 40 15% 95%;
+    --card: 0 0% 100%;
+    --card-foreground: 40 10% 10%;
 
     /* Popover */
-    --popover: 222 47% 8%;
-    --popover-foreground: 40 15% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 40 10% 10%;
 
-    /* Primary */
-    --primary: 40 15% 95%;
-    --primary-foreground: 222 47% 11%;
+    /* Primary (Deep Navy) */
+    --primary: 222 47% 11%;
+    --primary-foreground: 40 20% 98%;
 
     /* Secondary */
-    --secondary: 217 32% 17%;
-    --secondary-foreground: 40 15% 95%;
+    --secondary: 40 15% 95%;
+    --secondary-foreground: 222 47% 11%;
 
     /* Muted */
-    --muted: 217 32% 17%;
-    --muted-foreground: 40 8% 65%;
+    --muted: 40 10% 95%;
+    --muted-foreground: 40 5% 45%;
 
     /* Accent */
-    --accent: 217 32% 17%;
-    --accent-foreground: 40 15% 95%;
+    --accent: 40 10% 95%;
+    --accent-foreground: 222 47% 11%;
 
     /* Destructive */
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 40 15% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
     /* Border & Input */
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 40 8% 78%;
+    --border: 40 10% 89%;
+    --input: 40 10% 89%;
+    --ring: 222 47% 11%;
 
     /* Radius */
     --radius: 0.5rem;
@@ -69,32 +69,32 @@
     --info-foreground: 40 20% 98%;
 
     /* ========================================================================
-       Gray Scale (dark mode optimized)
+       Gray Scale
        ======================================================================== */
-    --gray-50: 222 47% 6%;
-    --gray-100: 222 45% 10%;
-    --gray-200: 222 40% 15%;
-    --gray-300: 222 35% 22%;
-    --gray-400: 222 25% 35%;
-    --gray-500: 222 20% 45%;
-    --gray-600: 222 15% 58%;
-    --gray-700: 222 12% 72%;
-    --gray-800: 222 10% 85%;
-    --gray-900: 222 8% 95%;
+    --gray-50: 40 20% 98%;
+    --gray-100: 40 15% 95%;
+    --gray-200: 40 12% 90%;
+    --gray-300: 40 10% 82%;
+    --gray-400: 40 8% 65%;
+    --gray-500: 40 6% 50%;
+    --gray-600: 40 6% 40%;
+    --gray-700: 40 7% 28%;
+    --gray-800: 40 8% 18%;
+    --gray-900: 40 10% 10%;
 
     /* ========================================================================
        Navy Scale
        ======================================================================== */
-    --navy-50: 222 47% 6%;
-    --navy-100: 222 47% 11%;
-    --navy-200: 222 47% 14%;
-    --navy-300: 222 47% 20%;
-    --navy-400: 222 47% 28%;
-    --navy-500: 222 47% 40%;
-    --navy-600: 222 46% 55%;
-    --navy-700: 222 45% 70%;
-    --navy-800: 222 44% 84%;
-    --navy-900: 222 42% 92%;
+    --navy-50: 222 42% 92%;
+    --navy-100: 222 44% 84%;
+    --navy-200: 222 45% 70%;
+    --navy-300: 222 46% 55%;
+    --navy-400: 222 47% 40%;
+    --navy-500: 222 47% 28%;
+    --navy-600: 222 47% 20%;
+    --navy-700: 222 47% 14%;
+    --navy-800: 222 47% 11%;
+    --navy-900: 222 47% 6%;
 
     /* ========================================================================
        Animation Timing
@@ -129,7 +129,7 @@
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
-  /* Scrollbar styling (dark) */
+  /* Scrollbar styling */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -140,11 +140,11 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-700/50 rounded-full;
+    @apply bg-gray-300/50 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-600/70;
+    @apply bg-gray-400/70;
   }
 }
 
@@ -200,9 +200,9 @@
   .stagger-4 { animation-delay: 200ms; }
   .stagger-5 { animation-delay: 250ms; }
 
-  /* Glass effect (dark mode) */
+  /* Glass effect */
   .glass {
-    @apply bg-gray-800/60 backdrop-blur-sm border border-gray-700/50;
+    @apply bg-white/60 backdrop-blur-sm border border-gray-300/50;
   }
 
   /* Card hover effect */
@@ -211,7 +211,7 @@
   }
 
   .card-hover:hover {
-    @apply shadow-lg shadow-black/20 -translate-y-0.5 border-gray-600/50;
+    @apply shadow-lg shadow-gray-200/50 -translate-y-0.5 border-gray-300/70;
   }
 
   /* Glow effect for important elements */

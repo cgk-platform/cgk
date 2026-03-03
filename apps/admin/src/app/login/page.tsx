@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Card, CardContent, Button, Input, Label } from '@cgk-platform/ui'
 import { Mail, Loader2, CheckCircle, Lock } from 'lucide-react'
+import Image from 'next/image'
 
 type AuthMode = 'magic-link' | 'password'
 
@@ -12,7 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
-  const [mode, setMode] = useState<AuthMode>('magic-link')
+  const [mode, setMode] = useState<AuthMode>('password')
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,7 +78,8 @@ export default function LoginPage() {
               </div>
               <h1 className="text-2xl font-bold">Check your email</h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                We sent a sign-in link to <span className="font-medium text-foreground">{email}</span>
+                We sent a sign-in link to{' '}
+                <span className="font-medium text-foreground">{email}</span>
               </p>
               <p className="mt-4 text-xs text-muted-foreground">
                 Click the link in your email to sign in. The link will expire in 24 hours.
@@ -104,17 +106,18 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardContent className="p-6">
           <div className="mb-6 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              {mode === 'magic-link' ? (
-                <Mail className="h-6 w-6 text-primary" />
-              ) : (
-                <Lock className="h-6 w-6 text-primary" />
-              )}
+            <div className="mb-4 flex justify-center">
+              <Image
+                src="/cgk-platform-logo.png"
+                alt="CGK Platform"
+                width={96}
+                height={64}
+                className="h-16 w-auto"
+                priority
+              />
             </div>
             <h1 className="text-2xl font-bold">Admin Portal</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Sign in to your account
-            </p>
+            <p className="mt-1 text-sm text-muted-foreground">Sign in to your account</p>
           </div>
 
           {mode === 'magic-link' ? (
@@ -131,9 +134,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
@@ -171,9 +172,7 @@ export default function LoginPage() {
                   required
                 />
               </div>
-              {error && (
-                <p className="text-sm text-destructive">{error}</p>
-              )}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
@@ -190,15 +189,13 @@ export default function LoginPage() {
           <div className="mt-4 text-center">
             <button
               type="button"
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground"
               onClick={() => {
                 setMode(mode === 'magic-link' ? 'password' : 'magic-link')
                 setError('')
               }}
             >
-              {mode === 'magic-link'
-                ? 'Sign in with password instead'
-                : 'Sign in with magic link instead'}
+              {mode === 'magic-link' ? 'Use password instead' : 'Use magic link instead'}
             </button>
           </div>
         </CardContent>

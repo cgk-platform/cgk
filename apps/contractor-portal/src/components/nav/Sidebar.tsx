@@ -10,6 +10,7 @@ import {
   HelpCircle,
   Briefcase,
 } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -43,21 +44,21 @@ export function Sidebar({ className }: SidebarProps): React.JSX.Element {
 
   return (
     <aside
-      className={cn(
-        'hidden w-64 shrink-0 border-r border-border/50 bg-card lg:block',
-        className
-      )}
+      className={cn('hidden w-64 shrink-0 border-r border-border/50 bg-card lg:block', className)}
     >
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="border-b border-border/50 p-4">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm">
-              <Briefcase className="h-4.5 w-4.5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight">
-              Contractor Portal
-            </span>
+            <Image
+              src="/cgk-platform-logo.png"
+              alt="CGK Platform"
+              width={54}
+              height={36}
+              className="h-9 w-auto"
+              priority
+            />
+            <span className="text-lg font-bold tracking-tight">Contractor Portal</span>
           </Link>
         </div>
 
@@ -97,12 +98,7 @@ interface NavLinkProps {
 /**
  * Navigation link with active state styling
  */
-export function NavLink({
-  href,
-  pathname,
-  children,
-  onClick,
-}: NavLinkProps): React.JSX.Element {
+export function NavLink({ href, pathname, children, onClick }: NavLinkProps): React.JSX.Element {
   // Handle root path specially
   const isActive =
     href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')

@@ -57,11 +57,7 @@ export const viewport: Viewport = {
   themeColor: '#0c1320',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}): React.JSX.Element {
+export default function RootLayout({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <html
       lang="en"
@@ -71,7 +67,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased">
         <TooltipProvider delayDuration={200}>
           {children}
-          <Toaster position="bottom-right" richColors closeButton theme="dark" />
+          <Toaster position="bottom-right" richColors closeButton />
         </TooltipProvider>
       </body>
     </html>
