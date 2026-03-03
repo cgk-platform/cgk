@@ -11,26 +11,13 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { cn } from '@cgk-platform/ui'
-import {
-  Menu,
-  X,
-  Search,
-  ShoppingCart,
-  User,
-  ChevronDown,
-} from 'lucide-react'
+import { Menu, X, Search, ShoppingCart, User, ChevronDown } from 'lucide-react'
 import type { BlockProps, HeaderBlockConfig, NavLinkItem } from '../types'
 
 /**
  * Navigation link with optional children dropdown
  */
-function NavLink({
-  item,
-  isMobile = false,
-}: {
-  item: NavLinkItem
-  isMobile?: boolean
-}) {
+function NavLink({ item, isMobile = false }: { item: NavLinkItem; isMobile?: boolean }) {
   const [isOpen, setIsOpen] = useState(false)
   const hasChildren = item.children && item.children.length > 0
 
@@ -60,10 +47,7 @@ function NavLink({
           </span>
           {hasChildren && (
             <ChevronDown
-              className={cn(
-                'h-4 w-4 transition-transform duration-200',
-                isOpen && 'rotate-180'
-              )}
+              className={cn('h-4 w-4 transition-transform duration-200', isOpen && 'rotate-180')}
               onClick={(e) => {
                 e.preventDefault()
                 setIsOpen(!isOpen)
@@ -125,10 +109,7 @@ function NavLink({
         )}
         {hasChildren && (
           <ChevronDown
-            className={cn(
-              'h-3 w-3 transition-transform duration-200',
-              isOpen && 'rotate-180'
-            )}
+            className={cn('h-3 w-3 transition-transform duration-200', isOpen && 'rotate-180')}
           />
         )}
       </Link>
@@ -240,17 +221,17 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
           sticky && 'sticky top-0 z-50',
           isScrolled && 'shadow-md',
           !transparent || isScrolled
-            ? 'bg-[hsl(var(--portal-card))] border-b border-[hsl(var(--portal-border))]'
+            ? 'border-b border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))]'
             : 'bg-transparent',
           'transition-all duration-300',
           className
         )}
         style={headerStyle}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between lg:h-20">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-4 lg:h-20">
             {/* Logo */}
-            <div className="flex-shrink-0">
+            <div className="min-w-0 flex-shrink-0">
               <Link href="/" className="flex items-center">
                 {logo?.src ? (
                   <Image
@@ -258,7 +239,7 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
                     alt={logo.alt || logoText}
                     width={logo.width || 150}
                     height={logo.height || 40}
-                    className="h-8 w-auto lg:h-10"
+                    className="h-8 w-auto max-w-full lg:h-10"
                     priority
                   />
                 ) : (
@@ -288,7 +269,7 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
                 <button
                   type="button"
                   className={cn(
-                    'p-2 rounded-lg',
+                    'rounded-lg p-2',
                     'text-[hsl(var(--portal-foreground))]',
                     'hover:bg-[hsl(var(--portal-muted))]',
                     'transition-colors duration-150'
@@ -304,7 +285,7 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
                 <Link
                   href="/account"
                   className={cn(
-                    'hidden p-2 rounded-lg sm:block',
+                    'hidden rounded-lg p-2 sm:block',
                     'text-[hsl(var(--portal-foreground))]',
                     'hover:bg-[hsl(var(--portal-muted))]',
                     'transition-colors duration-150'
@@ -320,7 +301,7 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
                 <Link
                   href="/cart"
                   className={cn(
-                    'relative p-2 rounded-lg',
+                    'relative rounded-lg p-2',
                     'text-[hsl(var(--portal-foreground))]',
                     'hover:bg-[hsl(var(--portal-muted))]',
                     'transition-colors duration-150'
@@ -345,7 +326,7 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
               <button
                 type="button"
                 className={cn(
-                  'p-2 rounded-lg lg:hidden',
+                  'rounded-lg p-2 lg:hidden',
                   'text-[hsl(var(--portal-foreground))]',
                   'hover:bg-[hsl(var(--portal-muted))]',
                   'transition-colors duration-150'
@@ -354,11 +335,7 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileMenuOpen}
               >
-                {mobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
@@ -385,13 +362,11 @@ export function HeaderBlock({ block, className }: BlockProps<HeaderBlockConfig>)
       >
         {/* Mobile Menu Header */}
         <div className="flex h-16 items-center justify-between border-b border-[hsl(var(--portal-border))] px-4">
-          <span className="text-lg font-semibold text-[hsl(var(--portal-foreground))]">
-            Menu
-          </span>
+          <span className="text-lg font-semibold text-[hsl(var(--portal-foreground))]">Menu</span>
           <button
             type="button"
             className={cn(
-              'p-2 rounded-lg',
+              'rounded-lg p-2',
               'text-[hsl(var(--portal-foreground))]',
               'hover:bg-[hsl(var(--portal-muted))]'
             )}

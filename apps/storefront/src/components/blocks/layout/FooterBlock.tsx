@@ -40,13 +40,7 @@ const socialIcons: Record<SocialLink['platform'], React.ElementType> = {
 /**
  * Newsletter form component
  */
-function NewsletterForm({
-  headline,
-  description,
-}: {
-  headline?: string
-  description?: string
-}) {
+function NewsletterForm({ headline, description }: { headline?: string; description?: string }) {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
@@ -68,14 +62,10 @@ function NewsletterForm({
   return (
     <div className="max-w-md">
       {headline && (
-        <h3 className="text-lg font-semibold text-[hsl(var(--portal-foreground))]">
-          {headline}
-        </h3>
+        <h3 className="text-lg font-semibold text-[hsl(var(--portal-foreground))]">{headline}</h3>
       )}
       {description && (
-        <p className="mt-2 text-sm text-[hsl(var(--portal-muted-foreground))]">
-          {description}
-        </p>
+        <p className="mt-2 text-sm text-[hsl(var(--portal-muted-foreground))]">{description}</p>
       )}
       <form onSubmit={handleSubmit} className="mt-4">
         <div className="flex gap-2">
@@ -102,7 +92,7 @@ function NewsletterForm({
               'rounded-lg px-5 py-2.5',
               'bg-[hsl(var(--portal-primary))] text-white',
               'hover:bg-[hsl(var(--portal-primary))]/90',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
+              'disabled:cursor-not-allowed disabled:opacity-50',
               'transition-colors duration-150',
               'flex items-center gap-2'
             )}
@@ -116,14 +106,10 @@ function NewsletterForm({
           </button>
         </div>
         {status === 'success' && (
-          <p className="mt-2 text-sm text-green-600">
-            Thanks for subscribing!
-          </p>
+          <p className="mt-2 text-sm text-green-600">Thanks for subscribing!</p>
         )}
         {status === 'error' && (
-          <p className="mt-2 text-sm text-red-600">
-            Something went wrong. Please try again.
-          </p>
+          <p className="mt-2 text-sm text-red-600">Something went wrong. Please try again.</p>
         )}
       </form>
     </div>
@@ -162,15 +148,16 @@ export function FooterBlock({ block, className }: BlockProps<FooterBlockConfig>)
       className={cn(
         'border-t border-[hsl(var(--portal-border))]',
         'bg-[hsl(var(--portal-card))]',
+        'overflow-hidden',
         className
       )}
       style={footerStyle}
     >
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
         {/* Main Footer Content */}
-        <div className="grid gap-12 lg:grid-cols-12">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12">
           {/* Brand Column */}
-          <div className="lg:col-span-4">
+          <div className="md:col-span-1 lg:col-span-4">
             {/* Logo */}
             <div className="mb-4">
               <Link href="/" className="inline-flex items-center">
@@ -180,7 +167,7 @@ export function FooterBlock({ block, className }: BlockProps<FooterBlockConfig>)
                     alt={logo.alt || logoText}
                     width={logo.width || 150}
                     height={logo.height || 40}
-                    className="h-8 w-auto"
+                    className="h-8 w-auto max-w-full"
                   />
                 ) : (
                   <span className="text-xl font-bold text-[hsl(var(--portal-foreground))]">
@@ -226,18 +213,18 @@ export function FooterBlock({ block, className }: BlockProps<FooterBlockConfig>)
           </div>
 
           {/* Navigation Columns */}
-          <div className="lg:col-span-8">
+          <div className="md:col-span-1 lg:col-span-8">
             <div
               className={cn(
-                'grid gap-8 sm:gap-12',
-                columns.length === 1 && 'sm:grid-cols-1',
-                columns.length === 2 && 'sm:grid-cols-2',
-                columns.length === 3 && 'sm:grid-cols-3',
-                columns.length >= 4 && 'sm:grid-cols-2 lg:grid-cols-4'
+                'grid gap-8 sm:gap-6 md:gap-8',
+                columns.length === 1 && 'grid-cols-1',
+                columns.length === 2 && 'grid-cols-1 sm:grid-cols-2',
+                columns.length === 3 && 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3',
+                columns.length >= 4 && 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
               )}
             >
               {columns.map((column, colIdx) => (
-                <div key={colIdx}>
+                <div key={colIdx} className="min-w-0">
                   <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[hsl(var(--portal-foreground))]">
                     {column.title}
                   </h4>
@@ -249,7 +236,8 @@ export function FooterBlock({ block, className }: BlockProps<FooterBlockConfig>)
                           className={cn(
                             'text-sm text-[hsl(var(--portal-muted-foreground))]',
                             'hover:text-[hsl(var(--portal-foreground))]',
-                            'transition-colors duration-150'
+                            'transition-colors duration-150',
+                            'inline-block break-words'
                           )}
                           {...(link.openInNewTab && {
                             target: '_blank',
@@ -266,7 +254,11 @@ export function FooterBlock({ block, className }: BlockProps<FooterBlockConfig>)
 
               {/* Newsletter Column */}
               {showNewsletter && (
-                <div className={columns.length > 0 ? 'sm:col-span-2 lg:col-span-2' : ''}>
+                <div
+                  className={
+                    columns.length > 0 ? 'sm:col-span-2 md:col-span-full lg:col-span-2' : ''
+                  }
+                >
                   <NewsletterForm
                     headline={newsletterHeadline}
                     description={newsletterDescription}
@@ -286,13 +278,13 @@ export function FooterBlock({ block, className }: BlockProps<FooterBlockConfig>)
           )}
         >
           {/* Copyright */}
-          <p className="text-sm text-[hsl(var(--portal-muted-foreground))]">
+          <p className="text-center text-sm text-[hsl(var(--portal-muted-foreground))] sm:text-left">
             &copy; {formattedCopyright}
           </p>
 
           {/* Legal Links */}
           {legalLinks.length > 0 && (
-            <nav className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+            <nav className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 md:gap-6">
               {legalLinks.map((link, idx) => (
                 <Link
                   key={idx}
@@ -300,7 +292,8 @@ export function FooterBlock({ block, className }: BlockProps<FooterBlockConfig>)
                   className={cn(
                     'text-sm text-[hsl(var(--portal-muted-foreground))]',
                     'hover:text-[hsl(var(--portal-foreground))]',
-                    'transition-colors duration-150'
+                    'transition-colors duration-150',
+                    'whitespace-nowrap'
                   )}
                 >
                   {link.label}
