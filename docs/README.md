@@ -25,6 +25,7 @@ Welcome to the CGK (Commerce Growth Kit) documentation.
 
 - [Database](./setup/DATABASE.md) - Database configuration
 - [Background Jobs](./setup/BACKGROUND-JOBS.md) - Job processing setup
+- [openCLAW Integration](./setup/openclaw-integration.md) - AI agent platform setup
 
 ## CLI Quick Start
 

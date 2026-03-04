@@ -15,29 +15,25 @@ const integrationsTabs = [
   { label: 'Klaviyo', href: '/admin/integrations/klaviyo' },
   { label: 'Yotpo', href: '/admin/integrations/yotpo' },
   { label: 'MCP', href: '/admin/integrations/mcp' },
+  { label: 'API Keys', href: '/admin/integrations/api-keys' },
 ]
 
-export default function IntegrationsLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function IntegrationsLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Integrations</h1>
-        <p className="text-sm text-muted-foreground">
-          Connect and manage third-party services
-        </p>
+        <p className="text-sm text-muted-foreground">Connect and manage third-party services</p>
       </div>
 
       <nav className="flex gap-1 overflow-x-auto border-b">
         {integrationsTabs.map((tab) => {
-          const isActive = tab.href === '/admin/integrations'
-            ? pathname === tab.href
-            : pathname === tab.href || pathname.startsWith(tab.href + '/')
+          const isActive =
+            tab.href === '/admin/integrations'
+              ? pathname === tab.href
+              : pathname === tab.href || pathname.startsWith(tab.href + '/')
 
           return (
             <Link

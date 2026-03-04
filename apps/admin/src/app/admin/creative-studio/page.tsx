@@ -1,15 +1,93 @@
 import { withTenant, sql } from '@cgk-platform/db'
+import { promises as fs } from 'fs'
 import { headers } from 'next/headers'
+import path from 'path'
 import { Suspense } from 'react'
 
 import { ProjectListClient } from './project-list-client'
+
+async function isCreativeStudioEnabled(): Promise<boolean> {
+  try {
+    const configPath = path.join(process.cwd(), '../..', 'platform.config.ts')
+    const content = await fs.readFile(configPath, 'utf-8')
+    const featuresMatch = content.match(/features:\s*{([^}]+)}/s)
+    if (!featuresMatch) return false
+    const featuresBlock = featuresMatch[1]
+    const creativeStudioMatch = featuresBlock.match(/creativeStudio:\s*(true|false)/)
+    return creativeStudioMatch?.[1] === 'true'
+  } catch {
+    return false
+  }
+}
+
+function CreativeStudioSetupPage() {
+  return (
+    <div className="flex flex-1 items-center justify-center p-8">
+      <div className="max-w-md space-y-6 text-center">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Creative Studio</h1>
+          <p className="text-muted-foreground">
+            Creative Studio enables AI-powered video project management through the openCLAW
+            video-editor agent, with real-time scene editing, captions, and render management.
+          </p>
+        </div>
+        <div className="rounded-lg border bg-card p-6 text-left">
+          <h2 className="mb-3 font-semibold">To enable Creative Studio:</h2>
+          <ol className="space-y-2 text-sm text-muted-foreground">
+            <li className="flex gap-2">
+              <span className="font-mono text-foreground">1.</span>
+              <span>
+                Open{' '}
+                <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
+                  platform.config.ts
+                </code>{' '}
+                in your project root
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-mono text-foreground">2.</span>
+              <span>
+                Set{' '}
+                <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
+                  features.creativeStudio: true
+                </code>
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="font-mono text-foreground">3.</span>
+              <span>Redeploy your application</span>
+            </li>
+          </ol>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          For full setup instructions, see the{' '}
+          <a
+            href="/docs/setup/openclaw-integration"
+            className="underline underline-offset-4 hover:text-foreground"
+          >
+            openCLAW Integration Guide
+          </a>
+          .
+        </p>
+      </div>
+    </div>
+  )
+}
 
 export default async function CreativeStudioPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const params = await searchParams
+  const [params, enabled] = await Promise.all([searchParams, isCreativeStudioEnabled()])
+
+  if (!enabled) {
+    return (
+      <div className="flex h-[calc(100vh-4rem)] flex-col">
+        <CreativeStudioSetupPage />
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">

@@ -240,6 +240,32 @@ git push origin main  # Auto-deploys to Vercel
 
 ---
 
+## AI Agent Integration (openCLAW)
+
+Connect AI agents for automated video editing, ad creative generation, competitor intelligence, and marketing automation.
+
+```bash
+# 1. Install openCLAW
+npm install -g openclaw && openclaw onboard --install-daemon
+
+# 2. Link skills from the repo
+cd openclaw-skills && ./install.sh
+
+# 3. Generate API key at /admin/integrations/api-keys
+
+# 4. Fill in .env values (install.sh creates them from .env.example)
+
+# 5. Enable features in /admin/platform-config
+#    Toggle: openCLAW Integration, Command Center, Creative Studio
+
+# 6. Restart gateway
+openclaw restart
+```
+
+15 skills included: video-editor, meta-ads, ad-library-dl, nano-banana-pro, veo-video-gen, video-remix, klaviyo, amazon-sp, youtube-uploader, youtube-watcher, google-workspace, triple-whale, proactive-agent, self-improving-agent, nova/openclaw-manager.
+
+See [docs/setup/openclaw-integration.md](docs/setup/openclaw-integration.md) for the full guide.
+
 ## Deployment
 
 ### Vercel (Recommended)
@@ -305,6 +331,7 @@ cgk/
 │   ├── scheduling/            # Task scheduling
 │   ├── support/               # Support ticket integration
 │   └── cli/                   # Command-line tools
+├── openclaw-skills/             # openCLAW AI agent skills (symlinked to profiles)
 ├── starters/                   # Project templates (basic, full, storefront-only)
 └── MULTI-TENANT-PLATFORM-PLAN/ # Architecture documentation
 ```

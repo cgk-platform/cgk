@@ -1,9 +1,8 @@
+import { isValidProfile, PROFILES } from '@cgk-platform/openclaw'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 
 const execAsync = promisify(exec)
-
-const VALID_PROFILES = new Set(['cgk', 'rawdog', 'vitahustle'])
 
 export const dynamic = 'force-dynamic'
 
@@ -16,12 +15,14 @@ export async function POST(request: Request): Promise<Response> {
     const body = await request.json()
     const profile = body.profile as string | undefined
 
-    if (profile && !VALID_PROFILES.has(profile)) {
+    if (profile && !isValidProfile(profile)) {
       return Response.json({ error: 'Invalid profile' }, { status: 400 })
     }
 
+    // Default profile (cgk) uses the bare command; all others use --profile flag
+    const defaultSlug = Object.keys(PROFILES)[0] ?? 'cgk'
     let cmd = 'openclaw doctor'
-    if (profile && profile !== 'cgk') {
+    if (profile && profile !== defaultSlug) {
       cmd = `openclaw --profile ${profile} doctor`
     }
 

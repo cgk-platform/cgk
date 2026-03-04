@@ -2,8 +2,8 @@
  * Wire protocol types for openCLAW gateway WebSocket RPC
  */
 
-/** Profile slugs for the 3 openCLAW instances */
-export type ProfileSlug = 'cgk' | 'rawdog' | 'vitahustle'
+/** Profile slug — a string identifier for an openCLAW profile instance */
+export type ProfileSlug = string
 
 /** Outbound RPC request frame (protocol v3) */
 export interface RequestFrame {
@@ -365,9 +365,12 @@ export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'rec
 
 /** Health response aggregated across all profiles */
 export interface AllProfilesHealth {
-  profiles: Record<ProfileSlug, {
-    connected: boolean
-    health: GatewayHealth | null
-    error?: string
-  }>
+  profiles: Record<
+    ProfileSlug,
+    {
+      connected: boolean
+      health: GatewayHealth | null
+      error?: string
+    }
+  >
 }

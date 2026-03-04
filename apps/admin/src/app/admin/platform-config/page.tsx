@@ -59,6 +59,9 @@ interface PlatformConfigData {
     videoTranscription?: boolean
     aiFeatures?: boolean
     analyticsIntegrations?: boolean
+    openclawIntegration?: boolean
+    commandCenter?: boolean
+    creativeStudio?: boolean
   }
 }
 
@@ -501,7 +504,7 @@ export default function PlatformConfigPage() {
           <CardTitle>Feature Flags</CardTitle>
           <CardDescription>Enable or disable platform features</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="feature-multiTenant">Multi-Tenant Support</Label>
@@ -574,6 +577,41 @@ export default function PlatformConfigPage() {
                 checked={config.features?.analyticsIntegrations ?? true}
                 onCheckedChange={(checked) => updateFeature('analyticsIntegrations', checked)}
               />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-medium">AI Agent Integration</h3>
+              <p className="text-xs text-muted-foreground">
+                Features powered by the openCLAW agent platform
+              </p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="feature-openclaw">openCLAW Integration</Label>
+                <Switch
+                  id="feature-openclaw"
+                  checked={config.features?.openclawIntegration ?? false}
+                  onCheckedChange={(checked) => updateFeature('openclawIntegration', checked)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="feature-command-center">Command Center</Label>
+                <Switch
+                  id="feature-command-center"
+                  checked={config.features?.commandCenter ?? false}
+                  onCheckedChange={(checked) => updateFeature('commandCenter', checked)}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="feature-creative-studio">Creative Studio</Label>
+                <Switch
+                  id="feature-creative-studio"
+                  checked={config.features?.creativeStudio ?? false}
+                  onCheckedChange={(checked) => updateFeature('creativeStudio', checked)}
+                />
+              </div>
             </div>
           </div>
         </CardContent>

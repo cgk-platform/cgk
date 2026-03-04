@@ -1,0 +1,57 @@
+{
+  "template_id": "ugc-testimonial",
+  "name": "UGC Testimonial",
+  "description": "User-generated content style. Authentic feel with customer reactions, unboxing, and personal endorsement. Works best with real customer footage or UGC-style clips.",
+  "best_for": ["social proof ads", "TikTok/Reels", "trust building"],
+  "scenes": [
+    {
+      "role": "hook",
+      "duration_fraction": 0.12,
+      "description": "Customer reaction or bold claim that stops the scroll",
+      "footage_hint": "Person speaking to camera or reacting to product",
+      "text": "{{customer_hook}}",
+      "transition": "cut"
+    },
+    {
+      "role": "unboxing",
+      "duration_fraction": 0.18,
+      "description": "Opening the package, first look at the product",
+      "footage_hint": "Hands opening box, revealing product, first touch",
+      "text": "{{unboxing_narration}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "experience",
+      "duration_fraction": 0.25,
+      "description": "Using the product in real life -- show the experience",
+      "footage_hint": "Product in use, lifestyle context, natural setting",
+      "text": "{{usage_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "reaction",
+      "duration_fraction": 0.2,
+      "description": "Genuine reaction to the product quality or results",
+      "footage_hint": "Close-up reaction, tactile moment, surprise/delight",
+      "text": "{{reaction_quote}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "endorsement",
+      "duration_fraction": 0.1,
+      "description": "Direct recommendation or star rating",
+      "footage_hint": "Person endorsing product, review screenshot, star rating overlay",
+      "text": "{{endorsement}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "cta",
+      "duration_fraction": 0.15,
+      "description": "Call-to-action with product shot",
+      "footage_hint": "Product beauty shot or person with product",
+      "text": "{{cta_text}}",
+      "transition": "crossfade"
+    }
+  ],
+  "voiceover_template": "{{customer_hook}} {{unboxing_narration}} {{usage_description}} {{reaction_quote}} {{endorsement}} {{cta_text}}"
+}

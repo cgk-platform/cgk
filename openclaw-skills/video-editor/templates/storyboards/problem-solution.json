@@ -1,0 +1,57 @@
+{
+  "template_id": "problem-solution",
+  "name": "Problem-Solution",
+  "description": "Classic pain point to solution flow. Hook with relatable frustration, agitate, introduce product as answer, prove with features/results, close with CTA.",
+  "best_for": ["DTC ads", "pain-point products", "before/after transformations"],
+  "scenes": [
+    {
+      "role": "hook",
+      "duration_fraction": 0.1,
+      "description": "Attention-grabbing visual or question that resonates with the target pain point",
+      "footage_hint": "Close-up of frustrating moment or relatable scenario",
+      "text": "{{hook_question}}",
+      "transition": "cut"
+    },
+    {
+      "role": "problem",
+      "duration_fraction": 0.15,
+      "description": "Show the problem in action -- make it visceral and relatable",
+      "footage_hint": "Real footage of the problem (messy, frustrating, uncomfortable)",
+      "text": "{{problem_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "agitate",
+      "duration_fraction": 0.1,
+      "description": "Amplify the emotional weight of the problem",
+      "footage_hint": "Continued problem footage or reaction shot",
+      "text": "{{agitate_statement}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "solution",
+      "duration_fraction": 0.2,
+      "description": "Introduce the product as the answer -- show the transformation",
+      "footage_hint": "Product reveal, installation, or first use",
+      "text": "{{solution_intro}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "proof",
+      "duration_fraction": 0.25,
+      "description": "Showcase key features, close-ups, or results",
+      "footage_hint": "Product close-ups, texture, quality details, before/after",
+      "text": "{{proof_points}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "cta",
+      "duration_fraction": 0.2,
+      "description": "Clear call-to-action with urgency or value proposition",
+      "footage_hint": "Product beauty shot or lifestyle scene with text overlay",
+      "text": "{{cta_text}}",
+      "transition": "crossfade"
+    }
+  ],
+  "voiceover_template": "{{hook_question}} {{problem_description}} {{agitate_statement}} {{solution_intro}} {{proof_points}} {{cta_text}}"
+}

@@ -78,6 +78,9 @@ const FeaturesSchema = z.object({
   videoTranscription: z.boolean().optional(),
   aiFeatures: z.boolean().optional(),
   analyticsIntegrations: z.boolean().optional(),
+  openclawIntegration: z.boolean().optional().default(false),
+  commandCenter: z.boolean().optional().default(false),
+  creativeStudio: z.boolean().optional().default(false),
 })
 
 // Complete platform configuration schema

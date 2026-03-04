@@ -1,0 +1,57 @@
+{
+  "template_id": "product-demo",
+  "name": "Product Demo",
+  "description": "Feature-focused walkthrough. Opens with the product, demonstrates key features and benefits, closes with value proposition. Best for products with clear visual differentiators.",
+  "best_for": ["product launches", "feature highlights", "comparison ads"],
+  "scenes": [
+    {
+      "role": "hook",
+      "duration_fraction": 0.1,
+      "description": "Stunning product reveal or bold feature claim",
+      "footage_hint": "Hero product shot, dramatic reveal, or close-up detail",
+      "text": "{{hook_claim}}",
+      "transition": "cut"
+    },
+    {
+      "role": "feature_1",
+      "duration_fraction": 0.2,
+      "description": "Primary feature demonstration with clear visual proof",
+      "footage_hint": "Product in action showing key feature, close-up details",
+      "text": "{{feature_1_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "feature_2",
+      "duration_fraction": 0.2,
+      "description": "Secondary feature or benefit demonstration",
+      "footage_hint": "Different angle or use case showing second key benefit",
+      "text": "{{feature_2_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "lifestyle",
+      "duration_fraction": 0.2,
+      "description": "Product in its natural context -- show the aspirational outcome",
+      "footage_hint": "Lifestyle scene with product, beautiful environment",
+      "text": "{{lifestyle_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "value",
+      "duration_fraction": 0.15,
+      "description": "Value proposition or social proof reinforcement",
+      "footage_hint": "Price point, review count, satisfaction guarantee",
+      "text": "{{value_proposition}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "cta",
+      "duration_fraction": 0.15,
+      "description": "Clear CTA with product beauty shot",
+      "footage_hint": "Final product hero shot with CTA overlay",
+      "text": "{{cta_text}}",
+      "transition": "crossfade"
+    }
+  ],
+  "voiceover_template": "{{hook_claim}} {{feature_1_description}} {{feature_2_description}} {{lifestyle_description}} {{value_proposition}} {{cta_text}}"
+}

@@ -1,0 +1,8 @@
+{
+  "ownerId": "custom-nova",
+  "slug": "google-workspace",
+  "version": "1.0.0",
+  "description": "Google Workspace API integration (Slides, Docs, Sheets, Drive)",
+  "publishedAt": null,
+  "custom": true
+}

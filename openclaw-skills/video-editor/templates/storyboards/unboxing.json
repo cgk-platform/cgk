@@ -1,0 +1,57 @@
+{
+  "template_id": "unboxing",
+  "name": "Unboxing",
+  "description": "ASMR-inspired unboxing flow. Package arrival through setup and first use. Satisfying, tactile, great for premium products. Works well without heavy voiceover.",
+  "best_for": ["premium products", "ASMR content", "first impression ads"],
+  "scenes": [
+    {
+      "role": "hook",
+      "duration_fraction": 0.08,
+      "description": "Package arrives or hands reach for the box -- anticipation",
+      "footage_hint": "Package on doorstep, hands picking up box, close-up of branded packaging",
+      "text": "{{arrival_text}}",
+      "transition": "cut"
+    },
+    {
+      "role": "open",
+      "duration_fraction": 0.18,
+      "description": "Opening the package -- reveal the product inside",
+      "footage_hint": "Hands opening box, tissue paper, first glimpse of product",
+      "text": "{{opening_narration}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "reveal",
+      "duration_fraction": 0.18,
+      "description": "Full product reveal -- hold on the beauty moment",
+      "footage_hint": "Product fully revealed, close-up of quality and detail",
+      "text": "{{reveal_reaction}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "touch",
+      "duration_fraction": 0.18,
+      "description": "Tactile moment -- hands touching, feeling the quality",
+      "footage_hint": "Hands on fabric/product, texture close-up, satisfying ASMR moment",
+      "text": "{{tactile_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "setup",
+      "duration_fraction": 0.2,
+      "description": "Product in its final context -- setup complete",
+      "footage_hint": "Product installed/placed in its environment, step back to admire",
+      "text": "{{setup_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "cta",
+      "duration_fraction": 0.18,
+      "description": "Final beauty shot with CTA",
+      "footage_hint": "Wide shot of product in beautiful setting, CTA overlay",
+      "text": "{{cta_text}}",
+      "transition": "crossfade"
+    }
+  ],
+  "voiceover_template": "{{arrival_text}} {{opening_narration}} {{reveal_reaction}} {{tactile_description}} {{setup_description}} {{cta_text}}"
+}

@@ -19,6 +19,7 @@
 - [Video/Media](#8-videomedia)
 - [Analytics](#9-analytics)
 - [AI/LLM](#10-aillm)
+- [openCLAW Integration](#10b-openclaw-integration)
 - [Monitoring](#11-monitoring)
 - [Internal/Platform](#12-internalplatform)
 - [Auto-Populated Variables](#13-auto-populated-variables)
@@ -514,6 +515,44 @@ const mutation = `
 - API keys have usage limits and costs
 - Monitor usage to avoid unexpected charges
 - Use separate keys for dev/prod
+
+---
+
+## 10b. openCLAW Integration
+
+**Purpose**: AI agent platform connecting the CGK Platform to multi-agent automation (video editing, ad creative, competitor intelligence, marketing).
+
+### Command Center / Gateway
+
+| Variable                        | Description                     | Where to Get    | Required           | Example                  |
+| ------------------------------- | ------------------------------- | --------------- | ------------------ | ------------------------ |
+| `OPENCLAW_CGK_PORT`             | CGK profile gateway port        | openCLAW config | For Command Center | `18789`                  |
+| `OPENCLAW_RAWDOG_PORT`          | RAWDOG profile gateway port     | openCLAW config | For multi-profile  | `19001`                  |
+| `OPENCLAW_VITA_PORT`            | VitaHustle profile gateway port | openCLAW config | For multi-profile  | `19021`                  |
+| `OPENCLAW_CGK_GATEWAY_TOKEN`    | CGK gateway auth token          | openCLAW `.env` | For Command Center | `tok_***`                |
+| `OPENCLAW_RAWDOG_GATEWAY_TOKEN` | RAWDOG gateway auth token       | openCLAW `.env` | For multi-profile  | `tok_***`                |
+| `OPENCLAW_VITA_GATEWAY_TOKEN`   | VitaHustle gateway auth token   | openCLAW `.env` | For multi-profile  | `tok_***`                |
+| `OPENCLAW_PROFILES`             | Explicit JSON profile config    | Manual          | Optional override  | `[{"slug":"brand",...}]` |
+| `OPENCLAW_DEFAULT_PORT`         | Single-profile gateway port     | openCLAW config | For single-profile | `18789`                  |
+
+### Skill Environment Variables (per-profile `.env`)
+
+| Variable                   | Description                | Skill        | Where to Get                   |
+| -------------------------- | -------------------------- | ------------ | ------------------------------ |
+| `CGK_PLATFORM_API_URL`     | Platform API base URL      | video-editor | Your deployment URL            |
+| `CGK_PLATFORM_API_KEY`     | Platform API key           | video-editor | `/admin/integrations/api-keys` |
+| `CGK_PLATFORM_TENANT_SLUG` | Tenant slug for API access | video-editor | Platform config                |
+| `META_AD_ACCOUNT_ID`       | Meta ad account            | meta-ads     | Facebook Business Manager      |
+| `META_BUSINESS_ID`         | Meta business ID           | meta-ads     | Facebook Business Manager      |
+| `META_PIXEL_ID`            | Meta pixel ID              | meta-ads     | Facebook Events Manager        |
+| `KLAVIYO_API_KEY`          | Klaviyo private API key    | klaviyo      | Klaviyo Account > Settings     |
+| `PEXELS_API_KEY`           | Pexels stock footage       | video-editor | pexels.com/api                 |
+| `FREESOUND_API_KEY`        | Freesound sound effects    | video-editor | freesound.org/apiv2/apply      |
+| `TRIPLE_WHALE_API_KEY`     | Triple Whale analytics     | triple-whale | Triple Whale dashboard         |
+
+**Setup**: See [docs/setup/openclaw-integration.md](setup/openclaw-integration.md) for the full guide.
+
+**When to Use**: Required if using openCLAW agent automation, Command Center, or Creative Studio features.
 
 ---
 

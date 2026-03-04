@@ -1,0 +1,57 @@
+{
+  "template_id": "listicle",
+  "name": "Listicle",
+  "description": "Numbered list format (3 reasons, 5 tips, etc.). Each item gets its own scene with footage. Fast-paced, scannable, great for retention. Works well on TikTok/Reels.",
+  "best_for": ["engagement content", "TikTok/Reels", "educational ads"],
+  "scenes": [
+    {
+      "role": "hook",
+      "duration_fraction": 0.1,
+      "description": "Bold numbered claim that promises value",
+      "footage_hint": "Eye-catching visual or text overlay with number",
+      "text": "{{list_hook}}",
+      "transition": "cut"
+    },
+    {
+      "role": "item_1",
+      "duration_fraction": 0.18,
+      "description": "First list item with visual proof",
+      "footage_hint": "Footage demonstrating point #1",
+      "text": "{{item_1}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "item_2",
+      "duration_fraction": 0.18,
+      "description": "Second list item with visual proof",
+      "footage_hint": "Footage demonstrating point #2",
+      "text": "{{item_2}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "item_3",
+      "duration_fraction": 0.18,
+      "description": "Third list item -- often the strongest point",
+      "footage_hint": "Footage demonstrating point #3 (save best for last)",
+      "text": "{{item_3}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "bonus",
+      "duration_fraction": 0.18,
+      "description": "Bonus point or summary reinforcement",
+      "footage_hint": "Product beauty shot or satisfying compilation",
+      "text": "{{bonus_or_summary}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "cta",
+      "duration_fraction": 0.18,
+      "description": "CTA with urgency or curiosity hook",
+      "footage_hint": "Product with CTA overlay",
+      "text": "{{cta_text}}",
+      "transition": "crossfade"
+    }
+  ],
+  "voiceover_template": "{{list_hook}} {{item_1}} {{item_2}} {{item_3}} {{bonus_or_summary}} {{cta_text}}"
+}

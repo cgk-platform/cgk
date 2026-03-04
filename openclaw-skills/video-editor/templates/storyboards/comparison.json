@@ -1,0 +1,57 @@
+{
+  "template_id": "comparison",
+  "name": "Comparison",
+  "description": "Side-by-side or sequential comparison. Shows the difference between generic/competitor and your product. Strong for differentiation and premium positioning.",
+  "best_for": ["competitive positioning", "premium products", "before/after"],
+  "scenes": [
+    {
+      "role": "hook",
+      "duration_fraction": 0.1,
+      "description": "Provocative comparison question or claim",
+      "footage_hint": "Split screen setup or bold text overlay",
+      "text": "{{comparison_hook}}",
+      "transition": "cut"
+    },
+    {
+      "role": "generic",
+      "duration_fraction": 0.2,
+      "description": "Show the generic/competitor/cheap alternative and its shortcomings",
+      "footage_hint": "Generic product footage, lower quality visuals, frustration",
+      "text": "{{generic_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "reveal",
+      "duration_fraction": 0.15,
+      "description": "Transition moment -- introduce your product as the upgrade",
+      "footage_hint": "Product reveal, dramatic transition, quality difference",
+      "text": "{{reveal_statement}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "advantage",
+      "duration_fraction": 0.25,
+      "description": "Demonstrate the clear advantages with visual proof",
+      "footage_hint": "Close-ups showing quality, features, craftsmanship",
+      "text": "{{advantage_points}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "result",
+      "duration_fraction": 0.15,
+      "description": "Show the end result -- the better outcome with your product",
+      "footage_hint": "Beautiful finished product in lifestyle context",
+      "text": "{{result_description}}",
+      "transition": "crossfade"
+    },
+    {
+      "role": "cta",
+      "duration_fraction": 0.15,
+      "description": "CTA emphasizing the upgrade or smart choice",
+      "footage_hint": "Product hero shot with CTA overlay",
+      "text": "{{cta_text}}",
+      "transition": "crossfade"
+    }
+  ],
+  "voiceover_template": "{{comparison_hook}} {{generic_description}} {{reveal_statement}} {{advantage_points}} {{result_description}} {{cta_text}}"
+}

@@ -1,5 +1,13 @@
 export { OpenClawGatewayClient } from './client.js'
-export { PROFILES, PROFILE_SLUGS, isValidProfile, getProfilePort, getProfileToken, getProfileUrl } from './profiles.js'
+export {
+  discoverProfiles,
+  PROFILES,
+  PROFILE_SLUGS,
+  isValidProfile,
+  getProfilePort,
+  getProfileToken,
+  getProfileUrl,
+} from './profiles.js'
 export type {
   ProfileSlug,
   ProfileConfig,

@@ -47,6 +47,9 @@ interface PlatformConfigData {
     videoTranscription?: boolean
     aiFeatures?: boolean
     analyticsIntegrations?: boolean
+    openclawIntegration?: boolean
+    commandCenter?: boolean
+    creativeStudio?: boolean
   }
 }
 
@@ -268,6 +271,9 @@ ${config.vercel.projects.map((p) => `      '${p}'`).join(',\n')},
     videoTranscription: ${config.features.videoTranscription ?? true},
     aiFeatures: ${config.features.aiFeatures ?? true},
     analyticsIntegrations: ${config.features.analyticsIntegrations ?? true},
+    openclawIntegration: ${config.features.openclawIntegration ?? false},
+    commandCenter: ${config.features.commandCenter ?? false},
+    creativeStudio: ${config.features.creativeStudio ?? false},
   },`
     : ''
 

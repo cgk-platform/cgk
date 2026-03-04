@@ -99,6 +99,11 @@ export const platformConfig = {
     videoTranscription: false, // Enable if using video content
     aiFeatures: false, // Enable if using AI/LLM features
     analyticsIntegrations: false, // Enable if using Google/Meta/TikTok integrations
+
+    // openCLAW Integration (optional)
+    // openclawIntegration: false,
+    // commandCenter: false,
+    // creativeStudio: false,
   },
 } as const
 

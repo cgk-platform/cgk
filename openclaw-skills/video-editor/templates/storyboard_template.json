@@ -1,0 +1,62 @@
+{
+  "title": "",
+  "total_duration": 30,
+  "mood": "",
+  "scenes": [
+    {
+      "scene_num": 1,
+      "start": 0,
+      "end": 3,
+      "text": "Hook text — first 3 seconds grab attention",
+      "description": "Visual description of the hook scene",
+      "footage_source": "stock:relevant search query",
+      "transition": "crossfade"
+    },
+    {
+      "scene_num": 2,
+      "start": 3,
+      "end": 8,
+      "text": "Problem statement — why does the viewer need this?",
+      "description": "Visual showing the problem or pain point",
+      "footage_source": "stock:relevant search query",
+      "transition": "crossfade"
+    },
+    {
+      "scene_num": 3,
+      "start": 8,
+      "end": 15,
+      "text": "Solution — introduce the product/brand",
+      "description": "Product hero shot or demonstration",
+      "footage_source": "file:/path/to/product-video.mp4",
+      "transition": "crossfade"
+    },
+    {
+      "scene_num": 4,
+      "start": 15,
+      "end": 22,
+      "text": "Social proof — testimonials, results, reviews",
+      "description": "Customer testimonial or before/after",
+      "footage_source": "social:https://tiktok.com/@user/video/123",
+      "transition": "crossfade"
+    },
+    {
+      "scene_num": 5,
+      "start": 22,
+      "end": 30,
+      "text": "CTA — shop now, link in bio, etc.",
+      "description": "Product lineup, logo, or website URL",
+      "footage_source": "file:/path/to/outro.mp4",
+      "transition": "fade-to-black"
+    }
+  ],
+  "voiceover_script": "Full voiceover script goes here. Write it as natural speech — the way someone would actually talk about the product.",
+  "_footage_source_types": {
+    "file:<path>": "Local file on disk",
+    "stock:<query>": "Search Pexels for stock footage",
+    "social:<url>": "Download from TikTok/Instagram/YouTube/X via yt-dlp",
+    "veo:<prompt>": "Generate AI footage with Veo (agent handles via generate_video_safe.sh)",
+    "gdrive:<id_or_url>": "Download from Google Drive (OAuth primary, yt-dlp fallback for public links)",
+    "clip:<filename>@<start>-<end>": "Time range from a cataloged clip (use analyze-footage to build catalog)"
+  },
+  "_transition_types": ["crossfade", "fade", "fade-to-black", "wipe", "dissolve", "slide"]
+}

@@ -1,0 +1,34 @@
+# Per-profile secrets (never commit)
+.env
+!.env.example
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Runtime / state
+logs/
+history/
+cache/
+.state.json
+.staging.json
+.token.json
+youtube-uploads.json
+
+# Self-improving agent runtime learnings
+.learnings/
+
+# OAuth credentials (sensitive)
+.oauth-client.json
+
+# Media artifacts
+*.mp4
+*.mov
+*.jpg
+*.png
+*.webp
+*.gif
+
+# OS files
+.DS_Store

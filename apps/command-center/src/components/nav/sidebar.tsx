@@ -1,5 +1,6 @@
 'use client'
 
+import { PROFILES } from '@cgk-platform/openclaw'
 import { Button, cn } from '@cgk-platform/ui'
 import {
   BarChart3,
@@ -36,11 +37,11 @@ interface NavItem {
   children?: NavItem[]
 }
 
-const PROFILE_NAV: NavItem[] = [
-  { label: 'CGK Linens', href: '/cgk', icon: 'Radio' },
-  { label: 'RAWDOG', href: '/rawdog', icon: 'Radio' },
-  { label: 'VitaHustle', href: '/vitahustle', icon: 'Radio' },
-]
+const PROFILE_NAV: NavItem[] = Object.values(PROFILES).map((p) => ({
+  label: p.label,
+  href: `/${p.slug}`,
+  icon: 'Radio',
+}))
 
 const PROFILE_TABS: NavItem[] = [
   { label: 'Overview', href: '', icon: 'LayoutDashboard' },
