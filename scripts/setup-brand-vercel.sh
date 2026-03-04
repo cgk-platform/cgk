@@ -20,12 +20,42 @@
 
 set -e
 
+# Trap handler for cleanup on error
+cleanup() {
+  local exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo -e "${RED}❌ Setup failed with exit code: $exit_code${NC}" >&2
+    echo -e "${YELLOW}Partial setup may have occurred. Check Vercel dashboard.${NC}" >&2
+  fi
+  # Return to original directory
+  cd "$ORIGINAL_DIR" 2>/dev/null || true
+}
+trap cleanup EXIT
+
+# Store original directory
+ORIGINAL_DIR=$(pwd)
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Dependency checks
+command -v vercel >/dev/null 2>&1 || {
+  echo -e "${RED}❌ Error: Vercel CLI is required but not installed${NC}" >&2
+  echo "" >&2
+  echo "Install Vercel CLI:" >&2
+  echo "  npm i -g vercel" >&2
+  echo "" >&2
+  exit 1
+}
+
+command -v git >/dev/null 2>&1 || {
+  echo -e "${RED}❌ Error: git is required but not installed${NC}" >&2
+  exit 1
+}
 
 # Check arguments
 if [ $# -ne 3 ]; then
@@ -95,37 +125,41 @@ for app in "admin" "storefront" "creator-portal" "contractor-portal"; do
         continue
     fi
 
-    cd "$APP_DIR"
+    # Use subshell for error isolation
+    (
+        cd "$APP_DIR" || exit 1
 
-    # Create Vercel project
-    echo "  Creating Vercel project: ${PROJECT_NAME}"
-    if vercel project add "$PROJECT_NAME" --scope "$VERCEL_TEAM" 2>/dev/null; then
-        echo -e "  ${GREEN}Project created successfully${NC}"
-    else
-        echo -e "  ${YELLOW}Project may already exist${NC}"
-    fi
+        # Create Vercel project
+        echo "  Creating Vercel project: ${PROJECT_NAME}"
+        if vercel project add "$PROJECT_NAME" --scope "$VERCEL_TEAM" 2>/dev/null; then
+            echo -e "  ${GREEN}Project created successfully${NC}"
+        else
+            echo -e "  ${YELLOW}Project may already exist${NC}"
+        fi
 
-    # Link project to directory
-    echo "  Linking project to directory..."
-    if vercel link --project "$PROJECT_NAME" --scope "$VERCEL_TEAM" --yes 2>/dev/null; then
-        echo -e "  ${GREEN}Project linked successfully${NC}"
-    else
-        echo -e "  ${YELLOW}Project link may already exist${NC}"
-    fi
+        # Link project to directory
+        echo "  Linking project to directory..."
+        if vercel link --project "$PROJECT_NAME" --scope "$VERCEL_TEAM" --yes 2>/dev/null; then
+            echo -e "  ${GREEN}Project linked successfully${NC}"
+        else
+            echo -e "  ${YELLOW}Project link may already exist${NC}"
+        fi
 
-    # Add custom domain
-    echo "  Adding domain: ${SUBDOMAIN}"
-    if vercel domains add "$SUBDOMAIN" "$PROJECT_NAME" --scope "$VERCEL_TEAM" 2>/dev/null; then
-        echo -e "  ${GREEN}Domain added successfully${NC}"
-    else
-        echo -e "  ${YELLOW}Domain may already exist${NC}"
-    fi
+        # Add custom domain
+        echo "  Adding domain: ${SUBDOMAIN}"
+        if vercel domains add "$SUBDOMAIN" "$PROJECT_NAME" --scope "$VERCEL_TEAM" 2>/dev/null; then
+            echo -e "  ${GREEN}Domain added successfully${NC}"
+        else
+            echo -e "  ${YELLOW}Domain may already exist${NC}"
+        fi
+    ) && {
+        CREATED_PROJECTS+=("$app → $SUBDOMAIN")
+        echo -e "  ${GREEN}✓ ${app} setup complete${NC}"
+    } || {
+        FAILED_PROJECTS+=("$app (setup error)")
+        echo -e "  ${RED}✗ ${app} setup failed${NC}"
+    }
 
-    # Return to root
-    cd ../..
-
-    CREATED_PROJECTS+=("$app → $SUBDOMAIN")
-    echo -e "  ${GREEN}✓ ${app} setup complete${NC}"
     echo ""
 done
 

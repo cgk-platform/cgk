@@ -8,21 +8,16 @@
 // Configuration
 export { defineConfig, type PlatformConfig } from './config'
 export { validateConfig } from './config-validator'
+export {
+  validatePlatformConfig,
+  validatePlatformConfigSafe,
+  type ValidatedPlatformConfig,
+} from './validate-platform-config'
 
 // Types
-export type {
-  TenantContext,
-  TenantId,
-  UserId,
-  OrganizationId,
-} from './types/tenant'
+export type { TenantContext, TenantId, UserId, OrganizationId } from './types/tenant'
 
-export type {
-  ApiResponse,
-  ApiError,
-  PaginatedResponse,
-  PaginationParams,
-} from './types/api'
+export type { ApiResponse, ApiError, PaginatedResponse, PaginationParams } from './types/api'
 
 // Utilities
 export { invariant } from './utils/invariant'

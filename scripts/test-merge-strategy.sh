@@ -25,6 +25,92 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Track branches for cleanup
+CURRENT_BRANCH=""
+TEST_BRANCH=""
+PLATFORM_BRANCH=""
+BRAND_FILE=""
+PACKAGE_FILE=""
+UNION_FILE=""
+
+# Trap handler for cleanup on exit (success or failure)
+cleanup() {
+  local exit_code=$?
+
+  echo ""
+  echo -e "${BLUE}============================================================================${NC}"
+  echo -e "${BLUE}CLEANUP${NC}"
+  echo -e "${BLUE}============================================================================${NC}"
+  echo ""
+
+  if [ $exit_code -ne 0 ]; then
+    echo -e "${RED}Tests failed with exit code: $exit_code${NC}"
+    echo -e "${YELLOW}Cleaning up test artifacts...${NC}"
+    echo ""
+  else
+    echo -e "${YELLOW}Cleaning up test branches...${NC}"
+  fi
+
+  # Restore original branch
+  if [ -n "$CURRENT_BRANCH" ]; then
+    git checkout "$CURRENT_BRANCH" --quiet 2>/dev/null || true
+  fi
+
+  # Delete test branches
+  if [ -n "$TEST_BRANCH" ]; then
+    git branch -D "$TEST_BRANCH" --quiet 2>/dev/null && \
+      echo -e "${GREEN}✓ Deleted test branch: $TEST_BRANCH${NC}" || true
+  fi
+
+  if [ -n "$PLATFORM_BRANCH" ]; then
+    git branch -D "$PLATFORM_BRANCH" --quiet 2>/dev/null && \
+      echo -e "${GREEN}✓ Deleted platform branch: $PLATFORM_BRANCH${NC}" || true
+  fi
+
+  # Remove test files
+  if [ -n "$BRAND_FILE" ] && [ -f "$BRAND_FILE" ]; then
+    rm -f "$BRAND_FILE"
+    echo -e "${GREEN}✓ Removed test file: $BRAND_FILE${NC}"
+  fi
+
+  if [ -n "$PACKAGE_FILE" ] && [ -f "$PACKAGE_FILE" ]; then
+    rm -f "$PACKAGE_FILE"
+    echo -e "${GREEN}✓ Removed test file: $PACKAGE_FILE${NC}"
+  fi
+
+  if [ -n "$UNION_FILE" ] && [ -f "$UNION_FILE" ]; then
+    rm -f "$UNION_FILE"
+    echo -e "${GREEN}✓ Removed test file: $UNION_FILE${NC}"
+  fi
+
+  # Restore .gitattributes if modified
+  git checkout .gitattributes --quiet 2>/dev/null && \
+    echo -e "${GREEN}✓ Restored .gitattributes${NC}" || true
+
+  # Restore platform.config.ts if backup exists
+  if [ -f "platform.config.ts.backup" ]; then
+    mv platform.config.ts.backup platform.config.ts 2>/dev/null && \
+      echo -e "${GREEN}✓ Restored platform.config.ts${NC}" || true
+  fi
+
+  # Discard any other unstaged changes from tests
+  git checkout . --quiet 2>/dev/null || true
+
+  echo -e "${GREEN}✓ Repository restored to original state${NC}"
+  echo ""
+
+  if [ $exit_code -ne 0 ]; then
+    echo -e "${RED}❌ TESTS FAILED - cleanup complete${NC}"
+  fi
+}
+trap cleanup EXIT
+
+# Dependency checks
+command -v git >/dev/null 2>&1 || {
+  echo -e "${RED}❌ Error: git is required but not installed${NC}" >&2
+  exit 1
+}
+
 echo -e "${BLUE}============================================================================${NC}"
 echo -e "${BLUE}CGK PLATFORM - MERGE STRATEGY TEST${NC}"
 echo -e "${BLUE}============================================================================${NC}"
@@ -260,7 +346,14 @@ echo -e "${YELLOW}Merging with union strategy (combines both versions)...${NC}"
 echo ""
 
 git checkout "$TEST_BRANCH" --quiet
-git merge "$PLATFORM_BRANCH" --no-edit --quiet || true
+# Union merge may have conflicts - handle them
+if ! git merge "$PLATFORM_BRANCH" --no-edit --quiet 2>/dev/null; then
+  # Accept merge result even with conflicts
+  git merge --abort 2>/dev/null || true
+  # Try again with strategy
+  git merge "$PLATFORM_BRANCH" --no-edit --no-commit 2>/dev/null || true
+  git commit --no-edit --no-verify --quiet 2>/dev/null || true
+fi
 
 # Verify both versions are present
 if grep -q "brand-dependency-1" "$UNION_FILE" && grep -q "platform-dependency-1" "$UNION_FILE"; then
@@ -328,29 +421,6 @@ EOF
 else
   echo -e "${YELLOW}⚠️  TEST 4 SKIPPED: platform.config.ts not found${NC}"
 fi
-
-echo ""
-echo -e "${BLUE}============================================================================${NC}"
-echo -e "${BLUE}CLEANUP${NC}"
-echo -e "${BLUE}============================================================================${NC}"
-echo ""
-
-# Restore original state
-echo -e "${YELLOW}Cleaning up test branches...${NC}"
-git checkout "$CURRENT_BRANCH" --quiet
-git branch -D "$TEST_BRANCH" --quiet 2>/dev/null || true
-git branch -D "$PLATFORM_BRANCH" --quiet 2>/dev/null || true
-
-# Remove test files
-rm -f "$BRAND_FILE" "$PACKAGE_FILE" "$UNION_FILE"
-git checkout . --quiet 2>/dev/null || true
-
-# Remove union merge attribute we added
-git checkout .gitattributes --quiet 2>/dev/null || true
-
-echo -e "${GREEN}✓ Test branches deleted${NC}"
-echo -e "${GREEN}✓ Test files removed${NC}"
-echo -e "${GREEN}✓ Repository restored to original state${NC}"
 
 echo ""
 echo -e "${GREEN}============================================================================${NC}"

@@ -28,5 +28,8 @@
     "eslint": "^9.18.0",
     "tsup": "^8.3.0",
     "typescript": "^5.9.0"
+  },
+  "dependencies": {
+    "zod": "^4.3.6"
   }
 }

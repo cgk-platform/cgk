@@ -29,17 +29,28 @@
 
 set -e
 
+# Dependency checks
+command -v openssl >/dev/null 2>&1 || {
+  echo "❌ Error: openssl is required but not installed" >&2
+  echo "" >&2
+  echo "Install openssl:" >&2
+  echo "  macOS:   brew install openssl" >&2
+  echo "  Ubuntu:  sudo apt-get install openssl" >&2
+  echo "  Fedora:  sudo dnf install openssl" >&2
+  exit 1
+}
+
 BRAND_NAME=$1
 
 if [ -z "$BRAND_NAME" ]; then
-  echo "❌ Error: Brand name required"
-  echo ""
-  echo "Usage: ./scripts/generate-brand-secrets.sh <brand-name>"
-  echo ""
-  echo "Examples:"
-  echo "  ./scripts/generate-brand-secrets.sh meliusly"
-  echo "  ./scripts/generate-brand-secrets.sh vitahustle"
-  echo "  ./scripts/generate-brand-secrets.sh your-brand > secrets.txt"
+  echo "❌ Error: Brand name required" >&2
+  echo "" >&2
+  echo "Usage: ./scripts/generate-brand-secrets.sh <brand-name>" >&2
+  echo "" >&2
+  echo "Examples:" >&2
+  echo "  ./scripts/generate-brand-secrets.sh meliusly" >&2
+  echo "  ./scripts/generate-brand-secrets.sh vitahustle" >&2
+  echo "  ./scripts/generate-brand-secrets.sh your-brand > secrets.txt" >&2
   exit 1
 fi
 

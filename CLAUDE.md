@@ -31,7 +31,7 @@
 **Before starting ANY work, read the Master Execution Guide:**
 
 ```
-Read file_path="/Users/novarussell/Documents/cgk-platform/MULTI-TENANT-PLATFORM-PLAN/MASTER-EXECUTION-GUIDE.md"
+Read file_path="/Users/holdenthemic/Documents/cgk/MULTI-TENANT-PLATFORM-PLAN/MASTER-EXECUTION-GUIDE.md"
 ```
 
 This guide contains:
@@ -163,12 +163,14 @@ export $(cat apps/admin/.env.local | grep POSTGRES_URL | xargs) && npx @cgk-plat
 ```
 
 **NEVER** look for env vars in:
+
 - ❌ Root directory (.env files)
 - ❌ packages/db/ directory
-- ❌ packages/*/ directories
+- ❌ packages/\*/ directories
 
 **ALWAYS** look in:
-- ✅ apps/*/. env.local files
+
+- ✅ apps/\*/. env.local files
 
 ---
 
@@ -178,15 +180,17 @@ The CGK platform uses specialized Claude agents for different types of work. Ful
 
 ### Quick Reference Matrix
 
-| Task Type                 | Agent                 | Model      | When to Use                               |
-| ------------------------- | --------------------- | ---------- | ----------------------------------------- |
-| **Architecture planning** | architect             | opus-4.5   | Multi-component designs, ADRs, migrations |
-| **Production coding**     | implementer           | sonnet-4.5 | Feature implementation, bug fixes         |
-| **Security review**       | reviewer              | opus-4.5   | Code audits, tenant isolation checks      |
-| **Debugging**             | debugger              | sonnet-4.5 | Root cause analysis, error investigation  |
-| **Exploration**           | researcher or Explore | haiku      | Fast codebase searches, doc lookup        |
-| **Test writing**          | tester                | sonnet-4.5 | Unit/integration/E2E tests                |
-| **Refactoring**           | refactorer            | sonnet-4.5 | Large-scale restructuring                 |
+| Task Type                 | Agent                 | Model      | When to Use                                |
+| ------------------------- | --------------------- | ---------- | ------------------------------------------ |
+| **Architecture planning** | architect             | opus-4.5   | Multi-component designs, ADRs, migrations  |
+| **Production coding**     | implementer           | sonnet-4.5 | Feature implementation, bug fixes          |
+| **Security review**       | reviewer              | opus-4.5   | Code audits, tenant isolation checks       |
+| **Security auditing**     | security-auditor      | opus-4.5   | OWASP Top 10 scans, secret detection       |
+| **Debugging**             | debugger              | sonnet-4.5 | Root cause analysis, error investigation   |
+| **Exploration**           | researcher or Explore | haiku      | Fast codebase searches, doc lookup         |
+| **Test writing**          | tester                | sonnet-4.5 | Unit/integration/E2E tests                 |
+| **Refactoring**           | refactorer            | sonnet-4.5 | Large-scale restructuring                  |
+| **Build optimization**    | build-optimizer       | haiku      | CI/CD performance monitoring, cache tuning |
 
 ### Model Selection (Cost Optimization)
 
@@ -363,10 +367,12 @@ pnpm validate:tenant-isolation --fix --path apps/admin
 |--------------|---------------|----------------|
 | `cgk-admin` | `apps/admin/` | cgk-admin-cgk-linens-88e79683.vercel.app |
 | `cgk-storefront` | `apps/storefront/` | cgk-storefront.vercel.app |
+| `cgk-meliusly-storefront` | `apps/meliusly-storefront/` | cgk-meliusly-storefront.vercel.app |
 | `cgk-shopify-app` | `apps/shopify-app/` | cgk-shopify-app-cgk-linens-88e79683.vercel.app |
 | `cgk-orchestrator` | `apps/orchestrator/` | cgk-orchestrator-cgk-linens-88e79683.vercel.app |
 | `cgk-creator-portal` | `apps/creator-portal/` | cgk-creator-portal.vercel.app |
 | `cgk-contractor-portal` | `apps/contractor-portal/` | cgk-contractor-portal-cgk-linens-88e79683.vercel.app |
+| `cgk-command-center` | `apps/command-center/` | cgk-command-center-cgk-linens-88e79683.vercel.app |
 | `cgk-mcp-server` | `apps/mcp-server/` | cgk-mcp-server.vercel.app |
 
 **Working with Vercel CLI:**
@@ -505,11 +511,15 @@ const mutation = `
 │                    MULTI-TENANT PLATFORM                     │
 ├─────────────────────────────────────────────────────────────┤
 │  apps/                                                       │
-│  ├── orchestrator/    # Super Admin Dashboard (internal)     │
-│  ├── admin/           # White-label admin portal             │
-│  ├── storefront/      # Headless Shopify storefront          │
-│  ├── creator-portal/  # Creator/contractor management        │
-│  └── mcp-server/      # Claude MCP integration               │
+│  ├── orchestrator/          # Super Admin Dashboard          │
+│  ├── admin/                 # White-label admin portal       │
+│  ├── storefront/            # Generic storefront template    │
+│  ├── meliusly-storefront/   # Meliusly brand storefront      │
+│  ├── creator-portal/        # Creator management             │
+│  ├── contractor-portal/     # Contractor management          │
+│  ├── shopify-app/           # Shopify App (Remix)            │
+│  ├── command-center/        # Operations dashboard           │
+│  └── mcp-server/            # Claude MCP integration         │
 ├─────────────────────────────────────────────────────────────┤
 │  packages/                                                   │
 │  ├── core/            # Types, utilities, config schemas     │
@@ -780,7 +790,7 @@ See [.claude/knowledge-bases/environment-variables-guide/README.md](.claude/know
 **Quick Reference**:
 
 - Production vars → Vercel first → `vercel env pull .env.local`
-- Local-only vars → `.env.development.local` (LOCAL*\*, DEBUG*_, TEST\__)
+- Local-only vars → `.env.development.local` (LOCAL*\*, DEBUG*\_, TEST\_\_)
 - Documentation → ALL `apps/*/.env.example` files must stay in sync
 - **NEVER** create `.env.production` files (security risk)
 
@@ -814,19 +824,20 @@ See [.claude/knowledge-bases/build-errors-reference/README.md](.claude/knowledge
 
 ## Phase Status
 
-| Phase             | Status         | Notes                                                                      |
-| ----------------- | -------------- | -------------------------------------------------------------------------- |
-| **Phase 0**       | ✅ Complete    | Monorepo, CLI, starters, docs                                              |
-| **Phase 1A-1D**   | ✅ Complete    | Foundation (Monorepo, Database, Auth, Packages)                            |
-| **Phase 2 (All)** | ✅ Complete    | Admin, Commerce, Content, Finance, Team, Platform Ops, Services, Analytics |
-| **Phase 3A-3F**   | ✅ Complete    | Storefront, Cart, Features, Theming, Video, DAM                            |
-| **Phase 3CP**     | ✅ Complete    | Customer Portal (Pages, Admin, Subscriptions, Theming)                     |
-| **Phase 4A-4F**   | ✅ Complete    | Creator Portal, Payments, E-Sign, Contractor, Vendor                       |
-| **Phase 5A-5G**   | ✅ Complete    | Jobs Setup, Handlers, Trigger.dev Tasks, Tenant Integrations               |
-| **Phase 6A-6B**   | ✅ Complete    | MCP Transport & Tools                                                      |
-| **Phase 7A-7C**   | ⏸️ Skipped     | Migration (run when deploying to production)                               |
-| **Phase 8**       | 🔄 In Progress | Final Audit                                                                |
-| **Phase FINAL**   | ⏳ Pending     | Feature Verification                                                       |
+| Phase              | Status         | Notes                                                                      |
+| ------------------ | -------------- | -------------------------------------------------------------------------- |
+| **Phase 0**        | ✅ Complete    | Monorepo, CLI, starters, docs                                              |
+| **Phase 1A-1D**    | ✅ Complete    | Foundation (Monorepo, Database, Auth, Packages)                            |
+| **Phase 2 (All)**  | ✅ Complete    | Admin, Commerce, Content, Finance, Team, Platform Ops, Services, Analytics |
+| **Phase 3A-3F**    | ✅ Complete    | Storefront, Cart, Features, Theming, Video, DAM                            |
+| **Phase 3CP**      | ✅ Complete    | Customer Portal (Pages, Admin, Subscriptions, Theming)                     |
+| **Phase 4A-4F**    | ✅ Complete    | Creator Portal, Payments, E-Sign, Contractor, Vendor                       |
+| **Phase 5A-5G**    | ✅ Complete    | Jobs Setup, Handlers, Trigger.dev Tasks, Tenant Integrations               |
+| **Phase 6A-6B**    | ✅ Complete    | MCP Transport & Tools                                                      |
+| **Phase 7A-7C**    | ⏸️ Skipped     | Migration (run when deploying to production)                               |
+| **Phase 8**        | ✅ Complete    | Final Audit                                                                |
+| **WordPress Impl** | ✅ Complete    | WordPress-style portable platform infrastructure                           |
+| **Phase FINAL**    | 🔄 In Progress | Comprehensive audit & improvement                                          |
 
 ---
 

@@ -141,25 +141,66 @@ export function getRequiredEnv(name: string): string {
  */
 export const APP_ENV_CONFIGS = {
   admin: {
-    required: ['DATABASE_URL', 'JWT_SECRET'],
-    optional: ['SESSION_SECRET', 'STRIPE_SECRET_KEY'],
+    required: [
+      'DATABASE_URL',
+      'JWT_SECRET',
+      'SESSION_SECRET',
+      'ENCRYPTION_KEY',
+      'DEFAULT_TENANT_SLUG',
+    ],
+    optional: [
+      'STRIPE_SECRET_KEY',
+      'SHOPIFY_CLIENT_ID',
+      'SHOPIFY_CLIENT_SECRET',
+      'RESEND_API_KEY',
+      'REDIS_URL',
+    ],
   },
   orchestrator: {
-    required: ['DATABASE_URL', 'JWT_SECRET'],
-    optional: ['SESSION_SECRET'],
+    required: ['DATABASE_URL', 'JWT_SECRET', 'SESSION_SECRET', 'ENCRYPTION_KEY'],
+    optional: ['REDIS_URL', 'SLACK_WEBHOOK_URL'],
   },
   'creator-portal': {
-    required: ['DATABASE_URL', 'JWT_SECRET'],
-    optional: ['SESSION_SECRET'],
+    required: [
+      'DATABASE_URL',
+      'CREATOR_JWT_SECRET',
+      'SESSION_SECRET',
+      'ENCRYPTION_KEY',
+      'DEFAULT_TENANT_SLUG',
+    ],
+    optional: ['STRIPE_CONNECT_CLIENT_ID', 'WISE_API_KEY', 'REDIS_URL'],
   },
   'contractor-portal': {
-    required: ['DATABASE_URL'],
-    // Contractor portal may use JWT_SECRET or CONTRACTOR_JWT_SECRET
-    optional: ['JWT_SECRET', 'CONTRACTOR_JWT_SECRET', 'SESSION_SECRET'],
+    required: [
+      'DATABASE_URL',
+      'CONTRACTOR_JWT_SECRET',
+      'SESSION_SECRET',
+      'ENCRYPTION_KEY',
+      'DEFAULT_TENANT_SLUG',
+    ],
+    optional: ['REDIS_URL'],
   },
   storefront: {
-    required: ['DATABASE_URL'],
-    optional: ['SHOPIFY_STORE_DOMAIN', 'SHOPIFY_STOREFRONT_ACCESS_TOKEN'],
+    required: ['DATABASE_URL', 'DEFAULT_TENANT_SLUG'],
+    optional: [
+      'SHOPIFY_STORE_DOMAIN',
+      'SHOPIFY_STOREFRONT_ACCESS_TOKEN',
+      'STRIPE_PUBLISHABLE_KEY',
+      'NEXT_PUBLIC_ADMIN_URL',
+      'REDIS_URL',
+    ],
+  },
+  'mcp-server': {
+    required: ['JWT_SECRET'],
+    optional: ['DATABASE_URL'],
+  },
+  'command-center': {
+    required: ['DATABASE_URL', 'JWT_SECRET'],
+    optional: ['REDIS_URL'],
+  },
+  'shopify-app': {
+    required: ['SHOPIFY_API_KEY', 'SHOPIFY_API_SECRET', 'DATABASE_URL'],
+    optional: ['SCOPES'],
   },
 } as const
 

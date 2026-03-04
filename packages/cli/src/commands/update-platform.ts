@@ -140,8 +140,20 @@ export const updatePlatformCommand = new Command('update-platform')
         }
       }
 
-      // Step 6: Create update branch
-      logger.info('')
+      // Step 6: Create backup branch BEFORE making changes
+      const backupBranch = `backup/pre-update-${Date.now()}`
+      spinner.start(`Creating backup branch ${backupBranch}...`)
+
+      try {
+        await execAsync(`git branch ${backupBranch}`)
+        spinner.succeed(`Created backup branch ${backupBranch}`)
+        logger.info(chalk.dim(`  Rollback command: git reset --hard ${backupBranch}\n`))
+      } catch (error) {
+        spinner.fail('Failed to create backup branch')
+        throw error
+      }
+
+      // Step 7: Create update branch
       const branchName = `update/platform-${latestVersion}`
       spinner.start(`Creating branch ${branchName}...`)
 
@@ -155,6 +167,11 @@ export const updatePlatformCommand = new Command('update-platform')
           spinner.warn(`Switched to existing branch ${branchName}`)
         } catch {
           spinner.fail('Failed to create or switch to update branch')
+          logger.error(
+            chalk.red(
+              `\n  To rollback: git reset --hard ${backupBranch} && git branch -D ${branchName}\n`
+            )
+          )
           throw error
         }
       }
@@ -202,7 +219,7 @@ export const updatePlatformCommand = new Command('update-platform')
         throw error
       }
 
-      // Step 9: Run type check
+      // Step 9: Run type check BEFORE committing
       if (!options.skipTypecheck) {
         spinner.start('Running typecheck...')
 
@@ -214,9 +231,7 @@ export const updatePlatformCommand = new Command('update-platform')
         } catch (error) {
           spinner.fail('Typecheck failed')
           logger.error(chalk.red('\n  ❌ Typecheck failed after merge\n'))
-          logger.error(chalk.dim('  This may indicate breaking changes in the platform update.'))
-          logger.error(chalk.dim('  Please review the errors and fix them before proceeding.\n'))
-          logger.error(chalk.dim('  To see full errors, run: pnpm turbo typecheck'))
+          logger.error(chalk.dim('  This indicates breaking changes in the platform update.'))
           logger.error('')
 
           // Show the error output
@@ -238,6 +253,36 @@ export const updatePlatformCommand = new Command('update-platform')
                 logger.error('')
               }
             }
+          }
+
+          // AUTOMATIC ROLLBACK
+          logger.warn(chalk.yellow('  🔄 Rolling back to previous state...\n'))
+          spinner.start('Rolling back changes...')
+
+          try {
+            await execAsync(`git reset --hard ${backupBranch}`)
+            await execAsync(`git branch -D ${branchName}`)
+            spinner.succeed('Rollback complete')
+            logger.info(chalk.green('\n  ✅ Repository restored to pre-update state\n'))
+            logger.info(chalk.dim('  The backup branch has been deleted.'))
+            logger.info(chalk.dim('  Your working directory is unchanged.'))
+            logger.info('')
+            logger.info(chalk.bold('  What to do next:\n'))
+            logger.info(
+              chalk.dim(
+                '  1. Check the platform changelog for breaking changes:\n     npx @cgk-platform/cli changelog'
+              )
+            )
+            logger.info(chalk.dim('  2. Review the typecheck errors above and prepare fixes'))
+            logger.info(chalk.dim('  3. Try updating again with fixes in place'))
+            logger.info('')
+          } catch (rollbackError) {
+            spinner.fail('Rollback failed')
+            logger.error(chalk.red(`\n  ❌ Automatic rollback failed: ${rollbackError}\n`))
+            logger.error(chalk.bold('  Manual rollback required:\n'))
+            logger.error(chalk.yellow(`    git reset --hard ${backupBranch}`))
+            logger.error(chalk.yellow(`    git branch -D ${branchName}`))
+            logger.error('')
           }
 
           process.exit(1)
@@ -269,6 +314,14 @@ export const updatePlatformCommand = new Command('update-platform')
       logger.error(chalk.red('\n❌ Error:\n'))
       logger.error(chalk.dim('  ' + (error instanceof Error ? error.message : String(error))))
       logger.error('')
+
+      // Show rollback instructions
+      logger.error(chalk.bold('  To rollback manually:\n'))
+      logger.error(chalk.yellow(`    git reset --hard backup/pre-update-*`))
+      logger.error(chalk.yellow(`    git branch -D update/platform-*`))
+      logger.error(chalk.dim('\n  (Replace * with the actual branch names shown above)'))
+      logger.error('')
+
       process.exit(1)
     }
   })

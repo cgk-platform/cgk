@@ -19,12 +19,34 @@
 
 set -e
 
+# Trap handler for cleanup on error
+cleanup() {
+  local exit_code=$?
+  if [ $exit_code -ne 0 ]; then
+    echo -e "${RED}❌ Setup failed with exit code: $exit_code${NC}" >&2
+    echo -e "${YELLOW}Git merge drivers may be partially configured.${NC}" >&2
+    echo -e "${YELLOW}Run this script again to complete setup.${NC}" >&2
+  fi
+}
+trap cleanup EXIT
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+# Dependency checks
+command -v git >/dev/null 2>&1 || {
+  echo -e "${RED}❌ Error: git is required but not installed${NC}" >&2
+  echo "" >&2
+  echo "Install git:" >&2
+  echo "  macOS:   brew install git" >&2
+  echo "  Ubuntu:  sudo apt-get install git" >&2
+  echo "  Fedora:  sudo dnf install git" >&2
+  exit 1
+}
 
 echo -e "${BLUE}============================================================================${NC}"
 echo -e "${BLUE}CGK PLATFORM - GIT MERGE DRIVERS SETUP${NC}"

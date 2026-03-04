@@ -9,7 +9,9 @@
  * 2. Meliusly (tenant_meliusly)
  */
 
-export const platformConfig = {
+import { validatePlatformConfig } from '@cgk-platform/core'
+
+const platformConfigDraft = {
   /**
    * Deployment Information
    */
@@ -96,6 +98,23 @@ export const platformConfig = {
   },
 } as const
 
+// Validate configuration at module load
+// This catches configuration errors immediately rather than at runtime
+try {
+  validatePlatformConfig(platformConfigDraft)
+} catch (error) {
+  if (error instanceof Error) {
+    console.error('\n' + '='.repeat(80))
+    console.error('❌ PLATFORM CONFIGURATION ERROR')
+    console.error('='.repeat(80))
+    console.error(error.message)
+    console.error('='.repeat(80) + '\n')
+  }
+  throw error
+}
+
+// Export validated config
+export const platformConfig = platformConfigDraft
 export type PlatformConfig = typeof platformConfig
 
 /**
