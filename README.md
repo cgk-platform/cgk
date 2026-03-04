@@ -199,16 +199,6 @@ npm i -g vercel
 vercel
 ```
 
-### Docker
-
-```bash
-# Build image
-docker build -t my-brand .
-
-# Run container
-docker run -p 3000:3000 my-brand
-```
-
 ### Platform Setup
 
 After deployment, run the setup wizard:
@@ -292,25 +282,7 @@ pnpm install --frozen-lockfile    # Install with exact versions (CI/production)
 pnpm install                      # Update pnpm-lock.yaml (development)
 ```
 
-> **Note on Lockfile**: Always commit `pnpm-lock.yaml`. Use `--frozen-lockfile` in CI/Docker for reproducible builds.
-
-### Docker Development
-
-Use `docker-compose` for local development with PostgreSQL and Redis:
-
-```bash
-# Start services
-docker-compose up -d
-
-# Stop services
-docker-compose down
-```
-
-The `docker-compose.yml` provides:
-
-- PostgreSQL 17 (port 5432)
-- Redis 8 (port 6379)
-- Adminer web UI (port 8080)
+> **Note on Lockfile**: Always commit `pnpm-lock.yaml`. Use `--frozen-lockfile` in CI for reproducible builds.
 
 ## Contributing
 

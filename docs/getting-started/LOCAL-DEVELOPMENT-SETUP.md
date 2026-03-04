@@ -8,13 +8,12 @@ This guide helps you run the CGK Commerce Platform on your local machine for dev
 
 ---
 
-## Three Setup Options
+## Two Setup Options
 
 Choose the setup path that fits your workflow:
 
 1. **Cloud-First Quick Start (5-10 minutes)** - Recommended for most developers
-2. **Docker Local Setup (10-15 minutes)** - If you prefer local Docker containers
-3. **Manual Setup (30 minutes)** - If you want full control
+2. **Manual Setup (30 minutes)** - If you want full control
 
 ---
 
@@ -86,32 +85,6 @@ This command will:
 
 ---
 
-## 🐳 Docker Local Setup (10-15 minutes)
-
-**Warning**: This creates a dev/prod mismatch (Docker locally, cloud in production). Use only if you have a specific need for local Docker containers.
-
-```bash
-# Clone repository
-git clone https://github.com/your-org/cgk.git
-cd cgk
-
-# Run quick-start with Docker option
-npx @cgk-platform/cli quick-start --use-docker
-```
-
-This will:
-
-- Start PostgreSQL and Redis in Docker containers
-- Auto-generate secrets
-- Create .env.local files
-- Install dependencies
-- Run migrations
-- Start dev server
-
-**Why not recommended?** Violates 12-factor app principle of dev/prod parity. Your local Docker environment won't match Vercel production (Neon + Upstash).
-
----
-
 ## Manual Setup (30 minutes)
 
 Prefer to set up manually? Follow these steps.
@@ -174,34 +147,9 @@ pnpm dev
 
 ### Step 1: Database Setup
 
-You have **two options** for local database:
+**Cloud-First Setup (ONLY OPTION)**
 
-#### Option A: Docker (Recommended for Beginners)
-
-**Easiest** - Everything configured automatically.
-
-1. Install Docker Desktop: https://www.docker.com/products/docker-desktop/
-
-2. Start PostgreSQL and Redis:
-
-   ```bash
-   docker-compose up -d
-   ```
-
-3. Verify containers are running:
-   ```bash
-   docker ps
-   # Should show: postgres:16 and redis:7
-   ```
-
-**Database will be available at**:
-
-- PostgreSQL: `postgresql://postgres:postgres@localhost:5432/cgk`
-- Redis: `redis://localhost:6379`
-
-#### Option B: Cloud Services (Recommended for Production-like Setup)
-
-Use free tier cloud services.
+CGK Platform uses cloud services for dev/prod parity. Use free tier cloud services - no local containers required.
 
 **PostgreSQL - Neon (Free tier: 3GB storage)**
 
@@ -373,20 +321,7 @@ kill -9 <PID>
 
 **Cause**: Database not running or wrong URL
 
-**Fix (Docker)**:
-
-```bash
-# Check if containers are running
-docker ps
-
-# If not, start them
-docker-compose up -d
-
-# Check logs
-docker-compose logs postgres
-```
-
-**Fix (Neon)**:
+**Fix (Cloud Database)**:
 
 ```bash
 # Test connection
@@ -432,68 +367,6 @@ npx @cgk-platform/cli doctor
 # If you want to reset everything (⚠️ DELETES ALL DATA)
 npx @cgk-platform/cli reset-db
 npx @cgk-platform/cli migrate
-```
-
----
-
-## Docker Compose Configuration
-
-Create `docker-compose.yml` in project root:
-
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: cgk-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: cgk
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: cgk-redis
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres-data:
-  redis-data:
-```
-
-**Usage**:
-
-```bash
-# Start services
-docker-compose up -d
-
-# Stop services
-docker-compose down
-
-# View logs
-docker-compose logs -f
-
-# Reset database (⚠️ DELETES ALL DATA)
-docker-compose down -v
-docker-compose up -d
 ```
 
 ---
