@@ -12,6 +12,7 @@ import Image from 'next/image'
 import { cn } from '@cgk-platform/ui'
 import type { BlockProps, PDPHeroConfig, ImageConfig } from '../types'
 import { LucideIcon } from '../icons'
+import Link from 'next/link'
 
 /**
  * Format price with currency
@@ -67,7 +68,7 @@ function ImageGallery({
 
   if (!images.length) {
     return (
-      <div className="aspect-square rounded-2xl bg-[hsl(var(--portal-muted))] flex items-center justify-center">
+      <div className="flex aspect-square items-center justify-center rounded-2xl bg-[hsl(var(--portal-muted))]">
         <LucideIcon name="Image" className="h-16 w-16 text-[hsl(var(--portal-muted-foreground))]" />
       </div>
     )
@@ -92,7 +93,7 @@ function ImageGallery({
 
         {/* Thumbnails */}
         {images.length > 1 && (
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-2">
             {images.map((image, index) => (
               <button
                 key={index}
@@ -144,7 +145,7 @@ function ImageGallery({
 
   // Grid layout (default)
   return (
-    <div className="grid gap-4 grid-cols-2">
+    <div className="grid grid-cols-2 gap-4">
       {images.slice(0, 4).map((image, index) => (
         <div
           key={index}
@@ -184,7 +185,7 @@ function QuantitySelector({
       <div className="flex items-center rounded-lg border border-[hsl(var(--portal-border))]">
         <button
           onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-          className="flex h-10 w-10 items-center justify-center text-[hsl(var(--portal-muted-foreground))] hover:text-[hsl(var(--portal-foreground))] transition-colors"
+          className="flex h-10 w-10 items-center justify-center text-[hsl(var(--portal-muted-foreground))] transition-colors hover:text-[hsl(var(--portal-foreground))]"
           aria-label="Decrease quantity"
         >
           <LucideIcon name="Minus" className="h-4 w-4" />
@@ -194,7 +195,7 @@ function QuantitySelector({
         </span>
         <button
           onClick={() => onQuantityChange(quantity + 1)}
-          className="flex h-10 w-10 items-center justify-center text-[hsl(var(--portal-muted-foreground))] hover:text-[hsl(var(--portal-foreground))] transition-colors"
+          className="flex h-10 w-10 items-center justify-center text-[hsl(var(--portal-muted-foreground))] transition-colors hover:text-[hsl(var(--portal-foreground))]"
           aria-label="Increase quantity"
         >
           <LucideIcon name="Plus" className="h-4 w-4" />
@@ -226,18 +227,15 @@ export function PDPHeroBlock({ block, className }: BlockProps<PDPHeroConfig>) {
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
 
   // Get current variant based on selected options
-  const currentVariant = product?.variants?.find((variant) =>
-    Object.entries(selectedOptions).every(
-      ([key, value]) => variant.options[key] === value
-    )
-  ) || product?.variants?.[0]
+  const currentVariant =
+    product?.variants?.find((variant) =>
+      Object.entries(selectedOptions).every(([key, value]) => variant.options[key] === value)
+    ) || product?.variants?.[0]
 
   const currentPrice = currentVariant?.price ?? product?.price ?? 0
   const compareAtPrice = product?.compareAtPrice
   const hasDiscount = compareAtPrice && compareAtPrice > currentPrice
-  const discountPercent = hasDiscount
-    ? Math.round((1 - currentPrice / compareAtPrice) * 100)
-    : 0
+  const discountPercent = hasDiscount ? Math.round((1 - currentPrice / compareAtPrice) * 100) : 0
 
   return (
     <section
@@ -248,13 +246,16 @@ export function PDPHeroBlock({ block, className }: BlockProps<PDPHeroConfig>) {
         {/* Breadcrumbs */}
         {showBreadcrumbs && (
           <nav className="mb-6 flex items-center gap-2 text-sm text-[hsl(var(--portal-muted-foreground))]">
-            <a href="/" className="hover:text-[hsl(var(--portal-foreground))] transition-colors">
+            <Link href="/" className="transition-colors hover:text-[hsl(var(--portal-foreground))]">
               Home
-            </a>
+            </Link>
             <LucideIcon name="ChevronRight" className="h-4 w-4" />
-            <a href="/shop" className="hover:text-[hsl(var(--portal-foreground))] transition-colors">
+            <Link
+              href="/shop"
+              className="transition-colors hover:text-[hsl(var(--portal-foreground))]"
+            >
               Shop
-            </a>
+            </Link>
             {product?.title && (
               <>
                 <LucideIcon name="ChevronRight" className="h-4 w-4" />
@@ -267,10 +268,7 @@ export function PDPHeroBlock({ block, className }: BlockProps<PDPHeroConfig>) {
         <div className="grid gap-12 lg:grid-cols-2">
           {/* Image Gallery */}
           <div className="animate-fade-in">
-            <ImageGallery
-              images={product?.images || []}
-              layout={galleryLayout}
-            />
+            <ImageGallery images={product?.images || []} layout={galleryLayout} />
           </div>
 
           {/* Product Info */}
@@ -313,7 +311,7 @@ export function PDPHeroBlock({ block, className }: BlockProps<PDPHeroConfig>) {
 
               {/* Description */}
               {product?.description && (
-                <p className="mt-6 text-[hsl(var(--portal-muted-foreground))] leading-relaxed">
+                <p className="mt-6 leading-relaxed text-[hsl(var(--portal-muted-foreground))]">
                   {product.description}
                 </p>
               )}
@@ -323,7 +321,7 @@ export function PDPHeroBlock({ block, className }: BlockProps<PDPHeroConfig>) {
                 <div className="mt-8 space-y-6">
                   {product.options.map((option) => (
                     <div key={option.name}>
-                      <label className="block text-sm font-medium text-[hsl(var(--portal-foreground))] mb-3">
+                      <label className="mb-3 block text-sm font-medium text-[hsl(var(--portal-foreground))]">
                         {option.name}
                       </label>
                       <div className="flex flex-wrap gap-2">
@@ -367,7 +365,7 @@ export function PDPHeroBlock({ block, className }: BlockProps<PDPHeroConfig>) {
                         'bg-[hsl(var(--portal-primary))] text-[hsl(var(--portal-primary-foreground))]',
                         'hover:bg-[hsl(var(--portal-primary))]/90',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--portal-primary))] focus-visible:ring-offset-2',
-                        'shadow-lg hover:shadow-xl hover:-translate-y-0.5'
+                        'shadow-lg hover:-translate-y-0.5 hover:shadow-xl'
                       )}
                     >
                       <span className="flex items-center justify-center gap-2">

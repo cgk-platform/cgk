@@ -12,6 +12,7 @@ import { createStorefrontClient, getBlogArticles } from '@cgk-platform/shopify'
 import type { ShopifyArticle } from '@cgk-platform/shopify'
 
 import { getTenantConfig } from '@/lib/tenant'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -31,7 +32,9 @@ export default async function BlogPage() {
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-sm text-gray-500">
           <li>
-            <a href="/" className="hover:text-cgk-navy">Home</a>
+            <Link href="/" className="hover:text-cgk-navy">
+              Home
+            </Link>
           </li>
           <li>/</li>
           <li className="text-cgk-navy">Blog</li>
@@ -87,9 +90,7 @@ async function BlogArticles() {
     return (
       <div className="flex min-h-[300px] flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-8 text-center">
         <h2 className="text-lg font-semibold text-cgk-navy">No articles yet</h2>
-        <p className="mt-2 text-gray-500">
-          Check back soon for new content.
-        </p>
+        <p className="mt-2 text-gray-500">Check back soon for new content.</p>
       </div>
     )
   }
@@ -109,7 +110,10 @@ function ArticleCard({ article }: { article: ShopifyArticle }) {
   const href = `/blog/${article.handle}`
 
   return (
-    <a href={href} className="group block overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-lg">
+    <Link
+      href={href}
+      className="group block overflow-hidden rounded-lg border border-gray-200 bg-white transition-shadow hover:shadow-lg"
+    >
       {article.image && (
         <div className="aspect-[4/3] overflow-hidden">
           <img
@@ -123,13 +127,9 @@ function ArticleCard({ article }: { article: ShopifyArticle }) {
         </div>
       )}
       <div className="p-5">
-        <h2 className="text-lg font-bold text-cgk-navy group-hover:underline">
-          {article.title}
-        </h2>
+        <h2 className="text-lg font-bold text-cgk-navy group-hover:underline">{article.title}</h2>
         {article.excerpt && (
-          <p className="mt-2 line-clamp-3 text-sm text-gray-600">
-            {article.excerpt}
-          </p>
+          <p className="mt-2 line-clamp-3 text-sm text-gray-600">{article.excerpt}</p>
         )}
         {article.tags.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
@@ -144,6 +144,6 @@ function ArticleCard({ article }: { article: ShopifyArticle }) {
           </div>
         )}
       </div>
-    </a>
+    </Link>
   )
 }

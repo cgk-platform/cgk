@@ -9,6 +9,7 @@
 import { useState, type FormEvent } from 'react'
 
 import { Mail, Phone, Send } from 'lucide-react'
+import Link from 'next/link'
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
@@ -45,7 +46,9 @@ export function ContactForm() {
     <div className="mx-auto max-w-store px-4 py-12">
       <div className="mx-auto max-w-4xl">
         <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-cgk-navy md:text-4xl">Contact Us</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-cgk-navy md:text-4xl">
+            Contact Us
+          </h1>
           <p className="mx-auto mt-4 max-w-2xl text-gray-600">
             Have a question or need help? We&apos;re here for you. Send us a message and we&apos;ll
             get back to you as soon as possible.
@@ -60,9 +63,7 @@ export function ContactForm() {
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
                   <Send className="h-6 w-6 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-green-800">
-                  Message Sent!
-                </h3>
+                <h3 className="text-lg font-semibold text-green-800">Message Sent!</h3>
                 <p className="mt-2 text-green-700">
                   Thanks for reaching out. We&apos;ll get back to you within 24-48 hours.
                 </p>
@@ -151,8 +152,19 @@ export function ContactForm() {
                   {status === 'submitting' ? (
                     <>
                       <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
                       </svg>
                       Sending...
                     </>
@@ -179,9 +191,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Email</p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      support@cgklinens.com
-                    </p>
+                    <p className="mt-1 text-sm text-gray-500">support@cgklinens.com</p>
                   </div>
                 </div>
 
@@ -191,9 +201,7 @@ export function ContactForm() {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">Phone</p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      Mon-Fri, 9am-5pm EST
-                    </p>
+                    <p className="mt-1 text-sm text-gray-500">Mon-Fri, 9am-5pm EST</p>
                   </div>
                 </div>
               </div>
@@ -203,24 +211,24 @@ export function ContactForm() {
               <h3 className="text-lg font-semibold text-cgk-navy">Quick Links</h3>
               <ul className="mt-4 space-y-3 text-sm">
                 <li>
-                  <a href="/faq" className="text-cgk-navy hover:underline">
+                  <Link href="/faq" className="text-cgk-navy hover:underline">
                     Frequently Asked Questions
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/shipping" className="text-cgk-navy hover:underline">
+                  <Link href="/shipping" className="text-cgk-navy hover:underline">
                     Shipping Information
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/returns" className="text-cgk-navy hover:underline">
+                  <Link href="/returns" className="text-cgk-navy hover:underline">
                     Returns &amp; Exchanges
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="/account/orders" className="text-cgk-navy hover:underline">
+                  <Link href="/account/orders" className="text-cgk-navy hover:underline">
                     Track Your Order
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

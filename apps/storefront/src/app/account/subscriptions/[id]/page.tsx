@@ -15,6 +15,7 @@ import { Container, Spinner } from '@cgk-platform/ui'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import Link from 'next/link'
 
 import {
   FrequencyChanger,
@@ -27,10 +28,7 @@ import {
   SubscriptionHeader,
 } from '../components'
 
-import {
-  getSubscriptionOrdersServer,
-  getSubscriptionServer,
-} from '@/lib/subscriptions/api.server'
+import { getSubscriptionOrdersServer, getSubscriptionServer } from '@/lib/subscriptions/api.server'
 
 interface SubscriptionDetailPageProps {
   params: Promise<{
@@ -64,9 +62,9 @@ export default async function SubscriptionDetailPage({ params }: SubscriptionDet
         <SubscriptionHeader subscription={subscription} />
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-6 lg:col-span-2">
             {/* Products */}
             <ProductList subscription={subscription} />
 
@@ -85,7 +83,7 @@ export default async function SubscriptionDetailPage({ params }: SubscriptionDet
             <OrderSummary subscription={subscription} />
 
             {/* Actions */}
-            <div className="bg-background rounded-xl border p-6">
+            <div className="rounded-xl border bg-background p-6">
               <SubscriptionActions subscription={subscription} />
             </div>
 
@@ -99,17 +97,17 @@ export default async function SubscriptionDetailPage({ params }: SubscriptionDet
             <PaymentMethodDisplay subscription={subscription} />
 
             {/* Support */}
-            <div className="bg-background rounded-xl border p-6">
-              <h3 className="font-semibold text-lg mb-4">Need Help?</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+            <div className="rounded-xl border bg-background p-6">
+              <h3 className="mb-4 text-lg font-semibold">Need Help?</h3>
+              <p className="mb-4 text-sm text-muted-foreground">
                 Our support team is here to help with any subscription questions.
               </p>
-              <a
+              <Link
                 href="/contact"
-                className="inline-flex items-center justify-center w-full px-4 py-2 border rounded-md text-sm font-medium hover:bg-muted transition-colors"
+                className="inline-flex w-full items-center justify-center rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:bg-muted"
               >
                 Contact Support
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -134,8 +132,8 @@ async function SubscriptionOrderHistory({
 
 function OrderHistoryLoading() {
   return (
-    <div className="bg-background rounded-xl border p-6">
-      <h3 className="font-semibold text-lg mb-6">Order History</h3>
+    <div className="rounded-xl border bg-background p-6">
+      <h3 className="mb-6 text-lg font-semibold">Order History</h3>
       <div className="flex items-center justify-center py-8">
         <Spinner size="default" />
       </div>

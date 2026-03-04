@@ -8,6 +8,7 @@
 import type { Metadata } from 'next'
 import { getTenantConfig } from '@/lib/tenant'
 import { FAQContent } from './FAQContent'
+import Link from 'next/link'
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenantConfig()
@@ -27,7 +28,7 @@ const faqCategories = [
       {
         question: 'What is your return policy?',
         answer:
-          'We offer a 30-day hassle-free return policy. If you\'re not completely satisfied with your purchase, return it in its original packaging for a full refund or exchange. Items must be unused and in their original condition.',
+          "We offer a 30-day hassle-free return policy. If you're not completely satisfied with your purchase, return it in its original packaging for a full refund or exchange. Items must be unused and in their original condition.",
       },
       {
         question: 'Do you offer free shipping?',
@@ -42,17 +43,17 @@ const faqCategories = [
       {
         question: 'How can I track my order?',
         answer:
-          'Once your order ships, you\'ll receive an email with tracking information. You can also log into your account to view order status and tracking details.',
+          "Once your order ships, you'll receive an email with tracking information. You can also log into your account to view order status and tracking details.",
       },
       {
         question: 'Can I exchange my sheets for a different size or color?',
         answer:
-          'Absolutely! Start an exchange through your account within 30 days of delivery. We\'ll send your new item as soon as we receive the return. If there\'s a price difference, you\'ll be charged or refunded accordingly.',
+          "Absolutely! Start an exchange through your account within 30 days of delivery. We'll send your new item as soon as we receive the return. If there's a price difference, you'll be charged or refunded accordingly.",
       },
       {
         question: 'What if my order arrives damaged?',
         answer:
-          'Contact us within 48 hours of delivery with photos of the damage. We\'ll arrange a free replacement or full refund — no need to return the damaged item.',
+          "Contact us within 48 hours of delivery with photos of the damage. We'll arrange a free replacement or full refund — no need to return the damaged item.",
       },
     ],
   },
@@ -134,10 +135,7 @@ export default function FAQPage() {
   return (
     <div className="mx-auto max-w-store px-4 py-12">
       {/* FAQ Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: faqJsonLd }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: faqJsonLd }} />
 
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
@@ -157,12 +155,12 @@ export default function FAQPage() {
           <p className="mt-2 text-gray-600">
             Can&apos;t find the answer you&apos;re looking for? We&apos;re here to help.
           </p>
-          <a
+          <Link
             href="/contact"
             className="mt-4 inline-flex items-center justify-center rounded-btn bg-cgk-navy px-6 py-3 font-medium text-white transition-all hover:bg-cgk-navy/90"
           >
             Contact Support
-          </a>
+          </Link>
         </div>
       </div>
     </div>

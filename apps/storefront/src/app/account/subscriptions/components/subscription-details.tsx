@@ -15,6 +15,7 @@ import type { Subscription, SubscriptionItem, SubscriptionOrder } from '@/lib/su
 import { FrequencySelector } from './frequency-selector'
 import { PaymentMethodModal } from './payment-method-modal'
 import { ProductSwapModal } from './product-swap-modal'
+import Link from 'next/link'
 
 // ---------------------------------------------------------------------------
 // Subscription Header
@@ -28,40 +29,45 @@ export function SubscriptionHeader({ subscription }: SubscriptionHeaderProps) {
   const statusDisplay = getStatusDisplay(subscription.status)
 
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <div className="flex items-center gap-3 mb-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Subscription
-          </h1>
+        <div className="mb-2 flex items-center gap-3">
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Subscription</h1>
           <Badge
             variant={
-              statusDisplay.variant === 'success' ? 'default' :
-              statusDisplay.variant === 'warning' ? 'secondary' :
-              statusDisplay.variant === 'error' ? 'destructive' : 'outline'
+              statusDisplay.variant === 'success'
+                ? 'default'
+                : statusDisplay.variant === 'warning'
+                  ? 'secondary'
+                  : statusDisplay.variant === 'error'
+                    ? 'destructive'
+                    : 'outline'
             }
             className={cn(
-              'uppercase text-xs tracking-wider',
-              statusDisplay.variant === 'success' && 'bg-emerald-500/10 text-emerald-700 border-emerald-200',
-              statusDisplay.variant === 'warning' && 'bg-amber-500/10 text-amber-700 border-amber-200',
+              'text-xs uppercase tracking-wider',
+              statusDisplay.variant === 'success' &&
+                'border-emerald-200 bg-emerald-500/10 text-emerald-700',
+              statusDisplay.variant === 'warning' &&
+                'border-amber-200 bg-amber-500/10 text-amber-700'
             )}
           >
             {statusDisplay.label}
           </Badge>
         </div>
         <p className="text-muted-foreground">
-          #{subscription.id.slice(-8).toUpperCase()} &middot; {formatFrequency(subscription.frequency)}
+          #{subscription.id.slice(-8).toUpperCase()} &middot;{' '}
+          {formatFrequency(subscription.frequency)}
         </p>
       </div>
-      <a
+      <Link
         href="/account/subscriptions"
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
         Back to Subscriptions
-      </a>
+      </Link>
     </div>
   )
 }
@@ -89,15 +95,12 @@ export function ProductList({
   return (
     <Card>
       <CardContent className="p-6">
-        <h3 className="font-semibold text-lg mb-6">Products</h3>
+        <h3 className="mb-6 text-lg font-semibold">Products</h3>
         <div className="space-y-4">
           {subscription.items.map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-4 pb-4 border-b last:border-0 last:pb-0"
-            >
+            <div key={item.id} className="flex gap-4 border-b pb-4 last:border-0 last:pb-0">
               {/* Product Image */}
-              <div className="relative w-20 h-20 rounded-lg border bg-muted/30 overflow-hidden flex-shrink-0">
+              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border bg-muted/30">
                 {item.imageUrl ? (
                   <Image
                     src={item.imageUrl}
@@ -107,25 +110,23 @@ export function ProductList({
                     sizes="80px"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs text-center p-2">
+                  <div className="flex h-full w-full items-center justify-center p-2 text-center text-xs text-muted-foreground">
                     {item.title}
                   </div>
                 )}
               </div>
 
               {/* Product Info */}
-              <div className="flex-1 min-w-0">
-                <h4 className="font-medium truncate">{item.title}</h4>
+              <div className="min-w-0 flex-1">
+                <h4 className="truncate font-medium">{item.title}</h4>
                 {item.variantTitle && (
                   <p className="text-sm text-muted-foreground">{item.variantTitle}</p>
                 )}
-                <p className="text-sm text-muted-foreground mt-1">
-                  Qty: {item.quantity}
-                </p>
+                <p className="mt-1 text-sm text-muted-foreground">Qty: {item.quantity}</p>
 
                 {/* Actions */}
                 {canEdit && (
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="mt-2 flex items-center gap-2">
                     {item.isSwappable && (
                       <Button
                         variant="ghost"
@@ -140,19 +141,39 @@ export function ProductList({
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => onQuantityChange(item.id, Math.max(1, item.quantity - 1))}
-                          className="w-6 h-6 rounded border flex items-center justify-center hover:bg-muted transition-colors"
+                          className="flex h-6 w-6 items-center justify-center rounded border transition-colors hover:bg-muted"
                           disabled={item.quantity <= 1}
                         >
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M20 12H4"
+                            />
                           </svg>
                         </button>
                         <button
                           onClick={() => onQuantityChange(item.id, item.quantity + 1)}
-                          className="w-6 h-6 rounded border flex items-center justify-center hover:bg-muted transition-colors"
+                          className="flex h-6 w-6 items-center justify-center rounded border transition-colors hover:bg-muted"
                         >
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          <svg
+                            className="h-3 w-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4v16m8-8H4"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -172,10 +193,13 @@ export function ProductList({
               </div>
 
               {/* Price */}
-              <div className="text-right flex-shrink-0">
+              <div className="flex-shrink-0 text-right">
                 {item.originalPriceCents && item.originalPriceCents > item.priceCents && (
                   <p className="text-sm text-muted-foreground line-through">
-                    {formatPrice(item.originalPriceCents * item.quantity, subscription.currencyCode)}
+                    {formatPrice(
+                      item.originalPriceCents * item.quantity,
+                      subscription.currencyCode
+                    )}
                   </p>
                 )}
                 <p className="font-medium">
@@ -214,17 +238,13 @@ export function OrderSummary({ subscription }: OrderSummaryProps) {
   return (
     <Card>
       <CardContent className="p-6">
-        <h3 className="font-semibold text-lg mb-4">
-          {isActive ? 'Next Order' : 'Order Summary'}
-        </h3>
+        <h3 className="mb-4 text-lg font-semibold">{isActive ? 'Next Order' : 'Order Summary'}</h3>
 
         {/* Next Order Date */}
         {isActive && subscription.nextOrderDate && (
-          <div className="mb-4 pb-4 border-b">
-            <p className="text-sm text-muted-foreground mb-1">Ships On</p>
-            <p className="font-medium text-lg">
-              {formatDate(subscription.nextOrderDate)}
-            </p>
+          <div className="mb-4 border-b pb-4">
+            <p className="mb-1 text-sm text-muted-foreground">Ships On</p>
+            <p className="text-lg font-medium">{formatDate(subscription.nextOrderDate)}</p>
           </div>
         )}
 
@@ -258,13 +278,15 @@ export function OrderSummary({ subscription }: OrderSummaryProps) {
 
           {/* Applied Discounts */}
           {subscription.discounts.length > 0 && (
-            <div className="pt-2 space-y-1">
+            <div className="space-y-1 pt-2">
               {subscription.discounts.map((discount) => (
                 <div key={discount.id} className="flex items-center gap-2">
-                  <Badge variant="secondary" className="text-xs bg-emerald-100 text-emerald-700">
-                    {discount.type === 'percentage' ? `${discount.value}% OFF` :
-                     discount.type === 'free_shipping' ? 'FREE SHIPPING' :
-                     `$${(discount.value / 100).toFixed(2)} OFF`}
+                  <Badge variant="secondary" className="bg-emerald-100 text-xs text-emerald-700">
+                    {discount.type === 'percentage'
+                      ? `${discount.value}% OFF`
+                      : discount.type === 'free_shipping'
+                        ? 'FREE SHIPPING'
+                        : `$${(discount.value / 100).toFixed(2)} OFF`}
                   </Badge>
                   {discount.title && (
                     <span className="text-xs text-muted-foreground">{discount.title}</span>
@@ -275,9 +297,9 @@ export function OrderSummary({ subscription }: OrderSummaryProps) {
           )}
 
           {/* Total */}
-          <div className="flex justify-between pt-3 border-t mt-3">
+          <div className="mt-3 flex justify-between border-t pt-3">
             <span className="font-semibold">Total</span>
-            <span className="font-semibold text-lg">
+            <span className="text-lg font-semibold">
               {formatPrice(subscription.totalCents, subscription.currencyCode)}
             </span>
           </div>
@@ -304,28 +326,33 @@ export function ShippingAddress({ subscription }: ShippingAddressProps) {
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <h3 className="font-semibold text-lg">Shipping Address</h3>
+        <div className="mb-4 flex items-start justify-between">
+          <h3 className="text-lg font-semibold">Shipping Address</h3>
           {canEdit && (
-            <a
-              href="/account/addresses"
-              className="text-sm text-primary hover:underline"
-            >
+            <Link href="/account/addresses" className="text-sm text-primary hover:underline">
               Edit
-            </a>
+            </Link>
           )}
         </div>
 
-        <address className="not-italic text-sm text-muted-foreground">
-          {address.firstName} {address.lastName}<br />
-          {address.address1}<br />
-          {address.address2 && <>{address.address2}<br /></>}
-          {address.city}, {address.provinceCode || address.province} {address.zip}<br />
+        <address className="text-sm not-italic text-muted-foreground">
+          {address.firstName} {address.lastName}
+          <br />
+          {address.address1}
+          <br />
+          {address.address2 && (
+            <>
+              {address.address2}
+              <br />
+            </>
+          )}
+          {address.city}, {address.provinceCode || address.province} {address.zip}
+          <br />
           {address.country}
         </address>
 
         {canEdit && (
-          <p className="text-xs text-muted-foreground mt-4">
+          <p className="mt-4 text-xs text-muted-foreground">
             Update your default address to change where your subscription orders ship.
           </p>
         )}
@@ -350,8 +377,8 @@ export function PaymentMethodDisplay({ subscription }: PaymentMethodDisplayProps
   return (
     <Card>
       <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-4">
-          <h3 className="font-semibold text-lg">Payment Method</h3>
+        <div className="mb-4 flex items-start justify-between">
+          <h3 className="text-lg font-semibold">Payment Method</h3>
           {canEdit && (
             <button
               onClick={() => setShowModal(true)}
@@ -364,7 +391,7 @@ export function PaymentMethodDisplay({ subscription }: PaymentMethodDisplayProps
 
         {payment?.card ? (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-7 rounded bg-muted flex items-center justify-center">
+            <div className="flex h-7 w-10 items-center justify-center rounded bg-muted">
               <span className="text-xs font-medium">
                 {formatCardBrand(payment.card.brand).slice(0, 4)}
               </span>
@@ -379,9 +406,7 @@ export function PaymentMethodDisplay({ subscription }: PaymentMethodDisplayProps
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            Payment method on file
-          </p>
+          <p className="text-sm text-muted-foreground">Payment method on file</p>
         )}
       </CardContent>
 
@@ -412,33 +437,32 @@ export function OrderHistory({ orders, currencyCode }: OrderHistoryProps) {
   return (
     <Card>
       <CardContent className="p-6">
-        <h3 className="font-semibold text-lg mb-6">Order History</h3>
+        <h3 className="mb-6 text-lg font-semibold">Order History</h3>
         <div className="space-y-6">
           {orders.map((order) => (
-            <div key={order.id} className="pb-6 border-b last:border-0 last:pb-0">
+            <div key={order.id} className="border-b pb-6 last:border-0 last:pb-0">
               {/* Order Header */}
-              <div className="flex items-center justify-between mb-3">
+              <div className="mb-3 flex items-center justify-between">
                 <div>
                   <p className="font-medium">Order #{order.orderNumber}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {formatDate(order.billingDate)}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{formatDate(order.billingDate)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="font-medium">
-                    {formatPrice(order.totalCents, currencyCode)}
-                  </p>
+                  <p className="font-medium">{formatPrice(order.totalCents, currencyCode)}</p>
                   <Badge
                     variant={
-                      order.status === 'delivered' ? 'default' :
-                      order.status === 'shipped' ? 'secondary' :
-                      order.status === 'failed' || order.status === 'refunded' ? 'destructive' :
-                      'outline'
+                      order.status === 'delivered'
+                        ? 'default'
+                        : order.status === 'shipped'
+                          ? 'secondary'
+                          : order.status === 'failed' || order.status === 'refunded'
+                            ? 'destructive'
+                            : 'outline'
                     }
                     className={cn(
                       'text-xs capitalize',
                       order.status === 'delivered' && 'bg-emerald-100 text-emerald-700',
-                      order.status === 'shipped' && 'bg-blue-100 text-blue-700',
+                      order.status === 'shipped' && 'bg-blue-100 text-blue-700'
                     )}
                   >
                     {order.status}
@@ -447,7 +471,7 @@ export function OrderHistory({ orders, currencyCode }: OrderHistoryProps) {
               </div>
 
               {/* Order Breakdown */}
-              <div className="bg-muted/30 rounded-lg p-3 space-y-1 text-sm">
+              <div className="space-y-1 rounded-lg bg-muted/30 p-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span>{formatPrice(order.subtotalCents, currencyCode)}</span>
@@ -470,7 +494,7 @@ export function OrderHistory({ orders, currencyCode }: OrderHistoryProps) {
                     <span>-{formatPrice(order.discountCents, currencyCode)}</span>
                   </div>
                 )}
-                <div className="flex justify-between pt-2 border-t font-medium">
+                <div className="flex justify-between border-t pt-2 font-medium">
                   <span>Total</span>
                   <span>{formatPrice(order.totalCents, currencyCode)}</span>
                 </div>
@@ -482,11 +506,16 @@ export function OrderHistory({ orders, currencyCode }: OrderHistoryProps) {
                   href={order.trackingUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-3"
+                  className="mt-3 inline-flex items-center gap-1 text-sm text-primary hover:underline"
                 >
                   Track Package
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
                   </svg>
                 </a>
               )}
@@ -514,7 +543,7 @@ export function FrequencyChanger({ subscription }: FrequencyChangerProps) {
   return (
     <Card>
       <CardContent className="p-6">
-        <h3 className="font-semibold text-lg mb-4">Delivery Frequency</h3>
+        <h3 className="mb-4 text-lg font-semibold">Delivery Frequency</h3>
         <FrequencySelector
           subscriptionId={subscription.id}
           currentFrequency={subscription.frequency}

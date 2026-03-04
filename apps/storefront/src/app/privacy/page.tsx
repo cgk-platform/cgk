@@ -9,6 +9,7 @@ import type { Metadata } from 'next'
 
 import { createStorefrontClient, getShopPolicies } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
+import Link from 'next/link'
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenantConfig()
@@ -33,12 +34,17 @@ export default async function PrivacyPolicyPage() {
         </h1>
 
         <p className="mb-8 text-gray-500">
-          Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          Last updated:{' '}
+          {new Date().toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
         </p>
 
         {shopifyContent ? (
           <div
-            className="prose prose-gray max-w-none prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline"
+            className="prose prose-gray prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline max-w-none"
             dangerouslySetInnerHTML={{ __html: shopifyContent.body }}
           />
         ) : (
@@ -72,8 +78,8 @@ function StaticPrivacyContent() {
       <section>
         <h2 className="text-xl font-semibold text-cgk-navy">Introduction</h2>
         <p className="mt-4">
-          We take your privacy seriously. This Privacy Policy explains how we collect,
-          use, disclose, and safeguard your information when you visit our website and make purchases
+          We take your privacy seriously. This Privacy Policy explains how we collect, use,
+          disclose, and safeguard your information when you visit our website and make purchases
           from our store.
         </p>
       </section>
@@ -143,9 +149,10 @@ function StaticPrivacyContent() {
         <h2 className="text-xl font-semibold text-cgk-navy">Contact Us</h2>
         <p className="mt-4">
           If you have questions about this Privacy Policy, please{' '}
-          <a href="/contact" className="text-cgk-navy font-medium underline hover:no-underline">
+          <Link href="/contact" className="font-medium text-cgk-navy underline hover:no-underline">
             contact us
-          </a>.
+          </Link>
+          .
         </p>
       </section>
     </div>

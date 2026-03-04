@@ -18,14 +18,9 @@ import { getCommerceProvider } from '@/lib/commerce'
 import { getTenantConfig } from '@/lib/tenant'
 
 import { CollectionFilterWrapper } from './components'
+import Link from 'next/link'
 
-const CROSS_NAV_HANDLES = [
-  '6-piece-sheet-sets',
-  'bedding',
-  'featured',
-  'blankets',
-  'comforters-1',
-]
+const CROSS_NAV_HANDLES = ['6-piece-sheet-sets', 'bedding', 'featured', 'blankets', 'comforters-1']
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -75,9 +70,7 @@ const DEFAULT_SORT = 'best-selling'
  *   filter.v.tag=<tag>               -> tag filter
  *   filter.v.product_type=<type>     -> productType filter
  */
-function parseFiltersFromSearchParams(
-  searchParams: URLSearchParams
-): CollectionFilter[] {
+function parseFiltersFromSearchParams(searchParams: URLSearchParams): CollectionFilter[] {
   const filters: CollectionFilter[] = []
 
   for (const [key, value] of searchParams.entries()) {
@@ -126,17 +119,13 @@ function capitalizeWords(str: string): string {
 // Metadata
 // ---------------------------------------------------------------------------
 
-export async function generateMetadata({
-  params,
-}: CollectionPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: CollectionPageProps): Promise<Metadata> {
   const { handle } = await params
   const tenant = await getTenantConfig()
   const commerce = await getCommerceProvider()
 
   // Try to get the real collection title from Shopify
-  const collection = commerce
-    ? await commerce.collections.getByHandle(handle)
-    : null
+  const collection = commerce ? await commerce.collections.getByHandle(handle) : null
 
   const collectionName =
     collection?.title ??
@@ -159,19 +148,14 @@ export async function generateMetadata({
 // Page Component
 // ---------------------------------------------------------------------------
 
-export default async function CollectionPage({
-  params,
-  searchParams,
-}: CollectionPageProps) {
+export default async function CollectionPage({ params, searchParams }: CollectionPageProps) {
   const { handle } = await params
   const search = await searchParams
 
   const commerce = await getCommerceProvider()
 
   // Get collection metadata for title and description
-  const collection = commerce
-    ? await commerce.collections.getByHandle(handle)
-    : null
+  const collection = commerce ? await commerce.collections.getByHandle(handle) : null
 
   const collectionName =
     collection?.title ??
@@ -180,8 +164,7 @@ export default async function CollectionPage({
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ')
 
-  const collectionDescription =
-    collection?.description || undefined
+  const collectionDescription = collection?.description || undefined
 
   // Build absolute URL for structured data
   const headersList = await headers()
@@ -210,15 +193,15 @@ export default async function CollectionPage({
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-sm text-gray-500">
           <li>
-            <a href="/" className="hover:text-cgk-navy">
+            <Link href="/" className="hover:text-cgk-navy">
               Home
-            </a>
+            </Link>
           </li>
           <li>/</li>
           <li>
-            <a href="/collections" className="hover:text-cgk-navy">
+            <Link href="/collections" className="hover:text-cgk-navy">
               Collections
-            </a>
+            </Link>
           </li>
           <li>/</li>
           <li className="text-cgk-navy">{collectionName}</li>
@@ -253,9 +236,7 @@ export default async function CollectionPage({
         <div className="mb-8 rounded-lg bg-cgk-light-blue/30 px-6 py-8 text-center">
           <h1 className="text-3xl font-bold text-cgk-navy">{collectionName}</h1>
           {collectionDescription ? (
-            <p className="mx-auto mt-2 max-w-xl text-gray-600">
-              {collectionDescription}
-            </p>
+            <p className="mx-auto mt-2 max-w-xl text-gray-600">{collectionDescription}</p>
           ) : (
             <p className="mx-auto mt-2 max-w-xl text-gray-600">
               Premium bedding that&apos;s soft, breathable, and built to last.
@@ -299,11 +280,7 @@ export default async function CollectionPage({
           </div>
         }
       >
-        <CollectionProducts
-          handle={handle}
-          sort={search.sort}
-          searchParams={search}
-        />
+        <CollectionProducts handle={handle} sort={search.sort} searchParams={search} />
       </Suspense>
 
       {/* Shop By Collection Cross-Navigation */}
@@ -324,11 +301,7 @@ interface CollectionProductsProps {
   searchParams: Record<string, string | string[] | undefined>
 }
 
-async function CollectionProducts({
-  handle,
-  sort,
-  searchParams,
-}: CollectionProductsProps) {
+async function CollectionProducts({ handle, sort, searchParams }: CollectionProductsProps) {
   const commerce = await getCommerceProvider()
 
   if (!commerce) {
@@ -382,18 +355,16 @@ async function CollectionProducts({
             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
           />
         </svg>
-        <h2 className="text-lg font-semibold text-cgk-navy">
-          Collection not found
-        </h2>
+        <h2 className="text-lg font-semibold text-cgk-navy">Collection not found</h2>
         <p className="mt-2 text-gray-500">
           This collection doesn&apos;t exist or has been removed.
         </p>
-        <a
+        <Link
           href="/collections"
           className="mt-4 rounded-btn bg-cgk-navy px-6 py-2 text-sm font-medium text-white hover:bg-cgk-navy/90"
         >
           Browse Collections
-        </a>
+        </Link>
       </div>
     )
   }
@@ -423,8 +394,7 @@ async function ShopByCollectionSection({ currentHandle }: { currentHandle: strin
 
   try {
     const collectionResults = await Promise.all(
-      CROSS_NAV_HANDLES
-        .filter((h) => h !== currentHandle)
+      CROSS_NAV_HANDLES.filter((h) => h !== currentHandle)
         .slice(0, 5)
         .map((h) => commerce.collections.getByHandle(h))
     )
@@ -441,10 +411,7 @@ async function ShopByCollectionSection({ currentHandle }: { currentHandle: strin
 
     return (
       <div className="mt-16">
-        <CollectionGrid
-          title="Shop By Collection"
-          collections={collections}
-        />
+        <CollectionGrid title="Shop By Collection" collections={collections} />
       </div>
     )
   } catch {

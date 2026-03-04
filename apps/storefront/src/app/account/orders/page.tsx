@@ -14,6 +14,7 @@ import { OrdersListClient, OrdersListSkeleton, OrdersSearch } from './components
 import { getOrders } from '@/lib/account/api'
 import { defaultContent } from '@/lib/account/content'
 import type { OrderStatus } from '@/lib/account/types'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Order History',
@@ -40,22 +41,27 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
     <div className="min-h-screen">
       {/* Page Header */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <h1
             className="text-2xl font-bold tracking-tight lg:text-3xl"
             style={{ fontFamily: 'var(--portal-heading-font)' }}
           >
             {defaultContent['orders.title']}
           </h1>
-          <a
+          <Link
             href="/account"
             className="flex items-center gap-1 text-sm text-[hsl(var(--portal-muted-foreground))] transition-colors hover:text-[hsl(var(--portal-foreground))]"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Account
-          </a>
+          </Link>
         </div>
         <p className="text-[hsl(var(--portal-muted-foreground))]">
           Track your orders and view order details
@@ -69,34 +75,40 @@ export default async function OrdersPage({ searchParams }: OrdersPageProps) {
 
       {/* Filter Tabs */}
       <Tabs defaultValue={statusFilter} className="mb-6">
-        <TabsList className="w-full justify-start overflow-x-auto bg-transparent p-0 h-auto">
+        <TabsList className="h-auto w-full justify-start overflow-x-auto bg-transparent p-0">
           <TabsTrigger
             value="all"
             asChild
-            className="rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))] data-[state=active]:border-transparent"
+            className="rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:border-transparent data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))]"
           >
-            <a href="/account/orders">{defaultContent['orders.filter_all']}</a>
+            <Link href="/account/orders">{defaultContent['orders.filter_all']}</Link>
           </TabsTrigger>
           <TabsTrigger
             value="pending"
             asChild
-            className="ml-2 rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))] data-[state=active]:border-transparent"
+            className="ml-2 rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:border-transparent data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))]"
           >
-            <a href="/account/orders?status=pending">{defaultContent['orders.filter_pending']}</a>
+            <Link href="/account/orders?status=pending">
+              {defaultContent['orders.filter_pending']}
+            </Link>
           </TabsTrigger>
           <TabsTrigger
             value="shipped"
             asChild
-            className="ml-2 rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))] data-[state=active]:border-transparent"
+            className="ml-2 rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:border-transparent data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))]"
           >
-            <a href="/account/orders?status=shipped">{defaultContent['orders.filter_shipped']}</a>
+            <Link href="/account/orders?status=shipped">
+              {defaultContent['orders.filter_shipped']}
+            </Link>
           </TabsTrigger>
           <TabsTrigger
             value="delivered"
             asChild
-            className="ml-2 rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))] data-[state=active]:border-transparent"
+            className="ml-2 rounded-full border border-[hsl(var(--portal-border))] bg-[hsl(var(--portal-card))] px-4 py-2 text-sm font-medium data-[state=active]:border-transparent data-[state=active]:bg-[hsl(var(--portal-primary))] data-[state=active]:text-[hsl(var(--portal-primary-foreground))]"
           >
-            <a href="/account/orders?status=delivered">{defaultContent['orders.filter_delivered']}</a>
+            <Link href="/account/orders?status=delivered">
+              {defaultContent['orders.filter_delivered']}
+            </Link>
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -131,9 +143,7 @@ async function OrdersList({ status, search, page }: OrdersListProps) {
     filteredOrders = filteredOrders.filter(
       (order) =>
         order.orderNumber.toLowerCase().includes(searchLower) ||
-        order.lineItems.some((item) =>
-          item.title.toLowerCase().includes(searchLower)
-        )
+        order.lineItems.some((item) => item.title.toLowerCase().includes(searchLower))
     )
   }
 

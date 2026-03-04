@@ -25,6 +25,7 @@ import {
 import { NewsletterForm } from '@/components/forms/NewsletterForm'
 import { getTenantConfig, getTenantSlug } from '@/lib/tenant'
 import { loadThemeForSSR, createTheme } from '@/lib/theme'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -76,27 +77,42 @@ const FALLBACK_COLLECTIONS = [
 ]
 
 /** Handles to fetch from Shopify, in display order */
-const COLLECTION_HANDLES = [
-  '6-piece-sheet-sets',
-  'bedding',
-  'featured',
-  'blankets',
-  'comforters-1',
-]
+const COLLECTION_HANDLES = ['6-piece-sheet-sets', 'bedding', 'featured', 'blankets', 'comforters-1']
 
 const PRESS_LOGOS: { src: string; alt: string; width?: number }[] = [
-  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector.svg', alt: 'Good Housekeeping', width: 110 },
-  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3662.svg', alt: 'New York Magazine', width: 275 },
-  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector_1.svg', alt: 'Esquire', width: 110 },
-  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group.svg', alt: 'NBC Select', width: 185 },
-  { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Mens_Health.svg', alt: "Men's Health", width: 125 },
+  {
+    src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector.svg',
+    alt: 'Good Housekeeping',
+    width: 110,
+  },
+  {
+    src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3662.svg',
+    alt: 'New York Magazine',
+    width: 275,
+  },
+  {
+    src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Vector_1.svg',
+    alt: 'Esquire',
+    width: 110,
+  },
+  {
+    src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group.svg',
+    alt: 'NBC Select',
+    width: 185,
+  },
+  {
+    src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Mens_Health.svg',
+    alt: "Men's Health",
+    width: 125,
+  },
 ]
 
 const PRESS_ITEMS: { publication: string; logoSrc?: string; quote: string; url?: string }[] = [
   {
     publication: 'Good Housekeeping',
     logoSrc: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_3686.webp',
-    quote: 'CGK Linens makes some of the most popular bedding, and this particular sheet set is the crown jewel in its lineup.',
+    quote:
+      'CGK Linens makes some of the most popular bedding, and this particular sheet set is the crown jewel in its lineup.',
   },
   {
     publication: 'Esquire',
@@ -111,7 +127,8 @@ const PRESS_ITEMS: { publication: string; logoSrc?: string; quote: string; url?:
   {
     publication: 'Real Simple',
     logoSrc: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Group_2.webp',
-    quote: 'If your current set feels scratchy or worn out, consider upgrading to the CGK Unlimited 4-Piece Sheet Set.',
+    quote:
+      'If your current set feels scratchy or worn out, consider upgrading to the CGK Unlimited 4-Piece Sheet Set.',
   },
 ]
 
@@ -139,7 +156,13 @@ export default async function HomePage() {
       <OrganizationJsonLd
         name={tenant?.name ?? 'Store'}
         url={siteUrl}
-        logoUrl={theme.logoUrl ? (theme.logoUrl.startsWith('http') ? theme.logoUrl : `${siteUrl}${theme.logoUrl}`) : null}
+        logoUrl={
+          theme.logoUrl
+            ? theme.logoUrl.startsWith('http')
+              ? theme.logoUrl
+              : `${siteUrl}${theme.logoUrl}`
+            : null
+        }
       />
 
       {/* Hero Banner */}
@@ -163,12 +186,12 @@ export default async function HomePage() {
               <h2 className="text-2xl font-bold text-cgk-navy">Shop Our Best Sellers</h2>
               <p className="mt-1 text-gray-600">Our most popular products</p>
             </div>
-            <a
+            <Link
               href="/collections/best-sellers"
               className="text-sm font-medium text-cgk-navy hover:underline"
             >
               Shop Our Sheets
-            </a>
+            </Link>
           </div>
 
           <Suspense
@@ -192,7 +215,7 @@ export default async function HomePage() {
       {/* Image + Text: Size Matters */}
       <ImageTextBlock
         title="Size Matters"
-        description="The deepest, best-fitting sheets on the internet — up to 21&quot; deep. Our 21&quot; deep-pocket sheets are made to fit thick mattresses, toppers, and adjustable beds. No popping corners, no constant retucking. Just a smooth, snug fit that stays put all night."
+        description='The deepest, best-fitting sheets on the internet — up to 21" deep. Our 21" deep-pocket sheets are made to fit thick mattresses, toppers, and adjustable beds. No popping corners, no constant retucking. Just a smooth, snug fit that stays put all night.'
         imageUrl="https://cgk-unlimited.myshopify.com/cdn/shop/files/Mauve_1.webp"
         ctaText="Shop Extra Deep Sheets"
         ctaHref="/products/21-inch-6-piece-sheet-set"
@@ -200,33 +223,21 @@ export default async function HomePage() {
       />
 
       {/* Press Slider */}
-      {PRESS_ITEMS.length > 0 && (
-        <PressSlider items={PRESS_ITEMS} />
-      )}
+      {PRESS_ITEMS.length > 0 && <PressSlider items={PRESS_ITEMS} />}
 
       {/* Press Logos */}
-      {PRESS_LOGOS.length > 0 && (
-        <MarqueeLogos
-          logos={PRESS_LOGOS}
-          title="As Seen In"
-        />
-      )}
+      {PRESS_LOGOS.length > 0 && <MarqueeLogos logos={PRESS_LOGOS} title="As Seen In" />}
 
       {/* Shop By Collection */}
       <Suspense
-        fallback={
-          <CollectionGrid
-            title="Shop By Collection"
-            collections={FALLBACK_COLLECTIONS}
-          />
-        }
+        fallback={<CollectionGrid title="Shop By Collection" collections={FALLBACK_COLLECTIONS} />}
       >
         <FeaturedCollections />
       </Suspense>
 
       {/* Testimonials */}
       <TestimonialCarousel
-        title={"The Sheets Everyone\n(and Their Mom) Are Talking About"}
+        title={'The Sheets Everyone\n(and Their Mom) Are Talking About'}
         subtitle="Trusted by Over 5 Million Sleepers a Year"
         testimonials={TESTIMONIALS}
         ctaText="See Why Everyone's Obsessed"
@@ -239,12 +250,8 @@ export default async function HomePage() {
       {/* Newsletter CTA */}
       <section className="bg-cgk-light-blue/30 py-16">
         <div className="mx-auto max-w-xl px-4 text-center">
-          <h2 className="text-2xl font-bold text-cgk-navy">
-            Join the CGK Family
-          </h2>
-          <p className="mt-2 text-gray-600">
-            Get 10% off your first order when you subscribe.
-          </p>
+          <h2 className="text-2xl font-bold text-cgk-navy">Join the CGK Family</h2>
+          <p className="mt-2 text-gray-600">Get 10% off your first order when you subscribe.</p>
           <NewsletterForm variant="inline" className="mt-6" />
         </div>
       </section>
@@ -252,12 +259,30 @@ export default async function HomePage() {
       {/* Instagram Feed */}
       <InstagramFeed
         images={[
-          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.01.webp', alt: 'CGK Linens bedroom' },
-          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.20.webp', alt: 'CGK Linens sheets' },
-          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.28.webp', alt: 'CGK Linens bedding' },
-          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.33.webp', alt: 'CGK Linens home' },
-          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.07.webp', alt: 'CGK Linens lifestyle' },
-          { src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/1cbb170336db27d8920ac2ffaf6bcd9b6a518fc0.webp', alt: 'CGK Linens collection' },
+          {
+            src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.01.webp',
+            alt: 'CGK Linens bedroom',
+          },
+          {
+            src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.20.webp',
+            alt: 'CGK Linens sheets',
+          },
+          {
+            src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.28.webp',
+            alt: 'CGK Linens bedding',
+          },
+          {
+            src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.33.webp',
+            alt: 'CGK Linens home',
+          },
+          {
+            src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/Screenshot_2025-11-04_at_15.22.07.webp',
+            alt: 'CGK Linens lifestyle',
+          },
+          {
+            src: 'https://cgk-unlimited.myshopify.com/cdn/shop/files/1cbb170336db27d8920ac2ffaf6bcd9b6a518fc0.webp',
+            alt: 'CGK Linens collection',
+          },
         ]}
         handle="@CGKLINENS"
       />
@@ -291,11 +316,7 @@ async function FeaturedProducts() {
     }
 
     return (
-      <ProductGrid
-        products={result.items}
-        columns={{ sm: 2, md: 3, lg: 4 }}
-        priorityCount={4}
-      />
+      <ProductGrid products={result.items} columns={{ sm: 2, md: 3, lg: 4 }} priorityCount={4} />
     )
   } catch {
     return (
@@ -314,20 +335,13 @@ async function FeaturedCollections() {
   const commerce = await getCommerceProvider()
 
   if (!commerce) {
-    return (
-      <CollectionGrid
-        title="Shop By Collection"
-        collections={FALLBACK_COLLECTIONS}
-      />
-    )
+    return <CollectionGrid title="Shop By Collection" collections={FALLBACK_COLLECTIONS} />
   }
 
   try {
     // Fetch each collection by handle to get its image
     const collectionResults = await Promise.all(
-      COLLECTION_HANDLES.map((handle) =>
-        commerce.collections.getByHandle(handle)
-      )
+      COLLECTION_HANDLES.map((handle) => commerce.collections.getByHandle(handle))
     )
 
     // Map fetched collections to CollectionGrid format, filtering out nulls
@@ -341,27 +355,12 @@ async function FeaturedCollections() {
 
     // Fall back to static data if no collections were found
     if (collections.length === 0) {
-      return (
-        <CollectionGrid
-          title="Shop By Collection"
-          collections={FALLBACK_COLLECTIONS}
-        />
-      )
+      return <CollectionGrid title="Shop By Collection" collections={FALLBACK_COLLECTIONS} />
     }
 
-    return (
-      <CollectionGrid
-        title="Shop By Collection"
-        collections={collections}
-      />
-    )
+    return <CollectionGrid title="Shop By Collection" collections={collections} />
   } catch {
     // On error, render with static fallback data
-    return (
-      <CollectionGrid
-        title="Shop By Collection"
-        collections={FALLBACK_COLLECTIONS}
-      />
-    )
+    return <CollectionGrid title="Shop By Collection" collections={FALLBACK_COLLECTIONS} />
   }
 }

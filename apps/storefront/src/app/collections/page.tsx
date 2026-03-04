@@ -55,11 +55,32 @@ async function getCollections(tenantSlug: string): Promise<CollectionRow[]> {
 
 // Static CGK collections fallback when DB is empty
 const CGK_COLLECTIONS = [
-  { handle: '6-piece-sheet-sets', title: '6-Piece Sheet Sets', description: 'Our best-selling sheet sets with deep pockets that fit mattresses up to 16 inches.' },
-  { handle: 'bedding', title: 'Bedding', description: 'Complete your bedroom with our full range of premium bedding.' },
-  { handle: 'featured', title: 'Featured', description: 'Our top picks and best sellers, hand-selected for you.' },
-  { handle: 'blankets', title: 'Blankets', description: 'Ultra-soft blankets for year-round comfort.' },
-  { handle: 'comforters', title: 'Comforters', description: 'Cozy comforter sets to complete your bed.' },
+  {
+    handle: '6-piece-sheet-sets',
+    title: '6-Piece Sheet Sets',
+    description:
+      'Our best-selling sheet sets with deep pockets that fit mattresses up to 16 inches.',
+  },
+  {
+    handle: 'bedding',
+    title: 'Bedding',
+    description: 'Complete your bedroom with our full range of premium bedding.',
+  },
+  {
+    handle: 'featured',
+    title: 'Featured',
+    description: 'Our top picks and best sellers, hand-selected for you.',
+  },
+  {
+    handle: 'blankets',
+    title: 'Blankets',
+    description: 'Ultra-soft blankets for year-round comfort.',
+  },
+  {
+    handle: 'comforters',
+    title: 'Comforters',
+    description: 'Cozy comforter sets to complete your bed.',
+  },
 ]
 
 export default async function CollectionsPage() {
@@ -69,7 +90,9 @@ export default async function CollectionsPage() {
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-sm text-gray-500">
           <li>
-            <a href="/" className="hover:text-cgk-navy">Home</a>
+            <Link href="/" className="hover:text-cgk-navy">
+              Home
+            </Link>
           </li>
           <li>/</li>
           <li className="text-cgk-navy">Collections</li>
@@ -78,9 +101,7 @@ export default async function CollectionsPage() {
 
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-bold text-cgk-navy">Our Collections</h1>
-        <p className="mt-2 text-gray-600">
-          Browse our curated bedding collections
-        </p>
+        <p className="mt-2 text-gray-600">Browse our curated bedding collections</p>
       </div>
 
       <Suspense fallback={<CollectionsSkeleton />}>
@@ -117,11 +138,9 @@ async function CollectionsGrid() {
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
               <h3 className="text-xl font-bold text-cgk-navy">{collection.title}</h3>
               {collection.description && (
-                <p className="mt-2 text-sm text-gray-600 line-clamp-2">{collection.description}</p>
+                <p className="mt-2 line-clamp-2 text-sm text-gray-600">{collection.description}</p>
               )}
-              <span className="mt-3 text-sm font-medium text-cgk-navy underline">
-                Shop Now
-              </span>
+              <span className="mt-3 text-sm font-medium text-cgk-navy underline">Shop Now</span>
             </div>
           </Link>
         ))}
@@ -142,7 +161,7 @@ function CollectionCard({ collection }: { collection: CollectionRow }) {
   return (
     <Link
       href={`/collections/${collection.handle}`}
-      className="group block overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+      className="group block overflow-hidden rounded-lg bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-cgk-light-blue/20">
         {collection.image_url ? (
@@ -165,13 +184,9 @@ function CollectionCard({ collection }: { collection: CollectionRow }) {
           {collection.title}
         </h3>
         {collection.description && (
-          <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-            {collection.description}
-          </p>
+          <p className="mt-1 line-clamp-2 text-sm text-gray-500">{collection.description}</p>
         )}
-        <p className="mt-2 text-xs text-gray-400">
-          {collection.product_count ?? 0} products
-        </p>
+        <p className="mt-2 text-xs text-gray-400">{collection.product_count ?? 0} products</p>
       </div>
     </Link>
   )

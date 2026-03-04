@@ -11,6 +11,7 @@ import { Clock, Package, Truck } from 'lucide-react'
 
 import { createStorefrontClient, getShopPolicies } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
+import Link from 'next/link'
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenantConfig()
@@ -37,10 +38,15 @@ export default async function ShippingPage() {
         {shopifyContent ? (
           <>
             <p className="mb-8 text-gray-500">
-              Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              Last updated:{' '}
+              {new Date().toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+              })}
             </p>
             <div
-              className="prose prose-gray max-w-none prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline"
+              className="prose prose-gray prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline max-w-none"
               dangerouslySetInnerHTML={{ __html: shopifyContent.body }}
             />
           </>
@@ -75,10 +81,8 @@ function StaticShippingContent() {
       <p className="mb-8 text-gray-600">Everything you need to know about delivery.</p>
 
       {/* Free Shipping Banner */}
-      <div className="mb-10 rounded-lg bg-cgk-gold/10 border border-cgk-gold/20 p-6 text-center">
-        <p className="text-lg font-bold text-cgk-navy">
-          FREE 3-DAY DELIVERY ON ORDERS OVER $50
-        </p>
+      <div className="mb-10 rounded-lg border border-cgk-gold/20 bg-cgk-gold/10 p-6 text-center">
+        <p className="text-lg font-bold text-cgk-navy">FREE 3-DAY DELIVERY ON ORDERS OVER $50</p>
         <p className="mt-1 text-sm text-gray-600">
           No code needed — applied automatically at checkout.
         </p>
@@ -102,10 +106,7 @@ function StaticShippingContent() {
               description: 'Need it sooner? Express gets it to you fast.',
             },
           ].map((option) => (
-            <div
-              key={option.name}
-              className="rounded-lg border border-gray-200 bg-white p-6"
-            >
+            <div key={option.name} className="rounded-lg border border-gray-200 bg-white p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <h3 className="font-semibold text-gray-900">{option.name}</h3>
@@ -131,8 +132,8 @@ function StaticShippingContent() {
           <div>
             <h3 className="font-semibold text-gray-900">1-2 Business Days</h3>
             <p className="mt-1 text-gray-600">
-              Orders placed before 2 PM EST typically ship the same business day. Orders placed after
-              2 PM or on weekends/holidays will ship the next business day.
+              Orders placed before 2 PM EST typically ship the same business day. Orders placed
+              after 2 PM or on weekends/holidays will ship the next business day.
             </p>
           </div>
         </div>
@@ -185,22 +186,18 @@ function StaticShippingContent() {
           </div>
 
           <div>
-            <h3 className="font-medium text-gray-900">
-              What if my package is lost or damaged?
-            </h3>
+            <h3 className="font-medium text-gray-900">What if my package is lost or damaged?</h3>
             <p className="mt-1">
-              Please contact our support team within 7 days of the expected delivery date. We&apos;ll
-              work with the carrier to locate your package or arrange a replacement.
+              Please contact our support team within 7 days of the expected delivery date.
+              We&apos;ll work with the carrier to locate your package or arrange a replacement.
             </p>
           </div>
 
           <div>
-            <h3 className="font-medium text-gray-900">
-              Do you ship to PO Boxes?
-            </h3>
+            <h3 className="font-medium text-gray-900">Do you ship to PO Boxes?</h3>
             <p className="mt-1">
-              Yes, we can ship to PO Boxes via USPS. However, express shipping options
-              are not available for PO Box addresses.
+              Yes, we can ship to PO Boxes via USPS. However, express shipping options are not
+              available for PO Box addresses.
             </p>
           </div>
         </div>
@@ -212,12 +209,12 @@ function StaticShippingContent() {
         <p className="mt-2 text-gray-600">
           Our customer service team is happy to help with any shipping inquiries.
         </p>
-        <a
+        <Link
           href="/contact"
           className="mt-4 inline-flex items-center justify-center rounded-btn bg-cgk-navy px-6 py-3 font-medium text-white transition-all hover:bg-cgk-navy/90"
         >
           Contact Us
-        </a>
+        </Link>
       </section>
     </>
   )

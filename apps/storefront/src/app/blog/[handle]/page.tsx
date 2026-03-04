@@ -13,6 +13,7 @@ import { createStorefrontClient, getArticleByHandle } from '@cgk-platform/shopif
 
 import { BreadcrumbJsonLd } from '@/components/seo/JsonLd'
 import { getTenantConfig } from '@/lib/tenant'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -23,9 +24,7 @@ interface ArticlePageProps {
   }>
 }
 
-export async function generateMetadata({
-  params,
-}: ArticlePageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
   const { handle } = await params
   const config = await getTenantConfig()
 
@@ -105,11 +104,15 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-sm text-gray-500">
           <li>
-            <a href="/" className="hover:text-cgk-navy">Home</a>
+            <Link href="/" className="hover:text-cgk-navy">
+              Home
+            </Link>
           </li>
           <li>/</li>
           <li>
-            <a href="/blog" className="hover:text-cgk-navy">Blog</a>
+            <Link href="/blog" className="hover:text-cgk-navy">
+              Blog
+            </Link>
           </li>
           <li>/</li>
           <li className="text-cgk-navy">{article.title}</li>
@@ -119,14 +122,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       <article className="mx-auto max-w-3xl">
         {/* Article Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-bold text-cgk-navy md:text-4xl">
-            {article.title}
-          </h1>
+          <h1 className="text-3xl font-bold text-cgk-navy md:text-4xl">{article.title}</h1>
 
           <div className="mt-4 flex items-center gap-4 text-sm text-gray-500">
-            {article.authorV2 && (
-              <span>By {article.authorV2.name}</span>
-            )}
+            {article.authorV2 && <span>By {article.authorV2.name}</span>}
             <time dateTime={article.publishedAt}>
               {new Date(article.publishedAt).toLocaleDateString('en-US', {
                 year: 'numeric',
@@ -165,21 +164,26 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Article Content */}
         <div
-          className="prose prose-lg max-w-none prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:text-cgk-navy/80"
+          className="prose prose-lg prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:text-cgk-navy/80 max-w-none"
           dangerouslySetInnerHTML={{ __html: article.contentHtml }}
         />
 
         {/* Back to Blog */}
         <div className="mt-12 border-t pt-8">
-          <a
+          <Link
             href="/blog"
             className="inline-flex items-center gap-2 text-sm font-medium text-cgk-navy hover:underline"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
             Back to Blog
-          </a>
+          </Link>
         </div>
       </article>
     </div>

@@ -13,6 +13,7 @@ import { useState, useCallback, type ReactNode } from 'react'
 import { PortalSidebar } from './PortalSidebar'
 import { PortalHeader } from './PortalHeader'
 import type { PortalNavItem } from '../types'
+import Link from 'next/link'
 
 interface PortalShellProps {
   /** Main content */
@@ -98,9 +99,7 @@ export function PortalShell({
         <PortalHeader
           customerFirstName={customer?.firstName}
           customerName={
-            customer
-              ? [customer.firstName, customer.lastName].filter(Boolean).join(' ')
-              : undefined
+            customer ? [customer.firstName, customer.lastName].filter(Boolean).join(' ') : undefined
           }
           avatarUrl={customer?.avatarUrl}
           logo={logo}
@@ -111,9 +110,7 @@ export function PortalShell({
         />
 
         {/* Content */}
-        <main className="portal-content flex-1">
-          {children}
-        </main>
+        <main className="portal-content flex-1">{children}</main>
       </div>
     </div>
   )
@@ -124,7 +121,7 @@ export function PortalShell({
  */
 function SignOutLink(): React.ReactElement {
   return (
-    <a
+    <Link
       href="/account/logout"
       className={cn(
         'flex items-center gap-3 rounded-lg px-4 py-3',
@@ -149,7 +146,7 @@ function SignOutLink(): React.ReactElement {
         />
       </svg>
       <span>Sign Out</span>
-    </a>
+    </Link>
   )
 }
 
@@ -185,16 +182,10 @@ export function PortalSection({
               </h2>
             )}
             {description && (
-              <p className="text-sm text-[hsl(var(--portal-muted-foreground))]">
-                {description}
-              </p>
+              <p className="text-sm text-[hsl(var(--portal-muted-foreground))]">{description}</p>
             )}
           </div>
-          {actions && (
-            <div className="flex items-center gap-2">
-              {actions}
-            </div>
-          )}
+          {actions && <div className="flex items-center gap-2">{actions}</div>}
         </div>
       )}
       {children}
@@ -241,7 +232,7 @@ export function PortalCard({
         'portal-card',
         variant === 'outlined' && 'portal-card--outlined',
         variant === 'flat' && 'portal-card--flat',
-        clickable && 'cursor-pointer text-left w-full',
+        clickable && 'w-full cursor-pointer text-left',
         paddingClasses[padding],
         className
       )}
@@ -280,16 +271,12 @@ export function PortalGrid({
     columns.md && `md:grid-cols-${columns.md}`,
     columns.lg && `lg:grid-cols-${columns.lg}`,
     columns.xl && `xl:grid-cols-${columns.xl}`,
-  ].filter(Boolean).join(' ')
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <div
-      className={cn(
-        'grid gap-[var(--portal-card-gap)]',
-        columnClasses,
-        className
-      )}
-    >
+    <div className={cn('grid gap-[var(--portal-card-gap)]', columnClasses, className)}>
       {children}
     </div>
   )
@@ -335,9 +322,7 @@ export function PortalEmptyState({
           />
         </svg>
       </div>
-      <h3 className="text-lg font-medium text-[hsl(var(--portal-foreground))]">
-        {title}
-      </h3>
+      <h3 className="text-lg font-medium text-[hsl(var(--portal-foreground))]">{title}</h3>
       {description && (
         <p className="mt-1 max-w-sm text-sm text-[hsl(var(--portal-muted-foreground))]">
           {description}

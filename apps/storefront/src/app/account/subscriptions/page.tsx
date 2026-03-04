@@ -9,14 +9,11 @@ import { Container, Tabs, TabsList, TabsTrigger } from '@cgk-platform/ui'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
-import {
-  EmptySubscriptionsState,
-  SubscriptionCard,
-  SubscriptionCardSkeleton,
-} from './components'
+import { EmptySubscriptionsState, SubscriptionCard, SubscriptionCardSkeleton } from './components'
 
 import { listSubscriptionsServer } from '@/lib/subscriptions/api.server'
 import type { SubscriptionStatus } from '@/lib/subscriptions/types'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'My Subscriptions',
@@ -41,19 +38,22 @@ export default async function SubscriptionsPage({ searchParams }: SubscriptionsP
       <Container className="py-8 md:py-12">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              My Subscriptions
-            </h1>
-            <a
+          <div className="mb-2 flex items-center justify-between">
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">My Subscriptions</h1>
+            <Link
               href="/account"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
               Account
-            </a>
+            </Link>
           </div>
           <p className="text-muted-foreground">
             Manage your recurring orders and delivery preferences
@@ -62,18 +62,18 @@ export default async function SubscriptionsPage({ searchParams }: SubscriptionsP
 
         {/* Filter Tabs */}
         <Tabs defaultValue={statusFilter} className="mb-8">
-          <TabsList className="w-full sm:w-auto justify-start overflow-x-auto">
+          <TabsList className="w-full justify-start overflow-x-auto sm:w-auto">
             <TabsTrigger value="all" asChild>
-              <a href="/account/subscriptions">All</a>
+              <Link href="/account/subscriptions">All</Link>
             </TabsTrigger>
             <TabsTrigger value="active" asChild>
-              <a href="/account/subscriptions?status=active">Active</a>
+              <Link href="/account/subscriptions?status=active">Active</Link>
             </TabsTrigger>
             <TabsTrigger value="paused" asChild>
-              <a href="/account/subscriptions?status=paused">Paused</a>
+              <Link href="/account/subscriptions?status=paused">Paused</Link>
             </TabsTrigger>
             <TabsTrigger value="cancelled" asChild>
-              <a href="/account/subscriptions?status=cancelled">Cancelled</a>
+              <Link href="/account/subscriptions?status=cancelled">Cancelled</Link>
             </TabsTrigger>
           </TabsList>
         </Tabs>

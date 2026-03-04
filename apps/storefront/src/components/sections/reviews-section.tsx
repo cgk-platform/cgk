@@ -1,3 +1,4 @@
+import Link from 'next/link'
 /**
  * Reviews Section (Home Page)
  *
@@ -9,7 +10,7 @@ const FEATURED_REVIEWS = [
   {
     author: 'Lauren K.',
     rating: 5,
-    title: 'Best sheets I\'ve ever owned!',
+    title: "Best sheets I've ever owned!",
     body: "I don't normally write reviews unless something is either really good or terrible. These sheets are AMAZING!! They are so soft & very comfortable.",
   },
   {
@@ -53,24 +54,17 @@ export function ReviewsSection() {
             <StarRating rating={5} />
             <span className="text-sm font-medium text-gray-600">4.8 out of 5</span>
           </div>
-          <h2 className="text-2xl font-bold text-cgk-navy">
-            Loved by Over 50,000 Happy Sleepers
-          </h2>
-          <p className="mt-2 text-gray-600">
-            See what our customers are saying about CGK Linens
-          </p>
+          <h2 className="text-2xl font-bold text-cgk-navy">Loved by Over 50,000 Happy Sleepers</h2>
+          <p className="mt-2 text-gray-600">See what our customers are saying about CGK Linens</p>
         </div>
 
         {/* Featured Reviews Grid */}
         <div className="grid gap-6 md:grid-cols-3">
           {FEATURED_REVIEWS.map((review) => (
-            <div
-              key={review.author}
-              className="rounded-lg bg-white p-6 shadow-sm"
-            >
+            <div key={review.author} className="rounded-lg bg-white p-6 shadow-sm">
               <StarRating rating={review.rating} />
               <h3 className="mt-3 font-semibold text-cgk-navy">{review.title}</h3>
-              <p className="mt-2 text-sm text-gray-600 line-clamp-3">{review.body}</p>
+              <p className="mt-2 line-clamp-3 text-sm text-gray-600">{review.body}</p>
               <p className="mt-3 text-xs font-medium text-gray-500">&mdash; {review.author}</p>
             </div>
           ))}
@@ -78,12 +72,12 @@ export function ReviewsSection() {
 
         {/* CTA */}
         <div className="mt-8 text-center">
-          <a
+          <Link
             href="/collections/featured#reviews"
             className="inline-block rounded-btn bg-cgk-navy px-8 py-3 text-sm font-semibold text-white transition-colors hover:bg-cgk-navy/90"
           >
             Write a Review
-          </a>
+          </Link>
         </div>
       </div>
     </section>

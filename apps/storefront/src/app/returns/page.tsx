@@ -11,6 +11,7 @@ import { CheckCircle, Clock, Package, RefreshCcw, XCircle } from 'lucide-react'
 
 import { createStorefrontClient, getShopPolicies } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
+import Link from 'next/link'
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenantConfig()
@@ -36,7 +37,7 @@ export default async function ReturnsPage() {
 
         {shopifyContent ? (
           <div
-            className="prose prose-gray max-w-none prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline"
+            className="prose prose-gray prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline max-w-none"
             dangerouslySetInnerHTML={{ __html: shopifyContent.body }}
           />
         ) : (
@@ -68,7 +69,7 @@ function StaticReturnsContent() {
   return (
     <>
       {/* Policy Overview */}
-      <section className="rounded-lg bg-cgk-navy/5 border border-cgk-navy/10 p-6">
+      <section className="rounded-lg border border-cgk-navy/10 bg-cgk-navy/5 p-6">
         <div className="flex items-center gap-3">
           <RefreshCcw className="h-6 w-6 text-cgk-navy" />
           <h2 className="text-xl font-semibold text-cgk-navy">30-Day Hassle-Free Returns</h2>
@@ -216,18 +217,18 @@ function StaticReturnsContent() {
           Our customer service team is here to help with any return or exchange questions.
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-4">
-          <a
+          <Link
             href="/contact"
             className="inline-flex items-center justify-center rounded-btn bg-cgk-navy px-6 py-3 font-medium text-white transition-all hover:bg-cgk-navy/90"
           >
             Contact Support
-          </a>
-          <a
+          </Link>
+          <Link
             href="/account/orders"
             className="inline-flex items-center justify-center rounded-btn border border-cgk-navy px-6 py-3 font-medium text-cgk-navy transition-all hover:bg-cgk-navy hover:text-white"
           >
             View Orders
-          </a>
+          </Link>
         </div>
       </section>
     </>

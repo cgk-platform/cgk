@@ -24,6 +24,7 @@ import { getCommerceProvider } from '@/lib/commerce'
 import { getTenantConfig } from '@/lib/tenant'
 
 import { SearchSortSelect } from './components'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -67,10 +68,7 @@ function sortProducts(products: Product[], sort: string): Product[] {
       )
       break
     case 'newest':
-      sorted.sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      )
+      sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       break
   }
 
@@ -93,9 +91,7 @@ interface SearchPageProps {
 // Metadata
 // ---------------------------------------------------------------------------
 
-export async function generateMetadata({
-  searchParams,
-}: SearchPageProps): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const { q } = await searchParams
   const tenant = await getTenantConfig()
 
@@ -103,9 +99,7 @@ export async function generateMetadata({
     title: q
       ? `Search: "${q}" | ${tenant?.name ?? 'Store'}`
       : `Search | ${tenant?.name ?? 'Store'}`,
-    description: q
-      ? `Search results for "${q}"`
-      : 'Search our product catalog',
+    description: q ? `Search results for "${q}"` : 'Search our product catalog',
   }
 }
 
@@ -145,9 +139,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             autoFocus
           />
           {/* Preserve sort param when submitting a new search */}
-          {sort !== DEFAULT_SORT && (
-            <input type="hidden" name="sort" value={sort} />
-          )}
+          {sort !== DEFAULT_SORT && <input type="hidden" name="sort" value={sort} />}
           <svg
             className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
             fill="none"
@@ -175,7 +167,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 <div className="h-8 w-40 animate-pulse rounded bg-muted" />
               </div>
               {/* Skeleton grid */}
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 sm:gap-6">
+              <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="animate-pulse space-y-3">
                     <div className="aspect-square rounded-lg bg-muted" />
@@ -209,9 +201,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
             />
           </svg>
           <h2 className="text-lg font-semibold">Start searching</h2>
-          <p className="mt-2 text-muted-foreground">
-            Enter a search term to find products
-          </p>
+          <p className="mt-2 text-muted-foreground">Enter a search term to find products</p>
         </div>
       )}
     </div>
@@ -273,9 +263,9 @@ async function SearchResults({ query, page, sort }: SearchResultsProps) {
         <h2 className="text-lg font-semibold">No results found</h2>
         <p className="mt-2 text-muted-foreground">
           Try different keywords or browse our{' '}
-          <a href="/products" className="text-primary hover:underline">
+          <Link href="/products" className="text-primary hover:underline">
             product catalog
-          </a>
+          </Link>
         </p>
 
         {/* Search Suggestions */}
@@ -283,13 +273,13 @@ async function SearchResults({ query, page, sort }: SearchResultsProps) {
           <h3 className="mb-2 text-sm font-medium">Popular searches</h3>
           <div className="flex flex-wrap justify-center gap-2">
             {['New Arrivals', 'Best Sellers', 'Sale'].map((suggestion) => (
-              <a
+              <Link
                 key={suggestion}
                 href={`/search?q=${encodeURIComponent(suggestion)}`}
                 className="rounded-full bg-muted px-3 py-1 text-sm hover:bg-muted/80"
               >
                 {suggestion}
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -301,8 +291,7 @@ async function SearchResults({ query, page, sort }: SearchResultsProps) {
   // results but a non-relevance sort is requested. The Shopify fallback
   // handles sort natively via its API, but local DB search always returns
   // results ordered by ts_rank. We re-sort the page of results here.
-  const sortedItems =
-    sort !== 'relevance' ? sortProducts(result.items, sort) : result.items
+  const sortedItems = sort !== 'relevance' ? sortProducts(result.items, sort) : result.items
 
   // Build pagination URL preserving query and sort params
   const paginationParams = new URLSearchParams()
@@ -323,21 +312,17 @@ async function SearchResults({ query, page, sort }: SearchResultsProps) {
       </div>
 
       {/* Product Grid */}
-      <ProductGrid
-        products={sortedItems}
-        columns={{ sm: 2, md: 3, lg: 4 }}
-        showVendor
-      />
+      <ProductGrid products={sortedItems} columns={{ sm: 2, md: 3, lg: 4 }} showVendor />
 
       {/* Pagination */}
       {result.pageInfo.hasNextPage && (
         <div className="flex justify-center pt-8">
-          <a
+          <Link
             href={`/search?${paginationParams.toString()}`}
             className="rounded-lg border px-6 py-3 font-medium transition-colors hover:bg-muted"
           >
             Load More Results
-          </a>
+          </Link>
         </div>
       )}
     </div>

@@ -31,7 +31,6 @@ import {
   SleepSaverGallery,
   TrustBadges,
   ShopPayInstallment,
-  DeliveryEstimate,
   ProductComparisonTable,
 } from '@/components/products'
 import type { ComparisonFeature } from '@/components/products'
@@ -43,6 +42,7 @@ import { getMetafields, parseBadges, parseVideoUrl } from '@/lib/metafields'
 import { getProductRating } from '@/lib/reviews'
 import { getTenantConfig } from '@/lib/tenant'
 import type { Product } from '@cgk-platform/commerce'
+import Link from 'next/link'
 
 const PRESS_LOGOS: { src: string; alt: string; width?: number }[] = [
   {
@@ -247,26 +247,26 @@ async function ProductContent({ handle }: ProductContentProps) {
       <nav className="mb-6" aria-label="Breadcrumb">
         <ol className="flex items-center gap-2 text-sm text-gray-500">
           <li>
-            <a href="/" className="hover:text-meliusly-primary">
+            <Link href="/" className="hover:text-meliusly-primary">
               Home
-            </a>
+            </Link>
           </li>
           <li className="text-gray-400">&gt;</li>
           <li>
-            <a href="/products" className="hover:text-meliusly-primary">
+            <Link href="/products" className="hover:text-meliusly-primary">
               Products
-            </a>
+            </Link>
           </li>
           {product.productType && (
             <>
               <li className="text-gray-400">&gt;</li>
               <li>
-                <a
+                <Link
                   href={`/collections/${product.productType.toLowerCase().replace(/\s+/g, '-')}`}
                   className="hover:text-meliusly-primary"
                 >
                   {product.productType}
-                </a>
+                </Link>
               </li>
             </>
           )}
@@ -820,9 +820,12 @@ async function ProductRatingSummary({ productId }: { productId: string }) {
   }
 
   return (
-    <a href="#reviews-heading" className="inline-flex items-center gap-2 text-sm hover:underline">
+    <Link
+      href="#reviews-heading"
+      className="inline-flex items-center gap-2 text-sm hover:underline"
+    >
       <CompactStarRating rating={rating.averageRating} reviewCount={rating.totalReviews} />
-    </a>
+    </Link>
   )
 }
 

@@ -9,6 +9,7 @@ import type { Metadata } from 'next'
 
 import { createStorefrontClient, getShopPolicies } from '@cgk-platform/shopify'
 import { getTenantConfig } from '@/lib/tenant'
+import Link from 'next/link'
 
 export async function generateMetadata(): Promise<Metadata> {
   const tenant = await getTenantConfig()
@@ -34,12 +35,17 @@ export default async function TermsOfServicePage() {
         </h1>
 
         <p className="mb-8 text-gray-500">
-          Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          Last updated:{' '}
+          {new Date().toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })}
         </p>
 
         {shopifyContent ? (
           <div
-            className="prose prose-gray max-w-none prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline"
+            className="prose prose-gray prose-headings:text-cgk-navy prose-a:text-cgk-navy prose-a:underline hover:prose-a:no-underline max-w-none"
             dangerouslySetInnerHTML={{ __html: shopifyContent.body }}
           />
         ) : (
@@ -73,9 +79,9 @@ function StaticTermsContent() {
       <section>
         <h2 className="text-xl font-semibold text-cgk-navy">Agreement to Terms</h2>
         <p className="mt-4">
-          By accessing and using our website and services, you agree to be bound by
-          these Terms of Service. If you do not agree with any part of these terms, you may not
-          access or use our services.
+          By accessing and using our website and services, you agree to be bound by these Terms of
+          Service. If you do not agree with any part of these terms, you may not access or use our
+          services.
         </p>
       </section>
 
@@ -98,9 +104,9 @@ function StaticTermsContent() {
           Shipping times are estimates only and not guarantees. We are not responsible for delays
           caused by carriers, customs, or circumstances beyond our control. Risk of loss passes to
           you upon delivery to the carrier. For full shipping details, see our{' '}
-          <a href="/shipping" className="text-cgk-navy font-medium underline hover:no-underline">
+          <Link href="/shipping" className="font-medium text-cgk-navy underline hover:no-underline">
             Shipping Information
-          </a>{' '}
+          </Link>{' '}
           page.
         </p>
       </section>
@@ -109,9 +115,9 @@ function StaticTermsContent() {
         <h2 className="text-xl font-semibold text-cgk-navy">Returns and Refunds</h2>
         <p className="mt-4">
           Please refer to our{' '}
-          <a href="/returns" className="text-cgk-navy font-medium underline hover:no-underline">
+          <Link href="/returns" className="font-medium text-cgk-navy underline hover:no-underline">
             Returns & Exchanges Policy
-          </a>{' '}
+          </Link>{' '}
           for information about returns, exchanges, and refunds. Items must be returned in their
           original condition within 30 days of delivery.
         </p>
@@ -121,8 +127,9 @@ function StaticTermsContent() {
         <h2 className="text-xl font-semibold text-cgk-navy">Intellectual Property</h2>
         <p className="mt-4">
           All content on this website, including text, images, logos, and graphics, is the property
-          of the store owner or its content suppliers and is protected by intellectual property laws.
-          You may not use, reproduce, or distribute any content without prior written permission.
+          of the store owner or its content suppliers and is protected by intellectual property
+          laws. You may not use, reproduce, or distribute any content without prior written
+          permission.
         </p>
       </section>
 
@@ -160,9 +167,10 @@ function StaticTermsContent() {
         <h2 className="text-xl font-semibold text-cgk-navy">Contact Us</h2>
         <p className="mt-4">
           If you have questions about these Terms of Service, please{' '}
-          <a href="/contact" className="text-cgk-navy font-medium underline hover:no-underline">
+          <Link href="/contact" className="font-medium text-cgk-navy underline hover:no-underline">
             contact us
-          </a>.
+          </Link>
+          .
         </p>
       </section>
     </div>

@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { cn } from '@cgk-platform/ui'
 import type { BlockProps, FAQConfig } from '../types'
 import { LucideIcon } from '../icons'
+import Link from 'next/link'
 
 /**
  * Single FAQ item component
@@ -44,16 +45,14 @@ function FAQItem({
         className={cn(
           'flex w-full items-center justify-between gap-4 p-6 text-left',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--portal-primary))]',
-          'focus-visible:ring-offset-2 rounded-xl'
+          'rounded-xl focus-visible:ring-offset-2'
         )}
         aria-expanded={isOpen}
       >
         <span
           className={cn(
             'text-lg font-semibold transition-colors duration-200',
-            isOpen
-              ? 'text-[hsl(var(--portal-primary))]'
-              : 'text-[hsl(var(--portal-foreground))]'
+            isOpen ? 'text-[hsl(var(--portal-primary))]' : 'text-[hsl(var(--portal-foreground))]'
           )}
         >
           {question}
@@ -63,7 +62,7 @@ function FAQItem({
             'flex h-8 w-8 shrink-0 items-center justify-center rounded-full',
             'transition-all duration-300',
             isOpen
-              ? 'bg-[hsl(var(--portal-primary))] text-white rotate-180'
+              ? 'rotate-180 bg-[hsl(var(--portal-primary))] text-white'
               : 'bg-[hsl(var(--portal-muted))] text-[hsl(var(--portal-muted-foreground))]'
           )}
         >
@@ -79,9 +78,7 @@ function FAQItem({
       >
         <div className="overflow-hidden">
           <div className="px-6 pb-6 pt-0">
-            <p className="text-[hsl(var(--portal-muted-foreground))] leading-relaxed">
-              {answer}
-            </p>
+            <p className="leading-relaxed text-[hsl(var(--portal-muted-foreground))]">{answer}</p>
           </div>
         </div>
       </div>
@@ -115,9 +112,7 @@ function FAQGridItem({
       <h3 className="mb-3 text-lg font-semibold text-[hsl(var(--portal-foreground))]">
         {question}
       </h3>
-      <p className="text-[hsl(var(--portal-muted-foreground))] leading-relaxed">
-        {answer}
-      </p>
+      <p className="leading-relaxed text-[hsl(var(--portal-muted-foreground))]">{answer}</p>
     </div>
   )
 }
@@ -207,12 +202,12 @@ export function FAQBlock({ block, className }: BlockProps<FAQConfig>) {
         <div className="mt-16 text-center">
           <p className="text-[hsl(var(--portal-muted-foreground))]">
             Still have questions?{' '}
-            <a
+            <Link
               href="/contact"
               className="font-medium text-[hsl(var(--portal-primary))] hover:underline"
             >
               Contact our support team
-            </a>
+            </Link>
           </p>
         </div>
       </div>
