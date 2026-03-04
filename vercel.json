@@ -29,16 +29,6 @@
       "TURBO_TELEMETRY_DISABLED": "1"
     }
   },
-  "integrations": {
-    "neon": {
-      "required": true,
-      "description": "PostgreSQL database for multi-tenant data storage"
-    },
-    "upstash": {
-      "required": true,
-      "description": "Redis for session caching, rate limiting, and job queues"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
