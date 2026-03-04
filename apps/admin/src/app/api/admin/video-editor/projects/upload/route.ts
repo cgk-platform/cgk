@@ -95,31 +95,37 @@ export async function POST(request: Request) {
   }
 
   try {
-    const buffer = Buffer.from(await file.arrayBuffer())
     const ext = file.name.split('.').pop() ?? 'bin'
     const timestamp = Date.now()
     const blobPath = `video-editor/${tenantSlug}/${projectId}/${uploadType}-${timestamp}.${ext}`
 
-    const blob = await put(blobPath, buffer, {
+    // Stream the file directly to Vercel Blob — avoids buffering large files in memory
+    const blob = await put(blobPath, file.stream(), {
       access: 'public',
       contentType: file.type,
     })
 
     // Update the project record with the blob URL
+    const URL_COLUMN: Record<UploadType, string> = {
+      render: 'render_url',
+      voiceover: 'voiceover_url',
+      music: 'music_url',
+    }
+    const column = URL_COLUMN[uploadType]
     await withTenant(tenantSlug, async () => {
-      if (uploadType === 'render') {
+      if (column === 'render_url') {
         await sql`
-          UPDATE video_editor_projects SET render_url = ${blob.url}
+          UPDATE video_editor_projects SET render_url = ${blob.url}, updated_at = NOW()
           WHERE id = ${projectId} AND tenant_id = ${tenantSlug}
         `
-      } else if (uploadType === 'voiceover') {
+      } else if (column === 'voiceover_url') {
         await sql`
-          UPDATE video_editor_projects SET voiceover_url = ${blob.url}
+          UPDATE video_editor_projects SET voiceover_url = ${blob.url}, updated_at = NOW()
           WHERE id = ${projectId} AND tenant_id = ${tenantSlug}
         `
-      } else if (uploadType === 'music') {
+      } else {
         await sql`
-          UPDATE video_editor_projects SET music_url = ${blob.url}
+          UPDATE video_editor_projects SET music_url = ${blob.url}, updated_at = NOW()
           WHERE id = ${projectId} AND tenant_id = ${tenantSlug}
         `
       }
@@ -130,9 +136,23 @@ export async function POST(request: Request) {
       await createRenderRecord(tenantSlug, {
         projectId,
         renderUrl: blob.url,
-        fileSizeBytes: buffer.byteLength,
+        fileSizeBytes: file.size,
       })
     }
+
+    // Log upload activity (G4)
+    await withTenant(tenantSlug, async () => {
+      await sql`
+        INSERT INTO video_editor_activity (tenant_id, project_id, source, action, data)
+        VALUES (
+          ${tenantSlug},
+          ${projectId},
+          'agent',
+          ${`${uploadType}_uploaded`},
+          ${JSON.stringify({ blobUrl: blob.url, fileSizeBytes: file.size })}::jsonb
+        )
+      `
+    })
 
     return NextResponse.json({
       blobUrl: blob.url,
@@ -140,7 +160,10 @@ export async function POST(request: Request) {
       projectId,
     })
   } catch (error) {
-    logger.error('Video editor upload error:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      'Video editor upload error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Upload failed' },
       { status: 500 }

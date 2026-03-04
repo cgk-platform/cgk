@@ -27,6 +27,7 @@ export async function syncProject(
     const qcResults = input.qcResults != null ? JSON.stringify(input.qcResults) : null
     const brandDefaults = input.brandDefaults != null ? JSON.stringify(input.brandDefaults) : null
 
+    // B6: added updated_at = NOW() to upsert SET clause
     const result = await sql`
       INSERT INTO video_editor_projects (
         tenant_id,
@@ -86,15 +87,16 @@ export async function syncProject(
         voice_id = EXCLUDED.voice_id,
         voice_name = EXCLUDED.voice_name,
         voiceover_script = EXCLUDED.voiceover_script,
-        voiceover_url = EXCLUDED.voiceover_url,
+        voiceover_url = COALESCE(EXCLUDED.voiceover_url, video_editor_projects.voiceover_url),
         caption_style = EXCLUDED.caption_style,
         caption_config = EXCLUDED.caption_config,
-        music_url = EXCLUDED.music_url,
+        music_url = COALESCE(EXCLUDED.music_url, video_editor_projects.music_url),
         music_attribution = EXCLUDED.music_attribution,
         music_volume = EXCLUDED.music_volume,
-        render_url = EXCLUDED.render_url,
+        render_url = COALESCE(EXCLUDED.render_url, video_editor_projects.render_url),
         qc_results = EXCLUDED.qc_results,
-        brand_defaults = EXCLUDED.brand_defaults
+        brand_defaults = EXCLUDED.brand_defaults,
+        updated_at = NOW()
       RETURNING *, (xmax = 0) AS is_new
     `
 
@@ -107,45 +109,66 @@ export async function syncProject(
     const isNew = rowData['is_new'] === true || rowData['is_new'] === 't'
     const project = mapProjectRow(rowData)
 
-    // Sync scenes: upsert by (project_id, scene_number), then remove excess
+    // B2: Batch scene sync using unnest() — single query instead of N individual inserts
     if (input.scenes !== undefined) {
-      for (let i = 0; i < input.scenes.length; i++) {
-        const scene = input.scenes[i]
-        if (!scene) continue
-        const textOverlays = scene.textOverlays != null ? JSON.stringify(scene.textOverlays) : '[]'
+      const validScenes = input.scenes.filter(Boolean)
+
+      if (validScenes.length > 0) {
+        const sceneNumbers = `{${validScenes.map((s) => s!.sceneNumber).join(',')}}`
+        const roles = `{${validScenes.map((s) => s!.role ?? '').join(',')}}`
+        const durations = `{${validScenes.map((s) => s!.duration ?? 0).join(',')}}`
+        const clipAssetIds = `{${validScenes.map((s) => s!.clipAssetId ?? '').join(',')}}`
+        const clipSegmentIds = `{${validScenes.map((s) => s!.clipSegmentId ?? '').join(',')}}`
+        const clipStarts = `{${validScenes.map((s) => s!.clipStart ?? 0).join(',')}}`
+        const clipEnds = `{${validScenes.map((s) => s!.clipEnd ?? 0).join(',')}}`
+        const transitions = `{${validScenes.map((s) => s!.transition ?? 'crossfade').join(',')}}`
+        const textOverlaysArr = `{${validScenes.map((s) => `"${(s!.textOverlays != null ? JSON.stringify(s!.textOverlays) : '[]').replace(/"/g, '\\"')}"`).join(',')}}`
+        const footageHints = `{${validScenes.map((s) => s!.footageHint ?? '').join(',')}}`
+        const sourceTypes = `{${validScenes.map((s) => s!.sourceType ?? '').join(',')}}`
+        const sourceRefs = `{${validScenes.map((s) => s!.sourceReference ?? '').join(',')}}`
+        const sortOrders = `{${validScenes.map((_s, i) => i).join(',')}}`
+
         await sql`
           INSERT INTO video_editor_scenes (
-            tenant_id,
-            project_id,
-            scene_number,
-            role,
-            duration,
-            clip_asset_id,
-            clip_segment_id,
-            clip_start,
-            clip_end,
-            transition,
-            text_overlays,
-            footage_hint,
-            source_type,
-            source_reference,
-            sort_order
-          ) VALUES (
+            tenant_id, project_id, scene_number, role, duration,
+            clip_asset_id, clip_segment_id, clip_start, clip_end,
+            transition, text_overlays, footage_hint,
+            source_type, source_reference, sort_order
+          )
+          SELECT
             ${tenantId},
             ${project.id},
-            ${scene.sceneNumber},
-            ${scene.role ?? null},
-            ${scene.duration ?? null},
-            ${scene.clipAssetId ?? null},
-            ${scene.clipSegmentId ?? null},
-            ${scene.clipStart ?? null},
-            ${scene.clipEnd ?? null},
-            ${scene.transition ?? 'crossfade'},
-            ${textOverlays}::jsonb,
-            ${scene.footageHint ?? null},
-            ${scene.sourceType ?? null},
-            ${scene.sourceReference ?? null},
-            ${i}
+            u.scene_number,
+            NULLIF(u.role, ''),
+            NULLIF(u.duration, 0),
+            NULLIF(u.clip_asset_id, ''),
+            NULLIF(u.clip_segment_id, ''),
+            NULLIF(u.clip_start, 0),
+            NULLIF(u.clip_end, 0),
+            u.transition,
+            u.text_overlays::jsonb,
+            NULLIF(u.footage_hint, ''),
+            NULLIF(u.source_type, ''),
+            NULLIF(u.source_reference, ''),
+            u.sort_order
+          FROM unnest(
+            ${sceneNumbers}::int[],
+            ${roles}::text[],
+            ${durations}::numeric[],
+            ${clipAssetIds}::text[],
+            ${clipSegmentIds}::text[],
+            ${clipStarts}::numeric[],
+            ${clipEnds}::numeric[],
+            ${transitions}::text[],
+            ${textOverlaysArr}::text[],
+            ${footageHints}::text[],
+            ${sourceTypes}::text[],
+            ${sourceRefs}::text[],
+            ${sortOrders}::int[]
+          ) AS u(
+            scene_number, role, duration, clip_asset_id, clip_segment_id,
+            clip_start, clip_end, transition, text_overlays,
+            footage_hint, source_type, source_reference, sort_order
           )
           ON CONFLICT (project_id, scene_number) DO UPDATE SET
             role = EXCLUDED.role,
@@ -165,9 +188,7 @@ export async function syncProject(
 
       // Remove scenes beyond the new count
       const maxSceneNumber =
-        input.scenes.length > 0
-          ? Math.max(...input.scenes.filter(Boolean).map((s) => s!.sceneNumber))
-          : 0
+        validScenes.length > 0 ? Math.max(...validScenes.map((s) => s!.sceneNumber)) : 0
       await sql`
         DELETE FROM video_editor_scenes
         WHERE project_id = ${project.id}
@@ -176,9 +197,9 @@ export async function syncProject(
       `
     }
 
-    // Sync captions: delete non-edited, recreate from input
+    // B2: Batch caption sync — single INSERT with unnest() instead of N individual inserts
     if (input.captions !== undefined) {
-      // Only delete captions that weren't manually edited by the user
+      // Delete non-edited captions to make room for fresh data
       await sql`
         DELETE FROM video_editor_captions
         WHERE project_id = ${project.id}
@@ -186,35 +207,45 @@ export async function syncProject(
           AND (is_edited IS NULL OR is_edited = FALSE)
       `
 
-      for (let i = 0; i < input.captions.length; i++) {
-        const caption = input.captions[i]
-        if (!caption) continue
-        // Skip insert if an edited caption already occupies this sort_order
-        const existing = await sql`
-          SELECT id FROM video_editor_captions
-          WHERE project_id = ${project.id}
-            AND tenant_id = ${tenantId}
-            AND sort_order = ${i}
-            AND is_edited = TRUE
-        `
-        if (existing.rows.length > 0) continue
+      // Get sort_orders of edited captions so we can skip those positions
+      const editedResult = await sql`
+        SELECT sort_order FROM video_editor_captions
+        WHERE project_id = ${project.id}
+          AND tenant_id = ${tenantId}
+          AND is_edited = TRUE
+      `
+      const editedSortOrders = new Set(
+        editedResult.rows.map((r) => Number((r as Record<string, unknown>)['sort_order']))
+      )
+
+      // Filter out captions that would collide with edited positions
+      const captionsToInsert = input.captions
+        .map((c, i) => ({ ...c, sortOrder: i }))
+        .filter((c) => !editedSortOrders.has(c.sortOrder))
+
+      if (captionsToInsert.length > 0) {
+        const words = `{${captionsToInsert.map((c) => `"${c.word.replace(/"/g, '\\"')}"`).join(',')}}`
+        const startTimes = `{${captionsToInsert.map((c) => c.startTime).join(',')}}`
+        const endTimes = `{${captionsToInsert.map((c) => c.endTime).join(',')}}`
+        const captionSortOrders = `{${captionsToInsert.map((c) => c.sortOrder).join(',')}}`
 
         await sql`
           INSERT INTO video_editor_captions (
-            tenant_id,
-            project_id,
-            word,
-            start_time,
-            end_time,
-            sort_order
-          ) VALUES (
+            tenant_id, project_id, word, start_time, end_time, sort_order
+          )
+          SELECT
             ${tenantId},
             ${project.id},
-            ${caption.word},
-            ${caption.startTime},
-            ${caption.endTime},
-            ${i}
-          )
+            u.word,
+            u.start_time,
+            u.end_time,
+            u.sort_order
+          FROM unnest(
+            ${words}::text[],
+            ${startTimes}::numeric[],
+            ${endTimes}::numeric[],
+            ${captionSortOrders}::int[]
+          ) AS u(word, start_time, end_time, sort_order)
         `
       }
     }
