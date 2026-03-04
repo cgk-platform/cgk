@@ -57,14 +57,6 @@ export async function checkPrerequisites(): Promise<{ success: boolean; errors: 
       errors.push('pnpm not found. Install with: npm install -g pnpm@latest')
     }
 
-    // Check Docker (optional)
-    try {
-      const dockerVersion = execSync('docker --version', { encoding: 'utf-8' }).trim()
-      spinner.text = `${dockerVersion} ✓`
-    } catch {
-      spinner.warn('Docker not found (optional). Install from https://www.docker.com/get-started')
-    }
-
     if (errors.length === 0) {
       spinner.succeed('Prerequisites checked')
       return { success: true, errors: [] }
@@ -212,96 +204,6 @@ export async function createEnvFiles(
     spinner.fail('Failed to create environment files')
     throw error
   }
-}
-
-/**
- * Setup Docker database with docker-compose
- */
-export async function setupDockerDatabase(): Promise<string> {
-  const spinner = ora('Starting PostgreSQL and Redis...').start()
-
-  try {
-    // Check if docker-compose.yml exists
-    const composePath = join(process.cwd(), 'docker-compose.yml')
-    if (!existsSync(composePath)) {
-      spinner.text = 'Creating docker-compose.yml...'
-      createDockerCompose()
-    }
-
-    // Start containers
-    spinner.text = 'Starting containers...'
-    execSync('docker-compose up -d', { stdio: 'inherit' })
-
-    // Wait for PostgreSQL to be ready
-    spinner.text = 'Waiting for PostgreSQL...'
-    await waitForPostgres('postgresql://postgres:postgres@localhost:5432/cgk')
-
-    spinner.succeed('Database ready (PostgreSQL + Redis running)')
-    return 'postgresql://postgres:postgres@localhost:5432/cgk'
-  } catch (error) {
-    spinner.fail('Failed to start Docker database')
-    throw error
-  }
-}
-
-/**
- * Create docker-compose.yml file
- */
-function createDockerCompose(): void {
-  const composeContent = `version: '3.8'
-
-services:
-  postgres:
-    image: pgvector/pgvector:pg16
-    container_name: cgk-postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: cgk
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: cgk-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  pgdata:
-  redisdata:
-`
-
-  writeFileSync(join(process.cwd(), 'docker-compose.yml'), composeContent)
-}
-
-/**
- * Wait for PostgreSQL to be ready
- */
-async function waitForPostgres(url: string, maxAttempts = 30): Promise<void> {
-  for (let i = 0; i < maxAttempts; i++) {
-    try {
-      execSync(`psql "${url}" -c "SELECT 1" > /dev/null 2>&1`, { stdio: 'ignore' })
-      return
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    }
-  }
-  throw new Error('PostgreSQL failed to start within timeout')
 }
 
 /**

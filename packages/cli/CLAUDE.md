@@ -16,8 +16,8 @@ CLI tool for the CGK platform. Provides commands to create brand sites, initiali
 ```bash
 # ⚡ Ultra-fast setup (5-10 minutes) - NEW!
 npx @cgk-platform/cli quick-start
-npx @cgk-platform/cli quick-start --skip-docker
 npx @cgk-platform/cli quick-start --no-browser
+npx @cgk-platform/cli quick-start --skip-install
 
 # Create new brand site
 npx @cgk-platform/cli create my-brand
@@ -69,8 +69,8 @@ Set up CGK platform in 5-10 minutes with automated configuration.
 
 **What it does**:
 
-1. Checks prerequisites (Node 22+, pnpm 10+, Docker)
-2. Starts PostgreSQL and Redis (Docker) OR prompts for your database URL
+1. Checks prerequisites (Node 22+, pnpm 10+)
+2. Prompts for cloud database URLs (Neon PostgreSQL + Upstash Redis)
 3. Auto-generates all secrets (JWT, encryption keys, etc.)
 4. Creates all .env.local files automatically
 5. Installs dependencies (pnpm install)
@@ -80,7 +80,6 @@ Set up CGK platform in 5-10 minutes with automated configuration.
 
 **Options**:
 
-- `--skip-docker` - Skip Docker setup (use existing database)
 - `--no-browser` - Do not open browser automatically
 - `--skip-install` - Skip dependency installation (if already installed)
 
@@ -90,11 +89,11 @@ Set up CGK platform in 5-10 minutes with automated configuration.
 # Full automated setup
 npx @cgk-platform/cli quick-start
 
-# Use cloud database instead of Docker
-npx @cgk-platform/cli quick-start --skip-docker
-
 # Don't open browser
 npx @cgk-platform/cli quick-start --no-browser
+
+# Skip dependency installation (if already installed)
+npx @cgk-platform/cli quick-start --skip-install
 ```
 
 **Time**: 5-10 minutes (vs 30 minutes manual setup)
