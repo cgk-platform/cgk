@@ -1,0 +1,21 @@
+name: CGK Commerce Platform
+description: WordPress-style portable commerce platform with Shopify + Stripe integration. Fork and deploy to your own infrastructure in 5 minutes.
+labels:
+  - vercel
+  - nextjs
+  - commerce
+  - multi-tenant
+  - shopify
+  - stripe
+  - ecommerce
+  - headless-commerce
+exclude:
+  - .migration/
+  - .claude/session-handoffs/
+  - apps/meliusly-storefront/
+  - MULTI-TENANT-PLATFORM-PLAN/
+  - node_modules/
+  - .next/
+  - .turbo/
+  - dist/
+  - build/

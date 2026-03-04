@@ -35,7 +35,7 @@ interface HeaderProps {
 
 export function Header({ cartItemCount = 0, onMobileMenuToggle, onCartClick }: HeaderProps) {
   return (
-    <header className="w-full">
+    <header className="relative w-full">
       {/* Announcement Bar */}
       <div className="flex h-[36px] items-center justify-center bg-[#0268a0]">
         <p className="font-manrope text-[13px] leading-[1.15] font-bold tracking-[0.26px] text-white uppercase">
@@ -44,16 +44,13 @@ export function Header({ cartItemCount = 0, onMobileMenuToggle, onCartClick }: H
       </div>
 
       {/* Main Navigation */}
-      <div className="flex h-[72px] items-center justify-between bg-white px-[50px] py-[16px]">
+      <div className="relative z-50 flex h-[72px] items-center justify-between bg-white px-[50px] py-[16px]">
         {/* Logo */}
-        <Link
-          href="/"
-          className="relative flex h-[34px] w-[128px] items-center justify-center overflow-hidden"
-        >
+        <Link href="/" className="relative flex h-[34px] w-[160px] items-center justify-start">
           <img
             src="/assets/69bb33a6f2ea1403b208fab9c38e49c39bcb12bf.png"
             alt="Meliusly"
-            className="h-[32px] w-auto object-cover"
+            className="h-full w-auto object-contain"
           />
         </Link>
 

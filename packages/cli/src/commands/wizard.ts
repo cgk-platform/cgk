@@ -16,6 +16,31 @@ export const wizardCommand = new Command('wizard')
 
     try {
       const inquirer = (await import('inquirer')).default
+      const { existsSync } = await import('fs')
+      const { join } = await import('path')
+
+      // Check if platform.config.ts already exists
+      const configPath = join(process.cwd(), 'platform.config.ts')
+      const configExists = existsSync(configPath)
+
+      if (configExists) {
+        logger.info(chalk.yellow('✅ platform.config.ts already exists\n'))
+        const { proceed } = await inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'proceed',
+            message: 'platform.config.ts exists. Run wizard anyway (will overwrite)?',
+            default: false,
+          },
+        ])
+
+        if (!proceed) {
+          logger.info(
+            '\nWizard cancelled. Edit platform.config.ts manually or delete it to run wizard.\n'
+          )
+          process.exit(0)
+        }
+      }
 
       // Question 1: What are you building?
       const { useCase } = await inquirer.prompt([

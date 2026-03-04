@@ -15,7 +15,7 @@ export const sofaSupportProducts: MegaMenuProduct[] = [
     price: '$129.99',
     handle: 'classic-sofa-support-board',
     image: {
-      url: 'https://placeholder.co/400x300/0268a0/white?text=Classic+Support',
+      url: '/meliusly/guides/sofa-chair.png',
       alt: 'Classic Sofa Support Board',
     },
     badge: 'Best Seller',
@@ -26,7 +26,7 @@ export const sofaSupportProducts: MegaMenuProduct[] = [
     price: '$199.99',
     handle: 'premium-sofa-support-system',
     image: {
-      url: 'https://placeholder.co/400x300/161f2b/white?text=Premium+System',
+      url: '/meliusly/guides/sofa-chair.png',
       alt: 'Premium Sofa Support System',
     },
   },
@@ -36,7 +36,7 @@ export const sofaSupportProducts: MegaMenuProduct[] = [
     price: '$249.99',
     handle: 'heavy-duty-sofa-board',
     image: {
-      url: 'https://placeholder.co/400x300/0268a0/white?text=Heavy+Duty',
+      url: '/meliusly/guides/sofa-chair.png',
       alt: 'Heavy-Duty Sofa Board',
     },
   },
@@ -49,7 +49,7 @@ export const sleeperSofaSupportProducts: MegaMenuProduct[] = [
     price: '$159.99',
     handle: 'sleeper-sofa-support-board',
     image: {
-      url: 'https://placeholder.co/400x300/0268a0/white?text=Sleeper+Support',
+      url: '/meliusly/guides/sleeper-sofa.png',
       alt: 'Sleeper Sofa Support Board',
     },
     badge: 'New',
@@ -60,7 +60,7 @@ export const sleeperSofaSupportProducts: MegaMenuProduct[] = [
     price: '$229.99',
     handle: 'pro-sleeper-sofa-support',
     image: {
-      url: 'https://placeholder.co/400x300/161f2b/white?text=Pro+Sleeper',
+      url: '/meliusly/guides/sleeper-sofa.png',
       alt: 'Pro Sleeper Sofa Support',
     },
   },
@@ -70,7 +70,7 @@ export const sleeperSofaSupportProducts: MegaMenuProduct[] = [
     price: '$299.99',
     handle: 'custom-sleeper-package',
     image: {
-      url: 'https://placeholder.co/400x300/0268a0/white?text=Custom+Package',
+      url: '/meliusly/guides/sleeper-sofa.png',
       alt: 'Custom Sleeper Package',
     },
     badge: 'Premium',
@@ -84,7 +84,7 @@ export const bedSupportProducts: MegaMenuProduct[] = [
     price: '$179.99',
     handle: 'standard-bed-support-board',
     image: {
-      url: 'https://placeholder.co/400x300/0268a0/white?text=Standard+Bed',
+      url: '/meliusly/guides/bed-support.png',
       alt: 'Standard Bed Support Board',
     },
   },
@@ -94,7 +94,7 @@ export const bedSupportProducts: MegaMenuProduct[] = [
     price: '$259.99',
     handle: 'king-size-bed-support',
     image: {
-      url: 'https://placeholder.co/400x300/161f2b/white?text=King+Size',
+      url: '/meliusly/guides/bed-support.png',
       alt: 'King Size Bed Support',
     },
     badge: 'Popular',
@@ -105,7 +105,7 @@ export const bedSupportProducts: MegaMenuProduct[] = [
     price: '$319.99',
     handle: 'adjustable-bed-support-system',
     image: {
-      url: 'https://placeholder.co/400x300/0268a0/white?text=Adjustable+System',
+      url: '/meliusly/guides/bed-support.png',
       alt: 'Adjustable Bed Support System',
     },
   },

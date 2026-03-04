@@ -1,6 +1,6 @@
 # CGK - Commerce Growth Kit
 
-A multi-tenant e-commerce platform designed for agencies managing multiple DTC brands. Built for portability, scalability, and AI-first development.
+**WordPress-style portable commerce platform** - Fork, deploy, and own your infrastructure. Built for agencies managing multiple DTC brands with complete control.
 
 ## Features
 
@@ -10,20 +10,26 @@ A multi-tenant e-commerce platform designed for agencies managing multiple DTC b
 - **White-Label Ready**: Fully customizable per-brand theming
 - **Modern Stack**: Next.js 16, React 19, TypeScript 5.9, Tailwind CSS 4
 
-## 🚀 Quick Deploy
+## 🚀 One-Click Deploy
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcgk-platform%2Fcgk&integration-ids=oac_neon%2Coac_upstash)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/cgk-platform/cgk-template&env=DATABASE_URL,REDIS_URL&envDescription=Database%20and%20cache%20configuration&envLink=https://github.com/cgk-platform/cgk-template/blob/main/.env.example&project-name=my-commerce-platform&repository-name=my-commerce-platform&demo-title=CGK%20Platform&demo-description=WordPress-style%20commerce%20platform&demo-url=https://cgk-demo.vercel.app&integration-ids=oac_V3R1GIpkoJorr6fqyiwdhl17,oac_VqOgBHqhEoFTPzGkPd7L0iH6)
 
-**What happens when you click**:
+**True one-click deploy - WordPress style**:
 
-1. Forks repository to your GitHub account
-2. Auto-provisions Neon PostgreSQL (free tier)
-3. Auto-provisions Upstash Redis (free tier)
-4. Auto-generates secrets (JWT, encryption keys)
-5. Deploys platform to `*.vercel.app`
-6. Shows post-deploy wizard for Shopify/Stripe setup
+1. ✅ **Fork** repository to YOUR GitHub account
+2. ✅ **One Vercel project** deploys ALL 8 apps (admin, storefront, creator portal, etc.)
+3. ✅ **Auto-provision** Neon PostgreSQL (free tier) on YOUR account
+4. ✅ **Auto-provision** Upstash Redis (free tier) on YOUR account
+5. ✅ **Auto-generate** all secrets (JWT, encryption keys)
+6. ✅ **Path-based routing** works immediately:
+   - `mystore.vercel.app` → Storefront
+   - `mystore.vercel.app/admin` → Admin
+   - `mystore.vercel.app/creator` → Creator Portal
+   - `mystore.vercel.app/contractor` → Contractor Portal
+7. ✅ **Architecture wizard** guides setup with 6 plain-English questions
+8. ✅ **Self-hosted** on YOUR infrastructure (not ours)
 
-**Time to first deploy**: ~5 minutes
+**Time to live site**: 5-10 minutes | **No credit card required**
 
 ## Quick Start
 

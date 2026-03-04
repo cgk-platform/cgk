@@ -1,9 +1,19 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm turbo build --filter=admin --filter=storefront --filter=creator-portal --filter=contractor-portal --filter=orchestrator",
+  "buildCommand": "pnpm turbo build --filter=admin --filter=storefront --filter=creator-portal --filter=contractor-portal --filter=orchestrator --filter=shopify-app --filter=command-center --filter=mcp-server",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "regions": ["iad1"],
+  "rewrites": [
+    { "source": "/admin/:path*", "destination": "/apps/admin/:path*" },
+    { "source": "/creator/:path*", "destination": "/apps/creator-portal/:path*" },
+    { "source": "/contractor/:path*", "destination": "/apps/contractor-portal/:path*" },
+    { "source": "/orchestrator/:path*", "destination": "/apps/orchestrator/:path*" },
+    { "source": "/shopify-app/:path*", "destination": "/apps/shopify-app/:path*" },
+    { "source": "/command-center/:path*", "destination": "/apps/command-center/:path*" },
+    { "source": "/mcp/:path*", "destination": "/apps/mcp-server/:path*" },
+    { "source": "/:path*", "destination": "/apps/storefront/:path*" }
+  ],
   "functions": {
     "apps/*/src/app/api/**": {
       "maxDuration": 30
