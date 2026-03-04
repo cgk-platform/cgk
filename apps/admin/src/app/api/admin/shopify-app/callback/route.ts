@@ -60,7 +60,7 @@ export async function GET(request: Request) {
 
       logger.info(`[shopify-oauth] Registered ${registered.length} webhooks`)
       if (errors.length > 0) {
-        logger.warn('[shopify-oauth] Webhook registration errors:', errors)
+        logger.warn('[shopify-oauth] Webhook registration errors:', { errors })
       }
     } catch (webhookError) {
       // Log but don't fail the OAuth flow

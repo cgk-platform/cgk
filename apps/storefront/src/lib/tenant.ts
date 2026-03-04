@@ -28,6 +28,10 @@ export interface TenantConfig {
       currencyCode?: string
       locale?: string
     }
+    assets?: {
+      baseUrl?: string
+      cdnDomain?: string
+    }
     features?: Record<string, boolean>
   }
   shopify?: {
@@ -115,7 +119,7 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
           } catch (err) {
             logger.warn(
               `[tenant] Failed to decrypt Shopify storefront token for "${slug}" — skipping Shopify config`,
-              err,
+              err
             )
             storefrontToken = null as unknown as string
           }

@@ -67,12 +67,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   if (body.slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(body.slug)) {
     return NextResponse.json(
       { error: 'Slug must be lowercase alphanumeric with hyphens (e.g., "getting-started")' },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
   try {
-    const article = await withTenant(tenantSlug, () => updateArticle(id, body))
+    const article = await withTenant(tenantSlug, () => updateArticle(tenantSlug, id, body))
 
     if (!article) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 })
@@ -83,7 +83,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (error instanceof Error && error.message.includes('unique constraint')) {
       return NextResponse.json(
         { error: 'An article with this slug already exists' },
-        { status: 409 },
+        { status: 409 }
       )
     }
     throw error

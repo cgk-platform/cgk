@@ -3,11 +3,7 @@
  *
  * Handles processing orders to detect gift cards and issue store credit
  */
-import type {
-  GiftCardTransaction,
-  CreateGiftCardTransactionInput,
-  GiftCardProduct,
-} from './types'
+import type { GiftCardTransaction, CreateGiftCardTransactionInput, GiftCardProduct } from './types'
 import {
   getGiftCardProducts,
   createGiftCardTransaction,
@@ -113,7 +109,10 @@ export async function processGiftCardReward(
 
   // Check order subtotal threshold if configured
   const orderSubtotalCents = Math.round(parseFloat(order.subtotal_price) * 100)
-  if (product.min_order_subtotal_cents > 0 && orderSubtotalCents < product.min_order_subtotal_cents) {
+  if (
+    product.min_order_subtotal_cents > 0 &&
+    orderSubtotalCents < product.min_order_subtotal_cents
+  ) {
     return {
       success: false,
       skipped: true,
@@ -122,10 +121,7 @@ export async function processGiftCardReward(
   }
 
   // Check for existing transaction (idempotency)
-  const existingTransaction = await getTransactionByOrderAndVariant(
-    order.id,
-    product.variant_id
-  )
+  const existingTransaction = await getTransactionByOrderAndVariant(order.id, product.variant_id)
   if (existingTransaction) {
     return {
       success: true,
@@ -136,9 +132,8 @@ export async function processGiftCardReward(
   }
 
   // Create transaction
-  const customerName = [order.customer.first_name, order.customer.last_name]
-    .filter(Boolean)
-    .join(' ') || null
+  const customerName =
+    [order.customer.first_name, order.customer.last_name].filter(Boolean).join(' ') || null
 
   const transactionInput: CreateGiftCardTransactionInput = {
     shopify_order_id: order.id,
@@ -175,9 +170,7 @@ export async function processGiftCardReward(
  *
  * @param order - Order data from Shopify
  */
-export async function processOrderGiftCards(
-  order: OrderData
-): Promise<ProcessRewardResult[]> {
+export async function processOrderGiftCards(order: OrderData): Promise<ProcessRewardResult[]> {
   // Get active gift card products
   const products = await getGiftCardProducts('active')
   if (products.length === 0) {
@@ -219,15 +212,14 @@ export async function issueStoreCredit(
   tenantId?: string
 ): Promise<{ success: boolean; transactionId?: string; error?: string }> {
   // Import Shopify utilities dynamically to avoid circular deps
-  const {
-    createAdminClient,
-    getShopifyCredentials,
-    isShopifyConnected,
-  } = await import('@cgk-platform/shopify')
+  const { createAdminClient, getShopifyCredentials, isShopifyConnected } =
+    await import('@cgk-platform/shopify')
 
   // If no tenant ID provided, we can't connect to Shopify
   if (!tenantId) {
-    logger.info(`issueStoreCredit: No tenantId provided, using placeholder for transaction ${transaction.id}`)
+    logger.info(
+      `issueStoreCredit: No tenantId provided, using placeholder for transaction ${transaction.id}`
+    )
     const mockTransactionId = `sc_${Date.now()}_${transaction.id.slice(0, 8)}`
     return { success: true, transactionId: mockTransactionId }
   }
@@ -290,7 +282,10 @@ export async function issueStoreCredit(
     try {
       const result = await admin.query<{
         customerStoreCreditCreate: {
-          storeCreditAccount: { id: string; balance: { amount: string; currencyCode: string } } | null
+          storeCreditAccount: {
+            id: string
+            balance: { amount: string; currencyCode: string }
+          } | null
           userErrors: Array<{ field: string; message: string }>
         }
       }>(mutation, variables)
@@ -321,7 +316,10 @@ export async function issueStoreCredit(
       throw apiError
     }
   } catch (error) {
-    logger.error('issueStoreCredit error:', error)
+    logger.error(
+      'issueStoreCredit error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to issue store credit',

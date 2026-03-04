@@ -417,6 +417,7 @@ export const navigation: NavSection[] = [
     href: '/admin/system',
     children: [
       { label: 'Sync', href: '/admin/system/sync' },
+      { label: 'Platform Config', href: '/admin/platform-config' },
       { label: 'Config', href: '/admin/config' },
       { label: 'Changelog', href: '/admin/changelog' },
       { label: 'Onboarding Metrics', href: '/admin/onboarding-metrics' },

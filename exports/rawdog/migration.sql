@@ -1,0 +1,470 @@
+-- CGK Tenant Migration SQL
+-- Tenant: rawdog
+-- Schema: tenant_rawdog
+-- Generated: 2026-03-04T04:10:22.984Z
+-- Tables: 403 (203 total records)
+
+-- =============================================================================
+-- STEP 1: Restore organization record
+-- =============================================================================
+
+INSERT INTO public.organizations (
+  id,
+  slug,
+  name,
+  settings,
+  shopify_store_domain,
+  shopify_access_token_encrypted,
+  stripe_account_id,
+  stripe_customer_id,
+  status,
+  created_at,
+  updated_at
+) VALUES (
+  '1804e972-b014-4945-82aa-a4809bac454c'::uuid,
+  'rawdog',
+  'Rawdog',
+  '{}'::jsonb,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  'active'::organization_status,
+  '2026-03-03 05:15:13.676212+00'::timestamptz,
+  '2026-03-03 05:15:13.676212+00'::timestamptz
+) ON CONFLICT (slug) DO UPDATE SET
+  name = EXCLUDED.name,
+  settings = EXCLUDED.settings,
+  updated_at = EXCLUDED.updated_at;
+
+-- =============================================================================
+-- STEP 2: Create tenant schema and run migrations
+-- =============================================================================
+
+-- Use CLI to create tenant schema:
+-- npx @cgk-platform/cli tenant:create rawdog
+
+-- Or create schema manually and run migrations:
+-- CREATE SCHEMA IF NOT EXISTS tenant_rawdog;
+-- Run all tenant migrations from packages/db/src/migrations/tenant/
+
+-- =============================================================================
+-- STEP 3: Export/Import tenant data
+-- =============================================================================
+
+-- Use pg_dump to export tenant data from source:
+-- pg_dump --schema=tenant_rawdog --data-only --no-owner --no-privileges \
+--   -h SOURCE_HOST -U SOURCE_USER -d SOURCE_DB > rawdog_data.sql
+
+-- Import data to target:
+-- psql -h TARGET_HOST -U TARGET_USER -d TARGET_DB -f rawdog_data.sql
+
+-- =============================================================================
+-- Table Summary
+-- =============================================================================
+
+-- ab_daily_metrics                                  0 records
+-- ab_events                                         0 records
+-- ab_exclusion_groups                               0 records
+-- ab_guardrails                                     0 records
+-- ab_shipping_attributions                          0 records
+-- ab_targeting_rules                                0 records
+-- ab_test_assignments                               0 records
+-- ab_test_conversions                               0 records
+-- ab_test_exclusion_groups                          0 records
+-- ab_tests                                          0 records
+-- ab_variants                                       0 records
+-- ab_visitors                                       0 records
+-- abandoned_checkouts                               0 records
+-- ad_spend                                          0 records
+-- agent_action_autonomy                             0 records
+-- agent_action_log                                  0 records
+-- agent_approval_requests                           0 records
+-- agent_autonomy_settings                           0 records
+-- agent_calendar_events                             0 records
+-- agent_conversation_log                            0 records
+-- agent_email_config                                0 records
+-- agent_email_conversations                         0 records
+-- agent_failure_learnings                           0 records
+-- agent_feedback                                    0 records
+-- agent_google_oauth                                0 records
+-- agent_handoffs                                    0 records
+-- agent_memories                                    0 records
+-- agent_patterns                                    0 records
+-- agent_personality                                 0 records
+-- agent_relationships                               0 records
+-- agent_slack_apps                                  0 records
+-- agent_slack_messages                              0 records
+-- agent_sms_conversations                           0 records
+-- agent_sms_messages                                0 records
+-- agent_training_sessions                           0 records
+-- agent_voice_calls                                 0 records
+-- agent_voice_config                                0 records
+-- agent_voice_responses                             0 records
+-- agent_voice_transcripts                           0 records
+-- ai_agents                                         0 records
+-- ai_settings                                       0 records
+-- ai_team_members                                   0 records
+-- ai_teams                                          0 records
+-- analytics_bri_metrics                             0 records
+-- analytics_burn_rate                               0 records
+-- analytics_daily_metrics                           0 records
+-- analytics_geo_metrics                             0 records
+-- analytics_pipeline_metrics                        0 records
+-- analytics_report_runs                             0 records
+-- analytics_reports                                 0 records
+-- analytics_settings                                1 records
+-- analytics_slack_alerts                            0 records
+-- analytics_targets                                 0 records
+-- attribution_channel_summary                       0 records
+-- attribution_conversions                           0 records
+-- attribution_custom_dashboards                     0 records
+-- attribution_data_quality_snapshots                0 records
+-- attribution_export_configs                        0 records
+-- attribution_influencers                           0 records
+-- attribution_options                              21 records
+-- attribution_platform_connections                  0 records
+-- attribution_results                               0 records
+-- attribution_scheduled_reports                     0 records
+-- attribution_settings                              0 records
+-- attribution_touchpoints                           0 records
+-- audit_logs                                        0 records
+-- auto_response_log                                 0 records
+-- auto_response_rules                               0 records
+-- balance_transactions                              0 records
+-- blog_authors                                      0 records
+-- blog_categories                                   0 records
+-- blog_clusters                                     0 records
+-- blog_link_health_cache                            0 records
+-- blog_post_clusters                                0 records
+-- blog_posts                                        0 records
+-- brand_context_documents                           0 records
+-- brand_context_versions                            0 records
+-- bri_conversations                                 0 records
+-- bri_followup_settings                             0 records
+-- bri_integrations                                  0 records
+-- bri_notification_settings                         0 records
+-- bri_settings                                      0 records
+-- bri_team_defaults                                 0 records
+-- bri_voice_config                                  0 records
+-- bundle_orders                                     0 records
+-- bundles                                           0 records
+-- cached_segments                                   0 records
+-- cart_items                                        0 records
+-- carts                                             0 records
+-- channel_rate_limits                               0 records
+-- chat_messages                                     0 records
+-- chat_sessions                                     0 records
+-- chat_widget_config                                1 records
+-- ci_analyses                                       0 records
+-- ci_assets                                         0 records
+-- ci_brands                                         0 records
+-- ci_clones                                         0 records
+-- ci_rank_history                                   0 records
+-- ci_scans                                          0 records
+-- cogs_config                                       0 records
+-- commission_config                                 0 records
+-- commissions                                       0 records
+-- consent_records                                   0 records
+-- contractor_invitations                            0 records
+-- contractor_magic_links                            0 records
+-- contractor_password_reset_tokens                  0 records
+-- contractor_payouts                                0 records
+-- contractor_projects                               0 records
+-- contractor_sessions                               0 records
+-- contractors                                       0 records
+-- conversations                                     0 records
+-- creative_idea_links                               0 records
+-- creative_ideas                                    0 records
+-- creator_agreement_signatures                      0 records
+-- creator_analytics_snapshots                       0 records
+-- creator_application_drafts                        0 records
+-- creator_applications                              0 records
+-- creator_bulk_send_recipients                      0 records
+-- creator_bulk_sends                                0 records
+-- creator_communication_settings                    0 records
+-- creator_conversation_messages                     0 records
+-- creator_conversations                             0 records
+-- creator_email_queue                               0 records
+-- creator_email_template_versions                   0 records
+-- creator_email_templates                           0 records
+-- creator_notification_settings                    13 records
+-- creator_onboarding                                0 records
+-- creator_onboarding_wizard_progress                0 records
+-- creator_product_shipments                         0 records
+-- creator_projects                                  0 records
+-- creator_reminder_config                           0 records
+-- creator_response_metrics                          0 records
+-- creators                                          0 records
+-- csat_config                                       1 records
+-- csat_metrics_daily                                0 records
+-- csat_surveys                                      0 records
+-- customer_addresses                                0 records
+-- customer_loyalty_accounts                         0 records
+-- customer_loyalty_transactions                     0 records
+-- customer_password_resets                          0 records
+-- customer_redeemed_rewards                         0 records
+-- customer_referral_codes                           0 records
+-- customer_referral_rewards                         0 records
+-- customer_referrals                                0 records
+-- customer_rfm_segments                             0 records
+-- customer_sessions                                 0 records
+-- customers                                         0 records
+-- dam_assets                                        0 records
+-- dam_audit_logs                                    0 records
+-- dam_clip_segments                                 0 records
+-- dam_collection_assets                             0 records
+-- dam_collections                                   0 records
+-- dam_gdrive_connections                            0 records
+-- dam_gdrive_file_mappings                          0 records
+-- dam_import_queue_items                            0 records
+-- dam_trash                                         0 records
+-- dam_usage_logs                                    0 records
+-- discount_code_usages                              0 records
+-- draft_orders                                      0 records
+-- email_template_versions                           0 records
+-- email_templates                                  11 records
+-- email_threads                                     0 records
+-- entity_workflow_state                             0 records
+-- esign_audit_log                                   0 records
+-- esign_bulk_send_recipients                        0 records
+-- esign_bulk_sends                                  0 records
+-- esign_documents                                   0 records
+-- esign_email_queue                                 0 records
+-- esign_fields                                      0 records
+-- esign_in_person_sessions                          0 records
+-- esign_reminder_config                             0 records
+-- esign_reminder_configs                            0 records
+-- esign_signatures                                  0 records
+-- esign_signers                                     0 records
+-- esign_template_fields                             0 records
+-- esign_templates                                   0 records
+-- esign_webhook_deliveries                          0 records
+-- esign_webhooks                                    0 records
+-- esign_workflow_executions                         0 records
+-- esign_workflows                                   0 records
+-- expense_budgets                                   0 records
+-- expense_categories                                0 records
+-- expenses                                          0 records
+-- fulfillments                                      0 records
+-- gift_card_emails                                  0 records
+-- gift_card_products                                0 records
+-- gift_card_settings                                1 records
+-- gift_card_transactions                            0 records
+-- google_ads_connections                            0 records
+-- google_feed_images                                0 records
+-- google_feed_products                              0 records
+-- google_feed_settings                              0 records
+-- google_feed_sync_history                          0 records
+-- gsc_credentials                                   0 records
+-- inbound_email_logs                                0 records
+-- inbox_ai_drafts                                   0 records
+-- inbox_contacts                                    0 records
+-- inbox_messages                                    0 records
+-- inbox_threads                                     0 records
+-- integration_credentials                           0 records
+-- integration_event_queue                           0 records
+-- job_runs                                          0 records
+-- kb_article_feedback                               0 records
+-- kb_article_versions                               0 records
+-- kb_articles                                       0 records
+-- kb_categories                                     7 records
+-- klaviyo_connections                               0 records
+-- klaviyo_sync_config                               0 records
+-- landing_pages                                     0 records
+-- loyalty_rewards                                   5 records
+-- loyalty_tier_config                               4 records
+-- mcp_api_keys                                      0 records
+-- mcp_usage                                         0 records
+-- meta_ad_connections                               0 records
+-- mmm_models                                        0 records
+-- notification_channel_settings                     0 records
+-- notifications                                     0 records
+-- onboarding_config                                 0 records
+-- operating_expenses                                0 records
+-- order_line_items                                  0 records
+-- order_returns                                     0 records
+-- orders                                            0 records
+-- org_chart                                         0 records
+-- payee_tax_forms                                   0 records
+-- payee_tax_info                                    0 records
+-- payees                                            0 records
+-- payment_request_attachments                       0 records
+-- payment_requests                                  0 records
+-- payout_methods                                    0 records
+-- payout_settings                                   0 records
+-- payouts                                           0 records
+-- pipeline_config                                   1 records
+-- pipeline_saved_filters                            0 records
+-- pipeline_stage_history                            0 records
+-- pipeline_triggers                                 0 records
+-- pl_config_audit_log                               0 records
+-- pl_data                                           0 records
+-- pl_formula_config                                 0 records
+-- pnl_snapshots                                     0 records
+-- portal_sessions                                   0 records
+-- portal_settings                                   0 records
+-- portal_theme_config                               0 records
+-- privacy_requests                                  0 records
+-- product_answers                                   0 records
+-- product_cogs                                      0 records
+-- product_questions                                 0 records
+-- productivity_audit_log                            0 records
+-- products                                          0 records
+-- project_files                                     0 records
+-- project_revisions                                 0 records
+-- projects                                          0 records
+-- promo_code_metadata                               0 records
+-- promo_code_usage                                  0 records
+-- qa_answer_templates                               0 records
+-- recovery_analytics_daily                          0 records
+-- recovery_email_queue                              0 records
+-- refund_line_items                                 0 records
+-- refunds                                           0 records
+-- review_bulk_campaign_recipients                   0 records
+-- review_bulk_campaigns                             0 records
+-- review_bulk_send_templates                        0 records
+-- review_email_logs                                 0 records
+-- review_email_queue                                0 records
+-- review_email_templates                            3 records
+-- review_incentive_codes                            0 records
+-- review_media                                      0 records
+-- review_migrations                                 0 records
+-- review_settings                                   1 records
+-- reviews                                           0 records
+-- sample_requests                                   0 records
+-- samples_config                                    1 records
+-- saved_items                                       0 records
+-- scheduled_actions                                 0 records
+-- scheduled_promotions                              0 records
+-- scheduling_availability                           0 records
+-- scheduling_blocked_dates                          0 records
+-- scheduling_bookings                               0 records
+-- scheduling_changelog                              0 records
+-- scheduling_event_types                            0 records
+-- scheduling_round_robin_counters                   0 records
+-- scheduling_team_event_types                       0 records
+-- scheduling_team_members                           0 records
+-- scheduling_teams                                  0 records
+-- scheduling_users                                  0 records
+-- schema_migrations                               118 records
+-- segment_membership_cache                          0 records
+-- selling_plan_collections                          0 records
+-- selling_plan_products                             0 records
+-- selling_plans                                     0 records
+-- sentiment_alerts                                  0 records
+-- seo_audits                                        0 records
+-- seo_content_gaps                                  0 records
+-- seo_keyword_history                               0 records
+-- seo_keywords                                      0 records
+-- seo_redirects                                     0 records
+-- seo_settings                                      0 records
+-- settings_audit_log                                0 records
+-- shipping_rates                                    0 records
+-- shopify_connections                               0 records
+-- shopify_oauth_states                              0 records
+-- shopify_rate_limits                               0 records
+-- site_config                                       0 records
+-- slack_conversations                               0 records
+-- slack_user_associations                           0 records
+-- slack_user_links                                  0 records
+-- sms_consent                                       0 records
+-- sms_consent_log                                   0 records
+-- sms_opt_outs                                      0 records
+-- sms_queue                                         0 records
+-- sms_templates                                     0 records
+-- stripe_onboarding_progress                        0 records
+-- stripe_topup_settings                             0 records
+-- stripe_topups                                     0 records
+-- subscription_activity                             0 records
+-- subscription_email_queue                          0 records
+-- subscription_orders                               0 records
+-- subscription_save_attempts                        0 records
+-- subscription_save_flows                           0 records
+-- subscription_selling_plans                        0 records
+-- subscription_settings                             0 records
+-- subscription_validation_issues                    0 records
+-- subscription_validations                          0 records
+-- subscriptions                                     0 records
+-- support_agents                                    0 records
+-- support_sla_config                                4 records
+-- support_ticket_counter                            1 records
+-- support_ticket_messages                           0 records
+-- support_tickets                                   0 records
+-- survey_answers                                    0 records
+-- survey_questions                                  1 records
+-- survey_responses                                  0 records
+-- survey_slack_config                               0 records
+-- surveys                                           1 records
+-- sync_operations                                   0 records
+-- system_errors                                     0 records
+-- system_logs                                       0 records
+-- task_comments                                     0 records
+-- tasks                                             0 records
+-- tax_form_audit_log                                0 records
+-- tax_forms                                         0 records
+-- tax_payees                                        0 records
+-- tax_reminders                                     3 records
+-- team_invitation_queue                             0 records
+-- team_member_memories                              0 records
+-- template_ab_tests                                 0 records
+-- tenant_api_credentials                            0 records
+-- tenant_config                                     0 records
+-- tenant_email_domains                              0 records
+-- tenant_notification_routing                       0 records
+-- tenant_onboarding_settings                        1 records
+-- tenant_recovery_settings                          1 records
+-- tenant_resend_config                              0 records
+-- tenant_sender_addresses                           0 records
+-- tenant_slack_channel_mappings                     0 records
+-- tenant_slack_config                               0 records
+-- tenant_slack_notifications                        0 records
+-- tenant_slack_reports                              0 records
+-- tenant_slack_templates                            0 records
+-- tenant_slack_user_associations                    0 records
+-- tenant_slack_workspaces                           0 records
+-- tenant_sms_config                                 0 records
+-- tenant_sms_settings                               0 records
+-- tenant_stripe_config                              0 records
+-- tenant_user_notification_preferences              0 records
+-- tenant_users                                      0 records
+-- tenant_wise_config                                0 records
+-- thread_messages                                   0 records
+-- ticket_audit_log                                  0 records
+-- ticket_comments                                   0 records
+-- tiktok_ad_connections                             0 records
+-- topup_settings                                    1 records
+-- treasury_communications                           0 records
+-- treasury_draw_request_items                       0 records
+-- treasury_draw_requests                            0 records
+-- treasury_email_queue                              0 records
+-- treasury_receipts                                 0 records
+-- treasury_settings                                 1 records
+-- ugc_submissions                                   0 records
+-- user_memories                                     0 records
+-- variable_cost_config                              0 records
+-- vendor_payouts                                    0 records
+-- video_comments                                    0 records
+-- video_cta_buttons                                 0 records
+-- video_editor_activity                             0 records
+-- video_editor_captions                             0 records
+-- video_editor_projects                             0 records
+-- video_editor_renders                              0 records
+-- video_editor_scenes                               0 records
+-- video_folders                                     0 records
+-- video_permissions                                 0 records
+-- video_reactions                                   0 records
+-- video_scripts                                     0 records
+-- video_trim_jobs                                   0 records
+-- video_views                                       0 records
+-- videos                                            0 records
+-- w9_compliance_tracking                            0 records
+-- webhook_events                                    0 records
+-- webhook_registrations                             0 records
+-- wishlist_items                                    0 records
+-- wishlists                                         0 records
+-- withdrawal_requests                               0 records
+-- workflow_executions                               0 records
+-- workflow_rules                                    0 records
+
+-- Total records: 203

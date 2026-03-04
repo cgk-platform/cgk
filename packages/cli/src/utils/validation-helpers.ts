@@ -72,7 +72,7 @@ export function validateDomain(domain: string): boolean | string {
 
   // Check TLD length (2-63 characters)
   const tld = parts[parts.length - 1]
-  if (tld.length < 2 || tld.length > 63) {
+  if (!tld || tld.length < 2 || tld.length > 63) {
     return 'Invalid TLD (top-level domain). Example: .com, .io, .shop'
   }
 

@@ -6,7 +6,7 @@
  */
 
 import OpenAI from 'openai'
-import { sql } from '@cgk-platform/db'
+import { sql, withTenant } from '@cgk-platform/db'
 
 import type { KBArticleRow, KBArticleWithCategory, SearchOptions } from './types'
 import { logger } from '@cgk-platform/logging'
@@ -51,6 +51,7 @@ export async function generateArticleEmbedding(title: string, content: string): 
  * Generate and store embedding for a KB article (fire-and-forget safe)
  */
 export async function generateAndStoreArticleEmbedding(
+  tenantId: string,
   articleId: string,
   title: string,
   content: string
@@ -59,14 +60,21 @@ export async function generateAndStoreArticleEmbedding(
     const embedding = await generateArticleEmbedding(title, content)
     const vectorStr = `[${embedding.join(',')}]`
 
-    await sql`
-      UPDATE kb_articles
-      SET embedding = ${vectorStr}::public.vector
-      WHERE id = ${articleId}
-    `
+    await withTenant(
+      tenantId,
+      () =>
+        sql`
+        UPDATE kb_articles
+        SET embedding = ${vectorStr}::public.vector
+        WHERE id = ${articleId}
+      `
+    )
   } catch (err) {
     // Log but don't throw — embedding generation is non-critical
-    logger.error(`[kb-embeddings] Failed to generate embedding for article ${articleId}:`, err)
+    logger.error(
+      `[kb-embeddings] Failed to generate embedding for article ${articleId}:`,
+      err instanceof Error ? err : new Error(String(err))
+    )
   }
 }
 
@@ -83,10 +91,7 @@ export async function semanticSearchArticles(
   const embedding = await generateArticleEmbedding(query, '')
   const vectorStr = `[${embedding.join(',')}]`
 
-  const conditions: string[] = [
-    'a.embedding IS NOT NULL',
-    'a.is_published = true',
-  ]
+  const conditions: string[] = ['a.embedding IS NOT NULL', 'a.is_published = true']
   if (!options.includeInternal) {
     conditions.push('a.is_internal = false')
   }
@@ -122,7 +127,9 @@ export async function semanticSearchArticles(
 export async function hybridSearchArticles(
   query: string,
   options: SearchOptions & { minSimilarity?: number; rrfK?: number } = {}
-): Promise<Array<{ article: KBArticleWithCategory; score: number; ftsRank: number; similarity: number }>> {
+): Promise<
+  Array<{ article: KBArticleWithCategory; score: number; ftsRank: number; similarity: number }>
+> {
   const limit = options.limit ?? 10
   const minSimilarity = options.minSimilarity ?? 0.2
   const rffK = options.rrfK ?? 60 // standard RRF constant
@@ -199,16 +206,20 @@ export async function hybridSearchArticles(
 /**
  * Backfill embeddings for articles that don't have one yet
  */
-export async function backfillArticleEmbeddings(batchSize = 20): Promise<number> {
-  const result = await sql<{ id: string; title: string; content: string }>`
-    SELECT id, title, content FROM kb_articles
-    WHERE embedding IS NULL
-    LIMIT ${batchSize}
-  `
+export async function backfillArticleEmbeddings(tenantId: string, batchSize = 20): Promise<number> {
+  const result = await withTenant(
+    tenantId,
+    () =>
+      sql<{ id: string; title: string; content: string }>`
+      SELECT id, title, content FROM kb_articles
+      WHERE embedding IS NULL
+      LIMIT ${batchSize}
+    `
+  )
 
   let count = 0
   for (const row of result.rows) {
-    await generateAndStoreArticleEmbedding(row.id, row.title, row.content)
+    await generateAndStoreArticleEmbedding(tenantId, row.id, row.title, row.content)
     count++
   }
   return count
@@ -235,16 +246,20 @@ function rowToArticleWithCategory(row: KBArticleRow): KBArticleWithCategory {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     publishedAt: row.published_at,
-    category: row.category_id ? {
-      id: row.category_id,
-      slug: row.category_slug || '',
-      name: row.category_name || '',
-      icon: null,
-    } : null,
-    author: row.author_id ? {
-      id: row.author_id,
-      name: row.author_name || '',
-      email: row.author_email || '',
-    } : null,
+    category: row.category_id
+      ? {
+          id: row.category_id,
+          slug: row.category_slug || '',
+          name: row.category_name || '',
+          icon: null,
+        }
+      : null,
+    author: row.author_id
+      ? {
+          id: row.author_id,
+          name: row.author_name || '',
+          email: row.author_email || '',
+        }
+      : null,
   }
 }

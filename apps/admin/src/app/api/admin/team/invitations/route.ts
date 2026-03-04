@@ -38,11 +38,7 @@ export async function GET(request: Request) {
   }
 
   // Check permission to view invitations (uses team.view)
-  const permissionDenied = await checkPermissionOrRespond(
-    auth.userId,
-    tenantId,
-    'team.view'
-  )
+  const permissionDenied = await checkPermissionOrRespond(auth.userId, tenantId, 'team.view')
   if (permissionDenied) return permissionDenied
 
   const url = new URL(request.url)
@@ -65,11 +61,11 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     })
   } catch (error) {
-    logger.error('Error fetching invitations:', error instanceof Error ? error : new Error(String(error)))
-    return NextResponse.json(
-      { error: 'Failed to fetch invitations' },
-      { status: 500 }
+    logger.error(
+      'Error fetching invitations:',
+      error instanceof Error ? error : new Error(String(error))
     )
+    return NextResponse.json({ error: 'Failed to fetch invitations' }, { status: 500 })
   }
 }
 
@@ -131,10 +127,7 @@ export async function POST(request: Request) {
 
   // Non-owners cannot invite owners
   if (body.role === 'owner' && auth.role !== 'owner' && auth.role !== 'super_admin') {
-    return NextResponse.json(
-      { error: 'Only owners can invite new owners' },
-      { status: 403 }
-    )
+    return NextResponse.json({ error: 'Only owners can invite new owners' }, { status: 403 })
   }
 
   try {
@@ -161,7 +154,10 @@ export async function POST(request: Request) {
       message: `Invitation sent to ${body.email}`,
     })
   } catch (error) {
-    logger.error('Error creating invitation:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      'Error creating invitation:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     const message = error instanceof Error ? error.message : 'Failed to create invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -214,7 +210,7 @@ async function sendTeamInvitationEmail(
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${resendApiKey}`,
+      Authorization: `Bearer ${resendApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -227,7 +223,7 @@ async function sendTeamInvitationEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    logger.error('Failed to send invitation email:', error instanceof Error ? error : new Error(String(error)))
+    logger.error('Failed to send invitation email:', new Error(error))
     throw new Error('Failed to send invitation email')
   }
 }

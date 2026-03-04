@@ -52,10 +52,7 @@ export async function POST(request: Request) {
 
     if (!authToken) {
       logger.error('[Twilio Status Webhook] No auth token available for verification')
-      return NextResponse.json(
-        { error: 'Webhook verification not configured' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Webhook verification not configured' }, { status: 500 })
     }
 
     // Verify Twilio signature
@@ -65,17 +62,11 @@ export async function POST(request: Request) {
 
     if (!verifyTwilioSignature(authToken, signature, webhookUrl, body)) {
       logger.error('[Twilio Status Webhook] Invalid signature - request rejected')
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
     }
 
     if (!body.MessageSid || !body.MessageStatus) {
-      return NextResponse.json(
-        { error: 'Invalid webhook payload' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid webhook payload' }, { status: 400 })
     }
 
     // Check idempotency using MessageSid + Status combination
@@ -86,16 +77,13 @@ export async function POST(request: Request) {
     })
 
     if (isDuplicate) {
-      logger.info('[Twilio Status Webhook] Duplicate status update ignored:', idempotencyId)
+      logger.info('[Twilio Status Webhook] Duplicate status update ignored:', { idempotencyId })
       return NextResponse.json({ status: 'duplicate_ignored' })
     }
 
     // Validate From number exists
     if (!fromNumber) {
-      return NextResponse.json(
-        { error: 'Missing From number' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Missing From number' }, { status: 400 })
     }
 
     // Re-fetch tenantId for processing (already found during auth token lookup)
@@ -114,10 +102,10 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': result.contentType },
     })
   } catch (error) {
-    logger.error('Error handling status webhook:', error instanceof Error ? error : new Error(String(error)))
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    logger.error(
+      'Error handling status webhook:',
+      error instanceof Error ? error : new Error(String(error))
     )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

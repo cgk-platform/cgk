@@ -1,0 +1,13 @@
+{
+  "id": "ef25c728-8848-41cf-8268-a25affe57496",
+  "slug": "vitahustle",
+  "name": "VitaHustle",
+  "settings": {},
+  "shopify_store_domain": null,
+  "shopify_access_token_encrypted": null,
+  "stripe_account_id": null,
+  "stripe_customer_id": null,
+  "status": "active",
+  "created_at": "2026-03-03 05:16:13.529273+00",
+  "updated_at": "2026-03-03 05:16:13.529273+00"
+}

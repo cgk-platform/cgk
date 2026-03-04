@@ -1,0 +1,20 @@
+{
+  "id": "5cb87b13-3b13-4400-9542-53c8b8d12cb8",
+  "slug": "meliusly",
+  "name": "Meliusly",
+  "settings": {
+    "theme": {
+      "primaryColor": "#0268A0"
+    },
+    "features": {
+      "reviews": true
+    }
+  },
+  "shopify_store_domain": "meliusly.myshopify.com",
+  "shopify_access_token_encrypted": null,
+  "stripe_account_id": null,
+  "stripe_customer_id": null,
+  "status": "active",
+  "created_at": "2026-02-27 21:52:30.196607+00",
+  "updated_at": "2026-03-03 19:10:15.772132+00"
+}

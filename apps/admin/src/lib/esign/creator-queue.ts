@@ -92,7 +92,10 @@ export async function logToCreatorQueue(
     })
   } catch (error) {
     // Don't throw - this is supplementary logging
-    logger.error('Failed to log to creator queue:', error)
+    logger.error(
+      'Failed to log to creator queue:',
+      error instanceof Error ? error : new Error(String(error))
+    )
   }
 }
 

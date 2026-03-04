@@ -57,9 +57,7 @@ interface JobDefinition<T = unknown, R = unknown> {
   retry?: { maxAttempts?: number; backoff?: 'fixed' | 'exponential' }
 }
 
-function defineJob<T = unknown, R = unknown>(
-  definition: JobDefinition<T, R>
-): JobDefinition<T, R> {
+function defineJob<T = unknown, R = unknown>(definition: JobDefinition<T, R>): JobDefinition<T, R> {
   return {
     ...definition,
     options: {
@@ -402,7 +400,10 @@ export const sendEsignReminders = defineJob({
 
           sentCount++
         } catch (error) {
-          logger.error(`Failed to send reminder for document ${row.document_id}:`, error)
+          logger.error(
+            `Failed to send reminder for document ${row.document_id}:`,
+            error instanceof Error ? error : new Error(String(error))
+          )
         }
       }
 

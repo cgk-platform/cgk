@@ -8,10 +8,7 @@ import { withTenant } from '@cgk-platform/db'
 import { getArticleById, updateArticle, deleteArticle } from '@/lib/knowledge-base/db'
 import { logger } from '@cgk-platform/logging'
 
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -28,15 +25,15 @@ export async function GET(
     }
     return NextResponse.json({ article })
   } catch (err) {
-    logger.error('[kb/articles/:id] GET error:', err)
+    logger.error(
+      '[kb/articles/:id] GET error:',
+      err instanceof Error ? err : new Error(String(err))
+    )
     return NextResponse.json({ error: 'Failed to load article' }, { status: 500 })
   }
 }
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -63,21 +60,21 @@ export async function PATCH(
   }
 
   try {
-    const article = await withTenant(tenantSlug, () => updateArticle(id, body))
+    const article = await withTenant(tenantSlug, () => updateArticle(tenantSlug, id, body))
     if (!article) {
       return NextResponse.json({ error: 'Article not found' }, { status: 404 })
     }
     return NextResponse.json({ article })
   } catch (err) {
-    logger.error('[kb/articles/:id] PATCH error:', err)
+    logger.error(
+      '[kb/articles/:id] PATCH error:',
+      err instanceof Error ? err : new Error(String(err))
+    )
     return NextResponse.json({ error: 'Failed to update article' }, { status: 500 })
   }
 }
 
-export async function DELETE(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
 
@@ -91,7 +88,10 @@ export async function DELETE(
     await withTenant(tenantSlug, () => deleteArticle(id))
     return NextResponse.json({ success: true })
   } catch (err) {
-    logger.error('[kb/articles/:id] DELETE error:', err)
+    logger.error(
+      '[kb/articles/:id] DELETE error:',
+      err instanceof Error ? err : new Error(String(err))
+    )
     return NextResponse.json({ error: 'Failed to delete article' }, { status: 500 })
   }
 }

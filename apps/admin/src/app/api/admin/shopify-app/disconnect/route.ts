@@ -39,7 +39,7 @@ export async function DELETE() {
     try {
       await unregisterWebhooks(tenantId)
     } catch (error) {
-      logger.warn('[shopify-disconnect] Failed to unregister webhooks:', error)
+      logger.warn('[shopify-disconnect] Failed to unregister webhooks:', { error })
     }
 
     // Disconnect the store
@@ -52,7 +52,10 @@ export async function DELETE() {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('[shopify-disconnect] Error:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      '[shopify-disconnect] Error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })

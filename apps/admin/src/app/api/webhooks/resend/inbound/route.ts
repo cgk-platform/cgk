@@ -60,10 +60,7 @@ export async function POST(request: Request) {
 
   if (!isValidSvix && !isValidLegacy) {
     logger.error('Invalid webhook signature')
-    return NextResponse.json(
-      { error: 'Invalid signature' },
-      { status: 401 }
-    )
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
   // Parse payload
@@ -72,10 +69,7 @@ export async function POST(request: Request) {
     payload = JSON.parse(rawBody)
   } catch {
     logger.error('Invalid JSON payload')
-    return NextResponse.json(
-      { error: 'Invalid JSON' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
   // Check event type
@@ -90,16 +84,14 @@ export async function POST(request: Request) {
   }
 
   // Check idempotency - prevent duplicate processing
-  const eventId = (payload.data as { id?: string })?.id ||
-    (payload as { id?: string }).id ||
-    ''
+  const eventId = (payload.data as { id?: string })?.id || (payload as { id?: string }).id || ''
   if (eventId) {
     const isDuplicate = await checkAndMarkWebhook('resend', eventId, {
       type: eventType,
     })
 
     if (isDuplicate) {
-      logger.info('[Resend Webhook] Duplicate event ignored:', eventId)
+      logger.info('[Resend Webhook] Duplicate event ignored:', { eventId })
       return NextResponse.json({
         received: true,
         processed: false,
@@ -159,11 +151,7 @@ export async function POST(request: Request) {
 
     // Skip processing if auto-reply or spam
     if (!analysis.shouldProcess) {
-      await updateInboundLogStatus(
-        log.id,
-        'ignored',
-        analysis.reason
-      )
+      await updateInboundLogStatus(log.id, 'ignored', analysis.reason)
       return {
         received: true,
         processed: false,

@@ -156,7 +156,7 @@ export async function generatePdf(
         return { success: true, url: data.url }
       }
     } catch (error) {
-      logger.error('PDF API error:', error)
+      logger.error('PDF API error:', error instanceof Error ? error : new Error(String(error)))
     }
   }
 
@@ -528,7 +528,7 @@ export async function uploadPdf(
       })
       return { success: true, url: blob.url }
     } catch (error) {
-      logger.error('Blob upload error:', error)
+      logger.error('Blob upload error:', error instanceof Error ? error : new Error(String(error)))
     }
   }
 

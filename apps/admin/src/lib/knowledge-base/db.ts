@@ -87,7 +87,10 @@ export async function createCategory(data: CreateCategoryInput): Promise<KBCateg
   return rowToCategory(result.rows[0]!)
 }
 
-export async function updateCategory(categoryId: string, data: UpdateCategoryInput): Promise<KBCategory | null> {
+export async function updateCategory(
+  categoryId: string,
+  data: UpdateCategoryInput
+): Promise<KBCategory | null> {
   const current = await getCategoryById(categoryId)
   if (!current) return null
 
@@ -148,17 +151,21 @@ export function rowToArticleWithCategory(row: KBArticleRow): KBArticleWithCatego
   const article = rowToArticle(row)
   return {
     ...article,
-    category: row.category_id ? {
-      id: row.category_id,
-      slug: row.category_slug || '',
-      name: row.category_name || '',
-      icon: null, // Not included in join for performance
-    } : null,
-    author: row.author_id ? {
-      id: row.author_id,
-      name: row.author_name || '',
-      email: row.author_email || '',
-    } : null,
+    category: row.category_id
+      ? {
+          id: row.category_id,
+          slug: row.category_slug || '',
+          name: row.category_name || '',
+          icon: null, // Not included in join for performance
+        }
+      : null,
+    author: row.author_id
+      ? {
+          id: row.author_id,
+          name: row.author_name || '',
+          email: row.author_email || '',
+        }
+      : null,
   }
 }
 
@@ -178,7 +185,9 @@ export async function getArticles(filters: ArticleFilters): Promise<PaginatedArt
 
   if (filters.search) {
     paramIndex++
-    conditions.push(`(a.title ILIKE $${paramIndex} OR a.excerpt ILIKE $${paramIndex} OR a.slug ILIKE $${paramIndex})`)
+    conditions.push(
+      `(a.title ILIKE $${paramIndex} OR a.excerpt ILIKE $${paramIndex} OR a.slug ILIKE $${paramIndex})`
+    )
     values.push(`%${filters.search}%`)
   }
   if (filters.categoryId) {
@@ -219,13 +228,13 @@ export async function getArticles(filters: ArticleFilters): Promise<PaginatedArt
      ${whereClause}
      ORDER BY ${sortCol} ${sortDir} NULLS LAST
      LIMIT $${limitParam} OFFSET $${offsetParam}`,
-    values,
+    values
   )
 
   const countValues = values.slice(0, -2)
   const countResult = await sql.query(
     `SELECT COUNT(*) as count FROM kb_articles a ${whereClause}`,
-    countValues,
+    countValues
   )
 
   return {
@@ -264,7 +273,10 @@ export async function getArticleBySlug(slug: string): Promise<KBArticleWithCateg
   return result.rows[0] ? rowToArticleWithCategory(result.rows[0]) : null
 }
 
-export async function createArticle(data: CreateArticleInput): Promise<KBArticle> {
+export async function createArticle(
+  tenantId: string,
+  data: CreateArticleInput
+): Promise<KBArticle> {
   const publishedAt = data.isPublished ? new Date().toISOString() : null
   const tagsJson = JSON.stringify(data.tags || [])
 
@@ -293,12 +305,18 @@ export async function createArticle(data: CreateArticleInput): Promise<KBArticle
   const article = rowToArticle(result.rows[0]!)
 
   // Generate embedding async (fire-and-forget)
-  generateAndStoreArticleEmbedding(article.id, article.title, article.content).catch(() => {})
+  generateAndStoreArticleEmbedding(tenantId, article.id, article.title, article.content).catch(
+    () => {}
+  )
 
   return article
 }
 
-export async function updateArticle(articleId: string, data: UpdateArticleInput): Promise<KBArticle | null> {
+export async function updateArticle(
+  tenantId: string,
+  articleId: string,
+  data: UpdateArticleInput
+): Promise<KBArticle | null> {
   const current = await getArticleById(articleId)
   if (!current) return null
 
@@ -311,7 +329,8 @@ export async function updateArticle(articleId: string, data: UpdateArticleInput)
   const isPublished = data.isPublished ?? current.isPublished
   const isInternal = data.isInternal ?? current.isInternal
   const metaTitle = data.metaTitle !== undefined ? data.metaTitle : current.metaTitle
-  const metaDescription = data.metaDescription !== undefined ? data.metaDescription : current.metaDescription
+  const metaDescription =
+    data.metaDescription !== undefined ? data.metaDescription : current.metaDescription
 
   // Update published_at if transitioning to published
   let publishedAt = current.publishedAt
@@ -343,7 +362,9 @@ export async function updateArticle(articleId: string, data: UpdateArticleInput)
 
   // Re-generate embedding when title or content change
   if (updated && (data.title !== undefined || data.content !== undefined)) {
-    generateAndStoreArticleEmbedding(updated.id, updated.title, updated.content).catch(() => {})
+    generateAndStoreArticleEmbedding(tenantId, updated.id, updated.title, updated.content).catch(
+      () => {}
+    )
   }
 
   return updated
@@ -382,7 +403,10 @@ export async function unpublishArticle(articleId: string): Promise<KBArticle | n
 // Search Operations
 // =============================================================================
 
-export async function searchArticles(query: string, options: SearchOptions = {}): Promise<SearchResult[]> {
+export async function searchArticles(
+  query: string,
+  options: SearchOptions = {}
+): Promise<SearchResult[]> {
   const limit = options.limit ?? 10
   const conditions: string[] = ['a.is_published = true']
 
@@ -441,7 +465,10 @@ export async function searchArticlesHybrid(
   }
 }
 
-export async function getRelatedArticles(articleId: string, limit = 5): Promise<KBArticleWithCategory[]> {
+export async function getRelatedArticles(
+  articleId: string,
+  limit = 5
+): Promise<KBArticleWithCategory[]> {
   // Get related articles based on:
   // 1. Same category
   // 2. Matching tags
@@ -503,7 +530,10 @@ export async function incrementViewCount(articleId: string): Promise<void> {
   await sql`UPDATE kb_articles SET view_count = view_count + 1 WHERE id = ${articleId}`
 }
 
-export async function submitFeedback(articleId: string, feedback: FeedbackInput): Promise<KBArticleFeedback> {
+export async function submitFeedback(
+  articleId: string,
+  feedback: FeedbackInput
+): Promise<KBArticleFeedback> {
   const result = await sql<KBArticleFeedbackRow>`
     INSERT INTO kb_article_feedback (article_id, is_helpful, comment, visitor_id)
     VALUES (${articleId}, ${feedback.isHelpful}, ${feedback.comment || null}, ${feedback.visitorId || null})
@@ -526,7 +556,10 @@ export async function submitFeedback(articleId: string, feedback: FeedbackInput)
   }
 }
 
-export async function getArticleFeedback(articleId: string, limit = 50): Promise<KBArticleFeedback[]> {
+export async function getArticleFeedback(
+  articleId: string,
+  limit = 50
+): Promise<KBArticleFeedback[]> {
   const result = await sql<KBArticleFeedbackRow>`
     SELECT id, article_id, is_helpful, comment, visitor_id, created_at
     FROM kb_article_feedback
@@ -773,7 +806,10 @@ export async function getPublicCategories(): Promise<KBCategory[]> {
   return result.rows.map(rowToCategory)
 }
 
-export async function getPublicArticlesByCategory(categoryId: string, limit = 20): Promise<KBArticleWithCategory[]> {
+export async function getPublicArticlesByCategory(
+  categoryId: string,
+  limit = 20
+): Promise<KBArticleWithCategory[]> {
   const result = await sql<KBArticleRow>`
     SELECT a.id, a.slug, a.title, a.content, a.excerpt, a.category_id, a.tags,
            a.is_published, a.is_internal, a.view_count, a.helpful_count, a.not_helpful_count,

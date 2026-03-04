@@ -46,6 +46,103 @@ You are a senior software engineer focused on implementation excellence. You tur
 - Type check: `pnpm turbo typecheck`
 - Package manager: pnpm (never npm or yarn)
 
+## WordPress-Style Architecture Patterns
+
+**CRITICAL**: CGK Platform is a **template repository** (WordPress.org), NOT a multi-tenant SaaS (WordPress.com).
+
+### Self-Hosted Distribution
+
+When implementing features, remember:
+
+- ✅ Users fork and deploy to **THEIR infrastructure** (Vercel + Neon + Upstash)
+- ✅ Configuration-over-code approach (use `platform.config.ts`)
+- ✅ Single Vercel project contains ALL 8 apps (path-based routing)
+- ❌ NO shared infrastructure across users
+- ❌ NO platform-wide services or APIs
+- ❌ NO "upgrade plans" or platform pricing
+
+### Configuration-Driven Features
+
+**Prefer configuration over hardcoded values:**
+
+```typescript
+// ❌ WRONG - Hardcoded values
+const brandName = 'CGK Linens'
+const primaryColor = '#2B3E50'
+
+// ✅ CORRECT - Configuration-driven
+import { getTenantConfig } from '@/platform.config'
+
+const config = getTenantConfig(tenantSlug)
+const brandName = config.name
+const primaryColor = config.primaryColor
+```
+
+### Feature Flag Gating
+
+**Always check feature flags before rendering:**
+
+```typescript
+// ❌ WRONG - Always renders creator portal
+return <CreatorPortalPage />
+
+// ✅ CORRECT - Feature flag gating
+import { platformConfig } from '@/platform.config'
+
+if (!platformConfig.features.creatorPortal) {
+  return <FeatureDisabledMessage />
+}
+return <CreatorPortalPage />
+```
+
+### Tenant Export/Fork Workflow
+
+When implementing tenant-related features, consider:
+
+- Users may want to export tenants to separate forks
+- Brand assets must be in isolated directories (`public/brands/{slug}/`)
+- Tenant configuration must be portable (exportable as JSON)
+- Database exports should be self-contained (schema + data)
+
+### Anti-Patterns to Avoid
+
+1. **DON'T build shared platform services**
+
+   ```typescript
+   // ❌ WRONG
+   await sendToCGKPlatformAPI('user-data')
+
+   // ✅ CORRECT
+   await sendToUserOwnAnalytics('user-data')
+   ```
+
+2. **DON'T suggest multi-tenant SaaS patterns**
+
+   ```typescript
+   // ❌ WRONG - Suggests shared service
+   <button>Upgrade to Pro Plan - $49/month</button>
+
+   // ✅ CORRECT - User owns infrastructure
+   // No platform pricing UI
+   ```
+
+3. **DON'T use shared asset storage**
+
+   ```typescript
+   // ❌ WRONG
+   const logo = 'https://cgk-cdn.com/brands/my-brand/logo.png'
+
+   // ✅ CORRECT
+   const logo = await put('logo.png', file, {
+     token: process.env.BLOB_READ_WRITE_TOKEN, // User's token
+   })
+   ```
+
+### See Also
+
+- [.claude/knowledge-bases/wordpress-distribution-patterns/](../knowledge-bases/wordpress-distribution-patterns/) - Complete WordPress-style patterns
+- [platform.config.ts](../../platform.config.ts) - Configuration schema and examples
+
 ## Environment Variable Management
 
 When implementing features that require environment variables:

@@ -22,7 +22,8 @@ export async function GET(request: Request) {
   const search = url.searchParams.get('search') || ''
   const categoryId = url.searchParams.get('category') || ''
   const statusParam = url.searchParams.get('status')
-  const isPublished = statusParam === 'published' ? true : statusParam === 'draft' ? false : undefined
+  const isPublished =
+    statusParam === 'published' ? true : statusParam === 'draft' ? false : undefined
 
   try {
     const result = await withTenant(tenantSlug, () =>
@@ -37,9 +38,12 @@ export async function GET(request: Request) {
         dir: 'desc',
       })
     )
-    return NextResponse.json({ articles: result.rows.map(rowToArticleWithCategory), total: result.totalCount })
+    return NextResponse.json({
+      articles: result.rows.map(rowToArticleWithCategory),
+      total: result.totalCount,
+    })
   } catch (err) {
-    logger.error('[kb/articles] GET error:', err)
+    logger.error('[kb/articles] GET error:', err instanceof Error ? err : new Error(String(err)))
     return NextResponse.json({ error: 'Failed to load articles' }, { status: 500 })
   }
 }
@@ -74,7 +78,7 @@ export async function POST(request: Request) {
 
   try {
     const article = await withTenant(tenantSlug, () =>
-      createArticle({
+      createArticle(tenantSlug, {
         title: body.title!,
         content: body.content || '',
         excerpt: body.excerpt || undefined,
@@ -82,15 +86,15 @@ export async function POST(request: Request) {
         tags: body.tags || [],
         isPublished: body.isPublished ?? false,
         isInternal: body.isInternal ?? false,
-        slug: body.title!
-          .toLowerCase()
+        slug: body
+          .title!.toLowerCase()
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-|-$/g, ''),
       })
     )
     return NextResponse.json({ article }, { status: 201 })
   } catch (err) {
-    logger.error('[kb/articles] POST error:', err)
+    logger.error('[kb/articles] POST error:', err instanceof Error ? err : new Error(String(err)))
     return NextResponse.json({ error: 'Failed to create article' }, { status: 500 })
   }
 }

@@ -870,7 +870,7 @@ npx ts-node .claude/skills/vercel/index.ts quick:debug admin
 
 ---
 
-## 2. Knowledge Bases (9 Total)
+## 2. Knowledge Bases (10 Total)
 
 Knowledge bases are **reference documentation** for agents. They are NOT executable. Agents should reference these when working in their respective domains.
 
@@ -952,7 +952,35 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 
 ---
 
-### 2.4 figma-design-system
+### 2.4 wordpress-distribution-patterns
+
+**Domain**: Self-hosted portable platform architecture, WordPress.org-style distribution model, template repository patterns
+
+**Key Topics**:
+
+- ✅ WordPress.org vs WordPress.com comparison (self-hosted vs SaaS)
+- ✅ Template repository pattern (fork & deploy workflow)
+- ✅ Single Vercel project architecture (8 apps, path-based routing)
+- ✅ Configuration-over-code approach (`platform.config.ts` = `wp-config.php`)
+- ✅ Self-hosted infrastructure (user owns Vercel, Neon, Upstash)
+- ✅ One-click install process (5-10 minutes to live site)
+- ✅ Tenant export/fork system (separate brands to new deployments)
+- ✅ Docker removal and Vercel-native migration
+- ✅ Anti-patterns (what NOT to do)
+
+**When to Reference**:
+
+- Understanding CGK platform distribution model
+- Implementing user-facing features (avoid SaaS patterns)
+- Debugging deployment issues (user's infrastructure)
+- Planning new features (configuration vs code)
+- Explaining architecture to new developers
+
+**Documentation**: [.claude/knowledge-bases/wordpress-distribution-patterns/README.md](./knowledge-bases/wordpress-distribution-patterns/README.md)
+
+---
+
+### 2.5 figma-design-system
 
 **Domain**: Storefront development, tenant theming, block-based architecture, Figma → code workflow
 

@@ -168,7 +168,7 @@ async function fetchPageHtml(url: string): Promise<string> {
   } catch (err) {
     // Return minimal HTML for pages that can't be fetched
     // This allows the audit to continue with other pages
-    logger.warn(`Could not fetch ${url}:`, err)
+    logger.warn(`Could not fetch ${url}:`, { error: err })
     return `<!DOCTYPE html><html><head><title>Page Not Available</title></head><body></body></html>`
   }
 }

@@ -118,13 +118,7 @@ export async function POST(request: Request) {
       const result = await provider.getResult(jobId)
 
       // Save to database
-      await saveTranscriptionResult(
-        tenantId,
-        videoId,
-        result.text,
-        result.words,
-        result.chapters
-      )
+      await saveTranscriptionResult(tenantId, videoId, result.text, result.words, result.chapters)
 
       logger.info('[assemblyai-webhook] Transcription saved', {
         tenantId,
@@ -139,11 +133,11 @@ export async function POST(request: Request) {
         videoId,
       })
     } catch (err) {
-      logger.error('[assemblyai-webhook] Failed to process completion', {
-        tenantId,
-        videoId,
-        error: err instanceof Error ? err.message : 'Unknown error',
-      })
+      logger.error(
+        '[assemblyai-webhook] Failed to process completion',
+        err instanceof Error ? err : new Error(String(err)),
+        { tenantId, videoId }
+      )
 
       await failTranscription(
         tenantId,
@@ -152,11 +146,11 @@ export async function POST(request: Request) {
       )
     }
   } else if (status === 'error') {
-    logger.error('[assemblyai-webhook] Transcription failed', {
-      tenantId,
-      videoId,
-      error,
-    })
+    logger.error(
+      '[assemblyai-webhook] Transcription failed',
+      new Error(error || 'Transcription failed'),
+      { tenantId, videoId }
+    )
 
     await failTranscription(tenantId, videoId, error || 'Transcription failed')
   }

@@ -1,12 +1,14 @@
 /**
- * CGK Platform - Brand Configuration
+ * CGK Platform - Brand Configuration TEMPLATE
  *
- * This file contains brand-specific configuration for your deployment.
- * It is protected from upstream merges by .gitattributes (merge=ours).
+ * This is the TEMPLATE repository. Real tenant data has been exported to separate forks.
+ * This file contains example configuration only.
  *
- * Your deployment manages TWO brands (sister companies):
- * 1. CGK Linens (tenant_cgk_linens)
- * 2. Meliusly (tenant_meliusly)
+ * IMPORTANT: When forking for a new tenant:
+ * 1. Update deployment.name and deployment.organization
+ * 2. Update tenants array with your brand information
+ * 3. Update vercel.team with your Vercel team ID
+ * 4. Enable/disable features as needed
  */
 
 import { validatePlatformConfig } from '@cgk-platform/core'
@@ -16,58 +18,47 @@ const platformConfigDraft = {
    * Deployment Information
    */
   deployment: {
-    name: 'CGK Linens + Meliusly',
-    organization: 'CGK Linens LLC',
-    mode: 'multi-tenant', // This deployment manages 2 brands
+    name: process.env.COMPANY_NAME || 'My Company',
+    organization: process.env.COMPANY_NAME || 'My Organization',
+    mode: 'single-tenant', // Change to 'multi-tenant' if managing multiple brands
   },
 
   /**
    * Tenants/Brands in this deployment
    * Each tenant gets its own schema in the shared database
+   *
+   * TEMPLATE EXAMPLE - Replace with your brand data
    */
   tenants: [
     {
-      slug: 'cgk-linens',
-      name: 'CGK Linens',
-      schema: 'tenant_cgk_linens',
-      primaryColor: '#2B3E50', // Navy
-      secondaryColor: '#FFB81C', // Gold
-      logo: '/brands/cgk-linens/logo.svg',
-      domain: 'cgklinens.com',
+      slug: process.env.DEFAULT_TENANT_SLUG || 'my-brand',
+      name: process.env.NEXT_PUBLIC_SITE_NAME || 'My Brand',
+      schema: `tenant_${process.env.DEFAULT_TENANT_SLUG || 'my_brand'}`,
+      primaryColor: process.env.PRIMARY_COLOR || '#0268A0',
+      secondaryColor: process.env.SECONDARY_COLOR || '#6ABFEF',
+      logo: '/brands/my-brand/logo.svg',
+      domain: process.env.BRAND_DOMAIN || 'mybrand.com',
       apps: {
-        storefront: 'shop.cgklinens.com',
-        admin: 'admin.cgklinens.com',
-      },
-    },
-    {
-      slug: 'meliusly',
-      name: 'Meliusly',
-      schema: 'tenant_meliusly',
-      primaryColor: '#000000', // Black
-      secondaryColor: '#FFFFFF', // White
-      logo: '/brands/meliusly/logo.svg',
-      domain: 'meliusly.com',
-      apps: {
-        storefront: 'shop.meliusly.com',
-        admin: 'admin.meliusly.com',
+        storefront: process.env.NEXT_PUBLIC_STOREFRONT_URL || 'shop.mybrand.com',
+        admin: process.env.NEXT_PUBLIC_ADMIN_URL || 'admin.mybrand.com',
       },
     },
   ],
 
   /**
    * Vercel Configuration
-   * All apps deployed under single Vercel team
+   * Update with your Vercel team and project names
    */
   vercel: {
-    team: 'cgk-linens-88e79683',
+    team: process.env.VERCEL_TEAM || 'your-team-id',
     projects: [
-      'cgk-admin',
-      'cgk-storefront',
-      'cgk-shopify-app',
-      'cgk-orchestrator',
-      'cgk-creator-portal',
-      'cgk-contractor-portal',
-      'cgk-mcp-server',
+      `${process.env.DEFAULT_TENANT_SLUG || 'my-brand'}-admin`,
+      `${process.env.DEFAULT_TENANT_SLUG || 'my-brand'}-storefront`,
+      `${process.env.DEFAULT_TENANT_SLUG || 'my-brand'}-shopify-app`,
+      `${process.env.DEFAULT_TENANT_SLUG || 'my-brand'}-orchestrator`,
+      `${process.env.DEFAULT_TENANT_SLUG || 'my-brand'}-creator-portal`,
+      `${process.env.DEFAULT_TENANT_SLUG || 'my-brand'}-contractor-portal`,
+      `${process.env.DEFAULT_TENANT_SLUG || 'my-brand'}-mcp-server`,
     ],
   },
 
@@ -84,17 +75,18 @@ const platformConfigDraft = {
   /**
    * Feature Flags
    * Control which features are enabled for this deployment
+   * Enable only what you need to reduce complexity
    */
   features: {
-    multiTenant: true, // Supports multiple brands
+    multiTenant: false, // Set to true if managing multiple brands
     shopifyIntegration: true,
     stripeConnect: true,
-    wisePayments: true,
+    wisePayments: false, // Enable if you need international payments
     creatorPortal: true,
     contractorPortal: true,
-    videoTranscription: true,
-    aiFeatures: true,
-    analyticsIntegrations: true,
+    videoTranscription: false, // Enable if using video content
+    aiFeatures: false, // Enable if using AI/LLM features
+    analyticsIntegrations: false, // Enable if using Google/Meta/TikTok integrations
   },
 } as const
 

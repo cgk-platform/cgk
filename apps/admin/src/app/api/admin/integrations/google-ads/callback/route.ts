@@ -16,10 +16,7 @@ export async function GET(req: Request) {
 
   // Handle OAuth errors
   if (error) {
-    logger.error(
-      'Google Ads OAuth error:',
-      error instanceof Error ? error : new Error(String(error))
-    )
+    logger.error('Google Ads OAuth error:', new Error(error))
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(error)}`)
   }
 

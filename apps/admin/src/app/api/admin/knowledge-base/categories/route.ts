@@ -20,7 +20,7 @@ export async function GET() {
     const categories = await withTenant(tenantSlug, () => getCategories())
     return NextResponse.json({ categories })
   } catch (err) {
-    logger.error('[kb/categories] GET error:', err)
+    logger.error('[kb/categories] GET error:', err instanceof Error ? err : new Error(String(err)))
     return NextResponse.json({ categories: [] })
   }
 }

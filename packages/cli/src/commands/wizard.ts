@@ -125,7 +125,13 @@ export const wizardCommand = new Command('wizard')
         // Custom configuration - ask all questions
         logger.info(chalk.cyan('\n📋 Custom Configuration - Answer the following questions:\n'))
 
-        const customAnswers = await inquirer.prompt([
+        const customAnswers = await inquirer.prompt<{
+          commerceProvider: 'shopify' | 'custom'
+          storefrontType?: 'headless-react' | 'shopify-liquid'
+          checkoutProvider: 'shopify' | 'stripe'
+          cacheProducts: boolean
+          multiTenant: boolean
+        }>([
           {
             type: 'list',
             name: 'commerceProvider',
@@ -195,7 +201,9 @@ export const wizardCommand = new Command('wizard')
         answers = {
           useCase,
           commerceProvider: customAnswers.commerceProvider,
-          storefrontType: customAnswers.storefrontType || 'headless-react',
+          storefrontType: (customAnswers.storefrontType || 'headless-react') as
+            | 'headless-react'
+            | 'shopify-liquid',
           checkoutProvider: customAnswers.checkoutProvider,
           cacheProducts: customAnswers.cacheProducts,
           multiTenant: customAnswers.multiTenant,

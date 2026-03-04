@@ -11,10 +11,7 @@ import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { logger } from '@cgk-platform/logging'
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const headersList = await headers()
   const tenantId = headersList.get('x-tenant-id')
@@ -31,11 +28,7 @@ export async function POST(
   }
 
   // Check permission to invite team members (resending uses invite permission)
-  const permissionDenied = await checkPermissionOrRespond(
-    auth.userId,
-    tenantId,
-    'team.invite'
-  )
+  const permissionDenied = await checkPermissionOrRespond(auth.userId, tenantId, 'team.invite')
   if (permissionDenied) return permissionDenied
 
   try {
@@ -55,7 +48,10 @@ export async function POST(
       message: `Invitation resent to ${invitation.email}`,
     })
   } catch (error) {
-    logger.error('Error resending invitation:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      'Error resending invitation:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     const message = error instanceof Error ? error.message : 'Failed to resend invitation'
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -102,7 +98,7 @@ async function sendResendInvitationEmail(
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${resendApiKey}`,
+      Authorization: `Bearer ${resendApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -115,7 +111,7 @@ async function sendResendInvitationEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    logger.error('Failed to send invitation email:', error instanceof Error ? error : new Error(String(error)))
+    logger.error('Failed to send invitation email:', new Error(error))
     throw new Error('Failed to send invitation email')
   }
 }

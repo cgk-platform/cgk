@@ -42,10 +42,7 @@ export interface EmailTemplateVariables {
 /**
  * Render email template with variables
  */
-export function renderEmailTemplate(
-  template: string,
-  variables: EmailTemplateVariables
-): string {
+export function renderEmailTemplate(template: string, variables: EmailTemplateVariables): string {
   let result = template
   for (const [key, value] of Object.entries(variables)) {
     result = result.replace(new RegExp(`{{${key}}}`, 'g'), value)
@@ -126,7 +123,8 @@ export async function renderGiftCardEmail(
   storeUrl: string
 ): Promise<RenderedEmail> {
   const variables: EmailTemplateVariables = {
-    customer_name: transaction.customer_name || transaction.customer_email.split('@')[0] || 'Customer',
+    customer_name:
+      transaction.customer_name || transaction.customer_email.split('@')[0] || 'Customer',
     customer_email: transaction.customer_email,
     amount: formatMoney(transaction.amount_cents),
     order_name: transaction.shopify_order_name,
@@ -166,9 +164,8 @@ export async function sendEmail(
 
   try {
     // Import Resend client dynamically
-    const { getTenantResendClient, getTenantResendSenderConfig } = await import(
-      '@cgk-platform/integrations'
-    )
+    const { getTenantResendClient, getTenantResendSenderConfig } =
+      await import('@cgk-platform/integrations')
 
     // Get tenant's Resend client
     const resend = await getTenantResendClient(tenantId)
@@ -215,7 +212,7 @@ export async function sendEmail(
       messageId: result.data.id,
     }
   } catch (error) {
-    logger.error('sendEmail error:', error)
+    logger.error('sendEmail error:', error instanceof Error ? error : new Error(String(error)))
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to send email',

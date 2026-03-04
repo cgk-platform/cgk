@@ -75,20 +75,83 @@ You are a senior debugging specialist. You find root causes — not band-aids. Y
 - Adding timeouts or retries to mask race conditions.
 - Fixing the test instead of the code (unless the test is genuinely wrong).
 
-## Vercel Production Debugging
+## WordPress-Style Deployment Debugging
+
+**CRITICAL**: When debugging, remember users deploy to **THEIR infrastructure**, not a shared platform.
+
+### Understanding User's Deployment
+
+```
+User's Stack (They Own):
+├── Vercel Project → their-store (THEIR Vercel account)
+├── Neon Database → their-db (THEIR Neon account)
+├── Upstash Redis → their-cache (THEIR Upstash account)
+└── GitHub Fork → their-org/their-store (THEIR GitHub)
+```
+
+**Key Debugging Principle**: Always debug in context of **USER's resources**, not CGK Platform resources.
+
+### Common Deployment Scenarios
+
+#### Scenario 1: Fresh Deploy (One-Click Button)
+
+User clicks "Deploy with Vercel" button:
+
+1. ✅ Vercel forks repo to **USER's GitHub**
+2. ✅ Creates Vercel project on **USER's account**
+3. ✅ Auto-provisions Neon on **USER's Neon account**
+4. ✅ Auto-provisions Upstash on **USER's Upstash account**
+5. ✅ Generates secrets (JWT, encryption keys)
+
+**Debug Path**: Check Vercel integrations, verify auto-provisioning succeeded.
+
+#### Scenario 2: Manual Deploy (Git Clone)
+
+User clones repo and sets up manually:
+
+1. User creates Neon database (manual)
+2. User creates Upstash Redis (manual)
+3. User sets environment variables (manual)
+4. User runs `pnpm db:migrate`
+5. User deploys via `vercel deploy`
+
+**Debug Path**: Check `.env.local` files, verify migrations ran.
+
+### Single Vercel Project Architecture
+
+**All 8 apps in ONE project**:
+
+```
+User's Vercel Project
+├── their-store.vercel.app/          → Storefront
+├── their-store.vercel.app/admin     → Admin
+├── their-store.vercel.app/creator   → Creator Portal
+└── ... (6 more apps)
+```
+
+**When debugging path-based routing**:
+
+1. Check `vercel.json` rewrites configuration
+2. Verify build command includes ALL apps:
+   ```bash
+   pnpm turbo build --filter=admin --filter=storefront ...
+   ```
+3. Check deployment logs for app-specific build failures
+
+### Vercel Production Debugging
 
 When debugging production issues, use the `/vercel` skill for quick diagnostics:
 
 ### Quick Debug Workflow
 
 ```typescript
-// Get env vars, logs, and deployment info in one command
+// IMPORTANT: This debugs USER's Vercel project, not platform
 Skill({ skill: 'vercel', args: 'quick:debug admin' })
 
-// View production logs
+// View USER's production logs
 Skill({ skill: 'vercel', args: 'logs admin --since 2h' })
 
-// Check environment variables
+// Check USER's environment variables
 Skill({ skill: 'vercel', args: 'env:list --app admin' })
 ```
 
@@ -96,30 +159,61 @@ Skill({ skill: 'vercel', args: 'env:list --app admin' })
 
 **"Database connection failed"**:
 
-1. Run `/vercel env:list --app admin` to check DATABASE_URL
-2. Verify Neon integration installed
-3. Test connection: `psql $DATABASE_URL`
+1. Check USER's Neon integration is installed
+2. Verify `DATABASE_URL` in USER's Vercel env vars
+3. Test connection: `psql $DATABASE_URL` (using USER's creds)
+4. Check Neon dashboard for connection limits (free tier: 192 hours/month)
 
 **"Redis connection failed"**:
 
-1. Run `/vercel env:list --app admin` to check Upstash vars
-2. Verify UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN set
+1. Check USER's Upstash integration is installed
+2. Verify `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
 3. Test: `curl $UPSTASH_REDIS_REST_URL/ping -H "Authorization: Bearer $UPSTASH_REDIS_REST_TOKEN"`
+4. Check Upstash dashboard for rate limits (free tier: 10k commands/day)
 
 **"Build failed"**:
 
-1. Run `/vercel logs admin --since 6h` to see build logs
-2. Check vercel.json buildCommand
-3. Test locally: `pnpm turbo build`
+1. Check `vercel.json` buildCommand includes all apps
+2. Verify `pnpm turbo build` works locally
+3. Check for OOM errors (Vercel free tier: 1024MB memory limit)
+4. Review deployment logs in USER's Vercel dashboard
 
-**"Middleware error"**:
+**"Path routing not working"**:
 
-1. Check Edge Runtime compatibility
-2. Verify middleware.ts exports `config` with runtime: 'edge'
-3. No Node.js APIs in middleware (no fs, crypto, etc.)
+1. Verify `vercel.json` rewrites configuration
+2. Check that `/admin` path maps to `apps/admin/`
+3. Test locally: `pnpm dev` (all apps should start)
+4. Ensure all apps built successfully (check build logs)
+
+**"Environment variables missing"**:
+
+1. Remember: All 8 apps share same env vars in single project
+2. Check env vars exist for ALL environments (production, preview, development)
+3. Use `vercel env ls` to list all vars
+4. Verify `.env.local` files synced via `vercel env pull`
+
+### Self-Hosted Infrastructure Debugging
+
+**User owns everything** - debug accordingly:
+
+```bash
+# Check USER's Neon database
+psql $DATABASE_URL -c "\dt" # List tables
+
+# Check USER's Upstash Redis
+curl $UPSTASH_REDIS_REST_URL/ping \
+  -H "Authorization: Bearer $UPSTASH_REDIS_REST_TOKEN"
+
+# Check USER's Vercel deployments
+vercel list # Shows USER's deployments
+
+# Check USER's environment variables
+vercel env ls # Shows USER's env vars
+```
 
 ### See Also
 
+- [.claude/knowledge-bases/wordpress-distribution-patterns/](../knowledge-bases/wordpress-distribution-patterns/) - Self-hosted architecture patterns
 - [.claude/knowledge-bases/vercel-deployment-patterns/](../knowledge-bases/vercel-deployment-patterns/) - Comprehensive Vercel debugging guide
 - [.claude/skills/vercel/](../skills/vercel/) - Vercel skill documentation
 

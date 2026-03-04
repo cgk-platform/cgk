@@ -46,7 +46,9 @@ export class InternalReviewProvider implements ReviewProviderInterface {
     await db.deleteReviewResponse(this.tenantSlug, reviewId)
   }
 
-  async getQuestions(filters: QuestionFilters): Promise<{ rows: ProductQuestion[]; totalCount: number }> {
+  async getQuestions(
+    filters: QuestionFilters
+  ): Promise<{ rows: ProductQuestion[]; totalCount: number }> {
     return db.getQuestions(this.tenantSlug, filters)
   }
 
@@ -70,7 +72,7 @@ export class YotpoReviewProvider implements ReviewProviderInterface {
 
   constructor(
     private tenantSlug: string,
-    credentials: YotpoCredentials,
+    credentials: YotpoCredentials
   ) {
     this.credentials = credentials
   }
@@ -106,7 +108,9 @@ export class YotpoReviewProvider implements ReviewProviderInterface {
     await db.deleteReviewResponse(this.tenantSlug, reviewId)
   }
 
-  async getQuestions(filters: QuestionFilters): Promise<{ rows: ProductQuestion[]; totalCount: number }> {
+  async getQuestions(
+    filters: QuestionFilters
+  ): Promise<{ rows: ProductQuestion[]; totalCount: number }> {
     return db.getQuestions(this.tenantSlug, filters)
   }
 
@@ -117,13 +121,13 @@ export class YotpoReviewProvider implements ReviewProviderInterface {
   async syncFromProvider(): Promise<{ imported: number; updated: number; errors: number }> {
     // Would fetch all reviews from Yotpo and sync to local database
     // Implementation would use Yotpo's Reviews API
-    logger.info('Syncing from Yotpo...', this.credentials.app_key)
+    logger.info('Syncing from Yotpo...', { appKey: this.credentials.app_key })
     return { imported: 0, updated: 0, errors: 0 }
   }
 
   async pushToProvider(review: Review): Promise<void> {
     // Would push a review to Yotpo
-    logger.info('Pushing review to Yotpo...', review.id)
+    logger.info('Pushing review to Yotpo...', { reviewId: review.id })
   }
 }
 
@@ -133,9 +137,7 @@ export class YotpoReviewProvider implements ReviewProviderInterface {
 
 export type ReviewProviderType = 'internal' | 'yotpo'
 
-export async function getReviewProvider(
-  tenantSlug: string,
-): Promise<ReviewProviderInterface> {
+export async function getReviewProvider(tenantSlug: string): Promise<ReviewProviderInterface> {
   const settings = await db.getSettings(tenantSlug)
 
   if (settings.provider === 'yotpo' && settings.provider_credentials) {

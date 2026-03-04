@@ -91,17 +91,23 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     // Check signer status
     if (signer.status === 'signed') {
-      return NextResponse.json({
-        error: 'This document has already been signed',
-        status: 'signed',
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'This document has already been signed',
+          status: 'signed',
+        },
+        { status: 400 }
+      )
     }
 
     if (signer.status === 'declined') {
-      return NextResponse.json({
-        error: 'This document has been declined',
-        status: 'declined',
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'This document has been declined',
+          status: 'declined',
+        },
+        { status: 400 }
+      )
     }
 
     // Get document
@@ -121,28 +127,38 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     // Check document status
     if (document.status === 'voided') {
-      return NextResponse.json({
-        error: 'This document has been voided',
-        status: 'voided',
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'This document has been voided',
+          status: 'voided',
+        },
+        { status: 400 }
+      )
     }
 
     if (document.status === 'expired') {
-      return NextResponse.json({
-        error: 'This document has expired',
-        status: 'expired',
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'This document has expired',
+          status: 'expired',
+        },
+        { status: 400 }
+      )
     }
 
     if (document.expires_at && new Date(document.expires_at as string) < new Date()) {
-      return NextResponse.json({
-        error: 'This document has expired',
-        status: 'expired',
-      }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'This document has expired',
+          status: 'expired',
+        },
+        { status: 400 }
+      )
     }
 
     // Mark as viewed if first time
-    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined
+    const ipAddress =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined
     const userAgent = request.headers.get('user-agent') || undefined
 
     if (!signer.viewed_at) {
@@ -189,11 +205,11 @@ export async function GET(request: Request, { params }: RouteParams) {
       })),
     })
   } catch (error) {
-    logger.error('Error loading signing session', { error })
-    return NextResponse.json(
-      { error: 'Failed to load signing session' },
-      { status: 500 }
+    logger.error(
+      'Error loading signing session',
+      error instanceof Error ? error : new Error(String(error))
     )
+    return NextResponse.json({ error: 'Failed to load signing session' }, { status: 500 })
   }
 }
 
@@ -228,13 +244,21 @@ export async function POST(request: Request, { params }: RouteParams) {
     const body = await request.json()
     const { action, fields, signature, declineReason } = body
 
-    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined
+    const ipAddress =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined
     const userAgent = request.headers.get('user-agent') || undefined
 
     // Handle decline
     if (action === 'decline') {
       await markSignerDeclined(tenantSlug, signer.id, declineReason, ipAddress, userAgent)
-      await logDocumentDeclined(tenantSlug, signer.document_id, signer.id, declineReason, ipAddress, userAgent)
+      await logDocumentDeclined(
+        tenantSlug,
+        signer.document_id,
+        signer.id,
+        declineReason,
+        ipAddress,
+        userAgent
+      )
 
       return NextResponse.json({
         success: true,
@@ -280,7 +304,8 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (allSigned) {
       // Get document file URL for signed version (in production, generate signed PDF)
       const document = await withTenant(tenantSlug, async () => {
-        const result = await sql`SELECT file_url FROM esign_documents WHERE id = ${signer.document_id}`
+        const result =
+          await sql`SELECT file_url FROM esign_documents WHERE id = ${signer.document_id}`
         return result.rows[0]
       })
 
@@ -288,7 +313,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       await markDocumentCompleted(
         tenantSlug,
         signer.document_id,
-        document?.file_url as string || ''
+        (document?.file_url as string) || ''
       )
     }
 
@@ -298,10 +323,10 @@ export async function POST(request: Request, { params }: RouteParams) {
       allComplete: allSigned,
     })
   } catch (error) {
-    logger.error('Error processing signature', { error })
-    return NextResponse.json(
-      { error: 'Failed to process signature' },
-      { status: 500 }
+    logger.error(
+      'Error processing signature',
+      error instanceof Error ? error : new Error(String(error))
     )
+    return NextResponse.json({ error: 'Failed to process signature' }, { status: 500 })
   }
 }

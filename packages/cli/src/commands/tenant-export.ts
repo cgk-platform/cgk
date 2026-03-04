@@ -1,15 +1,17 @@
-import { exec } from 'child_process'
 import path from 'path'
-import { promisify } from 'util'
 
 import chalk from 'chalk'
 import { Command } from 'commander'
-import fs from 'fs-extra'
+import inquirer from 'inquirer'
 import ora from 'ora'
 import { logger } from '@cgk-platform/logging'
 
-
-const execAsync = promisify(exec)
+import {
+  exportTenantData,
+  exportToDirectory,
+  createGitHubRepo,
+  setupVercelProject,
+} from '../utils/tenant-export-helpers.js'
 
 /**
  * Validate tenant slug format
@@ -19,37 +21,19 @@ function isValidSlug(slug: string): boolean {
 }
 
 /**
- * Get the list of tables in a tenant schema
- */
-async function getTenantTables(slug: string): Promise<string[]> {
-  const schemaName = `tenant_${slug}`
-
-  try {
-    const db = await import('@cgk-platform/db')
-    const result = await db.sql<{ table_name: string }>`
-      SELECT table_name
-      FROM information_schema.tables
-      WHERE table_schema = ${schemaName}
-        AND table_type = 'BASE TABLE'
-      ORDER BY table_name
-    `
-    return result.rows.map((r) => r.table_name)
-  } catch (error) {
-    throw new Error(`Failed to get tables: ${error instanceof Error ? error.message : String(error)}`)
-  }
-}
-
-/**
  * tenant:export command
- * Exports tenant data to a SQL file using pg_dump
+ * Exports tenant to standalone repository (WordPress-style portability)
  */
 export const tenantExportCommand = new Command('tenant:export')
-  .description('Export tenant data to SQL file')
+  .description('Export tenant to standalone repository (WordPress-style)')
   .argument('<slug>', 'Tenant slug to export')
-  .option('-o, --output <file>', 'Output file path')
-  .option('--data-only', 'Export data only (no schema)')
-  .option('--schema-only', 'Export schema only (no data)')
-  .option('--dry-run', 'Show what would be exported without creating file')
+  .option('--fork', 'Create GitHub repository and Vercel project')
+  .option('--github-token <token>', 'GitHub personal access token')
+  .option('--vercel-token <token>', 'Vercel API token')
+  .option('--org <org>', 'GitHub organization or username')
+  .option('--repo-name <name>', 'GitHub repository name (default: tenant-slug)')
+  .option('-o, --output <dir>', 'Output directory (default: ./exports/<slug>)')
+  .option('--dry-run', 'Show what would be exported without executing')
   .action(async (slug: string, options) => {
     const spinner = ora()
 
@@ -57,167 +41,181 @@ export const tenantExportCommand = new Command('tenant:export')
     if (!isValidSlug(slug)) {
       logger.info(chalk.red('\n[ERROR] Invalid tenant slug'))
       logger.info(
-        chalk.dim(
-          '   Slug must be lowercase alphanumeric with underscores only (e.g., my_brand)'
-        )
+        chalk.dim('   Slug must be lowercase alphanumeric with underscores only (e.g., my_brand)')
       )
       process.exit(1)
     }
 
-    const schemaName = `tenant_${slug}`
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
-    const defaultFilename = `${slug}-export-${timestamp}.sql`
-    const output = options.output || defaultFilename
+    const defaultOutputDir = path.join(process.cwd(), 'exports', slug)
+    const outputDir = options.output || defaultOutputDir
 
-    logger.info(chalk.cyan('\n[EXPORT] Tenant Export\n'))
+    logger.info(chalk.cyan('\n[EXPORT] Tenant Export (WordPress-style)\n'))
     logger.info(`  Tenant: ${chalk.bold(slug)}`)
-    logger.info(`  Schema: ${chalk.bold(schemaName)}`)
-    logger.info(`  Output: ${chalk.bold(output)}`)
-
-    if (options.dataOnly && options.schemaOnly) {
-      logger.info(chalk.red('\n[ERROR] Cannot use both --data-only and --schema-only'))
-      process.exit(1)
-    }
-
-    // Check POSTGRES_URL (Vercel/Neon) or DATABASE_URL
-    const databaseUrl = process.env.POSTGRES_URL || process.env.DATABASE_URL
-    if (!databaseUrl) {
-      logger.info(chalk.red('\n[ERROR] POSTGRES_URL not set'))
-      logger.info(chalk.dim('   Run: npx @cgk-platform/cli setup:database'))
-      process.exit(1)
-    }
+    logger.info(`  Output: ${chalk.bold(outputDir)}`)
+    logger.info(
+      `  Mode: ${chalk.bold(options.fork ? 'Fork to GitHub + Vercel' : 'Local export only')}`
+    )
+    logger.info('')
 
     try {
-      // Check if tenant schema exists
-      spinner.start('Checking tenant schema...')
-      const migrations = await import('@cgk-platform/db/migrations')
-      const exists = await migrations.tenantSchemaExists(slug)
+      // Step 1: Export tenant data from database
+      spinner.start('Fetching tenant data from database...')
+      const tenantData = await exportTenantData(slug)
+      spinner.succeed(
+        `Fetched tenant data: ${tenantData.tableCount} tables, ${tenantData.totalRecords.toLocaleString()} records`
+      )
 
-      if (!exists) {
-        spinner.fail(`Tenant schema "${schemaName}" does not exist`)
-        process.exit(1)
-      }
-      spinner.succeed('Tenant schema found')
-
-      // Get list of tables
-      spinner.start('Getting table list...')
-      const tables = await getTenantTables(slug)
-      spinner.succeed(`Found ${tables.length} tables`)
-
+      // Show summary
       logger.info('')
-      logger.info(chalk.bold('  Tables to export:'))
-      for (const table of tables) {
-        logger.info(chalk.dim(`    - ${table}`))
+      logger.info(chalk.bold('  Organization:'))
+      logger.info(chalk.dim(`    Name: ${tenantData.organization.name}`))
+      logger.info(chalk.dim(`    Status: ${tenantData.organization.status}`))
+      if (tenantData.organization.shopify_store_domain) {
+        logger.info(chalk.dim(`    Shopify: ${tenantData.organization.shopify_store_domain}`))
+      }
+      if (tenantData.organization.stripe_account_id) {
+        logger.info(chalk.dim(`    Stripe: ${tenantData.organization.stripe_account_id}`))
       }
       logger.info('')
 
       if (options.dryRun) {
-        logger.info(chalk.yellow('  DRY RUN - No file will be created\n'))
-        logger.info(chalk.dim('  Would execute pg_dump with options:'))
-        logger.info(chalk.dim(`    --schema=${schemaName}`))
-        if (options.dataOnly) {
-          logger.info(chalk.dim('    --data-only'))
-        }
-        if (options.schemaOnly) {
-          logger.info(chalk.dim('    --schema-only'))
-        }
+        logger.info(chalk.yellow('  DRY RUN - No changes will be made\n'))
+        logger.info(chalk.dim('  Would export to:'))
+        logger.info(chalk.dim(`    Directory: ${outputDir}`))
+        logger.info(
+          chalk.dim(
+            `    Files: organization.json, tenant-data.json, platform.config.ts, migration.sql, .env.example`
+          )
+        )
         logger.info('')
+
+        if (options.fork) {
+          logger.info(chalk.dim('  Would create:'))
+          logger.info(
+            chalk.dim(`    GitHub repo: ${options.org || '<org>'}/${options.repoName || slug}`)
+          )
+          logger.info(chalk.dim(`    Vercel project: ${options.repoName || slug}`))
+          logger.info('')
+        }
+
         return
       }
 
-      // Build pg_dump command
-      spinner.start('Exporting tenant data...')
+      // Step 2: Export to directory
+      spinner.start('Exporting to directory...')
+      await exportToDirectory({
+        tenantData,
+        outputDir,
+        includeSecrets: false, // Never include encrypted secrets in exports
+      })
+      spinner.succeed(`Exported to directory: ${outputDir}`)
 
-      const pgDumpArgs = [
-        'pg_dump',
-        `--schema=${schemaName}`,
-        '--no-owner',
-        '--no-privileges',
-      ]
-
-      if (options.dataOnly) {
-        pgDumpArgs.push('--data-only')
-      }
-      if (options.schemaOnly) {
-        pgDumpArgs.push('--schema-only')
-      }
-
-      // Parse database URL for pg_dump
-      const url = new URL(databaseUrl)
-      const host = url.hostname
-      const port = url.port || '5432'
-      const database = url.pathname.slice(1) // Remove leading slash
-      const username = url.username
-
-      pgDumpArgs.push(`--host=${host}`)
-      pgDumpArgs.push(`--port=${port}`)
-      pgDumpArgs.push(`--username=${username}`)
-      pgDumpArgs.push(`--dbname=${database}`)
-
-      // Set PGPASSWORD environment variable for pg_dump
-      const env = { ...process.env, PGPASSWORD: decodeURIComponent(url.password) }
-
-      const command = pgDumpArgs.join(' ')
-
-      try {
-        const { stdout, stderr } = await execAsync(command, { env, maxBuffer: 100 * 1024 * 1024 })
-
-        if (stderr && !stderr.includes('warning')) {
-          spinner.warn('pg_dump completed with warnings')
-          logger.info(chalk.yellow(`  ${stderr}`))
+      // Step 3: Create GitHub repository (if --fork flag)
+      if (options.fork) {
+        // Prompt for GitHub token if not provided
+        let githubToken = options.githubToken
+        if (!githubToken) {
+          const answers = await inquirer.prompt([
+            {
+              type: 'password',
+              name: 'token',
+              message: 'GitHub personal access token:',
+              validate: (input: string) => (input.length > 0 ? true : 'Token is required'),
+            },
+          ])
+          githubToken = answers.token
         }
 
-        // Write output to file
-        const outputPath = path.isAbsolute(output) ? output : path.join(process.cwd(), output)
-        await fs.ensureDir(path.dirname(outputPath))
-        await fs.writeFile(outputPath, stdout, 'utf-8')
-
-        const stats = await fs.stat(outputPath)
-        const sizeKB = Math.round(stats.size / 1024)
-
-        spinner.succeed(`Export completed: ${outputPath}`)
-        logger.info('')
-        logger.info(`  File size: ${chalk.bold(`${sizeKB} KB`)}`)
-        logger.info(`  Tables: ${chalk.bold(tables.length)}`)
-        logger.info('')
-        logger.info(chalk.green('[SUCCESS] Tenant exported successfully!\n'))
-        logger.info('To import this export to another tenant:')
-        logger.info(chalk.cyan(`  npx @cgk-platform/cli tenant:import ${output} --target <new_slug>`))
-        logger.info('')
-      } catch {
-        // pg_dump might not be available, fall back to SQL export
-        spinner.warn('pg_dump not available, falling back to SQL query export')
-
-        // Generate SQL export using queries
-        let sqlContent = `-- CGK Tenant Export\n`
-        sqlContent += `-- Tenant: ${slug}\n`
-        sqlContent += `-- Schema: ${schemaName}\n`
-        sqlContent += `-- Exported: ${new Date().toISOString()}\n`
-        sqlContent += `-- Tables: ${tables.join(', ')}\n\n`
-
-        if (!options.dataOnly) {
-          sqlContent += `-- Schema creation\n`
-          sqlContent += `CREATE SCHEMA IF NOT EXISTS ${schemaName};\n\n`
+        // Prompt for organization if not provided
+        let org = options.org
+        if (!org) {
+          const answers = await inquirer.prompt([
+            {
+              type: 'input',
+              name: 'org',
+              message: 'GitHub organization or username:',
+              validate: (input: string) => (input.length > 0 ? true : 'Organization is required'),
+            },
+          ])
+          org = answers.org
         }
 
-        sqlContent += `-- Note: Full data export requires pg_dump.\n`
-        sqlContent += `-- This fallback export contains table structure only.\n`
-        sqlContent += `-- Install PostgreSQL client tools for full data export.\n\n`
+        const repoName = options.repoName || slug
 
-        // Write output to file
-        const outputPath = path.isAbsolute(output) ? output : path.join(process.cwd(), output)
-        await fs.ensureDir(path.dirname(outputPath))
-        await fs.writeFile(outputPath, sqlContent, 'utf-8')
+        spinner.start(`Creating GitHub repository: ${org}/${repoName}...`)
+        try {
+          const repoUrl = await createGitHubRepo({
+            githubToken,
+            orgOrUsername: org,
+            repoName,
+            description: `Exported CGK tenant: ${tenantData.organization.name}`,
+            private: true,
+            templateRepo: 'cgk-platform/cgk-template',
+          })
+          spinner.succeed(`Created GitHub repository: ${repoUrl}`)
+          logger.info('')
+        } catch (error) {
+          spinner.fail('Failed to create GitHub repository')
+          logger.info(chalk.red(`  ${error instanceof Error ? error.message : String(error)}`))
+          logger.info('')
+          logger.info(chalk.yellow('  Continuing without GitHub repository...\n'))
+        }
 
-        spinner.succeed(`Partial export completed: ${outputPath}`)
-        logger.info('')
-        logger.info(chalk.yellow('  Note: pg_dump not found. Install PostgreSQL client tools for full export.'))
-        logger.info('')
+        // Step 4: Create Vercel project (if --vercel-token provided)
+        if (options.vercelToken) {
+          spinner.start('Creating Vercel project...')
+          try {
+            const vercelProjectId = await setupVercelProject({
+              token: options.vercelToken,
+              teamId: 'cgk-linens-88e79683', // CGK team ID
+              projectName: repoName,
+              githubRepo: `${org}/${repoName}`,
+              framework: 'nextjs',
+            })
+            spinner.succeed(`Created Vercel project: ${vercelProjectId}`)
+            logger.info('')
+          } catch (error) {
+            spinner.fail('Failed to create Vercel project')
+            logger.info(chalk.red(`  ${error instanceof Error ? error.message : String(error)}`))
+            logger.info('')
+          }
+        } else {
+          logger.info(chalk.dim('  Skipping Vercel project (no --vercel-token provided)\n'))
+        }
       }
+
+      // Success message
+      logger.info(chalk.green('[SUCCESS] Tenant exported successfully!\n'))
+      logger.info('Next steps:')
+      logger.info('  1. Review exported files:')
+      logger.info(chalk.cyan(`     cd ${outputDir}`))
+      logger.info('  2. Import to new platform:')
+      logger.info(
+        chalk.cyan(
+          `     npx @cgk-platform/cli tenant:import ${path.join(outputDir, 'migration.sql')} --target new_slug`
+        )
+      )
+
+      if (options.fork) {
+        logger.info('  3. Push exported files to GitHub:')
+        logger.info(chalk.cyan(`     cd ${outputDir}`))
+        logger.info(chalk.cyan(`     git init && git add . && git commit -m "Initial export"`))
+        logger.info(
+          chalk.cyan(
+            `     git remote add origin https://github.com/${options.org || '<org>'}/${options.repoName || slug}.git`
+          )
+        )
+        logger.info(chalk.cyan(`     git push -u origin main`))
+      }
+
+      logger.info('')
     } catch (error) {
       spinner.fail('Export failed')
       if (error instanceof Error) {
         logger.info(chalk.red(`  ${error.message}`))
+        if (error.stack) {
+          logger.debug(chalk.dim(error.stack))
+        }
       }
       process.exit(1)
     }

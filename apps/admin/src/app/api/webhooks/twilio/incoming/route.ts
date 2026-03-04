@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       })
 
       if (isDuplicate) {
-        logger.info('[Twilio Webhook] Duplicate incoming message ignored:', messageSid)
+        logger.info('[Twilio Webhook] Duplicate incoming message ignored:', { messageSid })
         return createTwimlResponse()
       }
     }
@@ -75,7 +75,10 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': result.contentType },
     })
   } catch (error) {
-    logger.error('Error handling incoming SMS webhook:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      'Error handling incoming SMS webhook:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     // Still return valid TwiML even on error
     return createTwimlResponse()
   }

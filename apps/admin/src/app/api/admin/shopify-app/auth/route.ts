@@ -28,7 +28,7 @@ export async function GET(request: Request) {
   })
 
   if (!tenantSlug || !tenantId) {
-    logger.error('[shopify-oauth] Missing tenant context', {
+    logger.error('[shopify-oauth] Missing tenant context', new Error('Missing tenant context'), {
       tenantSlug,
       tenantId,
       userId,
@@ -81,7 +81,10 @@ export async function GET(request: Request) {
 
     return NextResponse.redirect(authUrl)
   } catch (error) {
-    logger.error('[shopify-oauth] Auth initiation error:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      '[shopify-oauth] Auth initiation error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
 
     if (error instanceof ShopifyError) {
       return NextResponse.redirect(
@@ -116,7 +119,7 @@ export async function POST(request: Request) {
   })
 
   if (!tenantSlug || !tenantId) {
-    logger.error('[shopify-oauth] Missing tenant context', {
+    logger.error('[shopify-oauth] Missing tenant context', new Error('Missing tenant context'), {
       tenantSlug,
       tenantId,
       userId,
@@ -159,7 +162,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ authUrl })
   } catch (error) {
-    logger.error('[shopify-oauth] Auth initiation error:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      '[shopify-oauth] Auth initiation error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
 
     if (error instanceof ShopifyError) {
       return NextResponse.json({ error: error.message, code: error.code }, { status: 400 })

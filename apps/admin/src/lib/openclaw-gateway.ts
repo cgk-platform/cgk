@@ -60,7 +60,7 @@ export async function pushToGateway(
   } catch (err) {
     logger.error(
       `[openclaw-gateway] Push to ${profile} error:`,
-      err instanceof Error ? err.message : err
+      err instanceof Error ? err : new Error(String(err))
     )
   }
 }

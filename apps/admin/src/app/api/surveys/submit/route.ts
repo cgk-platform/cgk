@@ -57,12 +57,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     const tenant = shopDomain.split('.')[0] // Handle subdomains
 
     // Transform answers to platform format
-    const platformAnswers = Object.entries(submission.answers).map(
-      ([questionId, answer]) => ({
-        question_id: questionId,
-        answer_value: Array.isArray(answer) ? answer : [answer],
-      })
-    )
+    const platformAnswers = Object.entries(submission.answers).map(([questionId, answer]) => ({
+      question_id: questionId,
+      answer_value: Array.isArray(answer) ? answer : [answer],
+    }))
 
     // Forward to platform survey response API
     const url = new URL(request.url)
@@ -95,18 +93,21 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     // Log error but return success to not break checkout
     const errorData = await platformResponse.text()
-    logger.error('[Survey Submit] Platform API error:', errorData)
+    logger.error('[Survey Submit] Platform API error:', new Error(errorData))
 
     // Still return success to not disrupt checkout experience
-    return NextResponse.json({ success: true, warning: 'Response may not have been saved' }, { headers })
-  } catch (error) {
-    logger.error('[Survey Submit] Error:', error instanceof Error ? error : new Error(String(error)))
-
-    // Return success anyway to not break checkout
     return NextResponse.json(
-      { success: true, warning: 'Response processing failed' },
+      { success: true, warning: 'Response may not have been saved' },
       { headers }
     )
+  } catch (error) {
+    logger.error(
+      '[Survey Submit] Error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
+
+    // Return success anyway to not break checkout
+    return NextResponse.json({ success: true, warning: 'Response processing failed' }, { headers })
   }
 }
 

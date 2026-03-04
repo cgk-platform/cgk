@@ -30,8 +30,18 @@ export async function GET(request: Request) {
     offset: 0,
     search: url.searchParams.get('search') || '',
     categoryId: url.searchParams.get('categoryId') || '',
-    isPublished: url.searchParams.get('isPublished') === 'true' ? true : url.searchParams.get('isPublished') === 'false' ? false : undefined,
-    isInternal: url.searchParams.get('isInternal') === 'true' ? true : url.searchParams.get('isInternal') === 'false' ? false : undefined,
+    isPublished:
+      url.searchParams.get('isPublished') === 'true'
+        ? true
+        : url.searchParams.get('isPublished') === 'false'
+          ? false
+          : undefined,
+    isInternal:
+      url.searchParams.get('isInternal') === 'true'
+        ? true
+        : url.searchParams.get('isInternal') === 'false'
+          ? false
+          : undefined,
     sort: url.searchParams.get('sort') || 'created_at',
     dir: url.searchParams.get('dir') === 'asc' ? 'asc' : 'desc',
   }
@@ -77,7 +87,7 @@ export async function POST(request: Request) {
   if (!body.slug || !body.title || !body.content) {
     return NextResponse.json(
       { error: 'Missing required fields: slug, title, content' },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -85,7 +95,7 @@ export async function POST(request: Request) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(body.slug)) {
     return NextResponse.json(
       { error: 'Slug must be lowercase alphanumeric with hyphens (e.g., "getting-started")' },
-      { status: 400 },
+      { status: 400 }
     )
   }
 
@@ -96,13 +106,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const article = await withTenant(tenantSlug, () => createArticle(articleData))
+    const article = await withTenant(tenantSlug, () => createArticle(tenantSlug, articleData))
     return NextResponse.json({ article }, { status: 201 })
   } catch (error) {
     if (error instanceof Error && error.message.includes('unique constraint')) {
       return NextResponse.json(
         { error: 'An article with this slug already exists' },
-        { status: 409 },
+        { status: 409 }
       )
     }
     throw error

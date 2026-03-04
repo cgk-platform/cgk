@@ -24,10 +24,7 @@ import {
   extractRequestIdFromSubject,
   isAutoReply,
 } from '@/lib/treasury/approval-parser'
-import {
-  notifyDrawRequestApproved,
-  notifyDrawRequestRejected,
-} from '@/lib/treasury/slack'
+import { notifyDrawRequestApproved, notifyDrawRequestRejected } from '@/lib/treasury/slack'
 import { logger } from '@cgk-platform/logging'
 
 interface InboundEmailPayload {
@@ -44,7 +41,10 @@ interface InboundEmailPayload {
  * Verify Resend webhook signature
  * SECURITY: Signature verification is MANDATORY - never skip in any environment
  */
-function verifyResendSignature(payload: string, signature: string): { valid: boolean; error?: string } {
+function verifyResendSignature(
+  payload: string,
+  signature: string
+): { valid: boolean; error?: string } {
   const webhookSecret = process.env.RESEND_WEBHOOK_SECRET
   if (!webhookSecret) {
     logger.error('RESEND_WEBHOOK_SECRET not configured - rejecting webhook request')
@@ -55,16 +55,10 @@ function verifyResendSignature(payload: string, signature: string): { valid: boo
     return { valid: false, error: 'Missing signature header' }
   }
 
-  const expectedSignature = crypto
-    .createHmac('sha256', webhookSecret)
-    .update(payload)
-    .digest('hex')
+  const expectedSignature = crypto.createHmac('sha256', webhookSecret).update(payload).digest('hex')
 
   try {
-    const isValid = crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    )
+    const isValid = crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature))
     return { valid: isValid, error: isValid ? undefined : 'Invalid signature' }
   } catch {
     return { valid: false, error: 'Signature verification failed' }
@@ -153,7 +147,7 @@ export async function POST(request: Request) {
   // SECURITY: Always verify signature - no exceptions for any environment
   const signatureResult = verifyResendSignature(rawBody, signature)
   if (!signatureResult.valid) {
-    logger.error('Webhook signature verification failed:', signatureResult.error)
+    logger.error('Webhook signature verification failed:', new Error(signatureResult.error))
     return NextResponse.json({ error: signatureResult.error }, { status: 401 })
   }
 
@@ -176,22 +170,19 @@ export async function POST(request: Request) {
     })
 
     if (isDuplicate) {
-      logger.info('[Treasury Webhook] Duplicate email ignored:', messageId)
+      logger.info('[Treasury Webhook] Duplicate email ignored:', { messageId })
       return NextResponse.json({ status: 'duplicate_ignored' })
     }
   }
 
   // Validate required fields
   if (!from || !to || !text) {
-    return NextResponse.json(
-      { error: 'Missing required fields: from, to, text' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Missing required fields: from, to, text' }, { status: 400 })
   }
 
   // Check for auto-reply/out-of-office
   if (isAutoReply(subject, text, emailHeaders)) {
-    logger.info('Ignoring auto-reply from:', from)
+    logger.info('Ignoring auto-reply from:', { from })
     return NextResponse.json({ status: 'ignored', reason: 'auto-reply' })
   }
 
@@ -206,7 +197,7 @@ export async function POST(request: Request) {
 
   // Validate sender is the treasurer
   if (!validateSenderEmail(from, treasurerEmail)) {
-    logger.warn('Email from unauthorized sender:', from, 'expected:', treasurerEmail)
+    logger.warn('Email from unauthorized sender:', { from, expected: treasurerEmail })
     return NextResponse.json({ status: 'ignored', reason: 'unauthorized-sender' })
   }
 

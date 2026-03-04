@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 
   // Handle OAuth errors
   if (error) {
-    logger.error('Meta OAuth error:', error, errorDescription)
+    logger.error('Meta OAuth error:', new Error(error), { errorDescription })
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(errorDescription || error)}`)
   }
 

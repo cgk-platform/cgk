@@ -309,19 +309,20 @@ Skill({ skill: 'vercel', args: 'env:list --app admin' })
 
 ### Knowledge Bases (Agent Reference Docs)
 
-Located in `.claude/knowledge-bases/`, these are README-only references (9 total):
+Located in `.claude/knowledge-bases/`, these are README-only references (10 total):
 
-| Knowledge Base                 | Content                              | When to Reference        |
-| ------------------------------ | ------------------------------------ | ------------------------ |
-| `database-migration-patterns/` | SQL best practices, ID type patterns | Writing migrations       |
-| `payment-processing-patterns/` | Stripe Connect, Wise integration     | Payment features         |
-| `shopify-api-guide/`           | Shopify Admin/Storefront API         | Shopify integration      |
-| `figma-design-system/`         | Meliusly design tokens, components   | Storefront design        |
-| `environment-variables-guide/` | Env var management, Vercel workflow  | Setting up env vars      |
-| `multi-tenancy-patterns/`      | Tenant isolation, schema-per-tenant  | Multi-tenant development |
-| `design-system-rules/`         | Portal design system (Navy + Gold)   | Building portal UI       |
-| `vercel-postgres-patterns/`    | SQL template tag limitations         | Database queries         |
-| `build-errors-reference/`      | Common build errors and solutions    | Troubleshooting builds   |
+| Knowledge Base                     | Content                                 | When to Reference            |
+| ---------------------------------- | --------------------------------------- | ---------------------------- |
+| `wordpress-distribution-patterns/` | Self-hosted architecture, fork workflow | Understanding platform model |
+| `database-migration-patterns/`     | SQL best practices, ID type patterns    | Writing migrations           |
+| `payment-processing-patterns/`     | Stripe Connect, Wise integration        | Payment features             |
+| `shopify-api-guide/`               | Shopify Admin/Storefront API            | Shopify integration          |
+| `figma-design-system/`             | Meliusly design tokens, components      | Storefront design            |
+| `environment-variables-guide/`     | Env var management, Vercel workflow     | Setting up env vars          |
+| `multi-tenancy-patterns/`          | Tenant isolation, schema-per-tenant     | Multi-tenant development     |
+| `design-system-rules/`             | Portal design system (Navy + Gold)      | Building portal UI           |
+| `vercel-postgres-patterns/`        | SQL template tag limitations            | Database queries             |
+| `build-errors-reference/`          | Common build errors and solutions       | Troubleshooting builds       |
 
 **Reference Pattern**:
 
@@ -386,56 +387,106 @@ pnpm validate:tenant-isolation --fix --path apps/admin
 
 ---
 
-## Vercel Team Configuration
+## Vercel Deployment Architecture
 
-**CRITICAL**: All CGK apps are deployed under a single Vercel team. NEVER create new Vercel projects without explicit user confirmation.
+**CRITICAL**: CGK Platform uses **ONE Vercel project** per user deployment, NOT 8 separate projects.
 
-**Team Details:**
+### Single Project with Path-Based Routing
 
-- **Team ID**: `cgk-linens-88e79683`
-- **Team Name**: CGK Linens
-- **Scope Flag**: `--scope cgk-linens-88e79683`
+Users fork the template and deploy to **THEIR Vercel account** as a single project:
 
-**Existing Vercel Projects:**
-| Project Name | App Directory | Production URL |
-|--------------|---------------|----------------|
-| `cgk-admin` | `apps/admin/` | cgk-admin-cgk-linens-88e79683.vercel.app |
-| `cgk-storefront` | `apps/storefront/` | cgk-storefront.vercel.app |
-| `cgk-meliusly-storefront` | `apps/meliusly-storefront/` | cgk-meliusly-storefront.vercel.app |
-| `cgk-shopify-app` | `apps/shopify-app/` | cgk-shopify-app-cgk-linens-88e79683.vercel.app |
-| `cgk-orchestrator` | `apps/orchestrator/` | cgk-orchestrator-cgk-linens-88e79683.vercel.app |
-| `cgk-creator-portal` | `apps/creator-portal/` | cgk-creator-portal.vercel.app |
-| `cgk-contractor-portal` | `apps/contractor-portal/` | cgk-contractor-portal-cgk-linens-88e79683.vercel.app |
-| `cgk-command-center` | `apps/command-center/` | cgk-command-center-cgk-linens-88e79683.vercel.app |
-| `cgk-mcp-server` | `apps/mcp-server/` | cgk-mcp-server.vercel.app |
-
-**Working with Vercel CLI:**
-
-```bash
-# List all projects
-vercel project ls --scope cgk-linens-88e79683
-
-# Add environment variable to a project
-cd apps/<app-name>
-vercel env add VAR_NAME production --scope cgk-linens-88e79683
-vercel env add VAR_NAME preview --scope cgk-linens-88e79683
-vercel env add VAR_NAME development --scope cgk-linens-88e79683
-
-# Pull environment variables
-cd apps/<app-name>
-vercel env pull .env.local --scope cgk-linens-88e79683
+```
+User's Vercel Project: my-commerce-platform
+├── Domain: my-store.vercel.app (or custom domain)
+├── Path Routing (via vercel.json):
+│   ├── /                  → apps/storefront/
+│   ├── /admin/*           → apps/admin/
+│   ├── /creator/*         → apps/creator-portal/
+│   ├── /contractor/*      → apps/contractor-portal/
+│   ├── /orchestrator/*    → apps/orchestrator/
+│   ├── /shopify-app/*     → apps/shopify-app/
+│   ├── /command-center/*  → apps/command-center/
+│   └── /mcp/*             → apps/mcp-server/
+└── Build: pnpm turbo build (builds ALL 8 apps in one deploy)
 ```
 
-**IMPORTANT RULES:**
+### vercel.json Configuration
 
-1. **NEVER create new Vercel projects** unless explicitly confirmed by user
-2. **ALL apps already exist** except `meliusly-storefront` (to be created in Phase 1F)
-3. **ALWAYS use `--scope cgk-linens-88e79683`** with Vercel CLI commands
-4. When updating env vars, update for ALL environments: production, preview, development
-5. **NEVER deploy using Vercel CLI** - All apps are linked to GitHub and auto-deploy on push to main branch
-   - Use `git push origin main` to deploy changes
-   - Vercel automatically builds and deploys when commits are pushed
-   - Check deployment status at vercel.com dashboard, NOT via CLI commands
+```json
+{
+  "buildCommand": "pnpm turbo build --filter=admin --filter=storefront ...",
+  "rewrites": [
+    { "source": "/admin/:path*", "destination": "/apps/admin/:path*" },
+    { "source": "/creator/:path*", "destination": "/apps/creator-portal/:path*" },
+    { "source": "/:path*", "destination": "/apps/storefront/:path*" }
+  ],
+  "integrations": {
+    "neon": { "required": true },
+    "upstash": { "required": true }
+  }
+}
+```
+
+### One-Click Deploy Button
+
+Users click "Deploy with Vercel" button in README.md:
+
+1. ✅ Fork repository to **USER's GitHub**
+2. ✅ Deploy to **USER's Vercel account** (single project)
+3. ✅ Auto-provision Neon PostgreSQL on **USER's Neon account**
+4. ✅ Auto-provision Upstash Redis on **USER's Upstash account**
+5. ✅ Auto-generate secrets (JWT, encryption keys)
+6. ✅ Site live in 5-10 minutes
+
+**Time to live**: 5-10 minutes | **Cost**: $0/month (free tier)
+
+### Environment Variable Management
+
+```bash
+# List environment variables (user's project)
+vercel env ls
+
+# Add environment variable (applies to ALL 8 apps)
+vercel env add DATABASE_URL production
+vercel env add DATABASE_URL preview
+vercel env add DATABASE_URL development
+
+# Pull to local .env.local files
+vercel env pull apps/admin/.env.local
+vercel env pull apps/storefront/.env.local
+# ... repeat for all apps
+```
+
+**IMPORTANT**: Environment variables are **shared across all 8 apps** in the single Vercel project.
+
+### Deployment Workflow
+
+```bash
+# Users deploy via git push (NOT vercel CLI)
+git add .
+git commit -m "feat: add new feature"
+git push origin main
+
+# Vercel auto-deploys:
+# 1. Detects push to main branch
+# 2. Runs build: pnpm turbo build
+# 3. Runs migrations: pnpm db:migrate
+# 4. Deploys all 8 apps
+# 5. Live at: my-store.vercel.app
+```
+
+**NEVER use `vercel deploy` CLI** - GitHub integration handles all deployments.
+
+### Example: CGK Development Team Project (Reference Only)
+
+The CGK development team maintains **ONE reference deployment** for testing:
+
+- **Project**: cgk-platform (single Vercel project)
+- **Team**: cgk-linens-88e79683
+- **URL**: cgk-platform.vercel.app
+- **Purpose**: Testing template updates before release
+
+**This is NOT a production deployment**. Users create their own separate projects.
 
 ---
 
@@ -538,35 +589,119 @@ const mutation = `
 
 ---
 
+## 🏗️ Architecture: WordPress-Style Portable Platform
+
+**CRITICAL**: CGK Platform is a **template repository** (like WordPress.org), NOT a multi-tenant SaaS (like WordPress.com or Shopify).
+
+### Distribution Model
+
+| CGK Platform                    | WordPress.org              | NOT WordPress.com         |
+| ------------------------------- | -------------------------- | ------------------------- |
+| ✅ Template repository          | ✅ Download & install      | ❌ Shared SaaS hosting    |
+| ✅ Fork & deploy to YOUR Vercel | ✅ Install on YOUR hosting | ❌ wordpress.com accounts |
+| ✅ Own database, cache, assets  | ✅ Own MySQL, files        | ❌ Shared infrastructure  |
+| ✅ Full code access             | ✅ Full PHP access         | ❌ Limited customization  |
+| ✅ Git-based updates            | ✅ Core updates            | ❌ Platform upgrades      |
+
+**Key Insight**: Users **fork the template** and deploy to **THEIR infrastructure** (Vercel + Neon + Upstash), not ours.
+
+See [.claude/knowledge-bases/wordpress-distribution-patterns/README.md](.claude/knowledge-bases/wordpress-distribution-patterns/README.md) for complete patterns.
+
+### Single Vercel Project (All 8 Apps)
+
+**Before**: 8 separate Vercel projects (REMOVED in WordPress migration)
+
+**After**: ONE Vercel project with path-based routing
+
+```
+Single Deployment: my-commerce-platform.vercel.app
+├── /                 → Storefront (apps/storefront/)
+├── /admin/*          → Admin Portal (apps/admin/)
+├── /creator/*        → Creator Portal (apps/creator-portal/)
+├── /contractor/*     → Contractor Portal (apps/contractor-portal/)
+├── /orchestrator/*   → Super Admin (apps/orchestrator/)
+├── /shopify-app/*    → Shopify Integration (apps/shopify-app/)
+├── /command-center/* → Operations Dashboard (apps/command-center/)
+└── /mcp/*            → Claude MCP Server (apps/mcp-server/)
+```
+
+**Benefits**: True one-click deploy, single environment variable set, simplified user experience.
+
+### platform.config.ts = wp-config.php
+
+Users customize via configuration (not code):
+
+```typescript
+// platform.config.ts (PROTECTED from upstream merges)
+export const platformConfig = {
+  deployment: {
+    name: 'My Commerce Platform',
+    mode: 'single-tenant', // or 'multi-tenant'
+  },
+  tenants: [
+    {
+      slug: 'my-brand',
+      name: 'My Brand',
+      primaryColor: '#000000',
+      logo: '/brands/my-brand/logo.svg',
+    },
+  ],
+  features: {
+    shopifyIntegration: true,
+    creatorPortal: false,
+    // ... enable/disable features
+  },
+}
+```
+
+**Admin UI**: `/admin/platform-config` for non-technical editing.
+
+### Self-Hosted Infrastructure
+
+```
+User's Stack (They Own Everything)
+├── Vercel Project → my-store (user's Vercel account)
+├── Neon Database → cgk-db (user's Neon account)
+├── Upstash Redis → cgk-cache (user's Upstash account)
+├── Vercel Blob → cgk-assets (user's Vercel account)
+└── GitHub Fork → my-org/my-store (user's GitHub)
+```
+
+**Cost**: $0/month (free tiers) to $49/month (production).
+
+---
+
 ## Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    MULTI-TENANT PLATFORM                     │
+│              WORDPRESS-STYLE PORTABLE PLATFORM               │
 ├─────────────────────────────────────────────────────────────┤
-│  apps/                                                       │
-│  ├── orchestrator/          # Super Admin Dashboard          │
-│  ├── admin/                 # White-label admin portal       │
-│  ├── storefront/            # Generic storefront template    │
-│  ├── meliusly-storefront/   # Meliusly brand storefront      │
-│  ├── creator-portal/        # Creator management             │
-│  ├── contractor-portal/     # Contractor management          │
-│  ├── shopify-app/           # Shopify App (Remix)            │
-│  ├── command-center/        # Operations dashboard           │
-│  └── mcp-server/            # Claude MCP integration         │
+│  apps/                    # All in ONE Vercel project        │
+│  ├── storefront/          # Generic storefront (user themes) │
+│  ├── admin/               # Admin portal                     │
+│  ├── creator-portal/      # Creator management               │
+│  ├── contractor-portal/   # Contractor management            │
+│  ├── orchestrator/        # Super Admin Dashboard            │
+│  ├── shopify-app/         # Shopify App (Remix)              │
+│  ├── command-center/      # Operations dashboard             │
+│  └── mcp-server/          # Claude MCP integration           │
 ├─────────────────────────────────────────────────────────────┤
-│  packages/                                                   │
-│  ├── core/            # Types, utilities, config schemas     │
-│  ├── db/              # Database + tenant isolation          │
-│  ├── auth/            # JWT authentication                   │
-│  ├── ui/              # Shared React components              │
-│  ├── commerce/        # Commerce provider abstraction        │
-│  ├── shopify/         # Shopify API client                   │
-│  ├── payments/        # Stripe + Wise integration            │
-│  ├── jobs/            # Background job definitions           │
-│  ├── mcp/             # MCP tools and handlers               │
-│  ├── analytics/       # GA4, attribution                     │
-│  └── logging/         # Structured logging                   │
+│  packages/                # Shared utilities                 │
+│  ├── core/                # Types, config schemas            │
+│  ├── db/                  # Database + tenant isolation      │
+│  ├── auth/                # JWT authentication               │
+│  ├── ui/                  # Shared React components          │
+│  ├── commerce/            # Commerce abstraction             │
+│  ├── shopify/             # Shopify API client               │
+│  ├── payments/            # Stripe + Wise integration        │
+│  ├── jobs/                # Background jobs                  │
+│  ├── mcp/                 # MCP tools                        │
+│  ├── analytics/           # GA4, attribution                 │
+│  └── logging/             # Structured logging               │
+├─────────────────────────────────────────────────────────────┤
+│  platform.config.ts       # User configuration (PROTECTED)   │
+│  vercel.json              # Single project, path routing     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -838,14 +973,18 @@ See [.claude/knowledge-bases/environment-variables-guide/README.md](.claude/know
 
 ## Key Decisions Already Made
 
-| Decision        | Choice                        | Notes                           |
-| --------------- | ----------------------------- | ------------------------------- |
-| Database        | Schema-per-tenant PostgreSQL  | Each brand gets isolated schema |
-| Auth            | Custom JWT + sessions         | Replacing Clerk                 |
-| Commerce        | Dual: Shopify + Custom+Stripe | Feature flag controlled         |
-| Background Jobs | Trigger.dev v4 or Inngest     | Vendor-agnostic abstraction     |
-| MCP Transport   | Streamable HTTP               | Not SSE (deprecated)            |
-| Payments        | Stripe Connect + Wise         | Domestic + international        |
+| Decision        | Choice                        | Notes                                    |
+| --------------- | ----------------------------- | ---------------------------------------- |
+| Distribution    | WordPress.org-style template  | Fork & self-host (NOT multi-tenant SaaS) |
+| Deployment      | Single Vercel project         | 8 apps via path-based routing            |
+| Docker          | ❌ REMOVED (435 lines)        | Vercel-native only                       |
+| Database        | Schema-per-tenant PostgreSQL  | Each brand gets isolated schema          |
+| Auth            | Custom JWT + sessions         | Replacing Clerk                          |
+| Commerce        | Dual: Shopify + Custom+Stripe | Feature flag controlled                  |
+| Background Jobs | Trigger.dev v4 or Inngest     | Vendor-agnostic abstraction              |
+| MCP Transport   | Streamable HTTP               | Not SSE (deprecated)                     |
+| Payments        | Stripe Connect + Wise         | Domestic + international                 |
+| Storefronts     | Single generic + theming      | Hard-coded meliusly-storefront REMOVED   |
 
 ---
 
