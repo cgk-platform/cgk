@@ -18,6 +18,7 @@
  * - tenant:import     : Import tenant data from SQL file
  * - check-updates     : Check for available package updates
  * - update            : Update packages to latest versions
+ * - update-platform   : Update CGK platform from upstream repository
  * - changelog         : View changelog for a version
  */
 
@@ -38,13 +39,11 @@ import { tenantImportCommand } from './commands/tenant-import.js'
 import { tenantHealthCommand } from './commands/tenant-health.js'
 import { createTenantCommand, listTenantsCommand } from './commands/tenant.js'
 import { updateCommand } from './commands/update.js'
+import { updatePlatformCommand } from './commands/update-platform.js'
 
 const program = new Command()
 
-program
-  .name('cgk')
-  .description('CGK - Commerce Growth Kit CLI')
-  .version('0.0.0')
+program.name('cgk').description('CGK - Commerce Growth Kit CLI').version('0.0.0')
 
 // Register commands
 program.addCommand(createCommand)
@@ -63,6 +62,7 @@ program.addCommand(tenantImportCommand)
 program.addCommand(tenantHealthCommand)
 program.addCommand(checkUpdatesCommand)
 program.addCommand(updateCommand)
+program.addCommand(updatePlatformCommand)
 program.addCommand(changelogCommand)
 
 program.parse()

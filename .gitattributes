@@ -1,0 +1,148 @@
+# ============================================================================
+# CGK PLATFORM - GIT ATTRIBUTES FOR WORDPRESS-STYLE FORK WORKFLOW
+# ============================================================================
+#
+# This file controls how git merges platform updates from upstream while
+# protecting brand-specific customizations. Similar to WordPress update model.
+#
+# Merge Strategy Reference:
+#   merge=default   - Normal 3-way merge (platform updates applied)
+#   merge=ours      - Always keep brand's version (protects customizations)
+#   merge=union     - Combine both versions (manual review required)
+#
+# To enable custom merge drivers, add to your .git/config:
+#   [merge "ours"]
+#     name = Always keep our version
+#     driver = true
+#   [merge "union"]
+#     name = Union merge (combine both versions)
+#     driver = git merge-file --union %A %O %B
+#
+# ============================================================================
+
+# ============================================================================
+# ALWAYS MERGE - Core Platform Packages
+# ============================================================================
+# These are maintained by CGK Platform team and should ALWAYS receive updates
+
+packages/**/*.ts                 merge=default
+packages/**/*.tsx                merge=default
+packages/**/*.js                 merge=default
+packages/**/*.jsx                merge=default
+packages/**/package.json         merge=default
+packages/**/tsconfig.json        merge=default
+packages/**/README.md            merge=default
+
+# ============================================================================
+# NEVER MERGE - Brand Customizations (Protected)
+# ============================================================================
+# These contain brand-specific customizations and must NEVER be overwritten
+
+# Storefront customizations (generic template in cgk-template)
+apps/storefront/src/**           merge=ours
+apps/storefront/public/**        merge=ours
+apps/storefront/styles/**        merge=ours
+apps/storefront/.env.local       merge=ours
+apps/storefront/next.config.js   merge=ours
+apps/storefront/tailwind.config.js merge=ours
+
+# Brand-specific storefronts (if created)
+apps/*-storefront/**             merge=ours
+
+# Brand configuration and assets
+platform.config.ts               merge=ours
+public/brands/**                 merge=ours
+.env.local                       merge=ours
+.env.*.local                     merge=ours
+
+# Brand-specific documentation
+README.md                        merge=ours
+docs/brand/**                    merge=ours
+
+# ============================================================================
+# REVIEW MERGE - Infrastructure (Manual Review Required)
+# ============================================================================
+# These files may have both platform updates AND brand customizations
+# Use union merge to combine both, then manually review
+
+# Root configuration files
+package.json                     merge=union
+pnpm-workspace.yaml              merge=union
+turbo.json                       merge=union
+tsconfig.json                    merge=union
+.eslintrc.js                     merge=union
+.prettierrc                      merge=union
+
+# App-level configuration
+apps/*/package.json              merge=union
+apps/*/.env.example              merge=union
+apps/*/next.config.js            merge=union
+apps/*/tailwind.config.js        merge=union
+apps/*/tsconfig.json             merge=union
+
+# Database migrations (CRITICAL - always review)
+packages/db/src/migrations/**    merge=union
+
+# Vercel configuration
+vercel.json                      merge=ours
+apps/*/vercel.json               merge=ours
+
+# Git configuration
+.gitignore                       merge=union
+.gitattributes                   merge=union
+
+# ============================================================================
+# PLATFORM APPS - Merge with Caution
+# ============================================================================
+# Admin, Orchestrator, Creator Portal, Contractor Portal are platform apps
+# Brands usually don't customize these, but allow merges with some protection
+
+# Admin portal (usually platform-managed, but brands may customize)
+apps/admin/src/app/**            merge=default
+apps/admin/src/components/**     merge=default
+apps/admin/public/**             merge=ours
+
+# Orchestrator (platform-only, brands don't touch)
+apps/orchestrator/**             merge=default
+
+# Creator portal (platform-managed with brand theming)
+apps/creator-portal/src/app/**   merge=default
+apps/creator-portal/src/components/** merge=default
+apps/creator-portal/public/**    merge=ours
+
+# Contractor portal (platform-managed with brand theming)
+apps/contractor-portal/src/app/** merge=default
+apps/contractor-portal/src/components/** merge=default
+apps/contractor-portal/public/** merge=ours
+
+# MCP server (platform-only)
+apps/mcp-server/**               merge=default
+
+# ============================================================================
+# SCRIPTS AND TOOLING
+# ============================================================================
+
+scripts/**                       merge=default
+.claude/**                       merge=default
+.github/**                       merge=default
+
+# ============================================================================
+# BINARY AND LOCK FILES
+# ============================================================================
+
+*.lock                           binary
+*.png                            binary
+*.jpg                            binary
+*.jpeg                           binary
+*.gif                            binary
+*.ico                            binary
+*.svg                            binary
+*.woff                           binary
+*.woff2                          binary
+*.ttf                            binary
+*.eot                            binary
+*.pdf                            binary
+
+# ============================================================================
+# END OF FILE
+# ============================================================================

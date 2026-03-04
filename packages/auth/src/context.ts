@@ -46,8 +46,21 @@ export async function getTenantContext(
 
   // Fallback to subdomain extraction
   const tenantId = extractTenantFromSubdomain(req)
+  if (tenantId) {
+    return { tenantId, userId: null }
+  }
 
-  return { tenantId, userId: null }
+  // Fall back to DEFAULT_TENANT_SLUG (single-tenant mode)
+  const defaultTenant = process.env.DEFAULT_TENANT_SLUG
+
+  if (!defaultTenant) {
+    return { tenantId: null, userId: null }
+  }
+
+  return {
+    tenantId: defaultTenant,
+    userId: null, // No user auth in single-tenant mode
+  }
 }
 
 /**
@@ -124,7 +137,7 @@ async function getAuthContextFromHeaders(req: Request): Promise<AuthContext> {
   const user = userResult.rows[0] as { id: string; email: string; role: UserRole }
 
   // Determine effective role (super_admin always takes precedence)
-  const effectiveRole = user.role === 'super_admin' ? 'super_admin' : (role || user.role)
+  const effectiveRole = user.role === 'super_admin' ? 'super_admin' : role || user.role
 
   // Get organizations based on role
   let orgs: OrgContext[]
