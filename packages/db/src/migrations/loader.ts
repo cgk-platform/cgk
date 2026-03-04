@@ -11,7 +11,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { Migration, SchemaType } from './types.js'
-import { logger } from '@cgk-platform/logging'
+import { logger } from '../internal-logger.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
