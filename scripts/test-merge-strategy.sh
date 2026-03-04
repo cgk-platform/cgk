@@ -107,7 +107,7 @@ export default function MeliuslyFeature() {
 EOF
 
 git add "$BRAND_FILE"
-git commit -m "feat: add Meliusly brand customization" --quiet
+git commit -m "feat: add Meliusly brand customization" --quiet --no-verify
 
 # Switch to platform branch and create conflicting change
 git checkout "$PLATFORM_BRANCH" --quiet
@@ -131,7 +131,7 @@ export default function GenericFeature() {
 EOF
 
 git add "$BRAND_FILE"
-git commit -m "chore: update platform template" --quiet
+git commit -m "chore: update platform template" --quiet --no-verify
 
 # Merge with ours strategy
 echo -e "${YELLOW}Merging platform update (should keep brand customization)...${NC}"
@@ -177,7 +177,7 @@ export function platformFeature() {
 EOF
 
 git add "$PACKAGE_FILE"
-git commit -m "feat: add platform feature v1.0.0" --quiet
+git commit -m "feat: add platform feature v1.0.0" --quiet --no-verify
 
 # Create updated version in platform branch
 git checkout "$PLATFORM_BRANCH" --quiet
@@ -197,7 +197,7 @@ export function newPlatformFeature() {
 EOF
 
 git add "$PACKAGE_FILE"
-git commit -m "feat: update platform feature to v2.0.0" --quiet
+git commit -m "feat: update platform feature to v2.0.0" --quiet --no-verify
 
 # Merge platform update
 echo -e "${YELLOW}Merging platform update to packages...${NC}"
@@ -239,7 +239,7 @@ EOF
 echo "test-union-merge.txt merge=union" >> .gitattributes
 
 git add "$UNION_FILE" .gitattributes
-git commit -m "feat: add brand dependencies" --quiet
+git commit -m "feat: add brand dependencies" --quiet --no-verify
 
 # Create version 2 in platform branch with different dependencies
 git checkout "$PLATFORM_BRANCH" --quiet
@@ -253,7 +253,7 @@ EOF
 echo "test-union-merge.txt merge=union" >> .gitattributes
 
 git add "$UNION_FILE" .gitattributes
-git commit -m "feat: add platform dependencies" --quiet
+git commit -m "feat: add platform dependencies" --quiet --no-verify
 
 # Merge with union strategy
 echo -e "${YELLOW}Merging with union strategy (combines both versions)...${NC}"
@@ -306,7 +306,7 @@ export const platformConfig = {
 EOF
 
   git add platform.config.ts
-  git commit -m "chore: update platform.config template" --quiet
+  git commit -m "chore: update platform.config template" --quiet --no-verify
 
   # Merge (should keep brand version)
   git checkout "$TEST_BRANCH" --quiet
