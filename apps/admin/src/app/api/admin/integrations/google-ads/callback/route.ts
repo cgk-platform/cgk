@@ -16,7 +16,10 @@ export async function GET(req: Request) {
 
   // Handle OAuth errors
   if (error) {
-    logger.error('Google Ads OAuth error:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      'Google Ads OAuth error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(error)}`)
   }
 
@@ -34,7 +37,10 @@ export async function GET(req: Request) {
 
     redirect(result.returnUrl || '/admin/settings/integrations?success=google_ads')
   } catch (err) {
-    logger.error('Google Ads OAuth callback failed:', err)
+    logger.error(
+      'Google Ads OAuth callback failed:',
+      err instanceof Error ? err : new Error(String(err))
+    )
     const message = err instanceof Error ? err.message : 'OAuth failed'
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(message)}`)
   }

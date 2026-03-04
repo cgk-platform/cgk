@@ -3,18 +3,12 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { sql } from '@cgk-platform/db'
-import {
-  getTenantResendClient,
-  getTenantResendSenderConfig,
-} from '@cgk-platform/integrations'
+import { getTenantResendClient, getTenantResendSenderConfig } from '@cgk-platform/integrations'
 
 import { updateApplicationStatus, getApplicationById } from '@/lib/creators-admin-ops'
 import { logger } from '@cgk-platform/logging'
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const tenantId = headerList.get('x-tenant-id')
@@ -31,12 +25,7 @@ export async function POST(
   try {
     const { id } = await params
     const body = await request.json()
-    const {
-      commissionPercent,
-      discountCode,
-      notes,
-      sendNotification,
-    } = body as {
+    const { commissionPercent, discountCode, notes, sendNotification } = body as {
       commissionPercent?: number
       discountCode?: string
       notes?: string
@@ -46,10 +35,7 @@ export async function POST(
     // Fetch application from tenant schema
     const application = await getApplicationById(tenantSlug, id)
     if (!application) {
-      return NextResponse.json(
-        { error: 'Application not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Application not found' }, { status: 404 })
     }
 
     // Generate discount code if not provided
@@ -57,7 +43,7 @@ export async function POST(
 
     // Create creator record in PUBLIC schema (creators table uses UUID, name field)
     const creatorResult = await sql`
-      INSERT INTO creators (
+      INSERT INTO public.creators (
         email, name, phone, status
       ) VALUES (
         ${application.email},
@@ -73,16 +59,13 @@ export async function POST(
 
     const creatorRow = creatorResult.rows[0]
     if (!creatorRow) {
-      return NextResponse.json(
-        { error: 'Failed to create creator record' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to create creator record' }, { status: 500 })
     }
     const creatorId = creatorRow.id as string
 
     // Create brand membership in PUBLIC schema (creator_brand_memberships)
     await sql`
-      INSERT INTO creator_brand_memberships (
+      INSERT INTO public.creator_brand_memberships (
         creator_id, organization_id, status,
         commission_percent, discount_code
       ) VALUES (
@@ -113,9 +96,7 @@ export async function POST(
         const { createMagicLink } = await import('@cgk-platform/auth')
         const magicToken = await createMagicLink(application.email, 'signup')
 
-        const portalUrl =
-          process.env.NEXT_PUBLIC_CREATOR_PORTAL_URL ||
-          'https://creators.cgk.com'
+        const portalUrl = process.env.NEXT_PUBLIC_CREATOR_PORTAL_URL || 'https://creators.cgk.com'
         const setupUrl = `${portalUrl}/auth/verify?token=${encodeURIComponent(magicToken)}&email=${encodeURIComponent(application.email)}`
 
         const resend = await getTenantResendClient(tenantSlug)
@@ -157,7 +138,10 @@ export async function POST(
           notificationSent = true
         }
       } catch (emailError) {
-        logger.error('Failed to send approval notification email:', emailError)
+        logger.error(
+          'Failed to send approval notification email:',
+          emailError instanceof Error ? emailError : new Error(String(emailError))
+        )
       }
     }
 
@@ -167,16 +151,19 @@ export async function POST(
       notificationSent,
     })
   } catch (error) {
-    logger.error('Error approving application:', error instanceof Error ? error : new Error(String(error)))
-    return NextResponse.json(
-      { error: 'Failed to approve application' },
-      { status: 500 }
+    logger.error(
+      'Error approving application:',
+      error instanceof Error ? error : new Error(String(error))
     )
+    return NextResponse.json({ error: 'Failed to approve application' }, { status: 500 })
   }
 }
 
 function generateDiscountCode(name: string): string {
-  const cleanName = name.replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, 6)
+  const cleanName = name
+    .replace(/[^a-zA-Z]/g, '')
+    .toUpperCase()
+    .slice(0, 6)
   const random = Math.floor(Math.random() * 100)
     .toString()
     .padStart(2, '0')

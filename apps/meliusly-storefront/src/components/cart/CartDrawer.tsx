@@ -5,7 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCart } from '@/lib/cart'
 import { useEffect, useState } from 'react'
-import { logger } from '@cgk-platform/logging'
+
+const logger = { info: console.log, warn: console.warn, error: console.error, debug: console.debug }
 
 interface CartDrawerProps {
   isOpen: boolean

@@ -24,7 +24,7 @@ async function fetchCollectionProducts(handle: string): Promise<{
     })
 
     if (!res.ok) {
-      logger.error('Failed to fetch collection:', await res.text())
+      logger.error('Failed to fetch collection:', new Error(await res.text()))
       return {
         products: [],
         collection: { title: formatCollectionTitle(handle), description: '' },
@@ -34,7 +34,7 @@ async function fetchCollectionProducts(handle: string): Promise<{
     const json = (await res.json()) as ProductsResponse
 
     if (!json.success || !json.data) {
-      logger.error('Invalid collection response:', json)
+      logger.error('Invalid collection response:', undefined, { response: json })
       return {
         products: [],
         collection: { title: formatCollectionTitle(handle), description: '' },
@@ -49,7 +49,10 @@ async function fetchCollectionProducts(handle: string): Promise<{
       },
     }
   } catch (error) {
-    logger.error('Error fetching collection:', error)
+    logger.error(
+      'Error fetching collection:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       products: [],
       collection: { title: formatCollectionTitle(handle), description: '' },

@@ -1,10 +1,7 @@
 import { headers } from 'next/headers'
 import { type NextRequest, NextResponse } from 'next/server'
 
-import {
-  getTenantResendClient,
-  getTenantResendSenderConfig,
-} from '@cgk-platform/integrations'
+import { getTenantResendClient, getTenantResendSenderConfig } from '@cgk-platform/integrations'
 
 import { createContractorInvitation, createProject } from '@/lib/contractors/db'
 import type { ContractorInvitation } from '@/lib/contractors/types'
@@ -42,10 +39,7 @@ export async function POST(req: NextRequest) {
   if (body.projectAssignment?.dueDate) {
     const dueDate = new Date(body.projectAssignment.dueDate)
     if (dueDate < new Date()) {
-      return NextResponse.json(
-        { error: 'Project due date must be in the future' },
-        { status: 400 },
-      )
+      return NextResponse.json({ error: 'Project due date must be in the future' }, { status: 400 })
     }
   }
 
@@ -54,7 +48,7 @@ export async function POST(req: NextRequest) {
     tenantSlug,
     tenantId,
     body.email,
-    body.name,
+    body.name
   )
 
   // Create initial project if specified
@@ -113,7 +107,10 @@ export async function POST(req: NextRequest) {
       emailSent = true
     }
   } catch (emailError) {
-    logger.error('Failed to send contractor invitation email:', emailError)
+    logger.error(
+      'Failed to send contractor invitation email:',
+      emailError instanceof Error ? emailError : new Error(String(emailError))
+    )
   }
 
   return NextResponse.json(
@@ -125,6 +122,6 @@ export async function POST(req: NextRequest) {
         ? `Invitation sent to ${body.email}`
         : `Contractor created but email failed. Invite link: ${inviteUrl}`,
     },
-    { status: 201 },
+    { status: 201 }
   )
 }

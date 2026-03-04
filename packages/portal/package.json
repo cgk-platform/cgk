@@ -41,7 +41,8 @@
   "dependencies": {
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
-    "@cgk-platform/shopify": "workspace:*"
+    "@cgk-platform/shopify": "workspace:*",
+    "@cgk-platform/logging": "workspace:*"
   },
   "peerDependencies": {
     "next": ">=14.0.0"

@@ -2,18 +2,12 @@ export const dynamic = 'force-dynamic'
 
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
-import {
-  getTenantResendClient,
-  getTenantResendSenderConfig,
-} from '@cgk-platform/integrations'
+import { getTenantResendClient, getTenantResendSenderConfig } from '@cgk-platform/integrations'
 
 import { updateApplicationStatus, getApplicationById } from '@/lib/creators-admin-ops'
 import { logger } from '@cgk-platform/logging'
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const headerList = await headers()
   const tenantSlug = headerList.get('x-tenant-slug')
   const userId = headerList.get('x-user-id')
@@ -35,10 +29,7 @@ export async function POST(
     }
 
     if (!reason) {
-      return NextResponse.json(
-        { error: 'reason is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'reason is required' }, { status: 400 })
     }
 
     // Get application details for the email
@@ -77,7 +68,10 @@ export async function POST(
           })
           notificationSent = true
         } catch (emailError) {
-          logger.error('Failed to send rejection notification email:', emailError)
+          logger.error(
+            'Failed to send rejection notification email:',
+            emailError instanceof Error ? emailError : new Error(String(emailError))
+          )
         }
       }
     }
@@ -87,10 +81,10 @@ export async function POST(
       notificationSent,
     })
   } catch (error) {
-    logger.error('Error rejecting application:', error instanceof Error ? error : new Error(String(error)))
-    return NextResponse.json(
-      { error: 'Failed to reject application' },
-      { status: 500 }
+    logger.error(
+      'Error rejecting application:',
+      error instanceof Error ? error : new Error(String(error))
     )
+    return NextResponse.json({ error: 'Failed to reject application' }, { status: 500 })
   }
 }

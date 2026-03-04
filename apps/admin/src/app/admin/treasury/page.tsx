@@ -35,9 +35,7 @@ export default async function TreasuryPage() {
                   <Banknote className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-                    Treasury
-                  </h1>
+                  <h1 className="text-2xl font-semibold tracking-tight text-slate-900">Treasury</h1>
                   <p className="text-sm text-slate-500">Financial oversight and cash management</p>
                 </div>
               </div>
@@ -82,33 +80,43 @@ async function TreasuryDashboard() {
           <Banknote className="h-8 w-8 text-slate-400" />
         </div>
         <p className="text-lg font-medium text-slate-900">No tenant configured</p>
-        <p className="text-sm text-slate-500">Please configure your tenant to view treasury data.</p>
+        <p className="text-sm text-slate-500">
+          Please configure your tenant to view treasury data.
+        </p>
       </div>
     )
   }
 
-  const [summary, alerts, drawRequests, { receipts }, receiptSummary] =
-    await Promise.all([
-      getTreasurySummary(tenantSlug),
-      getLowBalanceAlerts(tenantSlug),
-      getDrawRequests(tenantSlug, { status: undefined }).catch((error) => {
-        logger.error('[treasury] Failed to load draw requests:', error)
-        return []
-      }),
-      getReceipts(tenantSlug, { limit: 5 }).catch((error) => {
-        logger.error('[treasury] Failed to load receipts:', error)
-        return { receipts: [], totalCount: 0 }
-      }),
-      getReceiptSummary(tenantSlug).catch((error) => {
-        logger.error('[treasury] Failed to load receipt summary:', error)
-        return {
-          pending_count: 0,
-          processed_count: 0,
-          archived_count: 0,
-          total_amount_cents: 0,
-        }
-      }),
-    ])
+  const [summary, alerts, drawRequests, { receipts }, receiptSummary] = await Promise.all([
+    getTreasurySummary(tenantSlug),
+    getLowBalanceAlerts(tenantSlug),
+    getDrawRequests(tenantSlug, { status: undefined }).catch((error) => {
+      logger.error(
+        '[treasury] Failed to load draw requests:',
+        error instanceof Error ? error : new Error(String(error))
+      )
+      return []
+    }),
+    getReceipts(tenantSlug, { limit: 5 }).catch((error) => {
+      logger.error(
+        '[treasury] Failed to load receipts:',
+        error instanceof Error ? error : new Error(String(error))
+      )
+      return { receipts: [], totalCount: 0 }
+    }),
+    getReceiptSummary(tenantSlug).catch((error) => {
+      logger.error(
+        '[treasury] Failed to load receipt summary:',
+        error instanceof Error ? error : new Error(String(error))
+      )
+      return {
+        pending_count: 0,
+        processed_count: 0,
+        archived_count: 0,
+        total_amount_cents: 0,
+      }
+    }),
+  ])
 
   const pendingRequests = drawRequests.filter((r) => r.status === 'pending')
   const recentRequests = drawRequests.slice(0, 5)
@@ -286,9 +294,7 @@ async function TreasuryDashboard() {
                     <div className="flex items-center gap-3">
                       <StatusBadge status={request.status} />
                       <div>
-                        <span className="font-medium text-slate-900">
-                          {request.request_number}
-                        </span>
+                        <span className="font-medium text-slate-900">{request.request_number}</span>
                         <div className="text-xs text-slate-500">
                           {request.items.length} item{request.items.length !== 1 ? 's' : ''} &bull;{' '}
                           {request.treasurer_name}
@@ -318,8 +324,8 @@ async function TreasuryDashboard() {
             <div>
               <h3 className="font-semibold text-slate-900">Receipts & Invoices</h3>
               <p className="text-xs text-slate-500">
-                {receiptSummary.pending_count} pending &bull;{' '}
-                {receiptSummary.processed_count} processed
+                {receiptSummary.pending_count} pending &bull; {receiptSummary.processed_count}{' '}
+                processed
               </p>
             </div>
             <Link
@@ -356,9 +362,7 @@ async function TreasuryDashboard() {
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <ReceiptStatusBadge status={receipt.status} />
                       {receipt.amount_cents && (
-                        <span className="font-mono">
-                          {formatMoney(receipt.amount_cents)}
-                        </span>
+                        <span className="font-mono">{formatMoney(receipt.amount_cents)}</span>
                       )}
                     </div>
                   </div>
@@ -426,9 +430,7 @@ function SummaryCard({
     <Card
       className={`relative overflow-hidden border-slate-200 shadow-sm transition-all hover:shadow-md ${highlight ? 'ring-2 ring-emerald-500/20' : ''}`}
     >
-      <div
-        className={`absolute left-0 top-0 h-1 w-full bg-gradient-to-r ${style.bg}`}
-      />
+      <div className={`absolute left-0 top-0 h-1 w-full bg-gradient-to-r ${style.bg}`} />
       <CardContent className="pt-5">
         <div className="flex items-start justify-between">
           <div>
@@ -482,9 +484,7 @@ function ReceiptStatusBadge({ status }: { status: ReceiptStatus }) {
 
 function ProviderIcon({ provider }: { provider: string }) {
   // Simple initials-based icon
-  return (
-    <span className="text-sm font-bold uppercase">{provider.charAt(0)}</span>
-  )
+  return <span className="text-sm font-bold uppercase">{provider.charAt(0)}</span>
 }
 
 function TreasurySkeleton() {

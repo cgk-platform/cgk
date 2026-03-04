@@ -163,12 +163,14 @@ export $(cat apps/admin/.env.local | grep POSTGRES_URL | xargs) && npx @cgk-plat
 ```
 
 **NEVER** look for env vars in:
+
 - ❌ Root directory (.env files)
 - ❌ packages/db/ directory
-- ❌ packages/*/ directories
+- ❌ packages/\*/ directories
 
 **ALWAYS** look in:
-- ✅ apps/*/. env.local files
+
+- ✅ apps/\*/. env.local files
 
 ---
 
@@ -526,6 +528,12 @@ const mutation = `
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Creative Studio (Video Editor UI)
+
+The Creative Studio at `apps/admin/src/app/admin/creative-studio/` is the UI for the openCLAW video-editor agent (Reel). It provides real-time project editing with DnD scenes, editable captions, and SSE-driven activity updates. Backend logic is in `packages/video-editor/`.
+
+See [.claude/knowledge-bases/creative-studio/README.md](.claude/knowledge-bases/creative-studio/README.md) for complete architecture and API reference.
+
 ---
 
 ## Multi-Tenancy Patterns
@@ -780,7 +788,7 @@ See [.claude/knowledge-bases/environment-variables-guide/README.md](.claude/know
 **Quick Reference**:
 
 - Production vars → Vercel first → `vercel env pull .env.local`
-- Local-only vars → `.env.development.local` (LOCAL*\*, DEBUG*_, TEST\__)
+- Local-only vars → `.env.development.local` (LOCAL*\*, DEBUG*\_, TEST\_\_)
 - Documentation → ALL `apps/*/.env.example` files must stay in sync
 - **NEVER** create `.env.production` files (security risk)
 

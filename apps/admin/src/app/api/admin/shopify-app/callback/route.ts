@@ -2,11 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { NextResponse } from 'next/server'
 
-import {
-  handleOAuthCallback,
-  registerWebhooks,
-  ShopifyError,
-} from '@cgk-platform/shopify'
+import { handleOAuthCallback, registerWebhooks, ShopifyError } from '@cgk-platform/shopify'
 import { logger } from '@cgk-platform/logging'
 
 /**
@@ -20,7 +16,9 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
   if (!appUrl) {
-    return NextResponse.redirect(new URL('/admin/integrations/shopify-app?error=config_missing', 'http://localhost:3001'))
+    return NextResponse.redirect(
+      new URL('/admin/integrations/shopify-app?error=config_missing', 'http://localhost:3001')
+    )
   }
 
   // Extract OAuth parameters
@@ -50,17 +48,15 @@ export async function GET(request: Request) {
       host: host || undefined,
     })
 
-    logger.info(`[shopify-oauth] Successfully connected shop ${connectedShop} for tenant ${tenantId}`)
+    logger.info(
+      `[shopify-oauth] Successfully connected shop ${connectedShop} for tenant ${tenantId}`
+    )
 
     // Register webhooks for the connected shop
     const webhookBaseUrl = process.env.SHOPIFY_WEBHOOK_BASE_URL || appUrl
 
     try {
-      const { registered, errors } = await registerWebhooks(
-        tenantId,
-        connectedShop,
-        webhookBaseUrl
-      )
+      const { registered, errors } = await registerWebhooks(tenantId, connectedShop, webhookBaseUrl)
 
       logger.info(`[shopify-oauth] Registered ${registered.length} webhooks`)
       if (errors.length > 0) {
@@ -68,7 +64,10 @@ export async function GET(request: Request) {
       }
     } catch (webhookError) {
       // Log but don't fail the OAuth flow
-      logger.error('[shopify-oauth] Webhook registration failed:', webhookError)
+      logger.error(
+        '[shopify-oauth] Webhook registration failed:',
+        webhookError instanceof Error ? webhookError : new Error(String(webhookError))
+      )
     }
 
     // Redirect to success page
@@ -76,7 +75,10 @@ export async function GET(request: Request) {
       new URL('/admin/integrations/shopify-app?success=connected', appUrl)
     )
   } catch (error) {
-    logger.error('[shopify-oauth] Callback error:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      '[shopify-oauth] Callback error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
 
     if (error instanceof ShopifyError) {
       return NextResponse.redirect(

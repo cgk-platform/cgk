@@ -7,7 +7,13 @@ import { NextResponse } from 'next/server'
 import { generate1099NECPacketPdf } from '@cgk-platform/tax'
 
 import { parseTaxFilters } from '@/lib/search-params'
-import { getCreatorTaxInfo, getTaxYearSummary, updateW9Status, generate1099, mark1099Sent } from '@/lib/tax/db'
+import {
+  getCreatorTaxInfo,
+  getTaxYearSummary,
+  updateW9Status,
+  generate1099,
+  mark1099Sent,
+} from '@/lib/tax/db'
 import { logger } from '@cgk-platform/logging'
 
 export async function GET(request: Request) {
@@ -87,8 +93,13 @@ export async function POST(request: Request) {
       let pdfUrl: string | null = null
       try {
         const { rows } = await getCreatorTaxInfo(tenantSlug, {
-          page: 1, limit: 1, offset: 0,
-          w9_status: '', form_1099_status: '', tax_year: taxYear, requires_1099: '',
+          page: 1,
+          limit: 1,
+          offset: 0,
+          w9_status: '',
+          form_1099_status: '',
+          tax_year: taxYear,
+          requires_1099: '',
         })
         const creator = rows.find((r) => r.creator_id === body.creatorId)
         if (creator) {
@@ -120,7 +131,10 @@ export async function POST(request: Request) {
           pdfUrl = blob.url
         }
       } catch (pdfErr) {
-        logger.error('[tax] PDF generation failed:', pdfErr)
+        logger.error(
+          '[tax] PDF generation failed:',
+          pdfErr instanceof Error ? pdfErr : new Error(String(pdfErr))
+        )
         // Continue to mark as generated even if PDF fails
       }
 
@@ -142,8 +156,10 @@ export async function POST(request: Request) {
 
     default:
       return NextResponse.json(
-        { error: 'Invalid action. Must be: approve_w9, reject_w9, generate_1099, or mark_1099_sent' },
-        { status: 400 },
+        {
+          error: 'Invalid action. Must be: approve_w9, reject_w9, generate_1099, or mark_1099_sent',
+        },
+        { status: 400 }
       )
   }
 }

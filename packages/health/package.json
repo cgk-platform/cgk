@@ -26,7 +26,8 @@
   },
   "dependencies": {
     "@cgk-platform/core": "workspace:*",
-    "@cgk-platform/db": "workspace:*"
+    "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/logging": "workspace:*"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",

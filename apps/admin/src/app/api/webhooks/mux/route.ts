@@ -36,7 +36,10 @@ export async function POST(request: Request) {
   // Verify webhook signature
   const { valid, error: verifyError } = verifyWebhookSignature(body, signature)
   if (!valid) {
-    logger.error('[Mux Webhook] Invalid signature:', verifyError)
+    logger.error(
+      '[Mux Webhook] Invalid signature:',
+      new Error(verifyError ?? 'Unknown signature error')
+    )
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
@@ -45,7 +48,10 @@ export async function POST(request: Request) {
   try {
     payload = parseWebhookPayload(body)
   } catch (error) {
-    logger.error('[Mux Webhook] Failed to parse payload:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      '[Mux Webhook] Failed to parse payload:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
@@ -104,11 +110,7 @@ export async function POST(request: Request) {
       logger.info('[Mux Webhook] Updated video with asset ID:', videoId, assetId)
     },
 
-    onAssetReady: async (
-      assetId: string,
-      playbackId: string | null,
-      duration: number | null,
-    ) => {
+    onAssetReady: async (assetId: string, playbackId: string | null, duration: number | null) => {
       logger.info('[Mux Webhook] Asset ready:', assetId, playbackId, duration)
 
       // Find video by asset ID
@@ -130,9 +132,7 @@ export async function POST(request: Request) {
       }
 
       // Generate thumbnail URL
-      const thumbnailUrl = playbackId
-        ? getThumbnailUrl(playbackId, { width: 640, time: 2 })
-        : null
+      const thumbnailUrl = playbackId ? getThumbnailUrl(playbackId, { width: 640, time: 2 }) : null
 
       // Update video
       await withTenant(tenantId, async () => {
@@ -152,7 +152,11 @@ export async function POST(request: Request) {
     },
 
     onAssetErrored: async (assetId: string, error: string) => {
-      logger.error('[Mux Webhook] Asset errored:', assetId, error instanceof Error ? error : new Error(String(error)))
+      logger.error(
+        '[Mux Webhook] Asset errored:',
+        assetId,
+        error instanceof Error ? error : new Error(String(error))
+      )
 
       // Find video by asset ID
       const result = await sql`
@@ -192,7 +196,11 @@ export async function POST(request: Request) {
     },
 
     onUploadErrored: async (uploadId: string, error: string) => {
-      logger.error('[Mux Webhook] Upload errored:', uploadId, error instanceof Error ? error : new Error(String(error)))
+      logger.error(
+        '[Mux Webhook] Upload errored:',
+        uploadId,
+        error instanceof Error ? error : new Error(String(error))
+      )
 
       // Find video by upload ID
       const result = await sql`

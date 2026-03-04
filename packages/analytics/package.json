@@ -23,7 +23,8 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@cgk-platform/core": "workspace:*"
+    "@cgk-platform/core": "workspace:*",
+    "@cgk-platform/logging": "workspace:*"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",

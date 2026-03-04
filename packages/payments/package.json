@@ -26,7 +26,8 @@
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
     "@cgk-platform/integrations": "workspace:*",
-    "stripe": "^17.0.0"
+    "stripe": "^17.0.0",
+    "@cgk-platform/logging": "workspace:*"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",

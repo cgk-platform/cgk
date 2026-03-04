@@ -28,7 +28,8 @@
     "@cgk-platform/auth": "workspace:*",
     "@cgk-platform/core": "workspace:*",
     "@cgk-platform/db": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@cgk-platform/logging": "workspace:*"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",

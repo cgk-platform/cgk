@@ -17,20 +17,23 @@ async function fetchProducts(): Promise<Product[]> {
     })
 
     if (!res.ok) {
-      logger.error('Failed to fetch products:', await res.text())
+      logger.error('Failed to fetch products:', new Error(await res.text()))
       return []
     }
 
     const json = (await res.json()) as ProductsResponse
 
     if (!json.success || !json.data) {
-      logger.error('Invalid products response:', json)
+      logger.error('Invalid products response:', undefined, { response: json })
       return []
     }
 
     return json.data
   } catch (error) {
-    logger.error('Error fetching products:', error)
+    logger.error(
+      'Error fetching products:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return []
   }
 }

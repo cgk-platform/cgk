@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { Cart, CartItem, CartContextValue } from './types'
-import { logger } from '@cgk-platform/logging'
+
+const logger = { info: console.log, warn: console.warn, error: console.error, debug: console.debug }
 
 const CART_STORAGE_KEY = 'meliusly_cart'
 const CART_SYNC_INTERVAL = 30000 // Sync every 30 seconds

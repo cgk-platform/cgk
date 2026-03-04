@@ -59,10 +59,7 @@ export async function GET(request: Request) {
     const audits = await withTenant(tenantSlug, () => getAudits())
 
     if (audits.length < 2) {
-      return NextResponse.json(
-        { error: 'Need at least 2 audits to compare' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Need at least 2 audits to compare' }, { status: 400 })
     }
 
     const currentAudit = audits[0]!
@@ -98,7 +95,10 @@ export async function POST(request: Request) {
   const pages = await withTenant(tenantSlug, () => getAnalyzablePages())
 
   // Get the base URL from environment or request
-  const baseUrl = process.env.STOREFRONT_URL || process.env.NEXT_PUBLIC_STOREFRONT_URL || request.headers.get('origin')
+  const baseUrl =
+    process.env.STOREFRONT_URL ||
+    process.env.NEXT_PUBLIC_STOREFRONT_URL ||
+    request.headers.get('origin')
   if (!baseUrl) {
     return NextResponse.json(
       { error: 'STOREFRONT_URL environment variable is required' },
@@ -122,15 +122,15 @@ export async function POST(request: Request) {
       pageResults.push(analysis)
     } catch (err) {
       // Log error but continue with other pages
-      logger.error(`Failed to analyze ${pagePath}:`, err)
+      logger.error(
+        `Failed to analyze ${pagePath}:`,
+        err instanceof Error ? err : new Error(String(err))
+      )
     }
   }
 
   if (pageResults.length === 0) {
-    return NextResponse.json(
-      { error: 'No pages could be analyzed' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'No pages could be analyzed' }, { status: 400 })
   }
 
   // Create the audit

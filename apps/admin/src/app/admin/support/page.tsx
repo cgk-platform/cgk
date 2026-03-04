@@ -1,5 +1,9 @@
 import { Card, CardContent, CardHeader } from '@cgk-platform/ui'
-import { getTicketMetrics, getUnacknowledgedAlerts, type TicketMetrics } from '@cgk-platform/support'
+import {
+  getTicketMetrics,
+  getUnacknowledgedAlerts,
+  type TicketMetrics,
+} from '@cgk-platform/support'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import {
@@ -32,7 +36,10 @@ export default async function SupportDashboardPage() {
   const [metrics, alerts] = await Promise.all([
     getMetrics(tenantId),
     getUnacknowledgedAlerts(tenantId).catch((error) => {
-      logger.error('[support] Failed to load alerts:', error)
+      logger.error(
+        '[support] Failed to load alerts:',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return []
     }),
   ])
@@ -97,7 +104,7 @@ export default async function SupportDashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((stat) => (
           <Link key={stat.title} href={stat.href}>
-            <Card className="hover:border-primary/50 transition-colors">
+            <Card className="transition-colors hover:border-primary/50">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -121,9 +128,7 @@ export default async function SupportDashboardPage() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Sentiment Alerts</h2>
-              <span className="text-sm text-muted-foreground">
-                {alerts.length} unacknowledged
-              </span>
+              <span className="text-sm text-muted-foreground">{alerts.length} unacknowledged</span>
             </div>
           </CardHeader>
           <CardContent>
@@ -138,16 +143,14 @@ export default async function SupportDashboardPage() {
                   <Link
                     key={alert.id}
                     href={`/admin/support/tickets/${alert.ticketId}`}
-                    className="flex items-start gap-3 rounded-md border p-3 hover:bg-muted/50 transition-colors"
+                    className="flex items-start gap-3 rounded-md border p-3 transition-colors hover:bg-muted/50"
                   >
                     <div className="mt-0.5 rounded-full bg-red-100 p-1.5 dark:bg-red-900">
                       <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">
-                        Negative sentiment detected
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium">Negative sentiment detected</p>
+                      <p className="truncate text-xs text-muted-foreground">
                         {alert.triggerReason || `Score: ${alert.sentimentScore.toFixed(2)}`}
                       </p>
                     </div>
@@ -190,8 +193,8 @@ export default async function SupportDashboardPage() {
                     : '--'}
                 </span>
               </div>
-              <div className="border-t pt-4 mt-4">
-                <p className="text-sm font-medium mb-3">Tickets by Channel</p>
+              <div className="mt-4 border-t pt-4">
+                <p className="mb-3 text-sm font-medium">Tickets by Channel</p>
                 <div className="space-y-2">
                   {metrics?.ticketsByChannel &&
                     Object.entries(metrics.ticketsByChannel)
@@ -215,8 +218,8 @@ export default async function SupportDashboardPage() {
       {/* Quick Links */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Link href="/admin/support/tickets">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-6 flex items-center gap-4">
+          <Card className="cursor-pointer transition-colors hover:border-primary/50">
+            <CardContent className="flex items-center gap-4 pt-6">
               <div className="rounded-lg bg-primary/10 p-3">
                 <MessageSquare className="h-6 w-6 text-primary" />
               </div>
@@ -228,8 +231,8 @@ export default async function SupportDashboardPage() {
           </Card>
         </Link>
         <Link href="/admin/support/agents">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-6 flex items-center gap-4">
+          <Card className="cursor-pointer transition-colors hover:border-primary/50">
+            <CardContent className="flex items-center gap-4 pt-6">
               <div className="rounded-lg bg-primary/10 p-3">
                 <Users className="h-6 w-6 text-primary" />
               </div>
@@ -241,8 +244,8 @@ export default async function SupportDashboardPage() {
           </Card>
         </Link>
         <Link href="/admin/support/settings">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-6 flex items-center gap-4">
+          <Card className="cursor-pointer transition-colors hover:border-primary/50">
+            <CardContent className="flex items-center gap-4 pt-6">
               <div className="rounded-lg bg-primary/10 p-3">
                 <Clock className="h-6 w-6 text-primary" />
               </div>
