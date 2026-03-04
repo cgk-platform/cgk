@@ -44,7 +44,7 @@ fi
 echo -e "${GREEN}✓ Working directory clean${NC}"
 
 # Check merge drivers configured
-if [ "$(git config --get merge.ours.driver)" != "true" ]; then
+if [ "$(git config --get merge.ours.driver)" != "git merge-file --ours %A %O %B" ]; then
   echo -e "${RED}❌ Error: merge.ours.driver not configured${NC}"
   echo ""
   echo "Run: ./scripts/setup-git-merge-drivers.sh"

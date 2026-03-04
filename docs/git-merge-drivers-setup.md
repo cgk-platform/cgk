@@ -26,7 +26,7 @@ Add this section:
 ```ini
 [merge "ours"]
     name = Always keep our version
-    driver = true
+    driver = git merge-file --ours %A %O %B
 
 [merge "union"]
     name = Union merge (combine both versions)
@@ -38,7 +38,7 @@ Add this section:
 ```bash
 # Configure "ours" merge driver
 git config merge.ours.name "Always keep our version"
-git config merge.ours.driver true
+git config merge.ours.driver "git merge-file --ours %A %O %B"
 
 # Configure "union" merge driver
 git config merge.union.name "Union merge (combine both versions)"
@@ -58,7 +58,7 @@ We provide a script to set this up automatically:
 ```bash
 # Check that merge drivers are configured
 git config --get merge.ours.driver
-# Should output: true
+# Should output: git merge-file --ours %A %O %B
 
 git config --get merge.union.driver
 # Should output: git merge-file --union %A %O %B

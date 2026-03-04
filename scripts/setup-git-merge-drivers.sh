@@ -60,7 +60,7 @@ echo ""
 echo -e "${BLUE}1. Configuring 'ours' merge driver${NC}"
 echo "   Purpose: Always keep our version (protects brand customizations)"
 git config merge.ours.name "Always keep our version"
-git config merge.ours.driver true
+git config merge.ours.driver "git merge-file --ours %A %O %B"
 echo -e "${GREEN}   ✓ Configured merge.ours.driver${NC}"
 echo ""
 
@@ -79,7 +79,7 @@ echo ""
 OURS_DRIVER=$(git config --get merge.ours.driver)
 UNION_DRIVER=$(git config --get merge.union.driver)
 
-if [ "$OURS_DRIVER" = "true" ]; then
+if [ "$OURS_DRIVER" = "git merge-file --ours %A %O %B" ]; then
   echo -e "${GREEN}   ✓ merge.ours.driver = true${NC}"
 else
   echo -e "${RED}   ✗ merge.ours.driver NOT configured correctly${NC}"
