@@ -1,14 +1,59 @@
 # CGK Platform - Local Development Setup
 
 > **Last Updated**: 2026-03-03
-> **Time Required**: 30 minutes
+> **Time Required**: 5-10 minutes (automated) or 30 minutes (manual)
 > **Difficulty**: Beginner
 
 This guide helps you run the CGK Commerce Platform on your local machine for development.
 
 ---
 
-## Prerequisites
+## 🚀 Ultra-Fast Setup (5-10 minutes)
+
+**NEW**: Use the automated quick-start command for the fastest setup experience.
+
+```bash
+# Clone repository
+git clone https://github.com/your-org/cgk.git
+cd cgk
+
+# Run automated setup
+npx @cgk-platform/cli quick-start
+```
+
+This command will:
+
+- ✅ Check prerequisites (Node 22+, pnpm 10+, Docker)
+- ✅ Start PostgreSQL and Redis (Docker) OR prompt for your database URL
+- ✅ Auto-generate all secrets (JWT, encryption keys, etc.)
+- ✅ Create all .env.local files automatically
+- ✅ Install dependencies (pnpm install)
+- ✅ Run database migrations
+- ✅ Start dev server
+- ✅ Open browser to http://localhost:3200
+
+**Done!** Platform ready in 5-10 minutes.
+
+**Options**:
+
+```bash
+# Skip Docker (use your own database)
+npx @cgk-platform/cli quick-start --skip-docker
+
+# Don't open browser automatically
+npx @cgk-platform/cli quick-start --no-browser
+
+# Skip install if dependencies already installed
+npx @cgk-platform/cli quick-start --skip-install
+```
+
+---
+
+## Manual Setup (30 minutes)
+
+Prefer to set up manually? Follow these steps.
+
+### Prerequisites
 
 Before you begin, ensure you have:
 
@@ -32,7 +77,7 @@ Before you begin, ensure you have:
 
 ---
 
-## Quick Start (5 Steps)
+## Quick Start (5 Manual Steps)
 
 ```bash
 # 1. Clone repository

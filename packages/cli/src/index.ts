@@ -20,6 +20,7 @@
  * - update            : Update packages to latest versions
  * - update-platform   : Update CGK platform from upstream repository
  * - changelog         : View changelog for a version
+ * - quick-start       : Set up CGK platform in 5-10 minutes
  */
 
 import { Command } from 'commander'
@@ -32,6 +33,7 @@ import { initCommand } from './commands/init.js'
 import { migrateCreateCommand } from './commands/migrate-create.js'
 import { migrateCommand } from './commands/migrate.js'
 import { migrateAutoCommand } from './commands/migrate-auto.js'
+import { quickStartCommand } from './commands/quick-start.js'
 import { setupJobsCommand } from './commands/setup-jobs.js'
 import { setupCommand, setupDatabaseCommand } from './commands/setup.js'
 import { tenantExportCommand } from './commands/tenant-export.js'
@@ -46,6 +48,7 @@ const program = new Command()
 program.name('cgk').description('CGK - Commerce Growth Kit CLI').version('0.0.0')
 
 // Register commands
+program.addCommand(quickStartCommand) // Featured command first
 program.addCommand(createCommand)
 program.addCommand(initCommand)
 program.addCommand(doctorCommand)

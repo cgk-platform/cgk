@@ -1,7 +1,7 @@
 # @cgk-platform/cli - AI Development Guide
 
-> **Package Version**: 0.0.0
-> **Last Updated**: 2025-02-10
+> **Package Version**: 1.1.0
+> **Last Updated**: 2026-03-03
 
 ---
 
@@ -14,6 +14,11 @@ CLI tool for the CGK platform. Provides commands to create brand sites, initiali
 ## Quick Reference
 
 ```bash
+# ⚡ Ultra-fast setup (5-10 minutes) - NEW!
+npx @cgk-platform/cli quick-start
+npx @cgk-platform/cli quick-start --skip-docker
+npx @cgk-platform/cli quick-start --no-browser
+
 # Create new brand site
 npx @cgk-platform/cli create my-brand
 npx @cgk-platform/cli create my-brand --template=basic
@@ -58,16 +63,56 @@ npx @cgk-platform/cli changelog 1.0.0
 
 ## Commands
 
+### `quick-start` ⚡ NEW
+
+Set up CGK platform in 5-10 minutes with automated configuration.
+
+**What it does**:
+
+1. Checks prerequisites (Node 22+, pnpm 10+, Docker)
+2. Starts PostgreSQL and Redis (Docker) OR prompts for your database URL
+3. Auto-generates all secrets (JWT, encryption keys, etc.)
+4. Creates all .env.local files automatically
+5. Installs dependencies (pnpm install)
+6. Runs database migrations
+7. Starts dev server
+8. Opens browser to http://localhost:3200
+
+**Options**:
+
+- `--skip-docker` - Skip Docker setup (use existing database)
+- `--no-browser` - Do not open browser automatically
+- `--skip-install` - Skip dependency installation (if already installed)
+
+**Example**:
+
+```bash
+# Full automated setup
+npx @cgk-platform/cli quick-start
+
+# Use cloud database instead of Docker
+npx @cgk-platform/cli quick-start --skip-docker
+
+# Don't open browser
+npx @cgk-platform/cli quick-start --no-browser
+```
+
+**Time**: 5-10 minutes (vs 30 minutes manual setup)
+
+---
+
 ### `create <name>`
 
 Create a new CGK brand site.
 
 **Options:**
+
 - `-t, --template <template>` - Template: basic, full, storefront-only (default: full)
 - `-d, --directory <dir>` - Target directory
 - `--skip-install` - Skip dependency installation
 
 **Example:**
+
 ```bash
 npx @cgk-platform/cli create my-brand --template=full
 ```
@@ -77,6 +122,7 @@ npx @cgk-platform/cli create my-brand --template=full
 Initialize CGK in an existing Next.js project.
 
 **Example:**
+
 ```bash
 cd existing-project
 npx @cgk-platform/cli init
@@ -87,6 +133,7 @@ npx @cgk-platform/cli init
 Check system requirements and configuration.
 
 **Checks:**
+
 - Node.js version (20+ required)
 - pnpm installation
 - Environment variables (DATABASE_URL, JWT_SECRET, etc.)
@@ -97,10 +144,12 @@ Check system requirements and configuration.
 Run the platform setup wizard.
 
 **Options:**
+
 - `--database` - Setup database only
 - `--cache` - Setup cache only
 
 **Steps:**
+
 1. Database (Neon PostgreSQL)
 2. Cache (Upstash Redis)
 3. Migrations
@@ -112,6 +161,7 @@ Run the platform setup wizard.
 Run database migrations.
 
 **Options:**
+
 - `--status` - Show migration status
 - `--rollback` - Rollback last migration
 - `--dry-run` - Preview without executing
@@ -121,10 +171,12 @@ Run database migrations.
 Check for available package updates.
 
 **Options:**
+
 - `--channel <channel>` - Release channel: stable, beta, canary (default: stable)
-- `--all` - Check all packages, not just @cgk-platform/*
+- `--all` - Check all packages, not just @cgk-platform/\*
 
 **Example:**
+
 ```bash
 npx @cgk-platform/cli check-updates
 npx @cgk-platform/cli check-updates --all
@@ -136,12 +188,14 @@ npx @cgk-platform/cli check-updates --channel beta
 Update packages to latest versions.
 
 **Options:**
+
 - `--dry-run` - Preview updates without applying them
-- `--all` - Update all packages, not just @cgk-platform/*
+- `--all` - Update all packages, not just @cgk-platform/\*
 - `--yes, -y` - Skip confirmation prompt
 - `--latest` - Update to latest versions (default: wanted versions)
 
 **Example:**
+
 ```bash
 npx @cgk-platform/cli update
 npx @cgk-platform/cli update --dry-run
@@ -153,15 +207,18 @@ npx @cgk-platform/cli update --all --yes
 Export tenant data to a SQL file.
 
 **Arguments:**
+
 - `<slug>` - Tenant slug to export
 
 **Options:**
+
 - `-o, --output <file>` - Output file path (default: `{slug}-export-{timestamp}.sql`)
 - `--data-only` - Export data only (no schema)
 - `--schema-only` - Export schema only (no data)
 - `--dry-run` - Show what would be exported without creating file
 
 **Example:**
+
 ```bash
 npx @cgk-platform/cli tenant:export rawdog
 npx @cgk-platform/cli tenant:export rawdog -o backup.sql
@@ -173,15 +230,18 @@ npx @cgk-platform/cli tenant:export rawdog --data-only --dry-run
 Import tenant data from a SQL file.
 
 **Arguments:**
+
 - `<file>` - SQL file to import
 
 **Options:**
+
 - `--target <slug>` - Target tenant slug (required)
 - `--dry-run` - Show what would be imported without executing
 - `--yes, -y` - Skip confirmation prompt
 - `--create-tenant` - Create the target tenant if it does not exist
 
 **Example:**
+
 ```bash
 npx @cgk-platform/cli tenant:import backup.sql --target new_brand
 npx @cgk-platform/cli tenant:import backup.sql --target new_brand --create-tenant
@@ -193,14 +253,17 @@ npx @cgk-platform/cli tenant:import backup.sql --target new_brand --dry-run
 View changelog for a version.
 
 **Arguments:**
+
 - `[version]` - Version to view (default: latest)
 
 **Options:**
+
 - `--json` - Output as JSON
 - `--all` - Show all versions
 - `--count <n>` - Show last N versions (default: 5)
 
 **Example:**
+
 ```bash
 npx @cgk-platform/cli changelog
 npx @cgk-platform/cli changelog 1.0.0
@@ -212,34 +275,34 @@ npx @cgk-platform/cli changelog --json
 
 ## File Map
 
-| File | Purpose |
-|------|---------|
-| `index.ts` | CLI entry point, command registration |
-| `commands/create.ts` | Create new brand site |
-| `commands/init.ts` | Initialize in existing project |
-| `commands/doctor.ts` | System health check |
-| `commands/setup.ts` | Platform setup wizard |
-| `commands/migrate.ts` | Database migrations |
-| `commands/migrate-create.ts` | Create new migration file |
-| `commands/tenant.ts` | Tenant create/list commands |
-| `commands/tenant-export.ts` | Export tenant data to SQL |
-| `commands/tenant-import.ts` | Import tenant data from SQL |
-| `commands/check-updates.ts` | Check for package updates |
-| `commands/update.ts` | Update packages |
-| `commands/changelog.ts` | View changelog |
-| `commands/setup-jobs.ts` | Setup background jobs provider |
+| File                         | Purpose                               |
+| ---------------------------- | ------------------------------------- |
+| `index.ts`                   | CLI entry point, command registration |
+| `commands/create.ts`         | Create new brand site                 |
+| `commands/init.ts`           | Initialize in existing project        |
+| `commands/doctor.ts`         | System health check                   |
+| `commands/setup.ts`          | Platform setup wizard                 |
+| `commands/migrate.ts`        | Database migrations                   |
+| `commands/migrate-create.ts` | Create new migration file             |
+| `commands/tenant.ts`         | Tenant create/list commands           |
+| `commands/tenant-export.ts`  | Export tenant data to SQL             |
+| `commands/tenant-import.ts`  | Import tenant data from SQL           |
+| `commands/check-updates.ts`  | Check for package updates             |
+| `commands/update.ts`         | Update packages                       |
+| `commands/changelog.ts`      | View changelog                        |
+| `commands/setup-jobs.ts`     | Setup background jobs provider        |
 
 ---
 
 ## Dependencies
 
-| Dependency | Why |
-|------------|-----|
-| `commander` | CLI framework |
-| `inquirer` | Interactive prompts |
-| `chalk` | Terminal colors |
-| `ora` | Spinners |
-| `fs-extra` | File operations |
+| Dependency  | Why                 |
+| ----------- | ------------------- |
+| `commander` | CLI framework       |
+| `inquirer`  | Interactive prompts |
+| `chalk`     | Terminal colors     |
+| `ora`       | Spinners            |
+| `fs-extra`  | File operations     |
 
 ---
 
