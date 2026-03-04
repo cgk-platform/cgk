@@ -127,7 +127,10 @@ export async function getVariantAssignment(
 
   // Persist to database (async, don't wait)
   persistAssignment(tenantSlug, assignment).catch((error) => {
-    logger.error('Failed to persist A/B assignment:', error)
+    logger.error(
+      'Failed to persist A/B assignment:',
+      error instanceof Error ? error : new Error(String(error))
+    )
   })
 
   return { variant, isNew: true, test }
@@ -136,9 +139,7 @@ export async function getVariantAssignment(
 /**
  * Get all active tests for the current page
  */
-export async function getActiveTests(
-  urlPath?: string
-): Promise<ABTest[]> {
+export async function getActiveTests(urlPath?: string): Promise<ABTest[]> {
   const tenantSlug = await getTenantSlug()
   if (!tenantSlug) return []
 
@@ -196,9 +197,7 @@ export async function getActiveTests(
         if (!test.targeting?.urlPatterns || test.targeting.urlPatterns.length === 0) {
           return true // No targeting = all URLs
         }
-        return test.targeting.urlPatterns.some((pattern) =>
-          matchUrlPattern(urlPath, pattern)
-        )
+        return test.targeting.urlPatterns.some((pattern) => matchUrlPattern(urlPath, pattern))
       })
     }
 
@@ -281,10 +280,7 @@ function assignVariant(visitorId: string, test: ABTest): ABVariant {
  */
 function matchUrlPattern(url: string, pattern: string): boolean {
   // Convert glob to regex
-  const regex = pattern
-    .replace(/\*/g, '.*')
-    .replace(/\?/g, '.')
-    .replace(/\//g, '\\/')
+  const regex = pattern.replace(/\*/g, '.*').replace(/\?/g, '.').replace(/\//g, '\\/')
 
   return new RegExp(`^${regex}$`).test(url)
 }

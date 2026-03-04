@@ -1,0 +1,3 @@
+id,slug,name,settings,shopify_store_domain,shopify_access_token_encrypted,stripe_account_id,stripe_customer_id,status,created_at,updated_at,onboarding_status,onboarding_completed_at,setup_checklist,primary_color,logo_url,custom_domain,custom_domain_verified,enabled_features,shopify_config
+eb034004-90c1-427e-ae6b-4091ea8a0cef,cgk_linens,CGK Linens,{},,,,,active,2026-02-10 23:27:09.49198+00,2026-02-10 23:27:09.49198+00,pending,,{},,,,f,[],{}
+5cb87b13-3b13-4400-9542-53c8b8d12cb8,meliusly,Meliusly,"{""theme"": {""primaryColor"": ""#0268A0""}, ""features"": {""reviews"": true}}",meliusly.myshopify.com,,,,active,2026-02-27 21:52:30.196607+00,2026-03-03 19:10:15.772132+00,pending,,{},,,,f,[],"{""checkoutDomain"": ""meliusly.myshopify.com"", ""storefrontAccessToken"": null}"

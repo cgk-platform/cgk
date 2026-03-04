@@ -119,7 +119,7 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
           } catch (err) {
             logger.warn(
               `[tenant] Failed to decrypt Shopify storefront token for "${slug}" — skipping Shopify config`,
-              err
+              { error: err instanceof Error ? err.message : String(err) }
             )
             storefrontToken = null as unknown as string
           }
@@ -137,7 +137,10 @@ export const getTenantConfig = cache(async (): Promise<TenantConfig | null> => {
 
     return config
   } catch (error) {
-    logger.error('Failed to get tenant config:', error)
+    logger.error(
+      'Failed to get tenant config:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 })

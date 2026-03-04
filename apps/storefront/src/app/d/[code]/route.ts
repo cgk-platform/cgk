@@ -51,7 +51,7 @@ const CRAWLER_USER_AGENTS = [
 function isCrawler(userAgent: string | null): boolean {
   if (!userAgent) return false
   return CRAWLER_USER_AGENTS.some((crawler) =>
-    userAgent.toLowerCase().includes(crawler.toLowerCase()),
+    userAgent.toLowerCase().includes(crawler.toLowerCase())
   )
 }
 
@@ -81,9 +81,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
   // If code not found in our system, redirect to home with the code as a query param
   // Shopify can still try to apply it
   if (!metadata) {
-    return NextResponse.redirect(
-      new URL(`/?discount=${encodeURIComponent(code)}`, request.url),
-    )
+    return NextResponse.redirect(new URL(`/?discount=${encodeURIComponent(code)}`, request.url))
   }
 
   const userAgent = request.headers.get('user-agent')
@@ -95,8 +93,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const title = metadata.og_title || `${metadata.code} - Discount Code`
     const description =
-      metadata.og_description ||
-      `Use code ${metadata.code} for a special discount at ${siteName}`
+      metadata.og_description || `Use code ${metadata.code} for a special discount at ${siteName}`
     const image = metadata.og_image || `${siteUrl}/og-default.png`
 
     const html = `
@@ -191,10 +188,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 /**
  * Track promo code visit for analytics
  */
-async function trackPromoCodeVisit(
-  tenantSlug: string,
-  promoCodeId: string,
-): Promise<void> {
+async function trackPromoCodeVisit(tenantSlug: string, promoCodeId: string): Promise<void> {
   try {
     await withTenant(tenantSlug, async () => {
       // Simple increment - we could add more detailed tracking later
@@ -206,7 +200,10 @@ async function trackPromoCodeVisit(
     })
   } catch (error) {
     // Don't fail the redirect if tracking fails
-    logger.error('Failed to track promo code visit:', error)
+    logger.error(
+      'Failed to track promo code visit:',
+      error instanceof Error ? error : new Error(String(error))
+    )
   }
 }
 

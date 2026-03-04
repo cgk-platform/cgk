@@ -128,10 +128,7 @@ export async function addToCart(
 /**
  * Update cart line quantity
  */
-export async function updateCartLine(
-  lineId: string,
-  quantity: number
-): Promise<Cart> {
+export async function updateCartLine(lineId: string, quantity: number): Promise<Cart> {
   const commerce = await requireCommerceProvider()
   const cart = await getOrCreateCart()
 
@@ -204,7 +201,9 @@ async function setCartAttributesInternal(
     return await commerce.cart.setAttributes(cartId, attributes)
   } catch (error) {
     // If setAttributes is not implemented, log and return current cart
-    logger.warn('Cart attributes update not supported by provider:', error)
+    logger.warn('Cart attributes update not supported by provider:', {
+      error: error instanceof Error ? error.message : String(error),
+    })
     const cart = await commerce.cart.get(cartId)
     if (!cart) {
       throw new Error(`Cart ${cartId} not found`)
@@ -269,7 +268,9 @@ export async function updateCartBuyerIdentity(email: string): Promise<Cart | nul
   } catch (error) {
     // Non-fatal: log and continue. A failed identity update should not
     // block the login flow.
-    logger.warn('updateCartBuyerIdentity: failed to update buyer identity', error)
+    logger.warn('updateCartBuyerIdentity: failed to update buyer identity', {
+      error: error instanceof Error ? error.message : String(error),
+    })
     return null
   }
 }
@@ -290,7 +291,9 @@ export async function updateCartNote(note: string): Promise<Cart | null> {
   try {
     return await setCartAttributesInternal(cart.id, [attribute])
   } catch (error) {
-    logger.warn('updateCartNote: failed to update cart note', error)
+    logger.warn('updateCartNote: failed to update cart note', {
+      error: error instanceof Error ? error.message : String(error),
+    })
     return null
   }
 }

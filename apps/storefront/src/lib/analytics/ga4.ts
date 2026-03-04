@@ -16,8 +16,13 @@ const DEBUG_MODE = process.env.NEXT_PUBLIC_DEBUG_ANALYTICS === 'true'
  * The runtime config is injected by AnalyticsHead from the tenant's site_config table.
  */
 function getGA4Id(): string | undefined {
-  if (typeof window !== 'undefined' && (window as typeof window & { __CGK_ANALYTICS__?: { ga4MeasurementId?: string } }).__CGK_ANALYTICS__?.ga4MeasurementId) {
-    return (window as typeof window & { __CGK_ANALYTICS__?: { ga4MeasurementId?: string } }).__CGK_ANALYTICS__!.ga4MeasurementId!
+  if (
+    typeof window !== 'undefined' &&
+    (window as typeof window & { __CGK_ANALYTICS__?: { ga4MeasurementId?: string } })
+      .__CGK_ANALYTICS__?.ga4MeasurementId
+  ) {
+    return (window as typeof window & { __CGK_ANALYTICS__?: { ga4MeasurementId?: string } })
+      .__CGK_ANALYTICS__!.ga4MeasurementId!
   }
   return process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID || undefined
 }
@@ -41,7 +46,7 @@ function isGA4Available(): boolean {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    logger.info(`[GA4] ${message}`, data ?? '')
+    logger.info(`[GA4] ${message}`, data ? { data } : undefined)
   }
 }
 
@@ -58,7 +63,10 @@ function sendGA4Event(eventName: string, params: Record<string, unknown>): void 
     window.gtag('event', eventName, params)
     debugLog(`Sent ${eventName}`, params)
   } catch (error) {
-    logger.error(`[GA4] Error sending ${eventName}:`, error)
+    logger.error(
+      `[GA4] Error sending ${eventName}:`,
+      error instanceof Error ? error : new Error(String(error))
+    )
   }
 }
 

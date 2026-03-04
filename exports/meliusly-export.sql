@@ -1,0 +1,3 @@
+psql:scripts/export-tenant.sql:19: ERROR:  syntax error at or near ":"
+LINE 3: ... (SELECT 1 FROM public.organizations WHERE slug = :'tenant')...
+                                                             ^

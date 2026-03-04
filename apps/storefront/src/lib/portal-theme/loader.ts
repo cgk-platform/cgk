@@ -48,13 +48,14 @@ export const loadPortalTheme = cache(
       }
 
       // Parse and merge with defaults
-      const savedConfig = typeof row.config === 'string'
-        ? JSON.parse(row.config)
-        : row.config
+      const savedConfig = typeof row.config === 'string' ? JSON.parse(row.config) : row.config
 
       return createPortalTheme(tenantId, savedConfig)
     } catch (error) {
-      logger.error('Failed to load portal theme:', error)
+      logger.error(
+        'Failed to load portal theme:',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return createPortalTheme(tenantId)
     }
   }
@@ -82,7 +83,10 @@ export async function loadPortalThemeForSSR(
 
     return loadPortalTheme(tenant.id)
   } catch (error) {
-    logger.error('Failed to load portal theme for SSR:', error)
+    logger.error(
+      'Failed to load portal theme for SSR:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return createPortalTheme('default')
   }
 }
@@ -110,10 +114,13 @@ export async function savePortalTheme(
 
     return { success: true }
   } catch (error) {
-    logger.error('Failed to save portal theme:', error)
+    logger.error(
+      'Failed to save portal theme:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
 }
@@ -134,10 +141,13 @@ export async function resetPortalTheme(
 
     return { success: true }
   } catch (error) {
-    logger.error('Failed to reset portal theme:', error)
+    logger.error(
+      'Failed to reset portal theme:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     }
   }
 }

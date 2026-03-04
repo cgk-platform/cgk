@@ -7,11 +7,7 @@
 
 import { sql, withTenant } from '@cgk-platform/db'
 import { cache } from 'react'
-import type {
-  LandingPageConfig,
-  LandingPageStatus,
-  BlockType,
-} from '@/lib/theme/types'
+import type { LandingPageConfig, LandingPageStatus, BlockType } from '@/lib/theme/types'
 import { logger } from '@cgk-platform/logging'
 
 /**
@@ -104,7 +100,10 @@ export const getLandingPage = cache(
 
       return transformLandingPage(row)
     } catch (error) {
-      logger.error('Failed to fetch landing page:', error)
+      logger.error(
+        'Failed to fetch landing page:',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return null
     }
   }
@@ -140,7 +139,10 @@ export const getLandingPageById = cache(
 
       return transformLandingPage(row)
     } catch (error) {
-      logger.error('Failed to fetch landing page by ID:', error)
+      logger.error(
+        'Failed to fetch landing page by ID:',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return null
     }
   }
@@ -169,7 +171,10 @@ export const getPublishedLandingPages = cache(
 
       return result.rows.map(transformLandingPage)
     } catch (error) {
-      logger.error('Failed to fetch published landing pages:', error)
+      logger.error(
+        'Failed to fetch published landing pages:',
+        error instanceof Error ? error : new Error(String(error))
+      )
       return []
     }
   }
@@ -209,9 +214,7 @@ export const landingPageExists = cache(
  * @param tenantSlug - The tenant identifier
  * @returns Array of slug params for generateStaticParams
  */
-export async function getLandingPageSlugs(
-  tenantSlug: string
-): Promise<Array<{ slug: string }>> {
+export async function getLandingPageSlugs(tenantSlug: string): Promise<Array<{ slug: string }>> {
   const pages = await getPublishedLandingPages(tenantSlug)
   return pages.map((page) => ({ slug: page.slug }))
 }

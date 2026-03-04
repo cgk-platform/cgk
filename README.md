@@ -193,6 +193,53 @@ const orders = await withTenant(tenantId, () => sql`SELECT * FROM orders`)
 // NEVER query without tenant context
 ```
 
+## WordPress-Style Fork Workflow
+
+CGK Platform follows the **WordPress.org distribution model**:
+
+- **Template Repository**: Clean template with no tenant data (this repo)
+- **Your Fork**: Contains YOUR tenant data and configuration
+- **Updates**: Pull and merge from template (like WordPress core updates)
+
+### Creating Your Fork
+
+**Automated (Recommended)**:
+
+```bash
+# Set credentials
+export GITHUB_TOKEN=ghp_xxxxx
+export VERCEL_TOKEN=xxxxx
+export DATABASE_URL=postgres://...
+
+# Create fork with tenant data
+./scripts/create-fork.ts your-org your-platform \
+  --tenants your-brand \
+  --multi-tenant  # omit for single-tenant
+```
+
+**Manual**:
+
+1. Click "Use this template" button
+2. Configure `platform.config.ts` with your tenant(s)
+3. Add Vercel integrations (Neon + Upstash)
+4. Deploy
+
+### Pulling Template Updates
+
+```bash
+# One-time setup
+git remote add upstream https://github.com/cgk-platform/cgk-template
+
+# Regular updates
+git fetch upstream
+git merge upstream/main
+git push origin main  # Auto-deploys to Vercel
+```
+
+**See full guide**: [docs/FORK-WORKFLOW.md](docs/FORK-WORKFLOW.md)
+
+---
+
 ## Deployment
 
 ### Vercel (Recommended)

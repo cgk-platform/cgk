@@ -54,7 +54,10 @@ export async function getAssetBaseUrl(tenantSlug: string): Promise<string> {
 
     return assetBaseUrl
   } catch (error) {
-    logger.error('Failed to get asset base URL:', error)
+    logger.error(
+      'Failed to get asset base URL:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     throw error
   }
 }

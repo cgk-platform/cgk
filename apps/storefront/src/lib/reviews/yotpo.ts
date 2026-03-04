@@ -77,7 +77,9 @@ export async function getYotpoReviews(
   const page = Math.floor(offset / limit) + 1
   const sortParam = mapSortToYotpo(sort)
 
-  const url = new URL(`${YOTPO_API_BASE}/widget/${config.appKey}/products/${encodeURIComponent(productId)}/reviews.json`)
+  const url = new URL(
+    `${YOTPO_API_BASE}/widget/${config.appKey}/products/${encodeURIComponent(productId)}/reviews.json`
+  )
   url.searchParams.set('per_page', String(limit))
   url.searchParams.set('page', String(page))
   url.searchParams.set('sort', sortParam)
@@ -89,7 +91,7 @@ export async function getYotpoReviews(
   try {
     const response = await fetch(url.toString(), {
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       next: { revalidate: 300 }, // Cache for 5 minutes
     })
@@ -119,7 +121,10 @@ export async function getYotpoReviews(
       hasMore: page * limit < data.response.pagination.total,
     }
   } catch (error) {
-    logger.error('Failed to fetch Yotpo reviews:', error)
+    logger.error(
+      'Failed to fetch Yotpo reviews:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return { reviews: [], total: 0, hasMore: false }
   }
 }
@@ -131,14 +136,16 @@ export async function getYotpoRating(
   config: YotpoConfig,
   productId: string
 ): Promise<ProductRating | null> {
-  const url = new URL(`${YOTPO_API_BASE}/widget/${config.appKey}/products/${encodeURIComponent(productId)}/reviews.json`)
+  const url = new URL(
+    `${YOTPO_API_BASE}/widget/${config.appKey}/products/${encodeURIComponent(productId)}/reviews.json`
+  )
   url.searchParams.set('per_page', '1')
   url.searchParams.set('page', '1')
 
   try {
     const response = await fetch(url.toString(), {
       headers: {
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
       next: { revalidate: 300 }, // Cache for 5 minutes
     })
@@ -172,7 +179,10 @@ export async function getYotpoRating(
       distribution,
     }
   } catch (error) {
-    logger.error('Failed to fetch Yotpo rating:', error)
+    logger.error(
+      'Failed to fetch Yotpo rating:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }

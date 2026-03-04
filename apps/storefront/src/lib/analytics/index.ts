@@ -64,7 +64,7 @@ function generateEventId(): string {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    logger.info(`[Analytics] ${message}`, data ?? '')
+    logger.info(`[Analytics] ${message}`, data ? { data } : undefined)
   }
 }
 

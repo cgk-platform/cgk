@@ -10,10 +10,13 @@ import type { CommerceProvider, ListParams, PaginatedResult, Product } from '@cg
 import { sendJob } from '@cgk-platform/jobs'
 import { cache } from 'react'
 
-import { getProductByHandleFromLocalDB, getProductsFromLocalDB, searchProductsInLocalDB } from './products-db'
+import {
+  getProductByHandleFromLocalDB,
+  getProductsFromLocalDB,
+  searchProductsInLocalDB,
+} from './products-db'
 import { getCommerceProviderType, getTenantConfig } from './tenant'
 import { logger } from '@cgk-platform/logging'
-
 
 /**
  * Extended Commerce Provider with local DB integration
@@ -79,10 +82,7 @@ export async function requireCommerceProvider(): Promise<StorefrontCommerceProvi
 /**
  * Create product operations that read from local DB first
  */
-function createLocalDBProductOperations(
-  tenantSlug: string,
-  fallbackProvider: CommerceProvider
-) {
+function createLocalDBProductOperations(tenantSlug: string, fallbackProvider: CommerceProvider) {
   return {
     /**
      * List products from local DB with pagination
@@ -105,7 +105,10 @@ function createLocalDBProductOperations(
         logger.warn('Local DB empty, falling back to Shopify API')
         return fallbackProvider.products.list(params)
       } catch (error) {
-        logger.error('Error fetching products from local DB:', error)
+        logger.error(
+          'Error fetching products from local DB:',
+          error instanceof Error ? error : new Error(String(error))
+        )
         return fallbackProvider.products.list(params)
       }
     },
@@ -141,7 +144,10 @@ function createLocalDBProductOperations(
 
         return shopifyProduct
       } catch (error) {
-        logger.error(`Error fetching product ${handle} from local DB:`, error)
+        logger.error(
+          `Error fetching product ${handle} from local DB:`,
+          error instanceof Error ? error : new Error(String(error))
+        )
         return fallbackProvider.products.getByHandle(handle)
       }
     },
@@ -163,7 +169,10 @@ function createLocalDBProductOperations(
         // Fallback to Shopify search if no local results
         return fallbackProvider.products.search(query, params)
       } catch (error) {
-        logger.error('Error searching products in local DB:', error)
+        logger.error(
+          'Error searching products in local DB:',
+          error instanceof Error ? error : new Error(String(error))
+        )
         return fallbackProvider.products.search(query, params)
       }
     },

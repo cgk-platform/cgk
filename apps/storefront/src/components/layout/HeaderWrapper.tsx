@@ -43,7 +43,10 @@ export async function HeaderWrapper(props: HeaderWrapperProps) {
         menuItems = menu.items.map(mapMenuItem)
       }
     } catch (error) {
-      logger.error('Failed to fetch navigation menu:', error)
+      logger.error(
+        'Failed to fetch navigation menu:',
+        error instanceof Error ? error : new Error(String(error))
+      )
     }
   }
 

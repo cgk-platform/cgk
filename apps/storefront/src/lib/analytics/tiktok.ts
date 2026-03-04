@@ -18,7 +18,10 @@ type CgkAnalyticsWindow = typeof window & { __CGK_ANALYTICS__?: { tiktokPixelId?
  * The runtime config is injected by AnalyticsHead from the tenant's site_config table.
  */
 function getTikTokPixelId(): string | undefined {
-  if (typeof window !== 'undefined' && (window as CgkAnalyticsWindow).__CGK_ANALYTICS__?.tiktokPixelId) {
+  if (
+    typeof window !== 'undefined' &&
+    (window as CgkAnalyticsWindow).__CGK_ANALYTICS__?.tiktokPixelId
+  ) {
     return (window as CgkAnalyticsWindow).__CGK_ANALYTICS__!.tiktokPixelId!
   }
   return process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID || undefined
@@ -43,7 +46,7 @@ function isTikTokPixelAvailable(): boolean {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    logger.info(`[TikTok Pixel] ${message}`, data ?? '')
+    logger.info(`[TikTok Pixel] ${message}`, data ? { data } : undefined)
   }
 }
 
@@ -65,7 +68,10 @@ function sendTikTokEvent(
     window.ttq.track(eventName, params, options)
     debugLog(`Sent ${eventName}`, params)
   } catch (error) {
-    logger.error(`[TikTok Pixel] Error sending ${eventName}:`, error)
+    logger.error(
+      `[TikTok Pixel] Error sending ${eventName}:`,
+      error instanceof Error ? error : new Error(String(error))
+    )
   }
 }
 
@@ -143,11 +149,7 @@ export function trackRemoveFromCart(item: EcommerceItem, currency = 'USD'): void
 /**
  * Track InitiateCheckout event
  */
-export function trackBeginCheckout(
-  items: EcommerceItem[],
-  value: number,
-  currency = 'USD'
-): void {
+export function trackBeginCheckout(items: EcommerceItem[], value: number, currency = 'USD'): void {
   sendTikTokEvent('InitiateCheckout', {
     value,
     currency,

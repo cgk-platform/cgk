@@ -5,8 +5,6 @@
  * a generalized message pattern.
  */
 
-import crypto from 'crypto'
-
 import type { ErrorAggregate, ErrorAggregateFilters, ServiceName } from './types.js'
 
 /** Patterns to generalize in error messages */
@@ -66,11 +64,11 @@ export function generalizeMessage(message: string): string {
  * 2. Generalized error message
  * 3. First non-library stack frame (if available)
  */
-export function computeErrorSignature(
+export async function computeErrorSignature(
   errorType: string,
   message: string,
   stack?: string | null
-): string {
+): Promise<string> {
   const generalizedMessage = generalizeMessage(message)
 
   // Extract first meaningful stack frame
@@ -95,12 +93,15 @@ export function computeErrorSignature(
   }
 
   // Create signature from components
-  const signatureInput = [errorType, generalizedMessage, stackFrame]
-    .filter(Boolean)
-    .join('::')
+  const signatureInput = [errorType, generalizedMessage, stackFrame].filter(Boolean).join('::')
 
-  // Hash for consistent, fixed-length signature
-  return crypto.createHash('sha256').update(signatureInput).digest('hex').slice(0, 16)
+  // Hash for consistent, fixed-length signature using Web Crypto API (Edge Runtime compatible)
+  const encoder = new TextEncoder()
+  const data = encoder.encode(signatureInput)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+  return hashHex.slice(0, 16)
 }
 
 /**

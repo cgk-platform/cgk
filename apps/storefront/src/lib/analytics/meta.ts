@@ -18,7 +18,10 @@ type CgkAnalyticsWindow = typeof window & { __CGK_ANALYTICS__?: { fbPixelId?: st
  * The runtime config is injected by AnalyticsHead from the tenant's site_config table.
  */
 function getMetaPixelId(): string | undefined {
-  if (typeof window !== 'undefined' && (window as CgkAnalyticsWindow).__CGK_ANALYTICS__?.fbPixelId) {
+  if (
+    typeof window !== 'undefined' &&
+    (window as CgkAnalyticsWindow).__CGK_ANALYTICS__?.fbPixelId
+  ) {
     return (window as CgkAnalyticsWindow).__CGK_ANALYTICS__!.fbPixelId!
   }
   return process.env.NEXT_PUBLIC_META_PIXEL_ID || undefined
@@ -43,18 +46,14 @@ function isMetaPixelAvailable(): boolean {
  */
 function debugLog(message: string, data?: unknown): void {
   if (DEBUG_MODE) {
-    logger.info(`[Meta Pixel] ${message}`, data ?? '')
+    logger.info(`[Meta Pixel] ${message}`, data ? { data } : undefined)
   }
 }
 
 /**
  * Send Meta Pixel event with error handling
  */
-function sendMetaEvent(
-  eventName: string,
-  params: Record<string, unknown>,
-  eventId?: string
-): void {
+function sendMetaEvent(eventName: string, params: Record<string, unknown>, eventId?: string): void {
   if (!isMetaPixelAvailable()) {
     debugLog(`Skipped ${eventName} - Meta Pixel not available`)
     return
@@ -69,7 +68,10 @@ function sendMetaEvent(
     }
     debugLog(`Sent ${eventName}`, params)
   } catch (error) {
-    logger.error(`[Meta Pixel] Error sending ${eventName}:`, error)
+    logger.error(
+      `[Meta Pixel] Error sending ${eventName}:`,
+      error instanceof Error ? error : new Error(String(error))
+    )
   }
 }
 
@@ -142,11 +144,7 @@ export function trackRemoveFromCart(item: EcommerceItem, currency = 'USD'): void
 /**
  * Track InitiateCheckout event
  */
-export function trackBeginCheckout(
-  items: EcommerceItem[],
-  value: number,
-  currency = 'USD'
-): void {
+export function trackBeginCheckout(items: EcommerceItem[], value: number, currency = 'USD'): void {
   sendMetaEvent('InitiateCheckout', {
     content_ids: formatContentIds(items),
     content_type: 'product',

@@ -24,16 +24,20 @@ export async function addBundleToCart(
 
   try {
     for (const item of items) {
-      const attributes: CartAttribute[] = Object.entries(item.properties).map(
-        ([key, value]) => ({ key, value })
-      )
+      const attributes: CartAttribute[] = Object.entries(item.properties).map(([key, value]) => ({
+        key,
+        value,
+      }))
 
       await addToCart(item.variantId, item.quantity, attributes)
     }
 
     return { success: true }
   } catch (err) {
-    logger.error('[BundleBuilder] Failed to add bundle to cart:', err)
+    logger.error(
+      '[BundleBuilder] Failed to add bundle to cart:',
+      err instanceof Error ? err : new Error(String(err))
+    )
     return {
       success: false,
       error: err instanceof Error ? err.message : 'Failed to add bundle to cart',

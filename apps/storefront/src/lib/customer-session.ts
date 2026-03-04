@@ -97,7 +97,10 @@ export async function getCustomerSession(): Promise<CustomerSession | null> {
     }
   } catch (error) {
     // Table might not exist yet, return null gracefully
-    logger.error('Failed to get customer session:', error)
+    logger.error(
+      'Failed to get customer session:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }

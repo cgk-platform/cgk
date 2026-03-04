@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm turbo build --filter=admin --filter=storefront --filter=creator-portal --filter=contractor-portal --filter=orchestrator --filter=shopify-app --filter=command-center --filter=mcp-server",
+  "buildCommand": "pnpm turbo build --filter=cgk-admin --filter=cgk-storefront --filter=cgk-creator-portal --filter=cgk-contractor-portal --filter=cgk-orchestrator --filter=@cgk-platform/shopify-app --filter=cgk-command-center --filter=cgk-mcp-server",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "regions": ["iad1"],

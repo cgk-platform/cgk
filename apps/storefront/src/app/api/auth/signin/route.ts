@@ -89,7 +89,9 @@ export async function POST(request: Request) {
     // can pre-fill checkout and apply customer-specific pricing.
     // This is fire-and-forget: a failure here must not break login.
     updateCartBuyerIdentity(customer.email as string).catch((err) => {
-      logger.warn('signin: updateCartBuyerIdentity failed', err)
+      logger.warn('signin: updateCartBuyerIdentity failed', {
+        error: err instanceof Error ? err.message : String(err),
+      })
     })
 
     return Response.json(

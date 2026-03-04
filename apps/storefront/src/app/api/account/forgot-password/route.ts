@@ -109,7 +109,10 @@ export async function POST(request: Request) {
             `.trim(),
           }),
         }).catch((err) => {
-          logger.error('Failed to send password reset email:', err)
+          logger.error(
+            'Failed to send password reset email:',
+            err instanceof Error ? err : new Error(String(err))
+          )
         })
       }
     }
@@ -117,7 +120,10 @@ export async function POST(request: Request) {
     // Always return success (anti-enumeration)
     return Response.json({ success: true })
   } catch (error) {
-    logger.error('Forgot password error:', error instanceof Error ? error : new Error(String(error)))
+    logger.error(
+      'Forgot password error:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return Response.json({ success: true })
   }
 }

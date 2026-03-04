@@ -33,7 +33,10 @@ export async function performPredictiveSearch(query: string) {
         title: p.title,
         handle: p.handle,
         image: p.images.edges[0]?.node
-          ? { url: p.images.edges[0].node.url, altText: p.images.edges[0].node.altText ?? undefined }
+          ? {
+              url: p.images.edges[0].node.url,
+              altText: p.images.edges[0].node.altText ?? undefined,
+            }
           : undefined,
         price: p.priceRange.minVariantPrice.amount,
         compareAtPrice: p.variants.edges[0]?.node.compareAtPrice?.amount ?? undefined,
@@ -47,7 +50,10 @@ export async function performPredictiveSearch(query: string) {
       queries: results.queries,
     }
   } catch (error) {
-    logger.error('Predictive search failed:', error)
+    logger.error(
+      'Predictive search failed:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }

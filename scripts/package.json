@@ -1,0 +1,17 @@
+{
+  "name": "@cgk-platform/scripts",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "WordPress-style fork creation and management scripts",
+  "scripts": {
+    "create-fork": "tsx create-fork.ts"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.9.0"
+  }
+}
