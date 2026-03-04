@@ -71,37 +71,42 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   return withTenant(tenantSlug, async () => {
-    let updatedCount = 0
-
-    for (const update of updates) {
-      if (!update.id) continue
-
-      const current = await sql`
-        SELECT word, start_time, end_time FROM video_editor_captions
-        WHERE id = ${update.id}
-          AND project_id = ${projectId}
-          AND tenant_id = ${tenantSlug}
-      `
-      if (current.rows.length === 0) continue
-
-      const row = current.rows[0] as Record<string, unknown>
-      const word = update.word !== undefined ? update.word : (row['word'] as string)
-      const startTime =
-        update.startTime !== undefined ? update.startTime : Number(row['start_time'])
-      const endTime = update.endTime !== undefined ? update.endTime : Number(row['end_time'])
-
-      await sql`
-        UPDATE video_editor_captions SET
-          word = ${word},
-          start_time = ${startTime},
-          end_time = ${endTime},
-          is_edited = TRUE
-        WHERE id = ${update.id}
-          AND project_id = ${projectId}
-          AND tenant_id = ${tenantSlug}
-      `
-      updatedCount++
+    // Filter to valid updates (must have id)
+    const validUpdates = updates.filter((u) => u.id)
+    if (validUpdates.length === 0) {
+      return NextResponse.json({ message: 'No valid updates', count: 0 })
     }
+
+    // B7: Batch update using unnest() — single query instead of 2N individual queries
+    const ids = `{${validUpdates.map((u) => u.id!).join(',')}}`
+    const words = `{${validUpdates.map((u) => `"${(u.word ?? '').replace(/"/g, '\\"')}"`).join(',')}}`
+    const startTimes = `{${validUpdates.map((u) => u.startTime ?? -1).join(',')}}`
+    const endTimes = `{${validUpdates.map((u) => u.endTime ?? -1).join(',')}}`
+    const hasWord = `{${validUpdates.map((u) => (u.word !== undefined ? 't' : 'f')).join(',')}}`
+    const hasStart = `{${validUpdates.map((u) => (u.startTime !== undefined ? 't' : 'f')).join(',')}}`
+    const hasEnd = `{${validUpdates.map((u) => (u.endTime !== undefined ? 't' : 'f')).join(',')}}`
+
+    const updateResult = await sql`
+      UPDATE video_editor_captions c SET
+        word = CASE WHEN u.has_word THEN u.word ELSE c.word END,
+        start_time = CASE WHEN u.has_start THEN u.start_time ELSE c.start_time END,
+        end_time = CASE WHEN u.has_end THEN u.end_time ELSE c.end_time END,
+        is_edited = TRUE
+      FROM unnest(
+        ${ids}::text[],
+        ${words}::text[],
+        ${startTimes}::numeric[],
+        ${endTimes}::numeric[],
+        ${hasWord}::boolean[],
+        ${hasStart}::boolean[],
+        ${hasEnd}::boolean[]
+      ) AS u(id, word, start_time, end_time, has_word, has_start, has_end)
+      WHERE c.id = u.id
+        AND c.project_id = ${projectId}
+        AND c.tenant_id = ${tenantSlug}
+    `
+
+    const updatedCount = updateResult.rowCount ?? validUpdates.length
 
     const activityData = JSON.stringify({ count: updatedCount, userId })
     await sql`

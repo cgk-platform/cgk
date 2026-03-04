@@ -8,7 +8,7 @@
 /**
  * Cache entry with optional expiration
  */
-import { logger } from '@cgk-platform/logging'
+import { logger } from './internal-logger.js'
 export interface CacheEntry<T = unknown> {
   value: T
   expiresAt?: number

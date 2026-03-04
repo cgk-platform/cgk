@@ -10,7 +10,12 @@ import { Suspense } from 'react'
 
 import { TopupsClient } from './topups-client'
 
-import type { PendingWithdrawal, StripeBalance, StripeTopup, TopupStats } from '@/lib/admin-utilities/types'
+import type {
+  PendingWithdrawal,
+  StripeBalance,
+  StripeTopup,
+  TopupStats,
+} from '@/lib/admin-utilities/types'
 import { logger } from '@cgk-platform/logging'
 
 export default function StripeTopupsPage() {
@@ -27,9 +32,7 @@ export default function StripeTopupsPage() {
               <h1 className="mt-2 text-3xl font-semibold tracking-tight text-white">
                 Balance & Top-ups
               </h1>
-              <p className="mt-1 text-slate-400">
-                Manage platform balance for processing payouts
-              </p>
+              <p className="mt-1 text-slate-400">Manage platform balance for processing payouts</p>
             </div>
           </div>
         </div>
@@ -78,8 +81,8 @@ async function BalanceCardsLoader() {
     const stripeBalance = await stripe.balance.retrieve()
 
     // Map Stripe balance to our format
-    const availableUsd = stripeBalance.available.find(b => b.currency === 'usd')?.amount || 0
-    const pendingUsd = stripeBalance.pending.find(b => b.currency === 'usd')?.amount || 0
+    const availableUsd = stripeBalance.available.find((b) => b.currency === 'usd')?.amount || 0
+    const pendingUsd = stripeBalance.pending.find((b) => b.currency === 'usd')?.amount || 0
 
     const balance: StripeBalance = {
       available: {
@@ -94,7 +97,10 @@ async function BalanceCardsLoader() {
 
     return <BalanceDisplay balance={balance} />
   } catch (error) {
-    logger.error('Failed to fetch Stripe balance:', error)
+    logger.error(
+      'Failed to fetch Stripe balance:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return <BalanceDisplay balance={null} error="Failed to load balance" />
   }
 }
@@ -143,9 +149,7 @@ function BalanceDisplay({ balance, error }: { balance: StripeBalance | null; err
               <p className="mt-2 font-mono text-4xl font-bold tabular-nums text-white">
                 {balance.available.usdFormatted}
               </p>
-              <p className="mt-1 text-sm text-emerald-300/70">
-                Ready for payouts
-              </p>
+              <p className="mt-1 text-sm text-emerald-300/70">Ready for payouts</p>
             </div>
             <div className="rounded-full bg-emerald-500/20 p-3">
               <svg
@@ -175,9 +179,7 @@ function BalanceDisplay({ balance, error }: { balance: StripeBalance | null; err
               <p className="mt-2 font-mono text-4xl font-bold tabular-nums text-slate-200">
                 {balance.pending.usdFormatted}
               </p>
-              <p className="mt-1 text-sm text-slate-500">
-                Arriving soon
-              </p>
+              <p className="mt-1 text-sm text-slate-500">Arriving soon</p>
             </div>
             <div className="rounded-full bg-slate-700/50 p-3">
               <svg
@@ -284,10 +286,7 @@ function BalanceCardsSkeleton() {
     <section className="border-b border-slate-700/50 px-6 py-8">
       <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">
         {[...Array(2)].map((_, i) => (
-          <div
-            key={i}
-            className="h-32 animate-pulse rounded-xl bg-slate-800/50"
-          />
+          <div key={i} className="h-32 animate-pulse rounded-xl bg-slate-800/50" />
         ))}
       </div>
     </section>

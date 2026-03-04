@@ -139,7 +139,17 @@ export function ProjectEditorClient({
         try {
           const entry = JSON.parse(event.data) as ActivityRecord
           setActivityLog((prev) => [entry, ...prev].slice(0, 100))
-          if (entry.action === 'project_synced' || entry.action === 'render_completed') {
+          const REFRESH_ACTIONS = [
+            'project_synced',
+            'render_completed',
+            'caption_edited',
+            'scene_reordered',
+            'scene_clip_changed',
+            'render_uploaded',
+            'voiceover_uploaded',
+            'music_uploaded',
+          ]
+          if (REFRESH_ACTIONS.includes(entry.action)) {
             router.refresh()
           }
         } catch {

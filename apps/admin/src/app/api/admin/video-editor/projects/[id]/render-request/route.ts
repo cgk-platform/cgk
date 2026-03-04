@@ -61,6 +61,14 @@ export async function POST(request: Request, { params }: RouteParams) {
     options?: Record<string, unknown>
   }
 
+  const ALLOWED_COMMANDS = ['render', 'deliver'] as const
+  if (!ALLOWED_COMMANDS.includes(command as (typeof ALLOWED_COMMANDS)[number])) {
+    return NextResponse.json(
+      { error: `Invalid command. Allowed: ${ALLOWED_COMMANDS.join(', ')}` },
+      { status: 400 }
+    )
+  }
+
   return withTenant(tenantSlug, async () => {
     const result = await sql<{ openclaw_session_id: string; openclaw_profile: string }>`
       SELECT openclaw_session_id, openclaw_profile

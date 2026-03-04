@@ -23,8 +23,7 @@
  * - https://vercel.com/docs/functions/edge-functions/edge-runtime#using-edge-runtime-apis
  */
 
-// Type-only import to avoid bundling issues
-import { logger } from '@cgk-platform/logging'
+import { logger } from './internal-logger.js'
 type AsyncLocalStorage<T> = {
   run<R>(store: T, callback: () => R): R
   getStore(): T | undefined
@@ -123,11 +122,12 @@ export function createRuntimeContext<T>(): {
       }
     } catch (err) {
       // Fallback to Edge implementation
-      logger.warn('[DB] AsyncLocalStorage not available, using Edge-compatible storage', { error: err })
+      logger.warn('[DB] AsyncLocalStorage not available, using Edge-compatible storage', {
+        error: err,
+      })
     }
   }
 
   // In Edge runtime, use Edge-compatible storage
   return new EdgeContextStorage<T>()
 }
-
