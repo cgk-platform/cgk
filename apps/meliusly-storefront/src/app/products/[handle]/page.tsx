@@ -99,20 +99,23 @@ async function fetchProduct(handle: string): Promise<Product | null> {
     })
 
     if (!res.ok) {
-      logger.error('Failed to fetch product:', await res.text())
+      logger.error('Failed to fetch product:', new Error(await res.text()))
       return null
     }
 
     const json = (await res.json()) as ProductResponse
 
     if (!json.success || !json.data) {
-      logger.error('Invalid product response:', json)
+      logger.error('Invalid product response:', undefined, { response: json })
       return null
     }
 
     return json.data
   } catch (error) {
-    logger.error('Error fetching product:', error)
+    logger.error(
+      'Error fetching product:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return null
   }
 }
@@ -133,20 +136,23 @@ async function fetchRelatedProducts(): Promise<Product[]> {
     })
 
     if (!res.ok) {
-      logger.error('Failed to fetch products:', await res.text())
+      logger.error('Failed to fetch products:', new Error(await res.text()))
       return []
     }
 
     const json = (await res.json()) as ProductsResponse
 
     if (!json.success || !json.data) {
-      logger.error('Invalid products response:', json)
+      logger.error('Invalid products response:', undefined, { response: json })
       return []
     }
 
     return json.data
   } catch (error) {
-    logger.error('Error fetching products:', error)
+    logger.error(
+      'Error fetching products:',
+      error instanceof Error ? error : new Error(String(error))
+    )
     return []
   }
 }

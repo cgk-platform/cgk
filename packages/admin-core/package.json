@@ -37,7 +37,8 @@
     "@cgk-platform/db": "workspace:*",
     "@cgk-platform/auth": "workspace:*",
     "@cgk-platform/communications": "workspace:*",
-    "@cgk-platform/slack": "workspace:*"
+    "@cgk-platform/slack": "workspace:*",
+    "@cgk-platform/logging": "workspace:*"
   },
   "devDependencies": {
     "@cgk-platform/eslint-config": "workspace:*",

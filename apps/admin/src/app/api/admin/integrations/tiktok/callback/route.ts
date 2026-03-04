@@ -27,7 +27,10 @@ export async function GET(req: Request) {
 
     redirect(result.returnUrl || '/admin/settings/integrations?success=tiktok')
   } catch (err) {
-    logger.error('TikTok OAuth callback failed:', err)
+    logger.error(
+      'TikTok OAuth callback failed:',
+      err instanceof Error ? err : new Error(String(err))
+    )
     const message = err instanceof Error ? err.message : 'OAuth failed'
     redirect(`/admin/settings/integrations?error=${encodeURIComponent(message)}`)
   }

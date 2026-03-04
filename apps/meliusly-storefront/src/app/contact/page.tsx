@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import type { Metadata } from 'next'
-import { logger } from '@cgk-platform/logging'
+
+const logger = { info: console.log, warn: console.warn, error: console.error, debug: console.debug }
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({

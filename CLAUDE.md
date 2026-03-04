@@ -570,6 +570,12 @@ const mutation = `
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## Creative Studio (Video Editor UI)
+
+The Creative Studio at `apps/admin/src/app/admin/creative-studio/` is the UI for the openCLAW video-editor agent (Reel). It provides real-time project editing with DnD scenes, editable captions, and SSE-driven activity updates. Backend logic is in `packages/video-editor/`.
+
+See [.claude/knowledge-bases/creative-studio/README.md](.claude/knowledge-bases/creative-studio/README.md) for complete architecture and API reference.
+
 ---
 
 ## Multi-Tenancy Patterns

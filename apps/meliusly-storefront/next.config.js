@@ -25,7 +25,7 @@ const nextConfig = {
   },
   // Externalize WebSocket packages that cause build errors with Turbopack
   // These are optional dependencies of @shopify/hydrogen-react not needed in production
-  serverExternalPackages: ['ws', 'bufferutil', 'utf-8-validate'],
+  serverExternalPackages: ['ws', 'bufferutil', 'utf-8-validate', '@cgk-platform/logging'],
   // Turbopack disabled - WebSocket bundling incompatibility
   // Re-enable after Next.js resolves serverExternalPackages support for Turbopack
   // https://github.com/vercel/next.js/issues/84336

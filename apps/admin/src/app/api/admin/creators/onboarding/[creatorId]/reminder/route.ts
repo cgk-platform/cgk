@@ -3,10 +3,7 @@ export const dynamic = 'force-dynamic'
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { withTenant, sql } from '@cgk-platform/db'
-import {
-  getTenantResendClient,
-  getTenantResendSenderConfig,
-} from '@cgk-platform/integrations'
+import { getTenantResendClient, getTenantResendSenderConfig } from '@cgk-platform/integrations'
 
 import { recordOnboardingReminder, getOnboardingConfig } from '@/lib/creators-admin-ops'
 import { logger } from '@cgk-platform/logging'
@@ -28,10 +25,7 @@ export async function POST(
     const { stepId } = body as { stepId: string }
 
     if (!stepId) {
-      return NextResponse.json(
-        { error: 'stepId is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'stepId is required' }, { status: 400 })
     }
 
     // Get creator details
@@ -44,19 +38,13 @@ export async function POST(
     })
 
     if (!creator?.email) {
-      return NextResponse.json(
-        { error: 'Creator not found or has no email' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Creator not found or has no email' }, { status: 404 })
     }
 
     // Get Resend client
     const resend = await getTenantResendClient(tenantSlug)
     if (!resend) {
-      return NextResponse.json(
-        { error: 'Email not configured for this tenant' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Email not configured for this tenant' }, { status: 400 })
     }
 
     // Get onboarding config for step name
@@ -66,8 +54,7 @@ export async function POST(
 
     const senderConfig = await getTenantResendSenderConfig(tenantSlug)
     const fromEmail = senderConfig?.from || `noreply@${tenantSlug}.com`
-    const portalUrl =
-      process.env.NEXT_PUBLIC_CREATOR_PORTAL_URL || 'https://creators.cgk.com'
+    const portalUrl = process.env.NEXT_PUBLIC_CREATOR_PORTAL_URL || 'https://creators.cgk.com'
 
     // Send reminder email
     try {
@@ -94,11 +81,11 @@ export async function POST(
         `,
       })
     } catch (emailError) {
-      logger.error('Failed to send reminder email:', emailError)
-      return NextResponse.json(
-        { error: 'Failed to send reminder email' },
-        { status: 500 }
+      logger.error(
+        'Failed to send reminder email:',
+        emailError instanceof Error ? emailError : new Error(String(emailError))
       )
+      return NextResponse.json({ error: 'Failed to send reminder email' }, { status: 500 })
     }
 
     // Record the reminder after successful send
@@ -106,10 +93,10 @@ export async function POST(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    logger.error('Error sending reminder:', error instanceof Error ? error : new Error(String(error)))
-    return NextResponse.json(
-      { error: 'Failed to send reminder' },
-      { status: 500 }
+    logger.error(
+      'Error sending reminder:',
+      error instanceof Error ? error : new Error(String(error))
     )
+    return NextResponse.json({ error: 'Failed to send reminder' }, { status: 500 })
   }
 }

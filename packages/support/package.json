@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@cgk-platform/core": "workspace:*",
-    "@cgk-platform/db": "workspace:*"
+    "@cgk-platform/db": "workspace:*",
+    "@cgk-platform/logging": "workspace:*"
   },
   "devDependencies": {
     "@cgk-platform/typescript-config": "workspace:*",

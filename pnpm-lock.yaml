@@ -177,7 +177,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@2.6.1)
+        version: 9.39.2(jiti@1.21.7)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
@@ -241,7 +241,7 @@ importers:
         version: 10.4.24(postcss@8.5.6)
       eslint:
         specifier: ^9.18.0
-        version: 9.39.2(jiti@1.21.7)
+        version: 9.39.2(jiti@2.6.1)
       postcss:
         specifier: ^8.4.33
         version: 8.5.6
@@ -510,8 +510,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/commerce
       '@cgk-platform/logging':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: workspace:*
+        version: link:../../packages/logging
       '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../../packages/shopify
@@ -883,6 +883,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@cgk-platform/slack':
         specifier: workspace:*
         version: link:../slack
@@ -914,6 +917,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       openai:
         specifier: ^4.77.0
         version: 4.104.0(ws@8.19.0(bufferutil@4.1.0))(zod@3.25.76)
@@ -945,6 +951,9 @@ importers:
       '@cgk-platform/core':
         specifier: workspace:*
         version: link:../core
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
     devDependencies:
       '@cgk-platform/eslint-config':
         specifier: workspace:*
@@ -970,6 +979,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       bcryptjs:
         specifier: ^3.0.3
         version: 3.0.3
@@ -1016,6 +1028,9 @@ importers:
       '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../jobs
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       chalk:
         specifier: ^5.3.0
         version: 5.6.2
@@ -1028,6 +1043,9 @@ importers:
       inquirer:
         specifier: ^9.2.12
         version: 9.3.8(@types/node@22.19.11)
+      open:
+        specifier: ^10.0.3
+        version: 10.2.0
       ora:
         specifier: ^8.0.1
         version: 8.2.0
@@ -1090,6 +1108,9 @@ importers:
       '@cgk-platform/commerce':
         specifier: workspace:*
         version: link:../commerce
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
     devDependencies:
       '@cgk-platform/eslint-config':
         specifier: workspace:*
@@ -1152,6 +1173,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       twilio:
         specifier: ^5.5.0
         version: 5.12.1
@@ -1243,6 +1267,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vercel/blob':
         specifier: ^0.27.0
         version: 0.27.3
@@ -1314,6 +1341,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@vercel/blob':
         specifier: ^0.27.0
         version: 0.27.3
@@ -1403,6 +1433,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
     devDependencies:
       '@cgk-platform/eslint-config':
         specifier: workspace:*
@@ -1434,6 +1467,9 @@ importers:
       '@cgk-platform/jobs':
         specifier: workspace:*
         version: link:../jobs
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
     devDependencies:
       '@cgk-platform/eslint-config':
         specifier: workspace:*
@@ -1477,6 +1513,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@trigger.dev/sdk':
         specifier: ^3.0.0 || ^4.0.0
         version: 4.3.3(bufferutil@4.1.0)(typescript@5.9.3)(zod@4.3.6)
@@ -1542,6 +1581,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@modelcontextprotocol/sdk':
         specifier: ^1.0.0
         version: 1.26.0(zod@4.3.6)
@@ -1592,6 +1634,9 @@ importers:
 
   packages/openclaw:
     dependencies:
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       ws:
         specifier: ^8.18.0
         version: 8.19.0(bufferutil@4.1.0)
@@ -1629,6 +1674,9 @@ importers:
       '@cgk-platform/integrations':
         specifier: workspace:*
         version: link:../integrations
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       stripe:
         specifier: ^17.0.0
         version: 17.7.0
@@ -1657,6 +1705,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@cgk-platform/shopify':
         specifier: workspace:*
         version: link:../shopify
@@ -1720,8 +1771,8 @@ importers:
         specifier: workspace:*
         version: link:../jobs
       '@cgk-platform/logging':
-        specifier: ^1.1.0
-        version: 1.1.0
+        specifier: workspace:*
+        version: link:../logging
       '@shopify/hydrogen-react':
         specifier: ^2025.10.0
         version: 2025.10.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(three@0.172.0)(vite@6.4.1(@types/node@22.19.11)(jiti@2.6.1)(lightningcss@1.31.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -1756,6 +1807,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@slack/web-api':
         specifier: ^7.8.0
         version: 7.14.0
@@ -1784,6 +1838,9 @@ importers:
       '@cgk-platform/db':
         specifier: workspace:*
         version: link:../db
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
     devDependencies:
       '@cgk-platform/typescript-config':
         specifier: workspace:*
@@ -1934,6 +1991,9 @@ importers:
       '@cgk-platform/integrations':
         specifier: workspace:*
         version: link:../integrations
+      '@cgk-platform/logging':
+        specifier: workspace:*
+        version: link:../logging
       '@mux/mux-node':
         specifier: ^9.0.0
         version: 9.0.1
@@ -2503,24 +2563,6 @@ packages:
     resolution:
       {
         integrity: sha512-zpvN8xQ5rdRWakMd/BcVkdn2F8HKlDSbM3l7duueK590WmI1T0ObTLc1V/1e55r14WNjPd5AJTYX4yPEAFVi+Q==,
-      }
-
-  '@cgk-platform/core@1.1.0':
-    resolution:
-      {
-        integrity: sha512-T0brqwdOY+ZoQ6mKYZJ+GvbM1FARATnPbuq4yEOMXJ3VjS95QRZy/qoAjYbC8TqDWvZhI3YSwdkHKJt0FW0OZA==,
-      }
-
-  '@cgk-platform/db@1.1.0':
-    resolution:
-      {
-        integrity: sha512-R3JLjpRF/RRw2JTpk1ly1XfBwYFrlXtLZsInSv0GR5rsI950e/7OYDXx+L2f4GpDQHSRvoLNyfsYnfUVl3ga1Q==,
-      }
-
-  '@cgk-platform/logging@1.1.0':
-    resolution:
-      {
-        integrity: sha512-lAoVmqGeLf25Z1mhEhmptN9He7KqYBwd4O1dUxU2beoAbt6JSrKNAXglX4/F63kIwDjXn1yS9OlQLIAw5tC8jw==,
       }
 
   '@changesets/apply-release-plan@7.0.14':
@@ -18278,22 +18320,6 @@ snapshots:
   '@bufbuild/protobuf@2.11.0': {}
 
   '@bugsnag/cuid@3.2.1': {}
-
-  '@cgk-platform/core@1.1.0': {}
-
-  '@cgk-platform/db@1.1.0':
-    dependencies:
-      '@cgk-platform/core': 1.1.0
-      '@vercel/postgres': 0.10.0
-    transitivePeerDependencies:
-      - utf-8-validate
-
-  '@cgk-platform/logging@1.1.0':
-    dependencies:
-      '@cgk-platform/core': 1.1.0
-      '@cgk-platform/db': 1.1.0
-    transitivePeerDependencies:
-      - utf-8-validate
 
   '@changesets/apply-release-plan@7.0.14':
     dependencies:
