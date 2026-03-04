@@ -42,6 +42,7 @@ import { tenantHealthCommand } from './commands/tenant-health.js'
 import { createTenantCommand, listTenantsCommand } from './commands/tenant.js'
 import { updateCommand } from './commands/update.js'
 import { updatePlatformCommand } from './commands/update-platform.js'
+import { wizardCommand } from './commands/wizard.js'
 
 const program = new Command()
 
@@ -49,6 +50,7 @@ program.name('cgk').description('CGK - Commerce Growth Kit CLI').version('0.0.0'
 
 // Register commands
 program.addCommand(quickStartCommand) // Featured command first
+program.addCommand(wizardCommand) // Architecture wizard
 program.addCommand(createCommand)
 program.addCommand(initCommand)
 program.addCommand(doctorCommand)

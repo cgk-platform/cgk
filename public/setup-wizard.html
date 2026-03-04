@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CGK Platform Setup Wizard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .step { display: none; }
+    .step.active { display: block; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 py-12">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+      <!-- Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome to CGK Platform! 🚀</h1>
+        <p class="text-gray-600">Let's finish setting up your platform. This will take about 5 minutes.</p>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm font-medium text-gray-700" id="progress-text">Step 1 of 4</span>
+          <span class="text-sm text-gray-500" id="progress-percentage">25%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+          <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 25%"></div>
+        </div>
+      </div>
+
+      <!-- Step 1: Database Check -->
+      <div class="step active" data-step="1">
+        <h2 class="text-xl font-semibold mb-4">Step 1: Verify Database Connection</h2>
+        <p class="text-gray-600 mb-6">We'll check if your Neon PostgreSQL database is connected properly.</p>
+
+        <div id="db-status" class="mb-6">
+          <div class="flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span class="text-gray-700">Checking database connection...</span>
+          </div>
+        </div>
+
+        <button onclick="checkDatabase()" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+          Check Database
+        </button>
+      </div>
+
+      <!-- Step 2: Shopify Configuration -->
+      <div class="step" data-step="2">
+        <h2 class="text-xl font-semibold mb-4">Step 2: Shopify Configuration</h2>
+        <p class="text-gray-600 mb-6">Connect your Shopify store to start selling products.</p>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Shopify API Key</label>
+            <input type="text" id="shopify-api-key" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your Shopify API key">
+            <p class="mt-1 text-sm text-gray-500">Find this in your Shopify Partners dashboard</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Shopify API Secret</label>
+            <input type="password" id="shopify-api-secret" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your Shopify API secret">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Shopify Store URL</label>
+            <input type="text" id="shopify-store-url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="your-store.myshopify.com">
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-sm text-blue-800">
+              <strong>Don't have a Shopify app yet?</strong><br>
+              <a href="https://partners.shopify.com" target="_blank" class="text-blue-600 hover:text-blue-700 underline">Create one in Shopify Partners →</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex space-x-4 mt-6">
+          <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition">
+            Back
+          </button>
+          <button onclick="saveShopifyConfig()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+            Continue
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 3: Stripe Configuration -->
+      <div class="step" data-step="3">
+        <h2 class="text-xl font-semibold mb-4">Step 3: Stripe Configuration</h2>
+        <p class="text-gray-600 mb-6">Set up payments with Stripe to accept credit cards.</p>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Stripe Secret Key</label>
+            <input type="password" id="stripe-secret-key" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="sk_test_...">
+            <p class="mt-1 text-sm text-gray-500">Find this in your Stripe dashboard under Developers → API Keys</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Stripe Publishable Key</label>
+            <input type="text" id="stripe-publishable-key" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="pk_test_...">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Stripe Webhook Secret (Optional)</label>
+            <input type="password" id="stripe-webhook-secret" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="whsec_...">
+            <p class="mt-1 text-sm text-gray-500">You can add this later after configuring webhooks</p>
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-sm text-blue-800">
+              <strong>Don't have a Stripe account yet?</strong><br>
+              <a href="https://dashboard.stripe.com/register" target="_blank" class="text-blue-600 hover:text-blue-700 underline">Create a free Stripe account →</a>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex space-x-4 mt-6">
+          <button onclick="prevStep()" class="flex-1 bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition">
+            Back
+          </button>
+          <button onclick="saveStripeConfig()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+            Continue
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 4: Complete -->
+      <div class="step" data-step="4">
+        <div class="text-center">
+          <div class="mb-6">
+            <svg class="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">Setup Complete! 🎉</h2>
+          <p class="text-gray-600 mb-8">Your CGK Platform is now configured and ready to use.</p>
+
+          <div class="bg-gray-50 rounded-lg p-6 mb-8 text-left">
+            <h3 class="font-semibold text-gray-900 mb-3">What's Next?</h3>
+            <ul class="space-y-2 text-sm text-gray-700">
+              <li class="flex items-start">
+                <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Run database migrations: <code class="bg-gray-200 px-2 py-1 rounded">npx @cgk-platform/cli migrate</code>
+              </li>
+              <li class="flex items-start">
+                <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Access the admin portal at <a href="/admin" class="text-blue-600 hover:text-blue-700 underline">/admin</a>
+              </li>
+              <li class="flex items-start">
+                <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                View the storefront at <a href="/" class="text-blue-600 hover:text-blue-700 underline">/</a>
+              </li>
+              <li class="flex items-start">
+                <svg class="h-5 w-5 text-blue-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                Read the documentation at <a href="https://github.com/cgk-platform/cgk" target="_blank" class="text-blue-600 hover:text-blue-700 underline">GitHub</a>
+              </li>
+            </ul>
+          </div>
+
+          <a href="/admin" class="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-medium hover:bg-blue-700 transition">
+            Go to Admin Portal
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    function updateProgress() {
+      const percentage = (currentStep / totalSteps) * 100;
+      document.getElementById('progress-bar').style.width = percentage + '%';
+      document.getElementById('progress-text').textContent = `Step ${currentStep} of ${totalSteps}`;
+      document.getElementById('progress-percentage').textContent = Math.round(percentage) + '%';
+    }
+
+    function showStep(step) {
+      document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+      document.querySelector(`[data-step="${step}"]`).classList.add('active');
+      currentStep = step;
+      updateProgress();
+    }
+
+    function nextStep() {
+      if (currentStep < totalSteps) {
+        showStep(currentStep + 1);
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 1) {
+        showStep(currentStep - 1);
+      }
+    }
+
+    async function checkDatabase() {
+      const statusEl = document.getElementById('db-status');
+      statusEl.innerHTML = '<div class="flex items-center space-x-3"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div><span class="text-gray-700">Checking database connection...</span></div>';
+
+      try {
+        const response = await fetch('/api/setup/check-db');
+        const data = await response.json();
+
+        if (data.success) {
+          statusEl.innerHTML = '<div class="flex items-center space-x-3 text-green-600"><svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg><span class="font-medium">Database connected successfully!</span></div>';
+          setTimeout(nextStep, 1500);
+        } else {
+          statusEl.innerHTML = '<div class="flex items-center space-x-3 text-red-600"><svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg><span class="font-medium">Database connection failed: ' + data.error + '</span></div>';
+        }
+      } catch (error) {
+        statusEl.innerHTML = '<div class="flex items-center space-x-3 text-red-600"><svg class="h-8 w-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg><span class="font-medium">Connection error. Please check Vercel env vars.</span></div>';
+      }
+    }
+
+    async function saveShopifyConfig() {
+      const config = {
+        apiKey: document.getElementById('shopify-api-key').value,
+        apiSecret: document.getElementById('shopify-api-secret').value,
+        storeUrl: document.getElementById('shopify-store-url').value
+      };
+
+      if (!config.apiKey || !config.apiSecret || !config.storeUrl) {
+        alert('Please fill in all Shopify fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/setup/shopify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(config)
+        });
+
+        if (response.ok) {
+          nextStep();
+        } else {
+          alert('Failed to save Shopify configuration');
+        }
+      } catch (error) {
+        alert('Error saving Shopify configuration');
+      }
+    }
+
+    async function saveStripeConfig() {
+      const config = {
+        secretKey: document.getElementById('stripe-secret-key').value,
+        publishableKey: document.getElementById('stripe-publishable-key').value,
+        webhookSecret: document.getElementById('stripe-webhook-secret').value
+      };
+
+      if (!config.secretKey || !config.publishableKey) {
+        alert('Please fill in required Stripe fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/setup/stripe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(config)
+        });
+
+        if (response.ok) {
+          nextStep();
+        } else {
+          alert('Failed to save Stripe configuration');
+        }
+      } catch (error) {
+        alert('Error saving Stripe configuration');
+      }
+    }
+  </script>
+</body>
+</html>

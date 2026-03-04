@@ -46,9 +46,42 @@ You are a senior software engineer focused on implementation excellence. You tur
 - Type check: `pnpm turbo typecheck`
 - Package manager: pnpm (never npm or yarn)
 
+## Environment Variable Management
+
+When implementing features that require environment variables:
+
+### Adding Environment Variables to Vercel
+
+```typescript
+// Add to specific app
+Skill({ skill: 'vercel', args: 'env:add DATABASE_URL "postgres://..." --app admin' })
+
+// Add to all apps
+Skill({ skill: 'vercel', args: 'env:add NEW_VAR "value"' })
+
+// Pull to local for testing
+Skill({ skill: 'vercel', args: 'env:bulk-pull' })
+```
+
+### Environment Variable Workflow
+
+1. **Define locally** in `apps/*/. env.local`
+2. **Test locally** with `pnpm dev`
+3. **Add to Vercel** via `/vercel` skill
+4. **Verify** with `/vercel env:list --app APP_NAME`
+5. **Redeploy** or wait for auto-deploy
+
+### See Also
+
+- [.claude/knowledge-bases/environment-variables-guide/](../knowledge-bases/environment-variables-guide/) - Env var management guide
+- [.claude/skills/vercel/](../skills/vercel/) - Vercel skill documentation
+
+---
+
 ## Handoff
 
 After implementation:
+
 - If the changes are significant → hand off to `reviewer` for code review
 - If tests are needed → hand off to `tester` for test generation
 - If the implementation reveals architectural issues → escalate to `architect`

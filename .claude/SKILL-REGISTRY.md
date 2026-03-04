@@ -10,13 +10,14 @@
 
 The `.claude/` directory contains three distinct types of development assets:
 
-| Type | Directory | Purpose | Invocation |
-|------|-----------|---------|------------|
-| **Executable Skills** | `.claude/skills/` | User-invocable workflows with code | `/skill-name` or direct execution |
-| **Knowledge Bases** | `.claude/knowledge-bases/` | Domain expertise documentation (agent reference only) | Referenced in prompts |
-| **Agent Definitions** | `.claude/agents/` | Specialized agent personas for specific tasks | `/agent-name` or handoff |
+| Type                  | Directory                  | Purpose                                               | Invocation                        |
+| --------------------- | -------------------------- | ----------------------------------------------------- | --------------------------------- |
+| **Executable Skills** | `.claude/skills/`          | User-invocable workflows with code                    | `/skill-name` or direct execution |
+| **Knowledge Bases**   | `.claude/knowledge-bases/` | Domain expertise documentation (agent reference only) | Referenced in prompts             |
+| **Agent Definitions** | `.claude/agents/`          | Specialized agent personas for specific tasks         | `/agent-name` or handoff          |
 
 **Key Distinction** (from [ADR-004](./adrs/004-skill-architecture-separation.md)):
+
 - **Skills** = Executable code with `index.js` entry point (DO one thing)
 - **Knowledge Bases** = Read-only documentation (KNOW one domain)
 - **Agents** = Specialized personas (ARE one role)
@@ -32,6 +33,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Validates that all tenant-scoped operations use proper isolation patterns across the CGK codebase.
 
 **Invocation**:
+
 ```bash
 /tenant-isolation-validator [--path <directory>] [--fix] [--verbose]
 
@@ -42,6 +44,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features**:
+
 - ✅ Detects SQL queries without `withTenant()` wrapper
 - ✅ Detects cache operations without `createTenantCache()`
 - ✅ Detects background jobs missing `tenantId` in payload
@@ -50,11 +53,13 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ CI/CD pipeline integration
 
 **Validation Rules**:
+
 1. **no-raw-sql**: All SQL queries MUST be wrapped in `withTenant()`
 2. **no-raw-cache**: All cache operations MUST use `createTenantCache()`
 3. **no-tenant-in-job**: All job payloads MUST include `{ tenantId }`
 
 **When to Use**:
+
 - Before committing code (automatic via pre-commit hook)
 - During code review
 - Before deploying to production
@@ -69,6 +74,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Encapsulates all Figma knowledge for the Meliusly storefront and provides pixel-perfect audit capabilities throughout the implementation process.
 
 **Invocation**:
+
 ```bash
 /meliusly-figma-audit <command> [args]
 
@@ -86,6 +92,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features**:
+
 - 📐 Complete Figma node ID registry (100+ sections across 5 pages)
 - 🎨 Design token extraction (colors, typography, spacing, breakpoints)
 - 📋 Section-by-section validation checklists
@@ -93,6 +100,7 @@ Skills are organized by tier based on impact and frequency of use.
 - 📊 Page audit generators
 
 **Meliusly Design System**:
+
 - **Pages**: Homepage (12 sections), PDP (12 sections), Collections (4 sections), Cart (2 states), How It Works
 - **Colors**: Primary `#0268A0`, Dark `#161F2B`, White `#FFFFFF`
 - **Typography**: Manrope font family, 12-40px sizes, 400-600 weights
@@ -100,6 +108,7 @@ Skills are organized by tier based on impact and frequency of use.
 - **Tolerance**: ±2px for all measurements
 
 **When to Use**:
+
 - Before building any Meliusly storefront section
 - During implementation to reference exact measurements
 - After building to validate pixel-perfect match
@@ -114,11 +123,13 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Validates SQL patterns specific to `@vercel/postgres` and prevents common TypeScript type errors.
 
 **Invocation**:
+
 ```bash
 /sql-pattern-enforcer [--path <directory>] [--fix] [--verbose]
 ```
 
 **Key Features** (Planned):
+
 - ✅ Detects PostgreSQL array literals (MUST use `{${items.join(',')}}::type[]`)
 - ✅ Detects Date objects (MUST use `.toISOString()`)
 - ✅ Detects toCamelCase without double-cast (MUST use `as unknown as Type`)
@@ -127,6 +138,7 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ Detects dynamic table names (use switch/case instead)
 
 **Validation Rules**:
+
 1. **no-direct-array**: Arrays in SQL MUST use PostgreSQL array literal syntax
 2. **no-date-objects**: Dates MUST be converted to ISO strings
 3. **no-unsafe-typecast**: toCamelCase results MUST double-cast through `unknown`
@@ -135,6 +147,7 @@ Skills are organized by tier based on impact and frequency of use.
 6. **no-dynamic-table**: Dynamic table names require explicit switch/case
 
 **When to Use**:
+
 - Before committing database code
 - After writing new SQL queries
 - When encountering TypeScript errors in database code
@@ -148,6 +161,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Enforces the mandatory planning workflow for all non-trivial implementation tasks.
 
 **Invocation**:
+
 ```bash
 /plan-mode-enforcer [--auto-check]
 
@@ -157,6 +171,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features** (Planned):
+
 - ✅ Detects when implementation starts without planning
 - ✅ Checks for existence of plan documents in `.claude/plans/`
 - ✅ Validates plan approval before implementation
@@ -164,12 +179,14 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ Auto-blocks commits without approved plan
 
 **Enforcement Rules**:
+
 1. **plan-required**: Multi-step tasks MUST have approved plan
 2. **plan-approval**: Plan MUST be explicitly approved by user
 3. **plan-exceptions**: Research/trivial fixes/explicit-skip are allowed
 4. **plan-tracking**: Plan document MUST exist in `.claude/plans/`
 
 **When to Use**:
+
 - At start of every coding session (automatic check)
 - Before beginning any feature implementation
 - During code review to verify planning was done
@@ -183,6 +200,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Guides proper environment variable setup workflow (Vercel → .env.local → .env.example).
 
 **Invocation**:
+
 ```bash
 /env-var-workflow <command> [args]
 
@@ -199,6 +217,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features** (Planned):
+
 - ✅ Validates Vercel-first workflow (production vars)
 - ✅ Handles local-only vars (`LOCAL_*`, `DEBUG_*`, `TEST_*`)
 - ✅ Auto-updates ALL `.env.example` files across apps
@@ -206,11 +225,13 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ Audits for missing documentation
 
 **Workflow Enforcement**:
+
 1. **Production vars**: Add to Vercel first → `vercel env pull` → document in `.env.example`
 2. **Local vars**: Add to `.env.development.local` → document in `.env.example`
 3. **Documentation**: MUST add commented placeholder to ALL app `.env.example` files
 
 **When to Use**:
+
 - When adding any new environment variable
 - When updating existing env var values
 - When syncing from Vercel
@@ -225,6 +246,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Generates Next.js API routes following CGK patterns (auth, tenant context, error handling, type safety).
 
 **Invocation**:
+
 ```bash
 /api-route-scaffolder <resource> [--methods GET,POST,PATCH,DELETE] [--permissions] [--app admin]
 
@@ -235,6 +257,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features**:
+
 - ✅ Auto-generates all HTTP method handlers (GET, POST, PATCH, DELETE)
 - ✅ Includes `requireAuth()` and permission checks
 - ✅ Tenant context with `withTenant()` wrapper
@@ -243,6 +266,7 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ Dry-run mode for previewing
 
 **Template Includes**:
+
 - `requireAuth()` with proper error handling
 - `checkPermissionOrRespond()` for each method
 - `withTenant()` for tenant-scoped queries
@@ -251,6 +275,7 @@ Skills are organized by tier based on impact and frequency of use.
 - `export const dynamic = 'force-dynamic'`
 
 **When to Use**:
+
 - Creating new API endpoints
 - Following consistent API patterns
 - Reducing boilerplate code
@@ -267,6 +292,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Pre-deployment validation (9 comprehensive checks: env vars, types, build, tests, migrations, Vercel config, security, git, package.json).
 
 **Invocation**:
+
 ```bash
 /deployment-readiness-checker [--app admin] [--skip-tests] [--skip-build] [--strict]
 
@@ -277,6 +303,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features**:
+
 - ✅ 9 critical deployment checks
 - ✅ Environment variable validation (Vercel vs .env.example)
 - ✅ TypeScript type checking (`npx tsc --noEmit`)
@@ -288,6 +315,7 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ Git status check (clean working tree)
 
 **Validation Checklist**:
+
 1. Environment variables exist in Vercel
 2. TypeScript compiles without errors
 3. Production build succeeds
@@ -296,9 +324,10 @@ Skills are organized by tier based on impact and frequency of use.
 6. Vercel config correct (team scope, framework)
 7. No critical security vulnerabilities
 8. Git working tree clean, on main branch
-9. Package.json consistency (workspace:*)
+9. Package.json consistency (workspace:\*)
 
 **When to Use**:
+
 - Before every production deployment
 - In CI/CD pipelines (required gate)
 - Pre-commit hooks (fast mode)
@@ -315,6 +344,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Automated encryption key lifecycle (generate, rotate, verify) for tenant credential encryption (AES-256-GCM).
 
 **Invocation**:
+
 ```bash
 /encryption-keys-manager <action> [options]
 
@@ -326,6 +356,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features**:
+
 - ✅ Cryptographically secure key generation (256-bit AES-GCM)
 - ✅ Automated key rotation with re-encryption
 - ✅ Vercel environment variable integration
@@ -334,6 +365,7 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ Decryption verification after rotation
 
 **Rotation Workflow**:
+
 1. Verify current key in Vercel
 2. Generate new 256-bit key
 3. Backup tenant_api_credentials table
@@ -345,6 +377,7 @@ Skills are organized by tier based on impact and frequency of use.
 9. Create rollback script
 
 **When to Use**:
+
 - Quarterly key rotation (recommended)
 - Initial key generation for new tenants
 - Key compromise response
@@ -361,6 +394,7 @@ Skills are organized by tier based on impact and frequency of use.
 **Purpose**: Validates TypeScript type casting patterns, enforces single-cast through `unknown` standard.
 
 **Invocation**:
+
 ```bash
 /type-cast-auditor [--path apps/admin] [--fix] [--format json]
 
@@ -371,6 +405,7 @@ Skills are organized by tier based on impact and frequency of use.
 ```
 
 **Key Features**:
+
 - ✅ Detects direct double casts (no `unknown` intermediate)
 - ✅ Detects database row casts without null checks
 - ✅ Detects config object casts
@@ -378,11 +413,13 @@ Skills are organized by tier based on impact and frequency of use.
 - ✅ Multiple output formats (text, JSON, CSV)
 
 **Validation Rules**:
+
 1. **no-direct-double-cast**: MUST use `as unknown as Type` (not `as Type`)
 2. **no-unsafe-db-row-cast**: Database rows MUST null-check before casting
 3. **no-unsafe-config-cast**: Config objects MUST cast through `unknown`
 
 **Example Fix**:
+
 ```typescript
 // BEFORE
 const data = result.rows[0] as MyType
@@ -394,6 +431,7 @@ return row as unknown as MyType
 ```
 
 **When to Use**:
+
 - Before committing TypeScript changes
 - After Phase 8 audit (806 violations found)
 - In pre-commit hooks
@@ -410,6 +448,7 @@ return row as unknown as MyType
 **Purpose**: Audits @cgk-platform/auth permission patterns (requireAuth, checkPermissionOrRespond signatures).
 
 **Invocation**:
+
 ```bash
 /permission-auditor [--path apps/admin] [--check-missing] [--fix] [--format json]
 
@@ -420,6 +459,7 @@ return row as unknown as MyType
 ```
 
 **Key Features**:
+
 - ✅ Validates `requireAuth()` usage in API routes
 - ✅ Checks `checkPermissionOrRespond()` signature (3 args: userId, tenantId, permission)
 - ✅ Enforces permission naming convention (resource.action)
@@ -428,12 +468,14 @@ return row as unknown as MyType
 - ✅ Permission coverage reporting
 
 **Validation Rules**:
+
 1. **require-auth**: All protected routes MUST use `requireAuth()`
 2. **correct-signature**: `checkPermissionOrRespond(userId, tenantId, permission)` (3 args)
 3. **naming-convention**: Permissions MUST follow `resource.action` format
 4. **permission-after-auth**: Protected routes SHOULD check specific permissions
 
 **When to Use**:
+
 - Before deploying security-sensitive features
 - During security audits
 - In pre-commit hooks (API routes only)
@@ -450,6 +492,7 @@ return row as unknown as MyType
 **Purpose**: Converts console.log/error/warn to structured logging (@cgk-platform/logging).
 
 **Invocation**:
+
 ```bash
 /structured-logging-converter [--path apps/admin] [--convert] [--format json]
 
@@ -460,6 +503,7 @@ return row as unknown as MyType
 ```
 
 **Key Features**:
+
 - ✅ Detects all console.log/error/warn/info calls
 - ✅ Auto-converts to structured logging (logger.info/error/warn)
 - ✅ Adds context metadata (tenantId, userId, requestId)
@@ -468,6 +512,7 @@ return row as unknown as MyType
 - ✅ Observability integration (DataDog, Vercel Logs)
 
 **Conversion Patterns**:
+
 ```typescript
 // BEFORE
 console.log('Order created:', orderId)
@@ -479,6 +524,7 @@ logger.error('Failed to create order', { error })
 ```
 
 **When to Use**:
+
 - After Phase 8 audit (707 console calls found)
 - Before production deployment
 - During observability setup
@@ -495,6 +541,7 @@ logger.error('Failed to create order', { error })
 **Purpose**: Scans codebase for TODO/FIXME/HACK comments, categorizes by severity, creates GitHub issues.
 
 **Invocation**:
+
 ```bash
 /todo-tracker <action> [options]
 
@@ -506,6 +553,7 @@ logger.error('Failed to create order', { error })
 ```
 
 **Key Features**:
+
 - ✅ Automatic severity categorization (critical/high/medium/low)
 - ✅ Keyword-based detection (TODO, FIXME, HACK, XXX, NOTE)
 - ✅ GitHub issue creation with labels
@@ -514,12 +562,14 @@ logger.error('Failed to create order', { error })
 - ✅ Duplicate detection
 
 **Severity Rules**:
+
 - **Critical**: Keywords: critical, urgent, security, vulnerability
 - **High**: Keywords: FIXME, HACK, XXX, bug
 - **Medium**: Keywords: TODO, refactor, improve
 - **Low**: Keywords: NOTE, optimize, consider
 
 **When to Use**:
+
 - Sprint planning (create issues from TODOs)
 - Technical debt tracking
 - Before major releases
@@ -536,6 +586,7 @@ logger.error('Failed to create order', { error })
 **Purpose**: Automated new tenant provisioning (organization, schema, migrations, admin user, encryption).
 
 **Invocation**:
+
 ```bash
 /tenant-provisioner <slug> <name> <admin-email> [--dry-run]
 
@@ -545,6 +596,7 @@ logger.error('Failed to create order', { error })
 ```
 
 **Key Features**:
+
 - ✅ 6-step automated provisioning workflow
 - ✅ Organization record creation in public schema
 - ✅ Tenant schema creation and migrations
@@ -554,14 +606,16 @@ logger.error('Failed to create order', { error })
 - ✅ Dry-run mode for preview
 
 **Provisioning Steps**:
+
 1. Validate inputs (slug format, email)
 2. Create organization record (public.organizations)
-3. Create tenant schema (tenant_{slug})
+3. Create tenant schema (tenant\_{slug})
 4. Run tenant migrations
 5. Create admin user with magic link
 6. Generate encryption keys
 
 **When to Use**:
+
 - Onboarding new customers
 - Creating demo/sandbox tenants
 - Testing multi-tenancy
@@ -578,6 +632,7 @@ logger.error('Failed to create order', { error })
 **Purpose**: Analyzes database migration files for impact (table changes, downtime, rollback complexity, type compatibility).
 
 **Invocation**:
+
 ```bash
 /migration-impact-analyzer <migration-file> [--format json]
 
@@ -587,6 +642,7 @@ logger.error('Failed to create order', { error })
 ```
 
 **Key Features**:
+
 - ✅ Table impact analysis (CREATE, ALTER, DROP, INDEX)
 - ✅ Type compatibility check (UUID vs TEXT mismatches)
 - ✅ Idempotency validation (IF NOT EXISTS)
@@ -595,6 +651,7 @@ logger.error('Failed to create order', { error })
 - ✅ Risk assessment scoring (low/medium/high)
 
 **Validation Checklist**:
+
 1. Affected tables and row counts
 2. Operation types (DDL, DML)
 3. Index creation (can cause locks)
@@ -603,6 +660,7 @@ logger.error('Failed to create order', { error })
 6. Idempotency (IF NOT EXISTS, IF EXISTS)
 
 **When to Use**:
+
 - Before running migrations in production
 - During migration code review
 - Planning maintenance windows
@@ -619,6 +677,7 @@ logger.error('Failed to create order', { error })
 **Purpose**: Audits Vercel environment variables across all 6 apps, validates .env.example consistency, auto-syncs missing vars.
 
 **Invocation**:
+
 ```bash
 /vercel-config-auditor [--fix] [--format json]
 
@@ -629,6 +688,7 @@ logger.error('Failed to create order', { error })
 ```
 
 **Key Features**:
+
 - ✅ Environment variable comparison across 6 apps
 - ✅ .env.example validation (all required vars documented)
 - ✅ Undocumented var detection
@@ -637,6 +697,7 @@ logger.error('Failed to create order', { error })
 - ✅ JSON output for automation
 
 **Validation Checks**:
+
 1. All vars in .env.example exist in Vercel
 2. All Vercel vars documented in .env.example
 3. Team scope correct (cgk-linens-88e79683)
@@ -644,6 +705,7 @@ logger.error('Failed to create order', { error })
 5. No secrets in .env.example (placeholders only)
 
 **When to Use**:
+
 - Before deploying new apps
 - After adding environment variables
 - Weekly environment variable audits
@@ -660,6 +722,7 @@ logger.error('Failed to create order', { error })
 **Purpose**: Quick database schema inspection for production debugging (tenant schemas, table columns, migration status).
 
 **Invocation**:
+
 ```bash
 /db-schema-inspector [--table <name>] [--column <name>] [--tenant <slug>] [--list-tenants] [--migration-status]
 
@@ -671,14 +734,16 @@ logger.error('Failed to create order', { error })
 ```
 
 **Key Features**:
+
 - ✅ Auto-finds DATABASE_URL from apps/.env.local files
-- ✅ Lists all tenant schemas (tenant_*)
+- ✅ Lists all tenant schemas (tenant\_\*)
 - ✅ Inspects table columns (name, type, nullable)
 - ✅ Verifies specific columns exist (e.g., total_cents vs total_amount)
 - ✅ Checks migration status (applied vs pending)
 - ✅ Fast production debugging (uses psql directly)
 
 **When to Use**:
+
 - Production errors about missing columns
 - Verifying migrations have been applied
 - Checking schema vs code mismatches
@@ -686,6 +751,7 @@ logger.error('Failed to create order', { error })
 - Validating foreign key types (UUID vs TEXT)
 
 **Prerequisites**:
+
 - `psql` installed (`brew install postgresql`)
 - DATABASE_URL in apps/.env.local
 - Access to production database
@@ -696,7 +762,115 @@ logger.error('Failed to create order', { error })
 
 ---
 
-## 2. Knowledge Bases (4 Total)
+### 1.17 vercel
+
+**Purpose**: Production debugging and environment variable management with Vercel CLI. Streamlines Vercel production workflows for quick debugging, env var management, and deployment inspection.
+
+**Invocation**:
+
+```bash
+npx ts-node .claude/skills/vercel/index.ts <command> [args]
+
+# Available commands
+npx ts-node .claude/skills/vercel/index.ts env:list [--app APP]
+npx ts-node .claude/skills/vercel/index.ts env:add VAR_NAME VAR_VALUE [--app APP]
+npx ts-node .claude/skills/vercel/index.ts env:bulk-pull
+npx ts-node .claude/skills/vercel/index.ts logs APP [--since TIME] [--limit N]
+npx ts-node .claude/skills/vercel/index.ts inspect APP
+npx ts-node .claude/skills/vercel/index.ts quick:debug APP
+
+# Examples
+npx ts-node .claude/skills/vercel/index.ts env:list
+npx ts-node .claude/skills/vercel/index.ts env:list --app admin
+npx ts-node .claude/skills/vercel/index.ts env:add DATABASE_URL "postgres://..." --app admin
+npx ts-node .claude/skills/vercel/index.ts env:bulk-pull
+npx ts-node .claude/skills/vercel/index.ts logs admin --since 2h
+npx ts-node .claude/skills/vercel/index.ts inspect admin
+npx ts-node .claude/skills/vercel/index.ts quick:debug admin
+```
+
+**Key Features**:
+
+- ✅ List environment variables for all apps or specific app
+- ✅ Add environment variables to all apps or specific app (production, preview, development)
+- ✅ Bulk pull all .env.local files from Vercel
+- ✅ View production logs with time filtering
+- ✅ Inspect deployments (env vars, logs, deployments)
+- ✅ Quick debug workflow (env vars + logs + deployments)
+- ✅ Automatic team scope (`cgk-linens-88e79683`)
+
+**Commands**:
+
+1. **env:list** - List environment variables
+   - All apps or specific app (`--app`)
+   - Shows production, preview, development tiers
+
+2. **env:add** - Add environment variable
+   - To all apps or specific app (`--app`)
+   - Automatically adds to production, preview, development
+
+3. **env:bulk-pull** - Pull all .env.local files
+   - Updates `apps/*/. env.local` for all 7 apps
+   - Syncs local env vars with production
+
+4. **logs** - View production logs
+   - Time filtering: `--since 1h`, `--since 30m`, `--since 2d`
+   - Limit: `--limit 100`
+
+5. **inspect** - Inspect deployment
+   - Recent deployments
+   - Environment variables
+
+6. **quick:debug** - Quick debugging workflow
+   - Environment variables
+   - Recent logs (last 1 hour)
+   - Latest deployments
+
+**When to Use**:
+
+- Debugging production errors
+- Syncing local and production env vars
+- Adding new environment variables to all apps
+- Viewing production logs for error investigation
+- Quick production diagnostics
+
+**Prerequisites**:
+
+- Vercel CLI installed (`npm install -g vercel`)
+- Authenticated with Vercel (`vercel login`)
+- Access to `cgk-linens-88e79683` team
+
+**Apps Supported**:
+
+- admin
+- storefront
+- creator-portal
+- contractor-portal
+- orchestrator
+- shopify-app
+- command-center
+
+**Time Saved**: 10-30 minutes per debugging session (vs manual Vercel dashboard navigation)
+
+**Cost Savings**: ~80-160 hours annually (assuming 1-2 production debugging sessions per week)
+
+**Tier**: Tier 1 (Critical Automation) - Essential for production debugging and env var management
+
+**Agent Usage**:
+
+- **Debugger agent**: Use for production error investigation
+- **Implementer agent**: Use for env var management during feature implementation
+
+**See Also**:
+
+- [.claude/knowledge-bases/vercel-deployment-patterns/](./knowledge-bases/vercel-deployment-patterns/) - Comprehensive Vercel deployment patterns guide
+- [.claude/knowledge-bases/environment-variables-guide/](./knowledge-bases/environment-variables-guide/) - Environment variable management guide
+
+**Documentation**: [.claude/skills/vercel/README.md](./skills/vercel/README.md)
+
+---
+
+## 2. Knowledge Bases (9 Total)
 
 Knowledge bases are **reference documentation** for agents. They are NOT executable. Agents should reference these when working in their respective domains.
 
@@ -705,6 +879,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 **Domain**: Database schema migrations, PostgreSQL patterns, tenant isolation in migrations
 
 **Key Topics**:
+
 - ✅ Public vs tenant schema patterns (UUID vs TEXT IDs)
 - ✅ Idempotent migration patterns (`IF NOT EXISTS`, `DO$$ EXCEPTION`)
 - ✅ Foreign key type validation (UUID vs TEXT mismatches)
@@ -714,6 +889,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 - ✅ Common gotchas and decision trees
 
 **When to Reference**:
+
 - Creating new database migrations
 - Adding tables, columns, indexes, or constraints
 - Working with tenant schemas
@@ -729,6 +905,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 **Domain**: Stripe, Wise, payment flows, financial audit trails, tenant-managed credentials
 
 **Key Topics**:
+
 - ✅ Tenant-owned payment accounts (Stripe, Wise)
 - ✅ Service client factories (`getTenantStripeClient`, `getTenantWiseClient`)
 - ✅ Idempotency keys (UUID v4 for all payment operations)
@@ -738,6 +915,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 - ✅ International payouts via Wise
 
 **When to Reference**:
+
 - Implementing payment processing features
 - Setting up webhook handlers
 - Creating payout flows
@@ -753,6 +931,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 **Domain**: Shopify Admin API, Storefront API, OAuth, webhooks, product sync
 
 **Key Topics**:
+
 - ✅ Dual API strategy (Admin for backend, Storefront for customer-facing)
 - ✅ OAuth token security (encryption with `SHOPIFY_TOKEN_ENCRYPTION_KEY`)
 - ✅ GraphQL cursor pagination patterns
@@ -762,6 +941,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 - ✅ Rate limiting and retry strategies
 
 **When to Reference**:
+
 - Integrating with Shopify APIs
 - Implementing product display on storefronts
 - Setting up Shopify webhooks
@@ -777,6 +957,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 **Domain**: Storefront development, tenant theming, block-based architecture, Figma → code workflow
 
 **Key Topics**:
+
 - ✅ Figma → deployed workflow (5 steps: extract tokens, build component, store config, render, deploy)
 - ✅ Tenant theming with CSS custom properties
 - ✅ Server Component vs Client Component patterns
@@ -786,6 +967,7 @@ Knowledge bases are **reference documentation** for agents. They are NOT executa
 - ✅ Image optimization with Next.js
 
 **When to Reference**:
+
 - Building storefront components
 - Implementing tenant-specific theming
 - Creating new landing page blocks
@@ -805,6 +987,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: System design and architecture decisions
 
 **Responsibilities**:
+
 - High-level system design
 - Technology selection
 - Architectural decision records (ADRs)
@@ -812,6 +995,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Integration patterns
 
 **When to Invoke**:
+
 - Designing new features or systems
 - Evaluating technology choices
 - Resolving architectural conflicts
@@ -826,6 +1010,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Code implementation and feature development
 
 **Responsibilities**:
+
 - Writing production code
 - Implementing features per approved plans
 - Following coding standards
@@ -833,6 +1018,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Documenting code
 
 **When to Invoke**:
+
 - After plan approval, ready to code
 - Building new features
 - Implementing API endpoints
@@ -847,6 +1033,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Code review and quality assurance
 
 **Responsibilities**:
+
 - Code review for style and patterns
 - Identifying bugs and edge cases
 - Ensuring test coverage
@@ -854,6 +1041,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Suggesting improvements
 
 **When to Invoke**:
+
 - After implementation, before merging
 - During pull request review
 - When validating pixel-perfect match (Figma vs live)
@@ -868,6 +1056,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Test creation and validation
 
 **Responsibilities**:
+
 - Writing unit tests
 - Creating integration tests
 - E2E test scenarios
@@ -875,6 +1064,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Bug reproduction
 
 **When to Invoke**:
+
 - After feature implementation
 - When adding test coverage
 - Debugging failing tests
@@ -889,6 +1079,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Issue diagnosis and troubleshooting
 
 **Responsibilities**:
+
 - Root cause analysis
 - Error reproduction
 - Log analysis
@@ -896,6 +1087,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Debugging complex issues
 
 **When to Invoke**:
+
 - When encountering bugs or errors
 - Debugging production issues
 - Investigating performance problems
@@ -910,6 +1102,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Code improvement and technical debt reduction
 
 **Responsibilities**:
+
 - Identifying code smells
 - Refactoring for clarity
 - Performance optimization
@@ -917,6 +1110,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Improving maintainability
 
 **When to Invoke**:
+
 - When code quality degrades
 - Before major feature work
 - Addressing technical debt
@@ -931,6 +1125,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Investigation and documentation
 
 **Responsibilities**:
+
 - Technology research
 - API documentation analysis
 - Creating examples
@@ -938,6 +1133,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Pattern discovery
 
 **When to Invoke**:
+
 - Exploring new technologies
 - Understanding third-party APIs
 - Documenting patterns
@@ -952,6 +1148,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Build performance optimization and resource efficiency
 
 **Responsibilities**:
+
 - Analyzing build performance bottlenecks
 - Optimizing webpack/turbopack configurations
 - Reducing bundle sizes and memory usage
@@ -960,6 +1157,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Resolving OOM (out of memory) errors
 
 **When to Invoke**:
+
 - Build failures due to memory issues
 - Slow build times (>5 minutes)
 - Bundle size optimization needed
@@ -977,6 +1175,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 **Role**: Security review and vulnerability assessment
 
 **Responsibilities**:
+
 - OWASP Top 10 vulnerability scanning
 - Credential exposure detection
 - Injection vector analysis (SQL, XSS, command)
@@ -986,6 +1185,7 @@ Agents are specialized personas for specific development tasks. Invoke via `/age
 - Security best practice enforcement
 
 **When to Invoke**:
+
 - Before production deployment (required)
 - After implementing auth/payment features
 - Security incident response
@@ -1117,11 +1317,13 @@ npx @cgk-platform/cli migrate --tenant rawdog
 ### Creating New Executable Skills
 
 **Requirements** (from [ADR-004](./adrs/004-skill-architecture-separation.md)):
+
 1. **index.js** or **index.ts** - Entry point with `execute()` function
 2. **package.json** - Metadata and dependencies
 3. **README.md** - Usage guide with examples
 
 **Example Structure**:
+
 ```
 .claude/skills/my-new-skill/
 ├── index.js           # Entry point
@@ -1132,14 +1334,17 @@ npx @cgk-platform/cli migrate --tenant rawdog
 ```
 
 **Entry Point Pattern**:
+
 ```javascript
 // index.js
 export async function execute(args) {
   // Skill implementation
   return {
-    status: 'success',  // or 'fail'
+    status: 'success', // or 'fail'
     message: 'Result message',
-    data: { /* results */ }
+    data: {
+      /* results */
+    },
   }
 }
 
@@ -1157,12 +1362,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 ### Creating New Knowledge Bases
 
 **Requirements**:
+
 1. **README.md** - Patterns, examples, best practices
 2. **Domain focus** - One area of expertise per knowledge base
 3. **Decision trees** - Clear guidance for common scenarios
 4. **Code examples** - Real patterns from CGK codebase
 
 **Example Structure**:
+
 ```
 .claude/knowledge-bases/my-domain-patterns/
 ├── README.md          # Main documentation
@@ -1176,6 +1383,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 ## 6. Integration Points
 
 ### Pre-Commit Hooks
+
 ```bash
 # .husky/pre-commit
 #!/bin/sh
@@ -1193,6 +1401,7 @@ pnpm lint-staged
 ```
 
 ### CI/CD Pipeline
+
 ```yaml
 # .github/workflows/ci.yml
 tenant-isolation:
@@ -1209,6 +1418,7 @@ sql-patterns:
 ```
 
 ### Agent Handoffs
+
 Agents automatically reference knowledge bases and can invoke skills:
 
 ```typescript
@@ -1223,6 +1433,7 @@ Agents automatically reference knowledge bases and can invoke skills:
 ## 7. Maintenance
 
 ### Adding New Skills
+
 1. Create skill directory in `.claude/skills/`
 2. Add `index.js`, `package.json`, `README.md`
 3. Update this registry
@@ -1230,12 +1441,14 @@ Agents automatically reference knowledge bases and can invoke skills:
 5. Add to CI/CD pipeline if validation skill
 
 ### Adding New Knowledge Bases
+
 1. Create directory in `.claude/knowledge-bases/`
 2. Add comprehensive `README.md`
 3. Update this registry
 4. Update relevant agent definitions to reference it
 
 ### Updating Agent Definitions
+
 1. Modify agent markdown file in `.claude/agents/`
 2. Update responsibilities and knowledge base references
 3. Update this registry if new agent added
@@ -1257,6 +1470,7 @@ Agents automatically reference knowledge bases and can invoke skills:
 - [SESSION-HANDOFF-TEMPLATE.md](./SESSION-HANDOFF-TEMPLATE.md) - Handoff document template with DoD checklist
 
 **Token Warning Thresholds**:
+
 - **120k tokens**: ⚠️ Early warning - start planning handoff
 - **140k tokens**: ⚠️ Urgent - create handoff in next 1-2 turns
 - **150k tokens**: 🚨 Critical - MUST create handoff immediately
@@ -1279,4 +1493,4 @@ Agents automatically reference knowledge bases and can invoke skills:
 
 ---
 
-*This registry serves as the single source of truth for all development assets in the `.claude/` directory. Keep it updated as new skills, knowledge bases, and agents are added.*
+_This registry serves as the single source of truth for all development assets in the `.claude/` directory. Keep it updated as new skills, knowledge bases, and agents are added._

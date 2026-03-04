@@ -105,7 +105,8 @@ export function generateAllSecrets(): BrandSecrets {
 export function generateEnvContent(
   app: string,
   secrets: BrandSecrets,
-  databaseUrl: string
+  databaseUrl: string,
+  redis?: { url: string; token: string }
 ): string {
   const baseEnv = `# CGK Platform Environment Variables
 # Generated: ${new Date().toISOString()}
@@ -119,10 +120,10 @@ POSTGRES_URL="${databaseUrl}"
 POSTGRES_PRISMA_URL="${databaseUrl}?pgbouncer=true&connect_timeout=15"
 POSTGRES_URL_NON_POOLING="${databaseUrl}"
 
-# Redis (optional - using local in-memory fallback)
-REDIS_URL="redis://localhost:6379"
-KV_REST_API_URL=""
-KV_REST_API_TOKEN=""
+# Redis${redis ? ' (Upstash)' : ' (optional - using local in-memory fallback)'}
+${redis ? `UPSTASH_REDIS_REST_URL="${redis.url}"` : 'REDIS_URL="redis://localhost:6379"'}
+${redis ? `UPSTASH_REDIS_REST_TOKEN="${redis.token}"` : 'KV_REST_API_URL=""'}
+${redis ? '' : 'KV_REST_API_TOKEN=""'}
 
 # ============================================================================
 # PLATFORM SECRETS
@@ -178,7 +179,11 @@ NEXT_PUBLIC_GA_MEASUREMENT_ID=""
 /**
  * Create .env.local files for all apps
  */
-export async function createEnvFiles(secrets: BrandSecrets, databaseUrl: string): Promise<void> {
+export async function createEnvFiles(
+  secrets: BrandSecrets,
+  databaseUrl: string,
+  redis?: { url: string; token: string }
+): Promise<void> {
   const spinner = ora('Creating environment files...').start()
 
   const apps = [
@@ -195,7 +200,7 @@ export async function createEnvFiles(secrets: BrandSecrets, databaseUrl: string)
     for (const app of apps) {
       const appDir = join(process.cwd(), 'apps', app)
       if (existsSync(appDir)) {
-        const envContent = generateEnvContent(app, secrets, databaseUrl)
+        const envContent = generateEnvContent(app, secrets, databaseUrl, redis)
         const envPath = join(appDir, '.env.local')
         writeFileSync(envPath, envContent)
         spinner.text = `Created apps/${app}/.env.local`
@@ -300,7 +305,84 @@ async function waitForPostgres(url: string, maxAttempts = 30): Promise<void> {
 }
 
 /**
- * Prompt for manual database URL
+ * Prompt for Neon database with helpful guidance
+ */
+export async function promptForNeonDatabase(): Promise<string> {
+  const inquirer = (await import('inquirer')).default
+
+  logger.info(chalk.cyan('\n📋 Neon PostgreSQL Setup\n'))
+  logger.info('Neon is a serverless PostgreSQL provider with a free tier.\n')
+  logger.info(chalk.bold('Steps to get your DATABASE_URL:'))
+  logger.info('  1. Sign up at ' + chalk.cyan('https://neon.tech'))
+  logger.info('  2. Create a new project')
+  logger.info('  3. Copy the connection string from the "Connection Details" section')
+  logger.info('  4. Paste it below\n')
+
+  const { databaseUrl } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'databaseUrl',
+      message: 'Enter your Neon DATABASE_URL:',
+      validate: (input: string) => {
+        if (!input.startsWith('postgres://') && !input.startsWith('postgresql://')) {
+          return 'Invalid PostgreSQL connection string (must start with postgres:// or postgresql://)'
+        }
+        return true
+      },
+    },
+  ])
+
+  return databaseUrl
+}
+
+/**
+ * Prompt for Upstash Redis with helpful guidance
+ */
+export async function promptForUpstashRedis(): Promise<{
+  url: string
+  token: string
+}> {
+  const inquirer = (await import('inquirer')).default
+
+  logger.info(chalk.cyan('\n📋 Upstash Redis Setup\n'))
+  logger.info('Upstash is a serverless Redis provider with a free tier.\n')
+  logger.info(chalk.bold('Steps to get your Redis credentials:'))
+  logger.info('  1. Sign up at ' + chalk.cyan('https://upstash.com'))
+  logger.info('  2. Create a new Redis database')
+  logger.info('  3. Click "REST API" tab')
+  logger.info('  4. Copy "UPSTASH_REDIS_REST_URL" and "UPSTASH_REDIS_REST_TOKEN"')
+  logger.info('  5. Paste them below\n')
+
+  const { redisUrl, redisToken } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'redisUrl',
+      message: 'Enter UPSTASH_REDIS_REST_URL:',
+      validate: (input: string) => {
+        if (!input.startsWith('https://')) {
+          return 'Invalid Upstash Redis URL (must start with https://)'
+        }
+        return true
+      },
+    },
+    {
+      type: 'input',
+      name: 'redisToken',
+      message: 'Enter UPSTASH_REDIS_REST_TOKEN:',
+      validate: (input: string) => {
+        if (!input || input.length < 10) {
+          return 'Invalid Upstash Redis token'
+        }
+        return true
+      },
+    },
+  ])
+
+  return { url: redisUrl, token: redisToken }
+}
+
+/**
+ * Prompt for manual database URL (fallback)
  */
 export async function promptForDatabaseUrl(): Promise<string> {
   const inquirer = (await import('inquirer')).default

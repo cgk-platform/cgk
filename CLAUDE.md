@@ -104,6 +104,34 @@ pnpm build
 
 ## Quick Start
 
+**Three paths to get started** (5 minutes to 30 minutes):
+
+### Path 1: One-Click Vercel Deploy (5 minutes) - FASTEST
+
+Click the deploy button in README.md. Vercel auto-provisions Neon + Upstash, generates secrets, and deploys.
+
+### Path 2: Cloud-First CLI (5-10 minutes) - RECOMMENDED
+
+```bash
+# Clone repo
+git clone https://github.com/cgk-platform/cgk
+cd cgk
+
+# Run wizard to configure architecture
+npx @cgk-platform/cli wizard
+
+# Quick start with cloud databases (Neon + Upstash)
+npx @cgk-platform/cli quick-start
+```
+
+### Path 3: Manual Setup (30 minutes)
+
+See `docs/getting-started/LOCAL-DEVELOPMENT-SETUP.md` for detailed manual setup.
+
+---
+
+**Development Commands** (after setup):
+
 ```bash
 # Development
 pnpm dev                      # Start all apps
@@ -123,6 +151,9 @@ npx @cgk-platform/cli migrate                # Run migrations
 npx @cgk-platform/cli migrate:auto           # Auto-run missing migrations on existing tenants
 npx @cgk-platform/cli migrate:auto --tenant meliusly  # Migrate specific tenant
 npx @cgk-platform/cli doctor                 # Check configuration
+
+# Architecture wizard
+npx @cgk-platform/cli wizard  # Interactive architecture decision wizard
 ```
 
 **CRITICAL: Auto-Migration System**
@@ -227,13 +258,14 @@ The platform has two types of Claude-invocable resources:
 
 Located in `.claude/skills/`, these have `index.js` and are invoked via `/skill-name`:
 
-#### Tier 1: Critical Automation (3 skills)
+#### Tier 1: Critical Automation (4 skills)
 
 | Skill                           | Purpose                              | Annual Time Saved |
 | ------------------------------- | ------------------------------------ | ----------------- |
 | `/api-route-scaffolder`         | Generate Next.js API routes          | 1,040-2,080 hrs   |
 | `/deployment-readiness-checker` | Pre-deployment validation (9 checks) | 160-320 hrs       |
 | `/encryption-keys-manager`      | Automated key rotation               | 16-40 hrs         |
+| `/vercel`                       | Production debugging & env var mgmt  | 80-160 hrs        |
 
 #### Tier 2: Developer Experience (3 skills)
 
@@ -269,6 +301,8 @@ Located in `.claude/skills/`, these have `index.js` and are invoked via `/skill-
 Skill({ skill: 'tenant-isolation-validator', args: '--fix --path apps/admin' })
 Skill({ skill: 'api-route-scaffolder', args: 'orders --methods GET,POST' })
 Skill({ skill: 'deployment-readiness-checker', args: '--app admin' })
+Skill({ skill: 'vercel', args: 'quick:debug admin' })
+Skill({ skill: 'vercel', args: 'env:list --app admin' })
 ```
 
 **Full Documentation**: See [.claude/SKILL-REGISTRY.md](.claude/SKILL-REGISTRY.md) for comprehensive skill catalog.

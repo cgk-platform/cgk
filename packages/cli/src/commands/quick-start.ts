@@ -7,7 +7,8 @@ import {
   generateAllSecrets,
   createEnvFiles,
   setupDockerDatabase,
-  promptForDatabaseUrl,
+  promptForNeonDatabase,
+  promptForUpstashRedis,
   installDependencies,
   runMigrations,
   startDevServer,
@@ -15,8 +16,8 @@ import {
 } from '../utils/quick-start-helpers.js'
 
 export const quickStartCommand = new Command('quick-start')
-  .description('Set up CGK platform in 5-10 minutes')
-  .option('--skip-docker', 'Skip Docker setup (use existing database)')
+  .description('Set up CGK platform in 5-10 minutes (cloud-first)')
+  .option('--use-docker', 'Use Docker for local database (not recommended)')
   .option('--no-browser', 'Do not open browser automatically')
   .option('--skip-install', 'Skip dependency installation (if already installed)')
   .action(async (options) => {
@@ -44,23 +45,36 @@ export const quickStartCommand = new Command('quick-start')
       // Step 2: Database setup (1-2 min)
       logger.info(chalk.bold('\nStep 2/7:') + ' Setting up database...\n')
       let databaseUrl: string
+      let redisConfig: { url: string; token: string } | undefined
 
-      if (options.skipDocker) {
-        logger.info('Skipping Docker setup. You will need to provide your own database URL.\n')
-        databaseUrl = await promptForDatabaseUrl()
-      } else {
+      if (options.useDocker) {
+        logger.warn(
+          chalk.yellow('\n⚠️  Using Docker for local database.\n') +
+            chalk.dim(
+              'Note: This creates dev/prod mismatch (Docker locally, cloud in production).\n' +
+                'For best 12-factor app practices, use cloud database instead.\n'
+            )
+        )
         try {
           databaseUrl = await setupDockerDatabase()
         } catch (error) {
-          logger.warn('\n⚠️  Docker setup failed. You can provide your own database URL instead.\n')
-          databaseUrl = await promptForDatabaseUrl()
+          logger.warn('\n⚠️  Docker setup failed. Falling back to cloud database.\n')
+          databaseUrl = await promptForNeonDatabase()
+          redisConfig = await promptForUpstashRedis()
         }
+      } else {
+        logger.info(
+          chalk.cyan('Using cloud database (recommended for dev/prod parity).\n') +
+            chalk.dim('This ensures your local environment matches production.\n')
+        )
+        databaseUrl = await promptForNeonDatabase()
+        redisConfig = await promptForUpstashRedis()
       }
 
       // Step 3: Auto-generate secrets and .env files (30s)
       logger.info(chalk.bold('\nStep 3/7:') + ' Generating secrets and configuration...\n')
       const secrets = generateAllSecrets()
-      await createEnvFiles(secrets, databaseUrl)
+      await createEnvFiles(secrets, databaseUrl, redisConfig)
 
       logger.info(
         chalk.dim('\n  ✓ Generated 10 unique secrets\n' + '  ✓ Created 7 .env.local files\n')

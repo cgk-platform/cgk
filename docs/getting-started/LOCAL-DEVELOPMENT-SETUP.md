@@ -1,30 +1,63 @@
 # CGK Platform - Local Development Setup
 
 > **Last Updated**: 2026-03-03
-> **Time Required**: 5-10 minutes (automated) or 30 minutes (manual)
+> **Time Required**: 5-10 minutes (cloud-first) or 30 minutes (manual)
 > **Difficulty**: Beginner
 
 This guide helps you run the CGK Commerce Platform on your local machine for development.
 
 ---
 
-## 🚀 Ultra-Fast Setup (5-10 minutes)
+## Three Setup Options
 
-**NEW**: Use the automated quick-start command for the fastest setup experience.
+Choose the setup path that fits your workflow:
+
+1. **Cloud-First Quick Start (5-10 minutes)** - Recommended for most developers
+2. **Docker Local Setup (10-15 minutes)** - If you prefer local Docker containers
+3. **Manual Setup (30 minutes)** - If you want full control
+
+---
+
+## 🚀 Cloud-First Quick Start (5-10 minutes) - RECOMMENDED
+
+**Why cloud-first?** Matches production environment (Neon + Upstash), ensures 12-factor app compliance, and avoids dev/prod mismatches.
+
+### Step 1: Run Architecture Wizard (Optional)
+
+Configure your platform architecture with non-technical questions:
 
 ```bash
 # Clone repository
 git clone https://github.com/your-org/cgk.git
 cd cgk
 
-# Run automated setup
+# Run architecture wizard
+npx @cgk-platform/cli wizard
+```
+
+The wizard will ask:
+
+- What are you building? (E-commerce, Creator marketplace, B2B, etc.)
+- How do you want to manage products? (Shopify, Custom)
+- What type of website? (Modern React, Shopify theme)
+- Checkout provider? (Shopify, Stripe)
+- Cache products? (Yes/No)
+- Multi-tenant? (Yes/No)
+
+**Output**: `platform.config.ts` and database settings configured.
+
+### Step 2: Run Cloud-First Quick Start
+
+```bash
+# Run automated setup (cloud-first)
 npx @cgk-platform/cli quick-start
 ```
 
 This command will:
 
-- ✅ Check prerequisites (Node 22+, pnpm 10+, Docker)
-- ✅ Start PostgreSQL and Redis (Docker) OR prompt for your database URL
+- ✅ Check prerequisites (Node 22+, pnpm 10+)
+- ✅ Prompt for **Neon PostgreSQL** connection string (free tier)
+- ✅ Prompt for **Upstash Redis** credentials (free tier)
 - ✅ Auto-generate all secrets (JWT, encryption keys, etc.)
 - ✅ Create all .env.local files automatically
 - ✅ Install dependencies (pnpm install)
@@ -34,18 +67,48 @@ This command will:
 
 **Done!** Platform ready in 5-10 minutes.
 
-**Options**:
+### Getting Cloud Database URLs
+
+**Neon PostgreSQL** (free tier):
+
+1. Sign up at https://neon.tech
+2. Create a new project
+3. Copy connection string from "Connection Details"
+4. Paste when prompted by quick-start
+
+**Upstash Redis** (free tier):
+
+1. Sign up at https://upstash.com
+2. Create a new Redis database
+3. Click "REST API" tab
+4. Copy `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`
+5. Paste when prompted by quick-start
+
+---
+
+## 🐳 Docker Local Setup (10-15 minutes)
+
+**Warning**: This creates a dev/prod mismatch (Docker locally, cloud in production). Use only if you have a specific need for local Docker containers.
 
 ```bash
-# Skip Docker (use your own database)
-npx @cgk-platform/cli quick-start --skip-docker
+# Clone repository
+git clone https://github.com/your-org/cgk.git
+cd cgk
 
-# Don't open browser automatically
-npx @cgk-platform/cli quick-start --no-browser
-
-# Skip install if dependencies already installed
-npx @cgk-platform/cli quick-start --skip-install
+# Run quick-start with Docker option
+npx @cgk-platform/cli quick-start --use-docker
 ```
+
+This will:
+
+- Start PostgreSQL and Redis in Docker containers
+- Auto-generate secrets
+- Create .env.local files
+- Install dependencies
+- Run migrations
+- Start dev server
+
+**Why not recommended?** Violates 12-factor app principle of dev/prod parity. Your local Docker environment won't match Vercel production (Neon + Upstash).
 
 ---
 

@@ -1,0 +1,19 @@
+{
+  "name": "vercel-debugging-skill",
+  "version": "1.0.0",
+  "description": "TypeScript skill for Vercel production debugging and env var management",
+  "main": "index.ts",
+  "type": "module",
+  "bin": {
+    "vercel-skill": "./index.ts"
+  },
+  "keywords": [
+    "vercel",
+    "debugging",
+    "environment-variables",
+    "production",
+    "logs"
+  ],
+  "author": "CGK Platform",
+  "license": "MIT"
+}

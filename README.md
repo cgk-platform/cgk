@@ -10,6 +10,21 @@ A multi-tenant e-commerce platform designed for agencies managing multiple DTC b
 - **White-Label Ready**: Fully customizable per-brand theming
 - **Modern Stack**: Next.js 16, React 19, TypeScript 5.9, Tailwind CSS 4
 
+## 🚀 Quick Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fcgk-platform%2Fcgk&integration-ids=oac_neon%2Coac_upstash)
+
+**What happens when you click**:
+
+1. Forks repository to your GitHub account
+2. Auto-provisions Neon PostgreSQL (free tier)
+3. Auto-provisions Upstash Redis (free tier)
+4. Auto-generates secrets (JWT, encryption keys)
+5. Deploys platform to `*.vercel.app`
+6. Shows post-deploy wizard for Shopify/Stripe setup
+
+**Time to first deploy**: ~5 minutes
+
 ## Quick Start
 
 Get a brand site running in under 10 minutes:
@@ -38,6 +53,7 @@ pnpm dev
 ```
 
 **Minimum Required Environment Variables:**
+
 - `POSTGRES_URL` or `DATABASE_URL` - PostgreSQL connection string
 - `JWT_SECRET` - Secret for JWT signing (generate with: `openssl rand -base64 32`)
 - `SESSION_SECRET` - Secret for session encryption (generate with: `openssl rand -base64 32`)
@@ -81,11 +97,11 @@ npx @cgk-platform/cli init
 
 ## Templates
 
-| Template | Description | Use Case |
-|----------|-------------|----------|
-| `full` | Admin + Storefront + Creator Portal | Complete platform with all features |
-| `basic` | Admin portal only | Minimal setup for admin-only needs |
-| `storefront-only` | Headless Shopify frontend | When using existing Shopify backend |
+| Template          | Description                         | Use Case                            |
+| ----------------- | ----------------------------------- | ----------------------------------- |
+| `full`            | Admin + Storefront + Creator Portal | Complete platform with all features |
+| `basic`           | Admin portal only                   | Minimal setup for admin-only needs  |
+| `storefront-only` | Headless Shopify frontend           | When using existing Shopify backend |
 
 ## Configuration
 
@@ -143,20 +159,20 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `@cgk-platform/core` | Core configuration and types |
-| `@cgk-platform/db` | Database utilities with tenant isolation |
-| `@cgk-platform/auth` | JWT + session authentication |
-| `@cgk-platform/ui` | React components (shadcn/ui based) |
-| `@cgk-platform/commerce` | Commerce provider abstraction |
-| `@cgk-platform/shopify` | Shopify Admin & Storefront clients |
-| `@cgk-platform/payments` | Stripe + Wise payment handling |
-| `@cgk-platform/jobs` | Background job abstraction |
-| `@cgk-platform/analytics` | GA4 and attribution tracking |
-| `@cgk-platform/logging` | Structured logging |
-| `@cgk-platform/mcp` | MCP server utilities |
-| `@cgk-platform/cli` | Command-line tools |
+| Package                   | Description                              |
+| ------------------------- | ---------------------------------------- |
+| `@cgk-platform/core`      | Core configuration and types             |
+| `@cgk-platform/db`        | Database utilities with tenant isolation |
+| `@cgk-platform/auth`      | JWT + session authentication             |
+| `@cgk-platform/ui`        | React components (shadcn/ui based)       |
+| `@cgk-platform/commerce`  | Commerce provider abstraction            |
+| `@cgk-platform/shopify`   | Shopify Admin & Storefront clients       |
+| `@cgk-platform/payments`  | Stripe + Wise payment handling           |
+| `@cgk-platform/jobs`      | Background job abstraction               |
+| `@cgk-platform/analytics` | GA4 and attribution tracking             |
+| `@cgk-platform/logging`   | Structured logging                       |
+| `@cgk-platform/mcp`       | MCP server utilities                     |
+| `@cgk-platform/cli`       | Command-line tools                       |
 
 ## Tenant Isolation
 
@@ -166,9 +182,7 @@ CGK uses schema-per-tenant PostgreSQL isolation. **Always** use the tenant conte
 import { withTenant } from '@cgk-platform/db'
 
 // Correct - uses tenant context
-const orders = await withTenant(tenantId, () =>
-  sql`SELECT * FROM orders`
-)
+const orders = await withTenant(tenantId, () => sql`SELECT * FROM orders`)
 
 // NEVER query without tenant context
 ```
@@ -204,6 +218,7 @@ npx @cgk-platform/cli setup
 ```
 
 This will:
+
 1. Verify database connection
 2. Set up Redis cache (if configured)
 3. Run database migrations
@@ -292,6 +307,7 @@ docker-compose down
 ```
 
 The `docker-compose.yml` provides:
+
 - PostgreSQL 17 (port 5432)
 - Redis 8 (port 6379)
 - Adminer web UI (port 8080)
