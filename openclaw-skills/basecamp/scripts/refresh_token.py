@@ -8,6 +8,7 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
+# Profile-aware path (NEVER .resolve()). Try __file__ first, then $PWD.
 SKILL_DIR = Path(__file__).parent.parent
 ENV_PATH = SKILL_DIR / ".env"
 

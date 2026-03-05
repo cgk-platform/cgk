@@ -12,8 +12,19 @@ import urllib.parse
 from pathlib import Path
 
 # Profile-aware env loading (NEVER use .resolve())
+# When imported via symlink, Python may resolve __file__ to the repo dir.
+# The .env lives in the profile dir, not the repo. Try __file__ first, then $PWD.
 SKILL_DIR = Path(__file__).parent.parent
 _env_path = SKILL_DIR / ".env"
+if not _env_path.exists():
+    _pwd = os.environ.get("PWD", "")
+    if _pwd:
+        _alt = Path(_pwd)
+        if _alt.name == "scripts":
+            _alt = _alt.parent
+        if (_alt / ".env").exists():
+            SKILL_DIR = _alt
+            _env_path = _alt / ".env"
 
 
 def _load_env(path):
