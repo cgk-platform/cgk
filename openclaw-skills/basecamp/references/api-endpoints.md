@@ -146,6 +146,14 @@ Base URL: `https://3.basecampapi.com/{ACCOUNT_ID}`
 | POST   | `/buckets/{project}/recordings/{id}/boosts.json` | Create      |
 | DELETE | `/buckets/{project}/boosts/{id}.json`            | Destroy     |
 
+## Attachments
+
+| Method | Endpoint            | Description                                       |
+| ------ | ------------------- | ------------------------------------------------- |
+| POST   | `/attachments.json` | Upload file (raw binary body, ?name= query param) |
+
+Response includes `attachable_sgid` for embedding in rich text via `<bc-attachment sgid="...">`.
+
 ## Auth & Headers
 
 - `Authorization: Bearer {TOKEN}` (required)

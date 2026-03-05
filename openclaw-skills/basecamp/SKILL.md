@@ -122,6 +122,7 @@ python3 scripts/comments.py create --project 12345 --recording 44444 --content "
 | comments      | list, create, update                                                                                                                                                                        |
 | webhooks      | list, get, create, update, destroy                                                                                                                                                          |
 | checkins      | get-questionnaire, list-questions, create-question, list-answers, create-answer, get-answer                                                                                                 |
+| attachments   | upload, embed-html                                                                                                                                                                          |
 | recordings    | search, archive, trash, restore                                                                                                                                                             |
 | subscriptions | get, subscribe, unsubscribe, update                                                                                                                                                         |
 | boosts        | list, get, create, destroy                                                                                                                                                                  |
