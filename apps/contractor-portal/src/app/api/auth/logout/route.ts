@@ -1,9 +1,10 @@
 export const dynamic = 'force-dynamic'
 
+import { logger } from '@cgk-platform/logging'
+
 import { getAuthCookie, getClearCookieHeader } from '@/lib/auth/cookies'
 import { verifyContractorJWT } from '@/lib/auth/jwt'
 import { revokeContractorSession } from '@/lib/auth/session'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/logout

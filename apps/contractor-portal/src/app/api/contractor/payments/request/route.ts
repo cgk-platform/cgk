@@ -5,6 +5,7 @@
  * POST /api/contractor/payments/request - Submit new payment request
  */
 
+import { logger } from '@cgk-platform/logging'
 import {
   createPaymentRequest,
   getPaymentRequests,
@@ -17,7 +18,6 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

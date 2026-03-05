@@ -4,12 +4,13 @@
  * POST /api/contractor/projects/[id]/submit - Submit work for a project
  */
 
+import { logger } from '@cgk-platform/logging'
+
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
 import { submitProjectWork } from '@/lib/projects'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

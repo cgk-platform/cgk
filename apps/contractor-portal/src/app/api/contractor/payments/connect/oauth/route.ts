@@ -4,13 +4,13 @@
  * POST /api/contractor/payments/connect/oauth - Get OAuth URL
  */
 
+import { logger } from '@cgk-platform/logging'
 import { getStripeOAuthUrl } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

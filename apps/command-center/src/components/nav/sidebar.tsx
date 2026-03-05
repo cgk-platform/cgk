@@ -1,6 +1,6 @@
 'use client'
 
-import { PROFILES } from '@cgk-platform/openclaw'
+import { PROFILES } from '@cgk-platform/openclaw/profiles'
 import { Button, cn } from '@cgk-platform/ui'
 import {
   BarChart3,

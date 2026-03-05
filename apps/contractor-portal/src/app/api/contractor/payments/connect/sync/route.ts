@@ -4,13 +4,13 @@
  * POST /api/contractor/payments/connect/sync - Sync account status from Stripe
  */
 
+import { logger } from '@cgk-platform/logging'
 import { StripeConnectError, syncStripeAccountStatus } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

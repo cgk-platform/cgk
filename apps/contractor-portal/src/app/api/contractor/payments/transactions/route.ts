@@ -4,13 +4,13 @@
  * GET /api/contractor/payments/transactions - List balance transactions
  */
 
+import { logger } from '@cgk-platform/logging'
 import { getBalanceTransactions, type ContractorTransactionType } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

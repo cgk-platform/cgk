@@ -98,7 +98,7 @@ export function useOrders(
         }
       } catch (err) {
         if (!cancelled) {
-          logger.error('Failed to fetch orders:', err)
+          logger.error('Failed to fetch orders:', err instanceof Error ? err : undefined)
           setError(err instanceof Error ? err.message : 'Failed to fetch orders')
         }
       } finally {
@@ -132,7 +132,7 @@ export function useOrders(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      logger.error('Failed to load more orders:', err)
+      logger.error('Failed to load more orders:', err instanceof Error ? err : undefined)
       setError(err instanceof Error ? err.message : 'Failed to load more orders')
     } finally {
       setIsLoading(false)
@@ -150,7 +150,7 @@ export function useOrders(
       setHasNextPage(result.hasNextPage)
       setEndCursor(result.endCursor)
     } catch (err) {
-      logger.error('Failed to refetch orders:', err)
+      logger.error('Failed to refetch orders:', err instanceof Error ? err : undefined)
       setError(err instanceof Error ? err.message : 'Failed to fetch orders')
     } finally {
       setIsLoading(false)
@@ -222,7 +222,7 @@ export function useOrder(actions: OrderActions, orderId: string) {
         }
       } catch (err) {
         if (!cancelled) {
-          logger.error('Failed to fetch order:', err)
+          logger.error('Failed to fetch order:', err instanceof Error ? err : undefined)
           setError(err instanceof Error ? err.message : 'Failed to fetch order')
         }
       } finally {
@@ -249,7 +249,7 @@ export function useOrder(actions: OrderActions, orderId: string) {
       const result = await actions.getOrder(orderIdRef.current)
       setOrder(result)
     } catch (err) {
-      logger.error('Failed to refetch order:', err)
+      logger.error('Failed to refetch order:', err instanceof Error ? err : undefined)
       setError(err instanceof Error ? err.message : 'Failed to fetch order')
     } finally {
       setIsLoading(false)

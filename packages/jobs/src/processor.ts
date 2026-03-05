@@ -71,7 +71,7 @@ export function processJobs(config: ProcessorConfig): JobProcessor {
       )
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error))
-      logger.error('Error polling for jobs:', err)
+      logger.error('Error polling for jobs:', err instanceof Error ? err : undefined)
     }
 
     // Schedule next poll

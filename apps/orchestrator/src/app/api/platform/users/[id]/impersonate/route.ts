@@ -158,7 +158,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       reason,
       startedAt: new Date(),
       sessionId: result.session.id,
-    }).catch((err) => logger.error('[Impersonation] Security notice failed:', err))
+    }).catch((err) => logger.error('[Impersonation] Security notice failed:', err instanceof Error ? err : undefined))
 
     // Get tenant info for response
     const tenantResult = await sql`

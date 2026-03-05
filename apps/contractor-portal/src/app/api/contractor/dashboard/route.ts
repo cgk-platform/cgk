@@ -4,12 +4,13 @@
  * GET /api/contractor/dashboard - Get dashboard stats for the authenticated contractor
  */
 
+import { logger } from '@cgk-platform/logging'
+
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
 import { getContractorDashboardStats } from '@/lib/projects'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

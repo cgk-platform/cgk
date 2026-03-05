@@ -108,7 +108,7 @@ export function useDiscountCode(actions: DiscountActions): UseDiscountCodeReturn
         setDiscount(result)
         return true
       } catch (err) {
-        logger.error('Failed to validate discount code:', err)
+        logger.error('Failed to validate discount code:', err instanceof Error ? err : undefined)
         setError(err instanceof Error ? err.message : 'Failed to validate discount code')
         return false
       } finally {

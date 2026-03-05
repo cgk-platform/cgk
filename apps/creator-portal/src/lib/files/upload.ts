@@ -210,7 +210,7 @@ export async function removeProjectFile(
     await del(fileUrl)
   } catch (error) {
     // Log but don't fail if blob deletion fails
-    logger.error('Failed to delete blob:', error)
+    logger.error('Failed to delete blob:', error instanceof Error ? error : undefined)
   }
 }
 

@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic'
 
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 import { headers } from 'next/headers'
 
 import { hashPassword } from '@/lib/auth/password'
 import { markPasswordResetTokenUsed, verifyPasswordResetToken } from '@/lib/auth/password-reset'
 import { revokeAllContractorSessions } from '@/lib/auth/session'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/reset-password

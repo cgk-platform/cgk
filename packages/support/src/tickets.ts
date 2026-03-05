@@ -126,7 +126,7 @@ export async function createTicket(
     // Run sentiment analysis on description (async, don't wait)
     if (runSentimentAnalysis) {
       processSentiment(tenantId, ticket.id, input.description, priority, true).catch((err) =>
-        logger.error('Sentiment analysis failed:', err)
+        logger.error('Sentiment analysis failed:', err instanceof Error ? err : undefined)
       )
     }
 

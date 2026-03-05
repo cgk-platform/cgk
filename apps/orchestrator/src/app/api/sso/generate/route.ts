@@ -5,8 +5,8 @@
  */
 
 import { generateSSOToken, requireAuth, type TargetApp } from '@cgk-platform/auth'
-import { NextResponse, type NextRequest } from 'next/server'
 import { logger } from '@cgk-platform/logging'
+import { NextResponse, type NextRequest } from 'next/server'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

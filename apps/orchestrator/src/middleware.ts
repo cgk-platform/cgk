@@ -8,9 +8,9 @@ import {
   verifyJWT,
 } from '@cgk-platform/auth'
 import { sql } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * Super Admin Middleware for Orchestrator
@@ -225,7 +225,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
         isSensitive: isSensitiveRoute,
       },
     }).catch((error) => {
-      logger.error('Failed to log audit action:', error)
+      logger.error('Failed to log audit action:', error instanceof Error ? error : undefined)
     })
 
     // Clone the request and add auth headers
@@ -250,7 +250,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (err: unknown) {
-    logger.error('Middleware error:', err)
+    logger.error('Middleware error:', err instanceof Error ? err : undefined)
     // Invalid token, redirect to login
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)

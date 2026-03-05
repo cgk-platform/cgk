@@ -4,13 +4,13 @@
  * GET /api/contractor/tax/forms - List tax forms (1099-NEC)
  */
 
+import { logger } from '@cgk-platform/logging'
 import { getTaxForms } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

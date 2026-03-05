@@ -1,6 +1,6 @@
 'use client'
 
-import { PROFILES } from '@cgk-platform/openclaw'
+import { PROFILES } from '@cgk-platform/openclaw/profiles'
 import { useCallback, useEffect, useState } from 'react'
 
 import { ActivityFeed } from '@/components/overview/activity-feed'

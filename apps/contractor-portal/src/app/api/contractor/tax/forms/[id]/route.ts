@@ -4,13 +4,13 @@
  * GET /api/contractor/tax/forms/[id] - Download tax form
  */
 
+import { logger } from '@cgk-platform/logging'
 import { getTaxFormById } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

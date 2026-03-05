@@ -634,7 +634,7 @@ export const processInternationalPayoutJob = defineJob<
       recordIdempotency(idempotencyKey, payoutId, 'failed')
 
       const err = error instanceof Error ? error : new Error(String(error))
-      logger.error(`[processInternationalPayout] Failed for payout ${payoutId}:`, err)
+      logger.error(`[processInternationalPayout] Failed for payout ${payoutId}:`, err instanceof Error ? err : undefined)
 
       return {
         success: false,
@@ -823,7 +823,7 @@ export const processDomesticPayoutJob = defineJob<
       recordIdempotency(idempotencyKey, payoutId, 'failed')
 
       const err = error instanceof Error ? error : new Error(String(error))
-      logger.error(`[processDomesticPayout] Failed for payout ${payoutId}:`, err)
+      logger.error(`[processDomesticPayout] Failed for payout ${payoutId}:`, err instanceof Error ? err : undefined)
 
       return {
         success: false,

@@ -4,13 +4,13 @@
  * GET /api/contractor/payments/connect/countries - Get available countries
  */
 
+import { logger } from '@cgk-platform/logging'
 import { getAvailableCountries } from '@cgk-platform/payments'
 
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

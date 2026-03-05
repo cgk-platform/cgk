@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { logger } from '@cgk-platform/logging'
 import {
   decryptToken,
   disconnectPlatformWorkspace,
@@ -7,7 +8,6 @@ import {
   revokeToken,
 } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * DELETE /api/platform/slack/disconnect

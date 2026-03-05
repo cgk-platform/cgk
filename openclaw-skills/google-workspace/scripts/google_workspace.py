@@ -10,6 +10,7 @@
 #     "openpyxl>=3.1.0",
 #     "pandas>=2.0.0",
 #     "python-docx>=1.0.0",
+#     "python-pptx>=0.6.21",
 # ]
 # ///
 """Google Workspace API helper — Slides, Docs, Sheets, Drive.
@@ -1949,6 +1950,733 @@ def cmd_slides_batch_update(args):
         presentationId=args.presentation_id, body={"requests": requests_data}
     ).execute()
     print(json.dumps({"replies": len(resp.get("replies", []))}))
+
+
+def _build_rich_presentation(spec, output_path):
+    """Build a rich .pptx file from a JSON spec using python-pptx.
+
+    spec format:
+    {
+      "title": "Presentation Title",
+      "theme": {"dark": "1A1A2E", "accent": "E94560", "accent2": "0F3460",
+                "lightBg": "F5F5F5", "medGray": "666666"},
+      "slideWidth": 13.333,
+      "slideHeight": 7.5,
+      "slides": [
+        {"type": "title_slide", "title": "...", "subtitle": "...", "notes": "..."},
+        {"type": "section", "title": "..."},
+        {"type": "content", "title": "...", "body": "..."},
+        {"type": "bullets", "title": "...", "items": [...]},
+        {"type": "kpi_row", "title": "...", "metrics": [{"value":"$42K","label":"Revenue","bg":"0F3460"}]},
+        {"type": "table", "title": "...", "headers": [...], "rows": [[...]], "style": {"headerBg":"...","zebra":true}},
+        {"type": "two_column", "title": "...", "left": {"heading":"...","body":"..."}, "right": {"heading":"...","body":"..."}},
+        {"type": "image", "title": "...", "path": "...", "caption": "..."},
+        {"type": "chart", "title": "...", "chartType": "bar", "categories": [...], "series": [{"name":"...","values":[...]}]},
+        {"type": "blank", "elements": [{"type":"text","text":"...","x":1,"y":1,"fontSize":14}]},
+        {"type": "closing", "title": "...", "subtitle": "..."}
+      ]
+    }
+    """
+    from pptx import Presentation
+    from pptx.util import Inches, Pt, Emu
+    from pptx.dml.color import RGBColor
+    from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
+    from pptx.enum.chart import XL_CHART_TYPE
+    from pptx.chart.data import CategoryChartData, XyChartData
+
+    prs = Presentation()
+
+    # Slide dimensions (default: widescreen 16:9)
+    slide_w = spec.get("slideWidth", 13.333)
+    slide_h = spec.get("slideHeight", 7.5)
+    prs.slide_width = Inches(slide_w)
+    prs.slide_height = Inches(slide_h)
+
+    # Theme colors
+    theme = spec.get("theme", {})
+    color_dark = theme.get("dark", "1A1A2E")
+    color_accent = theme.get("accent", "E94560")
+    color_accent2 = theme.get("accent2", "0F3460")
+    color_light_bg = theme.get("lightBg", "F5F5F5")
+    color_med_gray = theme.get("medGray", "666666")
+
+    def _rgb(hex_str):
+        h = hex_str.lstrip("#")
+        try:
+            return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+        except (ValueError, IndexError):
+            return RGBColor(0, 0, 0)
+
+    def _set_slide_bg(slide, hex_color):
+        bg = slide.background
+        fill = bg.fill
+        fill.solid()
+        fill.fore_color.rgb = _rgb(hex_color)
+
+    def _add_textbox(slide, text, left, top, width, height,
+                     font_size=18, bold=False, italic=False,
+                     color=None, align=PP_ALIGN.LEFT, font_name="Arial",
+                     anchor=MSO_ANCHOR.TOP):
+        txBox = slide.shapes.add_textbox(
+            Inches(left), Inches(top), Inches(width), Inches(height))
+        tf = txBox.text_frame
+        tf.word_wrap = True
+        tf.auto_size = None
+        try:
+            tf.paragraphs[0].alignment = align
+        except Exception:
+            pass
+        p = tf.paragraphs[0]
+        run = p.add_run()
+        run.text = text
+        run.font.size = Pt(font_size)
+        run.font.bold = bold
+        run.font.italic = italic
+        run.font.name = font_name
+        if color:
+            run.font.color.rgb = _rgb(color)
+        return txBox
+
+    def _add_accent_bar(slide, position="top", hex_color=None):
+        from pptx.util import Inches, Pt
+        bar_color = hex_color or color_accent
+        bar_h = 0.06
+        if position == "top":
+            left, top, w, h = 0, 0, slide_w, bar_h
+        elif position == "bottom":
+            left, top, w, h = 0, slide_h - bar_h, slide_w, bar_h
+        else:
+            left, top, w, h = 0, 0, slide_w, bar_h
+        shape = slide.shapes.add_shape(
+            1,  # MSO_SHAPE.RECTANGLE
+            Inches(left), Inches(top), Inches(w), Inches(h))
+        shape.fill.solid()
+        shape.fill.fore_color.rgb = _rgb(bar_color)
+        shape.line.fill.background()
+        return shape
+
+    def _add_notes(slide, notes_text):
+        if notes_text:
+            notes_slide = slide.notes_slide
+            notes_slide.notes_text_frame.text = notes_text
+
+    def _truncate(text, max_chars):
+        """Truncate text with ellipsis if too long."""
+        if not text or len(text) <= max_chars:
+            return text
+        return text[:max_chars - 3].rstrip() + "..."
+
+    def _build_kpi_cards(slide, metrics, start_y=2.0, title_text=None):
+        margin = 0.8
+        content_w = slide_w - 2 * margin
+        if title_text:
+            _add_textbox(slide, title_text,
+                         margin, 0.6, content_w, 0.6,
+                         font_size=28, bold=True, color=color_dark)
+
+        if not metrics:
+            return
+        n = len(metrics)
+        max_per_row = 4
+        rows_needed = (n + max_per_row - 1) // max_per_row
+
+        gap = 0.2
+        padding = 0.15  # inner padding for text
+        card_h = 1.5 if rows_needed == 1 else 1.3
+        row_gap = 0.25
+
+        for row_idx in range(rows_needed):
+            row_start = row_idx * max_per_row
+            row_end = min(row_start + max_per_row, n)
+            row_count = row_end - row_start
+            card_w = (content_w - gap * (row_count - 1)) / row_count
+            row_y = start_y + row_idx * (card_h + row_gap)
+
+            # Scale font sizes based on card width
+            val_font = max(20, min(32, int(card_w * 10)))
+            label_font = max(11, min(14, int(card_w * 4.5)))
+
+            for i, kpi in enumerate(metrics[row_start:row_end]):
+                bg = kpi.get("bg", color_accent2)
+                val = _truncate(str(kpi.get("value", "--")), 20)
+                label = _truncate(str(kpi.get("label", "")), 30)
+                card_x = margin + i * (card_w + gap)
+
+                # Card background shape
+                shape = slide.shapes.add_shape(
+                    1, Inches(card_x), Inches(row_y),
+                    Inches(card_w), Inches(card_h))
+                shape.fill.solid()
+                shape.fill.fore_color.rgb = _rgb(bg)
+                shape.line.fill.background()
+
+                # Value text (with padding)
+                _add_textbox(slide, val,
+                             card_x + padding, row_y + padding,
+                             card_w - 2 * padding, card_h * 0.55,
+                             font_size=val_font, bold=True, color="FFFFFF",
+                             align=PP_ALIGN.CENTER)
+
+                # Label text (with padding)
+                _add_textbox(slide, label,
+                             card_x + padding, row_y + card_h * 0.6,
+                             card_w - 2 * padding, card_h * 0.35,
+                             font_size=label_font, color="FFFFFF",
+                             align=PP_ALIGN.CENTER)
+
+    def _build_table_slide(slide, headers, rows, style_spec=None, title_text=None):
+        margin = 0.8
+        content_w = slide_w - 2 * margin
+        style_spec = style_spec or {}
+        header_bg = style_spec.get("headerBg", color_accent2)
+        zebra = style_spec.get("zebra", False)
+        zebra_color = style_spec.get("zebraColor", "F0F0F0")
+
+        if title_text:
+            _add_textbox(slide, title_text,
+                         margin, 0.4, content_w, 0.6,
+                         font_size=28, bold=True, color=color_dark)
+
+        all_rows = [headers] + rows if headers else rows
+        if not all_rows:
+            return
+        n_rows = len(all_rows)
+        n_cols = max(len(r) for r in all_rows)
+        table_top = 1.3 if title_text else 0.6
+        table_h = min(n_rows * 0.45, slide_h - table_top - 0.5)
+
+        tbl_shape = slide.shapes.add_table(
+            n_rows, n_cols,
+            Inches(margin), Inches(table_top),
+            Inches(content_w), Inches(table_h))
+        tbl = tbl_shape.table
+
+        for r_idx, row_data in enumerate(all_rows):
+            for c_idx in range(n_cols):
+                cell = tbl.cell(r_idx, c_idx)
+                cell_val = row_data[c_idx] if c_idx < len(row_data) else ""
+                cell.text = _truncate(str(cell_val), 80)
+
+                for paragraph in cell.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(11)
+                        run.font.name = "Arial"
+
+                if r_idx == 0 and headers:
+                    cell.fill.solid()
+                    cell.fill.fore_color.rgb = _rgb(header_bg)
+                    for paragraph in cell.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.bold = True
+                            run.font.color.rgb = RGBColor(255, 255, 255)
+                elif zebra and r_idx % 2 == 0:
+                    cell.fill.solid()
+                    cell.fill.fore_color.rgb = _rgb(zebra_color)
+
+    # Use blank layout for all slides
+    blank_layout = prs.slide_layouts[6]  # Blank layout
+
+    for slide_spec in spec.get("slides", []):
+        slide_type = slide_spec.get("type", "blank")
+        slide = prs.slides.add_slide(blank_layout)
+        notes = slide_spec.get("notes", "")
+        margin = 0.8
+        content_w = slide_w - 2 * margin
+
+        if slide_type == "title_slide":
+            _set_slide_bg(slide, color_dark)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "Untitled Presentation")
+            subtitle = slide_spec.get("subtitle", "")
+            _add_textbox(slide, title,
+                         margin, slide_h * 0.3, content_w, 1.0,
+                         font_size=40, bold=True, color="FFFFFF",
+                         align=PP_ALIGN.CENTER)
+            if subtitle:
+                _add_textbox(slide, subtitle,
+                             margin, slide_h * 0.3 + 1.1, content_w, 0.6,
+                             font_size=20, color="CCCCCC",
+                             align=PP_ALIGN.CENTER)
+
+        elif slide_type == "section":
+            _set_slide_bg(slide, color_accent2)
+            _add_accent_bar(slide, "bottom")
+            title = slide_spec.get("title", "Section")
+            _add_textbox(slide, title,
+                         margin, slide_h * 0.35, content_w, 1.0,
+                         font_size=36, bold=True, color="FFFFFF",
+                         align=PP_ALIGN.CENTER)
+
+        elif slide_type == "content":
+            _set_slide_bg(slide, color_light_bg)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "")
+            body = _truncate(slide_spec.get("body", slide_spec.get("content", "")), 600)
+            if title:
+                _add_textbox(slide, title,
+                             margin, 0.4, content_w, 0.6,
+                             font_size=28, bold=True, color=color_dark)
+            if body:
+                _add_textbox(slide, body,
+                             margin, 1.2, content_w, slide_h - 1.8,
+                             font_size=16, color="333333")
+
+        elif slide_type == "bullets":
+            _set_slide_bg(slide, color_light_bg)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "")
+            items = slide_spec.get("items", [])
+            if title:
+                _add_textbox(slide, title,
+                             margin, 0.4, content_w, 0.6,
+                             font_size=28, bold=True, color=color_dark)
+            if items:
+                # Cap at 10 bullets, indicate truncation
+                display_items = items[:10]
+                if len(items) > 10:
+                    display_items.append(f"... and {len(items) - 10} more")
+                txBox = slide.shapes.add_textbox(
+                    Inches(margin), Inches(1.3),
+                    Inches(content_w), Inches(slide_h - 1.8))
+                tf = txBox.text_frame
+                tf.word_wrap = True
+                # Scale font if many bullets
+                bullet_font = 16 if len(display_items) <= 7 else max(12, 16 - (len(display_items) - 7))
+                for idx, item in enumerate(display_items):
+                    if idx == 0:
+                        p = tf.paragraphs[0]
+                    else:
+                        p = tf.add_paragraph()
+                    p.space_after = Pt(6 if len(display_items) > 7 else 8)
+                    p.level = 0
+                    run = p.add_run()
+                    run.text = "\u2022  " + _truncate(str(item), 120)
+                    run.font.size = Pt(bullet_font)
+                    run.font.name = "Arial"
+                    run.font.color.rgb = _rgb("333333")
+
+        elif slide_type == "kpi_row":
+            _set_slide_bg(slide, color_light_bg)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "Key Metrics")
+            metrics = slide_spec.get("metrics", slide_spec.get("items", []))
+            _build_kpi_cards(slide, metrics, start_y=2.2, title_text=title)
+
+        elif slide_type == "table":
+            _set_slide_bg(slide, color_light_bg)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "")
+            headers = slide_spec.get("headers", [])
+            rows = slide_spec.get("rows", [])
+            style = slide_spec.get("style", {})
+            _build_table_slide(slide, headers, rows, style, title)
+
+        elif slide_type == "two_column":
+            _set_slide_bg(slide, color_light_bg)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "")
+            left = slide_spec.get("left", {})
+            right = slide_spec.get("right", {})
+            col_w = (content_w - 0.4) / 2
+
+            if title:
+                _add_textbox(slide, title,
+                             margin, 0.4, content_w, 0.6,
+                             font_size=28, bold=True, color=color_dark)
+
+            # Left column
+            left_heading = left.get("heading", "")
+            left_body = _truncate(left.get("body", ""), 400)
+            y_start = 1.3
+            if left_heading:
+                _add_textbox(slide, left_heading,
+                             margin, y_start, col_w, 0.5,
+                             font_size=20, bold=True, color=color_accent2)
+                y_start += 0.55
+            if left_body:
+                _add_textbox(slide, left_body,
+                             margin, y_start, col_w, slide_h - y_start - 0.5,
+                             font_size=14, color="333333")
+
+            # Right column
+            right_heading = right.get("heading", "")
+            right_body = _truncate(right.get("body", ""), 400)
+            right_x = margin + col_w + 0.4
+            y_start = 1.3
+            if right_heading:
+                _add_textbox(slide, right_heading,
+                             right_x, y_start, col_w, 0.5,
+                             font_size=20, bold=True, color=color_accent2)
+                y_start += 0.55
+            if right_body:
+                _add_textbox(slide, right_body,
+                             right_x, y_start, col_w, slide_h - y_start - 0.5,
+                             font_size=14, color="333333")
+
+        elif slide_type == "image":
+            _set_slide_bg(slide, color_light_bg)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "")
+            img_path = slide_spec.get("path", "")
+            caption = slide_spec.get("caption", "")
+
+            if title:
+                _add_textbox(slide, title,
+                             margin, 0.4, content_w, 0.6,
+                             font_size=28, bold=True, color=color_dark)
+
+            if img_path and os.path.exists(img_path):
+                img_top = 1.3 if title else 0.6
+                max_w = content_w
+                max_h = slide_h - img_top - (0.8 if caption else 0.4)
+                slide.shapes.add_picture(
+                    img_path,
+                    Inches(margin), Inches(img_top),
+                    Inches(max_w), Inches(max_h))
+
+            if caption:
+                _add_textbox(slide, caption,
+                             margin, slide_h - 0.7, content_w, 0.4,
+                             font_size=11, italic=True, color=color_med_gray,
+                             align=PP_ALIGN.CENTER)
+
+        elif slide_type == "chart":
+            _set_slide_bg(slide, color_light_bg)
+            _add_accent_bar(slide, "top")
+            title = slide_spec.get("title", "")
+            chart_type_str = slide_spec.get("chartType", "bar").lower()
+            categories = slide_spec.get("categories", [])
+            series_list = slide_spec.get("series", [])
+
+            if title:
+                _add_textbox(slide, title,
+                             margin, 0.4, content_w, 0.6,
+                             font_size=28, bold=True, color=color_dark)
+
+            # Guard: need at least one series with data
+            valid_series = [s for s in series_list if s.get("values")]
+            if not valid_series:
+                _add_textbox(slide, "(No chart data provided)",
+                             margin, 3.0, content_w, 1.0,
+                             font_size=16, italic=True, color=color_med_gray,
+                             align=PP_ALIGN.CENTER)
+            else:
+                chart_type_map = {
+                    "bar": XL_CHART_TYPE.COLUMN_CLUSTERED,
+                    "column": XL_CHART_TYPE.COLUMN_CLUSTERED,
+                    "line": XL_CHART_TYPE.LINE,
+                    "pie": XL_CHART_TYPE.PIE,
+                    "area": XL_CHART_TYPE.AREA,
+                    "scatter": XL_CHART_TYPE.XY_SCATTER,
+                    "doughnut": XL_CHART_TYPE.DOUGHNUT,
+                }
+                xl_type = chart_type_map.get(chart_type_str, XL_CHART_TYPE.COLUMN_CLUSTERED)
+
+                # Scatter charts require XyChartData; everything else uses CategoryChartData
+                if chart_type_str == "scatter":
+                    chart_data = XyChartData()
+                    for s in valid_series:
+                        xy_series = chart_data.add_series(s.get("name", "Series"))
+                        x_vals = categories if categories else list(range(1, len(s["values"]) + 1))
+                        for x, y in zip(x_vals, s["values"]):
+                            xy_series.add_data_point(x, y)
+                else:
+                    chart_data = CategoryChartData()
+                    if not categories:
+                        categories = [str(i + 1) for i in range(len(valid_series[0]["values"]))]
+                    chart_data.categories = categories
+                    for s in valid_series:
+                        chart_data.add_series(s.get("name", "Series"), s.get("values", []))
+
+                chart_top = 1.3 if title else 0.5
+                chart_shape = slide.shapes.add_chart(
+                    xl_type, Inches(margin), Inches(chart_top),
+                    Inches(content_w), Inches(slide_h - chart_top - 0.5),
+                    chart_data)
+                chart_obj = chart_shape.chart
+                chart_obj.has_legend = len(valid_series) > 1
+
+        elif slide_type == "blank":
+            bg_color = slide_spec.get("background", color_light_bg)
+            _set_slide_bg(slide, bg_color)
+            for elem in slide_spec.get("elements", []):
+                etype = elem.get("type", "text")
+                if etype == "text":
+                    _add_textbox(
+                        slide, elem.get("text", ""),
+                        elem.get("x", 0.5), elem.get("y", 0.5),
+                        elem.get("width", content_w), elem.get("height", 1.0),
+                        font_size=elem.get("fontSize", 14),
+                        bold=elem.get("bold", False),
+                        italic=elem.get("italic", False),
+                        color=elem.get("color", "333333"),
+                        align=PP_ALIGN.CENTER if elem.get("align") == "center"
+                              else PP_ALIGN.RIGHT if elem.get("align") == "right"
+                              else PP_ALIGN.LEFT)
+                elif etype == "image" and elem.get("path") and os.path.exists(elem["path"]):
+                    slide.shapes.add_picture(
+                        elem["path"],
+                        Inches(elem.get("x", 0.5)), Inches(elem.get("y", 0.5)),
+                        Inches(elem.get("width", 4)), Inches(elem.get("height", 3)))
+                elif etype == "shape":
+                    shape = slide.shapes.add_shape(
+                        1,
+                        Inches(elem.get("x", 0)), Inches(elem.get("y", 0)),
+                        Inches(elem.get("width", 1)), Inches(elem.get("height", 1)))
+                    shape.fill.solid()
+                    shape.fill.fore_color.rgb = _rgb(elem.get("color", color_accent))
+                    shape.line.fill.background()
+
+        elif slide_type == "closing":
+            _set_slide_bg(slide, color_dark)
+            _add_accent_bar(slide, "bottom")
+            title = slide_spec.get("title", "Thank You")
+            subtitle = slide_spec.get("subtitle", "")
+            _add_textbox(slide, title,
+                         margin, slide_h * 0.3, content_w, 1.0,
+                         font_size=40, bold=True, color="FFFFFF",
+                         align=PP_ALIGN.CENTER)
+            if subtitle:
+                _add_textbox(slide, subtitle,
+                             margin, slide_h * 0.3 + 1.1, content_w, 0.6,
+                             font_size=20, color="AAAAAA",
+                             align=PP_ALIGN.CENTER)
+
+        _add_notes(slide, notes)
+
+    prs.save(output_path)
+    return output_path
+
+
+def _qa_presentation(pptx_path, spec):
+    """Vision QA self-correction loop: export to images and check for layout issues."""
+    import subprocess
+
+    report = []
+    pdf_path = str(pptx_path).rsplit(".", 1)[0] + ".pdf"
+    images_dir = str(pptx_path).rsplit(".", 1)[0] + "_qa_images"
+
+    # Step 1: Convert .pptx to PDF
+    try:
+        for cmd in [
+            ["libreoffice", "--headless", "--convert-to", "pdf", "--outdir",
+             os.path.dirname(pdf_path), str(pptx_path)],
+            ["unoconv", "-f", "pdf", "-o", pdf_path, str(pptx_path)],
+        ]:
+            try:
+                subprocess.run(cmd, capture_output=True, timeout=60, check=True)
+                if os.path.exists(pdf_path):
+                    break
+            except (FileNotFoundError, subprocess.CalledProcessError):
+                continue
+        if not os.path.exists(pdf_path):
+            return {"skipped": True, "reason": "No PDF converter available (install LibreOffice or unoconv)"}
+    except Exception as e:
+        return {"skipped": True, "reason": f"PDF conversion failed: {e}"}
+
+    # Step 2: Convert PDF pages to PNG images
+    os.makedirs(images_dir, exist_ok=True)
+    slide_images = []
+    try:
+        try:
+            import fitz  # pymupdf
+            doc = fitz.open(pdf_path)
+            for page_num in range(len(doc)):
+                pix = doc[page_num].get_pixmap(dpi=150)
+                img_path = os.path.join(images_dir, f"slide_{page_num}.png")
+                pix.save(img_path)
+                slide_images.append(img_path)
+            doc.close()
+        except ImportError:
+            from pdf2image import convert_from_path
+            images = convert_from_path(pdf_path, dpi=150)
+            for i, img in enumerate(images):
+                img_path = os.path.join(images_dir, f"slide_{i}.png")
+                img.save(img_path, "PNG")
+                slide_images.append(img_path)
+    except Exception as e:
+        return {"skipped": True, "reason": f"PDF-to-image conversion failed: {e}"}
+
+    if not slide_images:
+        return {"skipped": True, "reason": "No slide images generated"}
+
+    # Step 3: Vision QA via Anthropic API
+    try:
+        import anthropic
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            return {"skipped": True, "reason": "ANTHROPIC_API_KEY not set"}
+        client = anthropic.Anthropic(api_key=api_key)
+    except ImportError:
+        return {"skipped": True, "reason": "anthropic package not installed"}
+
+    import base64
+    qa_prompt = (
+        "Analyze this presentation slide for layout issues: overlapping text, "
+        "text overflow, empty charts, broken formatting. List specific issues "
+        "found or say PASS if the slide looks correct."
+    )
+
+    for idx, img_path in enumerate(slide_images):
+        try:
+            with open(img_path, "rb") as f:
+                img_b64 = base64.b64encode(f.read()).decode("utf-8")
+            resp = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=300,
+                messages=[{
+                    "role": "user",
+                    "content": [
+                        {"type": "image", "source": {"type": "base64", "media_type": "image/png", "data": img_b64}},
+                        {"type": "text", "text": qa_prompt},
+                    ],
+                }],
+            )
+            result_text = resp.content[0].text.strip()
+            status = "PASS" if result_text.upper().startswith("PASS") else "FAIL"
+            issues = [] if status == "PASS" else [result_text]
+            report.append({"slide_index": idx, "status": status, "issues": issues})
+        except Exception as e:
+            report.append({"slide_index": idx, "status": "ERROR", "issues": [str(e)]})
+
+    # Cleanup temp files
+    try:
+        os.remove(pdf_path)
+        import shutil
+        shutil.rmtree(images_dir, ignore_errors=True)
+    except Exception:
+        pass
+
+    return {"slides": report, "has_issues": any(s["status"] != "PASS" for s in report)}
+
+
+def _upload_pptx_as_slides(pptx_path, title, folder_id=None):
+    """Upload .pptx to Drive, converting to Google Slides. Returns file metadata."""
+    from googleapiclient.http import MediaFileUpload
+    drive = _drive_service()
+
+    metadata = {
+        "name": title,
+        "mimeType": "application/vnd.google-apps.presentation",
+    }
+    if folder_id:
+        metadata["parents"] = [folder_id]
+
+    media = MediaFileUpload(
+        str(pptx_path),
+        mimetype="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        resumable=True,
+    )
+    uploaded = drive.files().create(
+        body=metadata,
+        media_body=media,
+        fields="id, name, webViewLink",
+    ).execute()
+    return uploaded
+
+
+def cmd_slides_build_rich(args):
+    """Build a rich presentation from JSON spec, upload to Drive as Google Slides."""
+    spec = _read_spec(args)
+    title = args.title or spec.get("title", "Untitled Presentation")
+
+    # Build .pptx locally
+    if args.output:
+        output_path = pathlib.Path(args.output)
+    else:
+        output_path = pathlib.Path(tempfile.mkdtemp()) / f"{title}.pptx"
+
+    _build_rich_presentation(spec, str(output_path))
+
+    # Optional QA check
+    qa_result = None
+    if getattr(args, "qa", False):
+        qa_result = _qa_presentation(str(output_path), spec)
+        if qa_result and not qa_result.get("skipped"):
+            report_path = str(output_path) + ".qa-report.json"
+            with open(report_path, "w") as f:
+                json.dump(qa_result, f, indent=2)
+            if qa_result.get("has_issues"):
+                print(f"QA WARNING: Issues found -- see {report_path}", file=sys.stderr)
+        elif qa_result and qa_result.get("skipped"):
+            print(f"QA skipped: {qa_result.get('reason', 'unknown')}", file=sys.stderr)
+
+    if args.output:
+        # Local-only mode -- skip upload
+        result = {"localPath": str(output_path), "title": title}
+        if qa_result:
+            result["qa"] = qa_result
+        print(json.dumps(result))
+        return
+
+    # Upload to Drive as Google Slides
+    uploaded = _upload_pptx_as_slides(str(output_path), title, folder_id=args.folder)
+    pres_id = uploaded["id"]
+    _auto_share_org(pres_id)
+    url = uploaded.get("webViewLink", f"https://docs.google.com/presentation/d/{pres_id}/edit")
+
+    result = {"presentationId": pres_id, "url": url, "title": title, "orgShared": True}
+
+    if args.link_share:
+        result["linkShare"] = _link_share_file(pres_id)
+
+    if args.share:
+        drive = _drive_service()
+        drive.permissions().create(
+            fileId=pres_id,
+            body={"type": "user", "role": "reader", "emailAddress": args.share},
+            sendNotificationEmail=True,
+            fields="id",
+        ).execute()
+        result["sharedWith"] = args.share
+
+    # Clean up temp file
+    output_path.unlink(missing_ok=True)
+
+    print(json.dumps(result, indent=2))
+
+
+def cmd_slides_build_rich_batch(args):
+    """Build multiple rich presentations in parallel from JSON spec array."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    specs = _read_spec(args)
+    if not isinstance(specs, list):
+        print("ERROR: Batch spec must be a JSON array of specs.", file=sys.stderr)
+        sys.exit(1)
+
+    max_workers = args.parallel or 4
+    results = {"total": len(specs), "succeeded": 0, "failed": 0, "presentations": []}
+
+    def build_one(spec):
+        title = spec.get("title", "Untitled Presentation")
+        tmp_path = pathlib.Path(tempfile.mkdtemp()) / f"{title}.pptx"
+        try:
+            _build_rich_presentation(spec, str(tmp_path))
+            uploaded = _upload_pptx_as_slides(str(tmp_path), title, folder_id=args.folder)
+            pres_id = uploaded["id"]
+            _auto_share_org(pres_id)
+            url = uploaded.get("webViewLink", f"https://docs.google.com/presentation/d/{pres_id}/edit")
+            entry = {"presentationId": pres_id, "url": url, "title": title, "orgShared": True}
+            if args.link_share:
+                entry["linkShare"] = _link_share_file(pres_id)
+            return entry
+        except Exception as e:
+            return {"title": title, "error": str(e)}
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(build_one, s): s for s in specs}
+        for future in as_completed(futures):
+            entry = future.result()
+            if "error" in entry:
+                results["failed"] += 1
+            else:
+                results["succeeded"] += 1
+            results["presentations"].append(entry)
+
+    print(json.dumps(results, indent=2))
 
 
 # ============================================================
@@ -4314,6 +5042,25 @@ def build_parser():
     p.add_argument("presentation_id")
     p.add_argument("--requests", required=True, help="JSON array of requests")
 
+    # slides build-rich
+    p = slides_sub.add_parser("build-rich", help="Build rich presentation from JSON spec")
+    p.add_argument("--title", help="Presentation title (overrides spec)")
+    p.add_argument("--folder", help="Drive folder ID")
+    p.add_argument("--link-share", action="store_true", help="Make link-shareable")
+    p.add_argument("--share", help="Email to share with")
+    p.add_argument("--output", help="Save .pptx locally instead of uploading")
+    p.add_argument("--spec", help="Inline JSON spec")
+    p.add_argument("--spec-file", help="Path to JSON spec file")
+    p.add_argument("--qa", action="store_true", help="Run vision QA check on output slides")
+
+    # slides build-rich-batch
+    p = slides_sub.add_parser("build-rich-batch", help="Build multiple rich presentations in parallel")
+    p.add_argument("--folder", help="Drive folder ID")
+    p.add_argument("--link-share", action="store_true", help="Make link-shareable")
+    p.add_argument("--parallel", type=int, default=4, help="Max parallel builds")
+    p.add_argument("--spec", help="Inline JSON spec array")
+    p.add_argument("--spec-file", help="Path to JSON spec file")
+
     # --- DOCS ---
     docs_p = sub.add_parser("docs", help="Google Docs operations")
     docs_sub = docs_p.add_subparsers(dest="docs_cmd")
@@ -4593,6 +5340,8 @@ DISPATCH = {
     ("slides", "add-layout"): cmd_slides_add_layout,
     ("slides", "export"): cmd_slides_export,
     ("slides", "batch-update"): cmd_slides_batch_update,
+    ("slides", "build-rich"): cmd_slides_build_rich,
+    ("slides", "build-rich-batch"): cmd_slides_build_rich_batch,
     ("docs", "create"): cmd_docs_create,
     ("docs", "get"): cmd_docs_get,
     ("docs", "add-text"): cmd_docs_add_text,

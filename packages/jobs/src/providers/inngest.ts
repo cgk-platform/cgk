@@ -122,7 +122,7 @@ export function createInngestProvider(config: InngestConfig): JobProvider {
         return { id: result.ids[0] ?? createJobId(), accepted: true }
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error))
-        logger.error(`[InngestProvider] Failed to send ${event as string}:`, err)
+        logger.error(`[InngestProvider] Failed to send ${event as string}:`, err instanceof Error ? err : undefined)
         throw err
       }
     },

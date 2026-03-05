@@ -1,7 +1,7 @@
+import { logger } from '@cgk-platform/logging'
 import { NextResponse } from 'next/server'
 
 import { getSetupStatus } from '@/lib/setup-detection'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

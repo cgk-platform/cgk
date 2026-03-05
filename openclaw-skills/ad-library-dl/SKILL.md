@@ -2,7 +2,7 @@
 name: ad-library-dl
 description: Download, analyze, monitor, and clone competitor ads from Facebook Ad Library. Includes brand asset management, design system capture, competitive intelligence pipeline, and interactive clone sessions with LLM-powered copy generation. Chain with nano-banana-pro for image generation and veo-video-gen for video production.
 author: nova russell
-version: 3.0.0
+version: 3.1.0
 triggers:
   - 'download ad library'
   - 'facebook ads'
@@ -34,6 +34,10 @@ triggers:
   - 'design system capture'
   - 'product catalog'
   - 'clone preflight'
+  - 'find competitors'
+  - 'discover competitors'
+  - 'brand lookup'
+  - 'resolve brand'
 metadata:
   {
     'clawdbot':
@@ -82,6 +86,8 @@ Download, analyze, monitor, and clone competitor ads from Facebook Ad Library. F
 | 9   | `product_catalog.py`       | Product catalog management (pricing, descriptions, images)                             |
 | 10  | `ci_store.py`              | Competitive intelligence data store (SQLite + optional ChromaDB)                       |
 | 11  | `sync_drive.py`            | Sync local assets/briefs to Google Drive                                               |
+| 12  | `brand_resolver.py`        | Brand name to Ad Library URL resolver (Brave Search verification)                      |
+| 13  | `competitor_discover.py`   | Multi-source competitor discovery pipeline                                             |
 
 All scripts use PEP 723 inline dependencies — `uv run` handles installation automatically.
 
@@ -91,6 +97,8 @@ All scripts use PEP 723 inline dependencies — `uv run` handles installation au
 
 ```bash
 uv run {baseDir}/scripts/ad_library_dl.py "AD_LIBRARY_URL" --type images --limit 10
+# Or use brand name instead of URL:
+uv run {baseDir}/scripts/ad_library_dl.py --brand-name "Casper" --type images --limit 10
 ```
 
 With Drive upload, Slack notification, and offscreen browser:
@@ -101,7 +109,8 @@ uv run {baseDir}/scripts/ad_library_dl.py "AD_LIBRARY_URL" --type both --limit 2
 
 | Argument         | Description                                       | Default                                       |
 | ---------------- | ------------------------------------------------- | --------------------------------------------- |
-| `URL`            | Facebook Ad Library URL (required)                | —                                             |
+| `URL`            | Facebook Ad Library URL (or use `--brand-name`)   | —                                             |
+| `--brand-name`   | Brand name to resolve to URL (alternative to URL) | —                                             |
 | `--type`         | `images`, `videos`, or `both`                     | `both`                                        |
 | `--limit`        | Max media files to download                       | `50`                                          |
 | `--output`       | Output directory                                  | `~/Downloads/ad-library/<brand>/<timestamp>/` |
@@ -121,13 +130,16 @@ Full Gemini-powered competitive intelligence pipeline:
 
 ```bash
 uv run {baseDir}/scripts/analyze_competitor.py "AD_LIBRARY_URL" --limit 10 --slack --drive
+# Or use brand name:
+uv run {baseDir}/scripts/analyze_competitor.py --brand-name "Casper" --limit 10 --slack --drive
 ```
 
 Pipeline: Download → Gemini vision per ad → Master CI brief → Google Doc → Slack.
 
 | Argument        | Description                                                 | Default                  |
 | --------------- | ----------------------------------------------------------- | ------------------------ |
-| `URL`           | Facebook Ad Library URL (positional, required)              | —                        |
+| `URL`           | Facebook Ad Library URL (or use `--brand-name`)             | —                        |
+| `--brand-name`  | Brand name to resolve to URL (alternative to URL)           | —                        |
 | `--limit`       | Max ads to analyze                                          | `10`                     |
 | `--type`        | `images`, `videos`, or `both`                               | `both`                   |
 | `--slack`       | Post results to Slack                                       | off                      |
@@ -148,11 +160,17 @@ Persistent tracking with rank change detection and scaling alerts:
 
 ```bash
 uv run {baseDir}/scripts/competitor_monitor.py "AD_LIBRARY_URL" --limit 15 --monitor --slack
+# Or use brand name:
+uv run {baseDir}/scripts/competitor_monitor.py --brand-name "Casper" --limit 15 --monitor --slack
+# Discover + monitor all competitors:
+uv run {baseDir}/scripts/competitor_monitor.py --brand-name "Casper" --discover-competitors --monitor --slack
 ```
 
-| Argument              | Description                                    | Default                  |
-| --------------------- | ---------------------------------------------- | ------------------------ |
-| `URL`                 | Facebook Ad Library URL (positional, optional) | —                        |
+| Argument                  | Description                                        | Default                  |
+| ------------------------- | -------------------------------------------------- | ------------------------ |
+| `URL`                     | Facebook Ad Library URL (or use `--brand-name`)    | —                        |
+| `--brand-name`            | Brand name to resolve to URL (alternative to URL)  | —                        |
+| `--discover-competitors`  | Discover competitors first, then monitor all found | off                      |
 | `--limit`             | Max ads to scan                                | `15`                     |
 | `--monitor`           | Run full monitoring scan                       | off                      |
 | `--slack`             | Post results to Slack                          | off                      |
@@ -181,6 +199,8 @@ Step-by-step workflow with human-in-the-loop decisions:
 ```bash
 # 1. Initialize session — loads catalog, generates initial briefs
 bash {baseDir}/scripts/clone_safe.sh init --brand "BrandDir" --top 5 --type statics
+# Or resolve brand URL from name:
+# bash {baseDir}/scripts/clone_safe.sh init --brand "BrandDir" --brand-url-query "Competitor Name" --top 5 --type statics
 
 # 2. Show competitor ad + analysis in Slack
 bash {baseDir}/scripts/clone_safe.sh show-ad --session <ID> --index 0
@@ -456,6 +476,96 @@ uv run {baseDir}/scripts/sync_drive.py --reconcile
 | `--reconcile` | Phase 1 + 3: match existing Drive files (skip Phase 2 upload) | off        |
 
 Syncs: competitor ad media, analysis docs, clone briefs, generated creatives. Creates/updates the Drive folder structure under `Competitor Ads/<Brand>/`.
+
+---
+
+## 12. Brand Resolver (`brand_resolver.py`)
+
+Resolve brand names to Facebook Ad Library URLs with optional Brave Search verification:
+
+```bash
+# Resolve a brand name to Ad Library URL
+uv run {baseDir}/scripts/brand_resolver.py "Casper"
+
+# JSON output only
+uv run {baseDir}/scripts/brand_resolver.py "Casper" --json
+
+# Also discover competitors
+uv run {baseDir}/scripts/brand_resolver.py "Casper" --competitors --limit 10
+
+# With category context
+uv run {baseDir}/scripts/brand_resolver.py "Casper" --competitors --category "mattress" --limit 10
+```
+
+| Argument        | Description                                        | Default |
+| --------------- | -------------------------------------------------- | ------- |
+| `brand`         | Brand name to resolve (positional, required)       | --      |
+| `--country`     | Country code for Ad Library                        | `US`    |
+| `--json`        | JSON output only                                   | off     |
+| `--competitors` | Also discover competitors                          | off     |
+| `--category`    | Category context for competitor discovery          | --      |
+| `--limit`       | Max competitors to return                          | `10`    |
+
+Returns `{brand_name, page_id, page_name, url, confidence_score, source}`. Confidence: `high` (exact match + page ID), `medium` (exact match), `low` (no Brave key or no match).
+
+**Optional:** `BRAVE_SEARCH_API_KEY` env var enables verification and page ID extraction. Without it, returns a constructed URL with `low` confidence.
+
+---
+
+## 13. Competitor Discovery (`competitor_discover.py`)
+
+Multi-source competitor discovery pipeline:
+
+```bash
+# Discover competitors for a brand
+uv run {baseDir}/scripts/competitor_discover.py "Casper" --limit 10 --slack
+
+# Category-based discovery
+uv run {baseDir}/scripts/competitor_discover.py --category "bedding" --limit 10
+
+# With auto-monitor command output
+uv run {baseDir}/scripts/competitor_discover.py "Casper" --auto-monitor
+
+# JSON output
+uv run {baseDir}/scripts/competitor_discover.py "Casper" --json
+```
+
+| Argument         | Description                                              | Default                            |
+| ---------------- | -------------------------------------------------------- | ---------------------------------- |
+| `brand_name`     | Source brand name (positional, optional)                 | --                                 |
+| `--category`     | Product category for discovery                           | --                                 |
+| `--limit`        | Max competitors to discover                              | `10`                               |
+| `--slack`        | Post results to Slack thread                             | off                                |
+| `--use-brave`    | Use Brave Search API                                     | on if `BRAVE_SEARCH_API_KEY` set   |
+| `--auto-monitor` | Print `competitor_monitor.py` commands for each brand    | off                                |
+| `--json`         | JSON output only                                         | off                                |
+
+Stores results to `workspace/brand/competitors/discovered.json`. Merges with existing discoveries on subsequent runs.
+
+**Requires:** `BRAVE_SEARCH_API_KEY` environment variable.
+
+---
+
+## Workflow: Zero-URL Workflow
+
+No need to find Facebook Ad Library URLs manually. Just use brand names:
+
+```bash
+# 1. Discover competitors
+uv run {baseDir}/scripts/competitor_discover.py "Casper" --limit 5 --slack
+
+# 2. Analyze a competitor by name
+uv run {baseDir}/scripts/analyze_competitor.py --brand-name "Purple" --limit 10 --slack --drive
+
+# 3. Monitor a competitor by name
+uv run {baseDir}/scripts/competitor_monitor.py --brand-name "Purple" --limit 15 --monitor --slack
+
+# 4. Discover + monitor all competitors in one command
+uv run {baseDir}/scripts/competitor_monitor.py --brand-name "Casper" --discover-competitors --monitor --slack
+
+# 5. Download competitor ads by name
+uv run {baseDir}/scripts/ad_library_dl.py --brand-name "Purple" --type both --limit 20
+```
 
 ---
 

@@ -5,6 +5,7 @@
  * POST /api/contractor/payments/connect/onboard - Start onboarding (step 1)
  */
 
+import { logger } from '@cgk-platform/logging'
 import {
   createStripeAccount,
   getOnboardingProgress,
@@ -17,7 +18,6 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

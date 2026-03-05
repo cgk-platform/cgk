@@ -27,6 +27,33 @@ if [[ -z "${SLACK_THREAD_TS:-}" ]]; then
     exit 1
 fi
 
+# --- Gate 1.5: Resolve --brand-url-query for init subcommand ---
+# If --brand-url-query is present, resolve brand name to Ad Library URL
+# and inject it into the arguments.
+RESOLVED_ARGS=("$@")
+for i in "${!RESOLVED_ARGS[@]}"; do
+    if [[ "${RESOLVED_ARGS[$i]}" == "--brand-url-query" ]]; then
+        BRAND_QUERY="${RESOLVED_ARGS[$((i+1))]:-}"
+        if [[ -z "$BRAND_QUERY" ]]; then
+            echo "ERROR: --brand-url-query requires a brand name argument." >&2
+            exit 1
+        fi
+        # Resolve via brand_resolver.py
+        RESOLVED_URL="$(uv run "$SCRIPT_DIR/brand_resolver.py" "$BRAND_QUERY" --json 2>/dev/null | python3 -c "import sys,json; print(json.load(sys.stdin)['url'])" 2>/dev/null)"
+        if [[ -z "$RESOLVED_URL" ]]; then
+            echo "ERROR: Could not resolve brand name '$BRAND_QUERY' to Ad Library URL." >&2
+            exit 1
+        fi
+        echo "[brand] Resolved '$BRAND_QUERY' -> $RESOLVED_URL"
+        # Remove --brand-url-query and its value from args
+        unset 'RESOLVED_ARGS[i]'
+        unset 'RESOLVED_ARGS[i+1]'
+        RESOLVED_ARGS=("${RESOLVED_ARGS[@]}")
+        break
+    fi
+done
+set -- "${RESOLVED_ARGS[@]}"
+
 # --- Gate 2: Subcommand whitelist ---
 ALLOWED_SUBCOMMANDS="init show-ad set-product copy-gen set-copy plan execute skip skip-all session-status list-sessions"
 SUBCOMMAND="${1:-}"

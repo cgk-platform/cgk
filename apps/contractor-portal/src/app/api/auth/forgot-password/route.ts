@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { logger } from '@cgk-platform/logging'
 import { headers } from 'next/headers'
 
 import { getTenantBySlug } from '@/lib/auth/authenticate'
@@ -12,7 +13,6 @@ import {
   getClientIP,
   recordPasswordResetAttempt,
 } from '@/lib/auth/rate-limit'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/forgot-password

@@ -7,6 +7,7 @@
  * DELETE /api/contractor/payments/methods - Remove payout method
  */
 
+import { logger } from '@cgk-platform/logging'
 import {
   addPayoutMethod,
   getPayoutMethods,
@@ -24,7 +25,6 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

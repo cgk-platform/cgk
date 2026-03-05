@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Button, Card, Input, Badge } from '@cgk-platform/ui'
 import { CheckCircle2, XCircle, Loader2, ExternalLink } from 'lucide-react'
 
@@ -50,7 +51,7 @@ export default function SetupPage() {
         setDbStatus('error')
         setDbError(data.error || 'Unknown error')
       }
-    } catch (error) {
+    } catch {
       setDbStatus('error')
       setDbError('Connection failed. Check Vercel environment variables.')
     }
@@ -75,7 +76,7 @@ export default function SetupPage() {
       } else {
         alert('Failed to save Shopify configuration')
       }
-    } catch (error) {
+    } catch {
       alert('Error saving Shopify configuration')
     } finally {
       setLoading(false)
@@ -101,7 +102,7 @@ export default function SetupPage() {
       } else {
         alert('Failed to save Stripe configuration')
       }
-    } catch (error) {
+    } catch {
       alert('Error saving Stripe configuration')
     } finally {
       setLoading(false)
@@ -394,9 +395,9 @@ export default function SetupPage() {
                     <CheckCircle2 className="mr-2 mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
                     <span>
                       View the storefront at{' '}
-                      <a href="/" className="text-blue-600 underline hover:text-blue-700">
+                      <Link href="/" className="text-blue-600 underline hover:text-blue-700">
                         /
-                      </a>
+                      </Link>
                     </span>
                   </li>
                   <li className="flex items-start">

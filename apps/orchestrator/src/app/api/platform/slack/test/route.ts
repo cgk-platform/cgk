@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic'
 
+import { logger } from '@cgk-platform/logging'
 import {
   sendInfoAlert,
   testPlatformConnection,
 } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/platform/slack/test

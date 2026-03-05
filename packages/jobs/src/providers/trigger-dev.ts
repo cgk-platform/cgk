@@ -152,7 +152,7 @@ export function createTriggerDevProvider(config: TriggerDevConfig): JobProvider 
         return { id: result.id, accepted: true }
       } catch (error) {
         const err = error instanceof Error ? error : new Error(String(error))
-        logger.error(`[TriggerDevProvider] Failed to send ${event as string}:`, err)
+        logger.error(`[TriggerDevProvider] Failed to send ${event as string}:`, err instanceof Error ? err : undefined)
         throw err
       }
     },

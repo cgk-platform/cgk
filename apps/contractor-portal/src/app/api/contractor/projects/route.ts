@@ -4,12 +4,13 @@
  * GET /api/contractor/projects - Get all projects for the contractor
  */
 
+import { logger } from '@cgk-platform/logging'
+
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
 import { getContractorProjects, getProjectsByKanbanColumn, getContractorDashboardStats } from '@/lib/projects'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

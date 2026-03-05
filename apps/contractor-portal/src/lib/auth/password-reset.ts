@@ -188,7 +188,7 @@ export async function sendPasswordResetEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    logger.error('Failed to send contractor password reset email:', error)
+    logger.error('Failed to send contractor password reset email:', new Error(error))
     throw new Error('Failed to send password reset email')
   }
 }

@@ -4,6 +4,7 @@
  * GET /api/contractor/payments/connect/oauth/callback - Handle OAuth callback
  */
 
+import { logger } from '@cgk-platform/logging'
 import {
   handleStripeOAuthCallback,
   StripeConnectError,
@@ -11,7 +12,6 @@ import {
 } from '@cgk-platform/payments'
 
 import { getContractorAuthContext } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,7 +70,7 @@ export async function GET(req: Request) {
     redirectUrl.searchParams.set('success', 'Stripe account connected')
     return Response.redirect(redirectUrl.toString())
   } catch (err) {
-    logger.error('Stripe OAuth callback error:', err)
+    logger.error('Stripe OAuth callback error:', err instanceof Error ? err : undefined)
 
     const redirectUrl = new URL('/settings/payout-methods', url.origin)
     if (err instanceof StripeConnectError) {

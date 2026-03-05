@@ -64,7 +64,7 @@ export function CartProvider({
           setIsLoading(false)
         })
         .catch((err) => {
-          logger.error('Failed to fetch cart:', err)
+          logger.error('Failed to fetch cart:', err instanceof Error ? err : undefined)
           setIsLoading(false)
         })
     }
@@ -86,7 +86,7 @@ export function CartProvider({
           setIsUpdating(false)
         })
       } catch (err) {
-        logger.error('Failed to add to cart:', err)
+        logger.error('Failed to add to cart:', err instanceof Error ? err : undefined)
         setError(err instanceof Error ? err.message : 'Failed to add to cart')
         // Rollback optimistic update
         setCart(previousCart)
@@ -121,7 +121,7 @@ export function CartProvider({
           setIsUpdating(false)
         })
       } catch (err) {
-        logger.error('Failed to update cart:', err)
+        logger.error('Failed to update cart:', err instanceof Error ? err : undefined)
         setError(err instanceof Error ? err.message : 'Failed to update cart')
         setCart(previousCart)
         setIsUpdating(false)
@@ -154,7 +154,7 @@ export function CartProvider({
           setIsUpdating(false)
         })
       } catch (err) {
-        logger.error('Failed to remove from cart:', err)
+        logger.error('Failed to remove from cart:', err instanceof Error ? err : undefined)
         setError(err instanceof Error ? err.message : 'Failed to remove item')
         setCart(previousCart)
         setIsUpdating(false)
@@ -187,7 +187,7 @@ export function CartProvider({
       const freshCart = await actions.getCurrentCart()
       setCart(freshCart)
     } catch (err) {
-      logger.error('Failed to refresh cart:', err)
+      logger.error('Failed to refresh cart:', err instanceof Error ? err : undefined)
       setError(err instanceof Error ? err.message : 'Failed to refresh cart')
     } finally {
       setIsLoading(false)
@@ -220,7 +220,7 @@ export function CartProvider({
 
         return true
       } catch (err) {
-        logger.error('Failed to apply discount:', err)
+        logger.error('Failed to apply discount:', err instanceof Error ? err : undefined)
         setError(err instanceof Error ? err.message : 'Invalid discount code')
         setIsUpdating(false)
         return false
@@ -243,7 +243,7 @@ export function CartProvider({
         setIsUpdating(false)
       })
     } catch (err) {
-      logger.error('Failed to remove discounts:', err)
+      logger.error('Failed to remove discounts:', err instanceof Error ? err : undefined)
       setError(err instanceof Error ? err.message : 'Failed to remove discount')
       setIsUpdating(false)
     }

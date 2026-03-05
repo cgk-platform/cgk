@@ -84,9 +84,68 @@ EOF
 
 **Multi-section:** Each object in `"sections"` array starts on a new page.
 
-### Presentation Tools (Slides)
+### Rich Presentation Builder (Slides) -- ALWAYS USE THIS
 
-You have full creative freedom on what slides to create and what goes on each. These are the building blocks — mix and match as needed:
+Build an entire presentation in one command via JSON spec. Automatically builds a .pptx with python-pptx, uploads to Drive as a native Google Slides deck, and org-shares.
+
+```bash
+cat <<'EOF' | gog slides build-rich --title "Q1 Review" --folder FOLDER_ID --link-share
+{
+  "theme": {"dark": "1A1A2E", "accent": "E94560", "accent2": "0F3460", "lightBg": "F5F5F5", "medGray": "666666"},
+  "slides": [
+    {"type": "title_slide", "title": "Q1 Performance Review", "subtitle": "March 2026"},
+    {"type": "section", "title": "Executive Summary"},
+    {"type": "kpi_row", "title": "Key Metrics", "metrics": [
+      {"value": "$42K", "label": "Revenue", "bg": "0F3460"},
+      {"value": "3.8x", "label": "ROAS", "bg": "2E7D32"},
+      {"value": "186", "label": "Orders", "bg": "1565C0"},
+      {"value": "+10.5%", "label": "Growth", "bg": "E94560"}
+    ]},
+    {"type": "bullets", "title": "Growth Drivers", "items": ["Organic traffic up 15%", "Paid ROAS improved 12%", "Email conversion steady at 4.2%"]},
+    {"type": "table", "title": "Ad Performance", "headers": ["Ad Name", "ROAS", "Spend", "Revenue"],
+     "rows": [["Morning Routine", "4.2x", "$1.2K", "$5.0K"], ["Product Hero", "2.8x", "$800", "$2.2K"]],
+     "style": {"headerBg": "0F3460", "zebra": true}},
+    {"type": "chart", "title": "Revenue Trend", "chartType": "bar",
+     "categories": ["Jan", "Feb", "Mar"],
+     "series": [{"name": "Revenue", "values": [32000, 38000, 42000]}]},
+    {"type": "two_column", "title": "Strategy vs Results",
+     "left": {"heading": "Strategy", "body": "Focus on UGC content and scaling top performers"},
+     "right": {"heading": "Results", "body": "UGC drove 3.2x ROAS, top performers scaled 40%"}},
+    {"type": "closing", "title": "Thank You", "subtitle": "Questions?"}
+  ]
+}
+EOF
+```
+
+**Flags:** `--title`, `--folder DRIVE_ID`, `--link-share`, `--share EMAIL`, `--output /local/path.pptx` (local-only, skip upload), `--spec-file /path/to/spec.json`.
+
+**Batch:** `gog slides build-rich-batch --spec-file specs.json --folder ID --link-share --parallel 4`
+
+#### Rich Presentation JSON Spec -- All 11 Slide Types
+
+```json
+{"type": "title_slide", "title": "Title", "subtitle": "Subtitle", "notes": "Speaker notes"}
+{"type": "section", "title": "Section Name"}
+{"type": "content", "title": "Heading", "body": "Body text"}
+{"type": "bullets", "title": "Heading", "items": ["Item 1", "Item 2"]}
+{"type": "kpi_row", "title": "Metrics", "metrics": [{"value": "$42K", "label": "Revenue", "bg": "0F3460"}]}
+{"type": "table", "title": "Data", "headers": ["A","B"], "rows": [["1","2"]], "style": {"headerBg": "0F3460", "zebra": true}}
+{"type": "two_column", "title": "Compare", "left": {"heading": "Left", "body": "..."}, "right": {"heading": "Right", "body": "..."}}
+{"type": "image", "title": "Visual", "path": "/path/to/image.png", "caption": "Caption text"}
+{"type": "chart", "title": "Chart", "chartType": "bar|line|pie|area|scatter|doughnut", "categories": [...], "series": [{"name": "...", "values": [...]}]}
+{"type": "blank", "background": "FFFFFF", "elements": [{"type": "text", "text": "...", "x": 1, "y": 1, "fontSize": 14, "bold": true}]}
+{"type": "closing", "title": "Thank You", "subtitle": "Questions?"}
+```
+
+**Theme:** Colors are 6-char hex without `#`. Keys: `dark`, `accent`, `accent2`, `lightBg`, `medGray`.
+
+**Speaker notes:** Add `"notes": "..."` to any slide spec.
+
+**Dimensions:** Default 13.333 x 7.5 inches (16:9 widescreen). Override with `"slideWidth"` and `"slideHeight"`.
+
+### Presentation Tools (Slides) -- Element-by-Element (Legacy)
+
+For editing existing Google Slides or adding individual slides to an existing presentation:
 
 ```bash
 # Always start with create + theme
@@ -183,7 +242,14 @@ gog sheets add-chart SHEET_ID --range A1:B4 --type bar
 | ------------- | ---------------------------------------- |
 | `auth status` | Check if credentials exist and are valid |
 
-### Slides (Presentations)
+### Slides (Presentations) -- Rich Builder (PREFERRED)
+
+| Command                                                                                                       | Description                                                                           |
+| ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `slides build-rich [--title T] [--folder ID] [--link-share] [--share EMAIL] [--output PATH] [--spec-file F]` | Build rich presentation from JSON spec, upload as Google Slides (auto org-shared)     |
+| `slides build-rich-batch [--folder ID] [--link-share] [--parallel N] [--spec-file F]`                         | Parallel batch build from JSON array of specs                                         |
+
+### Slides (Presentations) -- Live API (Element-by-Element)
 
 | Command                                                                           | Description                                                  |
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------ |

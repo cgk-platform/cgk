@@ -1,7 +1,7 @@
 import { createGlobalCache, sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 import type { PlatformKPIs } from '../../../../types/platform'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

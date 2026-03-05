@@ -175,7 +175,7 @@ export async function withCreatorAuth<T>(
     if (error instanceof CreatorAuthError) {
       return authErrorResponse(error)
     }
-    logger.error('API error:', error)
+    logger.error('API error:', error instanceof Error ? error : undefined)
     return Response.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -5,6 +5,7 @@
  * POST /api/contractor/payments/withdraw - Request withdrawal
  */
 
+import { logger } from '@cgk-platform/logging'
 import {
   createContractorWithdrawal,
   getContractorWithdrawals,
@@ -17,7 +18,6 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

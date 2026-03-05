@@ -8,7 +8,6 @@ import {
   FileText,
   Settings,
   HelpCircle,
-  Briefcase,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'

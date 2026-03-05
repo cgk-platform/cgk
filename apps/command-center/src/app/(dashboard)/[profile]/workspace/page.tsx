@@ -1,6 +1,6 @@
 'use client'
 
-import { PROFILES } from '@cgk-platform/openclaw'
+import { PROFILES } from '@cgk-platform/openclaw/profiles'
 import { use, useState } from 'react'
 
 import { FileTree } from '@/components/workspace/file-tree'

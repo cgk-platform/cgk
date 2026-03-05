@@ -1,6 +1,6 @@
 'use client'
 
-import { PROFILES } from '@cgk-platform/openclaw'
+import { PROFILES } from '@cgk-platform/openclaw/profiles'
 import { Card, CardContent, CardHeader, CardTitle, StatusBadge } from '@cgk-platform/ui'
 import { use, useCallback, useEffect, useState } from 'react'
 

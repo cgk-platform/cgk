@@ -253,7 +253,7 @@ export const syncRetellAgentsJob = defineJob({
           synced++
         } catch (agentError) {
           const err = agentError instanceof Error ? agentError : new Error(String(agentError))
-          logger.error(`[ai-agents/sync-retell-agents] Error syncing agent ${agent.id}:`, err)
+          logger.error(`[ai-agents/sync-retell-agents] Error syncing agent ${agent.id}:`, err instanceof Error ? err : undefined)
         }
       }
 

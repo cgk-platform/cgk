@@ -1,6 +1,6 @@
 'use client'
 
-import { PROFILES } from '@cgk-platform/openclaw'
+import { PROFILES } from '@cgk-platform/openclaw/profiles'
 import { Card, CardContent, CardHeader, CardTitle } from '@cgk-platform/ui'
 import { BookOpen } from 'lucide-react'
 import { use, useCallback, useEffect, useState } from 'react'

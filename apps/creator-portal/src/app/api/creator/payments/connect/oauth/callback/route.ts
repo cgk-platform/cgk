@@ -89,7 +89,7 @@ export async function GET(req: Request): Promise<Response> {
     // Redirect to success page
     return redirect('/creator/settings/payout-methods?setup=complete')
   } catch (err) {
-    logger.error('Error handling OAuth callback:', err)
+    logger.error('Error handling OAuth callback:', err instanceof Error ? err : undefined)
     return redirect('/creator/settings/payout-methods?error=oauth_failed')
   }
 }

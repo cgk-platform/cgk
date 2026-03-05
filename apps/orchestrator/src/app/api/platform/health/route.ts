@@ -22,9 +22,9 @@ import {
   type ServiceHealthSummary,
   type TenantHealthSummary,
 } from '@cgk-platform/health'
+import { logger } from '@cgk-platform/logging'
 
 import type { SystemHealth } from '../../../../types/platform'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

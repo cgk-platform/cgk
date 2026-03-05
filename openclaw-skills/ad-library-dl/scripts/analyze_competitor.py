@@ -818,7 +818,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Competitive ad analysis pipeline — download, analyze with Gemini, create report"
     )
-    parser.add_argument("url", help="Facebook Ad Library URL")
+    parser.add_argument("url", nargs="?", default=None, help="Facebook Ad Library URL")
+    parser.add_argument(
+        "--brand-name", dest="brand_name", default=None,
+        help="Brand name to resolve to Ad Library URL (alternative to positional URL)"
+    )
     parser.add_argument(
         "--limit", type=int, default=10,
         help="Max number of ads to analyze (default: 10)"
@@ -856,6 +860,16 @@ def main():
         help="Skip persistent storage (no catalog update, no MCP summary)"
     )
     args = parser.parse_args()
+
+    # Resolve brand name to URL if --brand-name provided
+    if args.brand_name and not args.url:
+        from brand_resolver import resolve_brand
+        resolved = resolve_brand(args.brand_name)
+        args.url = resolved["url"]
+        print(f"[brand] Resolved '{args.brand_name}' -> {args.url} (confidence: {resolved['confidence_score']})")
+    elif not args.url:
+        print("[error] Either a URL or --brand-name is required", file=sys.stderr)
+        sys.exit(1)
 
     # Validate URL
     if "facebook.com/ads/library" not in args.url and "fb.com/ads/library" not in args.url:

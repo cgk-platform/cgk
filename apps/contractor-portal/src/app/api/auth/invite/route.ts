@@ -1,13 +1,13 @@
 export const dynamic = 'force-dynamic'
 
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 
 import { getTenantBySlug } from '@/lib/auth/authenticate'
 import { getSetCookieHeader } from '@/lib/auth/cookies'
 import { signContractorJWT } from '@/lib/auth/jwt'
 import { hashPassword } from '@/lib/auth/password'
 import { createContractorSession } from '@/lib/auth/session'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/auth/invite?token=xxx&tenant=slug

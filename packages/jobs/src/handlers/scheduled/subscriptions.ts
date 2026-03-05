@@ -212,7 +212,7 @@ export const subscriptionDailyBillingJob = defineJob<TenantEvent<SubscriptionDai
       } catch (error) {
         failed++
         const err = error instanceof Error ? error : new Error(String(error))
-        logger.error(`[Billing] Failed to process ${subscriptionId}:`, err)
+        logger.error(`[Billing] Failed to process ${subscriptionId}:`, err instanceof Error ? err : undefined)
       }
     }
 

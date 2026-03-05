@@ -356,7 +356,7 @@ export const treasurySyncTopupStatusesJob = defineJob<TreasurySyncTopupStatusesP
           }
         } catch (topupError) {
           const err = topupError instanceof Error ? topupError : new Error(String(topupError))
-          logger.error(`[treasury/sync-topup-statuses] Error syncing topup ${topup.id}:`, err)
+          logger.error(`[treasury/sync-topup-statuses] Error syncing topup ${topup.id}:`, err instanceof Error ? err : undefined)
         }
       }
 

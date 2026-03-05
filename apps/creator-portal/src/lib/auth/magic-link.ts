@@ -152,7 +152,7 @@ export async function sendCreatorMagicLinkEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    logger.error('Failed to send creator magic link email:', error)
+    logger.error('Failed to send creator magic link email:', new Error(error))
     throw new Error('Failed to send magic link email')
   }
 }

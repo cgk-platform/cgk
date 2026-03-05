@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 import './globals.css'
 
@@ -17,19 +18,19 @@ export default function RootLayout({
       <body className="min-h-screen bg-background font-sans antialiased">
         <header className="border-b">
           <div className="container mx-auto flex h-16 items-center justify-between px-4">
-            <a href="/" className="text-xl font-bold">
+            <Link href="/" className="text-xl font-bold">
               Store
-            </a>
+            </Link>
             <nav className="flex items-center gap-6">
-              <a href="/products" className="text-sm hover:text-primary">
+              <Link href="/products" className="text-sm hover:text-primary">
                 Products
-              </a>
-              <a href="/collections" className="text-sm hover:text-primary">
+              </Link>
+              <Link href="/collections" className="text-sm hover:text-primary">
                 Collections
-              </a>
-              <a href="/cart" className="text-sm hover:text-primary">
+              </Link>
+              <Link href="/cart" className="text-sm hover:text-primary">
                 Cart
-              </a>
+              </Link>
             </nav>
           </div>
         </header>

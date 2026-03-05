@@ -1,8 +1,8 @@
 import { requireAuth } from '@cgk-platform/auth'
 // import { sendEmail } from '@cgk-platform/communications' // TODO: Implement email sending via queue
+import { logger } from '@cgk-platform/logging'
 import { sql } from '@vercel/postgres'
 import { NextResponse } from 'next/server'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 
@@ -186,7 +186,7 @@ export async function POST(request: Request) {
         // })
         logger.info(`TODO: Send invitation email to ${email} for ${orgName}`)
       } catch (emailError) {
-        logger.error('Failed to send invitation email:', emailError)
+        logger.error('Failed to send invitation email:', emailError instanceof Error ? emailError : undefined)
         // Don't fail the whole operation if email fails
       }
     }

@@ -10,6 +10,7 @@
  * - Vercel Blob storage for secure file hosting
  */
 
+import { logger } from '@cgk-platform/logging'
 import { createPaymentAttachment } from '@cgk-platform/payments'
 import { put } from '@vercel/blob'
 
@@ -17,7 +18,6 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

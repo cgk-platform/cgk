@@ -5,6 +5,7 @@
  * POST /api/contractor/tax/info - Submit W-9 info
  */
 
+import { logger } from '@cgk-platform/logging'
 import {
   getTaxInfo,
   getW9Status,
@@ -20,7 +21,6 @@ import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

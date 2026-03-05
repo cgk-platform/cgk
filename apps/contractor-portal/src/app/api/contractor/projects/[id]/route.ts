@@ -5,13 +5,14 @@
  * PATCH /api/contractor/projects/[id] - Update project status
  */
 
+import { logger } from '@cgk-platform/logging'
+
 import {
   requireContractorAuth,
   unauthorizedResponse,
 } from '@/lib/auth/middleware'
 import { getProjectById, updateProjectStatus } from '@/lib/projects'
 import type { ProjectStatus } from '@/lib/types'
-import { logger } from '@cgk-platform/logging'
 
 export const dynamic = 'force-dynamic'
 

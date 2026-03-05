@@ -1363,6 +1363,10 @@ def main():
         description="Competitive intelligence monitoring pipeline",
     )
     parser.add_argument("url", nargs="?", help="Facebook Ad Library URL")
+    parser.add_argument("--brand-name", dest="brand_name", default=None,
+                        help="Brand name to resolve to Ad Library URL (alternative to positional URL)")
+    parser.add_argument("--discover-competitors", dest="discover_competitors", action="store_true",
+                        help="Discover competitors first, then monitor all found brands")
     parser.add_argument("--limit", type=int, default=15, help="Max ads to scan (default: 15)")
     parser.add_argument("--type", choices=["images", "videos", "both"], default="both")
     parser.add_argument("--monitor", action="store_true", help="Run full monitoring scan")
@@ -1403,6 +1407,35 @@ def main():
             print("--scaling requires --brand <BrandDir>")
             sys.exit(1)
         cmd_scaling(competitors_dir, args.brand, args.threshold)
+        return
+
+    # Resolve brand name to URL if --brand-name provided
+    if args.brand_name and not args.url:
+        from brand_resolver import resolve_brand
+        resolved = resolve_brand(args.brand_name)
+        args.url = resolved["url"]
+        print(f"[brand] Resolved '{args.brand_name}' -> {args.url} (confidence: {resolved['confidence_score']})")
+
+    # Discover-then-monitor flow
+    if args.discover_competitors:
+        if not args.brand_name and not args.url:
+            print("[error] --discover-competitors requires --brand-name or a URL")
+            sys.exit(1)
+        brand = args.brand_name or parse_ad_library_url(args.url).get("q", "")
+        from competitor_discover import discover_competitors
+        competitors = discover_competitors(brand_name=brand, limit=10)
+        if not competitors:
+            print("[discover] No competitors found.")
+            sys.exit(0)
+        print(f"[discover] Found {len(competitors)} competitors. Monitoring each...")
+        for c in competitors:
+            print(f"\n{'='*60}")
+            print(f"[monitor] Starting: {c['brand_name']}")
+            args.url = c["url"]
+            try:
+                run_monitor(args)
+            except Exception as e:
+                print(f"[monitor] Error monitoring {c['brand_name']}: {e}")
         return
 
     # Monitoring scan requires URL

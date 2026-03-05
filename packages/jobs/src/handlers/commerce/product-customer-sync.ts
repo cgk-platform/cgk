@@ -555,7 +555,7 @@ export const productBatchSyncJob = defineJob<TenantEvent<ProductBatchSyncPayload
       }
     } catch (error) {
       const err = error instanceof Error ? error : new Error(String(error))
-      logger.error(`[commerce.productBatchSync] Error:`, err)
+      logger.error(`[commerce.productBatchSync] Error:`, err instanceof Error ? err : undefined)
       return {
         success: false,
         error: {

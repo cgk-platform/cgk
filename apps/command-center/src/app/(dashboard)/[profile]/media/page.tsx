@@ -1,6 +1,6 @@
 'use client'
 
-import { PROFILES } from '@cgk-platform/openclaw'
+import { PROFILES } from '@cgk-platform/openclaw/profiles'
 import { use, useCallback, useEffect, useState } from 'react'
 
 import { MediaGallery } from '@/components/media/media-gallery'

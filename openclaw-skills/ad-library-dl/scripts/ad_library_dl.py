@@ -808,7 +808,11 @@ def main():
     parser = argparse.ArgumentParser(
         description="Download images/videos from Facebook Ad Library"
     )
-    parser.add_argument("url", help="Facebook Ad Library URL")
+    parser.add_argument("url", nargs="?", default=None, help="Facebook Ad Library URL")
+    parser.add_argument(
+        "--brand-name", dest="brand_name", default=None,
+        help="Brand name to resolve to Ad Library URL (alternative to positional URL)"
+    )
     parser.add_argument(
         "--type", choices=["images", "videos", "both"], default="both",
         help="Media type to download (default: both)"
@@ -842,6 +846,15 @@ def main():
         help="Auto-purge local downloads older than N days (default: 30, 0 to disable)"
     )
     args = parser.parse_args()
+
+    # Resolve brand name to URL if --brand-name provided
+    if args.brand_name and not args.url:
+        from brand_resolver import resolve_brand
+        resolved = resolve_brand(args.brand_name)
+        args.url = resolved["url"]
+        print(f"[brand] Resolved '{args.brand_name}' -> {args.url} (confidence: {resolved['confidence_score']})")
+    elif not args.url:
+        parser.error("Either a URL or --brand-name is required")
 
     # Validate URL
     if "facebook.com/ads/library" not in args.url and "fb.com/ads/library" not in args.url:

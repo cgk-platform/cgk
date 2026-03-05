@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { logger } from '@cgk-platform/logging'
 import { headers } from 'next/headers'
 
 import { getTenantBySlug } from '@/lib/auth/authenticate'
@@ -8,7 +9,6 @@ import {
   sendContractorMagicLinkEmail,
 } from '@/lib/auth/magic-link'
 import { checkRateLimit, recordRateLimitAttempt, getClientIP } from '@/lib/auth/rate-limit'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/magic-link

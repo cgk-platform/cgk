@@ -41,7 +41,7 @@ export default async function handleRequest(
         onError(error) {
           responseStatusCode = 500
           const err = error instanceof Error ? error : new Error(String(error))
-          logger.error('Render error', err)
+          logger.error('Render error', err instanceof Error ? err : undefined)
         },
       }
     )

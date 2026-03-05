@@ -47,7 +47,7 @@ export async function validateTenantApiKey(request: Request): Promise<TenantApiK
     sql`
       UPDATE public.api_keys SET last_used_at = NOW()
       WHERE id = ${record.id}::uuid
-    `.catch((err) => logger.error('Failed to update api_keys last_used_at:', err))
+    `.catch((err) => logger.error('Failed to update api_keys last_used_at:', err instanceof Error ? err : undefined))
 
     return { tenantId: record.slug, tenantSlug: record.slug }
   }
@@ -72,7 +72,7 @@ export async function validateTenantApiKey(request: Request): Promise<TenantApiK
   sql`
     UPDATE public.tenant_api_keys SET last_used_at = NOW()
     WHERE api_key = ${apiKey}
-  `.catch((err) => logger.error('Failed to update tenant_api_keys last_used_at:', err))
+  `.catch((err) => logger.error('Failed to update tenant_api_keys last_used_at:', err instanceof Error ? err : undefined))
 
   return { tenantId: legacyRecord.slug, tenantSlug: legacyRecord.slug }
 }

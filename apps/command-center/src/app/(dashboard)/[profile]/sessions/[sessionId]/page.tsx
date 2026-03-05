@@ -1,6 +1,6 @@
 'use client'
 
-import { PROFILES } from '@cgk-platform/openclaw'
+import { PROFILES } from '@cgk-platform/openclaw/profiles'
 import { Button } from '@cgk-platform/ui'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'

@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic'
 
+import { logger } from '@cgk-platform/logging'
 import {
   getPlatformWorkspace,
   updatePlatformChannels,
 } from '@cgk-platform/slack'
 import { NextResponse } from 'next/server'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * GET /api/platform/slack/channels

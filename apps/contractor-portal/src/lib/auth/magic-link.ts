@@ -171,7 +171,7 @@ export async function sendContractorMagicLinkEmail(
 
   if (!response.ok) {
     const error = await response.text()
-    logger.error('Failed to send contractor magic link email:', error)
+    logger.error('Failed to send contractor magic link email:', new Error(error))
     throw new Error('Failed to send magic link email')
   }
 }

@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
 import { sql, withTenant } from '@cgk-platform/db'
+import { logger } from '@cgk-platform/logging'
 import { headers } from 'next/headers'
 
 import { getTenantBySlug } from '@/lib/auth/authenticate'
@@ -8,7 +9,6 @@ import { getSetCookieHeader } from '@/lib/auth/cookies'
 import { signContractorJWT } from '@/lib/auth/jwt'
 import { verifyContractorMagicLink } from '@/lib/auth/magic-link'
 import { createContractorSession } from '@/lib/auth/session'
-import { logger } from '@cgk-platform/logging'
 
 /**
  * POST /api/auth/verify
