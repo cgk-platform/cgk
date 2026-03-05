@@ -26,7 +26,8 @@ def _get_profile_root() -> Path:
     if env_root:
         return Path(env_root)
     # Derive: lib/ -> scripts/ -> video-editor/ -> skills/ -> profile root
-    return Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    return Path(__file__).parent.parent.parent.parent
 
 
 def _get_slack_bot_token() -> str:

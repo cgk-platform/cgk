@@ -4,70 +4,85 @@ Create polished, presentation-ready Google Slides, Docs, Sheets, and manage Driv
 
 ## CRITICAL RULES
 
-1. **NEVER pass markdown to any command.** No `#`, `**`, `- `, `1.`, or ` ``` `. The script REJECTS markdown and exits with an error. Use the structured commands below instead.
-2. **NEVER use `docs write` — it does not exist.** There is no bulk write command. Build documents element by element using the structured commands.
-3. **ALWAYS use `--style heading1`/`heading2`/`heading3` for headings** — never put `#` symbols in text.
-4. **ALWAYS use `add-list` for bullet/numbered lists** — never put `- ` or `1. ` in text.
-5. **ALWAYS use `add-table` for tabular data** — never try to format tables as text.
-6. **ALWAYS use `--text-style '{"bold":true}'` for bold text** — never use `**text**`.
-7. **ALWAYS use `add-chart` for numerical data** — render charts, don't just list numbers.
-8. Every document must have heading hierarchy, styled tables, and visual structure.
+1. **NEVER pass markdown to any command.** No `#`, `**`, `- `, `1.`, or ` ``` `. The script REJECTS markdown and exits with an error.
+2. **ALWAYS use `docs build-rich` for documents.** Do NOT fall back to element-by-element. If build-rich fails, report the error.
+3. **ALWAYS use `sheets build-rich` for new spreadsheets.** Element-by-element sheets commands are for live editing of existing sheets only.
+4. **All files are auto-shared with org.** Use `--link-share` for public links, `--share EMAIL` for individual sharing.
+5. **ALWAYS use `add-chart` for numerical data** — render charts, don't just list numbers.
+6. Every document must have heading hierarchy, styled tables, and visual structure.
 
 ## How to Build Beautiful Documents
 
-### Document Pattern (Docs)
+### Rich Document Builder (Docs) — ALWAYS USE THIS
 
-Build documents element by element. Each call adds one content block:
+Build the entire document in one command via JSON spec piped to stdin. Automatically builds a .docx with python-docx, uploads to Drive as a native Google Doc, and org-shares.
 
 ```bash
-# 1. Create the doc
-gog docs create "Monthly Performance Report"
-# Returns: {"documentId": "abc123", "url": "https://..."}
-
-# 2. Add title heading
-gog docs add-text abc123 "Monthly Performance Report" --style title
-
-# 3. Add subtitle
-gog docs add-text abc123 "February 2026 — Brand Name" --style subtitle
-
-# 4. Add section heading
-gog docs add-text abc123 "Executive Summary" --style heading1
-
-# 5. Add body paragraph (plain text, no markdown!)
-gog docs add-text abc123 "Revenue grew 10.5% this month driven by strong organic performance and improved ad creative."
-
-# 6. Add divider
-gog docs add-divider abc123
-
-# 7. Add KPI section
-gog docs add-text abc123 "Key Performance Indicators" --style heading2
-gog docs add-table abc123 \
-  --data '[["Metric","Value","Change"],["Revenue","$42,000","+10.5%"],["ROAS","3.8x","+0.4x"],["Orders","186","+8.8%"]]' \
-  --style '{"headerColor":"#34a853","headerTextColor":"#ffffff","zebra":true}'
-
-# 8. Add findings as bullet list
-gog docs add-text abc123 "Key Findings" --style heading2
-gog docs add-list abc123 \
-  --items '["Organic traffic up 15% from SEO improvements","Paid ROAS improved 12% after creative refresh","Email conversion steady at 4.2%"]' \
-  --type bullet
-
-# 9. Add bold emphasis in a paragraph
-gog docs add-text abc123 "The Morning Routine UGC format is our strongest performer." \
-  --text-style '{"bold":true}'
-
-# 10. New page section
-gog docs add-section abc123 --title "Detailed Analysis"
-gog docs add-text abc123 "Ad performance broke down as follows:"
-
-# 11. Add numbered recommendations
-gog docs add-list abc123 \
-  --items '["Scale Morning Routine UGC with 3-5 new variations","Test ingredient spotlight reels with trending audio","Refresh static ads with Q1 social proof"]' \
-  --type numbered
-
-# 12. Add header/footer
-gog docs add-header abc123 --text "Confidential — Brand Name"
-gog docs add-footer abc123 --text "Generated Feb 2026"
+cat <<'EOF' | gog docs build-rich --title "Monthly Report" --folder FOLDER_ID --share user@example.com
+{
+  "theme": {"dark": "1A1A2E", "accent": "E94560", "accent2": "0F3460", "lightBg": "F5F5F5", "medGray": "666666"},
+  "header": "Confidential",
+  "footer": "Generated March 2026",
+  "sections": [{
+    "children": [
+      {"type": "heading", "level": 1, "text": "Monthly Performance Report", "color": "1A1A2E"},
+      {"type": "subtitle", "text": "March 2026 — Brand Name"},
+      {"type": "accentBar", "color": "E94560"},
+      {"type": "kpiRow", "items": [
+        {"value": "$42K", "label": "Revenue", "bg": "0F3460"},
+        {"value": "3.8x", "label": "ROAS", "bg": "2E7D32"},
+        {"value": "186", "label": "Orders", "bg": "1565C0"}
+      ]},
+      {"type": "heading", "level": 2, "text": "Executive Summary"},
+      {"type": "paragraph", "text": "Revenue grew 10.5% this month driven by strong organic performance."},
+      {"type": "callout", "title": "Key Insight", "body": "Top performers drove 60% of revenue.", "bg": "E8F5E9"},
+      {"type": "divider"},
+      {"type": "heading", "level": 2, "text": "Ad Performance"},
+      {"type": "table", "headers": ["Ad Name", "ROAS", "Spend", "Revenue"],
+       "rows": [["Morning Routine", "4.2x", "$1.2K", "$5.0K"], ["Product Hero", "2.8x", "$800", "$2.2K"]],
+       "style": {"headerBg": "0F3460", "zebra": true}},
+      {"type": "heading", "level": 2, "text": "Key Findings"},
+      {"type": "bullets", "items": ["Organic traffic up 15%", "Paid ROAS improved 12%", "Email conversion steady at 4.2%"]},
+      {"type": "heading", "level": 2, "text": "Recommendations"},
+      {"type": "numberedList", "items": ["Scale top performers", "Test new UGC formats", "Refresh static ads"]}
+    ]
+  }]
+}
+EOF
 ```
+
+**Flags:** `--title`, `--folder DRIVE_ID`, `--link-share`, `--share EMAIL`, `--output /local/path.docx` (local-only, skip upload), `--spec-file /path/to/spec.json` (alternative to stdin).
+
+**Batch:** `gog docs build-rich-batch --spec-file specs.json --folder ID --link-share --parallel 4`
+
+#### Rich Document JSON Spec — All 18 Element Types
+
+```json
+{"type": "heading", "level": 1, "text": "Title", "color": "1A1A2E"}
+{"type": "subtitle", "text": "Subtitle text"}
+{"type": "paragraph", "text": "Body text"}
+{"type": "paragraph", "runs": [{"text": "Bold ", "bold": true}, {"text": "and italic", "italic": true, "color": "E94560"}]}
+{"type": "accentBar", "color": "E94560"}
+{"type": "divider"}
+{"type": "kpiRow", "items": [{"value": "$42K", "label": "Revenue", "bg": "0F3460"}]}
+{"type": "callout", "title": "Note", "body": "Important info here", "bg": "E8F5E9"}
+{"type": "table", "headers": ["A","B"], "rows": [["1","2"]], "style": {"headerBg": "0F3460", "zebra": true, "zebraColor": "F5F5F5"}}
+{"type": "richTable", "headers": ["A","B"], "rows": [[{"text": "Bold cell", "bold": true, "bg": "FFF3E0"}, "Normal"]]}
+{"type": "bullets", "items": ["Item 1", "Item 2"]}
+{"type": "numberedList", "items": ["Step 1", "Step 2"]}
+{"type": "personaCard", "name": "Sarah", "role": "Marketing Manager", "details": ["25-34", "Urban"], "bg": "F5F5F5"}
+{"type": "conceptHeader", "title": "STRATEGY", "subtitle": "Q2 growth plan", "color": "1A1A2E"}
+{"type": "tag", "text": "HIGH PRIORITY", "color": "E94560"}
+{"type": "pageBreak"}
+{"type": "spacer", "height": 12}
+{"type": "image", "path": "/absolute/path/to/image.png", "width": 5.0}
+```
+
+**Theme:** Colors are 6-char hex without `#`. Keys: `dark`, `accent`, `accent2`, `lightBg`, `medGray`.
+
+**Defaults:** Arial 11pt, US Letter, 0.8" margins. Header/footer via top-level `"header"` and `"footer"` strings.
+
+**Multi-section:** Each object in `"sections"` array starts on a new page.
 
 ### Presentation Tools (Slides)
 
@@ -102,7 +117,44 @@ gog slides set-background PRES_ID SLIDE_IDX --color "#f5f5f5"
 **Chart types:** `line`, `bar`, `pie`, `column`, `area`, `scatter`
 **Layout presets:** `title`, `section`, `kpi`, `two-column`, `closing`, `content`
 
-### Spreadsheet Pattern (Sheets)
+### Spreadsheet Pattern (Sheets) -- Rich Builder (PREFERRED)
+
+**ALWAYS use `build-rich` for new spreadsheets.** It creates a fully formatted .xlsx with openpyxl, uploads to Drive as Google Sheets, and optionally link-shares -- all in one command.
+
+**ALWAYS use formulas, not hardcoded calculations.** If a cell's value can be computed from other cells, write a formula.
+
+```bash
+# Build a complete spreadsheet from JSON spec (pipe or --spec-file)
+echo '{"title":"Sales Dashboard","sheets":[{"name":"Summary","frozenRows":1,"autoFilter":"A1:D1","columnWidths":{"A":25,"B":15,"C":15,"D":15},"data":[["Metric","Value","Change","Impact"],["Revenue",42000,0.105,null],["ROAS",3.8,0.12,null]],"formulas":{"D2":"=B2*C2","D3":"=B3*C3"},"styles":[{"range":"A1:D1","bold":true,"backgroundColor":"1a73e8","textColor":"FFFFFF","alignment":"center"},{"range":"B2:B4","numberFormat":"$#,##0","textColor":"0000FF"},{"range":"C2:C4","numberFormat":"0.0%"}],"conditionalFormats":[{"range":"C2:C10","type":"greaterThan","value":0,"fill":"E8F5E9","fontColor":"2E7D32"}],"charts":[{"type":"bar","title":"Revenue","dataRange":"A1:B4","position":"F2","width":15,"height":10}]}]}' | gog sheets build-rich --title "Sales Dashboard" --link-share
+
+# Batch build multiple spreadsheets
+gog sheets build-rich-batch --spec-file specs.json --link-share --parallel 4
+
+# Analyze a sheet
+gog sheets analyze SHEET_ID
+gog sheets analyze --file /tmp/report.xlsx
+
+# Query/filter data
+gog sheets query SHEET_ID --filter '{"Region":"West","Revenue":{">":50000}}' --sort Revenue --limit 10
+gog sheets query SHEET_ID --groupby Region --agg '{"Revenue":"sum","Orders":"count"}'
+
+# Download -> edit -> re-upload workflow
+gog sheets download SHEET_ID --output /tmp/report.xlsx
+echo '{"formulas":{"C11":"=SUM(C2:C10)"},"styles":[{"range":"B2:B10","numberFormat":"$#,##0"}]}' | gog sheets edit SHEET_ID --link-share
+```
+
+#### Financial Model Color Coding
+
+| Color             | Meaning                  | Hex      |
+| ----------------- | ------------------------ | -------- |
+| Blue text         | Input values (hardcoded) | `0000FF` |
+| Black text        | Formulas/calculations    | `000000` |
+| Green text        | Cross-sheet references   | `008000` |
+| Yellow background | Attention/review needed  | `FFFF00` |
+
+### Spreadsheet Pattern (Sheets) -- Element-by-Element (Legacy)
+
+For live interaction with existing Google Sheets (reading shared sheets, updating recurring reports):
 
 ```bash
 # Create with frozen header
@@ -153,28 +205,46 @@ gog sheets add-chart SHEET_ID --range A1:B4 --type bar
 
 **Slide layouts:** `BLANK`, `TITLE`, `TITLE_AND_BODY`, `SECTION_HEADER`, `TITLE_ONLY`, `ONE_COLUMN_TEXT`, `MAIN_POINT`, `BIG_NUMBER`, `CAPTION_ONLY`, `TITLE_AND_TWO_COLUMNS`
 
-### Docs (Documents)
+### Docs (Documents) -- Rich Builder (PREFERRED)
 
-| Command                                                                   | Description                                |
-| ------------------------------------------------------------------------- | ------------------------------------------ |
-| `docs create <title>`                                                     | Create a document                          |
-| `docs get <doc_id>`                                                       | Get document structure and heading outline |
-| `docs add-text <doc_id> <text> [--style STYLE] [--text-style JSON]`       | Add styled text (REJECTS markdown)         |
-| `docs add-table <doc_id> --data JSON [--style JSON]`                      | Add a styled table                         |
-| `docs add-image <doc_id> --url URL [--width PT] [--height PT]`            | Insert inline image                        |
-| `docs add-section <doc_id> --title TEXT`                                  | Add section break + H1 heading (new page)  |
-| `docs add-list <doc_id> --items JSON [--type bullet\|numbered]`           | Add bulleted/numbered list                 |
-| `docs add-page-break <doc_id>`                                            | Insert page break                          |
-| `docs add-divider <doc_id>`                                               | Add visual divider line                    |
-| `docs add-header <doc_id> --text TEXT`                                    | Add page header                            |
-| `docs add-footer <doc_id> --text TEXT`                                    | Add page footer                            |
-| `docs export <doc_id> --format pdf\|docx\|md\|html\|epub [--output PATH]` | Export document                            |
+| Command                                                                                                    | Description                                                                |
+| ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `docs build-rich [--title T] [--folder ID] [--link-share] [--share EMAIL] [--output PATH] [--spec-file F]` | Build rich document from JSON spec, upload as Google Doc (auto org-shared) |
+| `docs build-rich-batch [--folder ID] [--link-share] [--parallel N] [--spec-file F]`                        | Parallel batch build from JSON array of specs                              |
+| `docs create <title>`                                                                                      | Create an empty document (auto org-shared)                                 |
+| `docs get <doc_id>`                                                                                        | Get document structure and heading outline                                 |
+| `docs export <doc_id> --format pdf\|docx\|md\|html\|epub [--output PATH]`                                  | Export document                                                            |
+
+### Docs (Documents) -- Live API (Element-by-Element)
+
+For editing existing Google Docs or simple additions:
+
+| Command                                                             | Description                               |
+| ------------------------------------------------------------------- | ----------------------------------------- |
+| `docs add-text <doc_id> <text> [--style STYLE] [--text-style JSON]` | Add styled text (REJECTS markdown)        |
+| `docs add-table <doc_id> --data JSON [--style JSON]`                | Add a styled table                        |
+| `docs add-image <doc_id> --url URL [--width PT] [--height PT]`      | Insert inline image                       |
+| `docs add-section <doc_id> --title TEXT`                            | Add section break + H1 heading (new page) |
+| `docs add-list <doc_id> --items JSON [--type bullet\|numbered]`     | Add bulleted/numbered list                |
+| `docs add-page-break <doc_id>`                                      | Insert page break                         |
+| `docs add-divider <doc_id>`                                         | Add visual divider line                   |
+| `docs add-header <doc_id> --text TEXT`                              | Add page header                           |
+| `docs add-footer <doc_id> --text TEXT`                              | Add page footer                           |
 
 **Text styles:** `title`, `subtitle`, `heading1`-`heading6`, `normal`
 
-**Text style JSON for bold/italic/color:** `--text-style '{"bold":true,"italic":false,"color":"#1a73e8","fontSize":14,"fontFamily":"Arial"}'`
+### Sheets (Spreadsheets) -- Rich Builder (PREFERRED)
 
-### Sheets (Spreadsheets)
+| Command                                                                                                                      | Description                                                            |
+| ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `sheets build-rich [--title T] [--folder ID] [--link-share] [--output PATH] [--spec-file F]`                                 | Build rich spreadsheet from JSON spec (stdin or file), upload to Drive |
+| `sheets build-rich-batch [--folder ID] [--link-share] [--parallel N] [--spec-file F]`                                        | Parallel batch build from JSON array of specs                          |
+| `sheets analyze [SHEET_ID] [--file PATH] [--sheet NAME]`                                                                     | Analyze structure + data stats (pandas describe, dtypes, nulls)        |
+| `sheets query [SHEET_ID] [--file PATH] [--filter JSON] [--groupby COL] [--agg JSON] [--sort COL] [--limit N] [--sheet NAME]` | Filter, aggregate, sort spreadsheet data                               |
+| `sheets download <SHEET_ID> [--output PATH]`                                                                                 | Download Google Sheet as .xlsx                                         |
+| `sheets edit <SHEET_ID> [--spec-file F] [--link-share]`                                                                      | Edit existing sheet (download -> modify -> re-upload)                  |
+
+### Sheets (Spreadsheets) -- Live API (Element-by-Element)
 
 | Command                                                          | Description                 |
 | ---------------------------------------------------------------- | --------------------------- |
@@ -199,6 +269,84 @@ gog sheets add-chart SHEET_ID --range A1:B4 --type bar
 | `drive move <file_id> --to FOLDER_ID`                                  | Move file     |
 | `drive upload <local_path> [--folder ID] [--mime-type TYPE]`           | Upload file   |
 | `drive create-folder <name> [--parent ID]`                             | Create folder |
+
+## Rich Spreadsheet JSON Spec Format
+
+Full reference for `sheets build-rich` and `sheets edit` JSON specs:
+
+```json
+{
+  "title": "Spreadsheet Title",
+  "sheets": [
+    {
+      "name": "Tab Name",
+      "tabColor": "1a73e8",
+      "frozenRows": 1,
+      "frozenCols": 0,
+      "autoFilter": "A1:D1",
+      "columnWidths": { "A": 25, "B": 15, "C": 15 },
+      "data": [
+        ["Header1", "Header2", "Header3"],
+        ["val1", 42000, 0.105]
+      ],
+      "formulas": {
+        "C3": "=B2*B3",
+        "B5": "=SUM(B2:B4)"
+      },
+      "styles": [
+        {
+          "range": "A1:D1",
+          "bold": true,
+          "italic": false,
+          "fontSize": 12,
+          "fontFamily": "Arial",
+          "textColor": "FFFFFF",
+          "backgroundColor": "1a73e8",
+          "alignment": "center",
+          "wrapText": true,
+          "numberFormat": "$#,##0"
+        }
+      ],
+      "conditionalFormats": [
+        {
+          "range": "C2:C10",
+          "type": "greaterThan",
+          "value": 0,
+          "fill": "E8F5E9",
+          "fontColor": "2E7D32"
+        },
+        {
+          "range": "C2:C10",
+          "type": "lessThan",
+          "value": 0,
+          "fill": "FFEBEE",
+          "fontColor": "C62828"
+        },
+        { "range": "B2:B10", "type": "between", "start": 100, "end": 500, "fill": "FFF3E0" },
+        { "range": "A2:A10", "type": "containsText", "text": "Error", "fill": "FFCDD2" },
+        { "range": "D2:D10", "type": "colorScale", "startColor": "FF0000", "endColor": "00FF00" },
+        { "range": "E2:E10", "type": "dataBar", "color": "638EC6" }
+      ],
+      "charts": [
+        {
+          "type": "bar",
+          "title": "Chart Title",
+          "dataRange": "A1:B4",
+          "position": "F2",
+          "width": 15,
+          "height": 10
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Supported chart types:** `bar`, `line`, `pie`, `area`, `scatter`
+
+**Supported conditional format types:** `greaterThan`, `lessThan`, `equal`, `between`, `containsText`, `colorScale`, `dataBar`
+
+**Number format examples:** `$#,##0`, `$#,##0.00`, `0.0%`, `#,##0`, `0.00`, `yyyy-mm-dd`
 
 ## Data Formats
 

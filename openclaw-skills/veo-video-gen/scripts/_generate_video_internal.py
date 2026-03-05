@@ -61,7 +61,8 @@ SLACK_THREAD_TS = os.environ.get("SLACK_THREAD_TS", "")
 
 def _workspace_root():
     """Derive workspace root from script location (4 dirs up)."""
-    return Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    return Path(__file__).parent.parent.parent.parent
 
 
 def _get_allowed_channels():
@@ -621,7 +622,7 @@ def main():
 
     output_path = Path(args.filename).expanduser()
     if not output_path.is_absolute():
-        output_path = Path(__file__).resolve().parent.parent.parent.parent / "media" / output_path
+        output_path = Path(__file__).parent.parent.parent.parent / "media" / output_path  # no .resolve()
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     saved_paths = []
@@ -819,7 +820,7 @@ def main():
 
 def _notify_complete(message: str):
     """Notify the agent so it can follow up with the user."""
-    notify_script = Path(__file__).resolve().parent.parent.parent.parent / "scripts" / "notify-complete.sh"
+    notify_script = Path(__file__).parent.parent.parent.parent / "scripts" / "notify-complete.sh"  # no .resolve()
     if notify_script.exists():
         try:
             subprocess.run([str(notify_script), message], timeout=20,
@@ -829,7 +830,7 @@ def _notify_complete(message: str):
 
 
 # Task tracking — per-task file in active-tasks.d/ (no shared file = no race condition)
-TASKS_DIR = Path(__file__).resolve().parent.parent.parent.parent / "workspace" / "memory" / "active-tasks.d"
+TASKS_DIR = Path(__file__).parent.parent.parent.parent / "workspace" / "memory" / "active-tasks.d"  # no .resolve()
 
 
 def _register_task(task_id: str, backend: str, log_file: str) -> Path:

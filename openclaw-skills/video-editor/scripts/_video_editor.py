@@ -36,7 +36,8 @@ if os.environ.get("VIDEO_EDITOR_SAFE") != "1":
     sys.exit(1)
 
 # === Path Setup ===
-SCRIPT_DIR = Path(__file__).parent.resolve()
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SCRIPT_DIR = Path(__file__).parent
 SKILL_ROOT = SCRIPT_DIR.parent  # skills/video-editor/
 PROFILE_ROOT = Path(os.environ["PROFILE_ROOT"])
 MEDIA_DIR = Path(os.environ["MEDIA_DIR"])

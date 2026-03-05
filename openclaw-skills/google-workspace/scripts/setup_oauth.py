@@ -34,7 +34,9 @@ try:
 except (AttributeError, ValueError):
     pass
 
-SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
+# Do NOT use .resolve() -- skills are symlinked from the git repo.
+# .resolve() follows symlinks, breaking profile isolation.
+SKILL_DIR = pathlib.Path(__file__).parent.parent
 OAUTH_CLIENT_FILE = SKILL_DIR / ".oauth-client.json"
 
 SCOPES = [
@@ -47,7 +49,7 @@ SCOPES = [
 
 def _workspace_root():
     """Derive workspace root: <root>/skills/<name>/scripts/<this> -> climb 4 dirs."""
-    return pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    return pathlib.Path(__file__).parent.parent.parent.parent
 
 
 def main():

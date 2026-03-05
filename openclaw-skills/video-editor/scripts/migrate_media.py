@@ -32,7 +32,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # === Path Derivation (never hardcoded) ===
-SCRIPT_DIR = Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SCRIPT_DIR = Path(__file__).parent
 # scripts/ -> video-editor/ -> skills/ -> profile root
 PROFILE_ROOT = Path(os.environ.get("PROFILE_ROOT", str(SCRIPT_DIR.parents[2])))
 MEDIA_DIR = Path(os.environ.get("MEDIA_DIR", str(PROFILE_ROOT / "media")))

@@ -53,6 +53,29 @@ for patch in "${PATCH_SCRIPTS[@]}"; do
   fi
 done
 
+# --- Sync LaunchAgent Scripts ---
+section "Syncing LaunchAgent Scripts"
+
+# Derive source dir from this script's location
+SCRIPT_SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)"
+LAUNCHD_DEST_DIR="$HOME/.openclaw/scripts"
+
+mkdir -p "$LAUNCHD_DEST_DIR"
+
+LAUNCHD_SCRIPTS=("oc-watchdog.sh" "oc-log-rotate.sh")
+
+for script_name in "${LAUNCHD_SCRIPTS[@]}"; do
+  src="${SCRIPT_SOURCE_DIR}/${script_name}"
+  dst="${LAUNCHD_DEST_DIR}/${script_name}"
+  if [[ -f "$src" ]]; then
+    cp "$src" "$dst"
+    chmod +x "$dst"
+    pass "Synced: ${script_name}"
+  else
+    warn "Source not found (skipped): ${src}"
+  fi
+done
+
 # --- Verify Paired Scopes ---
 section "Paired Device Scopes"
 

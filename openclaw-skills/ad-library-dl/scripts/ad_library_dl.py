@@ -504,7 +504,8 @@ def _load_google_creds():
     import google.auth.transport.requests
     import google.oauth2.credentials
 
-    profile_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    profile_root = pathlib.Path(__file__).parent.parent.parent.parent
     creds_path = profile_root / "credentials" / "google-workspace-oauth.json"
 
     if not creds_path.exists():
@@ -608,8 +609,11 @@ def upload_to_drive(session_dir: pathlib.Path, brand_name: str, session_ts: str)
 # ---------------------------------------------------------------------------
 
 def _workspace_root():
-    """Derive workspace root from script location (4 dirs up)."""
-    return pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    """Derive workspace root from script location (4 dirs up).
+
+    IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks.
+    """
+    return pathlib.Path(__file__).parent.parent.parent.parent
 
 
 def _get_allowed_channels():

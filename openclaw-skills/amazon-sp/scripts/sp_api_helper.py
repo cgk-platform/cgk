@@ -74,7 +74,8 @@ import urllib.request
 # Configuration
 # ---------------------------------------------------------------------------
 
-SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SKILL_DIR = pathlib.Path(__file__).parent.parent
 ENV_FILE = SKILL_DIR / ".env"
 TOKEN_FILE = SKILL_DIR / ".token.json"
 CACHE_DIR = SKILL_DIR / "cache"

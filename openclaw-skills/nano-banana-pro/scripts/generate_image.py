@@ -115,7 +115,8 @@ def main():
     # Set up output path
     output_path = Path(args.filename).expanduser()
     if not output_path.is_absolute():
-        media_dir = Path(__file__).resolve().parent.parent.parent.parent / "media"
+        # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+        media_dir = Path(__file__).parent.parent.parent.parent / "media"
         output_path = media_dir / output_path
         print(f"No directory specified, defaulting to: {output_path}")
     output_path.parent.mkdir(parents=True, exist_ok=True)

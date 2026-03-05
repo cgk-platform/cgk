@@ -44,7 +44,8 @@ import sqlite3
 import struct
 import sys
 
-_script_dir = pathlib.Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+_script_dir = pathlib.Path(__file__).parent
 
 # ---------------------------------------------------------------------------
 # Profile detection (mirrors ci_store.py)

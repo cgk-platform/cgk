@@ -25,7 +25,8 @@ import pathlib
 import sys
 import time
 
-_script_dir = pathlib.Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+_script_dir = pathlib.Path(__file__).parent
 _profile_root = _script_dir.parent.parent.parent
 
 

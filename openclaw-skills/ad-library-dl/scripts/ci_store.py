@@ -35,7 +35,8 @@ import sys
 import urllib.parse
 import urllib.request
 
-_script_dir = pathlib.Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+_script_dir = pathlib.Path(__file__).parent
 
 # ---------------------------------------------------------------------------
 # Profile detection

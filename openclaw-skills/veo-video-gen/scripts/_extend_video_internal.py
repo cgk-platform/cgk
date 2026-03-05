@@ -60,7 +60,8 @@ SLACK_THREAD_TS = os.environ.get("SLACK_THREAD_TS", "")
 
 def _workspace_root():
     """Derive workspace root from script location (4 dirs up)."""
-    return Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    return Path(__file__).parent.parent.parent.parent
 
 
 def _get_allowed_channels():
@@ -546,7 +547,7 @@ def extend_sora(meta, video_path, prompt, num_extensions, output_path):
 # Task tracking
 # ---------------------------------------------------------------------------
 
-TASKS_DIR = Path(__file__).resolve().parent.parent.parent.parent / "workspace" / "memory" / "active-tasks.d"
+TASKS_DIR = Path(__file__).parent.parent.parent.parent / "workspace" / "memory" / "active-tasks.d"  # no .resolve()
 
 
 def _register_task(task_id: str, backend: str, log_file: str) -> Path:

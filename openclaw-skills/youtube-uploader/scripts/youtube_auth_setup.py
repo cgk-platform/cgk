@@ -47,7 +47,8 @@ def main():
     parser.add_argument(
         "--env-file",
         type=Path,
-        default=Path(__file__).resolve().parent.parent / ".env",
+        # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+        default=Path(__file__).parent.parent / ".env",
         help="Path to .env file (default: skill .env)",
     )
     args = parser.parse_args()

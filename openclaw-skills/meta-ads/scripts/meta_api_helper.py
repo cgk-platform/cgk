@@ -174,10 +174,11 @@ def _ads_manager_url(ad_id=None, adset_id=None, campaign_id=None, *, level=None)
         if campaign_id:
             url += f"&selected_campaign_ids={campaign_id}"
     return url
-TOKEN_FILE = pathlib.Path(__file__).resolve().parent.parent / ".token.json"
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+TOKEN_FILE = pathlib.Path(__file__).parent.parent / ".token.json"
 STAGING_CONFIG = pathlib.Path(__file__).parent.parent / ".staging.json"
 STAGING_LOG = pathlib.Path(__file__).parent.parent / "logs" / "staging.log"
-MEDIA_CACHE_DIR = pathlib.Path(__file__).resolve().parent.parent / "cache"
+MEDIA_CACHE_DIR = pathlib.Path(__file__).parent.parent / "cache"
 
 
 def _load_staging_config():
@@ -990,7 +991,8 @@ def _workspace_root():
 
     Path: <root>/skills/meta-ads/scripts/meta_api_helper.py → climb 4 dirs.
     """
-    return pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    return pathlib.Path(__file__).parent.parent.parent.parent
 
 
 def _get_slack_token():
@@ -6730,7 +6732,8 @@ def _load_google_creds():
     import google.auth.transport.requests
     import google.oauth2.credentials
 
-    profile_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    profile_root = pathlib.Path(__file__).parent.parent.parent.parent
     creds_path = profile_root / "credentials" / "google-workspace-oauth.json"
 
     if not creds_path.exists():

@@ -25,7 +25,8 @@ from urllib.error import HTTPError, URLError
 from google import genai
 from google.genai import types
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SCRIPT_DIR = Path(__file__).parent
 PROFILE_ROOT = SCRIPT_DIR.parent.parent.parent
 MEDIA_DIR = PROFILE_ROOT / "media"
 

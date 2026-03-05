@@ -67,7 +67,8 @@ import urllib.parse
 import urllib.request
 
 # --- Configuration ---
-SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SKILL_DIR = pathlib.Path(__file__).parent.parent
 ENV_FILE = SKILL_DIR / ".env"
 CACHE_DIR = SKILL_DIR / "cache"
 HISTORY_DIR = SKILL_DIR / "history"

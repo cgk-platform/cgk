@@ -23,7 +23,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 # Ensure lib/ is importable
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+sys.path.insert(0, str(Path(__file__).parent))
 
 from lib.dam_client import DAMClient, compute_file_hash, build_clip_payload
 
@@ -284,7 +285,8 @@ def main():
     if args.profile_root:
         profile_root = Path(args.profile_root).resolve()
     else:
-        script_dir = Path(__file__).resolve().parent
+        # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+        script_dir = Path(__file__).parent
         profile_root = script_dir.parents[2]
 
     # Resolve catalog path

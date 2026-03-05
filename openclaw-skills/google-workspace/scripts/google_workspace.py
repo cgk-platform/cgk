@@ -7,6 +7,9 @@
 #     "google-auth-oauthlib>=1.0.0",
 #     "google-auth-httplib2>=0.2.0",
 #     "matplotlib>=3.8.0",
+#     "openpyxl>=3.1.0",
+#     "pandas>=2.0.0",
+#     "python-docx>=1.0.0",
 # ]
 # ///
 """Google Workspace API helper — Slides, Docs, Sheets, Drive.
@@ -52,13 +55,18 @@ sys.stdout = _PipeSafe(sys.stdout)
 sys.stderr = _PipeSafe(sys.stderr)
 
 # --- Path derivation (profile-agnostic) ---
-SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
+# IMPORTANT: Do NOT use .resolve() here. The script is symlinked from each
+# profile directory (e.g. ~/.openclaw/skills/google-workspace/scripts/ -> repo).
+# Using .resolve() would follow the symlink to the repo, breaking profile
+# isolation for credentials, .env, and .oauth-client.json.
+_SCRIPT_PATH = pathlib.Path(__file__).parent  # keeps symlink path
+SKILL_DIR = _SCRIPT_PATH.parent
 SCRIPTS_DIR = SKILL_DIR / "scripts"
 
 
 def _workspace_root():
     """Derive workspace root: <root>/skills/<name>/scripts/<this> -> climb 4 dirs."""
-    return pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    return _SCRIPT_PATH.parent.parent.parent
 
 
 def _load_env_file():
@@ -152,6 +160,30 @@ def _sheets_service():
 
 def _drive_service():
     return _build_service("drive", "v3")
+
+
+def _auto_share_org(file_id):
+    """Share a file with the org domain (anyone at domain can view).
+
+    Derives domain from GOG_AUTH_EMAIL env var. Silently skips if
+    no email is set or if the account is a personal Gmail.
+    """
+    email = os.environ.get("GOG_AUTH_EMAIL", "")
+    if not email or "@" not in email:
+        return
+    domain = email.split("@", 1)[1].lower()
+    # Skip personal Gmail accounts — domain sharing doesn't work for them
+    if domain in ("gmail.com", "googlemail.com"):
+        return
+    try:
+        drive = _drive_service()
+        drive.permissions().create(
+            fileId=file_id,
+            body={"type": "domain", "domain": domain, "role": "reader"},
+            fields="id",
+        ).execute()
+    except Exception:
+        pass  # Silent fail for personal accounts or permission errors
 
 
 # ============================================================
@@ -567,8 +599,10 @@ def cmd_slides_create(args):
                     presentationId=pres_id, body={"requests": del_requests}
                 ).execute()
 
+    _auto_share_org(pres_id)
+
     url = f"https://docs.google.com/presentation/d/{pres_id}/edit"
-    print(json.dumps({"presentationId": pres_id, "url": url}, indent=2))
+    print(json.dumps({"presentationId": pres_id, "url": url, "orgShared": True}, indent=2))
 
 
 def cmd_slides_get(args):
@@ -1974,8 +2008,9 @@ def cmd_docs_create(args):
     svc = _docs_service()
     doc = svc.documents().create(body={"title": args.title}).execute()
     doc_id = doc["documentId"]
+    _auto_share_org(doc_id)
     url = f"https://docs.google.com/document/d/{doc_id}/edit"
-    print(json.dumps({"documentId": doc_id, "url": url}))
+    print(json.dumps({"documentId": doc_id, "url": url, "orgShared": True}))
 
 
 def cmd_docs_get(args):
@@ -2400,6 +2435,572 @@ def cmd_docs_export(args):
     print(json.dumps({"exported": out_path, "format": args.format, "bytes": len(content)}))
 
 
+# ============================================================
+# Rich DOCX pipeline (python-docx)
+# ============================================================
+
+def _build_rich_document(spec, output_path):
+    """Build a rich .docx file from a JSON spec using python-docx.
+
+    spec format:
+    {
+      "theme": {"dark": "1A1A2E", "accent": "E94560", "accent2": "0F3460",
+                "lightBg": "F5F5F5", "medGray": "666666"},
+      "header": "Header text",
+      "footer": "Footer text",
+      "sections": [{
+        "children": [
+          {"type": "heading", "level": 1, "text": "...", "color": "1A1A2E"},
+          {"type": "subtitle", "text": "..."},
+          {"type": "paragraph", "text": "...", "runs": [{"text": "...", "bold": true}]},
+          {"type": "accentBar", "color": "E94560"},
+          {"type": "divider"},
+          {"type": "kpiRow", "items": [{"value": "$42K", "label": "Revenue", "bg": "0F3460"}]},
+          {"type": "callout", "title": "...", "body": "...", "bg": "E8F5E9"},
+          {"type": "table", "headers": [...], "rows": [[...]], "style": {"headerBg": "0F3460", "zebra": true}},
+          {"type": "richTable", "headers": [...], "rows": [[{"text":"...","bold":true}]]},
+          {"type": "bullets", "items": [...]},
+          {"type": "numberedList", "items": [...]},
+          {"type": "personaCard", "name": "...", "role": "...", "details": [...]},
+          {"type": "conceptHeader", "title": "...", "subtitle": "..."},
+          {"type": "tag", "text": "...", "color": "E94560"},
+          {"type": "pageBreak"},
+          {"type": "spacer"},
+          {"type": "image", "path": "...", "width": 5.0}
+        ]
+      }]
+    }
+    """
+    from docx import Document
+    from docx.shared import Inches, Pt, RGBColor, Cm, Emu
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.table import WD_TABLE_ALIGNMENT
+    from docx.oxml.ns import qn, nsdecls
+    from docx.oxml import parse_xml
+
+    doc = Document()
+
+    # Set default styles
+    style = doc.styles["Normal"]
+    style.font.name = "Arial"
+    style.font.size = Pt(11)
+    style.paragraph_format.space_after = Pt(6)
+
+    # Page setup: US Letter, 0.8" margins
+    for section in doc.sections:
+        section.page_width = Inches(8.5)
+        section.page_height = Inches(11)
+        section.left_margin = Inches(0.8)
+        section.right_margin = Inches(0.8)
+        section.top_margin = Inches(0.8)
+        section.bottom_margin = Inches(0.8)
+
+    # Theme colors
+    theme = spec.get("theme", {})
+    color_dark = theme.get("dark", "1A1A2E")
+    color_accent = theme.get("accent", "E94560")
+    color_accent2 = theme.get("accent2", "0F3460")
+    color_light_bg = theme.get("lightBg", "F5F5F5")
+    color_med_gray = theme.get("medGray", "666666")
+
+    def _hex_rgb(hex_str):
+        h = hex_str.lstrip("#")
+        try:
+            return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+        except (ValueError, IndexError):
+            return RGBColor(0, 0, 0)  # fallback to black on invalid hex
+
+    def _set_cell_bg(cell, hex_color):
+        """Set a table cell's background color."""
+        h = hex_color.lstrip("#")
+        shading = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{h}"/>')
+        cell._tc.get_or_add_tcPr().append(shading)
+
+    # Header
+    header_text = spec.get("header", "")
+    if header_text:
+        header = doc.sections[0].header
+        hp = header.paragraphs[0]
+        hp.text = header_text
+        hp.style.font.size = Pt(9)
+        hp.style.font.color.rgb = _hex_rgb(color_med_gray)
+        hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+
+    # Footer
+    footer_text = spec.get("footer", "")
+    if footer_text:
+        footer = doc.sections[0].footer
+        fp = footer.paragraphs[0]
+        fp.text = footer_text
+        fp.style.font.size = Pt(9)
+        fp.style.font.color.rgb = _hex_rgb(color_med_gray)
+        fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+    # Process sections or flat elements list
+    # Supports two equivalent formats:
+    #   {"elements": [...]}                           — flat list, no page breaks between sections
+    #   {"sections": [{"children": [...]}, ...]}      — multi-section, page break between each
+    flat_elements = spec.get("elements")
+    if flat_elements is not None:
+        sections_iter = [{"children": flat_elements}]
+    else:
+        sections_iter = spec.get("sections", [])
+
+    for sec_idx, section_spec in enumerate(sections_iter):
+        if sec_idx > 0:
+            doc.add_page_break()
+
+        for child in section_spec.get("children", section_spec.get("elements", [])):
+            elem_type = child.get("type", "")
+
+            if elem_type == "heading":
+                level = child.get("level", 1)
+                level = max(1, min(level, 6))
+                p = doc.add_heading(child.get("text", ""), level=level)
+                color = child.get("color", color_dark)
+                for run in p.runs:
+                    run.font.color.rgb = _hex_rgb(color)
+                    run.font.name = "Arial"
+
+            elif elem_type == "subtitle":
+                p = doc.add_paragraph()
+                run = p.add_run(child.get("text", ""))
+                run.font.size = Pt(14)
+                run.font.color.rgb = _hex_rgb(color_med_gray)
+                run.font.name = "Arial"
+
+            elif elem_type == "paragraph":
+                p = doc.add_paragraph()
+                runs = child.get("runs")
+                if runs and isinstance(runs, list):
+                    for run_spec in runs:
+                        if isinstance(run_spec, str):
+                            run_spec = {"text": run_spec}
+                        run = p.add_run(run_spec.get("text", ""))
+                        run.font.name = "Arial"
+                        run.font.size = Pt(run_spec.get("fontSize", 11))
+                        if run_spec.get("bold"):
+                            run.bold = True
+                        if run_spec.get("italic"):
+                            run.italic = True
+                        if run_spec.get("color"):
+                            run.font.color.rgb = _hex_rgb(run_spec["color"])
+                else:
+                    text = child.get("text", "") or (runs if isinstance(runs, str) else "")
+                    run = p.add_run(text)
+                    run.font.name = "Arial"
+                    if child.get("bold"):
+                        run.bold = True
+                    if child.get("italic"):
+                        run.italic = True
+                    if child.get("color"):
+                        run.font.color.rgb = _hex_rgb(child["color"])
+
+            elif elem_type == "accentBar":
+                bar_color = child.get("color", color_accent)
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(0)
+                p.paragraph_format.space_after = Pt(8)
+                # Create a thin colored bar via a 1-row, 1-col table
+                tbl = doc.add_table(rows=1, cols=1)
+                tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+                cell = tbl.cell(0, 0)
+                cell.text = ""
+                _set_cell_bg(cell, bar_color)
+                # Set row height to ~4pt
+                tr = tbl.rows[0]._tr
+                trPr = tr.get_or_add_trPr()
+                trHeight = parse_xml(f'<w:trHeight {nsdecls("w")} w:val="80" w:hRule="exact"/>')
+                trPr.append(trHeight)
+
+            elif elem_type == "divider":
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(6)
+                p.paragraph_format.space_after = Pt(6)
+                # Add bottom border
+                pPr = p._p.get_or_add_pPr()
+                pBdr = parse_xml(
+                    f'<w:pBdr {nsdecls("w")}>'
+                    f'  <w:bottom w:val="single" w:sz="4" w:space="1" w:color="DADCE0"/>'
+                    f'</w:pBdr>'
+                )
+                pPr.append(pBdr)
+
+            elif elem_type == "kpiRow":
+                items = child.get("metrics") or child.get("items", [])
+                if not items:
+                    continue
+                n = len(items)
+                tbl = doc.add_table(rows=2, cols=n)
+                tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+                for i, kpi in enumerate(items):
+                    bg = kpi.get("bg", color_accent2)
+                    # Value cell
+                    val_cell = tbl.cell(0, i)
+                    val_cell.text = ""
+                    vp = val_cell.paragraphs[0]
+                    vr = vp.add_run(str(kpi.get("value", "")))
+                    vr.font.size = Pt(22)
+                    vr.font.bold = True
+                    vr.font.color.rgb = RGBColor(255, 255, 255)
+                    vr.font.name = "Arial"
+                    vp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    _set_cell_bg(val_cell, bg)
+                    # Label cell
+                    lbl_cell = tbl.cell(1, i)
+                    lbl_cell.text = ""
+                    lp = lbl_cell.paragraphs[0]
+                    lr = lp.add_run(str(kpi.get("label", "")))
+                    lr.font.size = Pt(9)
+                    lr.font.color.rgb = RGBColor(255, 255, 255)
+                    lr.font.name = "Arial"
+                    lp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                    _set_cell_bg(lbl_cell, bg)
+                # Remove table borders for clean KPI look
+                for row in tbl.rows:
+                    for cell in row.cells:
+                        tc = cell._tc
+                        tcPr = tc.get_or_add_tcPr()
+                        tcBorders = parse_xml(
+                            f'<w:tcBorders {nsdecls("w")}>'
+                            f'  <w:top w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+                            f'  <w:bottom w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+                            f'  <w:left w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+                            f'  <w:right w:val="none" w:sz="0" w:space="0" w:color="auto"/>'
+                            f'</w:tcBorders>'
+                        )
+                        tcPr.append(tcBorders)
+
+            elif elem_type == "callout":
+                title_text = child.get("title", "")
+                body_text = child.get("body", "")
+                bg = child.get("bg", color_light_bg)
+                tbl = doc.add_table(rows=1, cols=1)
+                cell = tbl.cell(0, 0)
+                cell.text = ""
+                if title_text:
+                    tp = cell.paragraphs[0]
+                    tr = tp.add_run(title_text)
+                    tr.font.bold = True
+                    tr.font.size = Pt(12)
+                    tr.font.name = "Arial"
+                if body_text:
+                    bp = cell.add_paragraph()
+                    br = bp.add_run(body_text)
+                    br.font.size = Pt(11)
+                    br.font.name = "Arial"
+                _set_cell_bg(cell, bg)
+
+            elif elem_type == "table":
+                headers = child.get("headers", [])
+                rows = child.get("rows", [])
+                style_spec = child.get("style", {})
+                header_bg = style_spec.get("headerBg", color_accent2)
+                zebra = style_spec.get("zebra", False)
+                zebra_color = style_spec.get("zebraColor", "F5F5F5")
+
+                all_rows = [headers] + rows if headers else rows
+                if not all_rows:
+                    continue
+
+                n_cols = max(len(r) for r in all_rows)
+                tbl = doc.add_table(rows=len(all_rows), cols=n_cols)
+                tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+                tbl.style = "Table Grid"
+
+                for r_idx, row_data in enumerate(all_rows):
+                    for c_idx, cell_val in enumerate(row_data):
+                        if c_idx >= n_cols:
+                            break
+                        cell = tbl.cell(r_idx, c_idx)
+                        cell.text = ""
+                        p = cell.paragraphs[0]
+                        run = p.add_run(str(cell_val))
+                        run.font.name = "Arial"
+                        run.font.size = Pt(10)
+
+                        if r_idx == 0 and headers:
+                            run.font.bold = True
+                            run.font.color.rgb = RGBColor(255, 255, 255)
+                            _set_cell_bg(cell, header_bg)
+                        elif zebra and r_idx % 2 == 0:
+                            _set_cell_bg(cell, zebra_color)
+
+            elif elem_type == "richTable":
+                headers = child.get("headers", [])
+                rows = child.get("rows", [])
+                style_spec = child.get("style", {})
+                # Accept headerColor/zebraColor as top-level keys (flat spec format)
+                # or headerBg/zebraColor inside nested "style" object (legacy format)
+                header_bg = (child.get("headerColor")
+                             or style_spec.get("headerBg", color_accent2))
+                rich_zebra_color = (child.get("zebraColor")
+                                    or style_spec.get("zebraColor"))
+
+                all_rows = [headers] + rows if headers else rows
+                if not all_rows:
+                    continue
+
+                n_cols = max(len(r) for r in all_rows)
+                tbl = doc.add_table(rows=len(all_rows), cols=n_cols)
+                tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+                tbl.style = "Table Grid"
+
+                for r_idx, row_data in enumerate(all_rows):
+                    for c_idx, cell_val in enumerate(row_data):
+                        if c_idx >= n_cols:
+                            break
+                        cell = tbl.cell(r_idx, c_idx)
+                        cell.text = ""
+                        p = cell.paragraphs[0]
+
+                        if isinstance(cell_val, dict):
+                            run = p.add_run(str(cell_val.get("text", "")))
+                            run.font.name = "Arial"
+                            run.font.size = Pt(cell_val.get("fontSize", 10))
+                            if cell_val.get("bold"):
+                                run.bold = True
+                            if cell_val.get("italic"):
+                                run.italic = True
+                            if cell_val.get("color"):
+                                run.font.color.rgb = _hex_rgb(cell_val["color"])
+                            if cell_val.get("bg"):
+                                _set_cell_bg(cell, cell_val["bg"])
+                        else:
+                            run = p.add_run(str(cell_val))
+                            run.font.name = "Arial"
+                            run.font.size = Pt(10)
+
+                        if r_idx == 0 and headers:
+                            run.font.bold = True
+                            run.font.color.rgb = RGBColor(255, 255, 255)
+                            _set_cell_bg(cell, header_bg)
+                        elif rich_zebra_color and r_idx % 2 == 0:
+                            _set_cell_bg(cell, rich_zebra_color)
+
+            elif elem_type == "bullets":
+                for item in child.get("items", []):
+                    p = doc.add_paragraph(str(item), style="List Bullet")
+                    for run in p.runs:
+                        run.font.name = "Arial"
+                        run.font.size = Pt(11)
+
+            elif elem_type == "numberedList":
+                for item in child.get("items", []):
+                    p = doc.add_paragraph(str(item), style="List Number")
+                    for run in p.runs:
+                        run.font.name = "Arial"
+                        run.font.size = Pt(11)
+
+            elif elem_type == "personaCard":
+                name = child.get("name", "")
+                role = child.get("role", "")
+                details = child.get("details", [])
+                bg = child.get("bg", color_light_bg)
+
+                tbl = doc.add_table(rows=1, cols=1)
+                cell = tbl.cell(0, 0)
+                cell.text = ""
+                _set_cell_bg(cell, bg)
+
+                # Name
+                np = cell.paragraphs[0]
+                nr = np.add_run(name)
+                nr.font.bold = True
+                nr.font.size = Pt(14)
+                nr.font.name = "Arial"
+                nr.font.color.rgb = _hex_rgb(color_dark)
+
+                # Role
+                if role:
+                    rp = cell.add_paragraph()
+                    rr = rp.add_run(role)
+                    rr.font.size = Pt(11)
+                    rr.font.italic = True
+                    rr.font.name = "Arial"
+                    rr.font.color.rgb = _hex_rgb(color_med_gray)
+
+                # Details
+                for detail in details:
+                    dp = cell.add_paragraph()
+                    dp.style = doc.styles["List Bullet"]
+                    dr = dp.add_run(str(detail))
+                    dr.font.size = Pt(10)
+                    dr.font.name = "Arial"
+
+            elif elem_type == "conceptHeader":
+                title_text = child.get("title", "")
+                sub_text = child.get("subtitle", "")
+                color = child.get("color", color_dark)
+
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(18)
+                p.paragraph_format.space_after = Pt(4)
+                run = p.add_run(title_text.upper())
+                run.font.bold = True
+                run.font.size = Pt(13)
+                run.font.color.rgb = _hex_rgb(color)
+                run.font.name = "Arial"
+                run.font.letter_spacing = Pt(1.5)
+
+                if sub_text:
+                    sp = doc.add_paragraph()
+                    sp.paragraph_format.space_before = Pt(0)
+                    sr = sp.add_run(sub_text)
+                    sr.font.size = Pt(11)
+                    sr.font.color.rgb = _hex_rgb(color_med_gray)
+                    sr.font.name = "Arial"
+
+            elif elem_type == "tag":
+                text = child.get("text", "")
+                tag_color = child.get("color", color_accent)
+                tbl = doc.add_table(rows=1, cols=1)
+                cell = tbl.cell(0, 0)
+                cell.text = ""
+                p = cell.paragraphs[0]
+                run = p.add_run(f"  {text}  ")
+                run.font.size = Pt(9)
+                run.font.bold = True
+                run.font.color.rgb = RGBColor(255, 255, 255)
+                run.font.name = "Arial"
+                _set_cell_bg(cell, tag_color)
+                # Compact sizing
+                tc = cell._tc
+                tcPr = tc.get_or_add_tcPr()
+                tcW = parse_xml(f'<w:tcW {nsdecls("w")} w:w="0" w:type="auto"/>')
+                tcPr.append(tcW)
+
+            elif elem_type == "pageBreak":
+                doc.add_page_break()
+
+            elif elem_type == "spacer":
+                p = doc.add_paragraph()
+                p.paragraph_format.space_before = Pt(child.get("height", 12))
+                p.paragraph_format.space_after = Pt(0)
+
+            elif elem_type == "image":
+                img_path = child.get("path", "")
+                width = child.get("width", 5.0)
+                if img_path and os.path.exists(img_path):
+                    doc.add_picture(img_path, width=Inches(width))
+
+    doc.save(output_path)
+    return output_path
+
+
+def _upload_docx_as_doc(docx_path, title, folder_id=None):
+    """Upload .docx to Drive, converting to Google Docs. Returns file metadata."""
+    from googleapiclient.http import MediaFileUpload
+    drive = _drive_service()
+
+    metadata = {
+        "name": title,
+        "mimeType": "application/vnd.google-apps.document",
+    }
+    if folder_id:
+        metadata["parents"] = [folder_id]
+
+    media = MediaFileUpload(
+        str(docx_path),
+        mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        resumable=True,
+    )
+    uploaded = drive.files().create(
+        body=metadata,
+        media_body=media,
+        fields="id, name, webViewLink",
+    ).execute()
+    return uploaded
+
+
+def cmd_docs_build_rich(args):
+    """Build a rich document from JSON spec, upload to Drive as Google Doc."""
+    spec = _read_spec(args)
+    title = args.title or spec.get("title", "Untitled Document")
+
+    # Build .docx locally
+    if args.output:
+        output_path = pathlib.Path(args.output)
+    else:
+        output_path = pathlib.Path(tempfile.mkdtemp()) / f"{title}.docx"
+
+    _build_rich_document(spec, str(output_path))
+
+    if args.output:
+        # Local-only mode — skip upload
+        print(json.dumps({"localPath": str(output_path), "title": title}))
+        return
+
+    # Upload to Drive as Google Doc
+    uploaded = _upload_docx_as_doc(str(output_path), title, folder_id=args.folder)
+    doc_id = uploaded["id"]
+    _auto_share_org(doc_id)
+    url = uploaded.get("webViewLink", f"https://docs.google.com/document/d/{doc_id}/edit")
+
+    result = {"documentId": doc_id, "url": url, "title": title, "orgShared": True}
+
+    if args.link_share:
+        result["linkShare"] = _link_share_file(doc_id)
+
+    if args.share:
+        drive = _drive_service()
+        drive.permissions().create(
+            fileId=doc_id,
+            body={"type": "user", "role": "reader", "emailAddress": args.share},
+            sendNotificationEmail=True,
+            fields="id",
+        ).execute()
+        result["sharedWith"] = args.share
+
+    # Clean up temp file
+    output_path.unlink(missing_ok=True)
+
+    print(json.dumps(result, indent=2))
+
+
+def cmd_docs_build_rich_batch(args):
+    """Build multiple rich documents in parallel from JSON spec array."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    specs = _read_spec(args)
+    if not isinstance(specs, list):
+        print("ERROR: Batch spec must be a JSON array of specs.", file=sys.stderr)
+        sys.exit(1)
+
+    max_workers = args.parallel or 4
+    results = {"total": len(specs), "succeeded": 0, "failed": 0, "documents": []}
+
+    def build_one(spec):
+        title = spec.get("title", "Untitled Document")
+        tmp_path = pathlib.Path(tempfile.mkdtemp()) / f"{title}.docx"
+        try:
+            _build_rich_document(spec, str(tmp_path))
+            uploaded = _upload_docx_as_doc(str(tmp_path), title, folder_id=args.folder)
+            doc_id = uploaded["id"]
+            _auto_share_org(doc_id)
+            url = uploaded.get("webViewLink", f"https://docs.google.com/document/d/{doc_id}/edit")
+            entry = {"documentId": doc_id, "url": url, "title": title, "orgShared": True}
+            if args.link_share:
+                entry["linkShare"] = _link_share_file(doc_id)
+            return entry
+        except Exception as e:
+            return {"title": title, "error": str(e)}
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(build_one, s): s for s in specs}
+        for future in as_completed(futures):
+            entry = future.result()
+            if "error" in entry:
+                results["failed"] += 1
+            else:
+                results["succeeded"] += 1
+            results["documents"].append(entry)
+
+    print(json.dumps(results, indent=2))
+
+
 def cmd_docs_replace_text(args):
     """Find and replace text in a document."""
     svc = _docs_service()
@@ -2454,8 +3055,9 @@ def cmd_sheets_create(args):
         }
     ss = svc.spreadsheets().create(body=body).execute()
     ss_id = ss["spreadsheetId"]
+    _auto_share_org(ss_id)
     url = f"https://docs.google.com/spreadsheets/d/{ss_id}/edit"
-    print(json.dumps({"spreadsheetId": ss_id, "url": url}))
+    print(json.dumps({"spreadsheetId": ss_id, "url": url, "orgShared": True}))
 
 
 def cmd_sheets_get(args):
@@ -2902,6 +3504,705 @@ def cmd_drive_search(args):
 
 
 # ============================================================
+# Rich XLSX pipeline (openpyxl + pandas)
+# ============================================================
+
+def _link_share_file(file_id):
+    """Make a Drive file link-shareable (anyone with link can view). Returns share URL."""
+    drive = _drive_service()
+    drive.permissions().create(
+        fileId=file_id,
+        body={"type": "anyone", "role": "reader"},
+        fields="id",
+    ).execute()
+    info = drive.files().get(fileId=file_id, fields="webViewLink").execute()
+    return info["webViewLink"]
+
+
+def _col_letter_to_idx(col_str):
+    """Convert column letter(s) to 0-based index. A=0, B=1, Z=25, AA=26."""
+    idx = 0
+    for c in col_str.upper():
+        idx = idx * 26 + (ord(c) - ord("A") + 1)
+    return idx - 1
+
+
+def _parse_range_to_cells(range_str):
+    """Parse 'A1:D5' into ((row_start, col_start), (row_end, col_end)) as 1-based."""
+    import re
+    m = re.match(r"([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?", range_str.upper())
+    if not m:
+        return None
+    c1 = _col_letter_to_idx(m.group(1)) + 1
+    r1 = int(m.group(2))
+    if m.group(3):
+        c2 = _col_letter_to_idx(m.group(3)) + 1
+        r2 = int(m.group(4))
+    else:
+        c2, r2 = c1, r1
+    return ((r1, c1), (r2, c2))
+
+
+def _hex_to_openpyxl_color(hex_str):
+    """Convert hex color (with or without #) to openpyxl aRGB string."""
+    h = hex_str.lstrip("#")
+    if len(h) == 6:
+        return "FF" + h.upper()
+    if len(h) == 8:
+        return h.upper()
+    return "FF000000"
+
+
+def _build_rich_spreadsheet(spec, output_path):
+    """Build a rich .xlsx file from a JSON spec using openpyxl.
+
+    spec format:
+    {
+      "title": "...",
+      "sheets": [{
+        "name": "Sheet1",
+        "tabColor": "1a73e8",
+        "frozenRows": 1, "frozenCols": 0,
+        "autoFilter": "A1:D1",
+        "columnWidths": {"A": 25, "B": 15},
+        "data": [[...], [...]],
+        "formulas": {"D2": "=B2*C2"},
+        "styles": [{"range": "A1:D1", "bold": true, ...}],
+        "conditionalFormats": [{"range": "...", "type": "greaterThan", ...}],
+        "charts": [{"type": "bar", "title": "...", "dataRange": "A1:B4", ...}]
+      }]
+    }
+    """
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side, numbers
+    from openpyxl.chart import BarChart, LineChart, PieChart, AreaChart, ScatterChart, Reference
+    from openpyxl.formatting.rule import CellIsRule, ColorScaleRule, DataBarRule, FormulaRule
+    from openpyxl.utils import get_column_letter
+
+    wb = Workbook()
+
+    # Professional defaults
+    default_font = Font(name="Arial", size=10)
+    thin_border_side = Side(style="thin", color="FFDADCE0")
+
+    sheets_spec = spec.get("sheets", [])
+    if not sheets_spec:
+        sheets_spec = [{"name": "Sheet1", "data": []}]
+
+    for i, sheet_spec in enumerate(sheets_spec):
+        if i == 0:
+            ws = wb.active
+            ws.title = sheet_spec.get("name", "Sheet1")
+        else:
+            ws = wb.create_sheet(title=sheet_spec.get("name", f"Sheet{i+1}"))
+
+        # Tab color
+        if sheet_spec.get("tabColor"):
+            ws.sheet_properties.tabColor = sheet_spec["tabColor"].lstrip("#")
+
+        # Write data
+        data = sheet_spec.get("data", [])
+        for r_idx, row in enumerate(data, 1):
+            for c_idx, val in enumerate(row, 1):
+                cell = ws.cell(row=r_idx, column=c_idx)
+                if val is not None:
+                    cell.value = val
+                cell.font = default_font
+
+        # Apply formulas
+        for cell_ref, formula in sheet_spec.get("formulas", {}).items():
+            ws[cell_ref] = formula
+
+        # Apply thin borders on data range
+        if data:
+            max_row = len(data)
+            max_col = max(len(row) for row in data) if data else 0
+            thin_border = Border(
+                left=thin_border_side, right=thin_border_side,
+                top=thin_border_side, bottom=thin_border_side,
+            )
+            for r in range(1, max_row + 1):
+                for c in range(1, max_col + 1):
+                    ws.cell(row=r, column=c).border = thin_border
+
+        # Apply styles
+        for style_spec in sheet_spec.get("styles", []):
+            rng = style_spec.get("range")
+            if not rng:
+                continue
+            parsed = _parse_range_to_cells(rng)
+            if not parsed:
+                continue
+            (r1, c1), (r2, c2) = parsed
+
+            # Build style objects
+            font_kwargs = {"name": "Arial", "size": 10}
+            if style_spec.get("bold"):
+                font_kwargs["bold"] = True
+            if style_spec.get("italic"):
+                font_kwargs["italic"] = True
+            if style_spec.get("fontSize"):
+                font_kwargs["size"] = style_spec["fontSize"]
+            if style_spec.get("fontFamily"):
+                font_kwargs["name"] = style_spec["fontFamily"]
+            if style_spec.get("textColor"):
+                font_kwargs["color"] = _hex_to_openpyxl_color(style_spec["textColor"])
+
+            fill = None
+            if style_spec.get("backgroundColor"):
+                fill = PatternFill(
+                    start_color=_hex_to_openpyxl_color(style_spec["backgroundColor"]),
+                    end_color=_hex_to_openpyxl_color(style_spec["backgroundColor"]),
+                    fill_type="solid",
+                )
+
+            alignment = None
+            align_kwargs = {}
+            if style_spec.get("alignment"):
+                align_kwargs["horizontal"] = style_spec["alignment"]
+            if style_spec.get("wrapText"):
+                align_kwargs["wrap_text"] = True
+            if align_kwargs:
+                alignment = Alignment(**align_kwargs)
+
+            num_fmt = style_spec.get("numberFormat")
+
+            font = Font(**font_kwargs)
+            for r in range(r1, r2 + 1):
+                for c in range(c1, c2 + 1):
+                    cell = ws.cell(row=r, column=c)
+                    cell.font = font
+                    if fill:
+                        cell.fill = fill
+                    if alignment:
+                        cell.alignment = alignment
+                    if num_fmt:
+                        cell.number_format = num_fmt
+
+        # Column widths
+        for col_letter, width in sheet_spec.get("columnWidths", {}).items():
+            ws.column_dimensions[col_letter.upper()].width = width
+
+        # Frozen rows/cols
+        frozen_rows = sheet_spec.get("frozenRows", 0)
+        frozen_cols = sheet_spec.get("frozenCols", 0)
+        if frozen_rows or frozen_cols:
+            freeze_cell = f"{get_column_letter(frozen_cols + 1)}{frozen_rows + 1}"
+            ws.freeze_panes = freeze_cell
+
+        # Auto-filter
+        if sheet_spec.get("autoFilter"):
+            ws.auto_filter.ref = sheet_spec["autoFilter"]
+
+        # Conditional formats
+        for cf_spec in sheet_spec.get("conditionalFormats", []):
+            cf_range = cf_spec.get("range")
+            cf_type = cf_spec.get("type")
+            if not cf_range or not cf_type:
+                continue
+
+            cf_fill = None
+            cf_font = None
+            if cf_spec.get("fill"):
+                cf_fill = PatternFill(
+                    start_color=_hex_to_openpyxl_color(cf_spec["fill"]),
+                    end_color=_hex_to_openpyxl_color(cf_spec["fill"]),
+                    fill_type="solid",
+                )
+            if cf_spec.get("fontColor"):
+                cf_font = Font(color=_hex_to_openpyxl_color(cf_spec["fontColor"]))
+
+            if cf_type == "colorScale":
+                rule = ColorScaleRule(
+                    start_type="min", start_color=_hex_to_openpyxl_color(cf_spec.get("startColor", "FF0000")),
+                    end_type="max", end_color=_hex_to_openpyxl_color(cf_spec.get("endColor", "00FF00")),
+                )
+                ws.conditional_formatting.add(cf_range, rule)
+            elif cf_type == "dataBar":
+                rule = DataBarRule(
+                    start_type="min", end_type="max",
+                    color=_hex_to_openpyxl_color(cf_spec.get("color", "638EC6")),
+                )
+                ws.conditional_formatting.add(cf_range, rule)
+            elif cf_type in ("greaterThan", "lessThan", "equal", "between"):
+                op_map = {
+                    "greaterThan": "greaterThan",
+                    "lessThan": "lessThan",
+                    "equal": "equal",
+                    "between": "between",
+                }
+                val = cf_spec.get("value")
+                if cf_type == "between":
+                    formula = [cf_spec.get("start", 0), cf_spec.get("end", 0)]
+                else:
+                    formula = [val]
+                rule = CellIsRule(
+                    operator=op_map[cf_type],
+                    formula=formula,
+                    fill=cf_fill,
+                    font=cf_font,
+                )
+                ws.conditional_formatting.add(cf_range, rule)
+            elif cf_type == "containsText":
+                text = cf_spec.get("text", "")
+                rule = FormulaRule(
+                    formula=[f'NOT(ISERROR(SEARCH("{text}",{cf_range.split(":")[0]})))'],
+                    fill=cf_fill,
+                    font=cf_font,
+                )
+                ws.conditional_formatting.add(cf_range, rule)
+
+        # Charts
+        for chart_spec in sheet_spec.get("charts", []):
+            chart_type = chart_spec.get("type", "bar")
+            chart_title = chart_spec.get("title", "")
+            data_range = chart_spec.get("dataRange", "")
+            position = chart_spec.get("position", "F2")
+            width = chart_spec.get("width", 15)
+            height = chart_spec.get("height", 10)
+
+            if not data_range:
+                continue
+            parsed = _parse_range_to_cells(data_range)
+            if not parsed:
+                continue
+            (dr1, dc1), (dr2, dc2) = parsed
+
+            chart_class_map = {
+                "bar": BarChart, "line": LineChart, "pie": PieChart,
+                "area": AreaChart, "scatter": ScatterChart,
+            }
+            ChartClass = chart_class_map.get(chart_type, BarChart)
+            chart_obj = ChartClass()
+            chart_obj.title = chart_title
+            chart_obj.width = width
+            chart_obj.height = height
+
+            if chart_type == "pie":
+                data_ref = Reference(ws, min_col=dc1 + 1, min_row=dr1, max_row=dr2)
+                cats = Reference(ws, min_col=dc1, min_row=dr1 + 1, max_row=dr2)
+                chart_obj.add_data(data_ref, titles_from_data=True)
+                chart_obj.set_categories(cats)
+            else:
+                data_ref = Reference(ws, min_col=dc1 + 1, max_col=dc2, min_row=dr1, max_row=dr2)
+                cats = Reference(ws, min_col=dc1, min_row=dr1 + 1, max_row=dr2)
+                chart_obj.add_data(data_ref, titles_from_data=True)
+                chart_obj.set_categories(cats)
+
+            ws.add_chart(chart_obj, position)
+
+    wb.save(output_path)
+    return output_path
+
+
+def _upload_xlsx_as_sheets(xlsx_path, title, folder_id=None):
+    """Upload .xlsx to Drive, converting to Google Sheets. Returns file metadata."""
+    from googleapiclient.http import MediaFileUpload
+    drive = _drive_service()
+
+    metadata = {
+        "name": title,
+        "mimeType": "application/vnd.google-apps.spreadsheet",
+    }
+    if folder_id:
+        metadata["parents"] = [folder_id]
+
+    media = MediaFileUpload(str(xlsx_path), mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", resumable=True)
+    uploaded = drive.files().create(
+        body=metadata,
+        media_body=media,
+        fields="id, name, webViewLink",
+    ).execute()
+    return uploaded
+
+
+def _read_spec(args):
+    """Read JSON spec from --spec (inline JSON), --spec-file, or stdin."""
+    if hasattr(args, "spec") and args.spec:
+        try:
+            return json.loads(args.spec)
+        except json.JSONDecodeError as e:
+            print(f"ERROR: Invalid JSON for --spec: {e}", file=sys.stderr)
+            sys.exit(1)
+    if hasattr(args, "spec_file") and args.spec_file:
+        p = pathlib.Path(args.spec_file)
+        if not p.exists():
+            print(f"ERROR: Spec file not found: {args.spec_file}", file=sys.stderr)
+            sys.exit(1)
+        return json.loads(p.read_text())
+    else:
+        data = sys.stdin.read()
+        if not data.strip():
+            print("ERROR: No spec provided. Use --spec, --spec-file, or pipe JSON to stdin.", file=sys.stderr)
+            sys.exit(1)
+        try:
+            return json.loads(data)
+        except json.JSONDecodeError as e:
+            print(f"ERROR: Invalid JSON from stdin: {e}", file=sys.stderr)
+            sys.exit(1)
+
+
+def cmd_sheets_build_rich(args):
+    """Build a rich spreadsheet from JSON spec, upload to Drive as Google Sheets."""
+    spec = _read_spec(args)
+    title = args.title or spec.get("title", "Untitled Spreadsheet")
+
+    # Build .xlsx locally
+    if args.output:
+        output_path = pathlib.Path(args.output)
+    else:
+        output_path = pathlib.Path(tempfile.mkdtemp()) / f"{title}.xlsx"
+
+    _build_rich_spreadsheet(spec, str(output_path))
+
+    # Upload to Drive as Google Sheets
+    uploaded = _upload_xlsx_as_sheets(str(output_path), title, folder_id=args.folder)
+    ss_id = uploaded["id"]
+    _auto_share_org(ss_id)
+    url = uploaded.get("webViewLink", f"https://docs.google.com/spreadsheets/d/{ss_id}/edit")
+
+    result = {"spreadsheetId": ss_id, "url": url, "title": title, "orgShared": True}
+
+    if args.link_share:
+        share_url = _link_share_file(ss_id)
+        result["linkShare"] = share_url
+
+    if hasattr(args, "share") and args.share:
+        drive = _drive_service()
+        drive.permissions().create(
+            fileId=ss_id,
+            body={"type": "user", "role": "reader", "emailAddress": args.share},
+            sendNotificationEmail=True,
+            fields="id",
+        ).execute()
+        result["sharedWith"] = args.share
+
+    # Clean up temp file if we created one
+    if not args.output:
+        output_path.unlink(missing_ok=True)
+
+    print(json.dumps(result, indent=2))
+
+
+def cmd_sheets_build_rich_batch(args):
+    """Build multiple rich spreadsheets in parallel from JSON spec array."""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+
+    specs = _read_spec(args)
+    if not isinstance(specs, list):
+        print("ERROR: Batch spec must be a JSON array of specs.", file=sys.stderr)
+        sys.exit(1)
+
+    max_workers = args.parallel or 4
+    results = {"total": len(specs), "succeeded": 0, "failed": 0, "spreadsheets": []}
+
+    def build_one(spec):
+        title = spec.get("title", "Untitled Spreadsheet")
+        tmp_path = pathlib.Path(tempfile.mkdtemp()) / f"{title}.xlsx"
+        try:
+            _build_rich_spreadsheet(spec, str(tmp_path))
+            uploaded = _upload_xlsx_as_sheets(str(tmp_path), title, folder_id=args.folder)
+            ss_id = uploaded["id"]
+            _auto_share_org(ss_id)
+            url = uploaded.get("webViewLink", f"https://docs.google.com/spreadsheets/d/{ss_id}/edit")
+            entry = {"spreadsheetId": ss_id, "url": url, "title": title, "orgShared": True}
+            if args.link_share:
+                entry["linkShare"] = _link_share_file(ss_id)
+            return entry
+        except Exception as e:
+            return {"title": title, "error": str(e)}
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        futures = {pool.submit(build_one, s): s for s in specs}
+        for future in as_completed(futures):
+            entry = future.result()
+            if "error" in entry:
+                results["failed"] += 1
+            else:
+                results["succeeded"] += 1
+            results["spreadsheets"].append(entry)
+
+    print(json.dumps(results, indent=2))
+
+
+def cmd_sheets_analyze(args):
+    """Analyze a spreadsheet's structure and data statistics."""
+    import pandas as pd
+    from openpyxl import load_workbook
+
+    # Get the .xlsx file
+    if args.file:
+        xlsx_path = args.file
+    else:
+        # Download from Google Sheets
+        xlsx_path = os.path.join(tempfile.mkdtemp(), "analyze.xlsx")
+        _download_sheet_as_xlsx(args.spreadsheet_id, xlsx_path)
+
+    # openpyxl analysis: structure
+    wb = load_workbook(xlsx_path, data_only=True)
+    structure = {
+        "sheetNames": wb.sheetnames,
+        "sheets": [],
+    }
+
+    target_sheets = [args.sheet] if args.sheet else wb.sheetnames
+    for sheet_name in target_sheets:
+        if sheet_name not in wb.sheetnames:
+            continue
+        ws = wb[sheet_name]
+        sheet_info = {
+            "name": sheet_name,
+            "dimensions": ws.dimensions,
+            "maxRow": ws.max_row,
+            "maxColumn": ws.max_column,
+            "mergedCells": [str(m) for m in ws.merged_cells.ranges],
+            "frozenPanes": str(ws.freeze_panes) if ws.freeze_panes else None,
+        }
+
+        # Find formulas (reload without data_only)
+        wb_formulas = load_workbook(xlsx_path, data_only=False)
+        ws_f = wb_formulas[sheet_name]
+        formulas = {}
+        for row in ws_f.iter_rows():
+            for cell in row:
+                if cell.value and isinstance(cell.value, str) and cell.value.startswith("="):
+                    formulas[cell.coordinate] = cell.value
+        sheet_info["formulaCount"] = len(formulas)
+        if formulas:
+            # Show first 20
+            sheet_info["formulaSample"] = dict(list(formulas.items())[:20])
+
+        structure["sheets"].append(sheet_info)
+    wb.close()
+
+    # pandas analysis: data stats
+    pandas_info = {}
+    for sheet_name in target_sheets:
+        try:
+            df = pd.read_excel(xlsx_path, sheet_name=sheet_name)
+            pandas_info[sheet_name] = {
+                "shape": list(df.shape),
+                "columns": list(df.columns),
+                "dtypes": {col: str(dtype) for col, dtype in df.dtypes.items()},
+                "nullCounts": {col: int(cnt) for col, cnt in df.isnull().sum().items() if cnt > 0},
+                "head": df.head(5).to_dict(orient="records"),
+                "describe": json.loads(df.describe(include="all").to_json()),
+            }
+        except Exception as e:
+            pandas_info[sheet_name] = {"error": str(e)}
+
+    result = {"structure": structure, "data": pandas_info}
+    if not args.file:
+        os.unlink(xlsx_path)
+
+    print(json.dumps(result, indent=2, default=str))
+
+
+def _download_sheet_as_xlsx(spreadsheet_id, output_path):
+    """Download a Google Sheet as .xlsx via Drive export."""
+    drive = _drive_service()
+    request = drive.files().export_media(
+        fileId=spreadsheet_id,
+        mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    with open(output_path, "wb") as f:
+        from googleapiclient.http import MediaIoBaseDownload
+        downloader = MediaIoBaseDownload(f, request)
+        done = False
+        while not done:
+            _, done = downloader.next_chunk()
+
+
+def cmd_sheets_query(args):
+    """Query/filter/aggregate data from a spreadsheet using pandas."""
+    import pandas as pd
+
+    # Get the .xlsx file
+    if args.file:
+        xlsx_path = args.file
+    else:
+        xlsx_path = os.path.join(tempfile.mkdtemp(), "query.xlsx")
+        _download_sheet_as_xlsx(args.spreadsheet_id, xlsx_path)
+
+    sheet_name = args.sheet or 0
+    df = pd.read_excel(xlsx_path, sheet_name=sheet_name)
+
+    # Apply filter
+    if args.filter:
+        filters = _parse_json_arg(args.filter, "filter")
+        for col, condition in filters.items():
+            if isinstance(condition, dict):
+                for op, val in condition.items():
+                    if op == ">":
+                        df = df[df[col] > val]
+                    elif op == "<":
+                        df = df[df[col] < val]
+                    elif op == ">=":
+                        df = df[df[col] >= val]
+                    elif op == "<=":
+                        df = df[df[col] <= val]
+                    elif op == "!=":
+                        df = df[df[col] != val]
+                    elif op == "contains":
+                        df = df[df[col].astype(str).str.contains(str(val), case=False, na=False)]
+            else:
+                df = df[df[col] == condition]
+
+    # Apply groupby + agg
+    if args.groupby:
+        agg_spec = _parse_json_arg(args.agg, "agg") if args.agg else "count"
+        df = df.groupby(args.groupby).agg(agg_spec).reset_index()
+
+    # Sort
+    if args.sort:
+        ascending = not args.sort.startswith("-")
+        sort_col = args.sort.lstrip("-")
+        df = df.sort_values(sort_col, ascending=ascending)
+
+    # Limit
+    if args.limit:
+        df = df.head(args.limit)
+
+    result = {
+        "rowCount": len(df),
+        "columns": list(df.columns),
+        "data": json.loads(df.to_json(orient="records", date_format="iso", default_handler=str)),
+    }
+
+    if not args.file:
+        os.unlink(xlsx_path)
+
+    print(json.dumps(result, indent=2))
+
+
+def cmd_sheets_download(args):
+    """Download a Google Sheet as .xlsx."""
+    output = args.output or f"/tmp/{args.spreadsheet_id}.xlsx"
+    _download_sheet_as_xlsx(args.spreadsheet_id, output)
+    print(json.dumps({"downloaded": output, "spreadsheetId": args.spreadsheet_id}))
+
+
+def cmd_sheets_edit(args):
+    """Edit an existing Google Sheet: download -> apply edits -> re-upload."""
+    from openpyxl import load_workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+    spec = _read_spec(args)
+    ss_id = args.spreadsheet_id
+
+    # Download current sheet
+    tmp_dir = tempfile.mkdtemp()
+    xlsx_path = os.path.join(tmp_dir, "edit.xlsx")
+    _download_sheet_as_xlsx(ss_id, xlsx_path)
+
+    # Load workbook
+    wb = load_workbook(xlsx_path)
+
+    # Apply edits per sheet (default to first sheet if no sheet name given)
+    target_sheets = spec.get("sheets", [spec]) if "sheets" in spec else [spec]
+    for edit_spec in target_sheets:
+        sheet_name = edit_spec.get("name")
+        if sheet_name and sheet_name in wb.sheetnames:
+            ws = wb[sheet_name]
+        else:
+            ws = wb.active
+
+        # Write new data if provided
+        for cell_ref, value in edit_spec.get("data", {}).items():
+            ws[cell_ref] = value
+
+        # Apply formulas
+        for cell_ref, formula in edit_spec.get("formulas", {}).items():
+            ws[cell_ref] = formula
+
+        # Apply styles
+        for style_spec in edit_spec.get("styles", []):
+            rng = style_spec.get("range")
+            if not rng:
+                continue
+            parsed = _parse_range_to_cells(rng)
+            if not parsed:
+                continue
+            (r1, c1), (r2, c2) = parsed
+
+            font_kwargs = {}
+            if style_spec.get("bold"):
+                font_kwargs["bold"] = True
+            if style_spec.get("italic"):
+                font_kwargs["italic"] = True
+            if style_spec.get("fontSize"):
+                font_kwargs["size"] = style_spec["fontSize"]
+            if style_spec.get("fontFamily"):
+                font_kwargs["name"] = style_spec["fontFamily"]
+            if style_spec.get("textColor"):
+                font_kwargs["color"] = _hex_to_openpyxl_color(style_spec["textColor"])
+
+            fill = None
+            if style_spec.get("backgroundColor"):
+                fill = PatternFill(
+                    start_color=_hex_to_openpyxl_color(style_spec["backgroundColor"]),
+                    end_color=_hex_to_openpyxl_color(style_spec["backgroundColor"]),
+                    fill_type="solid",
+                )
+
+            alignment = None
+            align_kwargs = {}
+            if style_spec.get("alignment"):
+                align_kwargs["horizontal"] = style_spec["alignment"]
+            if style_spec.get("wrapText"):
+                align_kwargs["wrap_text"] = True
+            if align_kwargs:
+                alignment = Alignment(**align_kwargs)
+
+            num_fmt = style_spec.get("numberFormat")
+
+            for r in range(r1, r2 + 1):
+                for c in range(c1, c2 + 1):
+                    cell = ws.cell(row=r, column=c)
+                    if font_kwargs:
+                        cell.font = Font(**font_kwargs)
+                    if fill:
+                        cell.fill = fill
+                    if alignment:
+                        cell.alignment = alignment
+                    if num_fmt:
+                        cell.number_format = num_fmt
+
+    # Save edited workbook
+    edited_path = os.path.join(tmp_dir, "edited.xlsx")
+    wb.save(edited_path)
+    wb.close()
+
+    # Delete old file on Drive, upload new one (preserving ID is not possible with Drive API
+    # when converting, so we upload as new and keep the same title)
+    drive = _drive_service()
+    old_info = drive.files().get(fileId=ss_id, fields="name, parents").execute()
+    title = old_info.get("name", "Edited Spreadsheet")
+    parents = old_info.get("parents", [])
+
+    # Trash the old file
+    drive.files().update(fileId=ss_id, body={"trashed": True}).execute()
+
+    # Upload edited version
+    uploaded = _upload_xlsx_as_sheets(edited_path, title, folder_id=parents[0] if parents else None)
+    new_id = uploaded["id"]
+    _auto_share_org(new_id)
+    url = uploaded.get("webViewLink", f"https://docs.google.com/spreadsheets/d/{new_id}/edit")
+
+    result = {"spreadsheetId": new_id, "url": url, "title": title, "previousId": ss_id, "orgShared": True}
+    if args.link_share:
+        result["linkShare"] = _link_share_file(new_id)
+
+    # Cleanup
+    os.unlink(xlsx_path)
+    os.unlink(edited_path)
+
+    print(json.dumps(result, indent=2))
+
+
+# ============================================================
 # Argument parser
 # ============================================================
 
@@ -3102,6 +4403,25 @@ def build_parser():
     p.add_argument("--format", required=True, choices=["pdf", "docx", "md", "html", "epub"])
     p.add_argument("--output", help="Output file path")
 
+    # docs build-rich
+    p = docs_sub.add_parser("build-rich", help="Build rich document from JSON spec")
+    p.add_argument("--title", help="Document title (overrides spec title)")
+    p.add_argument("--spec", help="JSON spec as inline string")
+    p.add_argument("--spec-file", dest="spec_file", help="JSON spec file path (or pipe via stdin)")
+    p.add_argument("--folder", help="Drive folder ID")
+    p.add_argument("--link-share", dest="link_share", action="store_true", help="Make link-shareable")
+    p.add_argument("--share", help="Share with this email address")
+    p.add_argument("--output", help="Save .docx locally (skip upload)")
+
+    # docs build-rich-batch
+    p = docs_sub.add_parser("build-rich-batch", help="Build multiple rich documents in parallel")
+    p.add_argument("--specs", help="JSON array of specs as inline string")
+    p.add_argument("--spec-file", dest="spec_file", help="JSON spec file path (or pipe via stdin)")
+    p.add_argument("--folder", help="Drive folder ID")
+    p.add_argument("--link-share", dest="link_share", action="store_true", help="Make link-shareable")
+    p.add_argument("--share", help="Share with this email address")
+    p.add_argument("--parallel", type=int, default=3, help="Max parallel workers (default: 3)")
+
     # --- SHEETS ---
     sheets_p = sub.add_parser("sheets", help="Google Sheets operations")
     sheets_sub = sheets_p.add_subparsers(dest="sheets_cmd")
@@ -3163,6 +4483,50 @@ def build_parser():
     p = sheets_sub.add_parser("auto-resize", help="Auto-resize columns")
     p.add_argument("spreadsheet_id")
     p.add_argument("--columns", help="Column range (e.g. 0:10)")
+
+    # sheets build-rich
+    p = sheets_sub.add_parser("build-rich", help="Build rich spreadsheet from JSON spec")
+    p.add_argument("--title", help="Spreadsheet title (overrides spec title)")
+    p.add_argument("--folder", help="Drive folder ID")
+    p.add_argument("--link-share", dest="link_share", action="store_true", help="Make link-shareable")
+    p.add_argument("--share", help="Share with this email address")
+    p.add_argument("--output", help="Save .xlsx locally instead of only uploading")
+    p.add_argument("--spec-file", dest="spec_file", help="JSON spec file path (or pipe via stdin)")
+
+    # sheets build-rich-batch
+    p = sheets_sub.add_parser("build-rich-batch", help="Build multiple rich spreadsheets in parallel")
+    p.add_argument("--folder", help="Drive folder ID")
+    p.add_argument("--link-share", dest="link_share", action="store_true", help="Make link-shareable")
+    p.add_argument("--parallel", type=int, default=4, help="Max parallel workers (default: 4)")
+    p.add_argument("--spec-file", dest="spec_file", help="JSON spec file path (or pipe via stdin)")
+
+    # sheets analyze
+    p = sheets_sub.add_parser("analyze", help="Analyze spreadsheet structure and data")
+    p.add_argument("spreadsheet_id", nargs="?", help="Google Sheets ID")
+    p.add_argument("--file", help="Local .xlsx file path")
+    p.add_argument("--sheet", help="Specific sheet name to analyze")
+
+    # sheets query
+    p = sheets_sub.add_parser("query", help="Filter/aggregate spreadsheet data")
+    p.add_argument("spreadsheet_id", nargs="?", help="Google Sheets ID")
+    p.add_argument("--file", help="Local .xlsx file path")
+    p.add_argument("--filter", help="JSON filter conditions")
+    p.add_argument("--groupby", help="Column name to group by")
+    p.add_argument("--agg", help="JSON aggregation spec (e.g. '{\"Revenue\": \"sum\"}')")
+    p.add_argument("--sort", help="Column to sort by (prefix - for descending)")
+    p.add_argument("--limit", type=int, help="Max rows to return")
+    p.add_argument("--sheet", help="Specific sheet name")
+
+    # sheets download
+    p = sheets_sub.add_parser("download", help="Download Google Sheet as .xlsx")
+    p.add_argument("spreadsheet_id")
+    p.add_argument("--output", help="Local output path")
+
+    # sheets edit
+    p = sheets_sub.add_parser("edit", help="Edit existing spreadsheet (download, modify, re-upload)")
+    p.add_argument("spreadsheet_id")
+    p.add_argument("--spec-file", dest="spec_file", help="JSON edit spec file (or pipe via stdin)")
+    p.add_argument("--link-share", dest="link_share", action="store_true", help="Make link-shareable")
 
     # --- DRIVE ---
     drive_p = sub.add_parser("drive", help="Google Drive operations")
@@ -3243,6 +4607,8 @@ DISPATCH = {
     ("docs", "replace-text"): cmd_docs_replace_text,
     ("docs", "delete-range"): cmd_docs_delete_range,
     ("docs", "export"): cmd_docs_export,
+    ("docs", "build-rich"): cmd_docs_build_rich,
+    ("docs", "build-rich-batch"): cmd_docs_build_rich_batch,
     ("sheets", "create"): cmd_sheets_create,
     ("sheets", "get"): cmd_sheets_get,
     ("sheets", "read"): cmd_sheets_read,
@@ -3253,6 +4619,12 @@ DISPATCH = {
     ("sheets", "delete-tab"): cmd_sheets_delete_tab,
     ("sheets", "conditional-format"): cmd_sheets_conditional_format,
     ("sheets", "auto-resize"): cmd_sheets_auto_resize,
+    ("sheets", "build-rich"): cmd_sheets_build_rich,
+    ("sheets", "build-rich-batch"): cmd_sheets_build_rich_batch,
+    ("sheets", "analyze"): cmd_sheets_analyze,
+    ("sheets", "query"): cmd_sheets_query,
+    ("sheets", "download"): cmd_sheets_download,
+    ("sheets", "edit"): cmd_sheets_edit,
     ("drive", "list"): cmd_drive_list,
     ("drive", "share"): cmd_drive_share,
     ("drive", "move"): cmd_drive_move,

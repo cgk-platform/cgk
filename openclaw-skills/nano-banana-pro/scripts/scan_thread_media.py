@@ -19,7 +19,8 @@ def main():
         sys.exit(0)  # No thread_ts = no images, not an error
 
     thread_ts = sys.argv[1]
-    profile_root = Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    profile_root = Path(__file__).parent.parent.parent.parent
     sessions_dir = profile_root / "agents" / "main" / "sessions"
 
     if not sessions_dir.exists():

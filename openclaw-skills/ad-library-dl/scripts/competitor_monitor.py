@@ -42,7 +42,8 @@ import urllib.request
 # Import from sibling modules (same package)
 # ---------------------------------------------------------------------------
 
-_script_dir = pathlib.Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+_script_dir = pathlib.Path(__file__).parent
 if str(_script_dir) not in sys.path:
     sys.path.insert(0, str(_script_dir))
 

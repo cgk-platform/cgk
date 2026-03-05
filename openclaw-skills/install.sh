@@ -22,7 +22,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DEFAULT_STATE_DIR="$HOME/.openclaw"
 
 # Linkable items (directories and files that get symlinked)
-LINKABLE_DIRS="scripts templates references assets hooks"
+LINKABLE_DIRS="scripts templates references assets hooks snippets"
 LINKABLE_FILES="SKILL.md _meta.json"
 
 # Complete skill list (relative to SCRIPT_DIR)
@@ -42,6 +42,20 @@ ALL_SKILLS="
   proactive-agent
   self-improving-agent
   nova/openclaw-manager
+  agent-browser
+  clawddocs
+  desktop-control
+  dreaming
+  giphy
+  github-1
+  humanizer
+  memory-setup
+  model-router
+  nano-pdf
+  skill-installer
+  slack
+  summarize
+  vertex-ai
 "
 
 # Skills excluded from certain profiles

@@ -24,7 +24,8 @@ from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 
-SCRIPT_DIR = Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SCRIPT_DIR = Path(__file__).parent
 PROFILE_ROOT = SCRIPT_DIR.parent.parent.parent
 MEDIA_DIR = PROFILE_ROOT / "media"
 

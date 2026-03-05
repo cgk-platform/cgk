@@ -40,7 +40,8 @@ import urllib.request
 from datetime import datetime, timedelta
 
 # --- Configuration ---
-SKILL_DIR = pathlib.Path(__file__).resolve().parent.parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SKILL_DIR = pathlib.Path(__file__).parent.parent
 PROFILE_ROOT = SKILL_DIR.parent.parent  # ~/.openclaw-vitahustle/
 ENV_FILE = SKILL_DIR / ".env"
 CACHE_DIR = SKILL_DIR / "cache"

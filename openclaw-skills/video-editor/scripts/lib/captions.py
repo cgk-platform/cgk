@@ -22,8 +22,9 @@ import json
 import os
 from pathlib import Path
 
-# Load preset styles -- resolve to skill root (scripts/lib/ -> scripts/ -> video-editor/)
-SKILL_ROOT = Path(__file__).parent.parent.parent.resolve()
+# Load preset styles -- skill root (scripts/lib/ -> scripts/ -> video-editor/)
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SKILL_ROOT = Path(__file__).parent.parent.parent
 STYLES_PATH = SKILL_ROOT / "templates" / "caption_styles.json"
 
 

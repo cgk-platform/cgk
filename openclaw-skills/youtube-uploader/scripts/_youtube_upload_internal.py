@@ -56,7 +56,8 @@ except Exception:
 # ---------------------------------------------------------------------------
 # Path derivation (no hardcoded paths)
 # ---------------------------------------------------------------------------
-SCRIPT_DIR = Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+SCRIPT_DIR = Path(__file__).parent
 SKILL_ROOT = SCRIPT_DIR.parent
 PROFILE_ROOT = SKILL_ROOT.parent.parent  # skills/<name> -> profile root
 

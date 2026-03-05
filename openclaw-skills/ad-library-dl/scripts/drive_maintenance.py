@@ -42,7 +42,8 @@ import sys
 # Path setup -- profile-agnostic via script location
 # ---------------------------------------------------------------------------
 
-_script_dir = pathlib.Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+_script_dir = pathlib.Path(__file__).parent
 sys.path.insert(0, str(_script_dir))
 
 PROFILE_ROOT = _script_dir.parent.parent.parent

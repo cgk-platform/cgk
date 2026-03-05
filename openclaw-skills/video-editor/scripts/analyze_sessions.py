@@ -156,7 +156,8 @@ def _print_markdown(stats: dict):
 
 if __name__ == "__main__":
     # Derive profile root from script location
-    script_dir = Path(__file__).parent.resolve()
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    script_dir = Path(__file__).parent
     default_root = str(script_dir.parent.parent.parent)
 
     profile_root = default_root

@@ -59,7 +59,8 @@ def _retry(fn, max_retries: int = 3, base_delay: float = 2.0, label: str = "",
 # ---------------------------------------------------------------------------
 
 # Add script dir to path so we can import sibling module
-_script_dir = pathlib.Path(__file__).resolve().parent
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+_script_dir = pathlib.Path(__file__).parent
 if str(_script_dir) not in sys.path:
     sys.path.insert(0, str(_script_dir))
 
@@ -608,7 +609,8 @@ def _load_google_creds():
     import google.auth.transport.requests
     import google.oauth2.credentials
 
-    profile_root = pathlib.Path(__file__).resolve().parent.parent.parent.parent
+    # IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+    profile_root = pathlib.Path(__file__).parent.parent.parent.parent
     creds_path = profile_root / "credentials" / "google-workspace-oauth.json"
 
     if not creds_path.exists():

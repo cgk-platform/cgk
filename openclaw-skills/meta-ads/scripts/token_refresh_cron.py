@@ -20,7 +20,8 @@ import urllib.parse
 import urllib.request
 
 # Derive profile root from script location: <root>/skills/meta-ads/scripts/token_refresh_cron.py
-_oc_home = os.environ.get("OPENCLAW_HOME", str(pathlib.Path(__file__).resolve().parent.parent.parent.parent))
+# IMPORTANT: Do NOT use .resolve() — breaks profile isolation via symlinks
+_oc_home = os.environ.get("OPENCLAW_HOME", str(pathlib.Path(__file__).parent.parent.parent.parent))
 SKILL_DIR = pathlib.Path(_oc_home) / "skills" / "meta-ads"
 TOKEN_FILE = SKILL_DIR / ".token.json"
 ENV_FILE = SKILL_DIR / ".env"
