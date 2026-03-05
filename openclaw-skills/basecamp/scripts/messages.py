@@ -48,29 +48,31 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_list = sub.add_parser("list", help="List messages on a message board")
-    p_list.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_list.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_list.add_argument("--message-board", dest="message_board", required=True, help="Message board ID")
     p_list.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_get = sub.add_parser("get", help="Get a message by ID")
-    p_get.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_get.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_get.add_argument("--message", required=True, help="Message ID")
 
     p_create = sub.add_parser("create", help="Create a message")
-    p_create.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_create.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_create.add_argument("--message-board", dest="message_board", required=True, help="Message board ID")
     p_create.add_argument("--subject", required=True, help="Message subject/title")
     p_create.add_argument("--content", required=True, help="Message body (HTML)")
     p_create.add_argument("--category-id", dest="category_id", help="Message category ID")
 
     p_update = sub.add_parser("update", help="Update a message")
-    p_update.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_update.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_update.add_argument("--message", required=True, help="Message ID")
     p_update.add_argument("--subject", help="New subject/title")
     p_update.add_argument("--content", help="New body (HTML)")
     p_update.add_argument("--category-id", dest="category_id", help="New category ID")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "list": cmd_list,
         "get": cmd_get,

@@ -39,24 +39,26 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_get = sub.add_parser("get", help="Get subscription info for a recording")
-    p_get.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_get.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_get.add_argument("--recording", required=True, help="Recording ID")
 
     p_sub = sub.add_parser("subscribe", help="Subscribe current user to a recording")
-    p_sub.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_sub.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_sub.add_argument("--recording", required=True, help="Recording ID")
 
     p_unsub = sub.add_parser("unsubscribe", help="Unsubscribe current user from a recording")
-    p_unsub.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_unsub.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_unsub.add_argument("--recording", required=True, help="Recording ID")
 
     p_update = sub.add_parser("update", help="Update subscriber list for a recording")
-    p_update.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_update.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_update.add_argument("--recording", required=True, help="Recording ID")
     p_update.add_argument("--subscriber-ids", dest="subscriber_ids", required=True,
                           help="Comma-separated person IDs to set as subscribers")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "get": cmd_get,
         "subscribe": cmd_subscribe,

@@ -57,30 +57,32 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_list = sub.add_parser("list", help="List webhooks in a project")
-    p_list.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_list.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_list.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_get = sub.add_parser("get", help="Get a webhook by ID")
-    p_get.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_get.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_get.add_argument("--webhook", required=True, help="Webhook ID")
 
     p_create = sub.add_parser("create", help="Create a webhook")
-    p_create.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_create.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_create.add_argument("--payload-url", dest="payload_url", required=True, help="Endpoint URL to receive events")
     p_create.add_argument("--types", required=True, help="Comma-separated event types (e.g. Todo,Comment)")
 
     p_update = sub.add_parser("update", help="Update a webhook")
-    p_update.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_update.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_update.add_argument("--webhook", required=True, help="Webhook ID")
     p_update.add_argument("--payload-url", dest="payload_url", help="New endpoint URL")
     p_update.add_argument("--types", help="New comma-separated event types")
     p_update.add_argument("--active", type=lambda x: x.lower() == "true", help="Active state (true/false)")
 
     p_destroy = sub.add_parser("destroy", help="Delete a webhook")
-    p_destroy.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_destroy.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_destroy.add_argument("--webhook", required=True, help="Webhook ID")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "list": cmd_list,
         "get": cmd_get,

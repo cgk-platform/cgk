@@ -43,8 +43,13 @@ All scripts are in `scripts/` and output JSON. Each module is standalone -- impo
 ### Environment Variables (per-profile .env)
 
 - `BASECAMP_ACCOUNT_ID` -- Numeric account ID from Basecamp URL
-- `BASECAMP_ACCESS_TOKEN` -- OAuth 2.0 Bearer token
+- `BASECAMP_ACCESS_TOKEN` -- OAuth 2.0 Bearer token (auto-refreshed via cron)
 - `BASECAMP_USER_AGENT` -- Required by API (e.g., "openCLAW (admin@example.com)")
+- `BASECAMP_REFRESH_TOKEN` -- OAuth refresh token (10-year expiry)
+- `BASECAMP_CLIENT_ID` -- OAuth app client ID
+- `BASECAMP_CLIENT_SECRET` -- OAuth app client secret
+- `BASECAMP_DEFAULT_PROJECT` -- Default project ID (used when `--project` is omitted)
+- `BASECAMP_DEFAULT_CARD_TABLE` -- Default card table ID for quick board access
 
 ### Usage Examples
 
@@ -76,6 +81,19 @@ python3 scripts/card_table.py create-card --project 12345 --column 88888 --title
 # Move a card to a different column
 python3 scripts/card_table.py move-card --project 12345 --card 77777 --column 66666
 
+# Reorder columns on the board
+python3 scripts/card_table.py move-column --project 12345 --card-table 99999 --source 11111 --target 22222 --position 1
+
+# Add a checklist step to a card
+python3 scripts/card_table.py add-step --project 12345 --card 77777 --title "Review copy" --due-on 2026-04-01
+
+# Complete a step
+python3 scripts/card_table.py complete-step --project 12345 --step 55555
+
+# Add/remove on-hold section from a column
+python3 scripts/card_table.py on-hold --project 12345 --column 88888
+python3 scripts/card_table.py on-hold --project 12345 --column 88888 --remove
+
 # Post a campfire message
 python3 scripts/campfire.py post --project 12345 --campfire 12345 --content "Team standup starting!"
 
@@ -91,22 +109,22 @@ python3 scripts/comments.py create --project 12345 --recording 44444 --content "
 
 ## API Coverage
 
-| Module        | Operations                                                                                                     |
-| ------------- | -------------------------------------------------------------------------------------------------------------- |
-| projects      | list, get, create, update, trash                                                                               |
-| todos         | list, get, create, update, complete, uncomplete, reposition                                                    |
-| messages      | list, get, create, update                                                                                      |
-| campfire      | list, get, post, delete                                                                                        |
-| schedule      | get, list-entries, create, update                                                                              |
-| card_table    | get, create-column, update-column, set-column-color, list-cards, get-card, create-card, update-card, move-card |
-| documents     | list, get, create, update                                                                                      |
-| people        | list, list-project, get, me, update-access                                                                     |
-| comments      | list, create, update                                                                                           |
-| webhooks      | list, get, create, update, destroy                                                                             |
-| checkins      | get-questionnaire, list-questions, create-question, list-answers, create-answer, get-answer                    |
-| recordings    | search, archive, trash, restore                                                                                |
-| subscriptions | get, subscribe, unsubscribe, update                                                                            |
-| boosts        | list, get, create, destroy                                                                                     |
+| Module        | Operations                                                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| projects      | list, get, create, update, trash                                                                                                                                                            |
+| todos         | list, get, create, update, complete, uncomplete, reposition                                                                                                                                 |
+| messages      | list, get, create, update                                                                                                                                                                   |
+| campfire      | list, get, post, delete                                                                                                                                                                     |
+| schedule      | get, list-entries, create, update                                                                                                                                                           |
+| card_table    | get, create-column, update-column, set-column-color, list-cards, get-card, create-card, update-card, move-card, move-column, add-step, update-step, complete-step, reposition-step, on-hold |
+| documents     | list, get, create, update                                                                                                                                                                   |
+| people        | list, list-project, get, me, update-access                                                                                                                                                  |
+| comments      | list, create, update                                                                                                                                                                        |
+| webhooks      | list, get, create, update, destroy                                                                                                                                                          |
+| checkins      | get-questionnaire, list-questions, create-question, list-answers, create-answer, get-answer                                                                                                 |
+| recordings    | search, archive, trash, restore                                                                                                                                                             |
+| subscriptions | get, subscribe, unsubscribe, update                                                                                                                                                         |
+| boosts        | list, get, create, destroy                                                                                                                                                                  |
 
 ## Rate Limiting
 

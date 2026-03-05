@@ -50,7 +50,7 @@ def main():
     p_list.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_lp = sub.add_parser("list-project", help="List people on a project")
-    p_lp.add_argument("--project", required=True, help="Project ID")
+    p_lp.add_argument("--project", default=None, help="Project ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_lp.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_get = sub.add_parser("get", help="Get a person by ID")
@@ -59,11 +59,13 @@ def main():
     sub.add_parser("me", help="Get the current user profile")
 
     p_ua = sub.add_parser("update-access", help="Grant or revoke project access")
-    p_ua.add_argument("--project", required=True, help="Project ID")
+    p_ua.add_argument("--project", default=None, help="Project ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_ua.add_argument("--grant", help="Comma-separated person IDs to grant access")
     p_ua.add_argument("--revoke", help="Comma-separated person IDs to revoke access")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "list": cmd_list,
         "list-project": cmd_list_project,

@@ -70,18 +70,20 @@ def main():
     p_search.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_archive = sub.add_parser("archive", help="Archive a recording")
-    p_archive.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_archive.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_archive.add_argument("--recording", required=True, help="Recording ID")
 
     p_trash = sub.add_parser("trash", help="Trash a recording")
-    p_trash.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_trash.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_trash.add_argument("--recording", required=True, help="Recording ID")
 
     p_restore = sub.add_parser("restore", help="Restore a recording to active")
-    p_restore.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_restore.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_restore.add_argument("--recording", required=True, help="Recording ID")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "search": cmd_search,
         "archive": cmd_archive,

@@ -52,17 +52,24 @@ Base URL: `https://3.basecampapi.com/{ACCOUNT_ID}`
 
 ## Card Tables (Kanban)
 
-| Method | Endpoint                                                 | Description   |
-| ------ | -------------------------------------------------------- | ------------- |
-| GET    | `/buckets/{project}/card_tables/{id}.json`               | Get board     |
-| POST   | `/buckets/{project}/card_tables/{id}/columns.json`       | Create column |
-| PUT    | `/buckets/{project}/card_tables/columns/{id}.json`       | Update column |
-| PUT    | `/buckets/{project}/card_tables/columns/{id}/color.json` | Set color     |
-| GET    | `/buckets/{project}/card_tables/lists/{id}/cards.json`   | List cards    |
-| GET    | `/buckets/{project}/card_tables/cards/{id}.json`         | Get card      |
-| POST   | `/buckets/{project}/card_tables/lists/{id}/cards.json`   | Create card   |
-| PUT    | `/buckets/{project}/card_tables/cards/{id}.json`         | Update card   |
-| POST   | `/buckets/{project}/card_tables/cards/{id}/moves.json`   | Move card     |
+| Method | Endpoint                                                     | Description     |
+| ------ | ------------------------------------------------------------ | --------------- |
+| GET    | `/buckets/{project}/card_tables/{id}.json`                   | Get board       |
+| POST   | `/buckets/{project}/card_tables/{id}/columns.json`           | Create column   |
+| PUT    | `/buckets/{project}/card_tables/columns/{id}.json`           | Update column   |
+| PUT    | `/buckets/{project}/card_tables/columns/{id}/color.json`     | Set color       |
+| GET    | `/buckets/{project}/card_tables/lists/{id}/cards.json`       | List cards      |
+| GET    | `/buckets/{project}/card_tables/cards/{id}.json`             | Get card        |
+| POST   | `/buckets/{project}/card_tables/lists/{id}/cards.json`       | Create card     |
+| PUT    | `/buckets/{project}/card_tables/cards/{id}.json`             | Update card     |
+| POST   | `/buckets/{project}/card_tables/cards/{id}/moves.json`       | Move card       |
+| POST   | `/buckets/{project}/card_tables/{id}/moves.json`             | Move column     |
+| POST   | `/buckets/{project}/card_tables/cards/{id}/steps.json`       | Add step        |
+| PUT    | `/buckets/{project}/card_tables/steps/{id}.json`             | Update step     |
+| PUT    | `/buckets/{project}/card_tables/steps/{id}/completions.json` | Complete step   |
+| POST   | `/buckets/{project}/card_tables/cards/{id}/positions.json`   | Reposition step |
+| POST   | `/buckets/{project}/card_tables/columns/{id}/on_hold.json`   | Add on-hold     |
+| DELETE | `/buckets/{project}/card_tables/columns/{id}/on_hold.json`   | Remove on-hold  |
 
 ## Documents
 

@@ -75,16 +75,16 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_list = sub.add_parser("list", help="List todos in a todolist")
-    p_list.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_list.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_list.add_argument("--todolist", required=True, help="Todolist ID")
     p_list.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_get = sub.add_parser("get", help="Get a todo by ID")
-    p_get.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_get.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_get.add_argument("--todo", required=True, help="Todo ID")
 
     p_create = sub.add_parser("create", help="Create a todo")
-    p_create.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_create.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_create.add_argument("--todolist", required=True, help="Todolist ID")
     p_create.add_argument("--content", required=True, help="Todo content/title")
     p_create.add_argument("--description", help="Longer description (HTML)")
@@ -97,7 +97,7 @@ def main():
     )
 
     p_update = sub.add_parser("update", help="Update a todo")
-    p_update.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_update.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_update.add_argument("--todo", required=True, help="Todo ID")
     p_update.add_argument("--content", help="New content/title")
     p_update.add_argument("--description", help="New description (HTML)")
@@ -107,21 +107,23 @@ def main():
     )
 
     p_complete = sub.add_parser("complete", help="Mark a todo as complete")
-    p_complete.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_complete.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_complete.add_argument("--todo", required=True, help="Todo ID")
 
     p_uncomplete = sub.add_parser("uncomplete", help="Mark a todo as incomplete")
-    p_uncomplete.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_uncomplete.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_uncomplete.add_argument("--todo", required=True, help="Todo ID")
 
     p_reposition = sub.add_parser("reposition", help="Reposition a todo in its list")
-    p_reposition.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_reposition.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_reposition.add_argument("--todo", required=True, help="Todo ID")
     p_reposition.add_argument(
         "--position", required=True, type=int, help="1-based position"
     )
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "list": cmd_list,
         "get": cmd_get,

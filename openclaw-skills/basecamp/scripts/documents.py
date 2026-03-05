@@ -45,27 +45,29 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_list = sub.add_parser("list", help="List documents in a vault")
-    p_list.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_list.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_list.add_argument("--vault", required=True, help="Vault ID")
     p_list.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_get = sub.add_parser("get", help="Get a document by ID")
-    p_get.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_get.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_get.add_argument("--document", required=True, help="Document ID")
 
     p_create = sub.add_parser("create", help="Create a document")
-    p_create.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_create.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_create.add_argument("--vault", required=True, help="Vault ID")
     p_create.add_argument("--title", required=True, help="Document title")
     p_create.add_argument("--content", required=True, help="Document content (HTML)")
 
     p_update = sub.add_parser("update", help="Update a document")
-    p_update.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_update.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_update.add_argument("--document", required=True, help="Document ID")
     p_update.add_argument("--title", help="New title")
     p_update.add_argument("--content", help="New content (HTML)")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "list": cmd_list,
         "get": cmd_get,

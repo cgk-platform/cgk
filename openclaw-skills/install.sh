@@ -56,6 +56,8 @@ ALL_SKILLS="
   slack
   summarize
   vertex-ai
+  openclaw-memory
+  basecamp
 "
 
 # Skills excluded from certain profiles

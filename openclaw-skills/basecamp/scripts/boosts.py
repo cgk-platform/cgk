@@ -39,24 +39,26 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_list = sub.add_parser("list", help="List boosts on a recording")
-    p_list.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_list.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_list.add_argument("--recording", required=True, help="Recording ID")
     p_list.add_argument("--all", action="store_true", help="Auto-paginate")
 
     p_get = sub.add_parser("get", help="Get a specific boost")
-    p_get.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_get.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_get.add_argument("--boost", required=True, help="Boost ID")
 
     p_create = sub.add_parser("create", help="Create a boost reaction")
-    p_create.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_create.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_create.add_argument("--recording", required=True, help="Recording ID")
     p_create.add_argument("--content", required=True, help="Boost content (emoji)")
 
     p_destroy = sub.add_parser("destroy", help="Destroy a boost")
-    p_destroy.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_destroy.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_destroy.add_argument("--boost", required=True, help="Boost ID")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "list": cmd_list,
         "get": cmd_get,

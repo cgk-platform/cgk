@@ -59,16 +59,16 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_get = sub.add_parser("get", help="Get a schedule")
-    p_get.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_get.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_get.add_argument("--schedule", required=True, help="Schedule ID")
 
     p_list = sub.add_parser("list-entries", help="List schedule entries")
-    p_list.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_list.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_list.add_argument("--schedule", required=True, help="Schedule ID")
     p_list.add_argument("--all", action="store_true", help="Auto-paginate all results")
 
     p_create = sub.add_parser("create", help="Create a schedule entry")
-    p_create.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_create.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_create.add_argument("--schedule", required=True, help="Schedule ID")
     p_create.add_argument("--summary", required=True, help="Entry title/summary")
     p_create.add_argument("--starts-at", dest="starts_at", required=True, help="Start time (ISO 8601)")
@@ -78,7 +78,7 @@ def main():
     p_create.add_argument("--notify", action="store_true", help="Notify participants")
 
     p_update = sub.add_parser("update", help="Update a schedule entry")
-    p_update.add_argument("--project", required=True, help="Project (bucket) ID")
+    p_update.add_argument("--project", default=None, help="Project (bucket) ID (default: BASECAMP_DEFAULT_PROJECT)")
     p_update.add_argument("--entry", required=True, help="Schedule entry ID")
     p_update.add_argument("--summary", help="New title/summary")
     p_update.add_argument("--starts-at", dest="starts_at", help="New start time (ISO 8601)")
@@ -86,6 +86,8 @@ def main():
     p_update.add_argument("--description", help="New description (HTML)")
 
     args = parser.parse_args()
+    if hasattr(args, 'project') and args.project is None:
+        args.project = bc.resolve_project(args.project)
     dispatch = {
         "get": cmd_get,
         "list-entries": cmd_list_entries,

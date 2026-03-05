@@ -39,9 +39,21 @@ ACCOUNT_ID = os.environ.get("BASECAMP_ACCOUNT_ID", "")
 ACCESS_TOKEN = os.environ.get("BASECAMP_ACCESS_TOKEN", "")
 USER_AGENT = os.environ.get("BASECAMP_USER_AGENT", "openCLAW (noreply@example.com)")
 
+DEFAULT_PROJECT = os.environ.get("BASECAMP_DEFAULT_PROJECT", "")
+
 BASE_URL = f"https://3.basecampapi.com/{ACCOUNT_ID}"
 
 MAX_RETRIES = 3
+
+
+def resolve_project(args_project):
+    """Return project ID from args or fall back to BASECAMP_DEFAULT_PROJECT."""
+    if args_project:
+        return args_project
+    if DEFAULT_PROJECT:
+        return DEFAULT_PROJECT
+    print(json.dumps({"error": "No --project specified and BASECAMP_DEFAULT_PROJECT not set"}))
+    sys.exit(1)
 
 
 def _check_config():

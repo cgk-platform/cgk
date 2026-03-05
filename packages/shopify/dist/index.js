@@ -11352,7 +11352,7 @@ async function handleOAuthCallback(params) {
     logger3.error("Failed to create Storefront Access Token:", error instanceof Error ? error : void 0);
   }
   try {
-    const { tasks } = await import("./v3-ORMCHZOJ.js");
+    const { tasks } = await import("./v3-KVKFRKMI.js");
     await tasks.trigger("commerce-product-batch-sync", {
       tenantId
     });
