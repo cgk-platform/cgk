@@ -92,8 +92,11 @@ def cmd_update_card(args):
         data["content"] = args.content
     if args.due_on:
         data["due_on"] = args.due_on
-    if args.assignee_ids:
-        data["assignee_ids"] = [int(x) for x in args.assignee_ids.split(",")]
+    if args.assignee_ids is not None:
+        if args.assignee_ids == "" or args.assignee_ids == "none":
+            data["assignee_ids"] = []
+        else:
+            data["assignee_ids"] = [int(x) for x in args.assignee_ids.split(",")]
     path = f"/buckets/{args.project}/card_tables/cards/{args.card}.json"
     result = bc.api_request("PUT", path, data=data)
     bc.output(result)
